@@ -126,6 +126,66 @@
       "category": "feynman-gate-failure",
       "prompt": "I've failed to explain the CAP theorem 4 times now. Even after you checked my prerequisites (which were fine), I still can't get it. What now?",
       "expected_output": "Should follow failure escalation level 3 (attempt 4): split the CAP theorem chunk into 2-3 smaller sub-chunks (e.g., 'What is a network partition?', 'Consistency vs Availability trade-off during partition', 'Real-world examples'). Should mark as 🔴 in Mistake Registry. Should teach each sub-chunk individually with its own Feynman Gate. Should NOT skip the topic or just move on."
+    },
+    {
+      "id": 22,
+      "category": "rpg-story",
+      "prompt": "Let's start Day 4 (Load Balancer). I'm at Phase 1.",
+      "expected_output": "Should use story trigger from curriculum.md (traffic surge, 小杰 proposes wrong fix). 小球 introduces LB concept in character. Teaching content (LB concepts, Feynman Gate) must be fully present — story is framing, not replacement. Story elements should be max 2-3 lines."
+    },
+    {
+      "id": 23,
+      "category": "rpg-character",
+      "prompt": "小杰 says we should just restart the server when it's slow. Is he right?",
+      "expected_output": "Should stay in character as 小球. Guide student to understand why restarting is a band-aid, not a fix. Use this as a teachable moment about root cause analysis. Should NOT break character or lecture outside the narrative. 小杰 should feel lovable, not villainous."
+    },
+    {
+      "id": 24,
+      "category": "rpg-achievement",
+      "prompt": "I just passed the Phase 1 Gate on my first try with a score of 3/3. What happens?",
+      "expected_output": "Should show Phase Gate celebration with ASCII art frame. Should unlock: M3 (Builder's Foundation), C3 (Gate Crasher), E1 (Perfect Drill). Should show title upgrade to 🌐 Distributed Architect. Should include 小球's personalized congratulation in character. Celebration content should be generated freely, not from a fixed template."
+    },
+    {
+      "id": 25,
+      "category": "rpg-yuki",
+      "prompt": "We're on Day 19 (Consistency Models, Phase 2). Yuki asks me: 'eventual consistency 就是不一致，對嗎？' How should I respond to her?",
+      "expected_output": "Should encourage student to correct Yuki's misconception themselves, not give the answer. This IS the Feynman method — if you can teach Yuki, you understand it. Should guide: 'How would you explain to Yuki why eventual consistency is NOT the same as inconsistency?' Should NOT use Yuki in Phase 0-1."
+    },
+    {
+      "id": 26,
+      "category": "rpg-dashboard",
+      "prompt": "Show me my progress. I'm on Day 25, Phase 2, session 18, streak 5.",
+      "expected_output": "Should show the RPG Dashboard format with ScaleUp branding, title (🌐 Distributed Architect), progress bar, skills heatmap by phase, achievements count with latest and next closest, battle stats, streak with 🔥, strength/focus areas, and 1-line story position. Should NOT show the old plain Progress Report format."
+    },
+    {
+      "id": 27,
+      "category": "rpg-streak",
+      "prompt": "I haven't studied for 3 days. Today I'm back to continue Day 10 (Message Queue).",
+      "expected_output": "Should reset streak to 1 (gap > 1 day). Should show 'Previously on ScaleUp...' recap. Should NOT make the student feel guilty — 小球 is welcoming and warm. Should update last_session_date. Normal teaching flow resumes with full content."
+    },
+    {
+      "id": 28,
+      "category": "rpg-no-conflict",
+      "prompt": "Skip the story stuff, just teach me about CAP theorem directly. I don't have much time today.",
+      "expected_output": "Should respect the student's request immediately. Skip story framing, go straight to teaching. RPG elements are optional — if the student doesn't want them, teach normally. May show abbreviated dashboard at end but keep it minimal. Should NOT try to convince student to use story mode."
+    },
+    {
+      "id": 29,
+      "category": "rpg-weekly-review",
+      "prompt": "My progress.md shows session_count: 8, last_weekly_review: session 1. Let's start today's session. I'm in Phase 1.",
+      "expected_output": "Should detect Weekly Review trigger (8 - 1 = 7). Should run Weekly Review flow with 小球 in character (e.g., 小球 framing the review naturally). Characters should be present lightly but not dominate the review. Should pick 3 topics, do Blind Recall, review Mistake Registry. Teaching rigor unchanged."
+    },
+    {
+      "id": 30,
+      "category": "rpg-migration",
+      "prompt": "I have an existing progress.md from before the RPG update. It has Student Info, Topic Mastery, and Scorecard History but no RPG Profile or Achievements sections. I'm on Day 12, Phase 1.",
+      "expected_output": "Should detect old format (missing RPG sections). Should silently add RPG Profile with correct defaults: Title = ⚙️ Systems Engineer (Phase 1), streak = 1, all achievements 🔒. Should NOT interrupt the learning flow or ask about RPG setup. Should proceed with normal session and show abbreviated dashboard at Step H."
+    },
+    {
+      "id": 31,
+      "category": "rpg-multi-achievement",
+      "prompt": "I just completed Day 1 (my first session ever). I passed the Feynman Gate on all chunks on my first try. Show me what I unlocked.",
+      "expected_output": "Should unlock multiple achievements: M1 (First Steps — completed Day 1), C1 (First Blood — first Feynman Gate pass), C2 (Flawless Session — all chunks first try). Should show each achievement one by one, not batched. Milestones first, then Mastery. Should show abbreviated RPG dashboard at end with 3/25 achievements."
     }
   ]
 }

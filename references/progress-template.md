@@ -19,6 +19,22 @@
 
 ---
 
+## RPG Profile
+
+<!-- FRAMEWORK: Reusable — RPG profile tracking pattern -->
+
+| Field | Value |
+|-------|-------|
+| **Title** | 🌱 Junior Engineer |
+| **Company** | ScaleUp |
+| **Story phase** | Phase 0 — First Week |
+| **Last story summary** | (first session) |
+| **Current streak** | 0 |
+| **Longest streak** | 0 |
+| **Last session date** | YYYY-MM-DD |
+
+---
+
 ## Current Session (Breakpoint)
 
 > Updated when session is interrupted or paused. Cleared when session completes normally.
@@ -128,3 +144,40 @@
 | Phase | Date | Score | Result | Weak spots |
 |-------|------|-------|--------|------------|
 | | | | ✅ Pass / ❌ Retry | |
+
+---
+
+## Achievements
+
+<!-- FRAMEWORK: Reusable — achievement tracking pattern -->
+
+| ID | Achievement | Status | Date |
+|----|------------|--------|------|
+| M1 | First Steps | 🔒 | |
+| M2 | Framework Forged | 🔒 | |
+| M3 | Builder's Foundation | 🔒 | |
+| M4 | Distributed Mind | 🔒 | |
+| M5 | System Architect | 🔒 | |
+| M6 | Ready for Anything | 🔒 | |
+| C1 | First Blood | 🔒 | |
+| C2 | Flawless Session | 🔒 | |
+| C3 | Gate Crasher | 🔒 | |
+| C4 | Comeback Kid | 🔒 | |
+| C5 | Myth Buster | 🔒 | |
+| K1 | One-Liner ×10 | 🔒 | |
+| K2 | One-Liner ×30 | 🔒 | |
+| K3 | Encyclopedia | 🔒 | |
+| K4 | Bug Squasher ×5 | 🔒 | |
+| S1 | Three-peat | 🔒 | |
+| S2 | Weekly Warrior | 🔒 | |
+| S3 | Streak: 7 | 🔒 | |
+| S4 | Iron Will | 🔒 | |
+| E1 | Perfect Drill | 🔒 | |
+| E2 | Deep Diver | 🔒 | |
+| E3 | The Mentor | 🔒 | |
+| R1 | 小杰's Nightmare | 🔒 | |
+| R2 | Karen's Hero | 🔒 | |
+| R3 | 小球's Pride | 🔒 | |
+
+> Status: 🔒 Locked / 🏆 Unlocked
+> Updated by AI at Step H when achievement conditions are met.

@@ -5,10 +5,12 @@ A Claude Code skill that transforms Claude into a structured System Design inter
 ## What It Does
 
 - **61-day structured curriculum** covering core building blocks, distributed systems, and classic SD problems
+- **RPG narrative** — learn as an architect at ScaleUp, a growing startup with memorable characters (小球 your mentor, 小杰 the shortcut-loving CTO, Karen the PM, Yuki the junior dev)
+- **Achievement system** — 25 achievements that reward understanding, persistence, and teaching others
 - **Interactive teaching** — never lectures; asks you to explain concepts in your own words
 - **Daily mock interviews** — practice the 4-step SD framework with AI feedback
-- **Hands-on PoCs** — build proof-of-concept projects, not just memorize
-- **Progress tracking** — weekly reviews with blind recall and gap analysis
+- **Hands-on PoCs** — build proof-of-concept projects in Go, not just memorize
+- **Progress tracking** — RPG dashboard with title progression, streaks, and mastery heatmaps
 
 ## Teaching Flow (Every Session)
 
@@ -69,6 +71,9 @@ You should see `sd-coach` in the list. You can also invoke it directly with `/sd
 
 ## Key Features
 
+### RPG Learning Experience
+Join **ScaleUp** as a system architect. Each phase of the curriculum maps to a company growth stage — from seed startup to international expansion. Characters bring concepts to life: 小球 mentors you with Socratic questions, 小杰 makes bad architecture decisions you learn to fix, Karen brings real business requirements, and Yuki (Phase 2+) forces you to teach what you've learned. Earn 25 achievements, level up your title from 🌱 Junior Engineer to 👑 Principal Architect, and track your streak.
+
 ### Feynman Method
 Never asks "Do you understand?" — instead asks "Can you explain X in your own words?" If wrong, guides you to find the error rather than correcting directly.
 
@@ -91,15 +96,17 @@ Every building block includes SLIs, SLO targets, alerts, and dashboard definitio
 
 ```
 system-design-coach/
-├── SKILL.md                  # Core skill — teaching methods, gates, session flow
+├── SKILL.md                  # Core skill — teaching methods, gates, session flow, RPG layer
 ├── references/
-│   ├── curriculum.md          # Full 61-day curriculum with prerequisites
-│   ├── progress-template.md   # Student progress tracking format
+│   ├── curriculum.md          # Full 61-day curriculum with prerequisites + story triggers
+│   ├── story.md               # RPG character personality guides + story arcs
+│   ├── achievements.md        # 25 achievement definitions + unlock conditions
+│   ├── progress-template.md   # Student progress + RPG profile + achievements tracking
 │   ├── notes-template.md      # Standardized notes format + interview template
 │   ├── 8-block-skeleton.md    # Whiteboard diagram template
 │   └── estimation-cheatsheet.md # Back-of-envelope numbers
 └── evals/
-    └── evals.json             # 18 test cases for skill validation
+    └── evals.json             # 31 test cases for skill validation
 ```
 
 ## License

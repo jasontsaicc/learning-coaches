@@ -10,18 +10,21 @@
 
 ### Day 1: What SD Interviews Actually Test
 **Prerequisites:** None (entry point)
+**Story:** 你的第一天。認識團隊。（角色：小球、小杰、Karen）
 - The 4 scoring dimensions: Problem Navigation, Design, Technical Depth, Trade-offs
 - Analyze good vs bad answers for the same question
 - **Discussion**: Deconstruct a real SD interview rubric
 
 ### Day 2: Back-of-Envelope Estimation
 **Prerequisites:** Day 1
+**Story:** 被問到容量估算問題，答不出來。（角色：Karen）
 - Powers of 2, latency numbers every engineer should know
 - Practice: Estimate YouTube daily storage, Twitter QPS
 - **Exercise**: Build an estimation cheat sheet you actually understand
 
 ### Day 3: Your SD Answer Framework (4-Step Method)
 **Prerequisites:** Day 1, Day 2
+**Story:** 學習框架，為明天的實戰做準備。（角色：小球）
 - The 4-Step SD Interview Framework (defined in SKILL.md)
 - Time budget for 45-min interview: Clarify (0-5) → Estimate (5-10) → Design (10-20) → Deep Dive (20-35) → Scale (35-45)
 - Standard Whiteboard Diagram Template — the 8-block skeleton (see `8-block-skeleton.md`)
@@ -42,6 +45,8 @@
 
 ⚠️ **Common Misconception:** "L7 is always better than L4." No — L4 has lower latency and is better for non-HTTP protocols and raw throughput. L7 gives you content-based routing but adds processing overhead.
 
+**Story:** 流量暴增，服務中斷。小杰提出了錯誤解法。（角色：小杰、小球）
+
 **Day 4 — DNS + LB Fundamentals:**
 - DNS fundamentals — resolution flow, TTL, record types
 - DNS-based load balancing (weighted, latency-based, failover)
@@ -58,6 +63,8 @@
 
 ⚠️ **Common Misconception:** "More cache = always better." No — cache invalidation bugs can cause stale data, and large caches increase memory cost and cold-start time. Cache is a trade-off between speed and freshness.
 
+**Story:** 頁面載入極慢，用戶在抱怨。（角色：Karen）
+
 **Day 6 — Cache Patterns:**
 - Cache levels: Browser → CDN → App → DB
 - Patterns: Cache-Aside, Write-Through, Write-Behind, Read-Through
@@ -71,6 +78,7 @@
 
 ### Day 8-9: Database Selection
 **Prerequisites:** Day 3
+**Story:** 新功能需要選 DB，團隊意見不一。（角色：小杰）
 
 **Day 8 — SQL vs NoSQL Concepts:**
 - SQL vs NoSQL vs NewSQL — decision framework
@@ -87,6 +95,8 @@
 
 ⚠️ **Common Misconception:** "Kafka has exactly-once delivery." Kafka has idempotent producers + transactional consumers, which achieves effectively-once processing. True exactly-once in distributed systems requires end-to-end idempotency — the broker alone cannot guarantee it.
 
+**Story:** 促銷活動，訂單處理異常。出現重複處理。（角色：Karen）
+
 **Day 10 — Queue Concepts + Semantics:**
 - Why async? Decoupling, buffering, peak handling
 - SQS vs Kafka vs RabbitMQ — positioning
@@ -99,6 +109,7 @@
 
 ### Day 12-13: API Design
 **Prerequisites:** Day 3, Day 4-5 (LB)
+**Story:** 行動 App 要上線，API 需要重新設計。（角色：小球）
 
 **Day 12 — API Styles:**
 - REST vs gRPC vs GraphQL — trade-off matrix
@@ -110,6 +121,7 @@
 
 ### Day 14: Security & Authentication
 **Prerequisites:** Day 12-13 (API Design)
+**Story:** 資安稽核。發現安全漏洞。（角色：小杰）
 - JWT vs Session-based authentication
 - OAuth 2.0 flow basics
 - API Key management, HTTPS, encryption
@@ -119,6 +131,8 @@
 **Prerequisites:** Day 8-9 (Database)
 
 ⚠️ **Common Misconception:** "Consistent hashing eliminates all data movement." No — it minimizes movement to K/N keys on average when a node joins/leaves, but rebalancing still happens and virtual nodes affect distribution uniformity.
+
+**Story:** 資料庫需要重新分片。搬移過程影響服務。（角色：小球）
 
 **Day 15 — Theory:**
 - Why simple hash mod N fails
@@ -140,6 +154,8 @@
 
 ⚠️ **Common Misconception:** CAP is NOT "pick 2 out of 3 in daily operation." It's about what happens DURING a network partition — you choose between consistency and availability. When there's no partition, you can have both. Teach PACELC as the practical mental model.
 
+**Story:** 海外用戶看到過時資料。（角色：Karen、Yuki 登場）
+
 **Day 17 — CAP + Examples:**
 - CAP is about network partitions, not a daily choice
 - Real-world examples: DynamoDB (AP), Zookeeper (CP)
@@ -152,6 +168,8 @@
 **Prerequisites:** Day 17-18 (CAP)
 
 ⚠️ **Common Misconception:** "Eventual consistency = inconsistent." No — eventual consistency means the system WILL converge to a consistent state given enough time with no new writes. It has a convergence guarantee, unlike "no consistency" which has none.
+
+**Story:** 跨區域資料不一致。（角色：Karen）
 
 **Day 19 — Models:**
 - Strong, Eventual, Causal, Read-your-writes
@@ -166,6 +184,8 @@
 
 ⚠️ **Common Misconception:** "Read replicas give you strong consistency." No — replicas have replication lag (milliseconds to seconds). Read-after-write consistency requires reading from the leader, or using techniques like session stickiness or synchronous replication.
 
+**Story:** 主資料庫故障。小杰的回應讓問題更嚴重。（角色：小杰）
+
 **Day 21 — Replication Patterns:**
 - Single-leader, multi-leader, leaderless
 - Raft consensus algorithm (simplified)
@@ -177,6 +197,8 @@
 **Prerequisites:** Day 6-7 (Caching), Day 12-13 (API Design)
 
 ⚠️ **Common Misconception:** "Token bucket and sliding window are interchangeable." No — token bucket allows bursts up to the bucket size (good for bursty traffic), while sliding window enforces a strict rate limit (better for steady rate enforcement). Choose based on your traffic pattern.
+
+**Story:** 被惡意爬蟲攻擊 API。（角色：小球）
 
 **Day 23 — Algorithms:**
 - Token Bucket, Sliding Window, Fixed Window
@@ -193,6 +215,7 @@
 
 ### Day 25: Observability Consolidation
 **Prerequisites:** Day 4-5 (LB), Day 6-7 (Caching), Day 8-9 (Database)
+**Story:** 半夜事故，但缺少可觀測性。（角色：小球）
 - Metrics, Logs, Traces — three pillars
 - Distributed tracing, SLI/SLO/SLA formalization
 - Structured logging, correlation IDs
@@ -200,6 +223,7 @@
 
 ### Day 26: Bloom Filter, Gossip Protocol & Advanced Concepts
 **Prerequisites:** Day 15-16 (Consistent Hashing), Day 19-20 (Consistency)
+**Story:** Sprint review。回顧整個 Phase 2。（角色：全員）
 - Bloom Filter: probabilistic membership testing
 - Gossip Protocol: node discovery and state sharing
 - Distributed Transactions overview (2PC/3PC)
@@ -219,6 +243,7 @@
 
 #### Day 27-28: URL Shortener ★★☆
 **Key Concepts:** Hashing, base62, read-heavy
+**Story:** 行銷需要短網址追蹤功能。（角色：Karen）
 
 **Day 27 — Design:**
 - Requirements clarification (read:write ratio, URL length, analytics)
@@ -232,6 +257,7 @@
 
 #### Day 29-30: Unique ID Generator ★★☆
 **Key Concepts:** Snowflake, clock sync, coordination-free
+**Story:** 訂單 ID 重複問題。（角色：Karen）
 
 **Day 29 — Design:**
 - Requirements: uniqueness, ordering, performance
@@ -245,6 +271,7 @@
 
 #### Day 31-32: Distributed Rate Limiter ★★★
 **Key Concepts:** Distributed sliding window, Redis Lua, race conditions
+**Story:** 開放第三方 API，需要限流。（角色：小球）
 
 **Day 31 — Design:**
 - Single-node vs distributed: new challenges
@@ -258,6 +285,7 @@
 
 #### Day 33-34: Notification System ★★★
 **Key Concepts:** Push/Pull, priority queue, multi-channel
+**Story:** 通知系統問題：有人收不到，有人收太多。（角色：Karen）
 
 **Day 33 — Design:**
 - Multi-channel: push notification, SMS, email
@@ -271,6 +299,7 @@
 
 #### Day 35-37: Chat System ★★★★
 **Key Concepts:** WebSocket, presence, read receipts, group chat
+**Story:** 新功能需求：即時客服聊天。（角色：Karen）
 
 **Day 35 — WebSocket + 1v1 Messaging:**
 - WebSocket vs long polling vs SSE
@@ -289,6 +318,7 @@
 
 #### Day 38-39: Distributed Cache ★★★
 **Key Concepts:** Consistent hashing, invalidation at scale, thundering herd
+**Story:** 商品頁效能問題。Cache 架構需要升級。（角色：小球）
 
 **Day 38 — Design:**
 - Distributed cache architecture (consistent hashing for sharding)
@@ -302,6 +332,7 @@
 
 #### Day 40-42: News Feed ★★★★
 **Key Concepts:** Fan-out on write/read, ranking, celebrity problem
+**Story:** 社交動態牆功能。大帳號發文導致效能問題。（角色：Karen）
 
 **Day 40 — Fan-out Design:**
 - Fan-out on write vs fan-out on read
@@ -320,6 +351,7 @@
 
 #### Day 43-45: Payment System ★★★★
 **Key Concepts:** Idempotency, SAGA, exactly-once, reconciliation
+**Story:** 支付系統嚴重事故：用戶被重複扣款。（角色：小球、Karen）
 
 **Day 43 — Idempotency + SAGA:**
 - Payment flow: authorization → capture → settlement
@@ -340,6 +372,7 @@
 
 #### Day 46-47: Metrics & Logging System
 **Key Concepts:** Time-series DB, aggregation, sampling
+**Story:** 工程團隊需要自建 metrics 平台。（角色：小球）
 
 **Day 46 — Design:**
 - Data ingestion pipeline: agents → collectors → storage
@@ -353,6 +386,7 @@
 
 #### Day 48-49: Search Autocomplete
 **Key Concepts:** Trie, ranking, Elasticsearch
+**Story:** 搜尋體驗很差，自動完成太慢。（角色：Karen）
 
 **Day 48 — Design:**
 - Trie data structure for prefix matching
@@ -366,6 +400,7 @@
 
 #### Day 50-51: Web Crawler
 **Key Concepts:** BFS/DFS, URL frontier, dedup (Bloom filter)
+**Story:** 需要爬取競品資料做分析。（角色：Karen）
 
 **Day 50 — Design:**
 - Crawler architecture: URL frontier → fetcher → parser → storage
@@ -379,6 +414,7 @@
 
 #### Day 52-53: Proximity Service
 **Key Concepts:** Geohash, QuadTree, spatial indexing
+**Story:** 新功能：附近取貨點。地理查詢需求。（角色：Karen）
 
 **Day 52 — Design:**
 - Geohash: encoding lat/lng into a string for range queries
@@ -403,6 +439,7 @@ Video Streaming, Cloud Storage, Distributed Task Scheduler, Ticket/Booking Syste
 
 ### Day 54-55: Trade-off Analysis Deep Dive
 **Prerequisites:** All Phase 1-3
+**Story:** 回顧成長。準備面對最難的挑戰。（角色：小球）
 
 **Day 54 — Trade-off Scenarios:**
 - Practice specific trade-off scenarios (5 min each)
@@ -413,6 +450,7 @@ Video Streaming, Cloud Storage, Distributed Task Scheduler, Ticket/Booking Syste
 
 ### Day 56-57: Mock Interview Round 1
 **Prerequisites:** All Phase 1-3
+**Story:** 模擬面試。小球不再提示。（角色：小球）
 
 **Day 56 — Mock 1:**
 - 45-minute strictly timed mock interview
@@ -424,6 +462,7 @@ Video Streaming, Cloud Storage, Distributed Task Scheduler, Ticket/Booking Syste
 
 ### Day 58-59: Weak Spot Reinforcement
 **Prerequisites:** All Phase 1-3
+**Story:** 弱點補強衝刺。（角色：小球）
 
 **Day 58 — Review Patterns:**
 - Review all notes, identify patterns in mistakes
@@ -434,6 +473,7 @@ Video Streaming, Cloud Storage, Distributed Task Scheduler, Ticket/Booking Syste
 
 ### Day 60-61: Final Mock Interview (Brutal Mode)
 **Prerequisites:** All Phase 1-3
+**Story:** 最終模擬。全力以赴。（角色：小球）
 
 **Day 60 — Final Mock 1:**
 - 45-minute interview with interruptions and requirement changes
