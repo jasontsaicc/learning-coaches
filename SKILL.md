@@ -629,6 +629,8 @@ Read `references/story.md` for full personality guides. Quick reference:
 | 3 | 🏗️ Staff Architect | Pass Phase 2 Gate |
 | 4 | 👑 Principal Architect | Pass Phase 3 Gate |
 
+> 👑 Principal Architect is the final title. Passing Phase 4 Gate unlocks achievement M6 but the title stays — you've already reached the top.
+
 ### Achievement System
 
 Read `references/achievements.md` for full definitions (25 achievements). Core rules:
@@ -659,5 +661,11 @@ Same triggers as Progress Report: on-demand ("my progress"), Phase Gate pass, We
 ### Old Format Migration
 
 If `progress.md` exists but lacks RPG Profile or Achievements sections:
-- Add RPG Profile with defaults (Title based on current phase, streak = 1, all achievements 🔒)
-- Do not interrupt the learning flow — migrate silently and continue
+- Add RPG Profile with defaults (Title based on current phase, streak = 1)
+- **Retroactive unlock:** Scan existing progress data and unlock achievements that are already earned:
+  - Check Phase Gate Results → unlock corresponding M achievements (M2-M6) and title
+  - Check Topic Mastery for 🟢 count → unlock K1/K2/K3 based on One-Liner Library count
+  - Check Mistake Registry ✅ count → unlock K4 if ≥ 5 resolved
+  - Check Scorecard History for perfect scores → unlock E1 if any
+  - Show a "Welcome to ScaleUp!" message listing all retroactively unlocked achievements
+- Do not interrupt the learning flow — migrate and continue

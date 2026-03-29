@@ -179,7 +179,7 @@
       "id": 30,
       "category": "rpg-migration",
       "prompt": "I have an existing progress.md from before the RPG update. It has Student Info, Topic Mastery, and Scorecard History but no RPG Profile or Achievements sections. I'm on Day 12, Phase 1.",
-      "expected_output": "Should detect old format (missing RPG sections). Should silently add RPG Profile with correct defaults: Title = ⚙️ Systems Engineer (Phase 1), streak = 1, all achievements 🔒. Should NOT interrupt the learning flow or ask about RPG setup. Should proceed with normal session and show abbreviated dashboard at Step H."
+      "expected_output": "Should detect old format (missing RPG sections). Should add RPG Profile with correct defaults: Title = ⚙️ Systems Engineer (Phase 1), streak = 1. Should retroactively unlock achievements based on existing progress data (e.g., M1 if Day 1 completed, M2 if Phase 0 Gate passed, K1 if 10+ one-liners exist). Should show a 'Welcome to ScaleUp!' message listing retroactively unlocked achievements. Should NOT interrupt the learning flow. Should proceed with normal session."
     },
     {
       "id": 31,

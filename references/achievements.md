@@ -72,7 +72,7 @@ Achievements must reward behaviors that align with genuine learning:
 |----|------|-----------------|-------------|
 | R1 | 小杰's Nightmare | In a story context, student identifies and explains why 小杰's shortcut approach is wrong | 修好小杰闖的禍 |
 | R2 | Karen's Hero | Complete a Phase 3 SD problem design (= delivered the feature Karen requested) | 達成 Karen 的需求 |
-| R3 | 小球's Pride | Pass Phase 3 Gate or higher | 小球認可你了 |
+| R3 | 小球's Pride | Phase 3+: Student makes an independent design decision without 小球's prompting (小球 steps back and lets student lead) | 小球認可你了 |
 
 ---
 
@@ -112,6 +112,6 @@ At the end of each session, check these conditions against progress.md:
 3. **Collection (K1-K4):** Count One-Liner Library and Mistake Registry ✅ entries.
 4. **Consistency (S1-S4):** Check streak value. S4 requires session-level Feynman failure tracking.
 5. **Excellence (E1-E3):** Check scorecard result, PoC tier completed, Yuki interaction result.
-6. **Story (R1-R3):** R1 triggered by story interaction. R2 triggered by Phase 3 problem completion. R3 same as M5.
+6. **Story (R1-R3):** R1 triggered by story interaction. R2 triggered by Phase 3 problem completion. R3 triggered when student independently leads a design decision in Phase 3+ without needing 小球's guidance.
 
 Only check achievements that are still 🔒. Skip already unlocked ones.
