@@ -118,6 +118,24 @@
 
 ---
 
+## Review Schedule (Leitner Box)
+
+> Spaced repetition for completed topics. 小球 checks this in Step A — if a topic is due, do a 2-min quick recall before new content.
+
+| Topic | Mastery | Last Review | Box | Next Review |
+|-------|---------|-------------|-----|-------------|
+| | | | | |
+
+> **Box rules:**
+> Box 1 → next review in +1 day (just learned / review failed)
+> Box 2 → +3 days (Box 1 passed)
+> Box 3 → +7 days (Box 2 passed)
+> Box 4 → +14 days (Box 3 passed, then retired)
+>
+> **Quick recall format:** 小球 asks the student to state the one-liner + the physical constraint that drives this technique. Pass → Box +1. Fail → back to Box 1.
+
+---
+
 ## Interview Drill Scorecard History
 
 <!-- FRAMEWORK: Reusable — scored assessment history pattern -->

@@ -30,6 +30,14 @@ Use this template for every session's notes. Save as `notes/dayXX-topic.md`.
   - Credential stuffing, replay attack, spam/bot abuse
   - Data exfiltration, DDoS/resource exhaustion
 
+## 🔗 Derivation Insight (Step 0 days only)
+
+> Capture your derivation path so future reviews can rebuild the "why" in 30 seconds.
+
+- **Physical constraint:** (the numbers that drive this technique)
+- **My derivation:** (your reasoning path, in your own words)
+- **Surprise:** (what you didn't expect, or where your initial intuition was wrong)
+
 ## Required Every Session
 
 ```markdown
@@ -72,3 +80,4 @@ After writing notes:
 1. Add any new 🔴 Mistakes to the Mistake Registry in `progress.md`
 2. Add this topic's one-liner to the One-Liner Library in `progress.md`
 3. Update Topic Mastery level based on session performance
+4. Add this topic to **Review Schedule** in `progress.md` (Box 1, next review = tomorrow)

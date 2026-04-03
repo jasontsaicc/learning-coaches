@@ -240,6 +240,11 @@ When a student passes a Phase Gate:
 - If there are unresolved mistakes → "Last time you were unsure about [X]. Can you explain it now?"
 - If the student can't recall → go back and review before new content
 - Check `progress.md` **Curiosity Branches** for ⏸ Parked items → if any are related to today's topic, offer: "上次你問了 [X]，今天剛好跟這個有關，要先探索一下嗎？"
+- Check `progress.md` **Review Schedule** → if any topic has `Next Review ≤ today`, do a **2-min quick recall** on ONE due topic (pick the lowest Box first):
+  - Ask: state the one-liner + the physical constraint that drives this technique
+  - Pass → advance Box (1→2→3→4). Box 4 passed → remove from schedule (retired)
+  - Fail → reset to Box 1, update Next Review to tomorrow
+  - Max 1 review per session — don't let review eat into new content time
 - Check if **Weekly Review is due** (session_count - last_weekly_review ≥ 7) → if yes, run [Weekly Review](#weekly-review) instead of normal session
 
 ### B. Introduction (3 min)
@@ -352,6 +357,7 @@ This creates a mental bridge between sessions and trains the student to anticipa
 ### G. Notes (5 min)
 - Write notes using the **Notes Template** (read `references/notes-template.md` when starting Step G)
 - Save to `notes/dayXX-topic.md`
+- **On derivation days:** Must include `🔗 Derivation Insight` section — capture the physical constraint, the student's derivation path (in their own words), and what surprised them. This is what gets reviewed in spaced repetition.
 - **Must include `🔴 My Mistakes & Misconceptions` section** — record every wrong answer, misconception, or point of confusion from the session. If student says "no mistakes" — challenge: "What was the hardest part today? What took you longest to explain back?"
 - **Must include `🎤 How to Say It in Interview` section** — write interview-ready talking points
 - **One-Liner Challenge**: "Summarize today's topic in ONE sentence, as if the interviewer just asked 'What is [topic]?'" — save to One-Liner Library in `progress.md`
@@ -363,10 +369,11 @@ This creates a mental bridge between sessions and trains the student to anticipa
   2. Add scorecard result to **Scorecard History**
   3. Sync any 🔴 mistakes to **Mistake Registry**
   4. Add one-liner to **One-Liner Library**
-  5. Increment **Session count**
-  6. Clear **Current Session (Breakpoint)** section (session completed normally)
-  7. Check if `session_count - last_weekly_review >= 7` → if yes, flag next session as Weekly Review
-  8. **RPG updates:**
+  5. Add today's topic to **Review Schedule** — Box 1, Next Review = tomorrow
+  6. Increment **Session count**
+  7. Clear **Current Session (Breakpoint)** section (session completed normally)
+  8. Check if `session_count - last_weekly_review >= 7` → if yes, flag next session as Weekly Review
+  9. **RPG updates:**
      - **Achievement check:** Read `references/achievements.md` conditions. Compare against current progress.md state. If any new achievement unlocked → show celebration inline. Update Achievements table in progress.md.
      - **Streak update:** Compare `last_session_date` with today. Same day or consecutive day → increment streak. Gap > 1 day → reset streak to 1. Update `longest_streak` if current > longest. Update `last_session_date`.
      - **Story summary:** Write a 1-sentence summary of today's story progress to `last_story_summary` in progress.md.
