@@ -46,6 +46,7 @@
 ⚠️ **Common Misconception:** "L7 is always better than L4." No — L4 has lower latency and is better for non-HTTP protocols and raw throughput. L7 gives you content-based routing but adds processing overhead.
 
 **Story:** 流量暴增，服務中斷。小杰提出了錯誤解法。（角色：小杰、小球）
+**Derivation:** ✅ 推導鏈 #1 — 單機硬體上限 → Load Balancer
 
 **Day 4 — DNS + LB Fundamentals:**
 - DNS fundamentals — resolution flow, TTL, record types
@@ -64,6 +65,7 @@
 ⚠️ **Common Misconception:** "More cache = always better." No — cache invalidation bugs can cause stale data, and large caches increase memory cost and cold-start time. Cache is a trade-off between speed and freshness.
 
 **Story:** 頁面載入極慢，用戶在抱怨。（角色：Karen）
+**Derivation:** ✅ 推導鏈 #2 — DRAM/SSD/Network 延遲差距 → Caching
 
 **Day 6 — Cache Patterns:**
 - Cache levels: Browser → CDN → App → DB
@@ -79,6 +81,7 @@
 ### Day 8-9: Database Selection
 **Prerequisites:** Day 3
 **Story:** 新功能需要選 DB，團隊意見不一。（角色：小杰）
+**Derivation:** ✅ 推導鏈 #3 — 讀寫模式決定最佳儲存結構 → Database Selection
 
 **Day 8 — SQL vs NoSQL Concepts:**
 - SQL vs NoSQL vs NewSQL — decision framework
@@ -96,6 +99,7 @@
 ⚠️ **Common Misconception:** "Kafka has exactly-once delivery." Kafka has idempotent producers + transactional consumers, which achieves effectively-once processing. True exactly-once in distributed systems requires end-to-end idempotency — the broker alone cannot guarantee it.
 
 **Story:** 促銷活動，訂單處理異常。出現重複處理。（角色：Karen）
+**Derivation:** ✅ 推導鏈 #4 — 同步呼叫的級聯故障 → Message Queue
 
 **Day 10 — Queue Concepts + Semantics:**
 - Why async? Decoupling, buffering, peak handling
@@ -110,6 +114,7 @@
 ### Day 12-13: API Design
 **Prerequisites:** Day 3, Day 4-5 (LB)
 **Story:** 行動 App 要上線，API 需要重新設計。（角色：小球）
+**Derivation:** ✅ 推導鏈 #5 — 不同客戶端的資料需求差異 → API Design
 
 **Day 12 — API Styles:**
 - REST vs gRPC vs GraphQL — trade-off matrix
@@ -122,6 +127,8 @@
 ### Day 14: Security & Authentication
 **Prerequisites:** Day 12-13 (API Design)
 **Story:** 資安稽核。發現安全漏洞。（角色：小杰）
+**Derivation:** ✅ 推導鏈 #6 — HTTP 明文傳輸的物理風險 → Security & Auth
+
 - JWT vs Session-based authentication
 - OAuth 2.0 flow basics
 - API Key management, HTTPS, encryption
@@ -133,6 +140,7 @@
 ⚠️ **Common Misconception:** "Consistent hashing eliminates all data movement." No — it minimizes movement to K/N keys on average when a node joins/leaves, but rebalancing still happens and virtual nodes affect distribution uniformity.
 
 **Story:** 資料庫需要重新分片。搬移過程影響服務。（角色：小球）
+**Derivation:** ✅ 推導鏈 #7 — hash mod N 的資料重分配問題 → Consistent Hashing
 
 **Day 15 — Theory:**
 - Why simple hash mod N fails
@@ -155,6 +163,7 @@
 ⚠️ **Common Misconception:** CAP is NOT "pick 2 out of 3 in daily operation." It's about what happens DURING a network partition — you choose between consistency and availability. When there's no partition, you can have both. Teach PACELC as the practical mental model.
 
 **Story:** 海外用戶看到過時資料。（角色：Karen、Yuki 登場）
+**Derivation:** ✅ 推導鏈 #8 — 網路 partition 不可避免 → CAP Theorem
 
 **Day 17 — CAP + Examples:**
 - CAP is about network partitions, not a daily choice
@@ -170,6 +179,7 @@
 ⚠️ **Common Misconception:** "Eventual consistency = inconsistent." No — eventual consistency means the system WILL converge to a consistent state given enough time with no new writes. It has a convergence guarantee, unlike "no consistency" which has none.
 
 **Story:** 跨區域資料不一致。（角色：Karen）
+**Derivation:** ✅ 推導鏈 #9 — 光速有限，跨節點同步需要時間 → Consistency Models
 
 **Day 19 — Models:**
 - Strong, Eventual, Causal, Read-your-writes
@@ -185,6 +195,7 @@
 ⚠️ **Common Misconception:** "Read replicas give you strong consistency." No — replicas have replication lag (milliseconds to seconds). Read-after-write consistency requires reading from the leader, or using techniques like session stickiness or synchronous replication.
 
 **Story:** 主資料庫故障。小杰的回應讓問題更嚴重。（角色：小杰）
+**Derivation:** ✅ 推導鏈 #10 — 硬體年故障率 2-10%，單點 = 單點故障 → Replication
 
 **Day 21 — Replication Patterns:**
 - Single-leader, multi-leader, leaderless
@@ -199,6 +210,7 @@
 ⚠️ **Common Misconception:** "Token bucket and sliding window are interchangeable." No — token bucket allows bursts up to the bucket size (good for bursty traffic), while sliding window enforces a strict rate limit (better for steady rate enforcement). Choose based on your traffic pattern.
 
 **Story:** 被惡意爬蟲攻擊 API。（角色：小球）
+**Derivation:** ✅ 推導鏈 #11 — 系統處理能力有物理上限 → Rate Limiting
 
 **Day 23 — Algorithms:**
 - Token Bucket, Sliding Window, Fixed Window
@@ -216,6 +228,8 @@
 ### Day 25: Observability Consolidation
 **Prerequisites:** Day 4-5 (LB), Day 6-7 (Caching), Day 8-9 (Database)
 **Story:** 半夜事故，但缺少可觀測性。（角色：小球）
+**Derivation:** ✅ 推導鏈 #12 — 無法逐台 ssh 到數千節點 → Observability
+
 - Metrics, Logs, Traces — three pillars
 - Distributed tracing, SLI/SLO/SLA formalization
 - Structured logging, correlation IDs
@@ -224,6 +238,8 @@
 ### Day 26: Bloom Filter, Gossip Protocol & Advanced Concepts
 **Prerequisites:** Day 15-16 (Consistent Hashing), Day 19-20 (Consistency)
 **Story:** Sprint review。回顧整個 Phase 2。（角色：全員）
+**Derivation:** ✅ 推導鏈 #13 — 精確查詢 O(N) 太貴 + 全量廣播 O(N²) 不 scale → Bloom/Gossip
+
 - Bloom Filter: probabilistic membership testing
 - Gossip Protocol: node discovery and state sharing
 - Distributed Transactions overview (2PC/3PC)

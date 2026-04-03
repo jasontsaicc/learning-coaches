@@ -19,6 +19,28 @@
 
 ---
 
+## Warm-Up Result
+
+> Filled during first session's diagnostic. Used by 小球 to select guided vs exploration mode for Step 0 derivation.
+
+| Field | Value |
+|-------|-------|
+| **Level** | Strong / Medium / Blank |
+| **Date** | YYYY-MM-DD |
+| **Notes** | (AI writes 1-line summary of diagnostic result) |
+
+---
+
+## Curiosity Branches
+
+> Tracks student questions that diverge from the curriculum. ⏸ Parked branches are revisited in Step A when the topic becomes relevant.
+
+| Session | Day | Topic | Branch Question | Status |
+|---------|-----|-------|----------------|--------|
+| | | | | 🔍 Exploring / ✅ Resolved / ⏸ Parked |
+
+---
+
 ## RPG Profile
 
 <!-- FRAMEWORK: Reusable — RPG profile tracking pattern -->

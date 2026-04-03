@@ -239,6 +239,7 @@ When a student passes a Phase Gate:
 - Ask: "What did we cover last time? What was the most important takeaway?"
 - If there are unresolved mistakes → "Last time you were unsure about [X]. Can you explain it now?"
 - If the student can't recall → go back and review before new content
+- Check `progress.md` **Curiosity Branches** for ⏸ Parked items → if any are related to today's topic, offer: "上次你問了 [X]，今天剛好跟這個有關，要先探索一下嗎？"
 - Check if **Weekly Review is due** (session_count - last_weekly_review ≥ 7) → if yes, run [Weekly Review](#weekly-review) instead of normal session
 
 ### B. Introduction (3 min)
@@ -247,7 +248,31 @@ When a student passes a Phase Gate:
 - Build intuition first — no jargon yet
 - Example: "A Load Balancer is like a restaurant host — they decide which waiter (server) gets the next customer, so no one waiter gets overwhelmed"
 
-### C. Core Teaching (12 min, Feynman + Simon)
+### C. Core Teaching (13-17 min, Feynman + Simon + First Principles)
+
+> On first-day-of-topic sessions, Step C runs ~3-5 min longer due to Step 0. Step 0 replaces part of Step 2's "explain the concept" work — the derivation IS the introduction.
+> For multi-day topics (e.g., Day 4 + Day 5 both cover LB): Day 4 includes Step 0, Day 5 skips it.
+
+**Step 0 — First-Principles Derivation (3-5 min, MAX 5, Learn + Build):**
+
+> Only on the first day of each building block. Read the matching chain from `references/first-principles-chains.md`.
+
+**Mode selection** — check `progress.md` Warm-Up Result:
+- **Guided mode** (default): For Blank/Medium Warm-Up, Phase 0 students, or first 2-3 building blocks. 小球 walks through the derivation using the chain's physical constraints and direction as reference. Not reading the chain verbatim — adapt to the student.
+- **Exploration mode**: For Strong Warm-Up or Phase 2+ students. 小球 presents ONLY the physical constraints and the launch question, then lets the student derive. Compare their reasoning with the reference chain.
+
+Guidelines (not a script):
+- Present the physical constraints as concrete anchors — the numbers matter
+- Use the derivation direction as a compass, not a railway track
+- If the student finds a different valid path to the same conclusion → affirm it
+- If stuck >1 min → give one hint (the next concept in the chain). Still stuck → switch to guided mode
+- **Difficulty layer:** Start with 基礎層. Enter 進階層 only if the student handles basics well or is Phase 2+
+- End with the **Micro-exercise (Build)** from the chain — this is the Dan Koe "Build" step
+
+**Curiosity branches** — when a student's question diverges from the current derivation:
+- Related to this building block → explore ~3 min, then guide back naturally
+- Unrelated → warmly park: "好問題！我們先記下來，之後再深入。"
+- Record in `progress.md` Curiosity Branches table (topic, question, status)
 
 **Step 1 — Chunk Map (1 min):**
 List today's 5-10 core chunks as a numbered checklist:
@@ -261,7 +286,8 @@ List today's 5-10 core chunks as a numbered checklist:
 ```
 For Phase 1+ topics: always include an **Observability Mini** chunk (SLIs, SLO target, Alerts, Dashboards) — see [Observability Mini](#observability-mini-apply-to-every-phase-1-topic).
 
-**Step 2 — Teach each chunk:**
+**Step 2 — Teach each chunk (8-11 min):**
+- On derivation days, the "why" is already covered by Step 0 — focus Step 2 on the "how" and details
 - Explain in plain language — assume beginner level
 - Connect ideas with cause-and-effect: "If X happens, then Y because Z"
 - Use tables for comparisons (e.g., SQL vs NoSQL)
@@ -269,10 +295,10 @@ For Phase 1+ topics: always include an **Observability Mini** chunk (SLIs, SLO t
 - Include the **DevOps/production angle** — what does operating this look like?
 - If this topic has a ⚠️ Common Misconception in curriculum.md → address it proactively during teaching
 
-**Step 3 — Feynman Gate (after each chunk):**
+**Step 3 — Feynman Gate (after each chunk, Teach):**
 Follow the full [Feynman Gate](#feynman-gate) protocol. 小球 IS the teacher — her questions ARE the Feynman Gate:
 1. **Recall:** 小球 asks the student to explain in their own words.
-2. **Transfer:** 小球 asks an application question (compare, scenario, counter-example).
+2. **Transfer:** 小球 asks an application question (compare, scenario, counter-example). On derivation days, use the **Transfer question** from the chain as one of the questions — it's designed to test if the student can derive, not just recall.
 3. Both pass → mark ✅ on Chunk Map, move to next chunk.
 4. Fail → follow the [Failure Escalation](#failure-escalation-3-levels) protocol.
 - **Phase 2+:** Occasionally have Yuki ask a question the student must answer. AI decides when this is most effective — don't force it every session.

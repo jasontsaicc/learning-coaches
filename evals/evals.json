@@ -186,6 +186,36 @@
       "category": "rpg-multi-achievement",
       "prompt": "I just completed Day 1 (my first session ever). I passed the Feynman Gate on all chunks on my first try. Show me what I unlocked.",
       "expected_output": "Should unlock multiple achievements: M1 (First Steps — completed Day 1), C1 (First Blood — first Feynman Gate pass), C2 (Flawless Session — all chunks first try). Should show each achievement one by one, not batched. Milestones first, then Mastery. Should show abbreviated RPG dashboard at end with 3/25 achievements."
+    },
+    {
+      "id": 32,
+      "category": "derivation-basic",
+      "prompt": "I'm a new student, Warm-Up was Medium. Starting Day 4 (Load Balancer). Let's begin Step C.",
+      "expected_output": "Should trigger Step 0 (First-Principles Derivation) BEFORE Chunk Map. Should use guided mode (Medium Warm-Up = guided). Should present physical constraints from chain #1 (single CPU limit, C10K problem). Should walk through derivation direction naturally — not reading the chain verbatim. Should end Step 0 with micro-exercise. Then proceed to Step 1 Chunk Map."
+    },
+    {
+      "id": 33,
+      "category": "derivation-explore",
+      "prompt": "My progress.md shows Warm-Up Level: Strong. I'm starting Day 6 (Caching). Let's do Step C.",
+      "expected_output": "Should trigger Step 0 in exploration mode (Strong Warm-Up). Should present ONLY the physical constraints (DRAM ~100ns, SSD ~100μs, Network ~1ms) and the launch question. Should wait for student to derive before comparing with reference chain. Should NOT walk through derivation steps — let the student reason first."
+    },
+    {
+      "id": 34,
+      "category": "learn-build-teach",
+      "prompt": "We just finished the Caching derivation in Step 0. I derived that caching is about keeping hot data in faster storage. Now what?",
+      "expected_output": "Should affirm the derivation. Should present the micro-exercise (Build phase): 'draw ASCII showing cache strategy for 95:5 vs 50:50 read-write ratio.' After micro-exercise, should proceed to Step 1 Chunk Map. Later in Step 3, Feynman Gate Transfer questions should reference the derivation (Teach phase), e.g., 'explain to Yuki why hit rate dropping 99%→95% causes latency spike.'"
+    },
+    {
+      "id": 35,
+      "category": "curiosity-branch",
+      "prompt": "We're in the middle of the Caching derivation. I just learned DRAM is ~100ns. Wait — why is DRAM so much faster than SSD? Is it because of the physical structure? Like, does it use capacitors vs NAND gates?",
+      "expected_output": "Should recognize this as a related curiosity branch (physical basis of storage latency IS related to caching derivation). Should encourage brief exploration (~3 min): DRAM uses capacitors (electrical charge, fast), SSD uses NAND gates (charge trapping, slower). Should then guide back to the derivation naturally. Should record in progress.md Curiosity Branches table with status 🔍→✅."
+    },
+    {
+      "id": 36,
+      "category": "difficulty-layer",
+      "prompt": "I'm in Phase 2, Day 19 (Consistency Models). My Warm-Up was Strong and I've been doing well. Let's start Step 0.",
+      "expected_output": "Should use exploration mode (Phase 2 + Strong). Should present constraints from chain #9 (speed of light, sync replication latency numbers). After student derives basic layer, should progress to advanced layer (linearizability cost, causal consistency, read-your-writes). Should NOT stay at basic layer for a Phase 2 student who handles it well."
     }
   ]
 }

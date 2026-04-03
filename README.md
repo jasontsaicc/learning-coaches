@@ -1,32 +1,138 @@
-# System Design Coach
+**[English](README.md)** | **[繁體中文](README.zh-TW.md)**
 
-A Claude Code skill that transforms Claude into a structured System Design interview coach, using **Feynman Method** (deep understanding) + **Simon Method** (mastery through chunking).
+```
+  ____            _                   ____            _                ____                 _
+ / ___| _   _ ___| |_ ___ _ __ ___  |  _ \  ___  ___(_) __ _ _ __   / ___|___   __ _  ___| |__
+ \___ \| | | / __| __/ _ \ '_ ` _ \ | | | |/ _ \/ __| |/ _` | '_ \ | |   / _ \ / _` |/ __| '_ \
+  ___) | |_| \__ \ ||  __/ | | | | || |_| |  __/\__ \ | (_| | | | || |__| (_) | (_| | (__| | | |
+ |____/ \__, |___/\__\___|_| |_| |_||____/ \___||___/_|\__, |_| |_| \____\___/ \__,_|\___|_| |_|
+        |___/                                           |___/
 
-## What It Does
+              an AI-powered system design interview coach skill
+```
 
-- **61-day structured curriculum** covering core building blocks, distributed systems, and classic SD problems
-- **RPG narrative** — learn as an architect at ScaleUp, a growing startup with memorable characters (小球 your mentor, 小杰 the shortcut-loving CTO, Karen the PM, Yuki the junior dev)
-- **Achievement system** — 25 achievements that reward understanding, persistence, and teaching others
-- **Interactive teaching** — never lectures; asks you to explain concepts in your own words
-- **Daily mock interviews** — practice the 4-step SD framework with AI feedback
-- **Hands-on PoCs** — build proof-of-concept projects in Go, not just memorize
-- **Progress tracking** — RPG dashboard with title progression, streaks, and mastery heatmaps
+> *Not flashcards. Not video lectures.*
+> *Your AI becomes a Socratic mentor who derives every technique from physics — then makes you teach it back.*
 
-## Teaching Flow (Every Session)
+An open-source skill for Claude Code (and 40+ AI editors) that turns your AI into a structured System Design interview coach. 61-day curriculum. First-principles derivation. RPG narrative. You don't memorize "use caching for reads" — you derive it from DRAM ~100ns vs SSD ~100μs vs Network ~1ms.
 
-Each session follows an 8-step flow (A→H) taking ~65-70 minutes of learning content. Sessions can be paused and resumed across conversations via progress tracking.
+---
 
-See `SKILL.md` for the complete teaching flow.
+## How It Works
 
-## Curriculum Overview
+```
+  You                     AI (小球)                  Your Terminal
+  ---                     --------                   -------------
 
-| Phase | Days | Focus |
-|-------|------|-------|
-| Phase 0 | 1-3 | Thinking Framework — interview rubric, estimation, 4-step method |
-| Phase 1 | 4-16 | Core Building Blocks — LB, caching, databases, queues, API, auth |
-| Phase 2 | 17-26 | Distributed Systems — CAP, consistency, replication, rate limiting |
-| Phase 3 | 27-53 | Classic SD Problems — URL shortener, chat, news feed, payment, etc. |
-| Phase 4 | 54-61 | Mock Interviews — timed mocks, trade-off drills, weak spot reinforcement |
+  "let's learn"  ----->   reads progress.md  -----> checks where
+                          becomes 小球 (★‿★)         you left off
+                          your mentor
+                                |
+                                v
+                          "DRAM is 100ns.
+                           SSD is 100μs.
+                           That's 1000x slower.
+                           What should we do?"
+                                |
+                                v
+                          derive --> build --> teach --> gate --> next
+```
+
+1. Install the skill (see below)
+2. Open Claude Code and say **"let's learn system design"**
+3. Learn by deriving, not memorizing
+
+---
+
+## The Cast
+
+Characters at **ScaleUp**, a fast-growing startup where everything breaks at scale:
+
+| Character | Role | Catchphrase |
+|-----------|------|-------------|
+| **(★‿★) 小球** | Senior Architect | "Why does this work?" — your Socratic mentor, never gives answers directly |
+| **(◎_◎;) 小杰** | CTO | "Just ship it" — makes bad architecture calls you learn to fix |
+| **(╯°□°)╯ Karen** | PM | "Demo is Friday" — brings real business pressure and requirements |
+| **(°▽°) Yuki** | Junior Dev (Phase 2+) | "Can you explain?" — you teach her to prove you truly understand |
+
+---
+
+## The Journey (61 Days)
+
+| Phase | Days | At ScaleUp... | You'll Learn |
+|-------|------|---------------|-------------|
+| 0 | 1-3 | First week onboarding | Interview rubric, estimation, 4-step SD framework |
+| 1 | 4-16 | Traffic spikes, DB debates | LB, caching, databases, queues, API, auth, consistent hashing |
+| 2 | 17-26 | International expansion | CAP, consistency, replication, rate limiting, observability |
+| 3 | 27-53 | Design review gauntlet | URL shortener, chat, news feed, payment + 8 more problems |
+| 4 | 54-61 | Final boss interviews | Timed mocks, trade-off drills, weak spot reinforcement |
+
+Title progression: 🌱 Junior Engineer → ⚙️ Systems Engineer → 🌐 Distributed Engineer → 🏗️ Staff Architect → 👑 Principal Architect
+
+---
+
+## Derivation Chains (What Makes This Different)
+
+Instead of pattern-matching ("see X scenario → use Y technique"), you derive from physics:
+
+```
+  Physical constraint              What you derive
+  --------------------             ----------------
+
+  DRAM ~100ns, SSD ~100μs    -->   Why caching exists, where to place it
+  Single CPU has core limit   -->   Why load balancers exist
+  Hardware fails 2-10%/year   -->   Why replication is non-negotiable
+  Light speed = 150ms RTT     -->   Why CAP is a partition trade-off
+  Sync call = fate coupling   -->   Why message queues decouple
+  HTTP is plaintext            -->   Why every security layer exists
+```
+
+13 derivation chains cover all Phase 1-2 building blocks. Each chain defines:
+- **Physical constraints** — concrete numbers (the anchors)
+- **Derivation direction** — logical flow, not a script (the compass)
+- **Micro-exercise** — ASCII diagram, pseudocode, or mental model (Build)
+- **Transfer question** — explain to Yuki (Teach)
+
+The AI uses these as a compass to guide you naturally — not as a script to read verbatim.
+
+### Adaptive Mode
+
+| Student Level | Derivation Mode | How It Works |
+|---------------|----------------|-------------|
+| Beginner / Medium Warm-Up | **Guided** | 小球 walks through constraints → derivation → conclusion |
+| Strong Warm-Up / Phase 2+ | **Exploration** | 小球 shows only the numbers, you derive, then compare |
+
+---
+
+## Teaching Methods
+
+Four methods, layered:
+
+| Method | What It Does | In Practice |
+|--------|-------------|-------------|
+| **First Principles** | Derive from physics, not memorize | Step 0: "DRAM is 1000x faster than SSD — now what?" |
+| **Feynman** | Explain in your own words to prove understanding | "Can you explain caching to Yuki?" not "Do you understand?" |
+| **Simon (Chunking)** | Break topics into 5-10 chunks, master each | Can't move to chunk 3 until chunk 2 passes the gate |
+| **Dan Koe (Learn→Build→Teach)** | Three-phase cycle per concept | Derive it → build ASCII diagram → teach it to Yuki |
+
+---
+
+## Session Flow
+
+Each session follows 8 steps (~65-70 min). Pause anytime, resume next session.
+
+```
+A. Review          -- recall last session + check parked curiosity branches
+B. Introduction    -- story hook + real-life analogy
+C. Core Teaching   -- Step 0: Derivation → Step 1: Chunk Map → Step 2: Teach → Step 3: Feynman Gate
+D. Hands-On        -- PoC in Go (or ASCII design exercise)
+E. Simon Drill     -- close notes, recall from memory
+F. Interview Drill -- mini mock with 4-step framework + tiered scorecard
+G. Notes           -- structured notes + one-liner challenge + cross-verification
+H. Progress        -- update mastery, achievements, streak, story summary
+```
+
+---
 
 ## Install
 
@@ -36,78 +142,61 @@ See `SKILL.md` for the complete teaching flow.
 npx skills add jasontsaicc/system-design-coach
 ```
 
-Works with Claude Code, Cursor, Copilot, and [40+ other agents](https://github.com/vercel-labs/skills). No extra setup needed.
+Works with Claude Code, Cursor, Copilot, and [40+ other agents](https://github.com/vercel-labs/skills).
 
 ### Manual Install
 
-**Personal skill** (available in all your projects):
-
 ```bash
+# Personal skill (all projects)
 git clone https://github.com/jasontsaicc/system-design-coach.git
 cp -r system-design-coach ~/.claude/skills/sd-coach
-```
 
-**Project skill** (one project only):
-
-```bash
+# Project skill (one project)
 mkdir -p .claude/skills
 git clone https://github.com/jasontsaicc/system-design-coach.git .claude/skills/sd-coach
-```
 
-**Temporary use** (no install):
-
-```bash
+# Temporary use (no install)
 git clone https://github.com/jasontsaicc/system-design-coach.git ~/sd-coach
 claude --add-dir ~/sd-coach
 ```
 
 ### Verify
 
-In Claude Code, type:
 ```
 What skills are available?
 ```
-You should see `sd-coach` in the list. You can also invoke it directly with `/sd-coach`.
 
-## Key Features
+You should see `sd-coach` in the list. Invoke directly with `/sd-coach`.
 
-### RPG Learning Experience
-Join **ScaleUp** as a system architect. Each phase of the curriculum maps to a company growth stage — from seed startup to international expansion. Characters bring concepts to life: 小球 mentors you with Socratic questions, 小杰 makes bad architecture decisions you learn to fix, Karen brings real business requirements, and Yuki (Phase 2+) forces you to teach what you've learned. Earn 25 achievements, level up your title from 🌱 Junior Engineer to 👑 Principal Architect, and track your streak.
-
-### Feynman Method
-Never asks "Do you understand?" — instead asks "Can you explain X in your own words?" If wrong, guides you to find the error rather than correcting directly.
-
-### Simon Method (Chunking)
-Every topic decomposed into 5-10 core chunks. Each chunk must pass the "explain in own words" test before moving on. No skipping — drill until breakthrough.
-
-### 4-Step Interview Framework
-Every design answer follows: Clarify Requirements → High-Level Design → Deep Dive → Scale & Trade-offs. Practiced daily to build muscle memory.
-
-### Observability Mindset
-Every building block includes SLIs, SLO targets, alerts, and dashboard definitions — training you to naturally weave monitoring into SD answers.
+---
 
 ## Language Support
 
-- **Default**: English
-- **Bilingual mode**: English + student's native language for Feynman-style plain explanations
-- Includes **English Polish** feature for non-native speakers practicing interview articulation
+- **English** (default) — all teaching in English
+- **Bilingual** — English for technical content, your native language for plain explanations
+- **English Polish** — after each response, shows an interview-ready version of what you said
+
+---
 
 ## Project Structure
 
 ```
 system-design-coach/
-├── SKILL.md                  # Core skill — teaching methods, gates, session flow, RPG layer
+├── SKILL.md                       # Core skill — methods, gates, flow, RPG layer
 ├── references/
-│   ├── curriculum.md          # Full 61-day curriculum with prerequisites + story triggers
-│   ├── story.md               # RPG character personality guides + story arcs
-│   ├── achievements.md        # 25 achievement definitions + unlock conditions
-│   ├── progress-template.md   # Student progress + RPG profile + achievements tracking
-│   ├── notes-template.md      # Standardized notes format + interview template
-│   ├── 8-block-skeleton.md    # Whiteboard diagram template
-│   └── estimation-cheatsheet.md # Back-of-envelope numbers
+│   ├── first-principles-chains.md # 13 derivation chains + dependency graph
+│   ├── curriculum.md              # 61-day curriculum + prerequisites + story triggers
+│   ├── story.md                   # Character personality guides + story arcs
+│   ├── achievements.md            # 25 achievements + unlock conditions
+│   ├── progress-template.md       # Progress tracking + warm-up + curiosity branches
+│   ├── notes-template.md          # Session notes format
+│   ├── 8-block-skeleton.md        # Whiteboard diagram template
+│   └── estimation-cheatsheet.md   # Back-of-envelope numbers
 └── evals/
-    └── evals.json             # 31 test cases for skill validation
+    └── evals.json                 # 36 test cases for skill validation
 ```
+
+---
 
 ## License
 
