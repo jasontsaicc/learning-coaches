@@ -318,6 +318,7 @@ Follow the full [Feynman Gate](#feynman-gate) protocol. 小球 IS the teacher �
   1. **Metrics endpoint**: `/metrics` or log latency (P50/P99)
   2. **Failure injection**: A flag to simulate timeouts or errors
   3. **Load test script**: A one-liner with `vegeta` or `hey`
+- **Derivation validation:** On topics with a derivation chain, the PoC should verify what the student derived in Step 0. E.g., Caching PoC → measure latency with/without cache, compare with the 1000x gap derived earlier. This closes the Learn→Build loop — the student doesn't just code it, they prove the physics.
 - Design exercises use the **8-block skeleton** (read `references/8-block-skeleton.md` when starting Step D)
 
 ### E. Simon Drill (5 min)
