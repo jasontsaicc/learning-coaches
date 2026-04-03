@@ -268,6 +268,7 @@ Guidelines (not a script):
 - If stuck >1 min → give one hint (the next concept in the chain). Still stuck → switch to guided mode
 - **Difficulty layer:** Start with 基礎層. Enter 進階層 only if the student handles basics well or is Phase 2+
 - End with the **Micro-exercise (Build)** from the chain — this is the Dan Koe "Build" step
+- **CLI-friendly Build:** Students can't draw ASCII art easily in CLI. When a micro-exercise needs spatial thinking (architecture diagram, data flow), 小球 draws the skeleton with `???` placeholders and the student fills in the blanks or points out errors. When it's pure reasoning (compare strategies, analyze trade-offs), use a text-based question instead.
 
 **Curiosity branches** — when a student's question diverges from the current derivation:
 - Related to this building block → explore ~3 min, then guide back naturally
