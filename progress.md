@@ -12,16 +12,23 @@
 |-------|-------|
 | **Start date** | 2026-03-04 |
 | **Current phase** | Phase 1 |
-| **Current day** | Day 9 |
+| **Current day** | Day 12 |
 | **Language mode** | Bilingual (繁中 + English) |
-| **Session count** | 13 |
+| **Session count** | 14 |
 | **Last weekly review** | 10 |
 
 ---
 
 ## Current Session (Breakpoint)
 
-> No active breakpoint — last session completed normally.
+| Field | Value |
+|-------|-------|
+| **Day** | Day 12 (API Design) |
+| **Step** | Step C — Chunk 2 (GraphQL Fundamentals) |
+| **Position** | Feynman Gate Recall question asked, student hasn't answered yet |
+| **Chunks completed** | ✅ 1. REST fundamentals |
+| **Chunks remaining** | ☐ 2-7 (GraphQL, gRPC, Pagination, Versioning, Idempotency, Observability Mini) |
+| **Review notes** | Step A: resolved 2 MQ mistakes (at-least-once vs idempotency ✅, inventory check placement ✅). MQ blind recall: 2/3 (missed DLQ). Derivation completed — student correctly matched REST/GraphQL/gRPC to scenarios. |
 
 ---
 
@@ -95,10 +102,10 @@
 | 12 | 10 | Message Queue | Simon Drill: delivery semantics 名稱講不完整 (most/least/excely) | ❌ Unresolved |
 | 12 | 10 | Message Queue | 設計練習不知道怎麼起手（需要拆成小問題逐步推） | ❌ Unresolved |
 | 13 | 10 | Message Queue | 忘了 Functional / Non-Functional / Scope 的定義（Step 1 基礎） | ❌ Unresolved |
-| 13 | 10 | Message Queue | Inventory check 放 Queue 之後（沒考慮 user 等半天才知道沒貨的體驗） | ❌ Unresolved |
+| 13 | 10 | Message Queue | Inventory check 放 Queue 之後（沒考慮 user 等半天才知道沒貨的體驗） | ✅ Resolved (S14) |
 | 13 | 10 | Message Queue | 把 Idempotency 當獨立 service（其實是 Order Service 裡的邏輯） | ❌ Unresolved |
 | 13 | 10 | Message Queue | 把 Redis DECR（庫存 pre-check）跟 Idempotency check（防重複）搞混 | ❌ Unresolved |
-| 13 | 10 | Message Queue | 說 at-least-once 是解決重複扣款的方法（at-least-once 是問題來源，idempotency 才是解法） | ❌ Unresolved |
+| 13 | 10 | Message Queue | 說 at-least-once 是解決重複扣款的方法（at-least-once 是問題來源，idempotency 才是解法） | ✅ Resolved (S14) |
 
 ---
 
@@ -118,10 +125,10 @@
 | Field | Value |
 |-------|-------|
 | **Title** | ⚙️ Systems Engineer |
-| **Current streak** | 3 🔥 |
+| **Current streak** | 1 🔥 |
 | **Longest streak** | 3 |
-| **Last session date** | 2026-04-02 |
-| **Last story summary** | 回到 flash sale 戰場，完成 Interview Drill — 設計了完整的訂單處理系統，從 Redis 擋庫存到 Queue 削峰到 idempotency 防重複扣款。 |
+| **Last session date** | 2026-04-07 |
+| **Last story summary** | Karen 催 mobile app 上線，API 回太多資料。開始 API Design 推導，學會 REST/GraphQL/gRPC 各適用場景，完成 REST chunk。中途離開，下次從 GraphQL chunk 繼續。 |
 
 ---
 
