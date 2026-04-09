@@ -24,11 +24,11 @@
 | Field | Value |
 |-------|-------|
 | **Day** | Day 12 (API Design) |
-| **Step** | Step C — Chunk 2 (GraphQL Fundamentals) |
-| **Position** | Feynman Gate Recall question asked, student hasn't answered yet |
-| **Chunks completed** | ✅ 1. REST fundamentals |
-| **Chunks remaining** | ☐ 2-7 (GraphQL, gRPC, Pagination, Versioning, Idempotency, Observability Mini) |
-| **Review notes** | Step A: resolved 2 MQ mistakes (at-least-once vs idempotency ✅, inventory check placement ✅). MQ blind recall: 2/3 (missed DLQ). Derivation completed — student correctly matched REST/GraphQL/gRPC to scenarios. |
+| **Step** | Step F — Interview Drill (mid-way) |
+| **Position** | Interview Drill: Food delivery API design. Completed Step 1 (Clarify Requirements). Step 2 (High-Level Design) started: chose REST/GraphQL/gRPC for web/mobile/internal. Defining endpoints next. |
+| **Chunks completed** | ✅ 1-7 all passed (Versioning reteach needed, Idempotency, Observability Mini) |
+| **Chunks remaining** | All chunks done. Remaining: Step F (finish drill), Step G (notes), Step H (progress update) |
+| **Review notes** | Step A: resolved 2 MQ mistakes (at-least-once vs idempotency ✅, inventory check placement ✅). Simon Drill: Pagination forgot, Versioning error (said 修改 not breaking), Observability repeated same mistake (framework vs metrics). Interview Drill: good scope negotiation, caught REST verb-in-URL mistake. |
 
 ---
 
@@ -106,6 +106,12 @@
 | 13 | 10 | Message Queue | 把 Idempotency 當獨立 service（其實是 Order Service 裡的邏輯） | ❌ Unresolved |
 | 13 | 10 | Message Queue | 把 Redis DECR（庫存 pre-check）跟 Idempotency check（防重複）搞混 | ❌ Unresolved |
 | 13 | 10 | Message Queue | 說 at-least-once 是解決重複扣款的方法（at-least-once 是問題來源，idempotency 才是解法） | ✅ Resolved (S14) |
+| 15 | 12 | API Design | gRPC recall 只說 "for service to service"，說不出 WHY（binary fast + strict contract） | ❌ Unresolved |
+| 15 | 12 | API Design | GraphQL transfer 只說「可以用」沒解釋 HOW（client 寫 query 選 fields，burden 從 backend 移到 client） | ❌ Unresolved |
+| 16 | 12 | API Design | Simon Drill: Pagination 完全忘記（Offset vs Cursor） | ❌ Unresolved |
+| 16 | 12 | API Design | Versioning 說「修改不需要新版本」，但 rename field 是 breaking change | ❌ Unresolved |
+| 16 | 12 | API Design | Observability: 又把 SLI/SLO/Dashboard 當成 metrics（正確是 Latency, Error rate, Throughput） | ❌ Unresolved |
+| 16 | 12 | API Design | Interview Drill: REST endpoint 寫 `/v1/get/restaurants`，verb 塞進 URL（正確：`GET /v1/restaurants`） | ❌ Unresolved |
 
 ---
 
@@ -125,10 +131,10 @@
 | Field | Value |
 |-------|-------|
 | **Title** | ⚙️ Systems Engineer |
-| **Current streak** | 1 🔥 |
+| **Current streak** | 3 🔥 |
 | **Longest streak** | 3 |
-| **Last session date** | 2026-04-07 |
-| **Last story summary** | Karen 催 mobile app 上線，API 回太多資料。開始 API Design 推導，學會 REST/GraphQL/gRPC 各適用場景，完成 REST chunk。中途離開，下次從 GraphQL chunk 繼續。 |
+| **Last session date** | 2026-04-09 |
+| **Last story summary** | API Design 7 chunks 全部完成。Versioning 需要 reteach 才過。學會 Idempotency Key (UUID per operation, replay response)。Simon Drill 暴露 Pagination 遺忘和 Observability metrics 混淆。Interview Drill 進行中：food delivery API 設計到 Step 2。 |
 
 ---
 
