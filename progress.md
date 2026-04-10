@@ -14,7 +14,7 @@
 | **Current phase** | Phase 1 |
 | **Current day** | Day 12 |
 | **Language mode** | Bilingual (繁中 + English) |
-| **Session count** | 14 |
+| **Session count** | 17 |
 | **Last weekly review** | 10 |
 
 ---
@@ -24,11 +24,11 @@
 | Field | Value |
 |-------|-------|
 | **Day** | Day 12 (API Design) |
-| **Step** | Step F — Interview Drill (mid-way) |
-| **Position** | Interview Drill: Food delivery API design. Completed Step 1 (Clarify Requirements). Step 2 (High-Level Design) started: chose REST/GraphQL/gRPC for web/mobile/internal. Defining endpoints next. |
-| **Chunks completed** | ✅ 1-7 all passed (Versioning reteach needed, Idempotency, Observability Mini) |
-| **Chunks remaining** | All chunks done. Remaining: Step F (finish drill), Step G (notes), Step H (progress update) |
-| **Review notes** | Step A: resolved 2 MQ mistakes (at-least-once vs idempotency ✅, inventory check placement ✅). Simon Drill: Pagination forgot, Versioning error (said 修改 not breaking), Observability repeated same mistake (framework vs metrics). Interview Drill: good scope negotiation, caught REST verb-in-URL mistake. |
+| **Step** | Step H — Progress Update (wrapping up) |
+| **Position** | Interview Drill 3/3 completed. Notes written. One-liner challenge skipped (do next session). Step H progress update in progress. |
+| **Chunks completed** | ✅ 1-7 all passed |
+| **Chunks remaining** | One-liner challenge (next session), Step H finalize |
+| **Review notes** | Session 17: GraphQL POST 問答 (HTTP body 基礎補強). REST endpoint design (plural nouns, path params, resource nesting). API security (price/user_id 不信任 client). Cursor vs Offset pagination 應用. Idempotency deep dive (crash recovery + intermediate states). Interview Drill 3/3. |
 
 ---
 
@@ -44,7 +44,7 @@
 | 6-7 | Caching & CDN | 🔴 | — | Weekly Review 0/4 recall. Drill partial recovery. Downgraded from 🟢. |
 | 8-9 | Database Selection | 🟡 | — | Weekly Review 3/4 recall. B-tree/LSM resolved. Trade-off axis confusion persists. |
 | 10-11 | Message Queue | 🟡 | — | Concepts understood with guidance. Interview Drill 3/3 but needed help with requirements framework, inventory placement, idempotency architecture. |
-| 12-13 | API Design | ⬜ | — | |
+| 12-13 | API Design | 🟡 | — | Chunks all passed. Interview Drill 3/3. But many endpoint design mistakes (singular nouns, path params, security), pagination naming confusion, HTTP body basics gap. |
 | 14 | Security & Auth | ⬜ | — | |
 | 15-16 | Consistent Hashing | ⬜ | Phase 1 Gate | |
 | 17-18 | CAP Theorem | ⬜ | — | |
@@ -79,6 +79,7 @@
 | 8 | 8-9 | Database Selection | 2/3 | ❌ Scope Negotiation, initially chose NoSQL based on data volume (wrong reasoning) |
 | 10 | WR1 | Weekly Review (DB/LB/Cache) | DB 3/4, LB 1/4, Cache 0/4 | First weekly review. LB 🟢→🟡, Cache 🟢→🔴. 2 mistakes resolved (DNS limits, LSM-tree). |
 | 13 | 10 | Message Queue (Interview Drill) | 3/3 | ✅ Think Aloud, ✅ Scope Negotiation, ✅ Used MQ. Needed guidance on requirements framework and idempotency placement. |
+| 17 | 12 | API Design (Interview Drill) | 3/3 | ✅ Think Aloud, ✅ Scope Negotiation, ✅ Used API Design. Fixed endpoint mistakes mid-drill. Strong idempotency deep dive. |
 
 ---
 
@@ -111,7 +112,12 @@
 | 16 | 12 | API Design | Simon Drill: Pagination 完全忘記（Offset vs Cursor） | ❌ Unresolved |
 | 16 | 12 | API Design | Versioning 說「修改不需要新版本」，但 rename field 是 breaking change | ❌ Unresolved |
 | 16 | 12 | API Design | Observability: 又把 SLI/SLO/Dashboard 當成 metrics（正確是 Latency, Error rate, Throughput） | ❌ Unresolved |
-| 16 | 12 | API Design | Interview Drill: REST endpoint 寫 `/v1/get/restaurants`，verb 塞進 URL（正確：`GET /v1/restaurants`） | ❌ Unresolved |
+| 16 | 12 | API Design | Interview Drill: REST endpoint 寫 `/v1/get/restaurants`，verb 塞進 URL（正確：`GET /v1/restaurants`） | ✅ Resolved (S17) |
+| 17 | 12 | API Design | 不知道 GET data 放 URL (query string)、POST data 放 request body | ❌ Unresolved |
+| 17 | 12 | API Design | REST path 用 singular noun + path param 寫成字面文字 | ✅ Resolved (S17, 當場修正) |
+| 17 | 12 | API Design | Price/user_id 放 request body（沒想過 client 可以竄改） | ❌ Unresolved |
+| 17 | 12 | API Design | Pagination 說成 "offline"（正確: offset），cursor 也靠提示才想起 | ❌ Unresolved |
+| 17 | 12 | API Design | Idempotency record 只想到 exists/not exists，沒想到需要 processing 中間狀態 | ❌ Unresolved |
 
 ---
 
@@ -123,6 +129,7 @@
 | Caching & CDN | Cache puts frequently-used data in a faster store like Redis in front of the DB, reducing latency and DB load by serving most requests without hitting the database. |
 | Database Selection | Database selection is choosing the right storage engine — SQL, NoSQL, or NewSQL — based on access patterns, relationship complexity, and consistency requirements, so the database fits the workload rather than forcing the workload to fit the database. |
 | Message Queue | A Message Queue decouples producers from consumers, enabling async processing, peak traffic buffering, and failure resilience through retry and dead letter queues — the key is pairing at-least-once delivery with idempotency to prevent duplicate processing. |
+| API Design | API Design is about choosing the right style (REST, GraphQL, gRPC) based on who's calling, call frequency, and data complexity — the key trade-off is flexibility versus simplicity and cacheability. |
 
 ---
 
@@ -131,10 +138,10 @@
 | Field | Value |
 |-------|-------|
 | **Title** | ⚙️ Systems Engineer |
-| **Current streak** | 3 🔥 |
-| **Longest streak** | 3 |
-| **Last session date** | 2026-04-09 |
-| **Last story summary** | API Design 7 chunks 全部完成。Versioning 需要 reteach 才過。學會 Idempotency Key (UUID per operation, replay response)。Simon Drill 暴露 Pagination 遺忘和 Observability metrics 混淆。Interview Drill 進行中：food delivery API 設計到 Step 2。 |
+| **Current streak** | 4 🔥 |
+| **Longest streak** | 4 |
+| **Last session date** | 2026-04-10 |
+| **Last story summary** | API Design Interview Drill 完成 (3/3)。Food delivery API: 學會 REST endpoint 設計 (plural nouns, path params, resource nesting)、API security (不信任 client input)、cursor pagination 應用、idempotency crash recovery (中間狀態)。 |
 
 ---
 
@@ -149,8 +156,9 @@
 | S2 | Weekly Warrior | 🏆 | retroactive |
 | E1 | Perfect Drill | 🏆 | 2026-04-02 |
 | S1 | Three-peat | 🏆 | 2026-04-02 |
+| K4 | Bug Squasher ×5 | 🏆 | 2026-04-10 |
 
-**Total: 7/25**
+**Total: 8/25**
 
 ---
 

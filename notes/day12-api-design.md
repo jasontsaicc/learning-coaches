@@ -1,7 +1,7 @@
-# Day 12 — API Design (Part 1, 未完成)
+# Day 12 — API Design
 
-> Session 14-15 | 2026-04-07 ~ 04-08 | Phase 1
-> ⚠️ Chunks 1-4 完成，Chunk 5 (Versioning) 教完但未測驗
+> Session 14-17 | 2026-04-07 ~ 04-10 | Phase 1
+> Chunks 1-7 全部通過 | Interview Drill 3/3 ✅
 
 ---
 
@@ -66,11 +66,60 @@ API Design 是根據「誰在呼叫、頻率多高、資料多複雜」來選擇
 - **Cursor：** `?cursor=xxx&limit=10` — `WHERE id > cursor LIMIT 10` 用 index seek（快）+ 穩定不跳位，但不能跳頁
 - **選擇框架：** Admin 後台小資料集 → offset（要頁碼）；Feed/即時資料 → cursor（資料一直在變）
 
-### Chunk 5: API Versioning（已教，未測驗）
+### Chunk 5: API Versioning
 
 - **三種策略：** URL path `/v1/`（最常用）、Header versioning、Query param `?version=2`
 - **核心原則：** Don't break existing clients — 保持舊版運行，deprecated 後才下架
 - **Breaking vs Non-breaking：** 新增 field/optional param = non-breaking；移除/改名 field = breaking，需要新版本
+- ⚠️ Versioning 初次測驗失敗（說「修改不需要新版本」），reteach 後通過
+
+### Chunk 6: Idempotency in APIs
+
+- **問題：** User 按兩次 "Place Order" → 兩張訂單、扣兩次款
+- **解法：** Client 產生 Idempotency-Key（UUID），Server 用 `(user_id, idempotency_key)` 當唯一識別
+- **流程：** 收到 request → 查 key → 不存在就處理 + 綁結果到 key → 第二次同 key 進來直接回原結果
+- **中間狀態：** idempotency record 需要 `pending → processing → completed`，不只是 exists/not exists
+- **Crash recovery：** Server crash 在 order 建好但 payment 未完成時 → 第二次 request 看到 status=processing → 檢查已完成步驟 → 從未完成的步驟繼續（resume, not restart）
+
+### Chunk 7: Observability Mini
+
+| Element | API Design |
+|---------|-----------|
+| **SLIs** | Latency (P50/P99), Error rate (4xx/5xx), Throughput (req/sec) |
+| **SLO target** | P99 < 200ms, 99.9% availability |
+| **Alerts** | Error rate spike, latency 突然上升 |
+| **Dashboards** | Throughput, latency distribution, error rate by endpoint |
+
+⚠️ 之前混淆：把 SLI/SLO/Dashboard 當成 metrics 本身（SLI 是 **measurement**，metrics 如 latency/error rate 是具體數值）
+
+---
+
+## Interview Drill: Food Delivery API Design
+
+**Score: 3/3 ✅** (Think Aloud ✅ | Scope Negotiation ✅ | Used API Design ✅)
+
+### Step 1: Clarify Requirements
+- Functional: 找餐廳、看菜單、下單、追蹤
+- Non-functional: low latency for search, order reliability
+- Scope: focus on customer-facing API, not driver/restaurant side
+
+### Step 2: High-Level Design
+- REST for client-facing, gRPC for internal services
+- Core endpoints:
+  ```
+  GET  /v1/restaurants                      -- 搜尋餐廳
+  GET  /v1/restaurants/{restaurant_id}/menu  -- 某餐廳的菜單
+  POST /v1/orders                           -- 下單
+  GET  /v1/orders/{order_id}                -- 查/追蹤訂單
+  GET  /v1/users/{user_id}/orders           -- 歷史訂單
+  ```
+- Pagination: cursor-based（資料持續新增 + 大量資料 offset 效能差）
+- Order body: restaurant_id, items[{item_id, quantity}], delivery_address, payment_method_id
+- Security: price 由 server 算（防竄改），user_id 從 auth token 取（不放 body）
+
+### Step 3: Deep Dive — Idempotency
+- Idempotency key 防止 duplicate order/payment
+- 中間狀態處理 crash recovery（見 Chunk 6）
 
 ---
 
@@ -82,6 +131,14 @@ API Design 是根據「誰在呼叫、頻率多高、資料多複雜」來選擇
 | Over-fetching 的問題只有「比較慢」 | 兩個問題：(1) over-fetching 浪費頻寬 (2) tight coupling — 每次前端需求變動都要改後端 | 只想到效能面，沒想到維護面的 coupling 問題 |
 | gRPC 知道是 service-to-service 用，但說不出 WHY | 要講出具體原因：(1) binary format ~10x faster (2) `.proto` strict contract 避免跨團隊 field 改名爆炸 | 只記住 WHAT（用途），沒記住 WHY（為什麼比 REST 更適合）— 面試要答的是 WHY |
 | GraphQL transfer 只說「可以用 GraphQL」沒解釋 HOW | 要說出機制：同一 endpoint，client 自己寫 query 選 fields → burden 從 backend 移到 client | 知道 GraphQL 能解決問題，但沒辦法解釋它怎麼解決的 — 理解停在表面 |
+| 不知道 GET data 放 URL、POST data 放 body | GET 參數放 query string（URL 上），POST 放 request body（大小限制小） | HTTP 基礎沒碰過，只用過 curl 或 UI 工具 |
+| REST path 用 singular noun (`/restaurant`) | Collection 用 plural（`/restaurants`），single item 用 `/{id}`（`/restaurants/123`） | 沒想過 URL 是在描述 collection |
+| Path parameter 寫成字面文字 (`restaurant_id`) | Path parameter 用 placeholder: `/restaurants/{restaurant_id}`，實際呼叫是 `/restaurants/123` | API 文件讀太少，不知道 `{id}` 慣例 |
+| Price 和 user_id 放 request body 讓 client 傳 | Price 由 server 從 DB 算（防竄改），user_id 從 auth token 取（防偽造） | **沒想過 client 可以竄改 request body** — API security 盲點 |
+| Pagination 說成 "offline"，cursor 想不起來名字 | Offset（偏移量）和 Cursor（游標）是兩種分頁法 | 學過但沒記住名詞，說明理解不夠深 |
+| Idempotency record 只有 "有/沒有" 兩種狀態 | 需要中間狀態 `pending → processing → completed`，才能在 crash 後 resume 未完成的操作 | 只想到 "擋重複"，沒想到 crash recovery 場景 |
+| Versioning 說「修改不需要新版本」 | Rename/remove field = breaking change，必須新版本 | 把「修改」跟 non-breaking change 搞混了 |
+| Observability 把 SLI/SLO 當成 metrics | SLI 是 measurement type（如 latency），metrics 是具體數值（如 P99=150ms） | 概念層次沒分清楚，framework vs 具體指標 |
 
 ---
 
@@ -93,6 +150,12 @@ API Design 是根據「誰在呼叫、頻率多高、資料多複雜」來選擇
 **When asked to go deeper:**
 > Q: "Why not just use GraphQL for everything?"
 > A: "GraphQL solves over-fetching, but all queries go through POST, making CDN caching much harder. For simple CRUD with predictable data, REST is simpler and more cache-friendly. For internal high-throughput service-to-service calls, gRPC's binary format is faster."
+
+> Q: "How do you prevent duplicate orders?"
+> A: "The client generates an idempotency key before sending the request. The server checks if this key exists. If not, it processes the order and binds the result to the key. If the same key comes in again, it returns the cached response. The key also needs intermediate states like processing, so if the server crashes mid-flow, it can resume from where it left off."
+
+**Showing production depth:**
+> "In production, I'd monitor P99 latency per endpoint, 4xx/5xx error rates, and set alerts on error budget burn rate. For order APIs, I'd track idempotency key hit rate to detect retry storms."
 
 ---
 
@@ -109,17 +172,6 @@ API Design 是根據「誰在呼叫、頻率多高、資料多複雜」來選擇
 | gRPC use binary format fast than REST usually json and more small | gRPC uses binary format, which is faster than REST's JSON and produces smaller payloads. |
 | when use REST two teams use API docs... gRPC is different strict schema | With REST, two teams rely on API docs or OpenAPI specs. If one team changes a field name, the other service will break. gRPC enforces a strict schema via the `.proto` file, reducing cross-team integration errors. |
 | i'd push for gRPC if the inventory call is on a high volume latency-sensitive | I'd push for gRPC if the inventory call is high-volume and latency-sensitive. |
-
----
-
-## 待完成（下次 Session 繼續）
-
-- ✅ Chunk 2: GraphQL fundamentals
-- ✅ Chunk 3: gRPC fundamentals
-- ✅ Chunk 4: Pagination (Offset vs Cursor)
-- ☐ Chunk 5: API Versioning（已教，Feynman Gate 未測）
-- ☐ Chunk 6: Idempotency in APIs
-- ☐ Chunk 7: Observability Mini
-- ☐ Step D: Hands-On Practice
-- ☐ Step E: Simon Drill
-- ☐ Step F: Interview Drill
+| 因爲GraphQL是自己寫query 決定要拿什麽 | GraphQL uses POST because the client writes its own query to specify which fields to fetch. The query can be complex with nested fields and variables, so it goes in the request body, which means POST. |
+| cursor 因爲一直有新的, 而且數量太多了 | I'd use cursor-based pagination because new restaurants are constantly being added, and with a large dataset, offset pagination degrades in performance as you go deeper. |
+| 因爲擔心duplicate order or payment | I'd deep dive into the Order service because duplicate orders and duplicate payments are the most critical failure mode in a food delivery system. |
