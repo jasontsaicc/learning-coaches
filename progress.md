@@ -14,7 +14,7 @@
 | **Current phase** | Phase 1 |
 | **Current day** | Day 12 |
 | **Language mode** | Bilingual (繁中 + English) |
-| **Session count** | 17 |
+| **Session count** | 18 |
 | **Last weekly review** | 10 |
 
 ---
@@ -23,12 +23,11 @@
 
 | Field | Value |
 |-------|-------|
-| **Day** | Day 12 (API Design) |
-| **Step** | Step H — Progress Update (wrapping up) |
-| **Position** | Interview Drill 3/3 completed. Notes written. One-liner challenge skipped (do next session). Step H progress update in progress. |
-| **Chunks completed** | ✅ 1-7 all passed |
-| **Chunks remaining** | One-liner challenge (next session), Step H finalize |
-| **Review notes** | Session 17: GraphQL POST 問答 (HTTP body 基礎補強). REST endpoint design (plural nouns, path params, resource nesting). API security (price/user_id 不信任 client). Cursor vs Offset pagination 應用. Idempotency deep dive (crash recovery + intermediate states). Interview Drill 3/3. |
+| **Day** | Weekly Review #2 (Session 18) |
+| **Step** | Blind Recall, Round 2 in progress |
+| **Position** | Round 1 API Design: 2/4 (One-liner ✅, Trade-off ✅, Scale trigger ❌, DevOps ❌). gRPC WHY mistake resolved. Round 2 Caching: One-liner done, Trade-off/Scale/DevOps not yet answered. Round 3 MQ: not started. |
+| **Topics** | 1. API Design (2/4) 2. Caching & CDN (in progress) 3. Message Queue (pending) |
+| **Remaining** | Finish Caching recall → MQ recall → Gap Check → Mistake Registry Review → Quick Drill → Update progress |
 
 ---
 
@@ -107,7 +106,7 @@
 | 13 | 10 | Message Queue | 把 Idempotency 當獨立 service（其實是 Order Service 裡的邏輯） | ❌ Unresolved |
 | 13 | 10 | Message Queue | 把 Redis DECR（庫存 pre-check）跟 Idempotency check（防重複）搞混 | ❌ Unresolved |
 | 13 | 10 | Message Queue | 說 at-least-once 是解決重複扣款的方法（at-least-once 是問題來源，idempotency 才是解法） | ✅ Resolved (S14) |
-| 15 | 12 | API Design | gRPC recall 只說 "for service to service"，說不出 WHY（binary fast + strict contract） | ❌ Unresolved |
+| 15 | 12 | API Design | gRPC recall 只說 "for service to service"，說不出 WHY（binary fast + strict contract） | ✅ Resolved (WR2) |
 | 15 | 12 | API Design | GraphQL transfer 只說「可以用」沒解釋 HOW（client 寫 query 選 fields，burden 從 backend 移到 client） | ❌ Unresolved |
 | 16 | 12 | API Design | Simon Drill: Pagination 完全忘記（Offset vs Cursor） | ❌ Unresolved |
 | 16 | 12 | API Design | Versioning 說「修改不需要新版本」，但 rename field 是 breaking change | ❌ Unresolved |
@@ -138,9 +137,9 @@
 | Field | Value |
 |-------|-------|
 | **Title** | ⚙️ Systems Engineer |
-| **Current streak** | 4 🔥 |
+| **Current streak** | 1 🔥 |
 | **Longest streak** | 4 |
-| **Last session date** | 2026-04-10 |
+| **Last session date** | 2026-04-13 |
 | **Last story summary** | API Design Interview Drill 完成 (3/3)。Food delivery API: 學會 REST endpoint 設計 (plural nouns, path params, resource nesting)、API security (不信任 client input)、cursor pagination 應用、idempotency crash recovery (中間狀態)。 |
 
 ---
