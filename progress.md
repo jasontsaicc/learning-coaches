@@ -24,10 +24,10 @@
 | Field | Value |
 |-------|-------|
 | **Day** | Weekly Review #2 (Session 18) |
-| **Step** | Blind Recall, Round 2 in progress |
-| **Position** | Round 1 API Design: 2/4 (One-liner ✅, Trade-off ✅, Scale trigger ❌, DevOps ❌). gRPC WHY mistake resolved. Round 2 Caching: One-liner done, Trade-off/Scale/DevOps not yet answered. Round 3 MQ: not started. |
-| **Topics** | 1. API Design (2/4) 2. Caching & CDN (in progress) 3. Message Queue (pending) |
-| **Remaining** | Finish Caching recall → MQ recall → Gap Check → Mistake Registry Review → Quick Drill → Update progress |
+| **Step** | Blind Recall complete, Gap Check next |
+| **Position** | Round 1 API Design: 2/4 (One-liner ✅, Trade-off ✅, Scale trigger ❌, DevOps ❌). Round 2 Caching: 4/4 (all ✅, huge improvement from 0/4). Round 3 MQ: 2/4 (One-liner ✅, Trade-off ✅, Scale trigger ❌, DevOps ❌). Parked: MQ long polling question. |
+| **Topics** | 1. API Design (2/4) 2. Caching & CDN (4/4) 3. Message Queue (2/4) |
+| **Remaining** | Gap Check → Mistake Registry Review → Quick Drill → Update progress |
 
 ---
 
@@ -137,9 +137,9 @@
 | Field | Value |
 |-------|-------|
 | **Title** | ⚙️ Systems Engineer |
-| **Current streak** | 1 🔥 |
+| **Current streak** | 2 🔥 |
 | **Longest streak** | 4 |
-| **Last session date** | 2026-04-13 |
+| **Last session date** | 2026-04-14 |
 | **Last story summary** | API Design Interview Drill 完成 (3/3)。Food delivery API: 學會 REST endpoint 設計 (plural nouns, path params, resource nesting)、API security (不信任 client input)、cursor pagination 應用、idempotency crash recovery (中間狀態)。 |
 
 ---
@@ -158,6 +158,14 @@
 | K4 | Bug Squasher ×5 | 🏆 | 2026-04-10 |
 
 **Total: 8/25**
+
+---
+
+## Curiosity Branches
+
+| Topic | Question | Status |
+|-------|----------|--------|
+| Message Queue | Long polling in MQ (長輪詢) | ⏸ Parked (likely relevant at Day 33-34 Notification System) |
 
 ---
 
