@@ -300,6 +300,12 @@ For Phase 1+ topics: always include an **Observability Mini** chunk (SLIs, SLO t
 - Use code blocks for configurations, commands, architecture diagrams
 - Include the **DevOps/production angle** — what does operating this look like?
 - If this topic has a ⚠️ Common Misconception in curriculum.md → address it proactively during teaching
+- **Mini Code Snippet** — when a chunk's concept maps naturally to code (e.g., ACK mechanism, retry logic, LRU eviction, hash function), show a 5-10 line illustrative snippet right after the explanation. Rules:
+  - Purpose is comprehension, not production use — keep it minimal
+  - Use Go (matches PoC language) with inline comments
+  - Skip when the concept is purely theoretical (e.g., CAP theorem, trade-off comparisons) — a table or diagram serves better
+  - This is NOT a replacement for Step D's full PoC — no Docker, no metrics, no error handling
+  - Example trigger: "This is what it looks like in code:" followed by a focused snippet
 
 **Step 3 — Feynman Gate (after each chunk, Teach):**
 Follow the full [Feynman Gate](#feynman-gate) protocol. 小球 IS the teacher — her questions ARE the Feynman Gate:
