@@ -92,6 +92,58 @@ API Design 是根據「誰在呼叫、頻率多高、資料多複雜」來選擇
 
 ⚠️ 之前混淆：把 SLI/SLO/Dashboard 當成 metrics 本身（SLI 是 **measurement**，metrics 如 latency/error rate 是具體數值）
 
+**正確層次：**
+```
+Metric (raw: 142ms)  →  SLI (P99 latency)  →  SLO (P99 < 200ms)  →  Dashboard (visualize)
+```
+
+---
+
+## 📈 Scale Trigger
+
+**何時 API Design 變成 scaling 問題？**
+
+| 訊號 | 處理方式 |
+|------|----------|
+| Traffic > 10K req/sec | 加 **API Gateway**（centralized auth、rate limiting、routing）|
+| 多個 backend services | API Gateway 當 single entry point，避免 client 直連每個 service |
+| GraphQL N+1 query 爆炸 | 用 **DataLoader** batching；server-side query complexity limit |
+| 高頻 internal calls | 改 **gRPC**（HTTP/2 multiplexing + binary format）|
+| Read-heavy public REST | **CDN cache** GET endpoints + ETag/If-None-Match |
+| Single backend bottleneck | API Gateway 後面 horizontal scale + LB |
+
+**口訣：** Public 走 REST + CDN，Internal 走 gRPC，Aggregation 用 GraphQL/BFF（Backend For Frontend）。
+
+---
+
+## 🔧 DevOps Angle
+
+**運維 public API 的 3 個關鍵面向：**
+
+### 1. Versioning Lifecycle（版本生命週期）
+- `/v1/` 跟 `/v2/` 並存，舊版加 `Sunset` header 預告下架
+- Breaking change（rename/remove field）必須新版本，non-breaking（add optional field）原版加就好
+- Deprecation flow: **warn (header) → sunset (date) → 410 Gone**
+
+### 2. API Gateway 集中化
+- **Auth**: JWT 驗證在 gateway 做完，後端 service 拿到的是 trusted user_id
+- **Rate Limiting**: per-API-key throttling，防 abuse
+- **Observability**: 所有 request log/metric 從 gateway 統一收
+
+### 3. Contract Safety
+- **Schema validation in CI**: OpenAPI lint、`openapi-diff` 檢測 breaking change
+- **Contract testing**: Pact 在 consumer/provider 間驗證 contract
+- **Auto-generated docs**: 從 OpenAPI / `.proto` 直接產生 SDK + 文件，保證 code 跟 doc 同步
+
+### Monitoring & Alerts
+
+| 指標 | 警報條件 |
+|------|----------|
+| P99 latency | > 200ms 持續 5 分鐘 |
+| 4xx error rate | > 5% (client 大量打錯，可能 contract 不一致) |
+| 5xx error rate | > 1% (server 自己壞了) |
+| Error budget burn rate | > 2x normal (SLO 快燒完) |
+
 ---
 
 ## Interview Drill: Food Delivery API Design

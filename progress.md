@@ -12,10 +12,10 @@
 |-------|-------|
 | **Start date** | 2026-03-04 |
 | **Current phase** | Phase 1 |
-| **Current day** | Day 12 |
-| **Language mode** | Bilingual (繁中 + English) |
-| **Session count** | 18 |
-| **Last weekly review** | 10 |
+| **Current day** | Day 14 — Security & Auth (in progress, chunks 4/8) |
+| **Language mode** | Bilingual (80% English / 20% 繁中) |
+| **Session count** | 19 |
+| **Last weekly review** | 18 |
 
 ---
 
@@ -23,11 +23,13 @@
 
 | Field | Value |
 |-------|-------|
-| **Day** | Weekly Review #2 (Session 18) |
-| **Step** | Blind Recall complete, Gap Check next |
-| **Position** | Round 1 API Design: 2/4 (One-liner ✅, Trade-off ✅, Scale trigger ❌, DevOps ❌). Round 2 Caching: 4/4 (all ✅, huge improvement from 0/4). Round 3 MQ: 2/4 (One-liner ✅, Trade-off ✅, Scale trigger ❌, DevOps ❌). Parked: MQ long polling question. |
-| **Topics** | 1. API Design (2/4) 2. Caching & CDN (4/4) 3. Message Queue (2/4) |
-| **Remaining** | Gap Check → Mistake Registry Review → Quick Drill → Update progress |
+| **Day** | Day 14 — Security & Authentication (Session 19) |
+| **Step** | Step C — Core Teaching, mid-flow |
+| **Position** | Step 0 derivation done (HTTPS → bcrypt+salt → JWT). Chunks 1-4 ✅ passed Feynman Gate. **Stopped at Chunk 5** mid-question (3 scenarios: banking / microservices / single-server VM — to determine JWT vs Session per case). |
+| **Chunks done** | ☑ 1 HTTPS/TLS / ☑ 2 bcrypt+salt / ☑ 3 JWT mechanics / ☑ 4 Refresh Token pattern |
+| **Chunks remaining** | ☐ 5 JWT vs Session (3-scenario quiz pending) / ☐ 6 OAuth 2.0 / ☐ 7 Observability Mini / ☐ 8 Scale Trigger + DevOps |
+| **Then** | Step D Hands-On → Step E Simon Drill → Step F Interview Drill → Step G Notes (finalize) → Step H Progress |
+| **Resume cue** | "Last time you nailed the JWT derivation. We stopped at the Session vs JWT scenario quiz — let's pick up there." |
 
 ---
 
@@ -42,8 +44,8 @@
 | 4-5 | Load Balancer | 🟡 | — | Weekly Review 1/4 recall. 5 unresolved mistakes. Downgraded from 🟢. |
 | 6-7 | Caching & CDN | 🔴 | — | Weekly Review 0/4 recall. Drill partial recovery. Downgraded from 🟢. |
 | 8-9 | Database Selection | 🟡 | — | Weekly Review 3/4 recall. B-tree/LSM resolved. Trade-off axis confusion persists. |
-| 10-11 | Message Queue | 🟡 | — | Concepts understood with guidance. Interview Drill 3/3 but needed help with requirements framework, inventory placement, idempotency architecture. |
-| 12-13 | API Design | 🟡 | — | Chunks all passed. Interview Drill 3/3. But many endpoint design mistakes (singular nouns, path params, security), pagination naming confusion, HTTP body basics gap. |
+| 10-11 | Message Queue | 🟢 | — | WR2 Part 2: 3 mistakes resolved (delivery semantics, why-async 3 reasons, FR/NFR/Scope definitions). Now confident on core concepts. Recall 2/4 → notes patched gap. Upgraded from 🟡. |
+| 12-13 | API Design | 🟢 | — | WR2 Part 2: 5 mistakes resolved (GET/POST data location, JWT in header, pagination, idempotency 3rd state, SLI/SLO hierarchy). Notes patched with Scale Trigger + DevOps Angle sections. Upgraded from 🟡. |
 | 14 | Security & Auth | ⬜ | — | |
 | 15-16 | Consistent Hashing | ⬜ | Phase 1 Gate | |
 | 17-18 | CAP Theorem | ⬜ | — | |
@@ -79,6 +81,7 @@
 | 10 | WR1 | Weekly Review (DB/LB/Cache) | DB 3/4, LB 1/4, Cache 0/4 | First weekly review. LB 🟢→🟡, Cache 🟢→🔴. 2 mistakes resolved (DNS limits, LSM-tree). |
 | 13 | 10 | Message Queue (Interview Drill) | 3/3 | ✅ Think Aloud, ✅ Scope Negotiation, ✅ Used MQ. Needed guidance on requirements framework and idempotency placement. |
 | 17 | 12 | API Design (Interview Drill) | 3/3 | ✅ Think Aloud, ✅ Scope Negotiation, ✅ Used API Design. Fixed endpoint mistakes mid-drill. Strong idempotency deep dive. |
+| 18 | WR2 | Weekly Review (API/Cache/MQ) — Mistake Review | 8 resolved | Single-session record. API Design 5 + MQ 3 mistakes fixed. Found notes-gap pattern (Scale Trigger / DevOps Angle missing from API Design notes). |
 
 ---
 
@@ -95,28 +98,28 @@
 | 4 | 4-5 | Load Balancer | Missed sticky session risk: uneven load distribution | ❌ Unresolved |
 | 9 | 8-9 | Database Selection | LSM-tree 讀寫搞反（以為是 read-optimized） | ✅ Resolved (WR1) |
 | 9 | 8-9 | Database Selection | Denormalization 跟 Normalization 搞混 | ✅ Resolved (S11) |
-| 9 | 8-9 | Database Selection | Consistency Trade-offs 空白（不知道三種 model） | ❌ Unresolved |
+| 9 | 8-9 | Database Selection | Consistency Trade-offs 空白（不知道三種 model） | ⏳ Pending Day 19-20 |
 | 9 | 8-9 | Database Selection | 看到「大量資料」就選 NoSQL（data volume ≠ DB 選擇關鍵） | ✅ Resolved (S11) |
 | 9 | 8-9 | Database Selection | Interview Drill 忘了 Scope Negotiation | ❌ Unresolved |
-| 12 | 10 | Message Queue | Simon Drill: Why Async 只記得 fast response，漏 decoupling/buffering | ❌ Unresolved |
-| 12 | 10 | Message Queue | Simon Drill: delivery semantics 名稱講不完整 (most/least/excely) | ❌ Unresolved |
+| 12 | 10 | Message Queue | Simon Drill: Why Async 只記得 fast response，漏 decoupling/buffering | ✅ Resolved (WR2-S18) |
+| 12 | 10 | Message Queue | Simon Drill: delivery semantics 名稱講不完整 (most/least/excely) | ✅ Resolved (WR2-S18) |
 | 12 | 10 | Message Queue | 設計練習不知道怎麼起手（需要拆成小問題逐步推） | ❌ Unresolved |
-| 13 | 10 | Message Queue | 忘了 Functional / Non-Functional / Scope 的定義（Step 1 基礎） | ❌ Unresolved |
+| 13 | 10 | Message Queue | 忘了 Functional / Non-Functional / Scope 的定義（Step 1 基礎） | ✅ Resolved (WR2-S18) |
 | 13 | 10 | Message Queue | Inventory check 放 Queue 之後（沒考慮 user 等半天才知道沒貨的體驗） | ✅ Resolved (S14) |
 | 13 | 10 | Message Queue | 把 Idempotency 當獨立 service（其實是 Order Service 裡的邏輯） | ❌ Unresolved |
 | 13 | 10 | Message Queue | 把 Redis DECR（庫存 pre-check）跟 Idempotency check（防重複）搞混 | ❌ Unresolved |
 | 13 | 10 | Message Queue | 說 at-least-once 是解決重複扣款的方法（at-least-once 是問題來源，idempotency 才是解法） | ✅ Resolved (S14) |
 | 15 | 12 | API Design | gRPC recall 只說 "for service to service"，說不出 WHY（binary fast + strict contract） | ✅ Resolved (WR2) |
 | 15 | 12 | API Design | GraphQL transfer 只說「可以用」沒解釋 HOW（client 寫 query 選 fields，burden 從 backend 移到 client） | ❌ Unresolved |
-| 16 | 12 | API Design | Simon Drill: Pagination 完全忘記（Offset vs Cursor） | ❌ Unresolved |
+| 16 | 12 | API Design | Simon Drill: Pagination 完全忘記（Offset vs Cursor） | ✅ Resolved (WR2-S18) |
 | 16 | 12 | API Design | Versioning 說「修改不需要新版本」，但 rename field 是 breaking change | ❌ Unresolved |
-| 16 | 12 | API Design | Observability: 又把 SLI/SLO/Dashboard 當成 metrics（正確是 Latency, Error rate, Throughput） | ❌ Unresolved |
+| 16 | 12 | API Design | Observability: 又把 SLI/SLO/Dashboard 當成 metrics（正確是 Latency, Error rate, Throughput） | ✅ Resolved (WR2-S18) |
 | 16 | 12 | API Design | Interview Drill: REST endpoint 寫 `/v1/get/restaurants`，verb 塞進 URL（正確：`GET /v1/restaurants`） | ✅ Resolved (S17) |
-| 17 | 12 | API Design | 不知道 GET data 放 URL (query string)、POST data 放 request body | ❌ Unresolved |
+| 17 | 12 | API Design | 不知道 GET data 放 URL (query string)、POST data 放 request body | ✅ Resolved (WR2-S18) |
 | 17 | 12 | API Design | REST path 用 singular noun + path param 寫成字面文字 | ✅ Resolved (S17, 當場修正) |
-| 17 | 12 | API Design | Price/user_id 放 request body（沒想過 client 可以竄改） | ❌ Unresolved |
-| 17 | 12 | API Design | Pagination 說成 "offline"（正確: offset），cursor 也靠提示才想起 | ❌ Unresolved |
-| 17 | 12 | API Design | Idempotency record 只想到 exists/not exists，沒想到需要 processing 中間狀態 | ❌ Unresolved |
+| 17 | 12 | API Design | Price/user_id 放 request body（沒想過 client 可以竄改） | ✅ Resolved (WR2-S18) |
+| 17 | 12 | API Design | Pagination 說成 "offline"（正確: offset），cursor 也靠提示才想起 | ✅ Resolved (WR2-S18) |
+| 17 | 12 | API Design | Idempotency record 只想到 exists/not exists，沒想到需要 processing 中間狀態 | ✅ Resolved (WR2-S18) |
 
 ---
 
@@ -139,8 +142,8 @@
 | **Title** | ⚙️ Systems Engineer |
 | **Current streak** | 2 🔥 |
 | **Longest streak** | 4 |
-| **Last session date** | 2026-04-14 |
-| **Last story summary** | API Design Interview Drill 完成 (3/3)。Food delivery API: 學會 REST endpoint 設計 (plural nouns, path params, resource nesting)、API security (不信任 client input)、cursor pagination 應用、idempotency crash recovery (中間狀態)。 |
+| **Last session date** | 2026-04-28 |
+| **Last story summary** | Day 14 Security 開場 — 從咖啡廳 WiFi 登銀行的物理威脅一路推導到 JWT。Step 0 derivation 走得乾淨，4 個 chunks 全過 Feynman Gate（HTTPS → bcrypt+salt → JWT mechanics → Refresh token）。學到「asymmetric cost」這個跨整章的 security 哲學。Chunk 5 (JWT vs Session 3-scenario quiz) 卡在中間，明天接續。|
 
 ---
 

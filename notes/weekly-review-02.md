@@ -1,8 +1,8 @@
 # Weekly Review #2 — Blind Recall (Part 1)
 
-> Status: 🟡 Session 18 (blind recall done, gap check/drill pending)
+> Status: ✅ Part 1 complete (Session 17 blind recall + interview templates)
 > Topics reviewed: API Design, Caching & CDN, Message Queue
-> Note: WR2 split across two sessions. This covers blind recall results only.
+> Note: WR2 split across two sessions. Part 2 (Session 18 mistake review) is in `weekly-review-02-part2.md`.
 
 ---
 
