@@ -3,6 +3,7 @@
 > Status: 🟡 **In Progress** (Session 19, Chunks 1-4 done; Chunks 5-8 + Drill pending)
 > Date: 2026-04-27 (Session 19 start)
 > Phase 1
+> **➡️ Continued in [day14-security-auth-pt2.md](day14-security-auth-pt2.md)** (Session 20: Chunk 5 ✅ + Chunk 6 partial)
 
 ---
 
@@ -205,6 +206,10 @@ Day 3: Alice 打客服「立刻登出我！」
 
 **面試話術：** 被問「access token TTL 多久？」直接答：
 > "15 minutes — it balances UX (don't refresh too often) with security (limit damage from theft)."
+
+---
+
+> **Chunk 5 onwards is in `day14-security-auth-pt2.md`**
 
 ---
 
