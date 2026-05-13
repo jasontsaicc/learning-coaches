@@ -12,24 +12,16 @@
 |-------|-------|
 | **Start date** | 2026-03-04 |
 | **Current phase** | Phase 1 |
-| **Current day** | Day 14 — Security & Auth (in progress, chunks 5/8 ✅, Chunk 6 partial) |
-| **Language mode** | Bilingual (default 80% English / 20% 繁中; Session 20 used 30%/70% per request) |
-| **Session count** | 20 |
+| **Current day** | Day 15-16 — Consistent Hashing (next) |
+| **Language mode** | Bilingual (default 80% English / 20% 繁中) |
+| **Session count** | 21 |
 | **Last weekly review** | 18 |
 
 ---
 
 ## Current Session (Breakpoint)
 
-| Field | Value |
-|-------|-------|
-| **Day** | Day 14 — Security & Authentication (Session 20) |
-| **Step** | Step C — Core Teaching, mid-flow |
-| **Position** | Chunk 5 (JWT vs Session 三情境) ✅ 全部過 Feynman Gate. Chunk 6 (OAuth) 開頭已教：3 個 disaster of password-sharing + 4 個 OAuth 角色框架. **Stopped at OAuth Feynman check** — Q1 答對 (delegated authorization), Q2 答太薄 ("不同 api"，沒講 blast radius separation), Q3 跳過沒答 (三個 disaster 對應 OAuth 解法). |
-| **Chunks done** | ☑ 1 HTTPS/TLS / ☑ 2 bcrypt+salt / ☑ 3 JWT mechanics / ☑ 4 Refresh Token / ☑ 5 JWT vs Session (3 scenarios) |
-| **Chunks remaining** | 🟡 6 OAuth 2.0 (partial: 4 actors done; need Q2/Q3 + Authorization Code Flow) / ☐ 7 Observability Mini / ☐ 8 Scale Trigger + DevOps |
-| **Then** | Step D Hands-On → Step E Simon Drill → Step F Interview Drill → Step G Notes (finalize) → Step H Progress |
-| **Resume cue** | "Last time you nailed JWT vs Session 三情境 (Chunk 5 ✅) and got the four OAuth actors. We stopped before Q2/Q3 of the OAuth Feynman check (blast radius separation + 三個 disaster 怎麼對應 OAuth 解法). Let's pick up there." |
+*(Session 21 completed normally — no breakpoint)*
 
 ---
 
@@ -46,7 +38,7 @@
 | 8-9 | Database Selection | 🟡 | — | Weekly Review 3/4 recall. B-tree/LSM resolved. Trade-off axis confusion persists. |
 | 10-11 | Message Queue | 🟢 | — | WR2 Part 2: 3 mistakes resolved (delivery semantics, why-async 3 reasons, FR/NFR/Scope definitions). Now confident on core concepts. Recall 2/4 → notes patched gap. Upgraded from 🟡. |
 | 12-13 | API Design | 🟢 | — | WR2 Part 2: 5 mistakes resolved (GET/POST data location, JWT in header, pagination, idempotency 3rd state, SLI/SLO hierarchy). Notes patched with Scale Trigger + DevOps Angle sections. Upgraded from 🟡. |
-| 14 | Security & Auth | 🟡 | — | Sessions 19-20. Chunks 1-5 ✅ (HTTPS/TLS, bcrypt+salt, JWT mechanics, Refresh Token, JWT vs Session 3-scenario). Chunk 6 OAuth partial (4 actors done; Q2/Q3 + Auth Code Flow pending). |
+| 14 | Security & Auth | 🟢 | — | Sessions 19-21. All 8 chunks ✅. OAuth Q2/Q3 resolved, Auth Code Flow, Observability Mini, Scale Trigger, JWT PoC, Simon Drill passed. |
 | 15-16 | Consistent Hashing | ⬜ | Phase 1 Gate | |
 | 17-18 | CAP Theorem | ⬜ | — | |
 | 19-20 | Consistency Models | ⬜ | — | |
@@ -122,8 +114,8 @@
 | 17 | 12 | API Design | Idempotency record 只想到 exists/not exists，沒想到需要 processing 中間狀態 | ✅ Resolved (WR2-S18) |
 | 20 | 14 | Security (JWT vs Session) | Scenario A trade-off 用「more mantion more infra」這種抽象詞，沒拆成 HA/failover/monitoring/backup | ✅ Resolved (S20, English Polish 補強) |
 | 20 | 14 | Security (JWT vs Session) | Scenario B 直接跳到答案 (Hybrid)，沒先論證為什麼 base 是 JWT 不是 Session — WR2 老問題 (WHAT 知道 WHY 跳過) 重現 | ✅ Resolved (S20, 補上 centralized state 的 WHY) |
-| 20 | 14 | Security (OAuth) | Q2「為什麼 Auth Server 跟 Resource Server 要分開」答「不同 api」— 描述現象沒講 blast radius separation | ❌ Unresolved (待下次補答) |
-| 20 | 14 | Security (OAuth) | Q3「三個 disaster 對應 OAuth 解法」跳過沒答 — 還沒建立「設計每元件對應一個痛點」的對照感 | ❌ Unresolved (待下次補答) |
+| 20 | 14 | Security (OAuth) | Q2「為什麼 Auth Server 跟 Resource Server 要分開」答「不同 api」— 描述現象沒講 blast radius separation | ✅ Resolved (S21) |
+| 20 | 14 | Security (OAuth) | Q3「三個 disaster 對應 OAuth 解法」跳過沒答 — 還沒建立「設計每元件對應一個痛點」的對照感 | ✅ Resolved (S21) |
 
 ---
 
@@ -136,6 +128,7 @@
 | Database Selection | Database selection is choosing the right storage engine — SQL, NoSQL, or NewSQL — based on access patterns, relationship complexity, and consistency requirements, so the database fits the workload rather than forcing the workload to fit the database. |
 | Message Queue | A Message Queue decouples producers from consumers, enabling async processing, peak traffic buffering, and failure resilience through retry and dead letter queues — the key is pairing at-least-once delivery with idempotency to prevent duplicate processing. |
 | API Design | API Design is about choosing the right style (REST, GraphQL, gRPC) based on who's calling, call frequency, and data complexity — the key trade-off is flexibility versus simplicity and cacheability. |
+| Security & Auth | Security in distributed systems means separating what can issue credentials from what can consume them — OAuth solves password-sharing disasters by introducing scoped, revocable access tokens exchanged through a trusted server-to-server flow. |
 
 ---
 
@@ -146,8 +139,8 @@
 | **Title** | ⚙️ Systems Engineer |
 | **Current streak** | 1 🔥 (reset — 8 day gap from S19 to S20) |
 | **Longest streak** | 4 |
-| **Last session date** | 2026-05-06 |
-| **Last story summary** | Session 20 — 接續 Day 14 Security 中段。JWT vs Session 三情境全打過 (銀行 Session / Microservices Hybrid+RS256 / Side-project blog Session)，特別是 RS256 的 verify-vs-sign blast radius 邏輯講得清楚。Chunk 6 OAuth 開場：用「ScaleUp 想自動寫 user 的 Google Drive」當鉤子，把「給密碼」三個 disaster (No Scope / No Revocation / Transitive Trust) 拆出來，再帶出四個 OAuth 角色框架。停在 Feynman check Q2 (blast radius separation) 答太薄、Q3 (對應解法) 跳過沒答。下次接續。|
+| **Last session date** | 2026-05-13 |
+| **Last story summary** | Session 21 — Day 14 Security 全部收尾。OAuth Q2 (blast radius separation) 和 Q3 (三個 disaster 對應解法) 補答通過。Authorization Code Flow 完整講完。JWT PoC 在 Go 跑通：issue + validate with timing-safe comparison。Simon Drill 三題全過，特別是 Refresh Token 的「兩層生命週期解衝突」和 Auth Code Flow 的「browser is hostile territory」講得很到位。Day 14 正式 🟢 完成，下一站 Day 15-16 Consistent Hashing。|
 
 ---
 
@@ -165,6 +158,16 @@
 | K4 | Bug Squasher ×5 | 🏆 | 2026-04-10 |
 
 **Total: 8/25**
+
+---
+
+## Review Schedule (Spaced Repetition)
+
+> Box 1 → next day | Box 2 → 3 days | Box 3 → 7 days | Box 4 → 14 days → retired
+
+| Topic | Box | Next Review |
+|-------|-----|-------------|
+| Security & Auth | 1 | 2026-05-14 |
 
 ---
 
