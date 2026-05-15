@@ -12,16 +12,37 @@
 |-------|-------|
 | **Start date** | 2026-03-04 |
 | **Current phase** | Phase 1 |
-| **Current day** | Day 15-16 — Consistent Hashing (next) |
+| **Current day** | Day 15 — Consistent Hashing (in progress) |
 | **Language mode** | Bilingual (default 80% English / 20% 繁中) |
-| **Session count** | 21 |
+| **Session count** | 22 |
 | **Last weekly review** | 18 |
 
 ---
 
 ## Current Session (Breakpoint)
 
-*(Session 21 completed normally — no breakpoint)*
+**Session 22 — Day 15 Consistent Hashing — Step C in progress**
+
+Completed today:
+- ✅ Step A — Spaced repetition on Security & Auth passed (Box 1 → Box 2)
+- ✅ Step B — Day 15 intro (Karen 的 reshard 危機)
+- ✅ Step C Step 0 — First Principles 推導：`hash % N` 為什麼失敗（~75% keys 搬家）
+- ✅ Step C Chunk 1 — Why `hash % N` fails (recall + transfer 都過)
+- ✅ Step C Chunk 2 — Ring Model (recall + transfer 都過，「固定座標 vs 動態位置」抓得很準)
+- 🟡 Step C Chunk 3+4 — Node Operations + Virtual Nodes（已教完概念 + mini code snippet，Transfer 問題 pending）
+
+**Pending Transfer question:**
+> 「150 vnodes per server vs 10,000 vnodes per server — trade-off？(distribution uniformity vs memory + add/remove cost)」
+
+Remaining for next session:
+- Chunk 3+4 Transfer answer
+- Chunk 5: Range-based vs Hash-based partitioning
+- Chunk 6: When to use consistent hashing (SD interview triggers)
+- Chunk 7: Observability Mini
+- Step D: PoC（Day 16 — implement consistent hashing in Go）
+- Step E/F/G/H: Drill, Interview Drill, Notes polish, Progress update
+
+Notes draft saved at `notes/day15-consistent-hashing.md`（下半場再 finalize）。
 
 ---
 
@@ -137,10 +158,10 @@
 | Field | Value |
 |-------|-------|
 | **Title** | ⚙️ Systems Engineer |
-| **Current streak** | 1 🔥 (reset — 8 day gap from S19 to S20) |
+| **Current streak** | 1 🔥 (reset — 2 day gap from S21 to S22) |
 | **Longest streak** | 4 |
-| **Last session date** | 2026-05-13 |
-| **Last story summary** | Session 21 — Day 14 Security 全部收尾。OAuth Q2 (blast radius separation) 和 Q3 (三個 disaster 對應解法) 補答通過。Authorization Code Flow 完整講完。JWT PoC 在 Go 跑通：issue + validate with timing-safe comparison。Simon Drill 三題全過，特別是 Refresh Token 的「兩層生命週期解衝突」和 Auth Code Flow 的「browser is hostile territory」講得很到位。Day 14 正式 🟢 完成，下一站 Day 15-16 Consistent Hashing。|
+| **Last session date** | 2026-05-15 |
+| **Last story summary** | Session 22 — Day 15 Consistent Hashing 起跑（半場）。Karen 帶來 reshard 危機。從 `hash % N` 推導出「N 變 → ~75% keys 重算 → 必停機」的物理限制。Ring Model 一秒抓到「固定座標 vs 動態位置」的核心差別。看到 3 個 server 分佈不均，直接脫口而出「樣本太少 → 統計學失效 → 負載失衡」，把 vnodes 的必要性用 Law of Large Numbers 框出來。下半場接 vnodes Transfer + PoC。要下班 push 回家繼續。|
 
 ---
 
@@ -167,7 +188,7 @@
 
 | Topic | Box | Next Review |
 |-------|-----|-------------|
-| Security & Auth | 1 | 2026-05-14 |
+| Security & Auth | 2 | 2026-05-18 |
 
 ---
 
