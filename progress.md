@@ -12,37 +12,33 @@
 |-------|-------|
 | **Start date** | 2026-03-04 |
 | **Current phase** | Phase 1 |
-| **Current day** | Day 15 — Consistent Hashing (in progress) |
+| **Current day** | Day 15-16 — Consistent Hashing ✅ → next: Distributed Cache (problem-driven) |
 | **Language mode** | Bilingual (default 80% English / 20% 繁中) |
-| **Session count** | 22 |
+| **Session count** | 23 |
 | **Last weekly review** | 18 |
+
+---
+
+## 🎚️ Learning Mode (Active — set Session 23)
+
+**Mode: 問題錨定 + 深度天花板 (Problem-anchored + Depth Ceiling)**
+
+Reason: 學生在純理論主題(consistency models、consistent hashing 的 vnodes 數學)磨太久,
+公式/形式化的深度對面試零回報,導致進度緩慢 + 學習痛苦。
+
+Rules going forward:
+1. **深度天花板三問** — 碰到一個主題往下鑽時問:(a) 面試官會問嗎? (b) 這層深度能讓我的回答更好嗎? (c) 我卡住是缺地基還是想完美? 任一題答「不會/不能/想完美」→ park 到 Curiosity Branches,繼續走。
+2. **壓縮理論期** — Day 15-22 building block 改「概念 + 一句話 + 一個 trade-off」快速模式,PoC 降級為 Light/Discussion,不追完整 Full PoC。
+3. **題目驅動 (pull)** — 用 **Design a Distributed Cache** 當錨,把 CAP(Day 17-18)、Consistency Models(Day 19-20)、Replication & Leader Election(Day 21-22)折進這個設計題,理論在設計需要時才 just-in-time 拉進來,capped 在面試深度。
+4. 面試考的是 breadth of mental models + trade-off reasoning,**不是** CS 理論深度(linearizability 形式證明、consistency 數學模型 = PhD 範圍,不學)。
 
 ---
 
 ## Current Session (Breakpoint)
 
-**Session 22 — Day 15 Consistent Hashing — Step C in progress**
+*(無 — Session 23 正常結束。Day 15-16 Consistent Hashing 已在 depth-ceiling 模式收尾。)*
 
-Completed today:
-- ✅ Step A — Spaced repetition on Security & Auth passed (Box 1 → Box 2)
-- ✅ Step B — Day 15 intro (Karen 的 reshard 危機)
-- ✅ Step C Step 0 — First Principles 推導：`hash % N` 為什麼失敗（~75% keys 搬家）
-- ✅ Step C Chunk 1 — Why `hash % N` fails (recall + transfer 都過)
-- ✅ Step C Chunk 2 — Ring Model (recall + transfer 都過，「固定座標 vs 動態位置」抓得很準)
-- 🟡 Step C Chunk 3+4 — Node Operations + Virtual Nodes（已教完概念 + mini code snippet，Transfer 問題 pending）
-
-**Pending Transfer question:**
-> 「150 vnodes per server vs 10,000 vnodes per server — trade-off？(distribution uniformity vs memory + add/remove cost)」
-
-Remaining for next session:
-- Chunk 3+4 Transfer answer
-- Chunk 5: Range-based vs Hash-based partitioning
-- Chunk 6: When to use consistent hashing (SD interview triggers)
-- Chunk 7: Observability Mini
-- Step D: PoC（Day 16 — implement consistent hashing in Go）
-- Step E/F/G/H: Drill, Interview Drill, Notes polish, Progress update
-
-Notes draft saved at `notes/day15-consistent-hashing.md`（下半場再 finalize）。
+**Next session:** Design a Distributed Cache(問題驅動)— 用設計題把 CAP(Day 17-18)/ Consistency Models(Day 19-20)/ Replication(Day 21-22)just-in-time 拉進來,consistent hashing 在此實作分片(這也是它的 PoC)。深度全程 capped 在面試級。詳見上方「🎚️ Learning Mode」。
 
 ---
 
@@ -60,7 +56,7 @@ Notes draft saved at `notes/day15-consistent-hashing.md`（下半場再 finalize
 | 10-11 | Message Queue | 🟢 | — | WR2 Part 2: 3 mistakes resolved (delivery semantics, why-async 3 reasons, FR/NFR/Scope definitions). Now confident on core concepts. Recall 2/4 → notes patched gap. Upgraded from 🟡. |
 | 12-13 | API Design | 🟢 | — | WR2 Part 2: 5 mistakes resolved (GET/POST data location, JWT in header, pagination, idempotency 3rd state, SLI/SLO hierarchy). Notes patched with Scale Trigger + DevOps Angle sections. Upgraded from 🟡. |
 | 14 | Security & Auth | 🟢 | — | Sessions 19-21. All 8 chunks ✅. OAuth Q2/Q3 resolved, Auth Code Flow, Observability Mini, Scale Trigger, JWT PoC, Simon Drill passed. |
-| 15-16 | Consistent Hashing | ⬜ | Phase 1 Gate | |
+| 15-16 | Consistent Hashing | 🟢 | Phase 1 Gate | S22-23. 所有 chunk ✅ at interview depth（why hash%N fails、ring、vnodes trade-off、when-to-use、range vs hash）。Strong self-recall。vnode 統計證明 + 獨立 PoC parked → 折進 Distributed Cache build。Phase 1 Gate mini-mock 由該設計題擔任。|
 | 17-18 | CAP Theorem | ⬜ | — | |
 | 19-20 | Consistency Models | ⬜ | — | |
 | 21-22 | Replication & Leader Election | ⬜ | — | |
@@ -150,6 +146,7 @@ Notes draft saved at `notes/day15-consistent-hashing.md`（下半場再 finalize
 | Message Queue | A Message Queue decouples producers from consumers, enabling async processing, peak traffic buffering, and failure resilience through retry and dead letter queues — the key is pairing at-least-once delivery with idempotency to prevent duplicate processing. |
 | API Design | API Design is about choosing the right style (REST, GraphQL, gRPC) based on who's calling, call frequency, and data complexity — the key trade-off is flexibility versus simplicity and cacheability. |
 | Security & Auth | Security in distributed systems means separating what can issue credentials from what can consume them — OAuth solves password-sharing disasters by introducing scoped, revocable access tokens exchanged through a trusted server-to-server flow. |
+| Consistent Hashing | Consistent hashing maps both keys and nodes onto a ring, so adding or removing a node only remaps about 1/N of the keys instead of nearly all — and virtual nodes keep the load evenly spread. |
 
 ---
 
@@ -158,10 +155,10 @@ Notes draft saved at `notes/day15-consistent-hashing.md`（下半場再 finalize
 | Field | Value |
 |-------|-------|
 | **Title** | ⚙️ Systems Engineer |
-| **Current streak** | 1 🔥 (reset — 2 day gap from S21 to S22) |
+| **Current streak** | 1 🔥 (reset — 13 day gap from S22 to S23) |
 | **Longest streak** | 4 |
-| **Last session date** | 2026-05-15 |
-| **Last story summary** | Session 22 — Day 15 Consistent Hashing 起跑（半場）。Karen 帶來 reshard 危機。從 `hash % N` 推導出「N 變 → ~75% keys 重算 → 必停機」的物理限制。Ring Model 一秒抓到「固定座標 vs 動態位置」的核心差別。看到 3 個 server 分佈不均，直接脫口而出「樣本太少 → 統計學失效 → 負載失衡」，把 vnodes 的必要性用 Law of Large Numbers 框出來。下半場接 vnodes Transfer + PoC。要下班 push 回家繼續。|
+| **Last session date** | 2026-05-28 |
+| **Last story summary** | Session 23 — 學生喊卡:理論磨太細、痛苦、進度慢。切換到「問題錨定 + 深度天花板」新打法(寫進 Learning Mode + memory)。用 depth-ceiling 三問把 Consistent Hashing 快速收尾 — vnodes trade-off 過(distribution vs routing table + gossip,Cassandra 256 錨點)、when-to-use 釘死(elastic stateful sharding)、統計證明 park。One-liner challenge 時整條推導鏈從記憶倒出來,證明底子在,順便學到「headline first」面試技巧。下一場 Design a Distributed Cache 當錨拉進 CAP/Consistency/Replication。|
 
 ---
 
@@ -189,6 +186,7 @@ Notes draft saved at `notes/day15-consistent-hashing.md`（下半場再 finalize
 | Topic | Box | Next Review |
 |-------|-----|-------------|
 | Security & Auth | 2 | 2026-05-18 |
+| Consistent Hashing | 1 | 2026-05-29 |
 
 ---
 

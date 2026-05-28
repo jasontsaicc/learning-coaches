@@ -1,14 +1,17 @@
 # Day 15 — Consistent Hashing (Theory, Part 1)
 
-> Session 22 — 2026-05-15
-> 進度：Step C 進行中（Chunk 1-2 完成，3+4 Transfer 提問待續）
-> Status: 🟡 In Progress（下半場：vnodes Transfer + chunks 5-7 + PoC）
+> Session 22 (2026-05-15) + Session 23 (2026-05-28)
+> Status: 🟢 Complete — 概念全收（depth-ceiling 模式收尾，公式/統計證明已 park）
+> PoC 不單獨做,折進 Day 17+ 的 "Design a Distributed Cache" 設計題
 
 ---
 
 ## One-liner
 
 > Consistent Hashing 把 server 和 key 都 hash 到同一個環狀座標系上，每個 key 由「順時針第一個 server」負責 — 讓「新增/移除一台機器」只影響相鄰的一小段資料，而不是整個資料集重新洗牌。
+
+**面試 one-liner(先講這句,headline first):**
+> "Consistent hashing maps both keys and nodes onto a ring, so adding or removing a node only remaps about **1/N** of the keys instead of nearly all — and virtual nodes keep the load evenly spread."
 
 ---
 
@@ -117,6 +120,40 @@ func (r *Ring) GetServer(key string) string {
 2. **Wrap-around** = 環的順時針性質
 3. **nodeMap** 把虛擬位置和實體 server 解耦 → 加減 server = 插入/刪除 150 entries
 
+### vnodes trade-off（150 vs 10,000）✅ Resolved S23
+
+| 更多 vnodes | 賺到 | 付出 |
+|---|---|---|
+| 150 → 10,000 | distribution 更均勻(load 更平) | routing table 更大 + node 間 gossip 同步更重 |
+
+- 超過某個點 = **diminishing returns**(邊際效益遞減):均勻度幾乎不再進步,memory 照付。
+- 實務錨點:**Cassandra 預設 256 tokens/node**。記這數字就夠面試用。
+- ⏸ Parked(depth ceiling):背後「為何更多點 → variance 下降」的統計學證明(Law of Large Numbers 的數學) — 面試不考,不深究。
+
+---
+
+## Chunk 5 — Range vs Hash partitioning(天花板版,一句對比)
+
+- **Range-based**:按 key 範圍切(A-M / N-Z)。利於**範圍查詢**,但易**熱點**(某段 key 特別熱)。
+- **Hash-based / consistent hashing**:按 hash 切。分佈**均勻**,但**範圍查詢**要掃所有節點。
+- 細節(re-balancing 策略、secondary index)→ ⏸ parked,設計題需要時再拉。
+
+---
+
+## Chunk 6 — When to use（面試最值錢)
+
+**觸發條件一句話:** 要把 stateful 資料/負載分散到一組「**會變動**」的節點上,且希望加減節點時只搬 ~1/N 的 key。
+
+| 看到這個場景 | 想到 consistent hashing |
+|---|---|
+| Distributed cache(Redis/Memcached cluster) | cache node 擴縮,不想加一台就 invalidate 全部 |
+| NoSQL 分片(Cassandra/DynamoDB) | 資料按 key 分散到動態節點 |
+| Sticky load balancing | 同一個 user/key 永遠打到同一台 backend |
+
+**反向(何時 NOT 用):** 節點數**固定不變** → 直接 `hash % N` 更簡單。CH 的全部價值在 **elasticity**。
+
+> Chunk 7 Observability Mini:SLI = key distribution skew(最熱 node / 最冷 node 的比值)、lookup P99;Alert = 某 node 負載 > 平均 ×1.5(分佈失衡);Dashboard = per-node key count。(天花板版,點到為止)
+
 ---
 
 ## 🔴 My Mistakes & Misconceptions
@@ -162,13 +199,15 @@ func (r *Ring) GetServer(key string) string {
 
 ---
 
-## ⏸ Pending for Next Session (下半場)
+## ⏸ Parked (depth ceiling — 面試不考,未來真需要再回來)
 
-- [ ] Chunk 3+4 Transfer Question: **150 vnodes vs 10,000 vnodes — trade-off?**
-- [ ] Chunk 5: Range-based vs Hash-based partitioning
-- [ ] Chunk 6: When to use consistent hashing in SD (interview triggers)
-- [ ] Chunk 7: Observability Mini (SLIs, SLO, alerts, dashboards)
-- [ ] Step D: PoC — implement consistent hashing in Go (Day 16)
-- [ ] Step E: Simon Drill
-- [ ] Step F: Interview Drill
-- [ ] One-Liner Challenge + final notes polish
+- vnodes 數量 → variance 下降的統計學證明(Law of Large Numbers 數學)
+- Range vs hash 的 re-balancing 策略、secondary index 細節
+- 獨立的 consistent hashing Go PoC → 折進下一場 Distributed Cache 設計題一起做
+
+---
+
+## ▶ Next Session — Design a Distributed Cache(問題驅動)
+
+用一個設計題當錨,把 CAP / Consistency Models / Replication 在「設計需要時」just-in-time 拉進來,
+consistent hashing 在這裡實際派上用場(分片 cache key)。深度全程 capped 在面試級。
