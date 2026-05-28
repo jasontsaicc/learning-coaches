@@ -14,23 +14,21 @@
 | **Current phase** | Phase 0 |
 | **Current pattern** | Two Pointers |
 | **Language** | Python |
-| **Session count** | 6 |
+| **Session count** | 7 |
 | **Last weekly review** | — |
-| **Problems solved** | 6 / 136 |
+| **Problems solved** | 7 / 136 |
 
 ---
 
 ## Current Session (Breakpoint)
 
-> 🔄 Session 7 paused (2026-05-07, 待 2026-05-08 接續)
-> Problem: Container With Most Water (#11) — jump-to (NeetCode 150)
-> Pattern: Two Pointers (Converging + Greedy decision)
-> Current step: F (Feynman Gate) — Q1 (Variation) ✅ 過, Q2 (Constraint Change: max instead of min) ⏸️ 待答
+> 🔄 Session 8 (2026-05-28) 進行中
+> Problem: Sliding Window Maximum (#239) **Hard** — jump-to (讀書會分享)
+> Current step: H 完成 (Notes → notes/pattern16)；F 只過 Q1 (Recall: O(n) amortized)，Q2 (改成 min) / Q3 (constraint) + G Mock 待補
 >
-> 已完成今天: A (Review) → B (Read Problem) → C (Pattern Teaching) → D (Brute Force, 4/4 tests pass) → E (Optimal, 4/4 tests pass) → F Q1
-> 明天接續: F Q2 → G (Mock Interview) → H (Notes) → I (Progress Update)
->
-> ⏸️ Parked: Two Sum II (#167) Step E — optimal 版有 bug：`l + 1` / `r + 1` 沒寫成 `l += 1` / `r -= 1`，下次回來修
+> ⏸️ Queued: Permutation in String (#567) workspace/15 (前一場 05-22 做到 Step E)；Best Time to Buy and Sell Stock (#121) Sliding Window 第 1 題；Longest Substring (#3) workspace/14 已有 brute force
+> ⏸️ Weekly Review 到期 (8 - 0 ≥ 7)，優先排
+> ⏸️ Parked: Trapping Rain Water (#42) F Q2/Q3 + G Mock；Container With Most Water (#11) F Q2/G/H；Two Sum II (#167) Step E bug
 
 ---
 
@@ -39,8 +37,8 @@
 | Pattern | Problems Done | Mastery | Phase Gate | Notes |
 |---------|--------------|---------|------------|-------|
 | Arrays & Hashing | 5/11 | 🟡 | — | Frequency Counter + Bucket Sort + Length-Prefix + HashSet per row/col/box + Sequence Start Detection learned. #238 (Product of Array Except Self) skipped, revisit later |
-| Two Pointers | 1.5/5 | 🟡 | — | Converging Two Pointers learned via Valid Palindrome (sharing talk); Container With Most Water Day 1 完成 (Greedy + prune 概念抓到, Day 2 收 Q2 + Mock); Two Sum II Step E parked |
-| Sliding Window | 0/5 | ⬜ | — | |
+| Two Pointers | 2.5/5 | 🟡 | — | + #42 Trapping Rain Water (Hard) 三層算法全綠 (Brute/DP/Two Pointers 18/18) — 加分: 自抓 6 個 bug 全修對；扣分: Q2/Q3 Feynman 沒自答 (看答案)。升 🟢 條件: Day 3 完成 F + G |
+| Sliding Window | 1/5 | 🟡 | — | #239 Sliding Window Maximum (Hard, jump-to 跳關做最難的第 6 題): Brute O(n·k) + Optimal Monotonic Deque O(n) 都親手寫過 12/12 tests; Feynman 只過 Q1 (O(n) amortized 講得出); Q2/Q3 + Mock 待補。基礎 5 題 (#121, #3, #424, #567...) 尚未做 |
 | Stack | 0/6 | ⬜ | Phase 0 Gate | |
 | Binary Search | 0/6 | ⬜ | — | |
 | Linked List | 0/9 | ⬜ | — | |
@@ -72,6 +70,8 @@
 | 5 | Longest Consecutive Sequence (128) | Medium | Arrays & Hashing | ✅ | O(n log n) / O(n) | O(n) / O(n) | Feynman Gate partial (快速預習), Mock skipped, jump-to (預習) |
 | 6 | Valid Palindrome (125) | Easy | Two Pointers | ✅ | O(n) / O(n) | O(n) / O(1) | Brute → Optimal 完整走一次, Feynman Gate Q1 pass (== vs = 終於鎖住), Q2/Q3 skipped (時間壓力), jump-to (明天分享會) |
 | 7 (Day 1) | Container With Most Water (11) | Medium | Two Pointers (Converging + Greedy) | 🟡 進行中 | O(n²) / O(1) | O(n) / O(1) | Brute + Optimal 都自己寫出 + 4/4 tests pass; Feynman Q1 pass (講出 Greedy proof + prune); Q2 + Mock + Notes 留 Day 2; jump-to (NeetCode 150) |
+| 7 (Day 2) | Trapping Rain Water (42) | **Hard** | Two Pointers + Bounded Computation | ✅ 主體完成 | O(n²) / O(1) | **O(n) / O(1)** ⭐ | 三層階梯全綠 (Brute 6/6, DP 6/6, Two Pointers 6/6 = 18/18); Feynman Q1 pass (Recall), Q2/Q3 看答案 (🟡); Mock + 變題練習留 Day 3; jump-to (NeetCode 150) |
+| 8 | Sliding Window Maximum (239) | **Hard** | Sliding Window + Monotonic Deque | 🟡 主體完成 | O(n·k) / O(k) | **O(n) / O(k)** ⭐ | Brute + Optimal 都親手寫 (12/12 tests pass); Feynman Q1 pass (O(n) amortized 自己講出), Q2/Q3 + Mock 待補; 9 個疑問全解 (deque/負索引/return result/i-k 邊界); 4 個語法錯 (num/windows/in/import); 突破點: 用 8 格動畫終於「看到」deque; jump-to (讀書會) |
 
 ---
 
@@ -115,6 +115,21 @@
 | 7 | Container With Most Water | Two Pointers | `while l > r:`（方向反了，loop 不會跑）| ✅ Resolved (S7) - 學到「代真實數字 trace 驗證」|
 | 7 | Container With Most Water | Two Pointers | `max_area = max(max_area, area)` 之前忘記初始化 `max_area = 0` | ✅ Resolved (S7) |
 | 7 | Container With Most Water | Two Pointers | `if ...:` 留佔位符忘記填邏輯（`...` 是 Ellipsis 永遠 truthy）| ✅ Resolved (S7) |
+| 7 (Day 2) | Trapping Rain Water | Two Pointers + Bounded | `for i in range(len(height)) - 1` — range object 不能減 1，且本意不該 -1 | ✅ Resolved (S7-D2) - Python `range(n)` 已含 0..n-1 |
+| 7 (Day 2) | Trapping Rain Water | Two Pointers + Bounded | `for` 結尾忘記 `:` (第二次踩) | ✅ Resolved (S7-D2) |
+| 7 (Day 2) | Trapping Rain Water | Two Pointers + Bounded | `total +=` 之前忘記初始化 `total = 0` (第二次踩, 同 max_area 教訓) | ✅ Resolved (S7-D2) |
+| 7 (Day 2) | Trapping Rain Water | Two Pointers + Bounded | `min(left_max[i], right_max[i] - height[i])` — `)` 位置錯，括號決定優先順序 | ✅ Resolved (S7-D2) - **重大語法觀念**: 括號改變語意 |
+| 7 (Day 2) | Trapping Rain Water | Two Pointers + Bounded | 鏡像對稱沒做完整：右邊分支只有 if (更新)、缺 else (加水) | ✅ Resolved (S7-D2) - 對稱寫法要兩邊都檢查 |
+| 7 (Day 2) | Trapping Rain Water | Two Pointers + Bounded | `r -= 1` 縮排錯位，跑到 `else` block 外，每輪都 -1 | ✅ Resolved (S7-D2) - **重大語法觀念**: 縮排決定 block |
+| 7 (Day 2) | Trapping Rain Water | Two Pointers + Bounded | Q2 (`[5,4,3,2,1]` 為什麼 0) Feynman Variation 沒自答 | 🟡 Parked - Day 3 Step A 重抽 |
+| 7 (Day 2) | Trapping Rain Water | Two Pointers + Bounded | Q3 (heights 允許負數會壞掉) Feynman Constraint Change 沒自答 | 🟡 Parked - Day 3 Step A 重抽 |
+| 8 | Sliding Window Maximum | Sliding Window + Deque | `num` vs `nums` 變數名少 s → NameError | ✅ Resolved (S8) |
+| 8 | Sliding Window Maximum | Sliding Window + Deque | `windows` vs `window` 單複數不一致 | ✅ Resolved (S8) |
+| 8 | Sliding Window Maximum | Sliding Window + Deque | `in` / `import` 關鍵字被 IDE 自動補全塞進來 → SyntaxError | ✅ Resolved (S8) - 教訓: 打完 i 別按 Tab/Enter |
+| 8 | Sliding Window Maximum | Sliding Window + Deque | 以為 sliding window「指針 vs deque」二選一 | ✅ Resolved (S8) - 兩者並存: 指針管邊界, deque 管 max 候選 |
+| 8 | Sliding Window Maximum | Sliding Window + Deque | 以為窗戶每滑一格就「直接 popleft 最左」 | ✅ Resolved (S8) - 只有真過期 (dq[0]<=i-k) 才踢, deque≠window, 最左常是答案 |
+| 8 | Sliding Window Maximum | Sliding Window + Deque | 窗戶 [1,3,-1] 以為 -1 也可丟 (新+小) | ✅ Resolved (S8) - 規則單方向: 只有「舊+小」可丟 |
+| 8 | Sliding Window Maximum | Sliding Window + Deque | `max(current_max, window)` 跨窗戶累積 vs 單窗戶獨立 max | ✅ Resolved (S8) |
 
 ---
 
@@ -129,6 +144,9 @@
 | Sequence Start Detection (Arrays & Hashing) | 丟進 set，只從起點 (num-1 不在 set) 開始往上數連續長度，每個數字最多碰一次，O(n) |
 | Converging Two Pointers (Two Pointers) | 左右兩個指標從兩端往中間走，邊走邊對稱比較，遇標點/非字元跳過 — O(n) 時間 O(1) 空間 |
 | Two Pointers + Greedy (Two Pointers) | 從兩端逼近，每輪移動「較矮的指標」— 因為動較高的會讓寬縮、高度被矮的卡住，永遠不可能更好；可安全 prune 一大堆 pair — O(n) 時間 O(1) 空間 |
+| Two Pointers + Bounded Computation (Two Pointers) | 每位置水量 = `min(left_max, right_max) - h[i]`；左右指標逼近，每輪動較矮側並算水 — 較高側保證有牆，較矮側水量瓶頸鎖在自己的 max，現在就能算 — O(n) 時間 O(1) 空間 |
+| Prefix Maximum DP (通用) | 邊掃邊記累積 max（或 min/sum/count），下一格直接從上一格累積 + 自己這格推出來 — 把 O(n²) 重複計算壓到 O(n) — 是 DP 最簡形式 |
+| Monotonic Deque (Sliding Window) | deque 存「可能當 max 的候選 index」呈遞減排列；新元素進場時把右邊比它小的 pop 掉、過期的從左 popleft，最左永遠是當前窗戶 max；每元素一生進出各一次 → O(n) 攤還 |
 
 ---
 
