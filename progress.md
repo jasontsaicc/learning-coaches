@@ -11,10 +11,10 @@
 | Field | Value |
 |-------|-------|
 | **Start date** | 2026-03-04 |
-| **Current phase** | Phase 1 |
-| **Current day** | Day 15-16 — Consistent Hashing ✅ → next: Distributed Cache (problem-driven) |
+| **Current phase** | Phase 2 🌐 |
+| **Current day** | Day 17-18 — CAP ✅ (pulled via Distributed Cache design) → next: Consistency Models (Day 19-20) |
 | **Language mode** | Bilingual (default 80% English / 20% 繁中) |
-| **Session count** | 23 |
+| **Session count** | 24 |
 | **Last weekly review** | 18 |
 
 ---
@@ -36,9 +36,12 @@ Rules going forward:
 
 ## Current Session (Breakpoint)
 
-*(無 — Session 23 正常結束。Day 15-16 Consistent Hashing 已在 depth-ceiling 模式收尾。)*
+*(無 — Session 24 正常結束。Distributed Cache 設計題完成 = Phase 1 Gate PASS 3/3，CAP + Replication 已 just-in-time 拉進。)*
 
-**Next session:** Design a Distributed Cache(問題驅動)— 用設計題把 CAP(Day 17-18)/ Consistency Models(Day 19-20)/ Replication(Day 21-22)just-in-time 拉進來,consistent hashing 在此實作分片(這也是它的 PoC)。深度全程 capped 在面試級。詳見上方「🎚️ Learning Mode」。
+**⚠️ Next session = Weekly Review #3 due**（25 - 18 = 7）。先跑 Weekly Review，再進 Consistency Models(Day 19-20)。
+
+**Next content:** Consistency Models(Day 19-20)— Strong / Causal / Eventual / Read-your-writes + Quorum(W+R>N)。延續 distributed cache 的 AP 選擇往下鑽「eventual consistency 到底保證什麼」。仍走 depth-ceiling 模式。
+**Pending PoC（park）：** Consistent hashing 獨立 Go PoC + distributed cache 完整實作 → 折進 Phase 3 Day 38-39 Distributed Cache。
 
 ---
 
@@ -56,8 +59,9 @@ Rules going forward:
 | 10-11 | Message Queue | 🟢 | — | WR2 Part 2: 3 mistakes resolved (delivery semantics, why-async 3 reasons, FR/NFR/Scope definitions). Now confident on core concepts. Recall 2/4 → notes patched gap. Upgraded from 🟡. |
 | 12-13 | API Design | 🟢 | — | WR2 Part 2: 5 mistakes resolved (GET/POST data location, JWT in header, pagination, idempotency 3rd state, SLI/SLO hierarchy). Notes patched with Scale Trigger + DevOps Angle sections. Upgraded from 🟡. |
 | 14 | Security & Auth | 🟢 | — | Sessions 19-21. All 8 chunks ✅. OAuth Q2/Q3 resolved, Auth Code Flow, Observability Mini, Scale Trigger, JWT PoC, Simon Drill passed. |
-| 15-16 | Consistent Hashing | 🟢 | Phase 1 Gate | S22-23. 所有 chunk ✅ at interview depth（why hash%N fails、ring、vnodes trade-off、when-to-use、range vs hash）。Strong self-recall。vnode 統計證明 + 獨立 PoC parked → 折進 Distributed Cache build。Phase 1 Gate mini-mock 由該設計題擔任。|
-| 17-18 | CAP Theorem | ⬜ | — | |
+| 15-16 | Consistent Hashing | 🟢 | — | S22-23. 所有 chunk ✅ at interview depth。Strong self-recall。S24 在 distributed cache 設計中當 sharding 機制實際應用。vnode 統計證明 + 獨立 PoC parked → Day 38-39。|
+| 17-18 | CAP Theorem | 🟢 | — | S24 problem-anchored。自己推出 cache stampede → replication → C vs A 矛盾。AP 選擇給出教科書級三理由(DB=truth, TTL 自癒, cache 天職是答得出)。partition 定義一開始不清→當場補。業界 CAP 對照表 + 「給錯=賠錢→CP」心法。PACELC 未深入(park)。|
+| — | Distributed Cache (design) | 🟢 | **Phase 1 Gate ✅** | S24. 問題錨定設計，3/3 PASS = Phase 1→2 Gate。涵蓋 clarify→sharding→cache-aside→client vs proxy routing→replication→CAP→thundering herd/request coalescing。完整 PoC park 到 Day 38-39。|
 | 19-20 | Consistency Models | ⬜ | — | |
 | 21-22 | Replication & Leader Election | ⬜ | — | |
 | 23-24 | Rate Limiting & Circuit Breaker | ⬜ | — | |
@@ -91,6 +95,7 @@ Rules going forward:
 | 13 | 10 | Message Queue (Interview Drill) | 3/3 | ✅ Think Aloud, ✅ Scope Negotiation, ✅ Used MQ. Needed guidance on requirements framework and idempotency placement. |
 | 17 | 12 | API Design (Interview Drill) | 3/3 | ✅ Think Aloud, ✅ Scope Negotiation, ✅ Used API Design. Fixed endpoint mistakes mid-drill. Strong idempotency deep dive. |
 | 18 | WR2 | Weekly Review (API/Cache/MQ) — Mistake Review | 8 resolved | Single-session record. API Design 5 + MQ 3 mistakes fixed. Found notes-gap pattern (Scale Trigger / DevOps Angle missing from API Design notes). |
+| 24 | Gate | **Phase 1 Gate** — Distributed Cache design (problem-anchored) | **3/3 ✅ PASS** | ✅ Think Aloud, ✅ Scope Negotiation, ✅ Used building block. 自己推出 stampede + cascading failure (Phase 2 級反應)。Improvement: clarify 時更早明確圈定範圍。Gate crashed on attempt 1. |
 
 ---
 
@@ -133,6 +138,9 @@ Rules going forward:
 | 20 | 14 | Security (JWT vs Session) | Scenario B 直接跳到答案 (Hybrid)，沒先論證為什麼 base 是 JWT 不是 Session — WR2 老問題 (WHAT 知道 WHY 跳過) 重現 | ✅ Resolved (S20, 補上 centralized state 的 WHY) |
 | 20 | 14 | Security (OAuth) | Q2「為什麼 Auth Server 跟 Resource Server 要分開」答「不同 api」— 描述現象沒講 blast radius separation | ✅ Resolved (S21) |
 | 20 | 14 | Security (OAuth) | Q3「三個 disaster 對應 OAuth 解法」跳過沒答 — 還沒建立「設計每元件對應一個痛點」的對照感 | ✅ Resolved (S21) |
+| 24 | 17-18 | Distributed Cache / CAP | 不清楚 network partition 是什麼（把「node 死」和「node 失聯但都活著」混為一談） | ✅ Resolved (S24, 當場補：partition = 都活著但網路斷、各自收 request) |
+| 24 | 17-18 | Distributed Cache | client-side vs proxy routing 答「不確定」— 缺「開放題=trade-off 取捨、沒有對錯」的反射 | ❌ Unresolved |
+| 24 | 17-18 | Distributed Cache | Clarify 時偏向「問 AI 要答案」而非主動斷言並圈定 scope（S8 Scope Negotiation 老問題變體） | ❌ Unresolved |
 
 ---
 
@@ -147,6 +155,8 @@ Rules going forward:
 | API Design | API Design is about choosing the right style (REST, GraphQL, gRPC) based on who's calling, call frequency, and data complexity — the key trade-off is flexibility versus simplicity and cacheability. |
 | Security & Auth | Security in distributed systems means separating what can issue credentials from what can consume them — OAuth solves password-sharing disasters by introducing scoped, revocable access tokens exchanged through a trusted server-to-server flow. |
 | Consistent Hashing | Consistent hashing maps both keys and nodes onto a ring, so adding or removing a node only remaps about 1/N of the keys instead of nearly all — and virtual nodes keep the load evenly spread. |
+| Distributed Cache | A distributed cache spreads data across multiple nodes using consistent hashing to route keys, with replicas for availability — the key trade-off is favoring AP over CP, because the DB is the source of truth and TTL makes staleness self-healing. |
+| CAP Theorem | CAP isn't "pick 2 of 3" — without a partition you get both C and A; CAP only forces a choice during a partition: stay consistent (refuse stale answers) or stay available (serve possibly-stale), and the choice can be made per-feature. |
 
 ---
 
@@ -154,11 +164,11 @@ Rules going forward:
 
 | Field | Value |
 |-------|-------|
-| **Title** | ⚙️ Systems Engineer |
-| **Current streak** | 1 🔥 (reset — 13 day gap from S22 to S23) |
+| **Title** | 🌐 Distributed Architect |
+| **Current streak** | 2 🔥 (S23 2026-05-28 → S24 2026-05-29 連續) |
 | **Longest streak** | 4 |
-| **Last session date** | 2026-05-28 |
-| **Last story summary** | Session 23 — 學生喊卡:理論磨太細、痛苦、進度慢。切換到「問題錨定 + 深度天花板」新打法(寫進 Learning Mode + memory)。用 depth-ceiling 三問把 Consistent Hashing 快速收尾 — vnodes trade-off 過(distribution vs routing table + gossip,Cassandra 256 錨點)、when-to-use 釘死(elastic stateful sharding)、統計證明 park。One-liner challenge 時整條推導鏈從記憶倒出來,證明底子在,順便學到「headline first」面試技巧。下一場 Design a Distributed Cache 當錨拉進 CAP/Consistency/Replication。|
+| **Last session date** | 2026-05-29 |
+| **Last story summary** | Session 24 — Karen 商品頁 P99 爆,要分散式 cache。problem-anchored 設計從頭跑:clarify(學會「多快/多大/多久後變多大」問規模)→ 100GB>32GB 推出 sharding(consistent hashing)→ cache-aside → client vs proxy routing trade-off → node 死自己推出 cache stampede + cascading failure(Phase 2 級反應)→ 拉進 replication → 一致 vs 快矛盾 → CAP。AP 選擇給教科書級三理由。partition 定義當場補。業界 CAP 對照表 + 「給錯=賠錢→CP」心法建立畫面。**Phase 1 Gate 3/3 PASS,晉升 🌐 Distributed Architect**。學生回饋:depth-ceiling problem-anchored 模式順、愉快、有效。|
 
 ---
 
@@ -174,8 +184,10 @@ Rules going forward:
 | E1 | Perfect Drill | 🏆 | 2026-04-02 |
 | S1 | Three-peat | 🏆 | 2026-04-02 |
 | K4 | Bug Squasher ×5 | 🏆 | 2026-04-10 |
+| M3 | Builder's Foundation | 🏆 | 2026-05-29 (Pass Phase 1 Gate) |
+| C3 | Gate Crasher | 🏆 | 2026-05-29 (Phase 1 Gate, attempt 1) |
 
-**Total: 8/25**
+**Total: 10/25**
 
 ---
 
@@ -185,8 +197,9 @@ Rules going forward:
 
 | Topic | Box | Next Review |
 |-------|-----|-------------|
-| Security & Auth | 2 | 2026-05-18 |
-| Consistent Hashing | 1 | 2026-05-29 |
+| Security & Auth | 2 | 2026-05-18 (overdue — 下次 Weekly Review 帶到) |
+| Consistent Hashing | 2 | 2026-06-01 (S24 recall pass, Box 1→2) |
+| Distributed Cache + CAP | 1 | 2026-05-30 |
 
 ---
 
@@ -203,3 +216,4 @@ Rules going forward:
 | Phase | Date | Score | Result | Weak spots |
 |-------|------|-------|--------|------------|
 | Phase 0 | — | — | ✅ Pass (retroactive — completed Day 1-3) | |
+| Phase 1 | 2026-05-29 | 3/3 | ✅ Pass (attempt 1) — Distributed Cache design (problem-anchored mini-mock) | clarify 時更早明確圈定 scope |
