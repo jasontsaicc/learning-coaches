@@ -12,10 +12,10 @@
 |-------|-------|
 | **Start date** | 2026-03-04 |
 | **Current phase** | Phase 2 🌐 |
-| **Current day** | Day 17-18 — CAP ✅ (pulled via Distributed Cache design) → next: Consistency Models (Day 19-20) |
+| **Current day** | WR3 done (S25) → next: Consistency Models (Day 19-20) |
 | **Language mode** | Bilingual (default 80% English / 20% 繁中) |
-| **Session count** | 24 |
-| **Last weekly review** | 18 |
+| **Session count** | 25 |
+| **Last weekly review** | 25 |
 
 ---
 
@@ -36,11 +36,11 @@ Rules going forward:
 
 ## Current Session (Breakpoint)
 
-*(無 — Session 24 正常結束。Distributed Cache 設計題完成 = Phase 1 Gate PASS 3/3，CAP + Replication 已 just-in-time 拉進。)*
-
-**⚠️ Next session = Weekly Review #3 due**（25 - 18 = 7）。先跑 Weekly Review，再進 Consistency Models(Day 19-20)。
+*(無 — Session 25 = Weekly Review #3 正常結束。)*
 
 **Next content:** Consistency Models(Day 19-20)— Strong / Causal / Eventual / Read-your-writes + Quorum(W+R>N)。延續 distributed cache 的 AP 選擇往下鑽「eventual consistency 到底保證什麼」。仍走 depth-ceiling 模式。
+
+**WR3 重點：** Caching 🔴→🟡 大躍進(recall 3.5/5,補上 cache invalidation 主動同步)；LB 🟡→🟢(recall 4/5,Weighted RR 老錯 resolved、補回 RR+Least Connections 基礎);CAP 本週剛學已衰退(recall 3/5,英文字母+stampede 術語掉了,核心判斷力都在)→排進間隔重複下次驗。
 **Pending PoC（park）：** Consistent hashing 獨立 Go PoC + distributed cache 完整實作 → 折進 Phase 3 Day 38-39 Distributed Cache。
 
 ---
@@ -53,8 +53,8 @@ Rules going forward:
 | 1 | SD Interview Rubric | 🟢 | — | |
 | 2 | Back-of-Envelope Estimation | 🟢 | — | |
 | 3 | 4-Step Framework | 🟢 | Phase 0 Gate | |
-| 4-5 | Load Balancer | 🟡 | — | Weekly Review 1/4 recall. 5 unresolved mistakes. Downgraded from 🟢. |
-| 6-7 | Caching & CDN | 🔴 | — | Weekly Review 0/4 recall. Drill partial recovery. Downgraded from 🟢. |
+| 4-5 | Load Balancer | 🟢 | — | WR3 (S25) recall 4/5 大回血。Weighted RR 老錯 resolved，補回 RR + Least Connections 基礎，L4/L7 最強。Upgraded 🟡→🟢. |
+| 6-7 | Caching & CDN | 🟡 | — | WR3 (S25) recall 3.5/5 大躍進 (WR1 是 0/4)。核心穩,補上 cache invalidation 主動同步 (寫時刪 cache 而非更新)。Scale trigger 補強 (read-heavy+熱點)。Upgraded 🔴→🟡. |
 | 8-9 | Database Selection | 🟡 | — | Weekly Review 3/4 recall. B-tree/LSM resolved. Trade-off axis confusion persists. |
 | 10-11 | Message Queue | 🟢 | — | WR2 Part 2: 3 mistakes resolved (delivery semantics, why-async 3 reasons, FR/NFR/Scope definitions). Now confident on core concepts. Recall 2/4 → notes patched gap. Upgraded from 🟡. |
 | 12-13 | API Design | 🟢 | — | WR2 Part 2: 5 mistakes resolved (GET/POST data location, JWT in header, pagination, idempotency 3rd state, SLI/SLO hierarchy). Notes patched with Scale Trigger + DevOps Angle sections. Upgraded from 🟡. |
@@ -96,6 +96,7 @@ Rules going forward:
 | 17 | 12 | API Design (Interview Drill) | 3/3 | ✅ Think Aloud, ✅ Scope Negotiation, ✅ Used API Design. Fixed endpoint mistakes mid-drill. Strong idempotency deep dive. |
 | 18 | WR2 | Weekly Review (API/Cache/MQ) — Mistake Review | 8 resolved | Single-session record. API Design 5 + MQ 3 mistakes fixed. Found notes-gap pattern (Scale Trigger / DevOps Angle missing from API Design notes). |
 | 24 | Gate | **Phase 1 Gate** — Distributed Cache design (problem-anchored) | **3/3 ✅ PASS** | ✅ Think Aloud, ✅ Scope Negotiation, ✅ Used building block. 自己推出 stampede + cascading failure (Phase 2 級反應)。Improvement: clarify 時更早明確圈定範圍。Gate crashed on attempt 1. |
+| 25 | WR3 | Weekly Review (Caching/LB/CAP) | Caching 3.5/5, LB 4/5, CAP 3/5 | Caching 🔴→🟡 (補 invalidation), LB 🟡→🟢 (Weighted RR 老錯 resolved). CAP 本週剛學已衰退 (英文字母+stampede 術語掉,核心判斷在). |
 
 ---
 
@@ -104,8 +105,8 @@ Rules going forward:
 | Session | Day | Topic | Mistake | Status |
 |---------|-----|-------|---------|--------|
 | 4 | 4-5 | Load Balancer | Said "least robin" — confused RR and Least Connections names | ❌ Unresolved |
-| 4 | 4-5 | Load Balancer | Thought Weighted RR is for different request processing times (it's for different server specs) | ❌ Unresolved |
-| 4 | 4-5 | Load Balancer | Couldn't recall LB algorithm names during Simon Drill | ❌ Unresolved |
+| 4 | 4-5 | Load Balancer | Thought Weighted RR is for different request processing times (it's for different server specs) | ✅ Resolved (WR3-S25, 答對「新舊機混用→Weighted」) |
+| 4 | 4-5 | Load Balancer | Couldn't recall LB algorithm names during Simon Drill | ✅ Resolved (WR3-S25, 補回 RR+Least Connections 5 演算法表) |
 | 4 | 4-5 | Load Balancer | Forgot DNS-based LB limitations (TTL stale IP, no real-time health check) | ✅ Resolved (WR1) |
 | 4 | 4-5 | Load Balancer | Thought 8.8.8.8 is ISP DNS (it's Google Public DNS) | ❌ Unresolved |
 | 4 | 4-5 | Load Balancer | Confused sticky sessions and Redis external store as same approach (opposite strategies) | ❌ Unresolved |
@@ -165,10 +166,10 @@ Rules going forward:
 | Field | Value |
 |-------|-------|
 | **Title** | 🌐 Distributed Architect |
-| **Current streak** | 2 🔥 (S23 2026-05-28 → S24 2026-05-29 連續) |
+| **Current streak** | 1 🔥 (S25 2026-06-02, gap >1 day 重置) |
 | **Longest streak** | 4 |
-| **Last session date** | 2026-05-29 |
-| **Last story summary** | Session 24 — Karen 商品頁 P99 爆,要分散式 cache。problem-anchored 設計從頭跑:clarify(學會「多快/多大/多久後變多大」問規模)→ 100GB>32GB 推出 sharding(consistent hashing)→ cache-aside → client vs proxy routing trade-off → node 死自己推出 cache stampede + cascading failure(Phase 2 級反應)→ 拉進 replication → 一致 vs 快矛盾 → CAP。AP 選擇給教科書級三理由。partition 定義當場補。業界 CAP 對照表 + 「給錯=賠錢→CP」心法建立畫面。**Phase 1 Gate 3/3 PASS,晉升 🌐 Distributed Architect**。學生回饋:depth-ceiling problem-anchored 模式順、愉快、有效。|
+| **Last session date** | 2026-06-02 |
+| **Last story summary** | Session 25 (WR3) — 小球驗收三主題:Caching 從 🔴 大躍進到 🟡(補上「寫時刪 cache」主動同步)、Load Balancer 從 🟡 回血到 🟢(困擾數週的 Weighted RR 老錯終於 resolved、補回 Round Robin + Least Connections 基礎)、CAP 本週剛學已小衰退但核心判斷力都在(英文字母和 stampede 術語掉了,排進間隔重複)。早期兩大失分點 Caching/LB 顯著回穩。|
 
 ---
 
@@ -197,9 +198,11 @@ Rules going forward:
 
 | Topic | Box | Next Review |
 |-------|-----|-------------|
-| Security & Auth | 2 | 2026-05-18 (overdue — 下次 Weekly Review 帶到) |
-| Consistent Hashing | 2 | 2026-06-01 (S24 recall pass, Box 1→2) |
-| Distributed Cache + CAP | 1 | 2026-05-30 |
+| Security & Auth | 2 | 2026-05-18 (overdue — 下次帶到) |
+| Consistent Hashing | 2 | 2026-06-05 |
+| Distributed Cache + CAP | 1 | 2026-06-03 (WR3 recall 3/5,術語衰退,reset Box 1) |
+| Caching & CDN | 1 | 2026-06-03 (WR3 🔴→🟡,新排入驗 invalidation) |
+| Load Balancer | 2 | 2026-06-05 (WR3 recall 4/5 pass, Box 1→2) |
 
 ---
 
