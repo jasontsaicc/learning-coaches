@@ -12,9 +12,9 @@
 |-------|-------|
 | **Start date** | 2026-03-04 |
 | **Current phase** | Phase 2 🌐 |
-| **Current day** | WR3 done (S25) → next: Consistency Models (Day 19-20) |
+| **Current day** | Day 19 done (S26) → next: Day 20 Consistency (Vector clocks / conflict resolution) or push to Day 21-22 Replication |
 | **Language mode** | Bilingual (default 80% English / 20% 繁中) |
-| **Session count** | 25 |
+| **Session count** | 26 |
 | **Last weekly review** | 25 |
 
 ---
@@ -36,12 +36,12 @@ Rules going forward:
 
 ## Current Session (Breakpoint)
 
-*(無 — Session 25 = Weekly Review #3 正常結束。)*
+*(無 — Session 26 = Day 19 Consistency Models 正常結束。)*
 
-**Next content:** Consistency Models(Day 19-20)— Strong / Causal / Eventual / Read-your-writes + Quorum(W+R>N)。延續 distributed cache 的 AP 選擇往下鑽「eventual consistency 到底保證什麼」。仍走 depth-ceiling 模式。
+**Next content:** Day 20 Consistency Models Part 2(Vector clocks、conflict resolution、eventual consistency PoC)— 或依 depth-ceiling 模式評估是否 park vector clock 數學,直接推進 Day 21-22 Replication & Leader Election。Vector clock 形式化偏 CS 理論,面試回報低,傾向用設計題 JIT 帶概念即可。
 
-**WR3 重點：** Caching 🔴→🟡 大躍進(recall 3.5/5,補上 cache invalidation 主動同步)；LB 🟡→🟢(recall 4/5,Weighted RR 老錯 resolved、補回 RR+Least Connections 基礎);CAP 本週剛學已衰退(recall 3/5,英文字母+stampede 術語掉了,核心判斷力都在)→排進間隔重複下次驗。
-**Pending PoC（park）：** Consistent hashing 獨立 Go PoC + distributed cache 完整實作 → 折進 Phase 3 Day 38-39 Distributed Cache。
+**S26 重點(Day 19):** 完整跑完 7 chunk(spectrum / strong / eventual / read-your-writes / causal / quorum W+R>N / observability)。學生自己推出「strong = 同步 = 等待 = 慢」的因果鏈。Interview drill 4/5 PASS — WHY 老問題明顯改善,Phase 1 gate 弱點(沒先 clarify 圈範圍)這次自己補上開場。Quorum overlap 卡兩次靠杯子比喻+填空打通。
+**Pending PoC(park):** Consistent hashing 獨立 Go PoC + distributed cache 完整實作 → 折進 Phase 3 Day 38-39。Eventual consistency PoC(Day 20)亦可 park 到設計題。
 
 ---
 
@@ -62,7 +62,7 @@ Rules going forward:
 | 15-16 | Consistent Hashing | 🟢 | — | S22-23. 所有 chunk ✅ at interview depth。Strong self-recall。S24 在 distributed cache 設計中當 sharding 機制實際應用。vnode 統計證明 + 獨立 PoC parked → Day 38-39。|
 | 17-18 | CAP Theorem | 🟢 | — | S24 problem-anchored。自己推出 cache stampede → replication → C vs A 矛盾。AP 選擇給出教科書級三理由(DB=truth, TTL 自癒, cache 天職是答得出)。partition 定義一開始不清→當場補。業界 CAP 對照表 + 「給錯=賠錢→CP」心法。PACELC 未深入(park)。|
 | — | Distributed Cache (design) | 🟢 | **Phase 1 Gate ✅** | S24. 問題錨定設計，3/3 PASS = Phase 1→2 Gate。涵蓋 clarify→sharding→cache-aside→client vs proxy routing→replication→CAP→thundering herd/request coalescing。完整 PoC park 到 Day 38-39。|
-| 19-20 | Consistency Models | ⬜ | — | |
+| 19-20 | Consistency Models | 🟢 | — | S26 Day 19。7 chunk 全過 at interview depth。自推 strong=同步=等待=慢。光譜表(Strong/Causal/RYW/Eventual)+ Quorum W+R>N(鴿籠重疊)。Eventual≠不一致(收斂保證)misconception 打通。Vector clock(Day 20)park。Drill 4/5。|
 | 21-22 | Replication & Leader Election | ⬜ | — | |
 | 23-24 | Rate Limiting & Circuit Breaker | ⬜ | — | |
 | 25 | Observability | ⬜ | — | |
@@ -97,6 +97,7 @@ Rules going forward:
 | 18 | WR2 | Weekly Review (API/Cache/MQ) — Mistake Review | 8 resolved | Single-session record. API Design 5 + MQ 3 mistakes fixed. Found notes-gap pattern (Scale Trigger / DevOps Angle missing from API Design notes). |
 | 24 | Gate | **Phase 1 Gate** — Distributed Cache design (problem-anchored) | **3/3 ✅ PASS** | ✅ Think Aloud, ✅ Scope Negotiation, ✅ Used building block. 自己推出 stampede + cascading failure (Phase 2 級反應)。Improvement: clarify 時更早明確圈定範圍。Gate crashed on attempt 1. |
 | 25 | WR3 | Weekly Review (Caching/LB/CAP) | Caching 3.5/5, LB 4/5, CAP 3/5 | Caching 🔴→🟡 (補 invalidation), LB 🟡→🟢 (Weighted RR 老錯 resolved). CAP 本週剛學已衰退 (英文字母+stampede 術語掉,核心判斷在). |
+| 26 | 19 | Consistency Models (Interview Drill) | 4/5 | ✅ Think Aloud, ✅ Scope Negotiation (主動 clarify 開場), ✅ Used spectrum, ✅ Trade-off WHY (老問題改善). ❌ Operational concerns (漏 replication lag 監控收尾). 社群三功能各選對等級。|
 
 ---
 
@@ -113,7 +114,7 @@ Rules going forward:
 | 4 | 4-5 | Load Balancer | Missed sticky session risk: uneven load distribution | ❌ Unresolved |
 | 9 | 8-9 | Database Selection | LSM-tree 讀寫搞反（以為是 read-optimized） | ✅ Resolved (WR1) |
 | 9 | 8-9 | Database Selection | Denormalization 跟 Normalization 搞混 | ✅ Resolved (S11) |
-| 9 | 8-9 | Database Selection | Consistency Trade-offs 空白（不知道三種 model） | ⏳ Pending Day 19-20 |
+| 9 | 8-9 | Database Selection | Consistency Trade-offs 空白（不知道三種 model） | ✅ Resolved (S26 Day 19, Strong/Causal/RYW/Eventual 光譜全建立) |
 | 9 | 8-9 | Database Selection | 看到「大量資料」就選 NoSQL（data volume ≠ DB 選擇關鍵） | ✅ Resolved (S11) |
 | 9 | 8-9 | Database Selection | Interview Drill 忘了 Scope Negotiation | ❌ Unresolved |
 | 12 | 10 | Message Queue | Simon Drill: Why Async 只記得 fast response，漏 decoupling/buffering | ✅ Resolved (WR2-S18) |
@@ -141,7 +142,10 @@ Rules going forward:
 | 20 | 14 | Security (OAuth) | Q3「三個 disaster 對應 OAuth 解法」跳過沒答 — 還沒建立「設計每元件對應一個痛點」的對照感 | ✅ Resolved (S21) |
 | 24 | 17-18 | Distributed Cache / CAP | 不清楚 network partition 是什麼（把「node 死」和「node 失聯但都活著」混為一談） | ✅ Resolved (S24, 當場補：partition = 都活著但網路斷、各自收 request) |
 | 24 | 17-18 | Distributed Cache | client-side vs proxy routing 答「不確定」— 缺「開放題=trade-off 取捨、沒有對錯」的反射 | ❌ Unresolved |
-| 24 | 17-18 | Distributed Cache | Clarify 時偏向「問 AI 要答案」而非主動斷言並圈定 scope（S8 Scope Negotiation 老問題變體） | ❌ Unresolved |
+| 24 | 17-18 | Distributed Cache | Clarify 時偏向「問 AI 要答案」而非主動斷言並圈定 scope（S8 Scope Negotiation 老問題變體） | 🟡 Improving (S26 Day 19 drill 主動 clarify 開場,但問的是容量題非一致性核心) |
+| 26 | 19 | Consistency | CAP recall 說平時「拿到 CAP 三個」— P 不是選項,是「網路會不會斷」的物理事實,平時拿到的是 C+A | ❌ Unresolved |
+| 26 | 19 | Consistency | 一開始推不出「instant/strong consistency 要付什麼代價」— 缺「同步=等待=慢」因果鏈 | ✅ Resolved (S26, 白板比喻當場通,後續自己推出) |
+| 26 | 19 | Consistency | Quorum W+R>N 不懂為何保證讀到最新(卡兩次) | ✅ Resolved (S26, 杯子/位子鴿籠比喻+填空打通「重疊」) |
 
 ---
 
@@ -158,6 +162,7 @@ Rules going forward:
 | Consistent Hashing | Consistent hashing maps both keys and nodes onto a ring, so adding or removing a node only remaps about 1/N of the keys instead of nearly all — and virtual nodes keep the load evenly spread. |
 | Distributed Cache | A distributed cache spreads data across multiple nodes using consistent hashing to route keys, with replicas for availability — the key trade-off is favoring AP over CP, because the DB is the source of truth and TTL makes staleness self-healing. |
 | CAP Theorem | CAP isn't "pick 2 of 3" — without a partition you get both C and A; CAP only forces a choice during a partition: stay consistent (refuse stale answers) or stay available (serve possibly-stale), and the choice can be made per-feature. |
+| Consistency Models | Consistency is a spectrum, not on/off — a latency budget from Strong (everyone always sees the latest, most expensive) to Eventual (stale now but guaranteed to converge, cheapest); you tune it with quorums (W+R>N forces read/write overlap) and pick per-operation by how much staleness the business tolerates. |
 
 ---
 
@@ -166,10 +171,10 @@ Rules going forward:
 | Field | Value |
 |-------|-------|
 | **Title** | 🌐 Distributed Architect |
-| **Current streak** | 1 🔥 (S25 2026-06-02, gap >1 day 重置) |
+| **Current streak** | 2 🔥 (S26 2026-06-03, 連續第 2 天) |
 | **Longest streak** | 4 |
-| **Last session date** | 2026-06-02 |
-| **Last story summary** | Session 25 (WR3) — 小球驗收三主題:Caching 從 🔴 大躍進到 🟡(補上「寫時刪 cache」主動同步)、Load Balancer 從 🟡 回血到 🟢(困擾數週的 Weighted RR 老錯終於 resolved、補回 Round Robin + Least Connections 基礎)、CAP 本週剛學已小衰退但核心判斷力都在(英文字母和 stampede 術語掉了,排進間隔重複)。早期兩大失分點 Caching/LB 顯著回穩。|
+| **Last session date** | 2026-06-03 |
+| **Last story summary** | Session 26 (Day 19) — Karen 又帶客訴(台北改資料、東京看到舊的)。小球帶學生從光速限制推出整個一致性光譜:學生自己推出「strong = 同步 = 等待 = 慢」,打通「eventual ≠ 不一致」(收斂保證 vs 寄丟)的迷思,用杯子比喻攻克 Quorum W+R>N 的「重疊」。Interview drill 4/5,WHY 老問題明顯改善、開場主動 clarify。One-Liner 庫達 10 條解鎖成就。|
 
 ---
 
@@ -187,8 +192,9 @@ Rules going forward:
 | K4 | Bug Squasher ×5 | 🏆 | 2026-04-10 |
 | M3 | Builder's Foundation | 🏆 | 2026-05-29 (Pass Phase 1 Gate) |
 | C3 | Gate Crasher | 🏆 | 2026-05-29 (Phase 1 Gate, attempt 1) |
+| K1 | One-Liner ×10 | 🏆 | 2026-06-03 (S26, Consistency Models 補上第 10 條) |
 
-**Total: 10/25**
+**Total: 11/25**
 
 ---
 
@@ -200,9 +206,10 @@ Rules going forward:
 |-------|-----|-------------|
 | Security & Auth | 2 | 2026-05-18 (overdue — 下次帶到) |
 | Consistent Hashing | 2 | 2026-06-05 |
-| Distributed Cache + CAP | 1 | 2026-06-03 (WR3 recall 3/5,術語衰退,reset Box 1) |
-| Caching & CDN | 1 | 2026-06-03 (WR3 🔴→🟡,新排入驗 invalidation) |
+| Distributed Cache + CAP | 2 | 2026-06-06 (S26 recall pass「partition 才選 CP/AP」,Box 1→2) |
+| Caching & CDN | 1 | 2026-06-03 (overdue — S26 已用滿單次 review 額度,下次帶到驗 invalidation) |
 | Load Balancer | 2 | 2026-06-05 (WR3 recall 4/5 pass, Box 1→2) |
+| Consistency Models | 1 | 2026-06-04 (S26 新學,Box 1) |
 
 ---
 
