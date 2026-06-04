@@ -36,12 +36,23 @@ Rules going forward:
 
 ## Current Session (Breakpoint)
 
-*(無 — Session 26 = Day 19 Consistency Models 正常結束。)*
+⏸ **Session 27 (Day 21-22 Replication) 進行中,2026-06-04 學生下班暫停。**
 
-**Next content:** Day 20 Consistency Models Part 2(Vector clocks、conflict resolution、eventual consistency PoC)— 或依 depth-ceiling 模式評估是否 park vector clock 數學,直接推進 Day 21-22 Replication & Leader Election。Vector clock 形式化偏 CS 理論,面試回報低,傾向用設計題 JIT 帶概念即可。
+**Resume point:** Step C **Chunk 4 (Multi-Leader & Leaderless)** 的 Feynman Gate 尚未答。下次先補這題:
+> 「為什麼 Multi-Leader 需要 vector clock/解衝突,Single-Leader 完全不需要?」(答案核心:single leader 提供唯一寫入排序,multi-leader 同時寫同筆資料 → write conflict)
 
-**S26 重點(Day 19):** 完整跑完 7 chunk(spectrum / strong / eventual / read-your-writes / causal / quorum W+R>N / observability)。學生自己推出「strong = 同步 = 等待 = 慢」的因果鏈。Interview drill 4/5 PASS — WHY 老問題明顯改善,Phase 1 gate 弱點(沒先 clarify 圈範圍)這次自己補上開場。Quorum overlap 卡兩次靠杯子比喻+填空打通。
-**Pending PoC(park):** Consistent hashing 獨立 Go PoC + distributed cache 完整實作 → 折進 Phase 3 Day 38-39。Eventual consistency PoC(Day 20)亦可 park 到設計題。
+**已完成(本次 S27 part 1):**
+- Vector Clock 5-min JIT(概念版,數學 park):記錄因果關係非時間先後,比對出「有序/並發」,衝突解法 LWW/merge/app-layer。面試一句話已給。
+- Day 21-22 Step 0 推導:學生自推「硬體會壞→多 server HA→網路/同步問題」,接上 replication=consistency 的為什麼(閉環)。
+- Chunk 2 ✅ Single-Leader(核心=唯一寫入排序,免解衝突;讀可水平擴展,寫卡單點→垂直/sharding)。
+- Chunk 3 ✅ Sync vs Async(判斷標準=「丟這筆的代價」,接 CAP 心法;async crash=data loss;半同步)。Transfer 題「自動儲存選 async」推理站得住,補上「反覆寫入自我修復」。
+- Chunk 4 講解完(Multi-Leader 跨 DC/寫衝突;Leaderless=Quorum W+R>N 出處),**Gate 待答**。
+
+**剩餘 chunk:** 5 Leader Election(Raft 直覺+腦裂 split-brain,術語已預告)、6 read replica≠strong(replication lag 誤解)、7 Observability Mini。然後 Step D/E/F/G。
+
+**語言:** S27 中途學生要求改 **English-primary 教學**(原 bilingual 80/20)。下次續用英文教,繁中只補卡住處。
+
+**Pending PoC(park):** Consistent hashing 獨立 Go PoC + distributed cache 完整實作 → Day 38-39。Eventual consistency PoC 亦可 park。
 
 ---
 
@@ -171,10 +182,10 @@ Rules going forward:
 | Field | Value |
 |-------|-------|
 | **Title** | 🌐 Distributed Architect |
-| **Current streak** | 2 🔥 (S26 2026-06-03, 連續第 2 天) |
+| **Current streak** | 3 🔥 (S27 2026-06-04, 連續第 3 天) |
 | **Longest streak** | 4 |
-| **Last session date** | 2026-06-03 |
-| **Last story summary** | Session 26 (Day 19) — Karen 又帶客訴(台北改資料、東京看到舊的)。小球帶學生從光速限制推出整個一致性光譜:學生自己推出「strong = 同步 = 等待 = 慢」,打通「eventual ≠ 不一致」(收斂保證 vs 寄丟)的迷思,用杯子比喻攻克 Quorum W+R>N 的「重疊」。Interview drill 4/5,WHY 老問題明顯改善、開場主動 clarify。One-Liner 庫達 10 條解鎖成就。|
+| **Last session date** | 2026-06-04 |
+| **Last story summary** | Session 27 part 1 (Day 21-22 開始) — 凌晨主 DB 硬碟掛掉、小杰想把流量導去空機器。小球帶學生自推 replication 的物理必然性(硬體會壞→多份→一致性問題),打通 Single-Leader「唯一排序免解衝突」、Sync vs Async「丟這筆的代價」判斷法。學生中途切換英文教學。Chunk 4 Gate 待答,下班暫停。|
 
 ---
 
@@ -207,7 +218,7 @@ Rules going forward:
 | Security & Auth | 2 | 2026-05-18 (overdue — 下次帶到) |
 | Consistent Hashing | 2 | 2026-06-05 |
 | Distributed Cache + CAP | 2 | 2026-06-06 (S26 recall pass「partition 才選 CP/AP」,Box 1→2) |
-| Caching & CDN | 1 | 2026-06-03 (overdue — S26 已用滿單次 review 額度,下次帶到驗 invalidation) |
+| Caching & CDN | 2 | 2026-06-07 (S27 recall PASS「寫時刪 cache 不更新,避 race condition」,Box 1→2) |
 | Load Balancer | 2 | 2026-06-05 (WR3 recall 4/5 pass, Box 1→2) |
 | Consistency Models | 1 | 2026-06-04 (S26 新學,Box 1) |
 
