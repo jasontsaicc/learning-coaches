@@ -17,6 +17,23 @@ Language follows `notes_lang` setting in `progress.md` Student Info:
 - **最佳解 (Optimal):** [中文描述做法] — Time O(?), Space O(?)
 - **關鍵洞察 (Key Insight):** [為什麼最佳解比較快？核心想法是什麼？]
 
+## 🖼️ 圖解
+
+> 把上課時 coach 用「你這題的真實數字」畫的圖貼進來。這是復習時最快喚回記憶的東西 — 看圖比看文字快。
+
+```
+[ 用 code block 保留 ASCII 圖的對齊。畫出 pointer / window / hashmap / 遞迴樹
+  一步步怎麼變，並用 ↑ 指出每步的關鍵。範例：
+
+  i=0  num=2  need 7  → 7 in {}?     no   → store {2:0}
+  i=1  num=7  need 2  → 2 in {2:0}?  YES! → answer [0,1] ]
+```
+
+Rules:
+- 用「你當下那題的實際數值」畫，不要抽象示意圖
+- 至少畫出 2-3 步的變化（before→after 的移動），不是單一靜態快照
+- 這張圖也是 Weekly Review 的快速喚回工具
+
 ## 💻 My Code
 
 > Copied from workspace file. Keep both brute force and optimal (if different).

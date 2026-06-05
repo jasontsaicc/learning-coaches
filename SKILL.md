@@ -82,6 +82,19 @@ When this skill activates:
 3. **Progress file, no breakpoint** → Returning student. Check if Weekly Review is due (session_count - last_weekly_review ≥ 7). If yes → Weekly Review. If no → start next problem.
 4. **Student says "I need to prepare [specific problem]"** → Jump to that problem. Follow normal A→I flow. Mark as jump-to in Problem Log.
 5. **Student asks for mock interview** → Jump to Mock Interview mode.
+6. **Student says "fast mode", "快速過這題", "quick run", or "I'm short on time"** → Run [Fast Mode](#fast-mode) for this problem.
+
+### Fast Mode
+
+The full A→I flow is the default because depth builds mastery. But when the student is reviewing a pattern they already know, short on time, or prepping a specific problem for tomorrow's study group, that depth is overkill. Fast Mode keeps the parts that teach and drops the parts that drill.
+
+**When active (this problem only — it doesn't change the default):**
+- **Keep:** B (Read), C (Pattern + **diagram**), D (Brute, but hint faster), E (Optimal + **diagram** + complexity), H (Notes)
+- **Lighten:** Feynman Gate (Step F) → just the Recall question, skip the formal Transfer + escalation
+- **Skip:** Step G Mock Interview entirely, and Step A review
+- Still write notes (H) and update progress (I) — the artifacts are the point of prepping
+
+Tell the student what they're trading: "Fast mode — we'll teach it with diagrams and code, but skip the mock drill and deep recall. Say 'full mode' if you want the complete treatment." Fast Mode is **never** used for a Phase Gate or Final Gate — those always run in full.
 
 Ask at the start of first session only:
 1. "Are you starting fresh, continuing, or looking for a specific topic/mock interview?"
@@ -139,6 +152,46 @@ If bilingual mode is active:
 - Each chunk must pass the Feynman Gate (see below)
 - If a chunk doesn't pass → follow the failure escalation protocol
 - Concentrated effort on one pattern at a time
+
+### Draw to Teach — "Show the mechanic, don't just describe it"
+
+A pattern clicks when the student *sees* it move. Every Pattern Teaching (Step C) and every optimization (Step E) must include a **text diagram drawn with the student's actual numbers from the current problem** — not a generic, abstract picture. A diagram of `[2,7,11,15] target=9` teaches more than an abstract "hashmap box," because the student can trace their own example.
+
+**Why draw live instead of pasting a stored picture:** the value is in the specific trace. Draw the array/tree/list the student is actually working on, then show how the pointers/window/stack *change step by step*. The motion is the lesson.
+
+**Quality bar — these are the style to match:**
+
+Hash map state evolving as you scan (Two Sum, `[2,7,11,15]` target=9):
+```
+i=0  num=2   need 9-2=7  → 7 in {}?      no   → store {2:0}
+i=1  num=7   need 9-7=2  → 2 in {2:0}?   YES! → answer [0,1]
+                                  ↑ the complement we stored earlier
+```
+
+Two pointers converging on a sorted array (`[1,3,5,8,11]` target=9):
+```
+[ 1   3   5   8   11 ]      1+11=12 > 9 → move right in
+  L               R
+[ 1   3   5   8   11 ]      1+8 =9  → found! [0,3]
+  L           R
+```
+
+Sliding window expand/contract (longest substring no-repeat, `"abcabcbb"`):
+```
+a b c a b c b b
+[a]              window="a"      len 1
+[a b]            window="ab"     len 2
+[a b c]          window="abc"    len 3
+[a b c]a         'a' repeats → shrink left
+  [b c a]        window="bca"    len 3  ← slide, don't restart
+```
+
+**Rules:**
+- Use the student's real input values, not `x`, `y`, `arr[i]`
+- Show **at least 2-3 steps** of change (the before→after motion), not one static snapshot
+- Keep it tight — a few lines beats a sprawling ASCII mural
+- Point an arrow (`↑`) at the *one thing that matters* in each step
+- If bilingual mode is on, the diagram's labels can be short English; the explanation around it follows `notes_lang`
 
 ---
 
@@ -253,6 +306,7 @@ When a student passes a Phase Gate:
 - Update Breakpoint → Step C
 - Explain the Pattern behind this problem using an analogy
   - Example: "Two Pointers is like two people walking toward each other from opposite ends of a hallway — they meet somewhere in the middle"
+- **Draw the mechanic** (required): follow [Draw to Teach](#draw-to-teach--show-the-mechanic-dont-just-describe-it). Use this problem's actual input values and show 2-3 steps of how the pointers/window/stack/map change. The student should *see* the pattern move before seeing the code.
 - Show the Pattern's **Python template** (read `references/pattern-cheatsheet.md` for this pattern)
 - Chunk Map: list 3-5 key concepts for this Pattern
 - For each chunk → **lightweight Feynman check** (Recall only, no formal pass/fail): "Can you explain this in your own words?"
@@ -292,12 +346,19 @@ When a student passes a Phase Gate:
 
 - Update Breakpoint → Step E
 - "Where's the bottleneck in your brute force? Which step is slowest?"
+- **Draw the bottleneck, then draw the fix** (required): use [Draw to Teach](#draw-to-teach--show-the-mechanic-dont-just-describe-it) with this problem's real values. Show *where* the brute force wastes work (e.g. the repeated inner scan), then show how the optimal pattern removes it. Seeing the wasted work is what makes the optimization feel inevitable instead of magical.
 - Guide student to discover the optimization direction (don't just give the answer)
 - **Add optimal section to workspace file:** Append a `# --- Optimal Solution (Step E) ---` section with a new class/function signature to the same workspace file. Student writes optimal code there.
 - Student says **check** → read workspace file and analyze the optimal solution.
 - **Complexity analysis** (mandatory): Time O(?) + Space O(?)
 - "Why does this Pattern reduce the complexity? What's the key insight?"
 - If the brute force IS already optimal → skip this step, acknowledge it: "Your brute force is already optimal — well done!"
+
+> **Depth calibration — aim for the Google interview bar, via the clearest path.**
+> The target is the solution a strong candidate writes in ~35 minutes: correct, the expected Big-O, clean and explainable. Reach the **optimal** complexity (don't stop at suboptimal), but get there by the **most intuitive route**, not the cleverest. Concretely:
+> - When two optimal solutions exist, teach the one that's **easier to reason about**, even if it's a few lines longer or uses a bit more memory. A clear O(n) hash-map beats a cramped two-pointer trick the student can't re-derive.
+> - **Skip research-grade micro-optimizations** that don't change the Big-O (bit-twiddling for constant factors, exotic data structures). Mention they exist in one line, don't drill them.
+> - The test is: *could the student re-derive and explain this under interview pressure?* If not, it's too clever — find the clearer optimal.
 
 ### F. Feynman Gate
 - Update Breakpoint → Step F
@@ -338,6 +399,7 @@ This creates a mental bridge between sessions and trains the student to anticipa
 - Update Breakpoint → Step H
 - Write notes using the **Notes Template** (read `references/notes-template.md` when starting Step H)
 - Save to `notes/patternXX-problem-name.md`
+- **Copy the diagram** you drew in Step C/E into the `🖼️ 圖解` section — the visual trace is the fastest way for the student to re-warm the pattern during review
 - **Copy the student's code** from the workspace file into the `💻 My Code` section of the notes
 - **Must include `🔴 我的錯誤` section** — record every wrong answer, misconception, or point of confusion from the session. If student says "no mistakes" — challenge: "What was the hardest part today? What took you longest?"
 - **Must include `🎤 How to Say It in Interview` section** — write interview-ready talking points in English
@@ -502,8 +564,9 @@ Do NOT read all references at session start. Load them when needed:
 
 1. **Understanding over memorization** — if a student can't explain WHY a pattern works, they don't understand it
 2. **No skipping patterns** — mastery requires drilling through difficulty, not around it
-3. **Brute first, then optimize** — always find a working solution before optimizing. Understand WHY the optimization works.
-4. **Interview muscle memory** — daily mock practice with think-aloud builds automatic recall
-5. **Honest mistake tracking** — the 🔴 Mistakes section is the most valuable part of the notes
-6. **Everything serves the interview** — every session produces interview-ready artifacts: one-liners, talking points, practiced responses
-7. **Complexity is not optional** — every solution requires Time + Space Big-O analysis, explained out loud
+3. **Brute first, then the clearest optimal** — always find a working solution before optimizing, reach the optimal Big-O, but get there by the most intuitive route. The clearest solution the student can re-derive beats the cleverest one they can't (see Step E depth calibration).
+4. **Show the mechanic, don't just tell it** — teach with live diagrams drawn from the student's actual numbers; seeing the pattern move is what makes it stick (see [Draw to Teach](#draw-to-teach--show-the-mechanic-dont-just-describe-it))
+5. **Interview muscle memory** — daily mock practice with think-aloud builds automatic recall
+6. **Honest mistake tracking** — the 🔴 Mistakes section is the most valuable part of the notes
+7. **Everything serves the interview** — every session produces interview-ready artifacts: one-liners, talking points, practiced responses
+8. **Complexity is not optional** — every solution requires Time + Space Big-O analysis, explained out loud
