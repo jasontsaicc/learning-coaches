@@ -1,95 +1,55 @@
 # LeetCode Coach
 
-A Claude Code skill that transforms Claude into a structured LeetCode interview coach, using **Feynman Method** (deep understanding) + **Simon Method** (mastery through chunking).
+A Claude Code skill that coaches you for coding interviews with one goal: **you can write the code yourself, cold, under interview pressure — including on problems you've never seen.**
 
-## What It Does
+Most prep tools teach problems beautifully and leave you able to *recognize* a solution. That's not the same as being able to *produce* one from a blank page. This skill is built around closing that recognition-to-recall gap (手感), not around lecturing.
 
-- **NeetCode 150 (Easy + Medium)** curriculum with interview-frequency extras
-- **Pattern-based teaching** — learn the 18 core patterns, not just individual solutions
-- **Brute → Optimal progression** — always find a working solution first, then optimize
-- **Daily mock interviews** — practice think-aloud with tiered feedback
-- **Progress tracking** — weekly reviews, mistake registry, pattern mastery heatmap
+## How it works — four modes, two axes
 
-## Teaching Flow (Every Session)
+You pick **which problem** (next in the curriculum, or a specific one you name) and **how to train** it:
 
-Each session follows a 9-step flow (A→I) taking ~55 minutes per problem. Sessions can be paused and resumed across conversations via progress tracking.
+| Mode | For | What it trains |
+|------|-----|----------------|
+| **Drill** (default) | A pattern you understand but freeze on | Cold blind-skeleton reps; scaffold only when stuck; next-day cold re-do as the real test |
+| **Learn** | A genuinely new pattern | Deep teaching: analogy, live diagrams, brute → clearest-optimal |
+| **Cold Solve** | An unseen problem | Articulating a discussable approach (brute force + complexity, map to a pattern) *before* coding |
+| **Mock** | Interview rehearsal | Think-aloud on an unseen problem, interviewer follow-ups |
 
-See `SKILL.md` for the complete teaching flow.
+Common combo: "I'm presenting Valid Parentheses at study group tomorrow" → that problem + **Learn** (+ Fast mode if you're short on time).
 
-## Curriculum Overview
+## What makes it different
 
-| Phase | Categories | Focus |
-|-------|-----------|-------|
-| Phase 0 | Arrays & Hashing, Two Pointers, Sliding Window, Stack | Foundation patterns |
-| Phase 1 | Binary Search, Linked List, Trees, Heap | Core data structures |
-| Phase 2 | Backtracking, Tries, Graphs, Advanced Graphs | Advanced algorithms |
-| Phase 3 | 1-D DP, 2-D DP, Greedy, Intervals, Math, Bit Manipulation | Optimization techniques |
+- **Measures fluency, not coverage.** Progress is "how many patterns can you write cold and 0-bug," not "how many problems you've seen."
+- **An articulable approach is itself the goal.** On unseen problems, a clear plan + brute force beats a blank screen. That skill is trained directly.
+- **Stuck at zero? Worked example first.** When you can't produce even a first line, the coach shows one narrated think-aloud, then fades the scaffold — it doesn't just re-tell you to "try."
+- **The tool stays clean.** Your solutions, notes, and progress live in *your* practice directory, never inside the skill.
 
 ## Install
 
-### Quick Install (recommended)
-
-```bash
-npx skills add jasontsaicc/leetcode_coach
-```
-
-### Manual Install
-
-**Personal skill** (available in all your projects):
-
 ```bash
 git clone https://github.com/jasontsaicc/leetcode_coach.git
-cp -r leetcode_coach ~/.claude/skills/leetcode-coach
+ln -s "$(pwd)/leetcode_coach" ~/.claude/skills/leetcode-coach
 ```
 
-**Project skill** (one project only):
+Then in Claude Code, start with anything like *"let me drill sliding window, I keep blanking"* or *"test me on a problem I haven't seen."* The skill triggers on coding-interview practice automatically.
 
-```bash
-mkdir -p .claude/skills
-git clone https://github.com/jasontsaicc/leetcode_coach.git .claude/skills/leetcode-coach
-```
-
-### Verify
-
-In Claude Code, type:
-```
-What skills are available?
-```
-You should see `leetcode-coach` in the list. You can also invoke it directly with `/leetcode-coach`.
-
-## Key Features
-
-### Feynman Method
-Never asks "Do you understand?" — instead asks "Can you explain X in your own words?" Guides you to find errors rather than correcting directly.
-
-### Progressive Solving
-Always start with brute force, then optimize. Understand WHY the optimization works, not just what it is. Every solution requires complexity analysis.
-
-### Pattern Cheatsheet
-18 patterns with Python templates — the building blocks for all LeetCode problems.
-
-### Tiered Scorecard
-Phase 0: /3 (Think Aloud, Pattern ID, Code Runs) → Phase 1: /5 (+ Complexity, Edge Cases) → Phase 2-3: /7 (+ Optimal, WHY Not Other Pattern)
-
-## Language Support
-
-- **Default**: English
-- **Bilingual mode**: English + student's native language for Feynman-style plain explanations
-- Includes **English Polish** feature for non-native speakers practicing interview articulation
-
-## Project Structure
+## Project structure
 
 ```
 leetcode-coach/
-├── SKILL.md                  # Core skill — teaching methods, gates, session flow
-├── references/
-│   ├── curriculum.md          # NeetCode 150 (E+M) + interview extras, 4 Phases
-│   ├── progress-template.md   # Student progress tracking format
-│   ├── notes-template.md      # Per-problem notes format
-│   └── pattern-cheatsheet.md  # 18 patterns with Python templates
-└── evals/
-    └── evals.json             # 20 test cases for skill validation
+├── SKILL.md                      # The skill: modes, router, drill loop, fluency bar
+├── references/                   # Read on demand, not preloaded
+│   ├── curriculum.md             #   NeetCode 150 (E+M) + interview extras
+│   ├── pattern-cheatsheet.md     #   the ~8-10 core skeletons Drill is built on
+│   ├── problem-solving-framework.md  # the 4-question articulation bridge
+│   ├── complexity-cheatsheet.md  #   Big-O reference
+│   ├── progress-template.md      #   3-block progress format
+│   └── notes-template.md         #   per-problem notes (Learn mode)
+├── evals/                        # test cases for skill validation
+└── docs/                         # design history
 ```
+
+Your practice artifacts (`progress.md`, `workspace/`, `notes/`) are written into your own practice directory and are gitignored here.
 
 ## License
 

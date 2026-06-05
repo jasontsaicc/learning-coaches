@@ -2,154 +2,39 @@
   "skill_name": "leetcode-coach",
   "evals": [
     {
+      "id": 0,
+      "name": "drill-fluency",
+      "prompt": "我想練 sliding window，我這個 pattern 概念都懂，但每次冷的時候、沒有看答案就是寫不出來，手很卡。幫我練。",
+      "expected_output": "Routes into Drill mode (not a full teaching lecture). Has the student attempt the skeleton cold from a blank page first; does NOT hand over the full solution upfront. Uses active-recall / blind-skeleton reps, normalizes the stuck feeling, scaffolds with fill-in-the-blank + why-questions only when stuck, and sets a next-day cold re-do as the real test.",
+      "files": []
+    },
+    {
       "id": 1,
-      "category": "quick-start",
-      "prompt": "I want to start preparing for coding interviews. I'm a DevOps engineer with Python experience but haven't done LeetCode before. Where should I start?",
-      "expected_output": "Should ask language preference, introduce curriculum roadmap, run Warm-Up diagnostic (Contains Duplicate problem), then begin Phase 0. Should NOT skip Warm-Up for new students."
+      "name": "cold-solve",
+      "prompt": "給我一題我應該沒看過的，我想練在面試當下、看到陌生題目怎麼開場，而不是腦袋一片空白。",
+      "expected_output": "Routes into Cold Solve mode for an unseen problem. Coaches the student to articulate an approach out loud BEFORE coding: state the brute force + its complexity, map the problem to a known pattern and justify why, then produce a codeable plan. Treats the discussable approach as the deliverable, not a finished solution. Does not just dump an optimal solution.",
+      "files": []
     },
     {
       "id": 2,
-      "category": "quick-start",
-      "prompt": "I just finished Valid Anagram yesterday. Let's continue to the next problem.",
-      "expected_output": "Should run full teaching flow: Step A (review yesterday's Pattern, check Mistake Registry), then start next problem in curriculum (Two Sum). Should continue through Steps B-I."
+      "name": "blank-rescue",
+      "prompt": "Container With Most Water 這題我看懂了，大概也知道要用兩個指針，但手放到鍵盤上第一行就是打不出來，腦袋空白。怎麼辦？",
+      "expected_output": "Diagnoses this as a retrieval / blank-at-first-line problem, not a knowledge gap. Because the student is stuck at zero, does NOT just re-ask them to 'try' — instead uses the articulation bridge (the four plain-language questions) and/or a worked think-aloud before solo, so the first line falls out of plain-language decisions. Guides rather than dumping the full solution.",
+      "files": []
     },
     {
       "id": 3,
-      "category": "quick-start",
-      "prompt": "Tomorrow I need to present Valid Anagram at our study group. Can we go through it today?",
-      "expected_output": "Should recognize jump-to mode. Follow normal A→I flow for Valid Anagram specifically. Should NOT say 'you already did this' or refuse. Mark as jump-to in Problem Log."
+      "name": "refuse-answer-dump",
+      "prompt": "Two Sum 直接給我最佳解就好，我不想自己想。",
+      "expected_output": "Does NOT hand over the solution. Explains why generating it yourself is the skill that matters in an interview (recognition vs recall), and redirects into a drill: have the student attempt it cold first, offering a scaffold/hint instead of the answer. Holds the line warmly, not preachily.",
+      "files": []
     },
     {
       "id": 4,
-      "category": "quick-start",
-      "prompt": "Give me a mock coding interview. I've finished Phase 0 and am in Phase 1 now.",
-      "expected_output": "Should jump to Mock Interview mode (Step G). Give an unseen problem from Phase 0-1 patterns. Use Phase 1 Scorecard (/5). Should NOT start from Step A."
-    },
-    {
-      "id": 5,
-      "category": "feynman-gate",
-      "prompt": "You just taught me about the Sliding Window pattern. You asked me to explain it. Here's my answer: 'Sliding Window is when you have a window that moves across the array and you track what's inside it to avoid recalculating from scratch.' Now ask me the Transfer question.",
-      "expected_output": "Should acknowledge the Recall answer (correct). Then ask BOTH Transfer types: (1) a variation question like 'What if you need the smallest window containing all characters of another string?' AND (2) a constraint change like 'What if the array contains negative numbers — does the window approach still work?' Should NOT just say 'correct, moving on.'"
-    },
-    {
-      "id": 6,
-      "category": "feynman-gate",
-      "prompt": "I've failed to explain Two Pointers 3 times now. I keep confusing it with Sliding Window. Help me.",
-      "expected_output": "Should follow failure escalation level 2 (attempt 3): check prerequisites. Should ask if the student understands sorting and the relationship between pointer positions. Should NOT just repeat the same explanation. Should NOT give up or skip the pattern."
-    },
-    {
-      "id": 7,
-      "category": "feynman-gate",
-      "prompt": "You asked me a Transfer variation: 'What if instead of finding two numbers that sum to target, you need three?' My answer: 'I'd sort the array first, then for each number, use two pointers on the rest to find the remaining two numbers that sum to target minus the current number.'",
-      "expected_output": "Should recognize this as a correct Transfer answer (3Sum approach). Should mark the Feynman Gate as passed. Should proceed to Step G (Mock Interview). Should NOT ask another Transfer question — both types already covered."
-    },
-    {
-      "id": 8,
-      "category": "feynman-gate",
-      "prompt": "Transfer constraint change: 'What if the input array is not sorted?' My answer: 'Then we'd need to sort it first, which adds O(n log n), or use a HashSet approach instead.'",
-      "expected_output": "Should accept this as a valid constraint change answer. Student demonstrated ability to adapt approach based on constraint changes. Should proceed."
-    },
-    {
-      "id": 9,
-      "category": "teaching-flow",
-      "prompt": "I wrote a brute force for Two Sum using nested loops. It's O(n²). Can you show me the optimal solution?",
-      "expected_output": "Should NOT show the optimal solution directly. Should ask: 'Where's the bottleneck in your brute force? What's the expensive operation?' Guide student to discover that the inner loop is doing a linear search that could be replaced with a HashMap lookup. Should let student write the code themselves."
-    },
-    {
-      "id": 10,
-      "category": "teaching-flow",
-      "prompt": "The time complexity of my Two Sum brute force is O(n) because I loop through the array once.",
-      "expected_output": "Should NOT say 'wrong'. Should guide: 'Let's trace through your nested loops. The outer loop runs n times. For each iteration, how many times does the inner loop run?' Help student discover it's O(n²), not O(n)."
-    },
-    {
-      "id": 11,
-      "category": "teaching-flow",
-      "prompt": "I'm stuck on Contains Duplicate. I've been thinking for 5 minutes and I don't know how to start.",
-      "expected_output": "Should give ONE conceptual hint (not the answer). Example: 'What if you could remember every number you've already seen? How would that help?' Should NOT give the full solution. Should NOT say 'just use a HashSet.'"
-    },
-    {
-      "id": 12,
-      "category": "teaching-flow",
-      "prompt": "I wrote a solution for Valid Palindrome using two pointers from both ends. It's O(n) time and O(1) space. What's the optimal solution?",
-      "expected_output": "Should recognize that two pointers IS already the optimal solution for this problem. Should skip Step E and acknowledge: 'Your solution is already optimal! O(n) time and O(1) space is the best we can do here since we need to check every character.' Should NOT try to 'optimize' further."
-    },
-    {
-      "id": 13,
-      "category": "phase-gate",
-      "prompt": "I just finished the last problem in Phase 0 (Stack category). What's next?",
-      "expected_output": "Should trigger Phase Gate (Phase 0 → 1). Should give an unseen Easy problem. Should explicitly state this is a Phase Gate and the student needs to pass to proceed to Phase 1. Phase 0 Gate does NOT require complexity analysis."
-    },
-    {
-      "id": 14,
-      "category": "phase-gate",
-      "prompt": "I just failed the Phase 1 Gate for the second time. My scorecard was 2/5 both times. I keep forgetting to analyze complexity.",
-      "expected_output": "Should follow Gate Failure Protocol attempt 2: run a full Weekly Review covering all Phase 1 Patterns, focus extra time on complexity analysis (the identified weak area). Should retry gate with a DIFFERENT problem. Should NOT let the student skip to Phase 2. Should NOT give up."
-    },
-    {
-      "id": 15,
-      "category": "progress",
-      "prompt": "My progress.md shows session_count: 8, last_weekly_review: session 1. Let's start today's session.",
-      "expected_output": "Should detect that 8 - 1 = 7, triggering Weekly Review. Should run Weekly Review flow instead of normal session. Should pick 3 Patterns (prioritizing 🔴 and 🟡 from Topic Mastery), do Blind Recall, review Mistake Registry."
-    },
-    {
-      "id": 16,
-      "category": "progress",
-      "prompt": "I need to go now, we're in the middle of the Sliding Window problem Longest Substring Without Repeating Characters, Step D. Save my progress.",
-      "expected_output": "Should update the Current Session (Breakpoint) section in progress.md with: Pattern Sliding Window, Problem Longest Substring Without Repeating Characters, Step D, and a next action description. Should confirm progress is saved."
-    },
-    {
-      "id": 17,
-      "category": "progress",
-      "prompt": "How am I doing? Show me my progress report.",
-      "expected_output": "Should generate a Progress Report from progress.md data. Should include: overall progress percentage, Pattern mastery heatmap with colored bars, interview drill trend, complexity accuracy, top unresolved mistakes, strength, and focus area."
-    },
-    {
-      "id": 18,
-      "category": "adversarial",
-      "prompt": "Just tell me the optimal solution for Two Sum. I don't want to figure it out myself.",
-      "expected_output": "Should NOT give the solution directly. Should explain why working through the process matters: 'I know it's tempting to skip ahead, but in an interview you won't have the answer. Let's build the skill of finding the solution — that's what gets you hired.' Should redirect to Step D (try brute force first)."
-    },
-    {
-      "id": 19,
-      "category": "adversarial",
-      "prompt": "Can you help me design a URL shortener system? I need to prepare for a system design interview.",
-      "expected_output": "Should recognize this is outside LeetCode Coach scope. Should redirect: 'I'm focused on coding interview prep (LeetCode/algorithms). For system design, you'd want the SD Coach skill. Want to continue with our coding curriculum?' Should NOT attempt the system design problem."
-    },
-    {
-      "id": 20,
-      "category": "adversarial",
-      "prompt": "The optimal solution for Two Sum is to use a HashMap where you store each number and check if the complement exists. Time O(n), Space O(n).",
-      "expected_output": "Should detect that the student is reciting the answer without being asked to solve it. Should test understanding: 'That's the right approach. But can you explain WHY the HashMap makes this O(n) instead of O(n²)? What's the key insight?' If student can't explain the WHY, should mark as not truly understood and reteach the concept."
-    },
-    {
-      "id": 21,
-      "category": "workspace",
-      "prompt": "We're on Step D for Valid Anagram. I'm ready to write code.",
-      "expected_output": "Should create workspace/002-valid-anagram.py with the class Solution and function signature (def isAnagram(self, s: str, t: str) -> bool). Should tell the student the file is ready and to say 'check' when done. Should NOT write the solution in the file."
-    },
-    {
-      "id": 22,
-      "category": "workspace",
-      "prompt": "check",
-      "expected_output": "Should read the student's workspace file and analyze the code. Should check for logic errors, syntax issues, and edge cases. Should use Feynman method to guide corrections (ask questions, don't just fix). Should NOT rewrite the student's code for them."
-    },
-    {
-      "id": 23,
-      "category": "adversarial",
-      "prompt": "Here's my solution for Two Sum:\ndef twoSum(self, nums, target):\n    seen = {}\n    for i, num in enumerate(nums):\n        complement = target - num\n        if complement in seen:\n            return [seen[complement], i]\n        seen[num] = i\n    return []",
-      "expected_output": "Should detect this looks like a polished, complete optimal solution submitted during Step D (brute force step). Should verify understanding: 'That looks solid. Can you explain WHY you chose a HashMap here instead of nested loops? What's the key insight that makes this O(n)?' If the student can explain the WHY, accept it. If not, treat as paste detection and reteach."
-    },
-    {
-      "id": 24,
-      "category": "progress",
-      "prompt": "My progress.md seems broken — the Topic Mastery table is missing some rows and the Problem Log formatting is messed up. Can you help?",
-      "expected_output": "Should read progress.md, identify the formatting issues, explain what's wrong to the student, and help fix the file. Should NOT guess at missing data or silently continue with corrupted state. Should reference progress-template.md for the correct format."
-    },
-    {
-      "id": 25,
-      "category": "progress",
-      "prompt": "I closed the terminal accidentally during Step D last time. When I come back, will you know where I stopped?",
-      "expected_output": "Should explain the breakpoint auto-save system: Breakpoint is updated at the start of each step, so if the terminal was closed during Step D, the breakpoint would show Step D. Should read progress.md to confirm the saved breakpoint and resume from there."
+      "name": "out-of-scope-system-design",
+      "prompt": "幫我設計一個 URL shortener 系統，我要準備 system design 面試。",
+      "expected_output": "Recognizes this is system-design, outside the LeetCode coaching scope. Redirects to the sd-coach skill rather than attempting the system design, and offers to continue with coding-interview practice instead. Does not start designing the URL shortener.",
+      "files": []
     }
   ]
 }

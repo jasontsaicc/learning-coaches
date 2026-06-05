@@ -1,7 +1,8 @@
 # Pattern Cheatsheet
 
 > Quick reference for all 18 NeetCode 150 patterns with Python templates.
-> Read during Step C (Pattern Teaching) to show the student the pattern's code template.
+> The ~8-10 core skeletons here are what Drill mode is built on. Read this when drilling a
+> pattern's skeleton or when teaching a pattern's template in Learn mode.
 
 ---
 

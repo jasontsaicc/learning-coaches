@@ -1,8 +1,8 @@
 # Notes Template
 
-Use this template for every session's notes. Save as `notes/patternXX-problem-name.md`.
+Notes are mainly a **Learn-mode** artifact (a new pattern worth a full write-up). In Drill, you don't write notes — you just log slips to the Mistake Registry and move on. Save notes into the student's practice directory as `notes/{pattern}-{problem}.md`, never inside the skill repo.
 
-Language follows `notes_lang` setting in `progress.md` Student Info:
+Language follows the `notes_lang` setting at the top of `progress.md`:
 - `mixed` (default): Pattern 摘要 + 錯誤 in Chinese, How to Say It + code in English
 - `english`: All English
 - `chinese`: 70% Chinese / 30% English (only terms and code in English)
@@ -32,11 +32,10 @@ Language follows `notes_lang` setting in `progress.md` Student Info:
 Rules:
 - 用「你當下那題的實際數值」畫，不要抽象示意圖
 - 至少畫出 2-3 步的變化（before→after 的移動），不是單一靜態快照
-- 這張圖也是 Weekly Review 的快速喚回工具
 
 ## 💻 My Code
 
-> Copied from workspace file. Keep both brute force and optimal (if different).
+> Copied from the workspace file. Keep both brute force and optimal (if different).
 
 ```python
 # Brute Force
@@ -52,8 +51,7 @@ Rules:
 
 Rules:
 - 每題至少列出 3 個 edge cases
-- 標記你在解題時漏掉的（⚠️）
-- 這是面試扣分重災區，復習時優先看
+- 標記你在解題時漏掉的（⚠️）— 面試扣分重災區
 
 ## 🔴 我的錯誤
 
@@ -65,7 +63,6 @@ Rules:
 - 記錄每一個錯誤答案、誤解、卡住的地方
 - 「我以為」欄位必須寫出具體的錯誤理解，不能空白
 - 如果真的沒有錯誤 → 寫 "本次無錯誤"（這應該很少見）
-- 這個 section 是 Weekly Review 的優先複習目標
 
 ## 🎤 How to Say It in Interview
 
@@ -82,14 +79,11 @@ Rules:
 
 Rules:
 - Write in YOUR words, not textbook definitions
-- Must include at least one trade-off with reasoning
-- Must include at least one complexity comparison (brute vs optimal)
-- This section feeds directly into interview muscle memory
+- Include at least one trade-off with reasoning, and one brute-vs-optimal complexity comparison
 
-## Sync to Progress File
+## Sync to progress.md
 
-After writing notes:
-1. Add any new 🔴 Mistakes to the Mistake Registry in `progress.md`
-2. Add this pattern's one-liner to the One-Liner Library in `progress.md`
-3. Update Topic Mastery level based on session performance
-4. Add to Problem Log with complexity info
+After writing notes, update the three blocks in `progress.md`:
+1. Add any new 🔴 mistakes to the **Mistake Registry**
+2. Update the pattern's row in **Pattern Fluency** (cold reps, last cold pass, whether it's at bar)
+3. Overwrite the **Resume** block with where to pick up next time

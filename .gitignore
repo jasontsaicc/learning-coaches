@@ -1,2 +1,7 @@
-# Student progress (contains breakpoint state)
+# Student practice DATA — lives in a practice dir, never in the skill repo
 progress.md
+workspace/
+notes/
+
+# Per-machine Claude state (not part of the portable skill)
+.claude/

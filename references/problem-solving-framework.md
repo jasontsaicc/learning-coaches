@@ -56,6 +56,21 @@
 | Overlapping intervals | Sort + sweep |
 | Bit-level operations | Bit Manipulation |
 
+### Step 2.5: Narrate the approach in plain words (the anti-blank bridge)
+
+> This step exists because of one specific failure: you understand the problem, you even know the pattern, but you put your hands on the keyboard and your mind goes blank. That blank is not a knowledge gap. It is a missing translation layer. You are trying to jump straight from a pattern name ("two pointers") to syntax, with nothing in between.
+
+Before writing any code, hold a plain-language Q&A with yourself. Four questions cover almost every array / string / graph problem:
+
+1. **What am I computing?** Name the quantity and how it is built. ("area = width × the shorter wall")
+2. **What must I try, and what is the brute force?** Say the O(n²) / O(2^n) version out loud first, even if you will not use it. It anchors everything that follows.
+3. **How do I shrink the work / move?** What pointer moves, what goes into the map, which branch the recursion takes. And WHY that move is safe (often: "the other move can never be better, so I drop it").
+4. **When do I stop?** The exact termination condition.
+
+The answers are plain sentences. The code is just their translation. The first line falls out of question 1 or 3 almost mechanically (`l, r = 0, len(a)-1`, `seen = {}`, `dq = deque([start])`). You are no longer generating code from nothing; you are transcribing decisions you already made in words.
+
+**Drill these four questions until they are automatic.** They are the fixed checklist your brain runs the moment it hits a blank screen. The blank disappears once the first move comes from a sentence you just said, not from thin air.
+
 ### Step 3: Plan & Code (10-20 min)
 - Write pseudocode or outline steps (3-5 bullet points)
 - Implement in Python:
@@ -76,6 +91,24 @@
 
 ---
 
+## An articulable approach IS the deliverable (interview reframe)
+
+You will almost never get a problem you have already solved. So the goal is NOT "recall the exact solution." The goal is: **produce a clear, discussable approach, out loud, even when you cannot fully solve it.**
+
+Interviewers score the conversation, not just the final code:
+- Stating the brute force and its complexity = points, always. Never skip it because it feels "too dumb."
+- Naming the pattern and explaining WHY it fits = points.
+- "Here is my plan; the part I am unsure about is X" = a strong signal, not a weakness. It turns a stuck moment into a collaboration with the interviewer.
+- A correct approach with a small bug beats silence at a blank screen.
+
+So train the Step 2.5 plain-language Q&A as a standalone skill, separate from typing solutions blind. They are two different abilities:
+- **Approach articulation** → produce a discussable plan for an UNSEEN problem. Saves you when you have never met the problem (the common case).
+- **Skeleton fluency** → type a KNOWN pattern cold, fast, bug-free.
+
+Interviews need both. Practice them separately.
+
+---
+
 ## Common Mistakes by Step
 
 | Step | Mistake | Fix |
@@ -84,6 +117,7 @@
 | 1 | Miss edge cases | Use the edge case table above |
 | 2 | Pick wrong pattern | Explain WHY out loud — if you can't explain, reconsider |
 | 2 | Skip complexity estimate | Always estimate BEFORE coding |
+| 2.5 | Mind goes blank at the first line | Run the 4 plain-language questions; transcribe the answer, don't invent code |
 | 3 | Write messy code | Use helper functions for complex logic |
 | 3 | Silent coding | Practice talking while coding |
 | 4 | Skip verification | Always trace at least 1 test case |
@@ -103,6 +137,12 @@
 - "Find pair" → Hash Map
 - Why: need O(1) lookup for complement (target - current)
 - Expected: O(n) time, O(n) space
+
+**Step 2.5: Narrate in plain words**
+- What am I computing? The two indices whose values add to `target`.
+- Brute force? Check every pair, O(n²). Too slow.
+- How to shrink? As I walk the array once, for each number ask "have I already seen its complement (`target - num`)?" That needs O(1) lookup → a hash map of value→index. First line writes itself: `seen = {}`.
+- When to stop? The moment a complement is found, return; the problem promises exactly one answer.
 
 **Step 3: Plan & Code**
 ```python

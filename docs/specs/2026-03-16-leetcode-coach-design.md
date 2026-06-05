@@ -1,5 +1,10 @@
 # LeetCode Coach — Design Spec
 
+> ⚠️ **Historical (v1, 2026-03-16).** This spec describes the original teaching-pipeline design
+> (9-step A→I flow, phase gates, 7-table progress). The skill was redesigned in June 2026 into a
+> retrieval-first "interview gym" (Drill / Learn / Cold Solve / Mock modes, 3-block progress) — see
+> the current `SKILL.md` for the live design. Kept here as a record of the original rationale.
+
 > A Claude Code skill for structured LeetCode interview preparation, using Feynman + Simon learning methods.
 > Based on the SD Coach framework with LeetCode-specific adaptations.
 
