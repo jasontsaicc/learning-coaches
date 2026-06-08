@@ -12,9 +12,9 @@
 |-------|-------|
 | **Start date** | 2026-03-04 |
 | **Current phase** | Phase 2 🌐 |
-| **Current day** | Day 19 done (S26) → next: Day 20 Consistency (Vector clocks / conflict resolution) or push to Day 21-22 Replication |
-| **Language mode** | Bilingual (default 80% English / 20% 繁中) |
-| **Session count** | 26 |
+| **Current day** | Day 21-22 done (S27) → next: Day 23-24 Rate Limiting & Circuit Breaker |
+| **Language mode** | Bilingual — S27 切回繁中為主（學生英文閱讀疲勞），術語保留英文 |
+| **Session count** | 27 |
 | **Last weekly review** | 25 |
 
 ---
@@ -36,23 +36,20 @@ Rules going forward:
 
 ## Current Session (Breakpoint)
 
-⏸ **Session 27 (Day 21-22 Replication) 進行中,2026-06-04 學生下班暫停。**
+⏸ **Session 28 (Day 23-24 Rate Limiting & Circuit Breaker) 中斷 — 學生忙，做到 Step D 一半。**
 
-**Resume point:** Step C **Chunk 4 (Multi-Leader & Leaderless)** 的 Feynman Gate 尚未答。下次先補這題:
-> 「為什麼 Multi-Leader 需要 vector clock/解衝突,Single-Leader 完全不需要?」(答案核心:single leader 提供唯一寫入排序,multi-leader 同時寫同筆資料 → write conflict)
+**已完成 (Step A→C)：**
+- Step A recall: Consistency Models（Box 1, 6/4 到期）**沒完全過** — (1) 把「consistency 光譜」答成 CAP（已當場劃清界線：光譜=latency 預算/平常就在選，CAP=partition 那刻二選一）(2) W+R>N 講成「超過 N 必讀到最新」，缺「重疊(overlap)/鴿籠」關鍵字（已補）。→ Consistency Models **留 Box 1，下次(明天)再快速複習鞏固**。
+- Step C: **7 個 chunk 全過 at interview depth，一次過沒卡關**。Token Bucket（+ 自己連到 AWS T-series CPU credits 比喻 👏）、Sliding Window（boundary burst=2x）、TB vs SW（突發 vs 嚴格封頂，⚠️misconception 打通）、分散式（集中計數 3 代價: latency/bottleneck/SPOF）、Circuit Breaker（Closed/Open/Half-Open，自己連到 thundering herd 👏）、Observability（fail-open vs fail-close）。修正點: token bucket 是 reject 不是 queue（queue 是 leaky bucket）。
 
-**已完成(本次 S27 part 1):**
-- Vector Clock 5-min JIT(概念版,數學 park):記錄因果關係非時間先後,比對出「有序/並發」,衝突解法 LWW/merge/app-layer。面試一句話已給。
-- Day 21-22 Step 0 推導:學生自推「硬體會壞→多 server HA→網路/同步問題」,接上 replication=consistency 的為什麼(閉環)。
-- Chunk 2 ✅ Single-Leader(核心=唯一寫入排序,免解衝突;讀可水平擴展,寫卡單點→垂直/sharding)。
-- Chunk 3 ✅ Sync vs Async(判斷標準=「丟這筆的代價」,接 CAP 心法;async crash=data loss;半同步)。Transfer 題「自動儲存選 async」推理站得住,補上「反覆寫入自我修復」。
-- Chunk 4 講解完(Multi-Leader 跨 DC/寫衝突;Leaderless=Quorum W+R>N 出處),**Gate 待答**。
+**下次從這裡接 (Step D 進行中)：**
+- Light Code PoC: `projects/day23-rate-limiter/main.go`，骨架已編譯通過。學生**自己手打練語法**（已抓 5 個 typo: 結尾逗號/unused import/NewTokenBuctet/I++/refillAAllowed）。
+- **`Allow()` 還沒實作** — `TODO(human)` 已就位，4 步 step-by-step 講解已給完（elapsed→refill+cap→update lastRefill→take token；`:=` vs `=` 已教）。下次：學生貼上 `Allow()` 實作 + `go run .` 輸出（預期 allowed≈100, rejected≈20, refill 後≈10）→ 對答案。
+- 然後接 **Step E Simon Drill → F Interview Drill（被惡意爬蟲攻擊 API，Phase 2 /5 scorecard）→ G Notes（含 🔴Mistakes + 🎤Interview + One-Liner）→ H Progress**。
 
-**剩餘 chunk:** 5 Leader Election(Raft 直覺+腦裂 split-brain,術語已預告)、6 read replica≠strong(replication lag 誤解)、7 Observability Mini。然後 Step D/E/F/G。
+**Pending PoC(park):** Circuit Breaker PoC（Day 24 那半，可 park 到 Day 31-32 分散式 rate limiter）。Replication lag + Consistent hashing 獨立 PoC + distributed cache 完整實作 → Day 38-39。
 
-**語言:** S27 中途學生要求改 **English-primary 教學**(原 bilingual 80/20)。下次續用英文教,繁中只補卡住處。
-
-**Pending PoC(park):** Consistent hashing 獨立 Go PoC + distributed cache 完整實作 → Day 38-39。Eventual consistency PoC 亦可 park。
+**Phase 2 進度:** [21-22]✅ [23-24]教學完成待 drill 剩 [25] Observability、[26] Bloom/Gossip → **Phase 2 Gate（設計分散式 KV store, ≥3/5）**。
 
 ---
 
@@ -74,7 +71,7 @@ Rules going forward:
 | 17-18 | CAP Theorem | 🟢 | — | S24 problem-anchored。自己推出 cache stampede → replication → C vs A 矛盾。AP 選擇給出教科書級三理由(DB=truth, TTL 自癒, cache 天職是答得出)。partition 定義一開始不清→當場補。業界 CAP 對照表 + 「給錯=賠錢→CP」心法。PACELC 未深入(park)。|
 | — | Distributed Cache (design) | 🟢 | **Phase 1 Gate ✅** | S24. 問題錨定設計，3/3 PASS = Phase 1→2 Gate。涵蓋 clarify→sharding→cache-aside→client vs proxy routing→replication→CAP→thundering herd/request coalescing。完整 PoC park 到 Day 38-39。|
 | 19-20 | Consistency Models | 🟢 | — | S26 Day 19。7 chunk 全過 at interview depth。自推 strong=同步=等待=慢。光譜表(Strong/Causal/RYW/Eventual)+ Quorum W+R>N(鴿籠重疊)。Eventual≠不一致(收斂保證)misconception 打通。Vector clock(Day 20)park。Drill 4/5。|
-| 21-22 | Replication & Leader Election | ⬜ | — | |
+| 21-22 | Replication & Leader Election | 🟢 | — | S27。7 chunk 全過 at interview depth。核心因果鏈打通(硬體壞→多份→ordering→election→split-brain→lag→監控)。Single-leader=唯一 ordering 免衝突、過半票防腦裂(鴿籠)、read replica≠strong(lag) 三大點都能在設計題情境自然調用。Interview Drill 5/5 滿分。Raft 細節/Service Discovery/PoC park。|
 | 23-24 | Rate Limiting & Circuit Breaker | ⬜ | — | |
 | 25 | Observability | ⬜ | — | |
 | 26 | Bloom Filter, Gossip, etc. | ⬜ | Phase 2 Gate | |
@@ -109,6 +106,7 @@ Rules going forward:
 | 24 | Gate | **Phase 1 Gate** — Distributed Cache design (problem-anchored) | **3/3 ✅ PASS** | ✅ Think Aloud, ✅ Scope Negotiation, ✅ Used building block. 自己推出 stampede + cascading failure (Phase 2 級反應)。Improvement: clarify 時更早明確圈定範圍。Gate crashed on attempt 1. |
 | 25 | WR3 | Weekly Review (Caching/LB/CAP) | Caching 3.5/5, LB 4/5, CAP 3/5 | Caching 🔴→🟡 (補 invalidation), LB 🟡→🟢 (Weighted RR 老錯 resolved). CAP 本週剛學已衰退 (英文字母+stampede 術語掉,核心判斷在). |
 | 26 | 19 | Consistency Models (Interview Drill) | 4/5 | ✅ Think Aloud, ✅ Scope Negotiation (主動 clarify 開場), ✅ Used spectrum, ✅ Trade-off WHY (老問題改善). ❌ Operational concerns (漏 replication lag 監控收尾). 社群三功能各選對等級。|
+| 27 | 21-22 | Replication & Leader Election (Interview Drill) | **5/5 滿分** | 「設計訂單資料層,機器掛掉不掉訂單」。全 5 項過: ✅ Think Aloud, ✅ Scope(收斂 create/read order), ✅ 用 replication+election, ✅ Trade-off WHY(C→sync), ✅ Operational(補回 lag/election 監控,Day 19 弱點收斂). read-after-write 一口氣列三解法無提示。改善點: 選 C 時主動講反面代價(partition 下不了單也賠錢)。|
 
 ---
 
@@ -157,6 +155,7 @@ Rules going forward:
 | 26 | 19 | Consistency | CAP recall 說平時「拿到 CAP 三個」— P 不是選項,是「網路會不會斷」的物理事實,平時拿到的是 C+A | ❌ Unresolved |
 | 26 | 19 | Consistency | 一開始推不出「instant/strong consistency 要付什麼代價」— 缺「同步=等待=慢」因果鏈 | ✅ Resolved (S26, 白板比喻當場通,後續自己推出) |
 | 26 | 19 | Consistency | Quorum W+R>N 不懂為何保證讀到最新(卡兩次) | ✅ Resolved (S26, 杯子/位子鴿籠比喻+填空打通「重疊」) |
+| 27 | 21-22 | Replication | Gate「為何 single-leader 免解衝突」答成「leader 是 bottleneck」— 把缺點誤當成原因,沒抓到「唯一 ordering」才是答案 | ✅ Resolved (S27, 用 Tokyo/London 同時寫比喻打通,後續自己遷移到設計題) |
 
 ---
 
@@ -173,6 +172,7 @@ Rules going forward:
 | Consistent Hashing | Consistent hashing maps both keys and nodes onto a ring, so adding or removing a node only remaps about 1/N of the keys instead of nearly all — and virtual nodes keep the load evenly spread. |
 | Distributed Cache | A distributed cache spreads data across multiple nodes using consistent hashing to route keys, with replicas for availability — the key trade-off is favoring AP over CP, because the DB is the source of truth and TTL makes staleness self-healing. |
 | CAP Theorem | CAP isn't "pick 2 of 3" — without a partition you get both C and A; CAP only forces a choice during a partition: stay consistent (refuse stale answers) or stay available (serve possibly-stale), and the choice can be made per-feature. |
+| Replication & Leader Election | Replication stores data on multiple nodes to survive hardware failure; the key design question is who accepts writes — a single leader gives one total ordering so conflicts are impossible, while multi-leader/leaderless buys write availability at the cost of conflict resolution, and leader election uses majority quorum to prevent split-brain. |
 | Consistency Models | Consistency is a spectrum, not on/off — a latency budget from Strong (everyone always sees the latest, most expensive) to Eventual (stale now but guaranteed to converge, cheapest); you tune it with quorums (W+R>N forces read/write overlap) and pick per-operation by how much staleness the business tolerates. |
 
 ---
@@ -182,10 +182,10 @@ Rules going forward:
 | Field | Value |
 |-------|-------|
 | **Title** | 🌐 Distributed Architect |
-| **Current streak** | 3 🔥 (S27 2026-06-04, 連續第 3 天) |
+| **Current streak** | 4 🔥 (S27 2026-06-05, 連續第 4 天) |
 | **Longest streak** | 4 |
-| **Last session date** | 2026-06-04 |
-| **Last story summary** | Session 27 part 1 (Day 21-22 開始) — 凌晨主 DB 硬碟掛掉、小杰想把流量導去空機器。小球帶學生自推 replication 的物理必然性(硬體會壞→多份→一致性問題),打通 Single-Leader「唯一排序免解衝突」、Sync vs Async「丟這筆的代價」判斷法。學生中途切換英文教學。Chunk 4 Gate 待答,下班暫停。|
+| **Last session date** | 2026-06-05 |
+| **Last story summary** | Session 27 完成 (Day 21-22 收尾) — 補完 Chunk 4 Gate(兩個 leader=兩套 ordering=conflict),走完 Leader Election(過半票防腦裂)、read replica lag 陷阱、Observability。Interview Drill「設計訂單資料層」拿 5/5 滿分,read-after-write 三解法全列出。Day 21-22 達成 🟢。|
 
 ---
 
@@ -221,6 +221,7 @@ Rules going forward:
 | Caching & CDN | 2 | 2026-06-07 (S27 recall PASS「寫時刪 cache 不更新,避 race condition」,Box 1→2) |
 | Load Balancer | 2 | 2026-06-05 (WR3 recall 4/5 pass, Box 1→2) |
 | Consistency Models | 1 | 2026-06-04 (S26 新學,Box 1) |
+| Replication & Leader Election | 1 | 2026-06-06 (S27 新學,Box 1) |
 
 ---
 
