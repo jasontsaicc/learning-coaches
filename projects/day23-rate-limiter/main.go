@@ -22,11 +22,12 @@ func NewTokenBucket(capacity, refillRate float64) *TokenBucket {
 }
 
 func (b *TokenBucket) Allow() bool {
-	// TODO(human): implement lazy-refill + take-one-token.
-	//   1. elapsed seconds since b.lastRefill  → time.Since(b.lastRefill).Seconds()
-	//   2. b.tokens += elapsed * b.refillRate, but cap at b.capacity (use min)
-	//   3. update b.lastRefill = time.Now()
-	//   4. if b.tokens >= 1 { consume one, return true } else { return false }
+	elapsed := time.Since(b.lastRefill).Seconds()
+	b.tokens = min(b.tokens+elapsed*b.refillRate, b.capacity)
+	b.lastRefill = time.Now()
+	if b.tokens >= 1 {
+		b.tokens -= 1
+		return true}
 	return false
 }
 

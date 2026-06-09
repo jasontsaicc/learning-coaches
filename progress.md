@@ -12,9 +12,9 @@
 |-------|-------|
 | **Start date** | 2026-03-04 |
 | **Current phase** | Phase 2 🌐 |
-| **Current day** | Day 21-22 done (S27) → next: Day 23-24 Rate Limiting & Circuit Breaker |
+| **Current day** | Day 23-24 done (S28) → next: Day 25 Observability |
 | **Language mode** | Bilingual — S27 切回繁中為主（學生英文閱讀疲勞），術語保留英文 |
-| **Session count** | 27 |
+| **Session count** | 28 |
 | **Last weekly review** | 25 |
 
 ---
@@ -36,20 +36,13 @@ Rules going forward:
 
 ## Current Session (Breakpoint)
 
-⏸ **Session 28 (Day 23-24 Rate Limiting & Circuit Breaker) 中斷 — 學生忙，做到 Step D 一半。**
+✅ **無中斷 — Session 28 (Day 23-24 Rate Limiting & Circuit Breaker) 正常完成全流程 A→H。**
 
-**已完成 (Step A→C)：**
-- Step A recall: Consistency Models（Box 1, 6/4 到期）**沒完全過** — (1) 把「consistency 光譜」答成 CAP（已當場劃清界線：光譜=latency 預算/平常就在選，CAP=partition 那刻二選一）(2) W+R>N 講成「超過 N 必讀到最新」，缺「重疊(overlap)/鴿籠」關鍵字（已補）。→ Consistency Models **留 Box 1，下次(明天)再快速複習鞏固**。
-- Step C: **7 個 chunk 全過 at interview depth，一次過沒卡關**。Token Bucket（+ 自己連到 AWS T-series CPU credits 比喻 👏）、Sliding Window（boundary burst=2x）、TB vs SW（突發 vs 嚴格封頂，⚠️misconception 打通）、分散式（集中計數 3 代價: latency/bottleneck/SPOF）、Circuit Breaker（Closed/Open/Half-Open，自己連到 thundering herd 👏）、Observability（fail-open vs fail-close）。修正點: token bucket 是 reject 不是 queue（queue 是 leaky bucket）。
+**Pending PoC(park):** Circuit Breaker PoC + 分散式 Redis rate limiter → Day 31-32 Distributed Rate Limiter。Replication lag + Consistent hashing 獨立 PoC + distributed cache 完整實作 → Day 38-39。
 
-**下次從這裡接 (Step D 進行中)：**
-- Light Code PoC: `projects/day23-rate-limiter/main.go`，骨架已編譯通過。學生**自己手打練語法**（已抓 5 個 typo: 結尾逗號/unused import/NewTokenBuctet/I++/refillAAllowed）。
-- **`Allow()` 還沒實作** — `TODO(human)` 已就位，4 步 step-by-step 講解已給完（elapsed→refill+cap→update lastRefill→take token；`:=` vs `=` 已教）。下次：學生貼上 `Allow()` 實作 + `go run .` 輸出（預期 allowed≈100, rejected≈20, refill 後≈10）→ 對答案。
-- 然後接 **Step E Simon Drill → F Interview Drill（被惡意爬蟲攻擊 API，Phase 2 /5 scorecard）→ G Notes（含 🔴Mistakes + 🎤Interview + One-Liner）→ H Progress**。
+**Pending review(下次帶到):** Consistency Models（Box 1, 6/4 到期）S28 Step A recall **沒完全過** — 光譜答成 CAP（已劃界線：光譜=latency 預算 vs CAP=partition 二選一）+ W+R>N 缺「重疊/鴿籠」關鍵字（已補）。**留 Box 1，下次快速複習鞏固**。
 
-**Pending PoC(park):** Circuit Breaker PoC（Day 24 那半，可 park 到 Day 31-32 分散式 rate limiter）。Replication lag + Consistent hashing 獨立 PoC + distributed cache 完整實作 → Day 38-39。
-
-**Phase 2 進度:** [21-22]✅ [23-24]教學完成待 drill 剩 [25] Observability、[26] Bloom/Gossip → **Phase 2 Gate（設計分散式 KV store, ≥3/5）**。
+**Phase 2 進度:** [21-22]✅ [23-24]✅ 剩 [25] Observability、[26] Bloom/Gossip → **Phase 2 Gate（設計分散式 KV store, ≥3/5）**。
 
 ---
 
@@ -72,7 +65,7 @@ Rules going forward:
 | — | Distributed Cache (design) | 🟢 | **Phase 1 Gate ✅** | S24. 問題錨定設計，3/3 PASS = Phase 1→2 Gate。涵蓋 clarify→sharding→cache-aside→client vs proxy routing→replication→CAP→thundering herd/request coalescing。完整 PoC park 到 Day 38-39。|
 | 19-20 | Consistency Models | 🟢 | — | S26 Day 19。7 chunk 全過 at interview depth。自推 strong=同步=等待=慢。光譜表(Strong/Causal/RYW/Eventual)+ Quorum W+R>N(鴿籠重疊)。Eventual≠不一致(收斂保證)misconception 打通。Vector clock(Day 20)park。Drill 4/5。|
 | 21-22 | Replication & Leader Election | 🟢 | — | S27。7 chunk 全過 at interview depth。核心因果鏈打通(硬體壞→多份→ordering→election→split-brain→lag→監控)。Single-leader=唯一 ordering 免衝突、過半票防腦裂(鴿籠)、read replica≠strong(lag) 三大點都能在設計題情境自然調用。Interview Drill 5/5 滿分。Raft 細節/Service Discovery/PoC park。|
-| 23-24 | Rate Limiting & Circuit Breaker | ⬜ | — | |
+| 23-24 | Rate Limiting & Circuit Breaker | 🟢 | — | S28。7 chunk 全過 at interview depth (一次過沒卡)。Token Bucket(+自連 AWS T-series credits)、lazy refill(成本跟流量走不跟桶數)、Sliding Window 嚴格封頂、分散式 local counter 失效(N×limit→Redis 3代價)、Circuit Breaker Closed/Open/Half-Open(fail fast 防雪崩)。Light PoC 手打 lazy refill 驗證 rate=refillRate×time。Interview Drill「惡意爬蟲攻擊 API」5/5 滿分,自推 per-user+global 兩層+SW 護 DB+CB 防雪崩。lazy 概念當場補。CB PoC park。|
 | 25 | Observability | ⬜ | — | |
 | 26 | Bloom Filter, Gossip, etc. | ⬜ | Phase 2 Gate | |
 | 27-28 | URL Shortener | ⬜ | — | |
@@ -107,6 +100,7 @@ Rules going forward:
 | 25 | WR3 | Weekly Review (Caching/LB/CAP) | Caching 3.5/5, LB 4/5, CAP 3/5 | Caching 🔴→🟡 (補 invalidation), LB 🟡→🟢 (Weighted RR 老錯 resolved). CAP 本週剛學已衰退 (英文字母+stampede 術語掉,核心判斷在). |
 | 26 | 19 | Consistency Models (Interview Drill) | 4/5 | ✅ Think Aloud, ✅ Scope Negotiation (主動 clarify 開場), ✅ Used spectrum, ✅ Trade-off WHY (老問題改善). ❌ Operational concerns (漏 replication lag 監控收尾). 社群三功能各選對等級。|
 | 27 | 21-22 | Replication & Leader Election (Interview Drill) | **5/5 滿分** | 「設計訂單資料層,機器掛掉不掉訂單」。全 5 項過: ✅ Think Aloud, ✅ Scope(收斂 create/read order), ✅ 用 replication+election, ✅ Trade-off WHY(C→sync), ✅ Operational(補回 lag/election 監控,Day 19 弱點收斂). read-after-write 一口氣列三解法無提示。改善點: 選 C 時主動講反面代價(partition 下不了單也賠錢)。|
+| 28 | 23-24 | Rate Limiting & Circuit Breaker (Interview Drill) | **5/5 滿分** | 「惡意爬蟲攻擊 API,DB 1000 QPS 上限 vs 50K 攻擊」。全 5 項過: ✅ Think Aloud, ✅ Scope(開場三問+主動提 WAF), ✅ 用 Rate Limiter+Circuit Breaker 雙主角, ✅ Trade-off WHY(global→per-user 被 challenge 後自修正+SW 護硬上限), ✅ Operational(reject數/CB狀態/P99). 改善點: 第一次答常太精簡(「global 一個桶」),被追問才展開,可主動把 why+反面代價一次講完。|
 
 ---
 
@@ -156,6 +150,9 @@ Rules going forward:
 | 26 | 19 | Consistency | 一開始推不出「instant/strong consistency 要付什麼代價」— 缺「同步=等待=慢」因果鏈 | ✅ Resolved (S26, 白板比喻當場通,後續自己推出) |
 | 26 | 19 | Consistency | Quorum W+R>N 不懂為何保證讀到最新(卡兩次) | ✅ Resolved (S26, 杯子/位子鴿籠比喻+填空打通「重疊」) |
 | 27 | 21-22 | Replication | Gate「為何 single-leader 免解衝突」答成「leader 是 bottleneck」— 把缺點誤當成原因,沒抓到「唯一 ordering」才是答案 | ✅ Resolved (S27, 用 Tokyo/London 同時寫比喻打通,後續自己遷移到設計題) |
+| 28 | 23-24 | Rate Limiting | 不清楚 lazy 是什麼 — 沒有 lazy/eager(敲門才算 vs 背景一直算)這組 CS 概念 | ✅ Resolved (S28, 集點卡比喻+「成本跟流量走不跟桶數走」打通,後續 drill 自己答出 N×limit) |
+| 28 | 23-24 | Rate Limiting | Interview Drill 選 global 一個桶 — 只想「保護 DB」漏「公平性」,沒想到爬蟲會吸乾全局桶餓死正常 user | ✅ Resolved (S28, 被 challenge 後自己推到 per-user+global 兩層) |
+| 28 | 23-24 | Circuit Breaker | 概念懂但講不出三狀態術語名 (Closed/Open/Half-Open) | ✅ Resolved (S28, 補上術語對照表,白話對應正式名稱) |
 
 ---
 
@@ -174,6 +171,7 @@ Rules going forward:
 | CAP Theorem | CAP isn't "pick 2 of 3" — without a partition you get both C and A; CAP only forces a choice during a partition: stay consistent (refuse stale answers) or stay available (serve possibly-stale), and the choice can be made per-feature. |
 | Replication & Leader Election | Replication stores data on multiple nodes to survive hardware failure; the key design question is who accepts writes — a single leader gives one total ordering so conflicts are impossible, while multi-leader/leaderless buys write availability at the cost of conflict resolution, and leader election uses majority quorum to prevent split-brain. |
 | Consistency Models | Consistency is a spectrum, not on/off — a latency budget from Strong (everyone always sees the latest, most expensive) to Eventual (stale now but guaranteed to converge, cheapest); you tune it with quorums (W+R>N forces read/write overlap) and pick per-operation by how much staleness the business tolerates. |
+| Rate Limiting & Circuit Breaker | Rate limiting protects the backend and ensures fairness — Token Bucket allows bursts while Sliding Window strictly caps, and you layer per-user limits for fairness plus a global cap to protect downstream; a Circuit Breaker complements it on outbound calls by failing fast when a dependency is down (Closed→Open→Half-Open) to prevent cascading failure. |
 
 ---
 
@@ -182,10 +180,10 @@ Rules going forward:
 | Field | Value |
 |-------|-------|
 | **Title** | 🌐 Distributed Architect |
-| **Current streak** | 4 🔥 (S27 2026-06-05, 連續第 4 天) |
+| **Current streak** | 1 🔥 (S28 2026-06-09, 距上次 6/5 隔 4 天 streak 重置) |
 | **Longest streak** | 4 |
-| **Last session date** | 2026-06-05 |
-| **Last story summary** | Session 27 完成 (Day 21-22 收尾) — 補完 Chunk 4 Gate(兩個 leader=兩套 ordering=conflict),走完 Leader Election(過半票防腦裂)、read replica lag 陷阱、Observability。Interview Drill「設計訂單資料層」拿 5/5 滿分,read-after-write 三解法全列出。Day 21-22 達成 🟢。|
+| **Last session date** | 2026-06-09 |
+| **Last story summary** | Session 28 完成 (Day 23-24) — Karen 衝進來說 API 被惡意爬蟲打爆、DB 快撐不住。學生手打 token bucket lazy refill PoC(驗證 rate=refillRate×time),Simon Drill 3/3 無提示答出分散式 N×limit 陷阱。Interview Drill「設計 API 防護層」拿 5/5,從 global 一個桶被 challenge 後自推 per-user+global 兩層+Sliding Window 護 DB 硬上限+Circuit Breaker 防雪崩。Day 23-24 達成 🟢。|
 
 ---
 
@@ -220,8 +218,9 @@ Rules going forward:
 | Distributed Cache + CAP | 2 | 2026-06-06 (S26 recall pass「partition 才選 CP/AP」,Box 1→2) |
 | Caching & CDN | 2 | 2026-06-07 (S27 recall PASS「寫時刪 cache 不更新,避 race condition」,Box 1→2) |
 | Load Balancer | 2 | 2026-06-05 (WR3 recall 4/5 pass, Box 1→2) |
-| Consistency Models | 1 | 2026-06-04 (S26 新學,Box 1) |
+| Consistency Models | 1 | 2026-06-04 (S26 新學,Box 1。S28 recall 未完全過,留 Box 1) |
 | Replication & Leader Election | 1 | 2026-06-06 (S27 新學,Box 1) |
+| Rate Limiting & Circuit Breaker | 1 | 2026-06-10 (S28 新學,Box 1) |
 
 ---
 
