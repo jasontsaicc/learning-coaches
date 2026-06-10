@@ -12,23 +12,33 @@
 |-------|-------|
 | **Start date** | 2026-03-17 |
 | **Current phase** | Phase 0 |
-| **Current pattern** | Two Pointers |
+| **Current pattern** | Stack |
 | **Language** | Python |
-| **Session count** | 7 |
+| **Session count** | 11 |
 | **Last weekly review** | — |
-| **Problems solved** | 7 / 136 |
+| **Problems solved** | 9 / 136 |
 
 ---
 
 ## Current Session (Breakpoint)
 
-> 🔄 Session 8 (2026-05-28) 進行中
-> Problem: Sliding Window Maximum (#239) **Hard** — jump-to (讀書會分享)
-> Current step: H 完成 (Notes → notes/pattern16)；F 只過 Q1 (Recall: O(n) amortized)，Q2 (改成 min) / Q3 (constraint) + G Mock 待補
+> ✅ Session 11 完成 (2026-06-10) — Evaluate Reverse Polish Notation (#150) 拿下
+> Pattern: **Stack** (Phase 0 最後一個 pattern, Phase 0 Gate 前)
+> Problem: Evaluate RPN (#150) Medium — Stack 第 2 題, **Drill 冷寫** ✅ DONE
 >
-> ⏸️ Queued: Permutation in String (#567) workspace/15 (前一場 05-22 做到 Step E)；Best Time to Buy and Sell Stock (#121) Sliding Window 第 1 題；Longest Substring (#3) workspace/14 已有 brute force
-> ⏸️ Weekly Review 到期 (8 - 0 ≥ 7)，優先排
-> ⏸️ Parked: Trapping Rain Water (#42) F Q2/Q3 + G Mock；Container With Most Water (#11) F Q2/G/H；Two Sum II (#167) Step E bug
+> ✅ Drill 冷寫全程自己寫 (workspace/18)，5/5 tests 全綠。4 個 bug 全自己 debug:
+>    少 `)` (括號成對) / 忘 return (第4次, 症狀=None) / return 縮排進迴圈 (只處理第一個 token) / `//` floor vs `int(l/r)` truncate (除法向0取整地雷)
+> ✅ 複雜度自推 (修正後): Time O(n) / Space O(n) — 教訓「複雜度 = 做幾次 × 每次多貴」, 學生原本漏掉「做幾次=n」
+> ✅ Feynman Gate **全過**:
+>    - Recall: 進去是(左,右)、FILO 出來鏡像成(右,左) → 先 pop = 右運算元
+>    - 設計選擇: 白名單判運算子 (有限固定) 勝過黑名單 isdigit (負數 "-132".isdigit()=False 會誤判)
+>    - 變題 (input 不保證合法): ["1","+"] 第二次 pop 空 stack → IndexError; 面試要主動講假設 / len>=2 檢查
+>
+> ⏭️ Next: Stack 升 🟢 條件 = 冷做 #20 skeleton 0-bug + 一題 Cold Solve; 或續做 Stack 第 3 題 (Min Stack #155 / Daily Temperatures #739)
+>
+> ⏸️ Weekly Review 嚴重到期 (≥11 session 未做)，建議下次優先補
+> ⏸️ Parked Feynman 債務 (Transfer Q2/Q3 未收尾): #239 Sliding Window Maximum, #42 Trapping Rain Water, #11 Container With Most Water
+> ⏸️ Queued: Sliding Window 基礎題 #121 / #3 (workspace/14 有 brute) / #567 (workspace/15 到 Step E)
 
 ---
 
@@ -39,7 +49,7 @@
 | Arrays & Hashing | 5/11 | 🟡 | — | Frequency Counter + Bucket Sort + Length-Prefix + HashSet per row/col/box + Sequence Start Detection learned. #238 (Product of Array Except Self) skipped, revisit later |
 | Two Pointers | 2.5/5 | 🟡 | — | + #42 Trapping Rain Water (Hard) 三層算法全綠 (Brute/DP/Two Pointers 18/18) — 加分: 自抓 6 個 bug 全修對；扣分: Q2/Q3 Feynman 沒自答 (看答案)。升 🟢 條件: Day 3 完成 F + G |
 | Sliding Window | 1/5 | 🟡 | — | #239 Sliding Window Maximum (Hard, jump-to 跳關做最難的第 6 題): Brute O(n·k) + Optimal Monotonic Deque O(n) 都親手寫過 12/12 tests; Feynman 只過 Q1 (O(n) amortized 講得出); Q2/Q3 + Mock 待補。基礎 5 題 (#121, #3, #424, #567...) 尚未做 |
-| Stack | 0/6 | ⬜ | Phase 0 Gate | |
+| Stack | 2/6 | 🟡 | Phase 0 Gate | #20 Valid Parentheses ✅ + #150 Evaluate RPN ✅ (Drill 冷寫 5/5, 4 bug 自 debug, Feynman 全過: 進左右/出右左鏡像, 白名單勝 isdigit, pop空stack→IndexError). 升 🟢 條件: 下次冷做 #20 skeleton 0-bug + 一題 Cold Solve |
 | Binary Search | 0/6 | ⬜ | — | |
 | Linked List | 0/9 | ⬜ | — | |
 | Trees | 0/13 | ⬜ | — | |
@@ -72,6 +82,8 @@
 | 7 (Day 1) | Container With Most Water (11) | Medium | Two Pointers (Converging + Greedy) | 🟡 進行中 | O(n²) / O(1) | O(n) / O(1) | Brute + Optimal 都自己寫出 + 4/4 tests pass; Feynman Q1 pass (講出 Greedy proof + prune); Q2 + Mock + Notes 留 Day 2; jump-to (NeetCode 150) |
 | 7 (Day 2) | Trapping Rain Water (42) | **Hard** | Two Pointers + Bounded Computation | ✅ 主體完成 | O(n²) / O(1) | **O(n) / O(1)** ⭐ | 三層階梯全綠 (Brute 6/6, DP 6/6, Two Pointers 6/6 = 18/18); Feynman Q1 pass (Recall), Q2/Q3 看答案 (🟡); Mock + 變題練習留 Day 3; jump-to (NeetCode 150) |
 | 8 | Sliding Window Maximum (239) | **Hard** | Sliding Window + Monotonic Deque | 🟡 主體完成 | O(n·k) / O(k) | **O(n) / O(k)** ⭐ | Brute + Optimal 都親手寫 (12/12 tests pass); Feynman Q1 pass (O(n) amortized 自己講出), Q2/Q3 + Mock 待補; 9 個疑問全解 (deque/負索引/return result/i-k 邊界); 4 個語法錯 (num/windows/in/import); 突破點: 用 8 格動畫終於「看到」deque; jump-to (讀書會) |
+| 9-10 | Valid Parentheses (20) | Easy | Stack (FILO 配對) | ✅ | — | O(n) / O(n) | Stack 解親手寫 (workspace/17, 8/8 pass); 複雜度自推對; **Feynman Gate 全過** (Recall FILO↔巢狀 + Transfer 單型別退化counter + Constraint stream→O(n)下限); 3 個 code 錯記入 Registry (分支反/變數名手滑/return寫死) |
+| 11 | Evaluate RPN (150) | Medium | Stack (FILO — 最近兩運算元) | ✅ | — | O(n) / O(n) | **Drill 冷寫** 5/5 (workspace/18); 4 bug 自 debug (少`)`/忘return第4次/return縮排進迴圈/`//`floor vs `int(l/r)`truncate); 複雜度自推 (修正後 O(n), 教訓「做幾次×每次多貴」); **Feynman Gate 全過** (進左右出右左鏡像 / 白名單勝isdigit負數陷阱 / pop空stack→IndexError) |
 
 ---
 
@@ -130,6 +142,13 @@
 | 8 | Sliding Window Maximum | Sliding Window + Deque | 以為窗戶每滑一格就「直接 popleft 最左」 | ✅ Resolved (S8) - 只有真過期 (dq[0]<=i-k) 才踢, deque≠window, 最左常是答案 |
 | 8 | Sliding Window Maximum | Sliding Window + Deque | 窗戶 [1,3,-1] 以為 -1 也可丟 (新+小) | ✅ Resolved (S8) - 規則單方向: 只有「舊+小」可丟 |
 | 8 | Sliding Window Maximum | Sliding Window + Deque | `max(current_max, window)` 跨窗戶累積 vs 單窗戶獨立 max | ✅ Resolved (S8) |
+| 9 | Valid Parentheses | Stack | 分支動作放反：開括號該 `append`、閉括號該比對+`pop`，一度寫反 | ✅ Resolved (S9) |
+| 9 | Valid Parentheses | Stack | 變數名手滑 `pairs`→`paris`→`pairss` (連三次) — **老毛病: 變數名逐字檢查** | 🟡 Recurring - 同 num/nums, window/windows 家族 |
+| 9 | Valid Parentheses | Stack | `return` 寫死 `True`/`False` 來回反，正解是 `return not stack`（掃完空才有效）| ✅ Resolved (S9) |
+| 11 | Evaluate RPN | Stack | `stack.append(int(token)` 少一個 `)` — append 的括號沒關 → SyntaxError | ✅ Resolved (S11) - 教訓: 從外往內寫, 打 `(` 先補 `)` |
+| 11 | Evaluate RPN | Stack | 忘記 `return`（**第 4 次**, 同 Palindrome×2 + Container）— 症狀: 答案全 `None` | 🟡 Recurring - 反射: 看到 None 先查 return |
+| 11 | Evaluate RPN | Stack | `return stack.pop()` 縮排進 `for` 迴圈內 → 只處理第一個 token 就回傳 | ✅ Resolved (S11) - **同 #42 縮排決定 block**; 症狀「只處理第一元素」先查縮排 |
+| 11 | Evaluate RPN | Stack | 除法用 `l // r`（floor 向負無窮）→ 負數錯; 正解 `int(l / r)`（truncate 向 0） | ✅ Resolved (S11) - **新坑**: `//`≠砍小數, 是 floor; 面試常考 |
 
 ---
 
@@ -147,6 +166,8 @@
 | Two Pointers + Bounded Computation (Two Pointers) | 每位置水量 = `min(left_max, right_max) - h[i]`；左右指標逼近，每輪動較矮側並算水 — 較高側保證有牆，較矮側水量瓶頸鎖在自己的 max，現在就能算 — O(n) 時間 O(1) 空間 |
 | Prefix Maximum DP (通用) | 邊掃邊記累積 max（或 min/sum/count），下一格直接從上一格累積 + 自己這格推出來 — 把 O(n²) 重複計算壓到 O(n) — 是 DP 最簡形式 |
 | Monotonic Deque (Sliding Window) | deque 存「可能當 max 的候選 index」呈遞減排列；新元素進場時把右邊比它小的 pop 掉、過期的從左 popleft，最左永遠是當前窗戶 max；每元素一生進出各一次 → O(n) 攤還 |
+| Stack 配對 (Stack) | 巢狀結構「最後開的最先關」= FILO；開括號 push、閉括號比對 stack 頂端配不配 (不配/空→False) 再 pop，掃完 stack 空才有效；計數器只管數量會漏型別+順序 (`([)]`)，所以要 Stack — O(n) 時間 O(n) 空間 |
+| Stack 後綴求值 / RPN (Stack) | 數字 push 進 stack、運算子來就 pop 兩個 (先 pop=右、後 pop=左, FILO 鏡像) 算完 push 回去，掃完 stack 剩一個=答案；判運算子用白名單 (4 個固定) 別用 isdigit (負數會誤判)；除法 `int(l/r)` 向 0 取整非 `//` — O(n) 時間 O(n) 空間 |
 
 ---
 
