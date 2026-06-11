@@ -16,7 +16,7 @@
 | **Language** | Python |
 | **Session count** | 11 |
 | **Last weekly review** | — |
-| **Problems solved** | 9 / 136 |
+| **Problems solved** | 10 / 136 |
 
 ---
 
@@ -49,7 +49,7 @@
 | Arrays & Hashing | 5/11 | 🟡 | — | Frequency Counter + Bucket Sort + Length-Prefix + HashSet per row/col/box + Sequence Start Detection learned. #238 (Product of Array Except Self) skipped, revisit later |
 | Two Pointers | 2.5/5 | 🟡 | — | + #42 Trapping Rain Water (Hard) 三層算法全綠 (Brute/DP/Two Pointers 18/18) — 加分: 自抓 6 個 bug 全修對；扣分: Q2/Q3 Feynman 沒自答 (看答案)。升 🟢 條件: Day 3 完成 F + G |
 | Sliding Window | 1/5 | 🟡 | — | #239 Sliding Window Maximum (Hard, jump-to 跳關做最難的第 6 題): Brute O(n·k) + Optimal Monotonic Deque O(n) 都親手寫過 12/12 tests; Feynman 只過 Q1 (O(n) amortized 講得出); Q2/Q3 + Mock 待補。基礎 5 題 (#121, #3, #424, #567...) 尚未做 |
-| Stack | 2/6 | 🟡 | Phase 0 Gate | #20 Valid Parentheses ✅ + #150 Evaluate RPN ✅ (Drill 冷寫 5/5, 4 bug 自 debug, Feynman 全過: 進左右/出右左鏡像, 白名單勝 isdigit, pop空stack→IndexError). 升 🟢 條件: 下次冷做 #20 skeleton 0-bug + 一題 Cold Solve |
+| Stack | 3/6 | 🟡 | Phase 0 Gate | #20 ✅ + #150 ✅ + #155 Min Stack ✅ (分享會速成，自己寫出 [val,min] 雙層結構，Feynman 一句話通過). 升 🟢 條件: 冷做 #20 skeleton 0-bug + 一題 Cold Solve |
 | Binary Search | 0/6 | ⬜ | — | |
 | Linked List | 0/9 | ⬜ | — | |
 | Trees | 0/13 | ⬜ | — | |
@@ -73,6 +73,7 @@
 
 | Session | Problem | Difficulty | Pattern | Solved? | Brute | Optimal | Notes |
 |---------|---------|-----------|---------|---------|-------|---------|-------|
+| 12 | Min Stack (155) | Medium | Stack | ✅ | — | O(1) all ops / O(n) space | 分享會前速成；自己寫出完整 code；理解 [val,min] 雙層結構、self、stack[-1][0/1]；Feynman: 每個元素進來時記錄當下 min |
 | 1 | Valid Anagram (242) | Easy | Arrays & Hashing | ✅ | O(n log n) / O(n) | O(n) / O(1) | Feynman Gate pass, Drill 3/3 |
 | 2 | Top K Frequent Elements (347) | Medium | Arrays & Hashing | ✅ | O(n log n) / O(n) | O(n) / O(n) | Feynman Gate pass, Mock skipped (no time), jump-to |
 | 3 | Encode and Decode Strings (271) | Medium | Arrays & Hashing | ✅ | — | O(n) / O(n) | Feynman Gate pass, Mock skipped, jump-to (study group) |
