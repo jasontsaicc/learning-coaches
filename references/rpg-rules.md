@@ -59,7 +59,7 @@ Same triggers as Progress Report: on-demand ("my progress"), Phase Gate pass, We
 
 **Full version includes:** progress bar, title, streak 🔥, skills heatmap by phase, achievements count (latest + next closest), battle stats (gate pass rate, avg score, mistakes, one-liners), strength/focus areas, 1-line story position.
 
-**Abbreviated version (end of every session):** title, streak, score, new achievements or next closest.
+**Abbreviated version (session end, only when something changed):** title, streak, score, new achievements or next closest. If nothing changed this session (no new achievement, no streak/title change), skip it — printed every time, it becomes wallpaper.
 
 **Phase Gate celebration:** ASCII celebration frame with new title, 小球's personalized reaction, key stats, unlocked achievements, next phase preview. AI generates content freely — format is a guide, not a template.
 
@@ -67,15 +67,21 @@ Same triggers as Progress Report: on-demand ("my progress"), Phase Gate pass, We
 
 ## Streak Tracking
 
-- Streak counts by DAY, not by session. Multiple sessions on the same day = 1 day.
-- Increment streak if `last_session_date` is yesterday or today.
-- Reset streak to 1 if gap > 1 day.
-- Update `longest_streak` if current exceeds it.
+Streak counts by WEEK, not by day. The student's real cadence is short sessions in work-gaps with 1-2 week breaks; a daily streak punishes that rhythm instead of rewarding it. A weekly streak rewards the habit that actually matters: showing up regularly over months.
+
+- Unit: calendar weeks (Monday to Sunday). A week with 1+ session is an **active week**.
+- If the week of `last_session_date` is this week or last week → streak continues (increment only when entering a new active week).
+- A full calendar week with zero sessions in between → reset streak to 1 (this week).
+- Update `longest_streak` (in weeks) if current exceeds it.
 - Streak achievements (S1, S3) checked at Step H.
 
 ---
 
 ## Old Format Migration
+
+**Day-based streak → weekly streak:** if the RPG Profile streak predates the weekly rule (any streak recorded before this rule existed, or a reset note citing a multi-day gap), convert: current streak = 1 (this week), `longest_streak` keeps its historical value annotated "(days, pre-weekly)". Don't shame the conversion — mention it once, move on.
+
+**Review Schedule backfill:** scan Topic Mastery for 🟡/🟢 topics missing from the Review Schedule and add each to Box 1 (Next Review = tomorrow). This re-enrolls topics that finished their days before auto-enroll existed — without it, they stay outside the spaced-repetition loop forever.
 
 If `progress.md` exists but lacks RPG Profile or Achievements sections:
 - Add RPG Profile with defaults (Title based on current phase, streak = 1)

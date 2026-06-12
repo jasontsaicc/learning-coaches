@@ -31,6 +31,16 @@
 
 ---
 
+## 🎚️ Learning Mode
+
+> Per-student overrides of skill defaults, written when the student and 小球 agree on a different way of working
+> (depth, pacing, PoC tiers, mode preferences). Read in Step A; honor over skill defaults.
+> Interview-depth ceiling and problem-anchored Phase 2 are already skill defaults and don't need an entry here.
+
+*(empty — no overrides)*
+
+---
+
 ## Curiosity Branches
 
 > Tracks student questions that diverge from the curriculum. ⏸ Parked branches are revisited in Step A when the topic becomes relevant.
@@ -51,8 +61,8 @@
 | **Company** | ScaleUp |
 | **Story phase** | Phase 0 — First Week |
 | **Last story summary** | (first session) |
-| **Current streak** | 0 |
-| **Longest streak** | 0 |
+| **Current streak** | 0 weeks |
+| **Longest streak** | 0 weeks |
 | **Last session date** | YYYY-MM-DD |
 
 ---
@@ -125,6 +135,8 @@
 ## Review Schedule (Leitner Box)
 
 > Spaced repetition for completed topics. 小球 checks this in Step A — if a topic is due, do a 2-min quick recall before new content.
+> **Auto-enroll:** every topic reaching 🟡/🟢 enters Box 1 at Step H, no exceptions. Step H also backfills
+> any 🟡/🟢 topic missing from this table — a topic outside the schedule is a topic the system agreed to forget.
 
 | Topic | Mastery | Last Review | Box | Next Review |
 |-------|---------|-------------|-----|-------------|

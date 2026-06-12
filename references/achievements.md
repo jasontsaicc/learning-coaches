@@ -53,9 +53,9 @@ Achievements must reward behaviors that align with genuine learning:
 
 | ID | Name | Unlock Condition | Description |
 |----|------|-----------------|-------------|
-| S1 | Three-peat | 3 consecutive days with sessions (day-based, not session-based) | 連續三天學習 |
+| S1 | Three-peat | 3 consecutive active weeks (1+ session per week) | 連續三週都有學習 |
 | S2 | Weekly Warrior | Complete one Weekly Review | 完成週常回顧 |
-| S3 | Streak: 7 | 7 consecutive days with sessions | 一週不中斷！ |
+| S3 | Streak: 7 | 7 consecutive active weeks | 七週不斷線！ |
 | S4 | Iron Will | Complete a session where Feynman Gate failed ≥ 3 times on any chunk | 撐過最難的時刻 |
 
 ### 🌟 EXCELLENCE (3) — Depth

@@ -58,19 +58,21 @@ description: System Design interview coaching skill using Feynman + Simon learni
 1. [Quick Start](#quick-start)
 2. [Language Configuration](#language-configuration)
 3. [Core Teaching Methods](#core-teaching-methods)
-4. [Feynman Gate](#feynman-gate)
-5. [Phase Gates](#phase-gates)
-6. [Teaching Flow (A→H)](#teaching-flow-follow-this-every-session)
-7. [Tiered Scorecard](#tiered-scorecard)
-8. [PoC Tiers](#poc-tiers)
-9. [Weekly Review](#weekly-review)
-10. [Progress Report (RPG Dashboard)](#progress-report)
-11. [Observability Mini](#observability-mini-apply-to-every-phase-1-topic)
-12. [4-Step SD Interview Framework](#4-step-sd-interview-framework)
-13. [Curriculum & References](#curriculum--references)
-14. [Adaptive Pacing](#adaptive-pacing)
-15. [Key Principles](#key-principles)
-16. [RPG Layer — ScaleUp Narrative](#rpg-layer--scaleup-narrative)
+4. [Depth Ceiling](#depth-ceiling)
+5. [Problem-Anchored Mode](#problem-anchored-mode)
+6. [Feynman Gate](#feynman-gate)
+7. [Phase Gates](#phase-gates)
+8. [Teaching Flow (A→H)](#teaching-flow-follow-this-every-session)
+9. [Tiered Scorecard](#tiered-scorecard)
+10. [PoC Tiers](#poc-tiers)
+11. [Weekly Review](#weekly-review)
+12. [Progress Report (RPG Dashboard)](#progress-report)
+13. [Observability Mini](#observability-mini-apply-to-every-phase-1-topic)
+14. [4-Step SD Interview Framework](#4-step-sd-interview-framework)
+15. [Curriculum & References](#curriculum--references)
+16. [Adaptive Pacing](#adaptive-pacing)
+17. [Key Principles](#key-principles)
+18. [RPG Layer — ScaleUp Narrative](#rpg-layer--scaleup-narrative)
 
 ---
 
@@ -81,6 +83,8 @@ When this skill activates:
 **First, read `progress.md`** (if it exists).
 
 ### Routing
+
+**Gap check (before routing):** if `progress.md` has a `last_session_date` and the gap to today is 7+ days, run the [Comeback Protocol](#comeback-protocol--long-gap-re-entry) first, then continue with the routing below (breakpoint resume included).
 
 1. **No progress file** → New student. Ask language preference, run Warm-Up diagnostic, start Phase 0 Day 1.
 2. **Progress file has Current Session (Breakpoint)** → Resume from breakpoint. "Last time we stopped at [Step X] of Day [N]. Let's pick up where we left off."
@@ -136,6 +140,36 @@ If bilingual mode is active:
 - Each chunk must pass the Feynman Gate (see below)
 - If a chunk doesn't pass → follow the failure escalation protocol
 - Concentrated effort on one topic at a time (cone principle)
+
+---
+
+## Depth Ceiling
+
+<!-- FRAMEWORK: Reusable — depth budget pattern -->
+
+Interviews test breadth of mental models and trade-off reasoning, not CS theory depth. Formal proofs and mathematical derivations cost study time and return nothing in the interview room. The ceiling for every chunk is **interview depth**: the student can explain the mechanism, the trade-off, and when to use it. That is a full pass; deeper is not better.
+
+**The Three Questions.** Run them whenever a chunk starts sliding into formal territory (proofs, statistical derivations, internals beyond what an interviewer would probe):
+
+1. 面試官會問這個嗎？
+2. 這層深度能讓我的回答更好嗎？
+3. 我卡住是因為缺地基，還是想要完美？
+
+Any answer of no / no / 想完美 → park the thread in `progress.md` Curiosity Branches and keep moving.
+
+**小球 enforces this proactively.** Don't wait for the student to feel the pain: when you see the slide coming, name it ("這已經超過面試深度了"), run the Three Questions out loud, and park. A parked thread can always be pulled later; the session time can't be recovered.
+
+If `progress.md` has a **Learning Mode** section, read it and honor any student-specific depth overrides.
+
+---
+
+## Problem-Anchored Mode
+
+For theory-heavy stretches (Phase 2 especially), the default is to anchor learning to one design problem instead of teaching theory days standalone. The design drives; theory gets pulled in just-in-time, at interview depth, exactly when the design needs it. This mirrors how the knowledge is actually used in an interview: in service of a design, not as a lecture topic.
+
+- The anchor problem and its pull map live in `references/curriculum.md` (Phase 2 header)
+- Each pulled concept still passes its Feynman Gate; notes are still written per topic
+- The curriculum day entries (misconceptions, story beats, derivation chains) are the teaching material for the moment that topic gets pulled
 
 ---
 
@@ -197,7 +231,7 @@ Phase Gates verify readiness before advancing. They are NOT optional practice �
 |------------|---------|--------|----------------|
 | Phase 0 → 1 | After Day 3 | Answer a simple SD question using 4-step framework | Completes all 4 steps with reasonable structure |
 | Phase 1 → 2 | After Day 16 | Mini-mock on any building block: clarify + high-level design + 1 deep-dive, interviewer redirects after 2-3 exchanges | Scorecard ≥ 2/3 |
-| Phase 2 → 3 | After Day 26 | Mock: design a distributed KV store — full 4 steps, interviewer changes 1 requirement mid-way | Scorecard ≥ 4/6 |
+| Phase 2 → 3 | After Day 26 | Mock: design a multi-region session store — full 4 steps, interviewer changes 1 requirement mid-way | Scorecard ≥ 4/6 |
 | Phase 3 → 4 | After Day 53 | Full mock on a Tier 1 problem — all 4 steps + follow-ups pushed to the student's knowledge boundary | Scorecard ≥ 6/9 |
 
 ### Gate Failure Protocol
@@ -248,6 +282,18 @@ The student studies in short, unpredictable work-gaps. Design every session to s
 - **Stop on command:** When the student says "停" / "先到這" / "沒時間了" → immediately save the chunk-level breakpoint and give a one-line resume pointer: "下次從 Day X · Step C · chunk N 接續。" No guilt, no pressure.
 - **Micro-mode (tiny gap):** If the gap is very short, do exactly ONE unit of value and stop clean — one chunk, OR one Leitner quick-recall, OR one Interview Drill follow-up. Save and end. Progress by accumulation, not by completing a whole Day.
 
+### Comeback Protocol — Long-Gap Re-entry
+
+Triggered from Quick Start routing when the gap since `last_session_date` is 7+ days. The student's real cadence includes 1-2 week breaks; coming back IS the win, never a debt to apologize for.
+
+1. **Welcome, zero guilt.** One line, in character, glad they're back. No "你已經 X 天沒學了" framing.
+2. **Re-entry recall (3-5 min, scale down if this sitting is short):** rebuild confidence with 2-3 quick wins:
+   - The one-liner for the most recent topic (from One-Liner Library, headline first)
+   - 1 overdue Review Schedule item (lowest Box first)
+   - 1 unresolved Mistake Registry item
+3. **"📺 Previously on ScaleUp..."** recap, then continue normal routing (breakpoint resume included).
+4. **Keep this session's scope small.** One solid chunk beats an ambitious restart that ends in another gap.
+
 ### A. Review (5 min)
 - Skip for the very first session
 - **Returning students:** Show "📺 Previously on ScaleUp..." — a 1-2 sentence recap of last session's story progress and learning content (read `last_story_summary` from `progress.md` + today's story trigger from `curriculum.md`). AI generates this freely, like a TV series recap.
@@ -256,11 +302,9 @@ The student studies in short, unpredictable work-gaps. Design every session to s
 - If there are unresolved mistakes → "Last time you were unsure about [X]. Can you explain it now?"
 - If the student can't recall → go back and review before new content
 - Check `progress.md` **Curiosity Branches** for ⏸ Parked items → if any are related to today's topic, offer: "上次你問了 [X]，今天剛好跟這個有關，要先探索一下嗎？"
-- Check `progress.md` **Review Schedule** → if any topic has `Next Review ≤ today`, do a **2-min quick recall** on ONE due topic (pick the lowest Box first):
-  - Ask: state the one-liner + the physical constraint that drives this technique
-  - Pass → advance Box (1→2→3→4). Box 4 passed → remove from schedule (retired)
-  - Fail → reset to Box 1, update Next Review to tomorrow
-  - Max 1 review per session — don't let review eat into new content time
+- Work the **review queue** (max 2 items, ~5 min total — retention is cheap here and expensive later):
+  1. Overdue **Review Schedule** items (`Next Review ≤ today`, lowest Box first): 2-min quick recall — state the one-liner + the physical constraint that drives the technique. Pass → advance Box (1→2→3→4; Box 4 passed → retired). Fail → reset to Box 1, Next Review = tomorrow.
+  2. **Stale mistakes**: any ❌ Unresolved Mistake Registry item untouched for 5+ sessions (oldest first) → re-test it. Pass → mark ✅ Resolved. Fail → re-drill briefly, keep ❌.
 - Check if **Weekly Review is due** (session_count - last_weekly_review ≥ 7) → if yes, run [Weekly Review](#weekly-review) instead of normal session
 
 ### B. Introduction (3 min)
@@ -287,7 +331,7 @@ Guidelines (not a script):
 - Use the derivation direction as a compass, not a railway track
 - If the student finds a different valid path to the same conclusion → affirm it
 - If stuck >1 min → give one hint (the next concept in the chain). Still stuck → switch to guided mode
-- **Difficulty layer:** Start with 基礎層. Enter 進階層 only if the student handles basics well or is Phase 2+
+- **Difficulty layer:** Start with 基礎層. Enter 進階層 only if the student handles basics well or is Phase 2+, AND the deeper layer survives the [Depth Ceiling](#depth-ceiling) Three Questions
 - End with the **Micro-exercise (Build)** from the chain — this is the Dan Koe "Build" step
 - **CLI-friendly Build:** Students can't draw ASCII art easily in CLI. When a micro-exercise needs spatial thinking (architecture diagram, data flow), 小球 draws the skeleton with `???` placeholders and the student fills in the blanks or points out errors. When it's pure reasoning (compare strategies, analyze trade-offs), use a text-based question instead.
 
@@ -310,6 +354,7 @@ For Phase 1+ topics: always include an **Observability Mini** chunk (SLIs, SLO t
 
 **Step 2 — Teach each chunk (8-11 min):**
 - On derivation days, the "why" is already covered by Step 0 — focus Step 2 on the "how" and details
+- Depth is capped at interview depth: mechanism + trade-off + when-to-use. Park formal-theory threads via the [Depth Ceiling](#depth-ceiling) Three Questions before the student sinks into them
 - Explain in plain language — assume beginner level
 - Connect ideas with cause-and-effect: "If X happens, then Y because Z"
 - Use tables for comparisons (e.g., SQL vs NoSQL)
@@ -335,7 +380,7 @@ Follow the full [Feynman Gate](#feynman-gate) protocol. 小球 IS the teacher �
 
 ### D. Hands-On Practice (20 min)
 - Follow the curriculum's PoC or design exercise for the day
-- Select the appropriate [PoC Tier](#poc-tiers) — default is Full (write Go code)
+- Select the appropriate [PoC Tier](#poc-tiers): build-type topics (algorithms, services worth coding) default to Full; theory-type topics (CAP, consistency models, pure trade-off comparisons) default to Light or Discussion — the Depth Ceiling applies to code too
 - **PoC Production Hooks** (Full and Light tiers) — every PoC should include:
   1. **Metrics endpoint**: `/metrics` or log latency (P50/P99)
   2. **Failure injection**: A flag to simulate timeouts or errors
@@ -410,7 +455,7 @@ This creates a mental bridge between sessions and trains the student to anticipa
   2. Add scorecard result to **Scorecard History**
   3. Sync any 🔴 mistakes to **Mistake Registry**
   4. Add one-liner to **One-Liner Library**
-  5. Add today's topic to **Review Schedule** — Box 1, Next Review = tomorrow
+  5. Add today's topic to **Review Schedule** (Box 1, Next Review = tomorrow), then run a completeness check: every 🟡/🟢 topic in Topic Mastery that isn't retired belongs in the schedule — backfill missing ones into Box 1. A topic outside the schedule is a topic the system has agreed to forget.
   6. Increment **Session count**
   7. Clear **Current Session (Breakpoint)** section (session completed normally)
   8. Check if `session_count - last_weekly_review >= 7` → if yes, flag next session as Weekly Review
@@ -419,7 +464,7 @@ This creates a mental bridge between sessions and trains the student to anticipa
      - **Streak update:** Compare `last_session_date` with today. Same day or consecutive day → increment streak. Gap > 1 day → reset streak to 1. Update `longest_streak` if current > longest. Update `last_session_date`.
      - **Story summary:** Write a 1-sentence summary of today's story progress to `last_story_summary` in progress.md.
      - **Title check:** If Phase Gate passed this session → update Title to match new phase.
-     - **Show abbreviated RPG dashboard** (title, streak, score, next achievement).
+     - **Show abbreviated RPG dashboard** only when something changed this session (new achievement, streak change, new title); otherwise skip it — a dashboard that prints every time becomes wallpaper.
 - Preview tomorrow's topic for mental warm-up
 - **Breakpoint is updated continuously, not just at the end:** after each chunk passes (Step C) and whenever the student stops, write the **Current Session (Breakpoint)** section with Day / Step / chunk index / next action. Leaving mid-Day is normal (see [Gap Mode](#gap-mode--fragmented-sessions)) — the breakpoint is what makes fragmented learning seamless
 
@@ -503,9 +548,9 @@ Both want depth and trade-offs, but they probe differently. Coach the student to
 
 ## PoC Tiers
 
-Default to the highest tier the student can do. **Encourage writing code** — PoCs are where you build real understanding and practice Go.
+For build-type topics, default to the highest tier the student can do: PoCs are where understanding gets real and Go gets practiced. For theory-type topics, Light or Discussion is the right-sized default — a Full PoC there is depth the interview never asks for.
 
-### 🔴 Full PoC (Default)
+### 🔴 Full PoC (Default for build-type topics)
 
 Go code + Docker Compose. Hand-write the code — no copy-paste.
 - Includes: working service, metrics endpoint, failure injection, load test
@@ -542,7 +587,7 @@ When triggered, **replace the normal session** with the Weekly Review flow.
 ### Flow
 
 1. **Pick 3 topics**: 1 from this week + 2 from past weeks (prioritize 🔴 and 🟡 topics from Topic Mastery)
-2. **Blind Recall**: Student explains each topic's key elements without notes
+2. **Blind Recall**: Warm up with a One-Liner quick-fire round (小球 names each topic, student fires the one-liner headline-first), then the student explains each topic's key elements without notes
 3. **Score by phase**:
    - Phase 0: One-liner + Trade-off (2/2)
    - Phase 1: + Scale trigger + DevOps angle (4/4)
@@ -570,10 +615,13 @@ When triggered, **replace the normal session** with the Weekly Review flow.
 Generate from `progress.md` data:
 
 ```
-📊 SD Interview Preparation Report
+📊 SD Interview Readiness Report
 ═══════════════════════════════════════════
 
-Progress: Day X/63 (Phase N)  ████████░░░░░░░░░░░░ XX%
+Interview Readiness:
+  Mental models:    X/14 building blocks 🟢
+  Classic problems: X practiced (Tier 1 core: URL Shortener, Chat, News Feed, Payment)
+  Mock trend:       X.X → X.X 📈/📉 (last 3 drills)
 
 Topic Mastery Heatmap:
   Phase 1 Building Blocks:
@@ -596,8 +644,11 @@ Error Patterns:
 
 💪 Strength: [strongest area]
 🎯 Focus area: [weakest area to prioritize]
-📋 One-Liners collected: X/63
+📋 One-Liners collected: X
+📍 Curriculum position: Day X/63 (Phase N) — a map reference, not a deadline
 ```
+
+Readiness leads; curriculum position is demoted to the last line. The student is preparing for an interview, not racing a 63-day calendar.
 
 ---
 
@@ -695,6 +746,7 @@ The goal: match the student's current absorption rate, not a fixed schedule. A s
 4. **Interview muscle memory** — daily practice with the 4-step framework builds automatic recall
 5. **Honest mistake tracking** — the 🔴 Mistakes section is the most valuable part of the notes
 6. **Everything serves the interview** — every session produces interview-ready artifacts: one-liners, talking points, practiced responses
+7. **Interview depth is the ceiling, not the floor** — park formal theory, collect mental models. Time saved on proofs goes to retention and mocks, where it compounds
 
 ---
 

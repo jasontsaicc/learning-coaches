@@ -6,6 +6,17 @@
 >   for a working engineer studying in spare time. Deep learning over memorization.
 > Approach: Discussion → PoC → Notes → Reflect
 
+## Fast Path (3-6 months, 1-2 sessions/week)
+
+For a student with a real interview window, "finish all 63 units" is the wrong target; "interview-ready" is. The Fast Path:
+
+1. **Phase 0-1 as written** (thinking framework + building blocks) — these are the mental models everything else stands on.
+2. **Phase 2 via the Anchor Problem** (see Phase 2 header below) — theory pulled just-in-time at interview depth, not taught as standalone days.
+3. **Phase 3 Tier 1 core**: URL Shortener, Chat System, News Feed, Payment System are the must-do four. The other Tier 1 problems are high-value if time allows; Tier 2 is optional.
+4. **Phase 4 mocks** — at least Mock Round 1 and the Final Mock.
+
+Skipped units aren't lost: their concepts get pulled into design problems as needed, and the Review Schedule keeps what was learned alive.
+
 ---
 
 ## Phase 0: Thinking Framework (Day 1-3)
@@ -177,6 +188,24 @@
 
 ## Phase 2: Distributed Systems Core (Day 17-26)
 
+### Anchor Problem: Design a Distributed Cache (default mode)
+
+Phase 2 is theory-heavy, and standalone theory days invite depth the interview never asks for. Default: run Phase 2 in [Problem-Anchored Mode](../SKILL.md) with **Design a Distributed Cache** (pulled forward from Day 38-39) as the anchor. The design drives; each theory day below gets pulled in just-in-time when the design hits the wall that theory exists to explain. Day entries below stay the teaching material (misconceptions, stories, derivation chains) for the moment their topic is pulled.
+
+**Pull map** (design pressure → theory pulled):
+
+| The design needs... | Pull |
+|---------------------|------|
+| Sharding keys across nodes | Consistent Hashing (Day 15-16) — its PoC happens here |
+| What happens when a node dies / network splits | CAP Theorem (Day 17-18) |
+| Replicas serving stale reads | Consistency Models (Day 19-20) |
+| Failover: who promotes, how | Replication & Leader Election (Day 21-22) |
+| Hot keys / overload protection | Rate Limiting & Circuit Breaker (Day 23-24) |
+| Knowing the cluster is healthy | Observability (Day 25) |
+| Membership without a master list; cheap miss checks | Gossip + Bloom Filter (Day 26) |
+
+A student may still request standalone days ("教我 CAP 就好"); honor it, with the Depth Ceiling active.
+
 ### Day 17-18: CAP Theorem in Practice
 **Prerequisites:** Day 8-9 (Database), Day 15-16 (Consistent Hashing)
 
@@ -277,7 +306,8 @@
 - **📖 Cross-verify**: Cassandra docs on Bloom Filter usage — check how they tune false positive rate per SSTable and if the formula from our derivation chain matches their implementation
 
 ### Phase 2 Gate
-> Mock (scope-based, not timed): Design a distributed key-value store — full 4 steps, interviewer changes 1 requirement mid-way. Scorecard ≥ 4/6.
+> Mock (scope-based, not timed): Design a multi-region session store — full 4 steps, interviewer changes 1 requirement mid-way. Scorecard ≥ 4/6.
+> (Not a KV store / cache: the Anchor Problem already covered that ground, and a gate should test transfer, not recall of the anchor design.)
 
 ---
 
