@@ -1,7 +1,9 @@
 # System Design Interview Curriculum
 
 > Target: Big tech SD interviews (FAANG, AWS, Google, etc.)
-> Pace: ~1 hour/day, deep learning over memorization
+> Pace: progress by **content units**, not by clock or calendar. Each "Day" is one Learning Unit
+>   that may span several work-gaps. **61 learning units ≠ 61 calendar days** — expect 12-14 weeks
+>   for a working engineer studying in spare time. Deep learning over memorization.
 > Approach: Discussion → PoC → Notes → Reflect
 
 ---
@@ -151,7 +153,7 @@
 - **PoC**: Implement consistent hashing from scratch in Go
 
 ### Phase 1 Gate
-> 15-minute mini-mock: Explain any building block using the 4-step framework. Scorecard ≥ 2/3.
+> Mini-mock (scope-based, not timed): Explain any building block using the 4-step framework. Interviewer redirects after 2-3 exchanges. Scorecard ≥ 2/3.
 
 ---
 
@@ -245,7 +247,7 @@
 - Distributed Transactions overview (2PC/3PC)
 
 ### Phase 2 Gate
-> 30-minute mock: Design a distributed key-value store. Scorecard ≥ 3/5.
+> Mock (scope-based, not timed): Design a distributed key-value store — full 4 steps, interviewer changes 1 requirement mid-way. Scorecard ≥ 3/5.
 
 ---
 
@@ -443,7 +445,7 @@
 - Notes with interview template
 
 ### Phase 3 Gate
-> 45-minute full mock on a Tier 1 problem. Scorecard ≥ 5/7.
+> Full mock (scope-based, not timed) on a Tier 1 problem — all 4 steps + follow-ups pushed to the student's knowledge boundary. Scorecard ≥ 5/7.
 
 ### Tier 3: Nice to Have (Optional)
 
@@ -458,7 +460,7 @@ Video Streaming, Cloud Storage, Distributed Task Scheduler, Ticket/Booking Syste
 **Story:** 回顧成長。準備面對最難的挑戰。（角色：小球）
 
 **Day 54 — Trade-off Scenarios:**
-- Practice specific trade-off scenarios (5 min each)
+- Practice specific trade-off scenarios (rapid-fire, a few exchanges each)
 - Cost estimation for designs
 
 **Day 55 — Trap & Pivot Drills:**
@@ -469,7 +471,7 @@ Video Streaming, Cloud Storage, Distributed Task Scheduler, Ticket/Booking Syste
 **Story:** 模擬面試。小球不再提示。（角色：小球）
 
 **Day 56 — Mock 1:**
-- 45-minute strictly timed mock interview
+- Full scope-based mock interview (no clock — interviewer drives via turns, redirects, and follow-ups)
 - Detailed feedback on 4 dimensions
 
 **Day 57 — Feedback + Re-do:**
@@ -492,13 +494,13 @@ Video Streaming, Cloud Storage, Distributed Task Scheduler, Ticket/Booking Syste
 **Story:** 最終模擬。全力以赴。（角色：小球）
 
 **Day 60 — Final Mock 1:**
-- 45-minute interview with interruptions and requirement changes
+- Full mock with interruptions and requirement changes (interviewer interrupts mid-thought, swaps a requirement, pushes follow-ups to the knowledge boundary)
 
 **Day 61 — Final Mock 2:**
-- 45-minute interview, double trap drills — chaining pivots without losing composure
+- Full mock, double trap drills — chaining pivots without losing composure
 
 ### Phase 4 Gate
-> 45-minute final mock (Day 60 or 61). Scorecard ≥ 5/7 on both final mocks.
+> Full final mock (scope-based, not timed — Day 60 or 61). Scorecard ≥ 5/7 on both final mocks.
 
 ---
 

@@ -59,7 +59,9 @@
 
 ## Current Session (Breakpoint)
 
-> Updated when session is interrupted or paused. Cleared when session completes normally.
+> Updated **continuously** — after each chunk passes its Feynman Gate (Step C) and whenever the
+> student stops. Fragmented work-gaps are the norm, so this is the mechanism that makes any-length
+> session resumable. Cleared only when a Learning Unit (Day) completes fully.
 
 | Field | Value |
 |-------|-------|
@@ -68,9 +70,10 @@
 | **Step** | A / B / C / D / E / F / G / H |
 | **Chunks completed** | [1, 2, 3] |
 | **Chunks remaining** | [4, 5, 6, 7] |
-| **Next action** | Description of what to do next |
+| **Next action** | One line: exactly what to do next when resuming |
 
 > When this section has content, Claude should resume from here instead of starting a new session.
+> Resume pointer format on stop: "下次從 Day X · Step C · chunk N 接續。"
 
 ---
 
