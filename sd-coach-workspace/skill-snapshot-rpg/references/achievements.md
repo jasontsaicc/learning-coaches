@@ -46,7 +46,7 @@ Achievements must reward behaviors that align with genuine learning:
 |----|------|-----------------|-------------|
 | K1 | One-Liner ×10 | One-Liner Library in progress.md reaches 10 entries | 面試快答庫初具規模 |
 | K2 | One-Liner ×30 | One-Liner Library reaches 30 entries | 面試快答庫豐富了 |
-| K3 | Encyclopedia | One-Liner Library reaches 63 entries (complete) | 完整的面試百科 |
+| K3 | Encyclopedia | One-Liner Library reaches 61 entries (complete) | 完整的面試百科 |
 | K4 | Bug Squasher ×5 | 5 mistakes resolved (❌→✅) in Mistake Registry | 錯誤是最好的老師 |
 
 ### 🔥 CONSISTENCY (4) — Habit building
@@ -62,7 +62,7 @@ Achievements must reward behaviors that align with genuine learning:
 
 | ID | Name | Unlock Condition | Description |
 |----|------|-----------------|-------------|
-| E1 | Perfect Drill | Score 100% on any Interview Drill (3/3, 6/6, or 9/9 depending on phase) | 面試模擬滿分 |
+| E1 | Perfect Drill | Score 100% on any Interview Drill (3/3, 5/5, or 7/7 depending on phase) | 面試模擬滿分 |
 | E2 | Deep Diver | Complete a Full PoC (Go + Docker Compose) | 真正動手寫了完整的 PoC |
 | E3 | The Mentor | Phase 2+: Student correctly answers a question Yuki asked | 教會別人才是真的懂 |
 

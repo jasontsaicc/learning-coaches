@@ -19,28 +19,6 @@
 
 ---
 
-## Warm-Up Result
-
-> Filled during first session's diagnostic. Used by 小球 to select guided vs exploration mode for Step 0 derivation.
-
-| Field | Value |
-|-------|-------|
-| **Level** | Strong / Medium / Blank |
-| **Date** | YYYY-MM-DD |
-| **Notes** | (AI writes 1-line summary of diagnostic result) |
-
----
-
-## Curiosity Branches
-
-> Tracks student questions that diverge from the curriculum. ⏸ Parked branches are revisited in Step A when the topic becomes relevant.
-
-| Session | Day | Topic | Branch Question | Status |
-|---------|-----|-------|----------------|--------|
-| | | | | 🔍 Exploring / ✅ Resolved / ⏸ Parked |
-
----
-
 ## RPG Profile
 
 <!-- FRAMEWORK: Reusable — RPG profile tracking pattern -->
@@ -59,9 +37,7 @@
 
 ## Current Session (Breakpoint)
 
-> Updated **continuously** — after each chunk passes its Feynman Gate (Step C) and whenever the
-> student stops. Fragmented work-gaps are the norm, so this is the mechanism that makes any-length
-> session resumable. Cleared only when a Learning Unit (Day) completes fully.
+> Updated when session is interrupted or paused. Cleared when session completes normally.
 
 | Field | Value |
 |-------|-------|
@@ -70,10 +46,9 @@
 | **Step** | A / B / C / D / E / F / G / H |
 | **Chunks completed** | [1, 2, 3] |
 | **Chunks remaining** | [4, 5, 6, 7] |
-| **Next action** | One line: exactly what to do next when resuming |
+| **Next action** | Description of what to do next |
 
 > When this section has content, Claude should resume from here instead of starting a new session.
-> Resume pointer format on stop: "下次從 Day X · Step C · chunk N 接續。"
 
 ---
 
@@ -112,31 +87,12 @@
 | 50-51 | Web Crawler | ⬜ | — | |
 | 52-53 | Proximity Service | ⬜ | — | |
 | 54-55 | Trade-off Deep Dive | ⬜ | — | |
-| 56-57 | Brownfield / Legacy Migration | ⬜ | — | |
-| 58-59 | Mock Interview Round 1 | ⬜ | — | |
-| 60-61 | Weak Spot Reinforcement | ⬜ | — | |
-| 62-63 | Final Mock (Brutal) | ⬜ | Phase 4 Gate | |
+| 56-57 | Mock Interview Round 1 | ⬜ | — | |
+| 58-59 | Weak Spot Reinforcement | ⬜ | — | |
+| 60-61 | Final Mock (Brutal) | ⬜ | Phase 4 Gate | |
 
 > Mastery levels: ⬜ Not started │ 🔴 Needs work │ 🟡 Developing │ 🟢 Solid
 > Update mastery after each session based on Feynman Gate + Drill performance.
-
----
-
-## Review Schedule (Leitner Box)
-
-> Spaced repetition for completed topics. 小球 checks this in Step A — if a topic is due, do a 2-min quick recall before new content.
-
-| Topic | Mastery | Last Review | Box | Next Review |
-|-------|---------|-------------|-----|-------------|
-| | | | | |
-
-> **Box rules:**
-> Box 1 → next review in +1 day (just learned / review failed)
-> Box 2 → +3 days (Box 1 passed)
-> Box 3 → +7 days (Box 2 passed)
-> Box 4 → +14 days (Box 3 passed, then retired)
->
-> **Quick recall format:** 小球 asks the student to state the one-liner + the physical constraint that drives this technique. Pass → Box +1. Fail → back to Box 1.
 
 ---
 
@@ -146,11 +102,11 @@
 
 | Session | Day | Topic | Score | Details |
 |---------|-----|-------|-------|---------|
-| | | | /3 or /6 or /9 | |
+| | | | /3 or /5 or /7 | |
 
 > Phase 0-1: /3 (Think Aloud, Scope Negotiation, Used Today's Block)
-> Phase 2: /6 (+ Trade-off WHY, Operational Concerns, Hint Response)
-> Phase 3+: /9 (+ Failure Modes, Capacity Estimation, Hint Response, Time/Breadth Mgmt)
+> Phase 2: /5 (+ Trade-off WHY, Operational Concerns)
+> Phase 3+: /7 (+ Failure Modes, Capacity Estimation)
 
 ---
 

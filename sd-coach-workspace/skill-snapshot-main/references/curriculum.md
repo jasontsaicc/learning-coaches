@@ -1,9 +1,7 @@
 # System Design Interview Curriculum
 
 > Target: Big tech SD interviews (FAANG, AWS, Google, etc.)
-> Pace: progress by **content units**, not by clock or calendar. Each "Day" is one Learning Unit
->   that may span several work-gaps. **63 learning units ≠ 63 calendar days**, expect 12-14 weeks
->   for a working engineer studying in spare time. Deep learning over memorization.
+> Pace: ~1 hour/day, deep learning over memorization
 > Approach: Discussion → PoC → Notes → Reflect
 
 ---
@@ -12,21 +10,18 @@
 
 ### Day 1: What SD Interviews Actually Test
 **Prerequisites:** None (entry point)
-**Story:** 你的第一天。認識團隊。（角色：小球、小杰、Karen）
 - The 4 scoring dimensions: Problem Navigation, Design, Technical Depth, Trade-offs
 - Analyze good vs bad answers for the same question
 - **Discussion**: Deconstruct a real SD interview rubric
 
 ### Day 2: Back-of-Envelope Estimation
 **Prerequisites:** Day 1
-**Story:** 被問到容量估算問題，答不出來。（角色：Karen）
 - Powers of 2, latency numbers every engineer should know
 - Practice: Estimate YouTube daily storage, Twitter QPS
 - **Exercise**: Build an estimation cheat sheet you actually understand
 
 ### Day 3: Your SD Answer Framework (4-Step Method)
 **Prerequisites:** Day 1, Day 2
-**Story:** 學習框架，為明天的實戰做準備。（角色：小球）
 - The 4-Step SD Interview Framework (defined in SKILL.md)
 - Time budget for 45-min interview: Clarify (0-5) → Estimate (5-10) → Design (10-20) → Deep Dive (20-35) → Scale (35-45)
 - Standard Whiteboard Diagram Template — the 8-block skeleton (see `8-block-skeleton.md`)
@@ -47,9 +42,6 @@
 
 ⚠️ **Common Misconception:** "L7 is always better than L4." No — L4 has lower latency and is better for non-HTTP protocols and raw throughput. L7 gives you content-based routing but adds processing overhead.
 
-**Story:** 流量暴增，服務中斷。小杰提出了錯誤解法。（角色：小杰、小球）
-**Derivation:** ✅ 推導鏈 #1 — 單機硬體上限 → Load Balancer
-
 **Day 4 — DNS + LB Fundamentals:**
 - DNS fundamentals — resolution flow, TTL, record types
 - DNS-based load balancing (weighted, latency-based, failover)
@@ -66,9 +58,6 @@
 
 ⚠️ **Common Misconception:** "More cache = always better." No — cache invalidation bugs can cause stale data, and large caches increase memory cost and cold-start time. Cache is a trade-off between speed and freshness.
 
-**Story:** 頁面載入極慢，用戶在抱怨。（角色：Karen）
-**Derivation:** ✅ 推導鏈 #2 — DRAM/SSD/Network 延遲差距 → Caching
-
 **Day 6 — Cache Patterns:**
 - Cache levels: Browser → CDN → App → DB
 - Patterns: Cache-Aside, Write-Through, Write-Behind, Read-Through
@@ -82,8 +71,6 @@
 
 ### Day 8-9: Database Selection
 **Prerequisites:** Day 3
-**Story:** 新功能需要選 DB，團隊意見不一。（角色：小杰）
-**Derivation:** ✅ 推導鏈 #3 — 讀寫模式決定最佳儲存結構 → Database Selection
 
 **Day 8 — SQL vs NoSQL Concepts:**
 - SQL vs NoSQL vs NewSQL — decision framework
@@ -100,9 +87,6 @@
 
 ⚠️ **Common Misconception:** "Kafka has exactly-once delivery." Kafka has idempotent producers + transactional consumers, which achieves effectively-once processing. True exactly-once in distributed systems requires end-to-end idempotency — the broker alone cannot guarantee it.
 
-**Story:** 促銷活動，訂單處理異常。出現重複處理。（角色：Karen）
-**Derivation:** ✅ 推導鏈 #4 — 同步呼叫的級聯故障 → Message Queue
-
 **Day 10 — Queue Concepts + Semantics:**
 - Why async? Decoupling, buffering, peak handling
 - SQS vs Kafka vs RabbitMQ — positioning
@@ -115,8 +99,6 @@
 
 ### Day 12-13: API Design
 **Prerequisites:** Day 3, Day 4-5 (LB)
-**Story:** 行動 App 要上線，API 需要重新設計。（角色：小球）
-**Derivation:** ✅ 推導鏈 #5 — 不同客戶端的資料需求差異 → API Design
 
 **Day 12 — API Styles:**
 - REST vs gRPC vs GraphQL — trade-off matrix
@@ -128,9 +110,6 @@
 
 ### Day 14: Security & Authentication
 **Prerequisites:** Day 12-13 (API Design)
-**Story:** 資安稽核。發現安全漏洞。（角色：小杰）
-**Derivation:** ✅ 推導鏈 #6 — HTTP 明文傳輸的物理風險 → Security & Auth
-
 - JWT vs Session-based authentication
 - OAuth 2.0 flow basics
 - API Key management, HTTPS, encryption
@@ -141,9 +120,6 @@
 
 ⚠️ **Common Misconception:** "Consistent hashing eliminates all data movement." No — it minimizes movement to K/N keys on average when a node joins/leaves, but rebalancing still happens and virtual nodes affect distribution uniformity.
 
-**Story:** 資料庫需要重新分片。搬移過程影響服務。（角色：小球）
-**Derivation:** ✅ 推導鏈 #7 — hash mod N 的資料重分配問題 → Consistent Hashing
-
 **Day 15 — Theory:**
 - Why simple hash mod N fails
 - Consistent hashing with virtual nodes
@@ -153,7 +129,7 @@
 - **PoC**: Implement consistent hashing from scratch in Go
 
 ### Phase 1 Gate
-> Mini-mock (scope-based, not timed): Explain any building block using the 4-step framework. Interviewer redirects after 2-3 exchanges. Scorecard ≥ 2/3.
+> 15-minute mini-mock: Explain any building block using the 4-step framework. Scorecard ≥ 2/3.
 
 ---
 
@@ -163,9 +139,6 @@
 **Prerequisites:** Day 8-9 (Database), Day 15-16 (Consistent Hashing)
 
 ⚠️ **Common Misconception:** CAP is NOT "pick 2 out of 3 in daily operation." It's about what happens DURING a network partition — you choose between consistency and availability. When there's no partition, you can have both. Teach PACELC as the practical mental model.
-
-**Story:** 海外用戶看到過時資料。（角色：Karen、Yuki 登場）
-**Derivation:** ✅ 推導鏈 #8 — 網路 partition 不可避免 → CAP Theorem
 
 **Day 17 — CAP + Examples:**
 - CAP is about network partitions, not a daily choice
@@ -180,9 +153,6 @@
 
 ⚠️ **Common Misconception:** "Eventual consistency = inconsistent." No — eventual consistency means the system WILL converge to a consistent state given enough time with no new writes. It has a convergence guarantee, unlike "no consistency" which has none.
 
-**Story:** 跨區域資料不一致。（角色：Karen）
-**Derivation:** ✅ 推導鏈 #9 — 光速有限，跨節點同步需要時間 → Consistency Models
-
 **Day 19 — Models:**
 - Strong, Eventual, Causal, Read-your-writes
 - Quorum: W + R > N
@@ -196,9 +166,6 @@
 
 ⚠️ **Common Misconception:** "Read replicas give you strong consistency." No — replicas have replication lag (milliseconds to seconds). Read-after-write consistency requires reading from the leader, or using techniques like session stickiness or synchronous replication.
 
-**Story:** 主資料庫故障。小杰的回應讓問題更嚴重。（角色：小杰）
-**Derivation:** ✅ 推導鏈 #10 — 硬體年故障率 2-10%，單點 = 單點故障 → Replication
-
 **Day 21 — Replication Patterns:**
 - Single-leader, multi-leader, leaderless
 - Raft consensus algorithm (simplified)
@@ -210,9 +177,6 @@
 **Prerequisites:** Day 6-7 (Caching), Day 12-13 (API Design)
 
 ⚠️ **Common Misconception:** "Token bucket and sliding window are interchangeable." No — token bucket allows bursts up to the bucket size (good for bursty traffic), while sliding window enforces a strict rate limit (better for steady rate enforcement). Choose based on your traffic pattern.
-
-**Story:** 被惡意爬蟲攻擊 API。（角色：小球）
-**Derivation:** ✅ 推導鏈 #11 — 系統處理能力有物理上限 → Rate Limiting
 
 **Day 23 — Algorithms:**
 - Token Bucket, Sliding Window, Fixed Window
@@ -229,9 +193,6 @@
 
 ### Day 25: Observability Consolidation
 **Prerequisites:** Day 4-5 (LB), Day 6-7 (Caching), Day 8-9 (Database)
-**Story:** 半夜事故，但缺少可觀測性。（角色：小球）
-**Derivation:** ✅ 推導鏈 #12 — 無法逐台 ssh 到數千節點 → Observability
-
 - Metrics, Logs, Traces — three pillars
 - Distributed tracing, SLI/SLO/SLA formalization
 - Structured logging, correlation IDs
@@ -239,15 +200,12 @@
 
 ### Day 26: Bloom Filter, Gossip Protocol & Advanced Concepts
 **Prerequisites:** Day 15-16 (Consistent Hashing), Day 19-20 (Consistency)
-**Story:** Sprint review。回顧整個 Phase 2。（角色：全員）
-**Derivation:** ✅ 推導鏈 #13 — 精確查詢 O(N) 太貴 + 全量廣播 O(N²) 不 scale → Bloom/Gossip
-
 - Bloom Filter: probabilistic membership testing
 - Gossip Protocol: node discovery and state sharing
 - Distributed Transactions overview (2PC/3PC)
 
 ### Phase 2 Gate
-> Mock (scope-based, not timed): Design a distributed key-value store — full 4 steps, interviewer changes 1 requirement mid-way. Scorecard ≥ 4/6.
+> 30-minute mock: Design a distributed key-value store. Scorecard ≥ 3/5.
 
 ---
 
@@ -261,7 +219,6 @@
 
 #### Day 27-28: URL Shortener ★★☆
 **Key Concepts:** Hashing, base62, read-heavy
-**Story:** 行銷需要短網址追蹤功能。（角色：Karen）
 
 **Day 27 — Design:**
 - Requirements clarification (read:write ratio, URL length, analytics)
@@ -275,7 +232,6 @@
 
 #### Day 29-30: Unique ID Generator ★★☆
 **Key Concepts:** Snowflake, clock sync, coordination-free
-**Story:** 訂單 ID 重複問題。（角色：Karen）
 
 **Day 29 — Design:**
 - Requirements: uniqueness, ordering, performance
@@ -289,7 +245,6 @@
 
 #### Day 31-32: Distributed Rate Limiter ★★★
 **Key Concepts:** Distributed sliding window, Redis Lua, race conditions
-**Story:** 開放第三方 API，需要限流。（角色：小球）
 
 **Day 31 — Design:**
 - Single-node vs distributed: new challenges
@@ -303,7 +258,6 @@
 
 #### Day 33-34: Notification System ★★★
 **Key Concepts:** Push/Pull, priority queue, multi-channel
-**Story:** 通知系統問題：有人收不到，有人收太多。（角色：Karen）
 
 **Day 33 — Design:**
 - Multi-channel: push notification, SMS, email
@@ -317,7 +271,6 @@
 
 #### Day 35-37: Chat System ★★★★
 **Key Concepts:** WebSocket, presence, read receipts, group chat
-**Story:** 新功能需求：即時客服聊天。（角色：Karen）
 
 **Day 35 — WebSocket + 1v1 Messaging:**
 - WebSocket vs long polling vs SSE
@@ -336,7 +289,6 @@
 
 #### Day 38-39: Distributed Cache ★★★
 **Key Concepts:** Consistent hashing, invalidation at scale, thundering herd
-**Story:** 商品頁效能問題。Cache 架構需要升級。（角色：小球）
 
 **Day 38 — Design:**
 - Distributed cache architecture (consistent hashing for sharding)
@@ -350,7 +302,6 @@
 
 #### Day 40-42: News Feed ★★★★
 **Key Concepts:** Fan-out on write/read, ranking, celebrity problem
-**Story:** 社交動態牆功能。大帳號發文導致效能問題。（角色：Karen）
 
 **Day 40 — Fan-out Design:**
 - Fan-out on write vs fan-out on read
@@ -369,7 +320,6 @@
 
 #### Day 43-45: Payment System ★★★★
 **Key Concepts:** Idempotency, SAGA, exactly-once, reconciliation
-**Story:** 支付系統嚴重事故：用戶被重複扣款。（角色：小球、Karen）
 
 **Day 43 — Idempotency + SAGA:**
 - Payment flow: authorization → capture → settlement
@@ -390,7 +340,6 @@
 
 #### Day 46-47: Metrics & Logging System
 **Key Concepts:** Time-series DB, aggregation, sampling
-**Story:** 工程團隊需要自建 metrics 平台。（角色：小球）
 
 **Day 46 — Design:**
 - Data ingestion pipeline: agents → collectors → storage
@@ -404,7 +353,6 @@
 
 #### Day 48-49: Search Autocomplete
 **Key Concepts:** Trie, ranking, Elasticsearch
-**Story:** 搜尋體驗很差，自動完成太慢。（角色：Karen）
 
 **Day 48 — Design:**
 - Trie data structure for prefix matching
@@ -418,7 +366,6 @@
 
 #### Day 50-51: Web Crawler
 **Key Concepts:** BFS/DFS, URL frontier, dedup (Bloom filter)
-**Story:** 需要爬取競品資料做分析。（角色：Karen）
 
 **Day 50 — Design:**
 - Crawler architecture: URL frontier → fetcher → parser → storage
@@ -432,7 +379,6 @@
 
 #### Day 52-53: Proximity Service
 **Key Concepts:** Geohash, QuadTree, spatial indexing
-**Story:** 新功能：附近取貨點。地理查詢需求。（角色：Karen）
 
 **Day 52 — Design:**
 - Geohash: encoding lat/lng into a string for range queries
@@ -445,7 +391,7 @@
 - Notes with interview template
 
 ### Phase 3 Gate
-> Full mock (scope-based, not timed) on a Tier 1 problem — all 4 steps + follow-ups pushed to the student's knowledge boundary. Scorecard ≥ 6/9.
+> 45-minute full mock on a Tier 1 problem. Scorecard ≥ 5/7.
 
 ### Tier 3: Nice to Have (Optional)
 
@@ -453,77 +399,50 @@ Video Streaming, Cloud Storage, Distributed Task Scheduler, Ticket/Booking Syste
 
 ---
 
-## Phase 4: Advanced & Mock Interviews (Day 54-63)
+## Phase 4: Advanced & Mock Interviews (Day 54-61)
 
 ### Day 54-55: Trade-off Analysis Deep Dive
 **Prerequisites:** All Phase 1-3
-**Story:** 回顧成長。準備面對最難的挑戰。（角色：小球）
 
 **Day 54 — Trade-off Scenarios:**
-- Practice specific trade-off scenarios (rapid-fire, a few exchanges each)
+- Practice specific trade-off scenarios (5 min each)
 - Cost estimation for designs
 
 **Day 55 — Trap & Pivot Drills:**
 - Trap & Pivot Drills — practice graceful pivots when initial design hits a wall
 
-### Day 56-57: Brownfield / Legacy Migration ★★★★
+### Day 56-57: Mock Interview Round 1
 **Prerequisites:** All Phase 1-3
-**Story:** ScaleUp 的單體訂單系統撐不住了，但不能停機重寫。（角色：小球、Karen）
 
-> **為什麼這個主題：** 真實工作 90% 是改造既有系統，不是綠地設計。Senior+ 面試官也越來越愛問 migration 題，因為它考的是「在約束下把事做成」的成熟度，而不是空地上畫架構。
-
-⚠️ **Common Misconception:** 「migration 就是把資料 copy 到新系統」。錯。難的是「遷移期間新舊系統並存、資料持續變動」下的一致性與可回滾性。
-
-**Day 56 — Migration Strategy & Patterns:**
-- Greenfield vs Brownfield：為什麼改造比新建難（不能停機、有舊資料、有既有依賴與呼叫方）
-- **Strangler Fig**：用 proxy/router 逐步把流量從舊系統導到新系統，舊系統慢慢「被絞殺」
-- **Dual-write + backfill**：新舊資料庫雙寫 + 回填歷史資料，怎麼保證一致、怎麼驗證
-- **Shadow traffic / dark launch**：複製真實流量到新系統驗證，但不影響用戶
-- **Cutover & rollback**：漸進切換（canary %）、出事怎麼安全退回
-- **DevOps**：feature flag、藍綠/金絲雀部署、遷移期的雙重監控（新舊系統同時看）
-
-**Day 57 — PoC + Design:**
-- **Design exercise**：把 ScaleUp 的 monolith 訂單模組拆成獨立的 event-driven Order Service，零停機
-- 畫出 migration 階段圖：strangler proxy → dual-write → backfill → shadow → cutover → decommission
-- **PoC**：用 Go 寫一個 strangler proxy（依 feature flag / % 把請求路由到舊 or 新 handler）+ dual-write 範例
-- Notes：每個階段的 failure mode 與 rollback 計畫
-- **🔗 連回你的工作**：對照你現在維護的某個系統，這套手法哪一步用得上、哪一步最危險
-
-### Day 58-59: Mock Interview Round 1
-**Prerequisites:** All Phase 1-3
-**Story:** 模擬面試。小球不再提示。（角色：小球）
-
-**Day 58 — Mock 1:**
-- Full scope-based mock interview (no clock — interviewer drives via turns, redirects, and follow-ups)
+**Day 56 — Mock 1:**
+- 45-minute strictly timed mock interview
 - Detailed feedback on 4 dimensions
 
-**Day 59 — Feedback + Re-do:**
+**Day 57 — Feedback + Re-do:**
 - Practice thinking aloud, following interviewer hints
-- Re-do weak sections from Day 58's mock
+- Re-do weak sections from Day 56's mock
 
-### Day 60-61: Weak Spot Reinforcement
+### Day 58-59: Weak Spot Reinforcement
 **Prerequisites:** All Phase 1-3
-**Story:** 弱點補強衝刺。（角色：小球）
 
-**Day 60 — Review Patterns:**
+**Day 58 — Review Patterns:**
 - Review all notes, identify patterns in mistakes
 
-**Day 61 — Re-do Designs:**
+**Day 59 — Re-do Designs:**
 - Re-do 2-3 difficult designs
 - Practice articulating trade-offs in 2-3 sentences
 
-### Day 62-63: Final Mock Interview (Brutal Mode)
+### Day 60-61: Final Mock Interview (Brutal Mode)
 **Prerequisites:** All Phase 1-3
-**Story:** 最終模擬。全力以赴。（角色：小球）
 
-**Day 62 — Final Mock 1:**
-- Full mock with interruptions and requirement changes (interviewer interrupts mid-thought, swaps a requirement, pushes follow-ups to the knowledge boundary)
+**Day 60 — Final Mock 1:**
+- 45-minute interview with interruptions and requirement changes
 
-**Day 63 — Final Mock 2:**
-- Full mock, double trap drills — chaining pivots without losing composure
+**Day 61 — Final Mock 2:**
+- 45-minute interview, double trap drills — chaining pivots without losing composure
 
 ### Phase 4 Gate
-> Full final mock (scope-based, not timed — Day 62 or 63). Scorecard ≥ 6/9 on both final mocks.
+> 45-minute final mock (Day 60 or 61). Scorecard ≥ 5/7 on both final mocks.
 
 ---
 

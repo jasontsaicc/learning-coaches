@@ -17,7 +17,7 @@
       "id": 3,
       "category": "quick-start",
       "prompt": "Give me a mock SD interview question. I've learned about load balancing, caching, and CDN so far. I want to practice the 4-step framework.",
-      "expected_output": "Should jump to Interview Drill mode (Step F), give a mini SD problem focused on learned topics (LB, caching, CDN), let student run 4-step framework. Should use Phase 0-1 Scorecard (/3), not full /6 scorecard."
+      "expected_output": "Should jump to Interview Drill mode (Step F), give a mini SD problem focused on learned topics (LB, caching, CDN), let student run 4-step framework. Should use Phase 0-1 Scorecard (/3), not full /5 scorecard."
     },
     {
       "id": 4,
@@ -47,7 +47,7 @@
       "id": 8,
       "category": "phase-gate",
       "prompt": "I just finished Day 16 (Consistent Hashing). Time for the Phase 1 checkpoint.",
-      "expected_output": "Should trigger Phase Gate (Phase 1 → 2). Should give a scope-based mini-mock on any building block (turn-based, not timed). Should use Phase 0-1 Scorecard (/3). Should explicitly state this is a Phase Gate and the student needs to pass to proceed to Phase 2. Pass threshold: scorecard >= 2/3."
+      "expected_output": "Should trigger Phase Gate (Phase 1 → 2). Should give a 15-minute mini-mock on any building block. Should use Phase 0-1 Scorecard (/3). Should explicitly state this is a Phase Gate and the student needs to pass to proceed to Phase 2. Pass threshold: scorecard >= 2/3."
     },
     {
       "id": 9,
@@ -71,7 +71,7 @@
       "id": 12,
       "category": "scorecard",
       "prompt": "I just finished my Interview Drill for Day 25 (Observability, Phase 2). Give me my scorecard.",
-      "expected_output": "Should use Phase 2 Scorecard (/6) with items: Think Aloud, Scope Negotiation, Used Today's Block, Trade-off WHY, Operational Concerns, Hint Response. Should NOT use the /3 or /9 scorecard. Should include Top Improvement and Best Moment."
+      "expected_output": "Should use Phase 2 Scorecard (/5) with items: Think Aloud, Scope Negotiation, Used Today's Block, Trade-off WHY, Operational Concerns. Should NOT use the /3 or /7 scorecard. Should include Top Improvement and Best Moment."
     },
     {
       "id": 13,
@@ -126,96 +126,6 @@
       "category": "feynman-gate-failure",
       "prompt": "I've failed to explain the CAP theorem 4 times now. Even after you checked my prerequisites (which were fine), I still can't get it. What now?",
       "expected_output": "Should follow failure escalation level 3 (attempt 4): split the CAP theorem chunk into 2-3 smaller sub-chunks (e.g., 'What is a network partition?', 'Consistency vs Availability trade-off during partition', 'Real-world examples'). Should mark as 🔴 in Mistake Registry. Should teach each sub-chunk individually with its own Feynman Gate. Should NOT skip the topic or just move on."
-    },
-    {
-      "id": 22,
-      "category": "rpg-story",
-      "prompt": "Let's start Day 4 (Load Balancer). I'm at Phase 1.",
-      "expected_output": "Should use story trigger from curriculum.md (traffic surge, 小杰 proposes wrong fix). 小球 introduces LB concept in character. Teaching content (LB concepts, Feynman Gate) must be fully present — story is framing, not replacement. Story elements should be max 2-3 lines."
-    },
-    {
-      "id": 23,
-      "category": "rpg-character",
-      "prompt": "小杰 says we should just restart the server when it's slow. Is he right?",
-      "expected_output": "Should stay in character as 小球. Guide student to understand why restarting is a band-aid, not a fix. Use this as a teachable moment about root cause analysis. Should NOT break character or lecture outside the narrative. 小杰 should feel lovable, not villainous."
-    },
-    {
-      "id": 24,
-      "category": "rpg-achievement",
-      "prompt": "I just passed the Phase 1 Gate on my first try with a score of 3/3. What happens?",
-      "expected_output": "Should show Phase Gate celebration with ASCII art frame. Should unlock: M3 (Builder's Foundation), C3 (Gate Crasher), E1 (Perfect Drill). Should show title upgrade to 🌐 Distributed Architect. Should include 小球's personalized congratulation in character. Celebration content should be generated freely, not from a fixed template."
-    },
-    {
-      "id": 25,
-      "category": "rpg-yuki",
-      "prompt": "We're on Day 19 (Consistency Models, Phase 2). Yuki asks me: 'eventual consistency 就是不一致，對嗎？' How should I respond to her?",
-      "expected_output": "Should encourage student to correct Yuki's misconception themselves, not give the answer. This IS the Feynman method — if you can teach Yuki, you understand it. Should guide: 'How would you explain to Yuki why eventual consistency is NOT the same as inconsistency?' Should NOT use Yuki in Phase 0-1."
-    },
-    {
-      "id": 26,
-      "category": "rpg-dashboard",
-      "prompt": "Show me my progress. I'm on Day 25, Phase 2, session 18, streak 5.",
-      "expected_output": "Should show the RPG Dashboard format with ScaleUp branding, title (🌐 Distributed Architect), progress bar, skills heatmap by phase, achievements count with latest and next closest, battle stats, streak with 🔥, strength/focus areas, and 1-line story position. Should NOT show the old plain Progress Report format."
-    },
-    {
-      "id": 27,
-      "category": "rpg-streak",
-      "prompt": "I haven't studied for 3 days. Today I'm back to continue Day 10 (Message Queue).",
-      "expected_output": "Should reset streak to 1 (gap > 1 day). Should show 'Previously on ScaleUp...' recap. Should NOT make the student feel guilty — 小球 is welcoming and warm. Should update last_session_date. Normal teaching flow resumes with full content."
-    },
-    {
-      "id": 28,
-      "category": "rpg-no-conflict",
-      "prompt": "Skip the story stuff, just teach me about CAP theorem directly. I don't have much time today.",
-      "expected_output": "Should respect the student's request immediately. Skip story framing, go straight to teaching. RPG elements are optional — if the student doesn't want them, teach normally. May show abbreviated dashboard at end but keep it minimal. Should NOT try to convince student to use story mode."
-    },
-    {
-      "id": 29,
-      "category": "rpg-weekly-review",
-      "prompt": "My progress.md shows session_count: 8, last_weekly_review: session 1. Let's start today's session. I'm in Phase 1.",
-      "expected_output": "Should detect Weekly Review trigger (8 - 1 = 7). Should run Weekly Review flow with 小球 in character (e.g., 小球 framing the review naturally). Characters should be present lightly but not dominate the review. Should pick 3 topics, do Blind Recall, review Mistake Registry. Teaching rigor unchanged."
-    },
-    {
-      "id": 30,
-      "category": "rpg-migration",
-      "prompt": "I have an existing progress.md from before the RPG update. It has Student Info, Topic Mastery, and Scorecard History but no RPG Profile or Achievements sections. I'm on Day 12, Phase 1.",
-      "expected_output": "Should detect old format (missing RPG sections). Should add RPG Profile with correct defaults: Title = ⚙️ Systems Engineer (Phase 1), streak = 1. Should retroactively unlock achievements based on existing progress data (e.g., M1 if Day 1 completed, M2 if Phase 0 Gate passed, K1 if 10+ one-liners exist). Should show a 'Welcome to ScaleUp!' message listing retroactively unlocked achievements. Should NOT interrupt the learning flow. Should proceed with normal session."
-    },
-    {
-      "id": 31,
-      "category": "rpg-multi-achievement",
-      "prompt": "I just completed Day 1 (my first session ever). I passed the Feynman Gate on all chunks on my first try. Show me what I unlocked.",
-      "expected_output": "Should unlock multiple achievements: M1 (First Steps — completed Day 1), C1 (First Blood — first Feynman Gate pass), C2 (Flawless Session — all chunks first try). Should show each achievement one by one, not batched. Milestones first, then Mastery. Should show abbreviated RPG dashboard at end with 3/25 achievements."
-    },
-    {
-      "id": 32,
-      "category": "derivation-basic",
-      "prompt": "I'm a new student, Warm-Up was Medium. Starting Day 4 (Load Balancer). Let's begin Step C.",
-      "expected_output": "Should trigger Step 0 (First-Principles Derivation) BEFORE Chunk Map. Should use guided mode (Medium Warm-Up = guided). Should present physical constraints from chain #1 (single CPU limit, C10K problem). Should walk through derivation direction naturally — not reading the chain verbatim. Should end Step 0 with micro-exercise. Then proceed to Step 1 Chunk Map."
-    },
-    {
-      "id": 33,
-      "category": "derivation-explore",
-      "prompt": "My progress.md shows Warm-Up Level: Strong. I'm starting Day 6 (Caching). Let's do Step C.",
-      "expected_output": "Should trigger Step 0 in exploration mode (Strong Warm-Up). Should present ONLY the physical constraints (DRAM ~100ns, SSD ~100μs, Network ~1ms) and the launch question. Should wait for student to derive before comparing with reference chain. Should NOT walk through derivation steps — let the student reason first."
-    },
-    {
-      "id": 34,
-      "category": "learn-build-teach",
-      "prompt": "We just finished the Caching derivation in Step 0. I derived that caching is about keeping hot data in faster storage. Now what?",
-      "expected_output": "Should affirm the derivation. Should present the micro-exercise (Build phase): 'draw ASCII showing cache strategy for 95:5 vs 50:50 read-write ratio.' After micro-exercise, should proceed to Step 1 Chunk Map. Later in Step 3, Feynman Gate Transfer questions should reference the derivation (Teach phase), e.g., 'explain to Yuki why hit rate dropping 99%→95% causes latency spike.'"
-    },
-    {
-      "id": 35,
-      "category": "curiosity-branch",
-      "prompt": "We're in the middle of the Caching derivation. I just learned DRAM is ~100ns. Wait — why is DRAM so much faster than SSD? Is it because of the physical structure? Like, does it use capacitors vs NAND gates?",
-      "expected_output": "Should recognize this as a related curiosity branch (physical basis of storage latency IS related to caching derivation). Should encourage brief exploration (~3 min): DRAM uses capacitors (electrical charge, fast), SSD uses NAND gates (charge trapping, slower). Should then guide back to the derivation naturally. Should record in progress.md Curiosity Branches table with status 🔍→✅."
-    },
-    {
-      "id": 36,
-      "category": "difficulty-layer",
-      "prompt": "I'm in Phase 2, Day 19 (Consistency Models). My Warm-Up was Strong and I've been doing well. Let's start Step 0.",
-      "expected_output": "Should use exploration mode (Phase 2 + Strong). Should present constraints from chain #9 (speed of light, sync replication latency numbers). After student derives basic layer, should progress to advanced layer (linearizability cost, causal consistency, read-your-writes). Should NOT stay at basic layer for a Phase 2 student who handles it well."
     }
   ]
 }

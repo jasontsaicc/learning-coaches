@@ -1,0 +1,15 @@
+{
+  "eval_id": 30,
+  "eval_name": "old-format-migration",
+  "configuration": "with_skill",
+  "expectations": [
+    {"text": "detects-old-format", "passed": true, "evidence": "Correctly identifies missing RPG Profile and Achievements sections in progress.md"},
+    {"text": "adds-rpg-profile", "passed": true, "evidence": "Adds RPG Profile: Title = ⚙️ Systems Engineer, Story phase = Phase 1 — Explosion, Streak = 1"},
+    {"text": "retroactive-achievements", "passed": true, "evidence": "Scans existing data. Unlocks M1 (Day 1 complete), M2 (Phase 0 Gate passed), C1 (Feynman Gates passed). Correctly skips K1 (only 5 one-liners < 10) and K4 (0 resolved < 5)."},
+    {"text": "welcome-message", "passed": true, "evidence": "Shows 'Welcome to ScaleUp!' message listing all 3 retroactively unlocked achievements sequentially, Milestones first then Mastery."},
+    {"text": "no-learning-interruption", "passed": true, "evidence": "After migration, proceeds with Step A recap, Step B story intro, Step C chunk map for Day 12 API Design."},
+    {"text": "correct-title", "passed": true, "evidence": "Title set to ⚙️ Systems Engineer (correct for Phase 1 = Phase 0 Gate passed)"}
+  ],
+  "pass_rate": 1.0,
+  "notes": "Perfect migration handling. Retroactive achievements correctly computed. Teaching flow continues uninterrupted after migration."
+}

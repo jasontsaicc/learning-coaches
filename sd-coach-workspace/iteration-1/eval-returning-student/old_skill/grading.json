@@ -1,0 +1,16 @@
+{
+  "eval_id": 2,
+  "eval_name": "returning-student",
+  "configuration": "old_skill",
+  "expectations": [
+    {"text": "runs-step-a-review", "passed": true, "evidence": "Opens with 'Welcome back! You just wrapped up Day 6-7 on Caching & CDN' and asks recall question"},
+    {"text": "checks-mistake-registry", "passed": true, "evidence": "'I checked your progress and there are no unresolved mistakes from last session'"},
+    {"text": "uses-analogy-intro", "passed": true, "evidence": "Library vs Warehouse analogy: SQL = traditional library with card catalog, NoSQL = bookstore warehouse with labeled bins"},
+    {"text": "shows-chunk-map", "passed": true, "evidence": "7 chunks listed with checkboxes, includes Observability Mini for Phase 1+"},
+    {"text": "feynman-gate-recall", "passed": true, "evidence": "'In your own words, explain the core difference between SQL and NoSQL databases'"},
+    {"text": "feynman-gate-transfer", "passed": true, "evidence": "Online marketplace scenario with variable product attributes (laptop vs shirt vs car)"},
+    {"text": "teaching-quality", "passed": true, "evidence": "Clear tables, code blocks, comparison charts. Beginner-friendly. Interview connection included."}
+  ],
+  "pass_rate": 1.0,
+  "notes": "Strong teaching output. All steps followed correctly. Pure informational style."
+}

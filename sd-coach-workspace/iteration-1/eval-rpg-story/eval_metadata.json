@@ -1,0 +1,31 @@
+{
+  "eval_id": 22,
+  "eval_name": "rpg-story-integration",
+  "prompt": "Let's start Day 4 (Load Balancer). I'm at Phase 1.",
+  "assertions": [
+    {
+      "name": "uses-story-trigger",
+      "description": "RPG version uses story trigger (traffic surge, 小杰's wrong fix). Main version introduces topic without story."
+    },
+    {
+      "name": "teaching-content-complete",
+      "description": "Full teaching content present: LB concepts, chunk map, Feynman Gate"
+    },
+    {
+      "name": "story-max-3-lines",
+      "description": "RPG story elements stay within ~3 lines per step, not dominating"
+    },
+    {
+      "name": "character-serves-learning",
+      "description": "RPG characters (小球, 小杰) connect to teaching goals, not decorative"
+    },
+    {
+      "name": "analogy-present",
+      "description": "Uses a real-life analogy to introduce Load Balancer concept"
+    },
+    {
+      "name": "engagement-quality",
+      "description": "Overall engagement: does the output make you want to continue learning?"
+    }
+  ]
+}

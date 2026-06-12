@@ -1,0 +1,15 @@
+{
+  "eval_id": 22,
+  "eval_name": "rpg-story-integration",
+  "configuration": "with_skill",
+  "expectations": [
+    {"text": "uses-story-trigger", "passed": true, "evidence": "Traffic spike → 502 errors → 小杰 proposes 64-core server (vertical scaling anti-pattern) → 小球 guides student to discover horizontal scaling + LB"},
+    {"text": "teaching-content-complete", "passed": true, "evidence": "Full teaching: What is LB, DNS fundamentals, DNS-based LB. Chunk map, Feynman Gates (Recall + Transfer) all present."},
+    {"text": "story-max-3-lines", "passed": true, "evidence": "Story elements are 2-3 lines per appearance. E.g., 小杰's Slack message is 2 lines, 小球's reaction is 1 line."},
+    {"text": "character-serves-learning", "passed": true, "evidence": "小杰's 64-core proposal = common interview anti-pattern (vertical vs horizontal). 小球's Feynman Gate questions are in-character. 小杰 asks a good question about DNS LB reliability."},
+    {"text": "analogy-present", "passed": true, "evidence": "Restaurant host analogy (same core concept), but framed through the crisis scenario which makes it more memorable."},
+    {"text": "engagement-quality", "passed": true, "evidence": "Story creates urgency ('the site is DOWN'), character conflict creates curiosity, teaching resolves the crisis. Strong narrative momentum."}
+  ],
+  "pass_rate": 1.0,
+  "notes": "Story perfectly integrated with teaching. 小杰's wrong answer is the common SD interview anti-pattern. Teaching content unchanged in depth and quality."
+}

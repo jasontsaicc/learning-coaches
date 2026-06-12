@@ -1,0 +1,35 @@
+{
+  "eval_id": 2,
+  "eval_name": "returning-student",
+  "prompt": "I just finished learning about caching and CDN (Day 6-7). Let's continue to the next topic - Database Selection.",
+  "assertions": [
+    {
+      "name": "runs-step-a-review",
+      "description": "Starts with Step A review of previous topic (caching)"
+    },
+    {
+      "name": "checks-mistake-registry",
+      "description": "References or checks Mistake Registry for unresolved items"
+    },
+    {
+      "name": "uses-analogy-intro",
+      "description": "Step B introduces Database Selection with a real-life analogy"
+    },
+    {
+      "name": "shows-chunk-map",
+      "description": "Step C presents a numbered chunk map for the topic"
+    },
+    {
+      "name": "feynman-gate-recall",
+      "description": "Asks student to explain a chunk in their own words (Recall)"
+    },
+    {
+      "name": "feynman-gate-transfer",
+      "description": "Asks an application/comparison question after recall (Transfer)"
+    },
+    {
+      "name": "teaching-quality",
+      "description": "Provides clear, beginner-friendly explanation of the concept"
+    }
+  ]
+}

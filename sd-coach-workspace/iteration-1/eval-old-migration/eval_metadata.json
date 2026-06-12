@@ -1,0 +1,31 @@
+{
+  "eval_id": 30,
+  "eval_name": "old-format-migration",
+  "prompt": "I have an existing progress.md from before the RPG update. It has Student Info, Topic Mastery, and Scorecard History but no RPG Profile or Achievements sections. I'm on Day 12, Phase 1.",
+  "assertions": [
+    {
+      "name": "detects-old-format",
+      "description": "Recognizes the progress.md is missing RPG sections"
+    },
+    {
+      "name": "adds-rpg-profile",
+      "description": "Adds RPG Profile with correct defaults (Title based on current phase)"
+    },
+    {
+      "name": "retroactive-achievements",
+      "description": "Scans existing data and retroactively unlocks earned achievements"
+    },
+    {
+      "name": "welcome-message",
+      "description": "Shows a 'Welcome to ScaleUp!' message with unlocked achievements"
+    },
+    {
+      "name": "no-learning-interruption",
+      "description": "Does not interrupt learning flow — migrates and continues with normal session"
+    },
+    {
+      "name": "correct-title",
+      "description": "Sets title to ⚙️ Systems Engineer (Phase 1)"
+    }
+  ]
+}

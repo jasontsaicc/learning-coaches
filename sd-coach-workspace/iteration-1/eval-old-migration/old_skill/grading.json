@@ -1,0 +1,15 @@
+{
+  "eval_id": 30,
+  "eval_name": "old-format-migration",
+  "configuration": "old_skill",
+  "expectations": [
+    {"text": "detects-old-format", "passed": false, "evidence": "Main branch has no concept of RPG format. Treats progress.md as standard (which it is for main)."},
+    {"text": "adds-rpg-profile", "passed": false, "evidence": "No RPG Profile feature exists in main branch."},
+    {"text": "retroactive-achievements", "passed": false, "evidence": "No achievement system exists in main branch."},
+    {"text": "welcome-message", "passed": false, "evidence": "No welcome message — proceeds as normal returning student."},
+    {"text": "no-learning-interruption", "passed": true, "evidence": "Proceeds directly to Day 12 (API Design) with full teaching flow A-H."},
+    {"text": "correct-title", "passed": false, "evidence": "No title system in main branch."}
+  ],
+  "pass_rate": 0.17,
+  "notes": "Expected result — migration assertions are RPG-specific features that don't exist in main. The one pass is 'no interruption' which main achieves by simply not having RPG."
+}
