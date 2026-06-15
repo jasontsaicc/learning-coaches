@@ -12,10 +12,10 @@
 |-------|-------|
 | **Start date** | 2026-03-04 |
 | **Current phase** | Phase 2 🌐 |
-| **Current day** | Day 23-24 done (S28) → next: Day 25 Observability |
+| **Current day** | Day 25 done (S29) → next: Day 26 Bloom Filter/Gossip → Phase 2 Gate |
 | **Language mode** | Bilingual — S27 切回繁中為主（學生英文閱讀疲勞），術語保留英文 |
-| **Session count** | 28 |
-| **Last weekly review** | 25 |
+| **Session count** | 29 |
+| **Last weekly review** | 25 (next due S32) |
 
 ---
 
@@ -36,13 +36,15 @@ Rules going forward:
 
 ## Current Session (Breakpoint)
 
-✅ **無中斷 — Session 28 (Day 23-24 Rate Limiting & Circuit Breaker) 正常完成全流程 A→H。**
+✅ **無中斷 — Session 29 (Day 25 Observability) 正常完成 A→H（Step D 併入 Drill，理論日 Discussion tier）。**
 
 **Pending PoC(park):** Circuit Breaker PoC + 分散式 Redis rate limiter → Day 31-32 Distributed Rate Limiter。Replication lag + Consistent hashing 獨立 PoC + distributed cache 完整實作 → Day 38-39。
 
-**Pending review(下次帶到):** Consistency Models（Box 1, 6/4 到期）S28 Step A recall **沒完全過** — 光譜答成 CAP（已劃界線：光譜=latency 預算 vs CAP=partition 二選一）+ W+R>N 缺「重疊/鴿籠」關鍵字（已補）。**留 Box 1，下次快速複習鞏固**。
+**Pending review(下次帶到):**
+- **大量 Review Schedule 逾期**（Security/Consistent Hashing/Distributed Cache/Caching/LB 多在 5-6 月到期）— S29 只清了 Consistency Models 一項，其餘下次 Step A 補。
+- **Observability cross-verify**: Google SRE Four Golden Signals，學生要找出我們 SLI 三類漏了 **Saturation**（飽和度）。
 
-**Phase 2 進度:** [21-22]✅ [23-24]✅ 剩 [25] Observability、[26] Bloom/Gossip → **Phase 2 Gate（設計分散式 KV store, ≥3/5）**。
+**Phase 2 進度:** [21-22]✅ [23-24]✅ [25]✅ 剩 [26] Bloom Filter/Gossip → **Phase 2 Gate（設計 multi-region session store, full 4 steps, 中途改需求, ≥4/6）**。
 
 ---
 
@@ -66,7 +68,7 @@ Rules going forward:
 | 19-20 | Consistency Models | 🟢 | — | S26 Day 19。7 chunk 全過 at interview depth。自推 strong=同步=等待=慢。光譜表(Strong/Causal/RYW/Eventual)+ Quorum W+R>N(鴿籠重疊)。Eventual≠不一致(收斂保證)misconception 打通。Vector clock(Day 20)park。Drill 4/5。|
 | 21-22 | Replication & Leader Election | 🟢 | — | S27。7 chunk 全過 at interview depth。核心因果鏈打通(硬體壞→多份→ordering→election→split-brain→lag→監控)。Single-leader=唯一 ordering 免衝突、過半票防腦裂(鴿籠)、read replica≠strong(lag) 三大點都能在設計題情境自然調用。Interview Drill 5/5 滿分。Raft 細節/Service Discovery/PoC park。|
 | 23-24 | Rate Limiting & Circuit Breaker | 🟢 | — | S28。7 chunk 全過 at interview depth (一次過沒卡)。Token Bucket(+自連 AWS T-series credits)、lazy refill(成本跟流量走不跟桶數)、Sliding Window 嚴格封頂、分散式 local counter 失效(N×limit→Redis 3代價)、Circuit Breaker Closed/Open/Half-Open(fail fast 防雪崩)。Light PoC 手打 lazy refill 驗證 rate=refillRate×time。Interview Drill「惡意爬蟲攻擊 API」5/5 滿分,自推 per-user+global 兩層+SW 護 DB+CB 防雪崩。lazy 概念當場補。CB PoC park。|
-| 25 | Observability | ⬜ | — | |
+| 25 | Observability | 🟢 | — | S29。3 chunk 全過 at interview depth。自推三支柱(Metrics→想到 CPU/mem、Logs→想到查原因、Traces→用 traceroute 點到方向對工具錯)。盲區互補表+debug 動線「Metrics 報警→Traces 指路→Logs 挖根因」。Correlation ID 機制(入口生成→header 傳遞→斷鏈風險)手寫 Go snippet。SLI/SLO/SLA 弱點鞏固(考試比喻:實際分/目標分/合約罰則,SLO 比 SLA 嚴格留 buffer)。Drill 5/6。理論日 Discussion tier 無 Full PoC。|
 | 26 | Bloom Filter, Gossip, etc. | ⬜ | Phase 2 Gate | |
 | 27-28 | URL Shortener | ⬜ | — | |
 | 29-30 | Unique ID Generator | ⬜ | — | |
@@ -101,6 +103,7 @@ Rules going forward:
 | 26 | 19 | Consistency Models (Interview Drill) | 4/5 | ✅ Think Aloud, ✅ Scope Negotiation (主動 clarify 開場), ✅ Used spectrum, ✅ Trade-off WHY (老問題改善). ❌ Operational concerns (漏 replication lag 監控收尾). 社群三功能各選對等級。|
 | 27 | 21-22 | Replication & Leader Election (Interview Drill) | **5/5 滿分** | 「設計訂單資料層,機器掛掉不掉訂單」。全 5 項過: ✅ Think Aloud, ✅ Scope(收斂 create/read order), ✅ 用 replication+election, ✅ Trade-off WHY(C→sync), ✅ Operational(補回 lag/election 監控,Day 19 弱點收斂). read-after-write 一口氣列三解法無提示。改善點: 選 C 時主動講反面代價(partition 下不了單也賠錢)。|
 | 28 | 23-24 | Rate Limiting & Circuit Breaker (Interview Drill) | **5/5 滿分** | 「惡意爬蟲攻擊 API,DB 1000 QPS 上限 vs 50K 攻擊」。全 5 項過: ✅ Think Aloud, ✅ Scope(開場三問+主動提 WAF), ✅ 用 Rate Limiter+Circuit Breaker 雙主角, ✅ Trade-off WHY(global→per-user 被 challenge 後自修正+SW 護硬上限), ✅ Operational(reject數/CB狀態/P99). 改善點: 第一次答常太精簡(「global 一個桶」),被追問才展開,可主動把 why+反面代價一次講完。|
+| 29 | 25 | Observability (Interview Drill) | **5/6** | 「單體拆 30 微服務,結帳慢+失敗查不到」。✅ Think Aloud, ✅ Scope(定位≠修復圈得好+問 scale/團隊配合), ✅ 用三支柱+trace-id+P99, 🟡 Trade-off WHY(多半被追問才講), ✅ Operational(sidecar→ELK,整題即 ops), ✅ Hint response(metrics-first + P99 兩個 redirect 都接住自修正). 改善點: 答案太精簡 + drill 中途問面試官「提供不同思路/提示」(S8/S24 握不住球老根:問需求 OK、問答案 NG)。Best: 沒等講完就抓到 tail latency 並調用今天的 P99。|
 
 ---
 
@@ -153,6 +156,10 @@ Rules going forward:
 | 28 | 23-24 | Rate Limiting | 不清楚 lazy 是什麼 — 沒有 lazy/eager(敲門才算 vs 背景一直算)這組 CS 概念 | ✅ Resolved (S28, 集點卡比喻+「成本跟流量走不跟桶數走」打通,後續 drill 自己答出 N×limit) |
 | 28 | 23-24 | Rate Limiting | Interview Drill 選 global 一個桶 — 只想「保護 DB」漏「公平性」,沒想到爬蟲會吸乾全局桶餓死正常 user | ✅ Resolved (S28, 被 challenge 後自己推到 per-user+global 兩層) |
 | 28 | 23-24 | Circuit Breaker | 概念懂但講不出三狀態術語名 (Closed/Open/Half-Open) | ✅ Resolved (S28, 補上術語對照表,白話對應正式名稱) |
+| 29 | 25 | Observability | 追蹤請求路徑想用 traceroute (那是 L3 追路由器;追請求跨服務要 distributed tracing 應用層) | ✅ Resolved (S29, 「tracing = 應用層的 traceroute」校準,方向本來就對) |
+| 29 | 25 | Observability | Debug 動線先看 trace (應先看 metrics 當雷達指方向→trace 定位→log 挖根因) | ✅ Resolved (S29, 補「Metrics 報警→Traces 指路→Logs 挖根因」口訣) |
+| 29 | 19 | Consistency (review) | 複習時 recall「consistency = 三個選項(strong/RYW/eventual)」沒抓到是光譜+軸 | ✅ Resolved (S29, 台北/倫敦同步比喻重建「軸=新鮮度 vs 等待成本」,自推出 Strong 慢在等同步) |
+| 29 | 25 | Interview habit | Drill 答案太精簡(被追問才展開)+中途問面試官「提供不同思路/提示」要參考答案 | 🟡 Improving (S8/S24 握不住球老根變體。分辨點:問「需求」OK、問「答案」NG。先大膽斷言+一次講足 why 再問取捨) |
 
 ---
 
@@ -172,6 +179,7 @@ Rules going forward:
 | Replication & Leader Election | Replication stores data on multiple nodes to survive hardware failure; the key design question is who accepts writes — a single leader gives one total ordering so conflicts are impossible, while multi-leader/leaderless buys write availability at the cost of conflict resolution, and leader election uses majority quorum to prevent split-brain. |
 | Consistency Models | Consistency is a spectrum, not on/off — a latency budget from Strong (everyone always sees the latest, most expensive) to Eventual (stale now but guaranteed to converge, cheapest); you tune it with quorums (W+R>N forces read/write overlap) and pick per-operation by how much staleness the business tolerates. |
 | Rate Limiting & Circuit Breaker | Rate limiting protects the backend and ensures fairness — Token Bucket allows bursts while Sliding Window strictly caps, and you layer per-user limits for fairness plus a global cap to protect downstream; a Circuit Breaker complements it on outbound calls by failing fast when a dependency is down (Closed→Open→Half-Open) to prevent cascading failure. |
+| Observability | Observability answers three different questions with three pillars — Metrics (how much / which service is unhealthy), Logs (what happened / why), and Traces (where / which hop in the request is slow) — stitched together by a correlation ID so a single request's journey across services forms one timeline, letting you localize problems across thousands of nodes without ssh-ing into any of them. |
 
 ---
 
@@ -180,10 +188,10 @@ Rules going forward:
 | Field | Value |
 |-------|-------|
 | **Title** | 🌐 Distributed Architect |
-| **Current streak** | 1 🔥 (S28 2026-06-09, 距上次 6/5 隔 4 天 streak 重置) |
+| **Current streak** | 1 🔥 (S29 2026-06-15, 距上次 6/9 隔 6 天 streak 重置) |
 | **Longest streak** | 4 |
-| **Last session date** | 2026-06-09 |
-| **Last story summary** | Session 28 完成 (Day 23-24) — Karen 衝進來說 API 被惡意爬蟲打爆、DB 快撐不住。學生手打 token bucket lazy refill PoC(驗證 rate=refillRate×time),Simon Drill 3/3 無提示答出分散式 N×limit 陷阱。Interview Drill「設計 API 防護層」拿 5/5,從 global 一個桶被 challenge 後自推 per-user+global 兩層+Sliding Window 護 DB 硬上限+Circuit Breaker 防雪崩。Day 23-24 達成 🟢。|
+| **Last session date** | 2026-06-15 |
+| **Last story summary** | Session 29 完成 (Day 25 Observability) — 半夜事故花 3 小時查不到兇手,小球讓學生主導建 observability stack。學生自推三支柱(Metrics/Logs/Traces),用 traceroute 類比點出 distributed tracing 靈魂。SLI/SLO/SLA 弱點用考試比喻鞏固。Interview Drill「30 微服務結帳慢查不到」拿 5/6,接住 metrics-first + P99 兩個 redirect,沒等講完就抓到 tail latency。Day 25 達成 🟢,Phase 2 剩 Day 26 即達 Gate。|
 
 ---
 
@@ -218,9 +226,10 @@ Rules going forward:
 | Distributed Cache + CAP | 2 | 2026-06-06 (S26 recall pass「partition 才選 CP/AP」,Box 1→2) |
 | Caching & CDN | 2 | 2026-06-07 (S27 recall PASS「寫時刪 cache 不更新,避 race condition」,Box 1→2) |
 | Load Balancer | 2 | 2026-06-05 (WR3 recall 4/5 pass, Box 1→2) |
-| Consistency Models | 1 | 2026-06-04 (S26 新學,Box 1。S28 recall 未完全過,留 Box 1) |
-| Replication & Leader Election | 1 | 2026-06-06 (S27 新學,Box 1) |
-| Rate Limiting & Circuit Breaker | 1 | 2026-06-10 (S28 新學,Box 1) |
+| Consistency Models | 1 | 2026-06-18 (S29 複習:cold recall 失敗→重教後重建「光譜=軸」,需 scaffolding,留 Box 1) |
+| Replication & Leader Election | 1 | 2026-06-06 (S27 新學,Box 1, overdue) |
+| Rate Limiting & Circuit Breaker | 1 | 2026-06-10 (S28 新學,Box 1, overdue) |
+| Observability | 1 | 2026-06-16 (S29 新學,Box 1) |
 
 ---
 
@@ -229,6 +238,8 @@ Rules going forward:
 | Topic | Question | Status |
 |-------|----------|--------|
 | Message Queue | Long polling in MQ (長輪詢) | ⏸ Parked (likely relevant at Day 33-34 Notification System) |
+| Observability | Trace/log sampling (head-based vs tail-based) + metrics high-cardinality 解法 | ⏸ Parked (深度天花板,面試不問細節。Follow-up preview 已預告,Day 31-32/46-47 可拉) |
+| Observability | Sidecar 本身掛了/拖慢主服務 → observability 自身可靠性與資源隔離 | ⏸ Parked (Drill follow-up 預告,下次可帶) |
 
 ---
 
