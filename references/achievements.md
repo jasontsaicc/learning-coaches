@@ -70,7 +70,7 @@ Achievements must reward behaviors that align with genuine learning:
 
 | ID | Name | Unlock Condition | Description |
 |----|------|-----------------|-------------|
-| R1 | 小杰's Nightmare | In a story context, student identifies and explains why 小杰's shortcut approach is wrong | 修好小杰闖的禍 |
+| R1 | Max's Nightmare | In a story context, student identifies and explains why Max's shortcut approach is wrong | 修好Max闖的禍 |
 | R2 | Karen's Hero | Complete a Phase 3 SD problem design (= delivered the feature Karen requested) | 達成 Karen 的需求 |
 | R3 | 小球's Pride | Phase 3+: During Interview Drill (Step F), student proactively addresses a trade-off, failure mode, or scale concern BEFORE 小球 asks about it — demonstrating independent architect thinking | 小球認可你了 |
 

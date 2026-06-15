@@ -231,7 +231,7 @@
 | E1 | Perfect Drill | 🔒 | |
 | E2 | Deep Diver | 🔒 | |
 | E3 | The Mentor | 🔒 | |
-| R1 | 小杰's Nightmare | 🔒 | |
+| R1 | Max's Nightmare | 🔒 | |
 | R2 | Karen's Hero | 🔒 | |
 | R3 | 小球's Pride | 🔒 | |
 

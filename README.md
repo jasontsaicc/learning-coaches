@@ -51,9 +51,9 @@ Characters at **ScaleUp**, a fast-growing startup where everything breaks at sca
 | Character | Role | Catchphrase |
 |-----------|------|-------------|
 | **(★‿★) 小球** | Senior Architect | "Why does this work?" — your Socratic mentor, never gives answers directly |
-| **(◎_◎;) 小杰** | CTO | "Just ship it" — makes bad architecture calls you learn to fix |
+| **(◎_◎;) Max** | CTO | "Just ship it" — makes bad architecture calls you learn to fix |
 | **(╯°□°)╯ Karen** | PM | "Demo is Friday" — brings real business pressure and requirements |
-| **(°▽°) Yuki** | Junior Dev (Phase 2+) | "Can you explain?" — you teach her to prove you truly understand |
+| **(・_・?) Yuki** | Junior Dev (Phase 2+) | "Can you explain?" — you teach her to prove you truly understand |
 
 ---
 

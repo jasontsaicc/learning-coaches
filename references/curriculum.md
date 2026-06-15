@@ -23,8 +23,8 @@ Skipped units aren't lost: their concepts get pulled into design problems as nee
 
 ### Day 1: What SD Interviews Actually Test
 **Prerequisites:** None (entry point)
-**Story:** 你的第一天。認識團隊。（角色：小球、小杰、Karen）
-**Story beats:** 1. 小球帶你參觀辦公室，介紹團隊 2. 小杰隨口問「你會設計系統嗎？」你愣住 3. 小球安慰：「沒關係，這就是我們要一起學的」
+**Story:** 你的第一天。認識團隊。（角色：小球、Max、Karen）
+**Story beats:** 1. 小球帶你參觀辦公室，介紹團隊 2. Max隨口問「你會設計系統嗎？」你愣住 3. 小球安慰：「沒關係，這就是我們要一起學的」
 - The 4 scoring dimensions: Problem Navigation, Design, Technical Depth, Trade-offs
 - Analyze good vs bad answers for the same question
 - **Discussion**: Deconstruct a real SD interview rubric
@@ -32,7 +32,7 @@ Skipped units aren't lost: their concepts get pulled into design problems as nee
 ### Day 2: Back-of-Envelope Estimation
 **Prerequisites:** Day 1
 **Story:** 被問到容量估算問題，答不出來。（角色：Karen）
-**Story beats:** 1. Karen 問「新功能需要多少儲存空間？」你算不出來 2. 小杰隨口猜一個數字，被小球指出差了 100 倍 3. 小球教你「工程師估算不是猜，是有方法的」
+**Story beats:** 1. Karen 問「新功能需要多少儲存空間？」你算不出來 2. Max隨口猜一個數字，被小球指出差了 100 倍 3. 小球教你「工程師估算不是猜，是有方法的」
 - Powers of 2, latency numbers every engineer should know
 - Practice: Estimate YouTube daily storage, Twitter QPS
 - **Exercise**: Build an estimation cheat sheet you actually understand
@@ -62,8 +62,8 @@ Skipped units aren't lost: their concepts get pulled into design problems as nee
 
 ⚠️ **Common Misconception:** "L7 is always better than L4." No — L4 has lower latency and is better for non-HTTP protocols and raw throughput. L7 gives you content-based routing but adds processing overhead.
 
-**Story:** 流量暴增，服務中斷。小杰提出了錯誤解法。（角色：小杰、小球）
-**Story beats:** 1. Karen 衝進來：「用戶回報網站掛了！」 2. 小杰說「加 RAM 就好」，小球搖頭 3. 小球問你：「一台機器的極限是什麼？超過了怎麼辦？」
+**Story:** 流量暴增，服務中斷。Max提出了錯誤解法。（角色：Max、小球）
+**Story beats:** 1. Karen 衝進來：「用戶回報網站掛了！」 2. Max說「加 RAM 就好」，小球搖頭 3. 小球問你：「一台機器的極限是什麼？超過了怎麼辦？」
 **Derivation:** ✅ 推導鏈 #1 — 單機硬體上限 → Load Balancer
 
 **Day 4 — DNS + LB Fundamentals:**
@@ -101,8 +101,8 @@ Skipped units aren't lost: their concepts get pulled into design problems as nee
 
 ### Day 8-9: Database Selection
 **Prerequisites:** Day 3
-**Story:** 新功能需要選 DB，團隊意見不一。（角色：小杰）
-**Story beats:** 1. 小杰堅持用 MongoDB 因為「NoSQL 比較潮」 2. Karen 問：「哪個選擇不會讓我們半年後後悔？」 3. 小球：「不是哪個比較好，而是你的 workload 長什麼樣」
+**Story:** 新功能需要選 DB，團隊意見不一。（角色：Max）
+**Story beats:** 1. Max堅持用 MongoDB 因為「NoSQL 比較潮」 2. Karen 問：「哪個選擇不會讓我們半年後後悔？」 3. 小球：「不是哪個比較好，而是你的 workload 長什麼樣」
 **Derivation:** ✅ 推導鏈 #3 — 讀寫模式決定最佳儲存結構 → Database Selection
 
 **Day 8 — SQL vs NoSQL Concepts:**
@@ -122,7 +122,7 @@ Skipped units aren't lost: their concepts get pulled into design problems as nee
 ⚠️ **Common Misconception:** "Kafka has exactly-once delivery." Kafka has idempotent producers + transactional consumers, which achieves effectively-once processing. True exactly-once in distributed systems requires end-to-end idempotency — the broker alone cannot guarantee it.
 
 **Story:** 促銷活動，訂單處理異常。出現重複處理。（角色：Karen）
-**Story beats:** 1. 促銷開始 5 分鐘，Karen 收到用戶反映「被扣了兩次款」 2. 小杰：「重啟消費者應該就好了吧？」結果更慘 3. 小球帶你看 log：「你看到問題了嗎？消費者處理太慢，rebalance 導致重複消費」
+**Story beats:** 1. 促銷開始 5 分鐘，Karen 收到用戶反映「被扣了兩次款」 2. Max：「重啟消費者應該就好了吧？」結果更慘 3. 小球帶你看 log：「你看到問題了嗎？消費者處理太慢，rebalance 導致重複消費」
 **Derivation:** ✅ 推導鏈 #4 — 同步呼叫的級聯故障 → Message Queue
 
 **Day 10 — Queue Concepts + Semantics:**
@@ -139,7 +139,7 @@ Skipped units aren't lost: their concepts get pulled into design problems as nee
 ### Day 12-13: API Design
 **Prerequisites:** Day 3, Day 4-5 (LB)
 **Story:** 行動 App 要上線，API 需要重新設計。（角色：小球）
-**Story beats:** 1. 行動端工程師抱怨：「一個 API call 回 50 個欄位，我只要 3 個」 2. 小杰：「那就多開幾個 endpoint 啊」小球皺眉 3. 小球：「有沒有辦法讓客戶端自己選要什麼？」
+**Story beats:** 1. 行動端工程師抱怨：「一個 API call 回 50 個欄位，我只要 3 個」 2. Max：「那就多開幾個 endpoint 啊」小球皺眉 3. 小球：「有沒有辦法讓客戶端自己選要什麼？」
 **Derivation:** ✅ 推導鏈 #5 — 不同客戶端的資料需求差異 → API Design
 
 **Day 12 — API Styles:**
@@ -153,8 +153,8 @@ Skipped units aren't lost: their concepts get pulled into design problems as nee
 
 ### Day 14: Security & Authentication
 **Prerequisites:** Day 12-13 (API Design)
-**Story:** 資安稽核。發現安全漏洞。（角色：小杰）
-**Story beats:** 1. 資安稽核報告出來，小杰臉色發白：「我把 API key 放在 URL query string 裡...」 2. 小球冷靜地說：「我們一個一個修」 3. 修復過程中發現 JWT token 沒設過期時間
+**Story:** 資安稽核。發現安全漏洞。（角色：Max）
+**Story beats:** 1. 資安稽核報告出來，Max臉色發白：「我把 API key 放在 URL query string 裡...」 2. 小球冷靜地說：「我們一個一個修」 3. 修復過程中發現 JWT token 沒設過期時間
 **Derivation:** ✅ 推導鏈 #6 — HTTP 明文傳輸的物理風險 → Security & Auth
 
 - JWT vs Session-based authentication
@@ -169,7 +169,7 @@ Skipped units aren't lost: their concepts get pulled into design problems as nee
 ⚠️ **Common Misconception:** "Consistent hashing eliminates all data movement." No — it minimizes movement to K/N keys on average when a node joins/leaves, but rebalancing still happens and virtual nodes affect distribution uniformity.
 
 **Story:** 資料庫需要重新分片。搬移過程影響服務。（角色：小球）
-**Story beats:** 1. 資料庫快撐不住，需要從 4 台擴到 5 台 2. 小杰做了 hash mod 5 的遷移，結果 80% 的資料要搬家 3. 小球：「有沒有一種方法，加一台只搬 20% 的資料？」
+**Story beats:** 1. 資料庫快撐不住，需要從 4 台擴到 5 台 2. Max做了 hash mod 5 的遷移，結果 80% 的資料要搬家 3. 小球：「有沒有一種方法，加一台只搬 20% 的資料？」
 **Derivation:** ✅ 推導鏈 #7 — hash mod N 的資料重分配問題 → Consistent Hashing
 
 **Day 15 — Theory:**
@@ -247,8 +247,8 @@ A student may still request standalone days ("教我 CAP 就好"); honor it, wit
 
 ⚠️ **Common Misconception:** "Read replicas give you strong consistency." No — replicas have replication lag (milliseconds to seconds). Read-after-write consistency requires reading from the leader, or using techniques like session stickiness or synchronous replication.
 
-**Story:** 主資料庫故障。小杰的回應讓問題更嚴重。（角色：小杰）
-**Story beats:** 1. 凌晨 3 點 on-call 警報：primary DB 掛了 2. 小杰 半夢半醒手動 promote replica，但選了 lag 最大的那台，丟了 30 秒資料 3. 小球事後覆盤：「如果有自動 failover + 正確的 replica 選擇策略，就不會發生這種事」
+**Story:** 主資料庫故障。Max的回應讓問題更嚴重。（角色：Max）
+**Story beats:** 1. 凌晨 3 點 on-call 警報：primary DB 掛了 2. Max 半夢半醒手動 promote replica，但選了 lag 最大的那台，丟了 30 秒資料 3. 小球事後覆盤：「如果有自動 failover + 正確的 replica 選擇策略，就不會發生這種事」
 **Derivation:** ✅ 推導鏈 #10 — 硬體年故障率 2-10%，單點 = 單點故障 → Replication
 
 **Day 21 — Replication Patterns:**

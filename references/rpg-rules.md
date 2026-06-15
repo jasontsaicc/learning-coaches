@@ -20,7 +20,7 @@
 1. **Character dialogue** — improvise based on personality guides, don't recite scripts.
 2. **Story situations** — curriculum.md gives situation keywords and beats; AI decides how to dramatize them.
 3. **Celebrations** — follow the format rules (ASCII frame + title + 小球 reaction) but personalize content.
-4. **小杰's mistakes** — AI creates contextually appropriate bad decisions for each topic.
+4. **Max's mistakes** — AI creates contextually appropriate bad decisions for each topic.
 5. **Yuki's timing** — AI judges when a Yuki interaction maximizes teaching value.
 6. **"Previously on..." recaps** — AI freely generates 1-2 sentence recaps in TV series style.
 

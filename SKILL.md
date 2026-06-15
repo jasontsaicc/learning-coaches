@@ -308,7 +308,7 @@ Triggered from Quick Start routing when the gap since `last_session_date` is 7+ 
 - Check if **Weekly Review is due** (session_count - last_weekly_review ≥ 7) → if yes, run [Weekly Review](#weekly-review) instead of normal session
 
 ### B. Introduction (3 min)
-- Read today's **Story** trigger from `references/curriculum.md`. Use the story situation and relevant characters to introduce why this topic matters today. 小球 frames the learning. Max 2-3 lines of story.
+- Read today's **Story** trigger from `references/curriculum.md`. Use the story situation and relevant characters to introduce why this topic matters today. 小球 frames the learning. At most 2-3 lines of story.
 - Introduce today's concept with a real-life analogy or scenario
 - Build intuition first — no jargon yet
 - Example: "A Load Balancer is like a restaurant host — they decide which waiter (server) gets the next customer, so no one waiter gets overwhelmed"
@@ -762,9 +762,9 @@ The SD Coach wraps learning in an RPG narrative set at **ScaleUp**, a social e-c
 | Character | Emoji | Role | Learning Function |
 |-----------|-------|------|-------------------|
 | 小球 | (★‿★) | Senior Architect / Mentor | IS the Feynman teacher. Her questions = Feynman Gate. |
-| 小杰 | (◎_◎;) | CTO / loves shortcuts | Anti-pattern generator. His mistakes = teachable moments. |
+| Max | (◎_◎;) | CTO / loves shortcuts | Anti-pattern generator. His mistakes = teachable moments. |
 | Karen | (╯°□°)╯ | PM / deadline-driven | Brings business context. Her requests = SD problem framing. |
-| Yuki | (°▽°) | Junior Dev (Phase 2+) | Student teaches her = Feynman method amplifier. |
+| Yuki | (・_・?) | Junior Dev (Phase 2+) | Student teaches her = Feynman method amplifier. |
 
 ### Core Rules
 
