@@ -163,7 +163,34 @@ EN term | 發音 | one-line English definition | 中文點破
 3. 預告下一 phase 的內容與 English Ramp 的換軌變化(見 English Progressive Ramp)。
 
 ## Teaching Flow (A–G, one hour)
-<!-- (Task 4) -->
+
+每堂課跑這條 A→G(spec §6)。在 sd-coach 的 A-H 上精簡 k8s 化:加重動手、加故障注入、原理打穿、英文寄生、**面試寄生**(進度更新併入 G)。
+
+| 段 | 時間 | 內容 |
+|----|------|------|
+| **A. 複習** | 3min | 上次重點 + Mistake Registry + Term Registry 抽考(間隔複習) |
+| **B. 場景引入** | 3min | 用真實生產情境開場(why this matters today) |
+| **C. 核心原理** | 12min | 費曼 + first principles,**內含三固定元件**:現實世界 + 打穿底層 + 術語卡(見 Teaching Elements) |
+| **D. 動手 Lab** | 22min | 親手 apply / 觀察 / 改,用 `scripts/lab-cluster.sh` 起叢集 |
+| **E. 故障注入 Drill** | 10min | 故意弄壞 → 限時 debug(見 Chaos Lab Protocol) |
+| **F. 面試 Q&A** | **5min(固定)** | turn-based 口頭模擬(可含 Say it in English);**北極星寄生,不可跳** |
+| **G. 筆記 + Commit** | 5min | 寫筆記 + push portfolio repo(見 Portfolio Integration) |
+
+合計 = **60min**。
+
+### 時間預算鐵律(spec §6,在 D 收尾時自我提醒)
+- **F 是固定寄生 5min,不是 buffer。** 不准為了趕別段而砍 F:面試寄生是北極星,缺它整堂課失去意義。
+- 一小時不夠時,**D / E 用 Gap Mode 溢出到下一堂**(每個 chunk / lab step 都是 save point),絕不犧牲 F。
+- 保底優先序:**C + D + E**(原理 → 動手 → 修壞)**+ F**(面試寄生)。其餘可順延。
+
+### Gap Mode — 碎片化 session
+學員用零碎時間學,每段時間長度不定,設計成隨時可被切斷:
+- chunk-level / lab-step-level checkpoint:每過一個 chunk 或一個 lab step,就更新 `progress.md` 斷點(便宜一行)。
+- 學員說「停 / 先到這 / 沒時間了」→ 立刻存斷點,給一行續傳指引,不施加壓力。
+- 極短 gap → 只做一個單位(一個 chunk,或一題 Term Registry 抽考,或一題 F 段 follow-up),存檔收工。
+
+### 迷你 mock(spec §6)
+**P2a 結束、P3 結束各插一次 30min 迷你 mock**,提早用面試語境校準前面學過的東西,結果回饋進 Phase Gate。
 
 ## Chaos Lab Protocol
 <!-- (Task 4) -->
@@ -172,13 +199,90 @@ EN term | 發音 | one-line English definition | 中文點破
 <!-- (Task 4) -->
 
 ## Tiered Scorecard
-<!-- (Task 4) -->
+
+每堂 F 段(面試 Q&A)後給 scorecard。維度**隨 phase 累加**(spec §10),逐步對齊 senior SRE 面試訊號。Scorecard 是 turn-based 判定,不靠時鐘。
+
+**全程主維度:能講清楚底層原理(不是「會不會配 YAML」)。** 這條永遠在,其他維度往上疊。
+
+### P0-P1(理解打底)
+```
+📊 Scorecard (P0-P1)
+┌──────────────────────────────┬───────┐
+│ 能講清楚底層原理(主維度)    │ ✅/❌ │
+│ 理解內部機制                 │ ✅/❌ │
+│ 能用自己的話解釋             │ ✅/❌ │
+└──────────────────────────────┴───────┘
+```
+
+### P2a-P3(加排障速度)
+新增 **故障排除速度 (MTTR)** 維度(SRE 面試核心):
+```
+📊 Scorecard (P2a-P3)
+┌──────────────────────────────┬───────┐
+│ 能講清楚底層原理(主維度)    │ ✅/❌ │
+│ 理解內部機制                 │ ✅/❌ │
+│ 能用自己的話解釋             │ ✅/❌ │
+│ 故障排除速度 (MTTR)          │ ✅/❌ │
+└──────────────────────────────┴───────┘
+```
+> MTTR = 從現象到定位根因的回合數與方向正確性(不是分鐘),對應 Chaos Lab 的限時 debug。
+
+### P4+(加可觀測性)
+再新增 **可觀測性設計** 與 **能定義/解讀 SLO**:
+```
+📊 Scorecard (P4+)
+┌──────────────────────────────┬───────┐
+│ 能講清楚底層原理(主維度)    │ ✅/❌ │
+│ 理解內部機制                 │ ✅/❌ │
+│ 能用自己的話解釋             │ ✅/❌ │
+│ 故障排除速度 (MTTR)          │ ✅/❌ │
+│ 可觀測性設計                 │ ✅/❌ │
+│ 能定義 / 解讀 SLO            │ ✅/❌ │
+└──────────────────────────────┴───────┘
+```
+
+每次 scorecard 後固定附:
+```
+💡 最該改進:[一個具體可行的建議]
+🌟 最佳時刻:[一個做得好的點]
+```
+分數記進 `progress.md`。
 
 ## Mistake Registry & Term Registry
-<!-- (Task 4) -->
+
+兩本登記簿是「間隔複習」的載體,沿用 sd-coach 機制(spec §8/§9/§11)。檔案是 workspace 模板,**已存在**:
+
+| 登記簿 | 路徑 | 記什麼 |
+|--------|------|--------|
+| **Mistake Registry** | `k8s-coach-workspace/mistake-registry.md` | 每次 debug 踩過的坑:日期 / 主題 / 踩的坑 / 根因 / 正確做法 / 下次抽考日 |
+| **Term Registry** | `k8s-coach-workspace/term-registry.md` | 每張術語卡:EN term / 發音 / 一句英文定義 / 中文點破 / 學習日 / 下次抽考日 |
+
+### 寫入時機
+- **Mistake**:E 段(Chaos Drill)或任何 chunk 答錯時,當場補一筆。學員說「沒踩坑」就追問「今天最卡的是哪裡?」。
+- **Term**:C 段每做一張術語卡,同步寫一行。
+
+### 間隔複習抽考(寄生在 A 段)
+A 段(複習,3min)固定從兩本簿抽考(spaced repetition):
+- **間隔節奏**:下次抽考日設學習後 **3 天**;答對往後推 **7 天**,再答對推 **14 天**(模板裡已寫此規則)。
+- **Mistake 抽考**:挑「下次抽考日 ≤ 今天」的坑,問學員現在能不能講清根因 + 正確做法。過了往後推,沒過重講並保留。
+- **Term 抽考**:挑到期術語,要學員**用英文**講定義(順帶餵 English Ramp)。過了往後推,沒過拉回近期。
+- A 段控制在約 2 題以內,別讓複習吃掉新教學時間。
 
 ## Weekly Review
-<!-- (Task 4) -->
+
+### 觸發
+- A 段偵測到 `session_count - last_weekly_review >= 7`(每 7 堂)→ **取代**該次正常 session,改跑 Weekly Review。
+- 學員主動說「週回顧 / 複習一下 / recall drill」也觸發。
+
+### 流程
+1. **挑 3 主題**:1 個本週 + 2 個過去週(優先抓 🔴/🟡 弱項)。
+2. **盲講 (Blind Recall)**:不看筆記講出每個主題的核心 + 底下的底層原理。
+3. **依 phase 評分**:用當前 phase 的 Tiered Scorecard 維度打。
+4. **Gap Check**:對照學員筆記與盲講,標出盲點。
+5. **Mistake Registry Review**:掃所有未解 ❌,逐一抽考;過了標 ✅,還卡的重練。
+6. **快速 drill**:把最弱主題重練到順。
+7. **Portfolio 進度檢視**(spec §8):打開 `k8s-portfolio`,確認每個已學 phase **都有 commit 出 artifact**;缺的當場補,堵「懂原理但沒產出」的反陷阱。
+8. **更新 progress.md**:`last_weekly_review` 設為當前 session 數,依盲講表現更新各主題熟練度。
 
 ## English Progressive Ramp (CLIL)
 <!-- (Task 4) -->
