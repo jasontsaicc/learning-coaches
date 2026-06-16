@@ -12,9 +12,9 @@
 |-------|-------|
 | **Start date** | 2026-03-04 |
 | **Current phase** | Phase 2 🌐 |
-| **Current day** | Day 25 done (S29) → next: Day 26 Bloom Filter/Gossip → Phase 2 Gate |
+| **Current day** | Day 26 done (S30) → **Phase 2 Gate next**（multi-region session store, full 4 steps, 中途改需求, ≥4/6）|
 | **Language mode** | Bilingual — S27 切回繁中為主（學生英文閱讀疲勞），術語保留英文 |
-| **Session count** | 29 |
+| **Session count** | 30 |
 | **Last weekly review** | 25 (next due S32) |
 
 ---
@@ -36,15 +36,15 @@ Rules going forward:
 
 ## Current Session (Breakpoint)
 
-✅ **無中斷 — Session 29 (Day 25 Observability) 正常完成 A→H（Step D 併入 Drill，理論日 Discussion tier）。**
+✅ **無中斷 — Session 30 (Day 26 Bloom Filter & Gossip) 正常完成 A→H（理論日 Discussion tier，無 Full PoC）。Phase 2 內容全部學完。**
 
-**Pending PoC(park):** Circuit Breaker PoC + 分散式 Redis rate limiter → Day 31-32 Distributed Rate Limiter。Replication lag + Consistent hashing 獨立 PoC + distributed cache 完整實作 → Day 38-39。
+**Next session = Phase 2 Gate**（設計 multi-region session store, full 4 steps, 中途改需求, Scorecard ≥4/6）。注意 gate **不是** KV/cache 題（anchor problem 已涵蓋），是 session store，測 transfer。
+
+**Pending PoC(park):** Circuit Breaker PoC + 分散式 Redis rate limiter → Day 31-32。Replication lag + Consistent hashing 獨立 PoC + distributed cache 完整實作 → Day 38-39。
 
 **Pending review(下次帶到):**
-- **大量 Review Schedule 逾期**（Security/Consistent Hashing/Distributed Cache/Caching/LB 多在 5-6 月到期）— S29 只清了 Consistency Models 一項，其餘下次 Step A 補。
-- **Observability cross-verify**: Google SRE Four Golden Signals，學生要找出我們 SLI 三類漏了 **Saturation**（飽和度）。
-
-**Phase 2 進度:** [21-22]✅ [23-24]✅ [25]✅ 剩 [26] Bloom Filter/Gossip → **Phase 2 Gate（設計 multi-region session store, full 4 steps, 中途改需求, ≥4/6）**。
+- **大量 Review Schedule 逾期**（Security/Consistent Hashing/Distributed Cache/Caching 多在 5-6 月到期）— S30 清了 Replication(讀recall) + LSM 補回 Box1，其餘下次 Gate 前 Step A 補。
+- ✅ **Observability cross-verify 已結**：學生找出漏掉 **Saturation**（四 Golden Signals = Latency/Traffic/Errors/Saturation）→ 觸發 C5 Myth Buster 成就。
 
 ---
 
@@ -68,8 +68,8 @@ Rules going forward:
 | 19-20 | Consistency Models | 🟢 | — | S26 Day 19。7 chunk 全過 at interview depth。自推 strong=同步=等待=慢。光譜表(Strong/Causal/RYW/Eventual)+ Quorum W+R>N(鴿籠重疊)。Eventual≠不一致(收斂保證)misconception 打通。Vector clock(Day 20)park。Drill 4/5。|
 | 21-22 | Replication & Leader Election | 🟢 | — | S27。7 chunk 全過 at interview depth。核心因果鏈打通(硬體壞→多份→ordering→election→split-brain→lag→監控)。Single-leader=唯一 ordering 免衝突、過半票防腦裂(鴿籠)、read replica≠strong(lag) 三大點都能在設計題情境自然調用。Interview Drill 5/5 滿分。Raft 細節/Service Discovery/PoC park。|
 | 23-24 | Rate Limiting & Circuit Breaker | 🟢 | — | S28。7 chunk 全過 at interview depth (一次過沒卡)。Token Bucket(+自連 AWS T-series credits)、lazy refill(成本跟流量走不跟桶數)、Sliding Window 嚴格封頂、分散式 local counter 失效(N×limit→Redis 3代價)、Circuit Breaker Closed/Open/Half-Open(fail fast 防雪崩)。Light PoC 手打 lazy refill 驗證 rate=refillRate×time。Interview Drill「惡意爬蟲攻擊 API」5/5 滿分,自推 per-user+global 兩層+SW 護 DB+CB 防雪崩。lazy 概念當場補。CB PoC park。|
-| 25 | Observability | 🟢 | — | S29。3 chunk 全過 at interview depth。自推三支柱(Metrics→想到 CPU/mem、Logs→想到查原因、Traces→用 traceroute 點到方向對工具錯)。盲區互補表+debug 動線「Metrics 報警→Traces 指路→Logs 挖根因」。Correlation ID 機制(入口生成→header 傳遞→斷鏈風險)手寫 Go snippet。SLI/SLO/SLA 弱點鞏固(考試比喻:實際分/目標分/合約罰則,SLO 比 SLA 嚴格留 buffer)。Drill 5/6。理論日 Discussion tier 無 Full PoC。|
-| 26 | Bloom Filter, Gossip, etc. | ⬜ | Phase 2 Gate | |
+| 25 | Observability | 🟢 | — | S29。3 chunk 全過 at interview depth。自推三支柱(Metrics→想到 CPU/mem、Logs→想到查原因、Traces→用 traceroute 點到方向對工具錯)。盲區互補表+debug 動線「Metrics 報警→Traces 指路→Logs 挖根因」。Correlation ID 機制(入口生成→header 傳遞→斷鏈風險)手寫 Go snippet。SLI/SLO/SLA 弱點鞏固(考試比喻:實際分/目標分/合約罰則,SLO 比 SLA 嚴格留 buffer)。Drill 5/6。理論日 Discussion tier 無 Full PoC。S30 cross-verify 補上 Saturation(第四 Golden Signal,leading indicator)。|
+| 26 | Bloom Filter & Gossip | 🟢 | Phase 2 Gate(next) | S30。5 chunk 全過 at interview depth。Bloom:燈泡/蓋章比喻打通機制,親手踩 false positive 陷阱(全亮≠一定在,hash 碰撞重疊),DB 當最終裁判。空間 8GB→1.2GB 省85%。落地 local/RedisBloom/SSTable 內建三放法+快取穿透應用。Gossip:八卦接力擴散 O(N²)→O(log N)回合,隨機挑 peer 抗分區,去中心化無 SPOF。共同哲學「近似/最終換效率」自己抽不出但兩實例講全。Interview Drill「爬蟲 100億 URL 去重」5/6,自己把 local Bloom 同步問題連到 Gossip(零提示)。理論日 Discussion tier。|
 | 27-28 | URL Shortener | ⬜ | — | |
 | 29-30 | Unique ID Generator | ⬜ | — | |
 | 31-32 | Distributed Rate Limiter | ⬜ | — | |
@@ -104,6 +104,7 @@ Rules going forward:
 | 27 | 21-22 | Replication & Leader Election (Interview Drill) | **5/5 滿分** | 「設計訂單資料層,機器掛掉不掉訂單」。全 5 項過: ✅ Think Aloud, ✅ Scope(收斂 create/read order), ✅ 用 replication+election, ✅ Trade-off WHY(C→sync), ✅ Operational(補回 lag/election 監控,Day 19 弱點收斂). read-after-write 一口氣列三解法無提示。改善點: 選 C 時主動講反面代價(partition 下不了單也賠錢)。|
 | 28 | 23-24 | Rate Limiting & Circuit Breaker (Interview Drill) | **5/5 滿分** | 「惡意爬蟲攻擊 API,DB 1000 QPS 上限 vs 50K 攻擊」。全 5 項過: ✅ Think Aloud, ✅ Scope(開場三問+主動提 WAF), ✅ 用 Rate Limiter+Circuit Breaker 雙主角, ✅ Trade-off WHY(global→per-user 被 challenge 後自修正+SW 護硬上限), ✅ Operational(reject數/CB狀態/P99). 改善點: 第一次答常太精簡(「global 一個桶」),被追問才展開,可主動把 why+反面代價一次講完。|
 | 29 | 25 | Observability (Interview Drill) | **5/6** | 「單體拆 30 微服務,結帳慢+失敗查不到」。✅ Think Aloud, ✅ Scope(定位≠修復圈得好+問 scale/團隊配合), ✅ 用三支柱+trace-id+P99, 🟡 Trade-off WHY(多半被追問才講), ✅ Operational(sidecar→ELK,整題即 ops), ✅ Hint response(metrics-first + P99 兩個 redirect 都接住自修正). 改善點: 答案太精簡 + drill 中途問面試官「提供不同思路/提示」(S8/S24 握不住球老根:問需求 OK、問答案 NG)。Best: 沒等講完就抓到 tail latency 並調用今天的 P99。|
+| 30 | 26 | Bloom Filter & Gossip (Interview Drill) | **5/6** | 「Web Crawler 100億 URL 去重」L2 probing+中途改需求(分散式 50 台 crawler)。✅ Think Aloud, ✅ Scope(問 scale/throughput/write pattern), ✅ 用 Bloom+Gossip 雙主角, ✅ Trade-off WHY(被追兩次但最終講全:Redis 網路 hop+SPOF vs gossip eventual 短暫重複爬,判斷爬蟲可容忍), ❌ Operational(漏監控:重複爬率/實際 FP rate), ✅ Hint response(改需求+SPOF 反將都接住). Best: local Bloom 同步問題零提示連到 Gossip。改善點(老主線在進步): 一次講足「選什麼+為什麼+反面代價」,別等追問,本次只追一次就完整。|
 
 ---
 
@@ -159,7 +160,10 @@ Rules going forward:
 | 29 | 25 | Observability | 追蹤請求路徑想用 traceroute (那是 L3 追路由器;追請求跨服務要 distributed tracing 應用層) | ✅ Resolved (S29, 「tracing = 應用層的 traceroute」校準,方向本來就對) |
 | 29 | 25 | Observability | Debug 動線先看 trace (應先看 metrics 當雷達指方向→trace 定位→log 挖根因) | ✅ Resolved (S29, 補「Metrics 報警→Traces 指路→Logs 挖根因」口訣) |
 | 29 | 19 | Consistency (review) | 複習時 recall「consistency = 三個選項(strong/RYW/eventual)」沒抓到是光譜+軸 | ✅ Resolved (S29, 台北/倫敦同步比喻重建「軸=新鮮度 vs 等待成本」,自推出 Strong 慢在等同步) |
-| 29 | 25 | Interview habit | Drill 答案太精簡(被追問才展開)+中途問面試官「提供不同思路/提示」要參考答案 | 🟡 Improving (S8/S24 握不住球老根變體。分辨點:問「需求」OK、問「答案」NG。先大膽斷言+一次講足 why 再問取捨) |
+| 29 | 25 | Interview habit | Drill 答案太精簡(被追問才展開)+中途問面試官「提供不同思路/提示」要參考答案 | 🟡 Improving (S30 又現:drill 中問「senior 大廠會怎麼答給我不同思維」— 動機是怕被帶歪,已教 course-correction「Let me step back and restate」可隨時重開不扣分。答太精簡本次只追一次就講全,持續進步) |
+| 30 | 26 | Bloom Filter | 查詢「三格全吻合 = 一定在」— 沒抓到 hash 碰撞讓不同元素 bit 重疊,全亮只能推「可能在」 | ✅ Resolved (S30, 親手踩陷阱:牆上只蓋過 evil_user,B 撞到同三格被誤判,當場通) |
+| 30 | 26 | Bloom/Gossip | 爬蟲 100億 URL 存不下歸因「訊息量 O(N²)」— 把儲存空間(O(N),~1TB)和節點間廣播訊息(O(N²))兩軸搞混 | ✅ Resolved (S30, 當場校準:這題是 O(N) 空間太大,O(N²) 是 gossip 廣播問題) |
+| 30 | 8-9 | Database (review) | LSM-tree 一度忘記 | ✅ Resolved (S30, 1 分鐘喚回 B-tree 讀優化/LSM 寫優化+SSTable 配 Bloom,加回複習排程) |
 
 ---
 
@@ -180,6 +184,8 @@ Rules going forward:
 | Consistency Models | Consistency is a spectrum, not on/off — a latency budget from Strong (everyone always sees the latest, most expensive) to Eventual (stale now but guaranteed to converge, cheapest); you tune it with quorums (W+R>N forces read/write overlap) and pick per-operation by how much staleness the business tolerates. |
 | Rate Limiting & Circuit Breaker | Rate limiting protects the backend and ensures fairness — Token Bucket allows bursts while Sliding Window strictly caps, and you layer per-user limits for fairness plus a global cap to protect downstream; a Circuit Breaker complements it on outbound calls by failing fast when a dependency is down (Closed→Open→Half-Open) to prevent cascading failure. |
 | Observability | Observability answers three different questions with three pillars — Metrics (how much / which service is unhealthy), Logs (what happened / why), and Traces (where / which hop in the request is slow) — stitched together by a correlation ID so a single request's journey across services forms one timeline, letting you localize problems across thousands of nodes without ssh-ing into any of them. |
+| Bloom Filter | A Bloom filter is a space-efficient, hash-based membership test that answers "definitely not in" or "probably in" — it trades a small false-positive rate (from hash collisions) for huge space savings (≈85% vs exact storage), with the database as the source of truth for any "probably" hit. |
+| Gossip Protocol | Gossip is a decentralized way for nodes to share state — each node periodically tells a few random peers, so information spreads exponentially and converges in O(log N) rounds with no central master to become a single point of failure; the trade-off is eventual rather than instant consistency. |
 
 ---
 
@@ -188,10 +194,10 @@ Rules going forward:
 | Field | Value |
 |-------|-------|
 | **Title** | 🌐 Distributed Architect |
-| **Current streak** | 1 🔥 (S29 2026-06-15, 距上次 6/9 隔 6 天 streak 重置) |
+| **Current streak** | 2 🔥 (S30 2026-06-16, 連續日 +1) |
 | **Longest streak** | 4 |
-| **Last session date** | 2026-06-15 |
-| **Last story summary** | Session 29 完成 (Day 25 Observability) — 半夜事故花 3 小時查不到兇手,小球讓學生主導建 observability stack。學生自推三支柱(Metrics/Logs/Traces),用 traceroute 類比點出 distributed tracing 靈魂。SLI/SLO/SLA 弱點用考試比喻鞏固。Interview Drill「30 微服務結帳慢查不到」拿 5/6,接住 metrics-first + P99 兩個 redirect,沒等講完就抓到 tail latency。Day 25 達成 🟢,Phase 2 剩 Day 26 即達 Gate。|
+| **Last session date** | 2026-06-16 |
+| **Last story summary** | Session 30 完成 (Day 26 Bloom Filter & Gossip) — Sprint review 全員到齊,Karen 丟 10 億黑名單、Max 喊「全塞記憶體」。學生用燈泡/蓋章比喻打通 Bloom,親手踩 false positive 陷阱;Gossip 用八卦接力理解 O(N²)→O(log N) 去中心化。自己抽出共同哲學「近似/最終換效率」。Interview Drill「爬蟲 100億 URL 去重」5/6,零提示把 local Bloom 同步連到 Gossip。cross-verify 找出 Saturation 觸發 C5,連 Max 廣播謬誤觸發 R1。**Phase 2 內容全數學完,下一場即 Phase 2 Gate。**|
 
 ---
 
@@ -210,8 +216,10 @@ Rules going forward:
 | M3 | Builder's Foundation | 🏆 | 2026-05-29 (Pass Phase 1 Gate) |
 | C3 | Gate Crasher | 🏆 | 2026-05-29 (Phase 1 Gate, attempt 1) |
 | K1 | One-Liner ×10 | 🏆 | 2026-06-03 (S26, Consistency Models 補上第 10 條) |
+| C5 | Myth Buster | 🏆 | 2026-06-16 (S30, cross-verify 找出 Observability 漏掉 Saturation) |
+| R1 | Max's Nightmare | 🏆 | 2026-06-16 (S30, 解釋 Max「全量廣播」為何 O(N²) 不 scale) |
 
-**Total: 11/25**
+**Total: 13/25**
 
 ---
 
@@ -227,9 +235,11 @@ Rules going forward:
 | Caching & CDN | 2 | 2026-06-07 (S27 recall PASS「寫時刪 cache 不更新,避 race condition」,Box 1→2) |
 | Load Balancer | 2 | 2026-06-05 (WR3 recall 4/5 pass, Box 1→2) |
 | Consistency Models | 1 | 2026-06-18 (S29 複習:cold recall 失敗→重教後重建「光譜=軸」,需 scaffolding,留 Box 1) |
-| Replication & Leader Election | 1 | 2026-06-06 (S27 新學,Box 1, overdue) |
+| Replication & Leader Election | 2 | 2026-06-19 (S30 recall PASS「read replica≠strong 因 replication lag」,Box 1→2) |
 | Rate Limiting & Circuit Breaker | 1 | 2026-06-10 (S28 新學,Box 1, overdue) |
-| Observability | 1 | 2026-06-16 (S29 新學,Box 1) |
+| Observability | 1 | 2026-06-16 (S29 新學,Box 1, overdue) |
+| Bloom Filter & Gossip | 1 | 2026-06-17 (S30 新學,Box 1) |
+| Database (B-tree/LSM) | 1 | 2026-06-17 (S30 LSM 一度遺忘→喚回,backfill Box 1) |
 
 ---
 
