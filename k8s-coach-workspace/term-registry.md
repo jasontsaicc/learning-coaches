@@ -14,6 +14,7 @@
 | controller | /kənˈtroʊl.ɚ/ | A control-plane component running a reconcile loop: it watches desired state and drives actual state to match. | reconcile loop 的主人,k8s 自動化的執行單位 | 2026-06-17 | 2026-06-20 |
 | scheduler | /ˈsked.juː.lɚ/ | A control-plane component that assigns each unscheduled Pod to a suitable node via filter then score. | 幫孤兒 Pod 挑 node 的排程器,挑完只寫綁定、不啟動容器 | 2026-06-17 | 2026-06-20 |
 | Pending | /ˈpen.dɪŋ/ | A Pod phase meaning it is accepted but not yet scheduled onto a node. | 已被接受但還沒排到 node 的狀態,常因 scheduler filter 找不到機器 | 2026-06-17 | 2026-06-20 |
-| kubeconfig | /ˈkjuːb.kən.fɪɡ/ | A file (~/.kube/config) that stores connection info for multiple clusters. | kubectl 的通訊錄,一個檔存所有叢集的地址+鑰匙 | 2026-06-18 | 2026-06-21 |
-| context | /ˈkɑːn.tekst/ | A named pointer selecting which cluster, user, and namespace kubectl talks to. | 通訊錄裡被標星號那筆「現在打給誰」,切它只換書籤不動叢集 | 2026-06-18 | 2026-06-21 |
-| kind | /kaɪnd/ | A tool that runs Kubernetes nodes as Docker containers for local testing. | Kubernetes IN Docker,1 node = 1 container,拋棄式本機練習叢集 | 2026-06-18 | 2026-06-21 |
+
+<!-- 2026-06-22 移除 kubeconfig / context / kind 三張卡:定義型瑣碼詞/工具名,面試不考,違反價值門檻(見 SKILL.md 術語卡)。current-context 改記為 ops 安全習慣,不當單字卡。 -->
+<!-- ops 安全習慣(非術語卡): `kubectl config current-context` = 動手前先確認指到哪個叢集,避免誤打 prod EKS。 -->
+

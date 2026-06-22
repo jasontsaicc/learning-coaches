@@ -34,3 +34,16 @@
 **正確做法:** 讀 `unknown field "路徑"` → 去檔案找該路徑那層,看欄位名「不是拼錯就是放錯層」。selector 認親的正確欄位是 `matchLabels`,且必須等於 template.metadata.labels。
 
 **下次抽考日:** 2026-06-21
+
+---
+
+**日期:** 2026-06-22
+**主題:** P1 probe — liveness vs readiness 混淆
+
+**踩的坑:** 認為 liveness probe 可以拿來檢查「service 準備好接新連線/請求了沒」(把 readiness 的職責塞給 liveness),延伸成「liveness 去 check DB 連線」。
+
+**根因:** 沒抓住兩種 probe 的本質差別 = 失敗後的「動作」不同。liveness 失敗 → 重啟;readiness 失敗 → 切流量不重啟。檢查 DB 這種外部依賴若放 liveness,DB 一慢 → 全 Pod liveness 失敗 → 集體重啟 → CrashLoopBackOff 雪崩(且 reconnection 風暴可能把 DB 壓垮)。
+
+**正確做法:** 判斷句「**Would a restart fix this?**」Yes(自己 deadlock/卡死)→ liveness 可管;No(DB/下游/外部依賴,重啟也修不好)→ 那是 readiness,頂多切流量等恢復。liveness 只檢查「我這個 process 還活著嗎」。
+
+**下次抽考日:** 2026-06-25
