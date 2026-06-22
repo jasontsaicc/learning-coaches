@@ -12,10 +12,10 @@
 |-------|-------|
 | **Start date** | 2026-03-04 |
 | **Current phase** | Phase 3 🏗️ |
-| **Current day** | **Phase 2 Gate ✅ PASS (S31, 5/6)** → Phase 3 起跑 = Day 27-28 URL Shortener |
+| **Current day** | **Day 27 URL Shortener 設計完成 (S32)** → 下一步 = Day 27 Interview Drill + Day 28 Full PoC |
 | **Language mode** | Bilingual — S27 切回繁中為主（學生英文閱讀疲勞），術語保留英文 |
-| **Session count** | 31 |
-| **Last weekly review** | 25 (next due ~S33) |
+| **Session count** | 32 |
+| **Last weekly review** | 25 (⚠️ WR due: 32−25=7，下次 Step A 評估是否插入 Weekly Review) |
 
 ---
 
@@ -36,15 +36,20 @@ Rules going forward:
 
 ## Current Session (Breakpoint)
 
-✅ **無中斷 — Session 31 = Phase 2 Gate（multi-region session store）5/6 PASS，正常完成。晉升 🏗️ Staff Architect，進入 Phase 3。**
+✅ **Session 32 = Day 27 URL Shortener 設計日完成（gap-mode 工作空擋）。** 涵蓋 Clarify → capacity（~2000億→7位 base62）→ 生碼法（counter/KGS 設計掉碰撞 vs hash）→ 分散式發號（SPOF+bottleneck→號碼段/Snowflake）→ NoSQL KV 選型（access pattern 非 data volume）→ 完整架構圖（寫/讀/async 分析三路）。筆記 `notes/day27-url-shortener.md`（含 L4 vs L6 SRE 逐段對照 + 架構圖自畫練習）。
 
-**Next session = Day 27-28 URL Shortener**（Phase 3 第一題經典 SD 問題；build-type，可拉 Full PoC：base62 encoding + KGS key generation）。
+**Interview Drill 本場跳過（學生選 B 收工存檔）→ 下次補。**
+
+**Next session 兩個選項（工作空擋學，挑短的先做）：**
+1. Day 27 Interview Drill（當面試官完整講一遍，練口條 + 頭號弱點：第一次開口講足方案+why+代價）
+2. Day 28 Full PoC（Go：base62 編碼 + KGS 發號）
+- ⚠️ WR due (32−25=7)，Step A 先評估要不要插 Weekly Review。
 
 **Pending PoC(park):** Circuit Breaker PoC + 分散式 Redis rate limiter → Day 31-32。Replication lag + Consistent hashing 獨立 PoC + distributed cache 完整實作 → Day 38-39。
 
 **Pending review(下次帶到):**
 - **Review Schedule 多筆逾期**（Security/Consistent Hashing/Caching 等 5-6 月到期）— Gate 暖身清了 Consistency(✅Box1→2) + CAP misconception(✅)，其餘 Phase 3 各 session Step A 分批補。
-- **🔴 頭號習慣弱點（S8→S31 主線）**：Drill 中「答太精簡，被追問才展開」+「主動要提示而非先嘗試」。S31 Gate 又現兩次。Phase 3 起每場 Drill 第一要求：第一次開口就講「方案+why+反面代價」，求助前先嘗試。
+- **🔴 頭號習慣弱點（S8→S32 主線）**：Drill 中「答太精簡，被追問才展開」+「主動要提示而非先嘗試」。S31 Gate 又現兩次。**S32 進展**：又喊一次「提示我」，但給 thinking scaffold（非答案）後成功自己 commit「NoSQL」並用對 access-pattern 理由 → 證明 scaffold 法有效，繼續逼「先嘗試再求助」。
 
 ---
 
@@ -71,7 +76,7 @@ Rules going forward:
 | 25 | Observability | 🟢 | — | S29。3 chunk 全過 at interview depth。自推三支柱(Metrics→想到 CPU/mem、Logs→想到查原因、Traces→用 traceroute 點到方向對工具錯)。盲區互補表+debug 動線「Metrics 報警→Traces 指路→Logs 挖根因」。Correlation ID 機制(入口生成→header 傳遞→斷鏈風險)手寫 Go snippet。SLI/SLO/SLA 弱點鞏固(考試比喻:實際分/目標分/合約罰則,SLO 比 SLA 嚴格留 buffer)。Drill 5/6。理論日 Discussion tier 無 Full PoC。S30 cross-verify 補上 Saturation(第四 Golden Signal,leading indicator)。|
 | 26 | Bloom Filter & Gossip | 🟢 | — | S30。5 chunk 全過 at interview depth。Bloom:燈泡/蓋章比喻打通機制,親手踩 false positive 陷阱(全亮≠一定在,hash 碰撞重疊),DB 當最終裁判。空間 8GB→1.2GB 省85%。落地 local/RedisBloom/SSTable 內建三放法+快取穿透應用。Gossip:八卦接力擴散 O(N²)→O(log N)回合,隨機挑 peer 抗分區,去中心化無 SPOF。共同哲學「近似/最終換效率」自己抽不出但兩實例講全。Interview Drill「爬蟲 100億 URL 去重」5/6,自己把 local Bloom 同步問題連到 Gossip(零提示)。理論日 Discussion tier。|
 | — | Multi-Region Session Store (design) | 🟢 | **Phase 2 Gate ✅** | S31. Transfer 題(沒設計過)。自組 home-region + Redis(TTL self-heal) + geo-routing + fetch-on-miss；中途改需求(US region 掛)→ 自戳設計洞(無 source of truth=被登出)→ async 複製到 backup(replication lag=資料遺失窗口)+ AP 選擇。Operational: P99 + replication lag。5/6 PASS。弱點: 答太精簡靠追問 + 兩次主動要提示。|
-| 27-28 | URL Shortener | ⬜ | — | |
+| 27-28 | URL Shortener | 🟡 | — | S32 Day 27 設計完成。生碼 counter/KGS+base62(設計掉碰撞)、7位、NoSQL KV(access pattern 非 volume)、cache immutable 無 invalidation、async analytics、SPOF+bottleneck→分散式發號。架構圖三路(寫/讀/分析)全拼出。當場修正:讀寫比理由(產量→用戶行為)、A vs B 混淆、真相來源誤填 cache。Interview Drill + Full PoC(base62+KGS) 待 Day 28。|
 | 29-30 | Unique ID Generator | ⬜ | — | |
 | 31-32 | Distributed Rate Limiter | ⬜ | — | |
 | 33-34 | Notification System | ⬜ | — | |
@@ -167,6 +172,10 @@ Rules going forward:
 | 30 | 26 | Bloom Filter | 查詢「三格全吻合 = 一定在」— 沒抓到 hash 碰撞讓不同元素 bit 重疊,全亮只能推「可能在」 | ✅ Resolved (S30, 親手踩陷阱:牆上只蓋過 evil_user,B 撞到同三格被誤判,當場通) |
 | 30 | 26 | Bloom/Gossip | 爬蟲 100億 URL 存不下歸因「訊息量 O(N²)」— 把儲存空間(O(N),~1TB)和節點間廣播訊息(O(N²))兩軸搞混 | ✅ Resolved (S30, 當場校準:這題是 O(N) 空間太大,O(N²) 是 gossip 廣播問題) |
 | 30 | 8-9 | Database (review) | LSM-tree 一度忘記 | ✅ Resolved (S30, 1 分鐘喚回 B-tree 讀優化/LSM 寫優化+SSTable 配 Bloom,加回複習排程) |
+| 32 | 27 | URL Shortener | 讀寫比從「每天產量」推 | ✅ Resolved (S32, 校準成「一條 URL 一生被讀幾次」= 用戶行為,跟產量無關) |
+| 32 | 27 | URL Shortener | hash+salt 再加 counter 來「減少」碰撞（A/B 兩路線混在一起）| ✅ Resolved (S32, counter=「消滅」碰撞非減少;salt 只是 A 撞了之後的重試手段,銀行號碼牌比喻打通) |
+| 32 | 27 | URL Shortener | 架構真相來源(②)誤填 redis cache | ✅ Resolved (S32, redis 重啟清空→全站短碼永久 404;真相來源要 durable DB,cache 只是前面擋的) |
+| 32 | 27 | Interview habit | 卡住直接喊「提示我」（頭號主線弱點再現）| 🟡 Improving (S32, 給 thinking scaffold 非答案後成功自己 commit「NoSQL」且用對 access-pattern 理由) |
 
 ---
 
@@ -190,6 +199,7 @@ Rules going forward:
 | Bloom Filter | A Bloom filter is a space-efficient, hash-based membership test that answers "definitely not in" or "probably in" — it trades a small false-positive rate (from hash collisions) for huge space savings (≈85% vs exact storage), with the database as the source of truth for any "probably" hit. |
 | Gossip Protocol | Gossip is a decentralized way for nodes to share state — each node periodically tells a few random peers, so information spreads exponentially and converges in O(log N) rounds with no central master to become a single point of failure; the trade-off is eventual rather than instant consistency. |
 | Multi-Region Session Store | A multi-region session store keeps each user's small KV session in their home region (Redis + TTL for self-healing staleness) and routes via geo-DNS, fetching on miss; for region-failure DR it async-replicates sessions to a backup region — an AP choice that accepts a few seconds of replication lag because a stale session is fine but logging out 100M users is not. |
+| URL Shortener | A URL shortener is an extremely read-heavy key-value system; short codes are generated collision-free by base62-encoding a globally unique counter (not by hashing), stored in a NoSQL KV store for simple point lookups, and served through a cache that needs no invalidation because the mapping is immutable. |
 
 ---
 
@@ -198,10 +208,10 @@ Rules going forward:
 | Field | Value |
 |-------|-------|
 | **Title** | 🏗️ Staff Architect |
-| **Current streak** | 1 週 🔥 (本週活躍；streak 規則由「連續日」遷移為「連續活躍週」，舊日數歸入 longest) |
+| **Current streak** | 2 週 🔥 (連續活躍週：上週 S31 + 本週 S32) |
 | **Longest streak** | 4 (days, pre-weekly) |
-| **Last session date** | 2026-06-18 |
-| **Last story summary** | Session 31 = Phase 2 Gate。設計 multi-region session store(沒練過的 transfer 題),自組 home-region+Redis(TTL self-heal)+geo-routing+fetch-on-miss。中途改需求「US region 掛掉」,先答錯(EU 扛得住)被 challenge 後自戳設計洞,推出 async 複製到 backup(replication lag=資料遺失窗口)+AP 選擇。Operational 補 P99+replication lag。5/6 PASS,晉升 🏗️ Staff Architect,進入 Phase 3。弱點:答太精簡+兩次要提示(頭號主線)。|
+| **Last session date** | 2026-06-22 |
+| **Last story summary** | Session 32 = Phase 3 開張 Day 27 URL Shortener 設計日。Karen 要可追蹤的短網址。學生在工作空擋裡從零推到 production 架構：算出讀 10k/寫 1k QPS、推到 7 位 base62、搞懂 counter「設計掉碰撞」勝過 hash「處理碰撞」、號碼牌比喻打通唯一 ID、自己答對單一 counter 的 SPOF+bottleneck、用對 access-pattern 理由(非 data volume)選 NoSQL KV、把零件拼成寫/讀/async 三路架構圖。卡點:真相來源一度誤填 cache(被 redis 重啟=全站404 點醒)、喊一次「提示我」但 scaffold 後自己 commit 答案。Interview Drill 跳過待下次。產出 L4 vs L6 SRE 對照筆記。|
 
 ---
 
@@ -246,6 +256,7 @@ Rules going forward:
 | Observability | 1 | 2026-06-16 (S29 新學,Box 1, overdue) |
 | Bloom Filter & Gossip | 1 | 2026-06-17 (S30 新學,Box 1) |
 | Database (B-tree/LSM) | 1 | 2026-06-17 (S30 LSM 一度遺忘→喚回,backfill Box 1) |
+| URL Shortener (design) | 1 | 2026-06-23 (S32 新學 Day 27 設計,Box 1) |
 
 ---
 
