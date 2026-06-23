@@ -6,7 +6,7 @@
 |-----------|------|-------------|---------|--------|-----------|
 | declarative | /dɪˈkler.ə.tɪv/ | You describe the desired end state; the system figures out how to get there. | 你只宣告「最終要長怎樣」,不管「怎麼做到」,k8s 的核心世界觀 | 2026-06-17 | 2026-06-20 |
 | imperative | /ɪmˈper.ə.tɪv/ | You command each step explicitly to reach a result. | 命令式,你親自管每一步,跟 declarative 相反 | 2026-06-17 | 2026-06-20 |
-| reconcile loop | /ˈrek.ən.saɪl luːp/ | A controller's continuous loop that compares the desired state with the actual state and takes action to close the gap. | 「差距偵測 + 自動修正」的無限迴圈,是 Kubernetes 一切自動化的底層引擎 | 2026-06-17 | 2026-06-20 |
+| reconcile loop | /ˈrek.ən.saɪl luːp/ | A controller's continuous loop that compares the desired state with the actual state and takes action to close the gap. | 「差距偵測 + 自動修正」的無限迴圈,是 Kubernetes 一切自動化的底層引擎 | 2026-06-17 | 2026-06-27 |
 | desired state | /dɪˈzaɪərd steɪt/ | The end state you declare you want; controllers work to make the actual state match it. | 你宣告「想要的樣子」,是 reconcile loop 比對的基準 | 2026-06-17 | 2026-06-20 |
 | control plane | /kənˈtroʊl pleɪn/ | The set of components that manage the cluster and make global decisions (API Server, etcd, scheduler, controllers). | 叢集的「大腦團隊」,負責管理與決策,不是單一元件 | 2026-06-17 | 2026-06-20 |
 | API Server | /ˌeɪ.piːˈaɪ ˈsɝː.vɚ/ | The single front door to the cluster; every component reads and writes state only through it. | 唯一入口/守門人,萬物皆透過它,彼此不直接溝通 | 2026-06-17 | 2026-06-20 |

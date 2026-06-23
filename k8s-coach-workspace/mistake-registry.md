@@ -33,7 +33,7 @@
 
 **正確做法:** 讀 `unknown field "路徑"` → 去檔案找該路徑那層,看欄位名「不是拼錯就是放錯層」。selector 認親的正確欄位是 `matchLabels`,且必須等於 template.metadata.labels。
 
-**下次抽考日:** 2026-06-21
+**下次抽考日:** 2026-06-30 (2026-06-23 抽考過,需引導才答對「檢查在 API Server、與 etcd 無關」,推 +7)
 
 ---
 
@@ -47,3 +47,16 @@
 **正確做法:** 判斷句「**Would a restart fix this?**」Yes(自己 deadlock/卡死)→ liveness 可管;No(DB/下游/外部依賴,重啟也修不好)→ 那是 readiness,頂多切流量等恢復。liveness 只檢查「我這個 process 還活著嗎」。
 
 **下次抽考日:** 2026-06-25
+
+---
+
+**日期:** 2026-06-23
+**主題:** P1 rollout — image 名稱打錯 → ImagePullBackOff
+
+**踩的坑:** Deployment 的 image 打成 `ngimx:1.25`(n→m)。`kubectl apply` **成功**、Pod 也建了也排程了,但卡在 `ImagePullBackOff` / `ErrImagePull`。
+
+**根因:** 驗證有邊界。`ngimx:1.25` 是**語法合法**的字串,API Server 無從得知這個 repo 不存在 → 不擋。真的去 registry 拉 image 的是 **kubelet,在第 5 棒(runtime pull)**,拉的那一刻才發現 `repository does not exist`。對比 `metaData` 這種 schema 錯,API Server apply 當場就退件。
+
+**正確做法:** `ImagePullBackOff` 第一個動作 = `kubectl describe pod <name>` 看 Events。Events 會直接印 `Pulling image "ngimx:1.25"` + 拒絕原因,一眼看到打錯字。分辨三類:`i/o timeout`=網路/egress、`401`/`toomanyrequests`=認證/限流、`repository does not exist`/`not found`=名稱或 tag 打錯。
+
+**下次抽考日:** 2026-06-26
