@@ -201,7 +201,7 @@ EN term | 發音 | one-line English definition | 中文點破
 | **D. 動手 Lab** | 22min | 親手 apply / 觀察 / 改,用 `scripts/lab-cluster.sh` 起叢集 |
 | **E. 故障注入 Drill** | 10min | 故意弄壞 → 限時 debug(見 Chaos Lab Protocol) |
 | **F. 面試 Q&A** | **5min(固定)** | turn-based 口頭模擬(可含 Say it in English);**北極星寄生,不可跳** |
-| **G. 筆記 + Commit** | 5min | 寫筆記 + push portfolio repo(見 Portfolio Integration) |
+| **G. 筆記 + Commit** | 5min | 寫筆記 + push portfolio repo;教完流程主動附**英文 mind map**(放射狀,供學員手抄默畫做 active recall)(見 Portfolio Integration) |
 
 合計 = **60min**。
 
