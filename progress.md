@@ -12,10 +12,10 @@
 |-------|-------|
 | **Start date** | 2026-03-04 |
 | **Current phase** | Phase 3 🏗️ |
-| **Current day** | **Day 27 URL Shortener 設計完成 (S32)** → 下一步 = Day 27 Interview Drill + Day 28 Full PoC |
+| **Current day** | **WR4 完成 (S33)** → 下一步 = Day 27 Interview Drill + Day 28 Full PoC（仍 pending）|
 | **Language mode** | Bilingual — S27 切回繁中為主（學生英文閱讀疲勞），術語保留英文 |
-| **Session count** | 32 |
-| **Last weekly review** | 25 (⚠️ WR due: 32−25=7，下次 Step A 評估是否插入 Weekly Review) |
+| **Session count** | 33 |
+| **Last weekly review** | 33 (S33 = WR4 完成) |
 
 ---
 
@@ -36,20 +36,21 @@ Rules going forward:
 
 ## Current Session (Breakpoint)
 
-✅ **Session 32 = Day 27 URL Shortener 設計日完成（gap-mode 工作空擋）。** 涵蓋 Clarify → capacity（~2000億→7位 base62）→ 生碼法（counter/KGS 設計掉碰撞 vs hash）→ 分散式發號（SPOF+bottleneck→號碼段/Snowflake）→ NoSQL KV 選型（access pattern 非 data volume）→ 完整架構圖（寫/讀/async 分析三路）。筆記 `notes/day27-url-shortener.md`（含 L4 vs L6 SRE 逐段對照 + 架構圖自畫練習）。
-
-**Interview Drill 本場跳過（學生選 B 收工存檔）→ 下次補。**
+✅ **Session 33 = Weekly Review #4 完成（gap-mode 工作空擋，內容很滿）。** 3 主題 + 1 bonus：
+- **URL Shortener**：暖身時 base62 又黏回「hash」(S32 resolved 後 2 天回退)→ 用進制轉換(hex/`#FF0000`)比喻 + encoding/hashing/encryption 三件套表打通。意外挖出深層誤解「base64 是加密被破解所以可回推」→ 校準 encoding≠encryption(摩斯密碼:可逆是設計非漏洞)。延伸到密碼存法：學生答 encryption→自推「只需驗證不需還原→不可逆才安全」→ 正解 salted slow hash(bcrypt/argon2)。
+- **Caching**：六維度全收。scale trigger/trade-off/invalidation(寫時刪口訣 zero-退化)/DevOps(hit rate)/failure modes(補成 stampede+penetration+avalanche 三件套)全穩；**capacity 是真盲區→補 80/20 法則**(只存熱20%,自算 1TB→200GB→256GB Feynman PASS)。**最弱主題(WR1 0/4)打成滿分 → 升 🟢。**
+- **Bloom Filter**(bonus,學生主動要求複習,逾期)：recall 一開始模糊(只記用途+insert 蓋 bit)→ 8格牆走查詢+假陽性→ Feynman PASS「靠 no-false-negative 才敢安全擋掉『一定不在』」。connect 到 cache penetration。
+- **Database**(狙擊老毛病)：避開「資料量大→NoSQL」陷阱,抓到 relationship/join;最後一答**一口氣講足**選 SQL+三理由(關聯/join/ACID)→**頭號主線弱點本場練成功**。
 
 **Next session 兩個選項（工作空擋學，挑短的先做）：**
 1. Day 27 Interview Drill（當面試官完整講一遍，練口條 + 頭號弱點：第一次開口講足方案+why+代價）
 2. Day 28 Full PoC（Go：base62 編碼 + KGS 發號）
-- ⚠️ WR due (32−25=7)，Step A 先評估要不要插 Weekly Review。
 
 **Pending PoC(park):** Circuit Breaker PoC + 分散式 Redis rate limiter → Day 31-32。Replication lag + Consistent hashing 獨立 PoC + distributed cache 完整實作 → Day 38-39。
 
 **Pending review(下次帶到):**
-- **Review Schedule 多筆逾期**（Security/Consistent Hashing/Caching 等 5-6 月到期）— Gate 暖身清了 Consistency(✅Box1→2) + CAP misconception(✅)，其餘 Phase 3 各 session Step A 分批補。
-- **🔴 頭號習慣弱點（S8→S32 主線）**：Drill 中「答太精簡，被追問才展開」+「主動要提示而非先嘗試」。S31 Gate 又現兩次。**S32 進展**：又喊一次「提示我」，但給 thinking scaffold（非答案）後成功自己 commit「NoSQL」並用對 access-pattern 理由 → 證明 scaffold 法有效，繼續逼「先嘗試再求助」。
+- **Review Schedule 仍有多筆逾期**：Consistent Hashing(6/05)/Load Balancer(6/05)/Rate Limiting(6/10)/Observability(6/16)/Database B-tree-LSM(6/17)。WR4 清了 Caching(Box2→3)+Bloom(1→2)+URL Shortener(1→2)+Security 一個 slice。**Security 廣度(OAuth/JWT/session)只測了 crypto-primitives 一塊,full recall 仍欠 → 下次 Step A 帶。**
+- **🔴 頭號習慣弱點（S8→S33 主線）**：「答太精簡，被追問才展開」+「主動要提示而非先嘗試」。**S33 進展(好)**：Database 最後一答無需追問、一口氣 commit SQL+三理由 → 主線弱點本場有練到且成功。繼續在 Drill 場景逼「第一次開口就講足方案+why+反面代價」。
 
 ---
 
@@ -62,8 +63,8 @@ Rules going forward:
 | 2 | Back-of-Envelope Estimation | 🟢 | — | |
 | 3 | 4-Step Framework | 🟢 | Phase 0 Gate | |
 | 4-5 | Load Balancer | 🟢 | — | WR3 (S25) recall 4/5 大回血。Weighted RR 老錯 resolved，補回 RR + Least Connections 基礎，L4/L7 最強。Upgraded 🟡→🟢. |
-| 6-7 | Caching & CDN | 🟡 | — | WR3 (S25) recall 3.5/5 大躍進 (WR1 是 0/4)。核心穩,補上 cache invalidation 主動同步 (寫時刪 cache 而非更新)。Scale trigger 補強 (read-heavy+熱點)。Upgraded 🔴→🟡. |
-| 8-9 | Database Selection | 🟡 | — | Weekly Review 3/4 recall. B-tree/LSM resolved. Trade-off axis confusion persists. |
+| 6-7 | Caching & CDN | 🟢 | — | **WR4 (S33) 六維度全收 → 升 🟢**(WR1 曾 0/4)。scale trigger/trade-off/invalidation(寫時刪 zero退化)/DevOps(hit rate)/failure modes(stampede+penetration+avalanche 三件套)/capacity(補 80/20 盲區,自算 1TB→256GB)全穩。最弱主題救成最穩之一。 |
+| 8-9 | Database Selection | 🟡 | — | WR4 (S33): 避開「資料量大→NoSQL」陷阱,訂單→SQL 完整三理由(關聯/join/ACID)一口氣講足,主線弱點本場練成功。但 NoSQL 何時選的完整光譜仍未全 drill,維持 🟡。B-tree/LSM resolved。 |
 | 10-11 | Message Queue | 🟢 | — | WR2 Part 2: 3 mistakes resolved (delivery semantics, why-async 3 reasons, FR/NFR/Scope definitions). Now confident on core concepts. Recall 2/4 → notes patched gap. Upgraded from 🟡. |
 | 12-13 | API Design | 🟢 | — | WR2 Part 2: 5 mistakes resolved (GET/POST data location, JWT in header, pagination, idempotency 3rd state, SLI/SLO hierarchy). Notes patched with Scale Trigger + DevOps Angle sections. Upgraded from 🟡. |
 | 14 | Security & Auth | 🟢 | — | Sessions 19-21. All 8 chunks ✅. OAuth Q2/Q3 resolved, Auth Code Flow, Observability Mini, Scale Trigger, JWT PoC, Simon Drill passed. |
@@ -76,7 +77,7 @@ Rules going forward:
 | 25 | Observability | 🟢 | — | S29。3 chunk 全過 at interview depth。自推三支柱(Metrics→想到 CPU/mem、Logs→想到查原因、Traces→用 traceroute 點到方向對工具錯)。盲區互補表+debug 動線「Metrics 報警→Traces 指路→Logs 挖根因」。Correlation ID 機制(入口生成→header 傳遞→斷鏈風險)手寫 Go snippet。SLI/SLO/SLA 弱點鞏固(考試比喻:實際分/目標分/合約罰則,SLO 比 SLA 嚴格留 buffer)。Drill 5/6。理論日 Discussion tier 無 Full PoC。S30 cross-verify 補上 Saturation(第四 Golden Signal,leading indicator)。|
 | 26 | Bloom Filter & Gossip | 🟢 | — | S30。5 chunk 全過 at interview depth。Bloom:燈泡/蓋章比喻打通機制,親手踩 false positive 陷阱(全亮≠一定在,hash 碰撞重疊),DB 當最終裁判。空間 8GB→1.2GB 省85%。落地 local/RedisBloom/SSTable 內建三放法+快取穿透應用。Gossip:八卦接力擴散 O(N²)→O(log N)回合,隨機挑 peer 抗分區,去中心化無 SPOF。共同哲學「近似/最終換效率」自己抽不出但兩實例講全。Interview Drill「爬蟲 100億 URL 去重」5/6,自己把 local Bloom 同步問題連到 Gossip(零提示)。理論日 Discussion tier。|
 | — | Multi-Region Session Store (design) | 🟢 | **Phase 2 Gate ✅** | S31. Transfer 題(沒設計過)。自組 home-region + Redis(TTL self-heal) + geo-routing + fetch-on-miss；中途改需求(US region 掛)→ 自戳設計洞(無 source of truth=被登出)→ async 複製到 backup(replication lag=資料遺失窗口)+ AP 選擇。Operational: P99 + replication lag。5/6 PASS。弱點: 答太精簡靠追問 + 兩次主動要提示。|
-| 27-28 | URL Shortener | 🟡 | — | S32 Day 27 設計完成。生碼 counter/KGS+base62(設計掉碰撞)、7位、NoSQL KV(access pattern 非 volume)、cache immutable 無 invalidation、async analytics、SPOF+bottleneck→分散式發號。架構圖三路(寫/讀/分析)全拼出。當場修正:讀寫比理由(產量→用戶行為)、A vs B 混淆、真相來源誤填 cache。Interview Drill + Full PoC(base62+KGS) 待 Day 28。|
+| 27-28 | URL Shortener | 🟡 | — | S32 Day 27 設計完成。生碼 counter/KGS+base62(設計掉碰撞)、7位、NoSQL KV(access pattern 非 volume)、cache immutable 無 invalidation、async analytics、SPOF+bottleneck→分散式發號。架構圖三路全拼出。**S33 WR4**: base62≠hash 回退已再修(進制轉換比喻)+ 補 encoding/hashing/encryption 三件套地基。Interview Drill + Full PoC(base62+KGS) 仍待 Day 28。|
 | 29-30 | Unique ID Generator | ⬜ | — | |
 | 31-32 | Distributed Rate Limiter | ⬜ | — | |
 | 33-34 | Notification System | ⬜ | — | |
@@ -112,6 +113,7 @@ Rules going forward:
 | 29 | 25 | Observability (Interview Drill) | **5/6** | 「單體拆 30 微服務,結帳慢+失敗查不到」。✅ Think Aloud, ✅ Scope(定位≠修復圈得好+問 scale/團隊配合), ✅ 用三支柱+trace-id+P99, 🟡 Trade-off WHY(多半被追問才講), ✅ Operational(sidecar→ELK,整題即 ops), ✅ Hint response(metrics-first + P99 兩個 redirect 都接住自修正). 改善點: 答案太精簡 + drill 中途問面試官「提供不同思路/提示」(S8/S24 握不住球老根:問需求 OK、問答案 NG)。Best: 沒等講完就抓到 tail latency 並調用今天的 P99。|
 | 30 | 26 | Bloom Filter & Gossip (Interview Drill) | **5/6** | 「Web Crawler 100億 URL 去重」L2 probing+中途改需求(分散式 50 台 crawler)。✅ Think Aloud, ✅ Scope(問 scale/throughput/write pattern), ✅ 用 Bloom+Gossip 雙主角, ✅ Trade-off WHY(被追兩次但最終講全:Redis 網路 hop+SPOF vs gossip eventual 短暫重複爬,判斷爬蟲可容忍), ❌ Operational(漏監控:重複爬率/實際 FP rate), ✅ Hint response(改需求+SPOF 反將都接住). Best: local Bloom 同步問題零提示連到 Gossip。改善點(老主線在進步): 一次講足「選什麼+為什麼+反面代價」,別等追問,本次只追一次就完整。|
 | 31 | Gate | **Phase 2 Gate** — Multi-Region Session Store (transfer) | **5/6 ✅ PASS** | ✅ Think Aloud, ✅ Scope, ✅ 用 Phase 2 零件(consistency/CAP/replication/TTL/AP), 🟡 Trade-off WHY(對但靠追問才展開), ✅ Operational(P99+replication lag,連到資料遺失窗口), ✅ Hint response(US-down 設計洞被 challenge 後自戳自修正). 弱點(頭號主線): 答太精簡 + 兩次主動要提示(本來都會,暖身講過). Best: 自己戳破單一 home-region 在 region 掛掉時的洞。|
+| 33 | WR4 | Weekly Review (URL Shortener / Caching / Database + Bloom bonus) | Caching 6/6, Bloom recall restored, DB trap避開 | **Caching** WR1 0/4 → WR4 六維滿分(capacity 盲區當場補)→ 升 🟢。**URL Shortener** base62≠hash 回退再修 + encoding/hashing/encryption 三件套地基。**Bloom** recall 模糊→Feynman PASS。**Database** 避陷阱+一口氣講足選 SQL → 頭號主線弱點本場練成功。意外複習掉 Security 一塊(crypto primitives)。|
 
 ---
 
@@ -167,7 +169,7 @@ Rules going forward:
 | 29 | 25 | Observability | 追蹤請求路徑想用 traceroute (那是 L3 追路由器;追請求跨服務要 distributed tracing 應用層) | ✅ Resolved (S29, 「tracing = 應用層的 traceroute」校準,方向本來就對) |
 | 29 | 25 | Observability | Debug 動線先看 trace (應先看 metrics 當雷達指方向→trace 定位→log 挖根因) | ✅ Resolved (S29, 補「Metrics 報警→Traces 指路→Logs 挖根因」口訣) |
 | 29 | 19 | Consistency (review) | 複習時 recall「consistency = 三個選項(strong/RYW/eventual)」沒抓到是光譜+軸 | ✅ Resolved (S29, 台北/倫敦同步比喻重建「軸=新鮮度 vs 等待成本」,自推出 Strong 慢在等同步) |
-| 29 | 25 | Interview habit | Drill 答案太精簡(被追問才展開)+中途問面試官「提供不同思路/提示」要參考答案 | ⚠️ 回升 (S31 Phase 2 Gate 又現兩次「提示我一下」+多次最短答案靠追問展開,本來都會。列為 Phase 3 頭號訓練目標:第一次開口講足方案+why+代價,求助前先嘗試) |
+| 29 | 25 | Interview habit | Drill 答案太精簡(被追問才展開)+中途問面試官「提供不同思路/提示」要參考答案 | 🟡 Improving (S31 Gate 回升;**S33 WR4 進展(好)**: Database 最後一答無需追問、一口氣 commit SQL+三理由(關聯/join/ACID)。給「四格填空 scaffold」後成功講足 → 主線弱點本場有練到且成功。續逼:第一次開口就講足方案+why+反面代價) |
 | 31 | Gate | Session Store (DR) | US region 掛掉時答「EU Redis 可服務」— 忽略 home-region 設計下 EU 根本沒這些 session,且 fetch-from-US 前提是 US 活著 | ✅ Resolved (S31, 被 challenge 一次後自戳:US 死=無 source of truth=被登出,續推 async 複製到 backup) |
 | 30 | 26 | Bloom Filter | 查詢「三格全吻合 = 一定在」— 沒抓到 hash 碰撞讓不同元素 bit 重疊,全亮只能推「可能在」 | ✅ Resolved (S30, 親手踩陷阱:牆上只蓋過 evil_user,B 撞到同三格被誤判,當場通) |
 | 30 | 26 | Bloom/Gossip | 爬蟲 100億 URL 存不下歸因「訊息量 O(N²)」— 把儲存空間(O(N),~1TB)和節點間廣播訊息(O(N²))兩軸搞混 | ✅ Resolved (S30, 當場校準:這題是 O(N) 空間太大,O(N²) 是 gossip 廣播問題) |
@@ -176,6 +178,10 @@ Rules going forward:
 | 32 | 27 | URL Shortener | hash+salt 再加 counter 來「減少」碰撞（A/B 兩路線混在一起）| ✅ Resolved (S32, counter=「消滅」碰撞非減少;salt 只是 A 撞了之後的重試手段,銀行號碼牌比喻打通) |
 | 32 | 27 | URL Shortener | 架構真相來源(②)誤填 redis cache | ✅ Resolved (S32, redis 重啟清空→全站短碼永久 404;真相來源要 durable DB,cache 只是前面擋的) |
 | 32 | 27 | Interview habit | 卡住直接喊「提示我」（頭號主線弱點再現）| 🟡 Improving (S32, 給 thinking scaffold 非答案後成功自己 commit「NoSQL」且用對 access-pattern 理由) |
+| 33 | 27 | URL Shortener | 暖身 recall 又把 base62 講成「做 hash」(S32 resolved 後 2 天回退) | ✅ Resolved (S33 WR4, 進制轉換 hex/`#FF0000` 比喻 + encoding/hashing/encryption 三件套對照表;碰撞判斷本身答對只是名詞滑掉) |
+| 33 | 14 | Security (encoding vs encryption) | 以為 base64 是「加密但被破解」所以人人能回推 | ✅ Resolved (S33 WR4, 摩斯密碼比喻:encoding 可逆是「設計」非「漏洞」,從不是拿來保密;三件套表釐清 encoding/hashing/encryption) |
+| 33 | 14 | Security (password storage) | 存密碼答 encryption (業界正解 = salted slow hash) | ✅ Resolved (S33 WR4, 自推「只需驗證、永遠不需還原原始密碼 → 不可逆才是安全特性」;補 salt 防 rainbow table + bcrypt/argon2 慢 hash) |
+| 33 | 6-7 | Caching (capacity) | cache 容量完全不會估(盲區) | ✅ Resolved (S33 WR4, 80/20 法則:不存全部只存熱20%;自己算對 1TB→200GB→256GB headroom,Feynman PASS) |
 
 ---
 
@@ -208,10 +214,10 @@ Rules going forward:
 | Field | Value |
 |-------|-------|
 | **Title** | 🏗️ Staff Architect |
-| **Current streak** | 2 週 🔥 (連續活躍週：上週 S31 + 本週 S32) |
+| **Current streak** | 2 週 🔥 (連續活躍週：上週 S31 + 本週 S32-S33,同週不加碼) |
 | **Longest streak** | 4 (days, pre-weekly) |
-| **Last session date** | 2026-06-22 |
-| **Last story summary** | Session 32 = Phase 3 開張 Day 27 URL Shortener 設計日。Karen 要可追蹤的短網址。學生在工作空擋裡從零推到 production 架構：算出讀 10k/寫 1k QPS、推到 7 位 base62、搞懂 counter「設計掉碰撞」勝過 hash「處理碰撞」、號碼牌比喻打通唯一 ID、自己答對單一 counter 的 SPOF+bottleneck、用對 access-pattern 理由(非 data volume)選 NoSQL KV、把零件拼成寫/讀/async 三路架構圖。卡點:真相來源一度誤填 cache(被 redis 重啟=全站404 點醒)、喊一次「提示我」但 scaffold 後自己 commit 答案。Interview Drill 跳過待下次。產出 L4 vs L6 SRE 對照筆記。|
+| **Last session date** | 2026-06-24 |
+| **Last story summary** | Session 33 = Weekly Review #4。小球帶學生回顧 URL Shortener / Caching / Database。一條「base62 是不是 hash」的小疑問滾出整串底層地基：進制轉換(hex `#FF0000`) → encoding/hashing/encryption 三件套 → 「base64 不是被破解、本來就設計成可逆」→ 密碼該用 salted slow hash 不是 encryption(學生自己推出「只需驗證不需還原 → 不可逆才安全」)。Caching 從歷史最弱(WR1 0/4)打成六維滿分,當場補掉 capacity 80/20 估算盲區。Bloom filter 從模糊 recall 救回,答出「靠 no-false-negative 才敢擋掉一定不在」。最後 Database 老毛病狙擊:學生避開「資料量大→NoSQL」陷阱、一口氣講足選 SQL+三理由 → 頭號主線弱點本場練成功。Karen 的短網址設計正式記功(R2)。|
 
 ---
 
@@ -233,8 +239,9 @@ Rules going forward:
 | C5 | Myth Buster | 🏆 | 2026-06-16 (S30, cross-verify 找出 Observability 漏掉 Saturation) |
 | R1 | Max's Nightmare | 🏆 | 2026-06-16 (S30, 解釋 Max「全量廣播」為何 O(N²) 不 scale) |
 | M4 | Distributed Mind | 🏆 | 2026-06-18 (S31, Pass Phase 2 Gate — 分散式思維覺醒) |
+| R2 | Karen's Hero | 🏆 | 2026-06-24 (S33 記功 — Day 27 URL Shortener Phase 3 設計完成 = 達成 Karen 可追蹤短網址需求) |
 
-**Total: 14/25**
+**Total: 15/25**
 
 ---
 
@@ -244,19 +251,19 @@ Rules going forward:
 
 | Topic | Box | Next Review |
 |-------|-----|-------------|
-| Security & Auth | 2 | 2026-05-18 (overdue — 下次帶到) |
+| Security & Auth | 2 | 2026-06-27 (S33 WR4 測了 crypto-primitives slice: encoding/hashing/encryption + 密碼存法 PASS;但 OAuth/JWT/session 廣度未測 → Box 維持 2,下次補 full recall) |
 | Consistent Hashing | 2 | 2026-06-05 |
 | Distributed Cache + CAP | 3 | 2026-06-25 (S31 暖身 recall PASS「平常 C+A,只有 partition 才選 AP/CP」,CAP misconception 收掉,Box 2→3) |
 | Multi-Region Session Store (design) | 1 | 2026-06-19 (S31 Gate,新 design pattern,Box 1) |
-| Caching & CDN | 2 | 2026-06-07 (S27 recall PASS「寫時刪 cache 不更新,避 race condition」,Box 1→2) |
+| Caching & CDN | 3 | 2026-07-01 (S33 WR4 六維度全收 zero退化 + 補 capacity 盲區,Box 2→3) |
 | Load Balancer | 2 | 2026-06-05 (WR3 recall 4/5 pass, Box 1→2) |
 | Consistency Models | 2 | 2026-06-21 (S31 暖身 recall PASS「光譜+等同步 trade-off」無需 scaffolding,Box 1→2) |
 | Replication & Leader Election | 2 | 2026-06-19 (S30 recall PASS「read replica≠strong 因 replication lag」,Box 1→2) |
 | Rate Limiting & Circuit Breaker | 1 | 2026-06-10 (S28 新學,Box 1, overdue) |
 | Observability | 1 | 2026-06-16 (S29 新學,Box 1, overdue) |
-| Bloom Filter & Gossip | 1 | 2026-06-17 (S30 新學,Box 1) |
-| Database (B-tree/LSM) | 1 | 2026-06-17 (S30 LSM 一度遺忘→喚回,backfill Box 1) |
-| URL Shortener (design) | 1 | 2026-06-23 (S32 新學 Day 27 設計,Box 1) |
+| Bloom Filter & Gossip | 2 | 2026-06-27 (S33 WR4 recall 模糊起步→8格牆走查詢+假陽性→Feynman PASS,Box 1→2) |
+| Database (B-tree/LSM) | 1 | 2026-06-17 (S30 LSM 一度遺忘→喚回,backfill Box 1;S33 測的是 selection 軸非 LSM 內部,此項仍欠) |
+| URL Shortener (design) | 2 | 2026-06-27 (S33 WR4 re-test,base62≠hash 回退已修,Box 1→2) |
 
 ---
 
