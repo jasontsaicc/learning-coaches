@@ -49,6 +49,7 @@ Rules going forward:
 **Pending PoC(park):** Circuit Breaker PoC + 分散式 Redis rate limiter → Day 31-32。Replication lag + Consistent hashing 獨立 PoC + distributed cache 完整實作 → Day 38-39。
 
 **Pending review(下次帶到):**
+- **⭐ 學生主動點名(S33 結束時)：Bloom + Cache 組合仍模糊 → 下次優先重講。** 切入點建議：畫完整 request flow（User → Bloom filter → Cache → DB），走兩條路徑 — (1) happy path：key 存在；(2) cache penetration：查不存在的 key。重點釐清 Bloom 在流程哪個「位置」、它擋的是「不存在的 key 打穿 cache 直接砸 DB」、為什麼 cache 自己擋不住（cache miss 也會放行到 DB，Bloom 在 cache 之前先攔）。
 - **Review Schedule 仍有多筆逾期**：Consistent Hashing(6/05)/Load Balancer(6/05)/Rate Limiting(6/10)/Observability(6/16)/Database B-tree-LSM(6/17)。WR4 清了 Caching(Box2→3)+Bloom(1→2)+URL Shortener(1→2)+Security 一個 slice。**Security 廣度(OAuth/JWT/session)只測了 crypto-primitives 一塊,full recall 仍欠 → 下次 Step A 帶。**
 - **🔴 頭號習慣弱點（S8→S33 主線）**：「答太精簡，被追問才展開」+「主動要提示而非先嘗試」。**S33 進展(好)**：Database 最後一答無需追問、一口氣 commit SQL+三理由 → 主線弱點本場有練到且成功。繼續在 Drill 場景逼「第一次開口就講足方案+why+反面代價」。
 
