@@ -12,9 +12,9 @@
 |-------|-------|
 | **Start date** | 2026-03-04 |
 | **Current phase** | Phase 3 🏗️ |
-| **Current day** | **WR4 完成 (S33)** → 下一步 = Day 27 Interview Drill + Day 28 Full PoC（仍 pending）|
+| **Current day** | **Day 27 Interview Drill 完成 (S34, 8/9 PASS)** → 下一步 = Day 28 Full PoC (Go: base62 + KGS, pending) |
 | **Language mode** | Bilingual — S27 切回繁中為主（學生英文閱讀疲勞），術語保留英文 |
-| **Session count** | 33 |
+| **Session count** | 34 |
 | **Last weekly review** | 33 (S33 = WR4 完成) |
 
 ---
@@ -36,22 +36,18 @@ Rules going forward:
 
 ## Current Session (Breakpoint)
 
-✅ **Session 33 = Weekly Review #4 完成（gap-mode 工作空擋，內容很滿）。** 3 主題 + 1 bonus：
-- **URL Shortener**：暖身時 base62 又黏回「hash」(S32 resolved 後 2 天回退)→ 用進制轉換(hex/`#FF0000`)比喻 + encoding/hashing/encryption 三件套表打通。意外挖出深層誤解「base64 是加密被破解所以可回推」→ 校準 encoding≠encryption(摩斯密碼:可逆是設計非漏洞)。延伸到密碼存法：學生答 encryption→自推「只需驗證不需還原→不可逆才安全」→ 正解 salted slow hash(bcrypt/argon2)。
-- **Caching**：六維度全收。scale trigger/trade-off/invalidation(寫時刪口訣 zero-退化)/DevOps(hit rate)/failure modes(補成 stampede+penetration+avalanche 三件套)全穩；**capacity 是真盲區→補 80/20 法則**(只存熱20%,自算 1TB→200GB→256GB Feynman PASS)。**最弱主題(WR1 0/4)打成滿分 → 升 🟢。**
-- **Bloom Filter**(bonus,學生主動要求複習,逾期)：recall 一開始模糊(只記用途+insert 蓋 bit)→ 8格牆走查詢+假陽性→ Feynman PASS「靠 no-false-negative 才敢安全擋掉『一定不在』」。connect 到 cache penetration。
-- **Database**(狙擊老毛病)：避開「資料量大→NoSQL」陷阱,抓到 relationship/join;最後一答**一口氣講足**選 SQL+三理由(關聯/join/ACID)→**頭號主線弱點本場練成功**。
+✅ **Session 34 完成（gap-mode 工作空擋）。兩段：**
+- **Bloom + Cache 組合重講**(S33 學生點名模糊)：用 request flow(User→Bloom→Cache→DB)走兩路徑,學生**自己講出**:位置(Bloom 最前)、cache 結構上擋不住不存在 key(只存有的→永遠 miss→放行 DB)、Bloom 敢擋因 no false negative(真實 key 絕不誤殺,錯誤單向倒向 false positive)、bit 層機制(insert 設 1 永不歸零)。Feynman PASS + 新增 one-liner。三件套(penetration/stampede/avalanche)複習。
+- **Day 27 URL Shortener Interview Drill (Phase 3 Bar Raiser, 8/9 PASS)**：capacity 反推(學會 62≈2⁶ 估算,6 碼=640億夠)、counter+base62(主動講足 trade-off=R3 解鎖)、NoSQL KV 用 access-pattern 理由(非資料量,頭號 DB 弱點再次答對)、讀路徑(Bloom→cache→DB)自己擺對 Bloom。**三次被質疑都自修正**(Redis 當 DB→cache、LB 歸位、6vs7 碼)。唯一 ❌ = Operational/監控全程沒主動提(S29/S30 重複盲點)。
 
-**Next session 兩個選項（工作空擋學，挑短的先做）：**
-1. Day 27 Interview Drill（當面試官完整講一遍，練口條 + 頭號弱點：第一次開口講足方案+why+代價）
-2. Day 28 Full PoC（Go：base62 編碼 + KGS 發號）
+**Next session = Day 28 Full PoC（Go：base62 編碼 + KGS 發號,驗證生碼無碰撞）。** 學生選了先做 Drill,PoC 留著。
 
-**Pending PoC(park):** Circuit Breaker PoC + 分散式 Redis rate limiter → Day 31-32。Replication lag + Consistent hashing 獨立 PoC + distributed cache 完整實作 → Day 38-39。
+**Pending PoC(park):** Day 28 base62+KGS PoC(下次)。Circuit Breaker PoC + 分散式 Redis rate limiter → Day 31-32。Replication lag + Consistent hashing 獨立 PoC + distributed cache 完整實作 → Day 38-39。
 
-**Pending review(下次帶到):**
-- **⭐ 學生主動點名(S33 結束時)：Bloom + Cache 組合仍模糊 → 下次優先重講。** 切入點建議：畫完整 request flow（User → Bloom filter → Cache → DB），走兩條路徑 — (1) happy path：key 存在；(2) cache penetration：查不存在的 key。重點釐清 Bloom 在流程哪個「位置」、它擋的是「不存在的 key 打穿 cache 直接砸 DB」、為什麼 cache 自己擋不住（cache miss 也會放行到 DB，Bloom 在 cache 之前先攔）。
-- **Review Schedule 仍有多筆逾期**：Consistent Hashing(6/05)/Load Balancer(6/05)/Rate Limiting(6/10)/Observability(6/16)/Database B-tree-LSM(6/17)。WR4 清了 Caching(Box2→3)+Bloom(1→2)+URL Shortener(1→2)+Security 一個 slice。**Security 廣度(OAuth/JWT/session)只測了 crypto-primitives 一塊,full recall 仍欠 → 下次 Step A 帶。**
-- **🔴 頭號習慣弱點（S8→S33 主線）**：「答太精簡，被追問才展開」+「主動要提示而非先嘗試」。**S33 進展(好)**：Database 最後一答無需追問、一口氣 commit SQL+三理由 → 主線弱點本場有練到且成功。繼續在 Drill 場景逼「第一次開口就講足方案+why+反面代價」。
+**Pending review(下次 Step A 帶):**
+- **Security 廣度(OAuth/JWT/session)** 只測了 crypto-primitives 一塊,full recall 仍欠 → Box 維持 2,下次補。
+- **Review Schedule 多筆逾期**：Consistent Hashing(6/05)/Load Balancer(6/05)/Rate Limiting(6/10)/Observability(6/16)/Database B-tree-LSM(6/17)。
+- **🔴 頭號習慣弱點（S8→S34 主線）**:「答太精簡,被追問才展開」+「主動要提示而非先嘗試」。**S34 進展(好)**:counter trade-off + NoSQL 理由**主動講足沒等追問**(R3);但讀路徑 trace/LB/DB 選擇仍被追問才展開,**未根除**。**新固定要求**:Drill Step 4 收尾必講「怎麼監控」(治 operational 重複盲點)。
 
 ---
 
@@ -76,9 +72,9 @@ Rules going forward:
 | 21-22 | Replication & Leader Election | 🟢 | — | S27。7 chunk 全過 at interview depth。核心因果鏈打通(硬體壞→多份→ordering→election→split-brain→lag→監控)。Single-leader=唯一 ordering 免衝突、過半票防腦裂(鴿籠)、read replica≠strong(lag) 三大點都能在設計題情境自然調用。Interview Drill 5/5 滿分。Raft 細節/Service Discovery/PoC park。|
 | 23-24 | Rate Limiting & Circuit Breaker | 🟢 | — | S28。7 chunk 全過 at interview depth (一次過沒卡)。Token Bucket(+自連 AWS T-series credits)、lazy refill(成本跟流量走不跟桶數)、Sliding Window 嚴格封頂、分散式 local counter 失效(N×limit→Redis 3代價)、Circuit Breaker Closed/Open/Half-Open(fail fast 防雪崩)。Light PoC 手打 lazy refill 驗證 rate=refillRate×time。Interview Drill「惡意爬蟲攻擊 API」5/5 滿分,自推 per-user+global 兩層+SW 護 DB+CB 防雪崩。lazy 概念當場補。CB PoC park。|
 | 25 | Observability | 🟢 | — | S29。3 chunk 全過 at interview depth。自推三支柱(Metrics→想到 CPU/mem、Logs→想到查原因、Traces→用 traceroute 點到方向對工具錯)。盲區互補表+debug 動線「Metrics 報警→Traces 指路→Logs 挖根因」。Correlation ID 機制(入口生成→header 傳遞→斷鏈風險)手寫 Go snippet。SLI/SLO/SLA 弱點鞏固(考試比喻:實際分/目標分/合約罰則,SLO 比 SLA 嚴格留 buffer)。Drill 5/6。理論日 Discussion tier 無 Full PoC。S30 cross-verify 補上 Saturation(第四 Golden Signal,leading indicator)。|
-| 26 | Bloom Filter & Gossip | 🟢 | — | S30。5 chunk 全過 at interview depth。Bloom:燈泡/蓋章比喻打通機制,親手踩 false positive 陷阱(全亮≠一定在,hash 碰撞重疊),DB 當最終裁判。空間 8GB→1.2GB 省85%。落地 local/RedisBloom/SSTable 內建三放法+快取穿透應用。Gossip:八卦接力擴散 O(N²)→O(log N)回合,隨機挑 peer 抗分區,去中心化無 SPOF。共同哲學「近似/最終換效率」自己抽不出但兩實例講全。Interview Drill「爬蟲 100億 URL 去重」5/6,自己把 local Bloom 同步問題連到 Gossip(零提示)。理論日 Discussion tier。|
+| 26 | Bloom Filter & Gossip | 🟢 | — | S30。5 chunk 全過 at interview depth。Bloom:燈泡/蓋章比喻打通機制,親手踩 false positive 陷阱(全亮≠一定在,hash 碰撞重疊),DB 當最終裁判。空間 8GB→1.2GB 省85%。落地 local/RedisBloom/SSTable 內建三放法+快取穿透應用。Gossip:八卦接力擴散 O(N²)→O(log N)回合,隨機挑 peer 抗分區,去中心化無 SPOF。共同哲學「近似/最終換效率」自己抽不出但兩實例講全。Interview Drill「爬蟲 100億 URL 去重」5/6,自己把 local Bloom 同步問題連到 Gossip(零提示)。理論日 Discussion tier。**S34**: Bloom+Cache 組合(S33 點名模糊)重講打通 — Bloom 位置/cache 為何擋不住/no false negative 為何敢擋/bit 機制全自己講出,Feynman PASS。|
 | — | Multi-Region Session Store (design) | 🟢 | **Phase 2 Gate ✅** | S31. Transfer 題(沒設計過)。自組 home-region + Redis(TTL self-heal) + geo-routing + fetch-on-miss；中途改需求(US region 掛)→ 自戳設計洞(無 source of truth=被登出)→ async 複製到 backup(replication lag=資料遺失窗口)+ AP 選擇。Operational: P99 + replication lag。5/6 PASS。弱點: 答太精簡靠追問 + 兩次主動要提示。|
-| 27-28 | URL Shortener | 🟡 | — | S32 Day 27 設計完成。生碼 counter/KGS+base62(設計掉碰撞)、7位、NoSQL KV(access pattern 非 volume)、cache immutable 無 invalidation、async analytics、SPOF+bottleneck→分散式發號。架構圖三路全拼出。**S33 WR4**: base62≠hash 回退已再修(進制轉換比喻)+ 補 encoding/hashing/encryption 三件套地基。Interview Drill + Full PoC(base62+KGS) 仍待 Day 28。|
+| 27-28 | URL Shortener | 🟢 | — | S32 設計 + S33 地基 + **S34 Interview Drill 8/9 PASS**(Phase 3 Bar Raiser)。capacity 反推學會 62≈2⁶ 估算(6碼=640億夠,7=保險)、counter+base62 主動講足 trade-off、NoSQL 用 access-pattern 理由、讀路徑自己擺對 Bloom、三次被質疑自修正(Redis→cache/LB歸位/6vs7)、KGS range allocation(中央配號器每block打一次+丟block=空洞OK)。唯一弱:operational 監控沒主動提。升 🟢。Full PoC(base62+KGS)仍待 Day 28。|
 | 29-30 | Unique ID Generator | ⬜ | — | |
 | 31-32 | Distributed Rate Limiter | ⬜ | — | |
 | 33-34 | Notification System | ⬜ | — | |
@@ -115,6 +111,7 @@ Rules going forward:
 | 30 | 26 | Bloom Filter & Gossip (Interview Drill) | **5/6** | 「Web Crawler 100億 URL 去重」L2 probing+中途改需求(分散式 50 台 crawler)。✅ Think Aloud, ✅ Scope(問 scale/throughput/write pattern), ✅ 用 Bloom+Gossip 雙主角, ✅ Trade-off WHY(被追兩次但最終講全:Redis 網路 hop+SPOF vs gossip eventual 短暫重複爬,判斷爬蟲可容忍), ❌ Operational(漏監控:重複爬率/實際 FP rate), ✅ Hint response(改需求+SPOF 反將都接住). Best: local Bloom 同步問題零提示連到 Gossip。改善點(老主線在進步): 一次講足「選什麼+為什麼+反面代價」,別等追問,本次只追一次就完整。|
 | 31 | Gate | **Phase 2 Gate** — Multi-Region Session Store (transfer) | **5/6 ✅ PASS** | ✅ Think Aloud, ✅ Scope, ✅ 用 Phase 2 零件(consistency/CAP/replication/TTL/AP), 🟡 Trade-off WHY(對但靠追問才展開), ✅ Operational(P99+replication lag,連到資料遺失窗口), ✅ Hint response(US-down 設計洞被 challenge 後自戳自修正). 弱點(頭號主線): 答太精簡 + 兩次主動要提示(本來都會,暖身講過). Best: 自己戳破單一 home-region 在 region 掛掉時的洞。|
 | 33 | WR4 | Weekly Review (URL Shortener / Caching / Database + Bloom bonus) | Caching 6/6, Bloom recall restored, DB trap避開 | **Caching** WR1 0/4 → WR4 六維滿分(capacity 盲區當場補)→ 升 🟢。**URL Shortener** base62≠hash 回退再修 + encoding/hashing/encryption 三件套地基。**Bloom** recall 模糊→Feynman PASS。**Database** 避陷阱+一口氣講足選 SQL → 頭號主線弱點本場練成功。意外複習掉 Security 一塊(crypto primitives)。|
+| 34 | 27 | URL Shortener (Interview Drill, Phase 3 Bar Raiser) | **8/9 ✅ PASS** | ✅ Think Aloud, ✅ Scope, ✅ 用 Bloom+cache(自己擺對讀路徑), ✅ Trade-off WHY(counter 取捨+NoSQL access-pattern 主動講足=R3), ❌ Operational(全程沒主動提監控,S29/S30 重複盲點), ✅ Failure modes(Redis durability+counter SPOF), ✅ Capacity(學會 62≈2⁶,6碼=640億), ✅ Hint response(Redis→cache/LB歸位/6vs7 三次自修正), ✅ Time/breadth(4步走完). Best: 被質疑「Redis當DB」自己想起重啟掉資料改 cache + 今天打通的 Bloom 自己擺進讀路徑。改善: operational 監控當固定收尾;讀路徑/LB/DB 仍被追問才展開。|
 
 ---
 
@@ -183,6 +180,12 @@ Rules going forward:
 | 33 | 14 | Security (encoding vs encryption) | 以為 base64 是「加密但被破解」所以人人能回推 | ✅ Resolved (S33 WR4, 摩斯密碼比喻:encoding 可逆是「設計」非「漏洞」,從不是拿來保密;三件套表釐清 encoding/hashing/encryption) |
 | 33 | 14 | Security (password storage) | 存密碼答 encryption (業界正解 = salted slow hash) | ✅ Resolved (S33 WR4, 自推「只需驗證、永遠不需還原原始密碼 → 不可逆才是安全特性」;補 salt 防 rainbow table + bcrypt/argon2 慢 hash) |
 | 33 | 6-7 | Caching (capacity) | cache 容量完全不會估(盲區) | ✅ Resolved (S33 WR4, 80/20 法則:不存全部只存熱20%;自己算對 1TB→200GB→256GB headroom,Feynman PASS) |
+| 34 | 27 | URL Shortener (read path) | LB 放在 redis 跟 db 中間 | ✅ Resolved (S34, 餐廳帶位員比喻:LB 站最前面 DNS後/API前,邊緣分流) |
+| 34 | 27 | URL Shortener (HTTP code) | 短碼不存在回 401 | ✅ Resolved (S34, 401=沒登入/403=沒權限/404=不存在;查無短碼=404) |
+| 34 | 27 | URL Shortener (storage) | Redis 當 source of truth(S32 老錯回退) | ✅ Resolved (S34, 被質疑「半夜 Redis 重啟」自己想起掉資料→改 cache + durable DB 當真相來源) |
+| 34 | 27 | Capacity estimation | 算不出 62ⁿ(預設背「7 碼」) | ✅ Resolved (S34, 學會 62≈2⁶ + 2³⁰≈10億 估算錨;算出 6 碼=640億已是需求10倍) |
+| 34 | 27 | URL Shortener (KGS) | 配號器去哪領範圍/機器掛掉剩號碼怎辦(知識邊界,沒想過) | ✅ Resolved (S34, 中央配號器每 block 領一次非 per-request;掛掉剩號丟掉=空洞=OK,短碼不需連續) |
+| 34 | 27 | Interview habit (operational) | Drill 全程沒主動提監控(S29/S30 重複盲點) | ❌ Unresolved (新固定要求:Step 4 收尾必講 cache hit rate/P99/配號器存活/Bloom FP rate) |
 
 ---
 
@@ -208,6 +211,7 @@ Rules going forward:
 | Multi-Region Session Store | A multi-region session store keeps each user's small KV session in their home region (Redis + TTL for self-healing staleness) and routes via geo-DNS, fetching on miss; for region-failure DR it async-replicates sessions to a backup region — an AP choice that accepts a few seconds of replication lag because a stale session is fine but logging out 100M users is not. |
 | URL Shortener | A URL shortener is an extremely read-heavy key-value system; short codes are generated collision-free by base62-encoding a globally unique counter (not by hashing), stored in a NoSQL KV store for simple point lookups, and served through a cache that needs no invalidation because the mapping is immutable. |
 | Cache vs Queue | Cache solves a read problem (same data read many times, serve it fast, losing it is fine because the DB is source of truth); Queue solves a work-handoff problem (decouple producer from consumer, each message consumed once, losing it is bad because the work may have no backup). Both often run on Redis but use different structures and have opposite durability needs. |
+| Cache Penetration (Bloom + Cache) | Cache penetration is a flood of queries for keys that don't exist — the cache only stores real keys, so every such request misses and crushes the DB; a Bloom filter in front rejects definitely-absent keys safely, because it has no false negatives (a real key is never wrongly blocked) and the worst case is a rare false positive that just wastes one lookup. |
 
 ---
 
@@ -216,10 +220,10 @@ Rules going forward:
 | Field | Value |
 |-------|-------|
 | **Title** | 🏗️ Staff Architect |
-| **Current streak** | 2 週 🔥 (連續活躍週：上週 S31 + 本週 S32-S33,同週不加碼) |
+| **Current streak** | 2 週 🔥 (連續活躍週：上週 S31 + 本週 S32-S34,同週不加碼) |
 | **Longest streak** | 4 (days, pre-weekly) |
-| **Last session date** | 2026-06-24 |
-| **Last story summary** | Session 33 = Weekly Review #4。小球帶學生回顧 URL Shortener / Caching / Database。一條「base62 是不是 hash」的小疑問滾出整串底層地基：進制轉換(hex `#FF0000`) → encoding/hashing/encryption 三件套 → 「base64 不是被破解、本來就設計成可逆」→ 密碼該用 salted slow hash 不是 encryption(學生自己推出「只需驗證不需還原 → 不可逆才安全」)。Caching 從歷史最弱(WR1 0/4)打成六維滿分,當場補掉 capacity 80/20 估算盲區。Bloom filter 從模糊 recall 救回,答出「靠 no-false-negative 才敢擋掉一定不在」。最後 Database 老毛病狙擊:學生避開「資料量大→NoSQL」陷阱、一口氣講足選 SQL+三理由 → 頭號主線弱點本場練成功。Karen 的短網址設計正式記功(R2)。|
+| **Last session date** | 2026-06-26 |
+| **Last story summary** | Session 34。小球先把學生 S33 點名「Bloom + Cache 怎麼組在一起還是模糊」的疙瘩解掉:用一條讀路徑(User→Bloom→Cache→DB)走兩遍,學生自己講出 cache 結構上擋不住「不存在的 key」(只存有的→永遠 miss→砸 DB),而 Bloom 敢當門神是因為 no false negative(真實 key 絕不誤殺,錯誤只單向倒向 false positive)。接著小球切成 Bar Raiser 面試官,跑完整 Day 27 URL Shortener Drill:學生學會 62≈2⁶ 心算容量、主動講足 counter+base62 的取捨(R3 解鎖)、被連續質疑三次(Redis 當 DB、LB 放錯、6 vs 7 碼)都自己修正回來,還把今天剛打通的 Bloom 自己擺進讀路徑正確位置。8/9 PASS,唯一漏的是 operational 監控(老盲點)。|
 
 ---
 
@@ -242,8 +246,9 @@ Rules going forward:
 | R1 | Max's Nightmare | 🏆 | 2026-06-16 (S30, 解釋 Max「全量廣播」為何 O(N²) 不 scale) |
 | M4 | Distributed Mind | 🏆 | 2026-06-18 (S31, Pass Phase 2 Gate — 分散式思維覺醒) |
 | R2 | Karen's Hero | 🏆 | 2026-06-24 (S33 記功 — Day 27 URL Shortener Phase 3 設計完成 = 達成 Karen 可追蹤短網址需求) |
+| R3 | 小球's Pride | 🏆 | 2026-06-26 (S34 Drill — 被問生碼方式時主動補上 counter+base62 的 trade-off,未經 prompt 的 architect 思維) |
 
-**Total: 15/25**
+**Total: 16/25**
 
 ---
 
@@ -263,9 +268,9 @@ Rules going forward:
 | Replication & Leader Election | 2 | 2026-06-19 (S30 recall PASS「read replica≠strong 因 replication lag」,Box 1→2) |
 | Rate Limiting & Circuit Breaker | 1 | 2026-06-10 (S28 新學,Box 1, overdue) |
 | Observability | 1 | 2026-06-16 (S29 新學,Box 1, overdue) |
-| Bloom Filter & Gossip | 2 | 2026-06-27 (S33 WR4 recall 模糊起步→8格牆走查詢+假陽性→Feynman PASS,Box 1→2) |
+| Bloom Filter & Gossip | 3 | 2026-07-03 (S34 Bloom+Cache 組合重講 Feynman PASS,no false negative/bit 機制自講,Box 2→3) |
 | Database (B-tree/LSM) | 1 | 2026-06-17 (S30 LSM 一度遺忘→喚回,backfill Box 1;S33 測的是 selection 軸非 LSM 內部,此項仍欠) |
-| URL Shortener (design) | 2 | 2026-06-27 (S33 WR4 re-test,base62≠hash 回退已修,Box 1→2) |
+| URL Shortener (design) | 3 | 2026-07-03 (S34 Day 27 Drill 8/9,整套設計實戰過一遍,Box 2→3) |
 
 ---
 
