@@ -1,0 +1,1048 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Caching &amp; CDN — Day 06-07 · The Memory Hierarchy</title>
+<style>
+  :root{
+    --bg:#0a0d14; --bg2:#0c1018; --panel:#11151e; --panel-2:#161b26; --panel-3:#1c2230;
+    --line:rgba(255,255,255,.07); --line-hi:rgba(255,255,255,.15);
+    --ink:#e9edf4; --soft:#9aa4b4; --muted:#646e7e; --dim:#39424f;
+    /* depth ramp: fast/near/bright → slow/far/deep */
+    --l0:#a9efff; --l1:#5cd0f2; --l2:#46a4e8; --l3:#5566d8; --l4:#4242a0;
+    --hit:#5eead4; --miss:#f6b756; --accent:#5cd0f2; --deep:#7c83ff;
+    /* augmentation tokens (names kept for .aug-- + .chart reuse) */
+    --verify:#5eead4; --sign:#f6b756; --danger:#ff7a8a;
+    --aug:#8b9bff; --intv:#5cd0f2; --war:#ff7a8a; --link:#7fb0ff;
+    --display:"Optima","Avenir Next","Segoe UI","PingFang TC",sans-serif;
+    --body:"Avenir Next","Avenir","Helvetica Neue","PingFang TC",sans-serif;
+    --mono:"SF Mono","SFMono-Regular","JetBrains Mono","Menlo","Monaco",ui-monospace,monospace;
+    --measure:72ch;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    background:var(--bg); color:var(--ink);
+    font-family:var(--body); font-size:17.5px; line-height:1.62;
+    -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+    background-image:
+      repeating-linear-gradient(180deg, transparent 0 33px, rgba(255,255,255,.014) 33px 34px),
+      radial-gradient(900px 460px at 50% -6%, rgba(92,208,242,.12), transparent 62%),
+      linear-gradient(180deg, #0e1422 0%, #0a0d14 42%, #07090e 100%);
+    background-attachment:fixed;
+  }
+  body::after{
+    content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.5;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='.02'/%3E%3C/svg%3E");
+    mix-blend-mode:overlay;
+  }
+  .wrap{position:relative;z-index:1;max-width:900px;margin:0 auto;padding:0 26px 150px}
+
+  header.bar{
+    position:sticky;top:0;z-index:30;margin:0 -26px 0;padding:12px 26px;
+    background:rgba(10,13,20,.86);backdrop-filter:blur(15px) saturate(150%);
+    border-bottom:1px solid var(--line);display:flex;align-items:center;gap:16px;flex-wrap:wrap;
+  }
+  .bar__id{font-family:var(--mono);font-size:12px;letter-spacing:.12em;color:var(--muted);
+    display:flex;align-items:center;gap:9px}
+  .bar__id .dot{width:8px;height:8px;border-radius:50%;background:var(--accent);box-shadow:0 0 11px var(--accent)}
+  .bar__id b{color:var(--accent);font-weight:600}
+  .bar__progress{margin-left:auto;display:flex;align-items:center;gap:11px;font-family:var(--mono);font-size:12px;color:var(--soft)}
+  .meter{width:118px;height:6px;border-radius:2px;background:var(--panel-2);overflow:hidden;border:1px solid var(--line)}
+  .meter i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--miss),var(--hit));transition:width .45s cubic-bezier(.2,.7,.2,1)}
+  .bar__btns{display:flex;gap:7px}
+  button.ctl{font-family:var(--mono);font-size:11px;letter-spacing:.04em;color:var(--soft);
+    background:var(--panel);border:1px solid var(--line);padding:7px 11px;border-radius:6px;cursor:pointer;transition:.16s}
+  button.ctl:hover{color:var(--ink);border-color:var(--accent);background:var(--panel-2)}
+  button.ctl:focus-visible{outline:2px solid var(--hit);outline-offset:2px}
+
+  /* ── hero: the memory hierarchy ── */
+  .hero{margin-top:30px;padding-top:18px}
+  .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.3em;text-transform:uppercase;color:var(--accent);margin-bottom:16px}
+  h1{font-family:var(--display);font-size:clamp(42px,7.5vw,76px);font-weight:700;line-height:.98;letter-spacing:.01em;text-transform:uppercase}
+  h1 em{font-style:normal;color:var(--accent)}
+  .sub{margin-top:18px;font-size:16px;color:var(--soft);max-width:62ch}
+  .sub b{color:var(--ink);font-weight:600}
+
+  .ladder{margin:26px 0 8px;display:grid;gap:6px}
+  .ladder__cap{display:flex;justify-content:space-between;font-family:var(--mono);font-size:10.5px;
+    letter-spacing:.12em;text-transform:uppercase;color:var(--muted);padding:0 4px 3px}
+  .rung{display:grid;grid-template-columns:138px 92px 1fr;align-items:center;gap:13px;
+    padding:12px 15px;border-radius:10px;border:1px solid var(--line);border-left-width:3px;
+    background:var(--panel)}
+  .rung .nm{font-family:var(--display);font-weight:600;font-size:16px;color:var(--ink)}
+  .rung .nm small{display:block;font-family:var(--mono);font-size:10px;color:var(--muted);font-weight:400;letter-spacing:.04em;text-transform:uppercase}
+  .rung .lat{font-family:var(--mono);font-size:17px;font-weight:600;text-align:right}
+  .rung .barwrap{height:9px;border-radius:5px;background:rgba(255,255,255,.05);overflow:hidden}
+  .rung .barwrap i{display:block;height:100%;border-radius:5px}
+  .rung.r0{border-left-color:var(--l0)} .rung.r0 .lat{color:var(--l0)} .rung.r0 .barwrap i{background:var(--l0)}
+  .rung.r1{border-left-color:var(--l1)} .rung.r1 .lat{color:var(--l1)} .rung.r1 .barwrap i{background:var(--l1)}
+  .rung.r2{border-left-color:var(--l2)} .rung.r2 .lat{color:var(--l2)} .rung.r2 .barwrap i{background:var(--l2)}
+  .rung.r3{border-left-color:var(--l3)} .rung.r3 .lat{color:var(--l3)} .rung.r3 .barwrap i{background:var(--l3)}
+  .rung.r4{border-left-color:var(--l4)} .rung.r4 .lat{color:#8f8fe0} .rung.r4 .barwrap i{background:var(--l4)}
+  .rung.r2{background:linear-gradient(90deg,rgba(70,164,232,.05),var(--panel))}
+  .rung.r4{opacity:.92}
+
+  .formula{margin:18px 0 4px;font-family:var(--mono);font-size:13.5px;color:var(--soft);
+    background:#070a10;border:1px solid var(--line);border-left:2px solid var(--accent);border-radius:10px;padding:14px 17px;line-height:1.7;overflow-x:auto}
+  .formula b{color:var(--hit)} .formula .hl{color:var(--accent)}
+
+  .chips{display:flex;flex-wrap:wrap;gap:9px;margin-top:22px}
+  .chip{font-family:var(--mono);font-size:11.5px;color:var(--soft);border:1px solid var(--line-hi);border-radius:30px;padding:5px 13px;letter-spacing:.03em}
+  .chip.ok{color:var(--hit);border-color:rgba(94,234,212,.4)} .chip.go{color:var(--miss);border-color:rgba(246,183,86,.4)}
+
+  .legend{display:flex;flex-wrap:wrap;gap:7px 15px;margin:24px 0 4px;padding:16px 0 2px;
+    border-top:1px dashed var(--line);font-family:var(--mono);font-size:11.5px;color:var(--muted)}
+  .legend span{display:flex;align-items:center;gap:7px} .legend i{width:10px;height:10px;border-radius:3px;display:inline-block}
+
+  section{margin-top:60px}
+  .kick{font-family:var(--mono);font-size:12px;letter-spacing:.06em;color:var(--muted);margin-bottom:13px;display:flex;align-items:center;gap:11px}
+  .kick .n{color:var(--accent);font-weight:600} .kick .ar{color:var(--accent)}
+  .kick::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,var(--line),transparent)}
+  h2{font-family:var(--display);font-size:32px;font-weight:700;letter-spacing:.005em;text-transform:uppercase;line-height:1.06}
+  h2 .tag{font-family:var(--mono);font-size:12px;font-weight:400;color:var(--muted);letter-spacing:.02em;margin-left:11px;text-transform:none;vertical-align:middle}
+  h3{font-family:var(--display);font-size:21px;font-weight:600;margin:34px 0 12px;color:var(--ink)}
+  h3 .ix{font-family:var(--mono);color:var(--accent);font-size:14px;margin-right:9px}
+  p{max-width:var(--measure);margin:13px 0;color:var(--soft)}
+  p.lead{color:var(--ink);font-size:19px}
+  strong{color:var(--ink);font-weight:700}
+  em.core{font-style:normal;color:var(--accent);font-weight:600}
+
+  .manifest{list-style:none;display:grid;gap:8px;margin-top:6px}
+  .manifest li{display:flex;gap:13px;align-items:baseline;font-family:var(--mono);font-size:14px;color:var(--soft);
+    padding:11px 15px;background:var(--panel);border:1px solid var(--line);border-radius:9px;border-left:2px solid var(--hit)}
+  .manifest li b{color:var(--hit)}
+
+  /* recall = a cache lookup: MISS (closed) → HIT (open) */
+  .recall{margin:24px 0}
+  .recall__q{font-family:var(--display);font-size:20px;font-weight:600;color:var(--ink);line-height:1.38}
+  .recall__q .qn{font-family:var(--mono);font-size:12px;color:var(--accent);font-weight:600;margin-right:10px;letter-spacing:.02em;border:1px solid rgba(92,208,242,.35);border-radius:5px;padding:2px 7px;vertical-align:2px}
+  details.reveal{margin-top:13px;border:1px solid var(--line);border-radius:12px;background:var(--panel);overflow:hidden;transition:border-color .2s}
+  details.reveal[open]{border-color:rgba(94,234,212,.35)}
+  details.reveal>summary{list-style:none;cursor:pointer;padding:13px 18px;display:flex;align-items:center;gap:12px;font-family:var(--mono);font-size:12.5px;letter-spacing:.03em;color:var(--muted);user-select:none;transition:.16s}
+  details.reveal>summary::-webkit-details-marker{display:none}
+  details.reveal>summary:hover{color:var(--hit);background:var(--panel-2)}
+  details.reveal>summary:focus-visible{outline:2px solid var(--hit);outline-offset:-2px}
+  .lock{width:9px;height:9px;border-radius:50%;background:var(--miss);flex:none;box-shadow:0 0 0 4px rgba(246,183,86,.1);transition:.25s}
+  details.reveal[open]>summary .lock{background:var(--hit);box-shadow:0 0 13px var(--hit)}
+  details.reveal>summary .cue::before{content:"MISS ▸ 想一下，點開即命中 · "}
+  details.reveal[open]>summary .cue::before{content:"HIT ✓ 命中 · "}
+  .reveal__body{padding:5px 20px 21px;border-top:1px solid var(--line);color:var(--soft)}
+  details.reveal[open] .reveal__body{animation:decrypt .5s cubic-bezier(.2,.7,.2,1)}
+  @keyframes decrypt{from{filter:blur(8px);opacity:0;transform:translateY(-4px)}to{filter:blur(0);opacity:1;transform:none}}
+  .reveal__body>:first-child{margin-top:15px}
+
+  table{width:100%;border-collapse:collapse;margin:17px 0;font-size:14.5px;font-family:var(--body)}
+  th,td{text-align:left;padding:10px 13px;border-bottom:1px solid var(--line);vertical-align:top;color:var(--soft)}
+  th{font-family:var(--mono);font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);font-weight:600}
+  tr:last-child td{border-bottom:none}
+  td strong{color:var(--ink)}
+  table.lined td:first-child{color:var(--ink);font-weight:600;width:30%}
+
+  pre{font-family:var(--mono);font-size:13px;line-height:1.72;background:#070a10;border:1px solid var(--line);border-left:2px solid var(--accent);border-radius:10px;padding:17px 19px;overflow-x:auto;color:#c5cedb;margin:17px 0}
+  pre .c{color:var(--muted)}
+  code{font-family:var(--mono);font-size:.85em;background:var(--panel-2);padding:2px 6px;border-radius:5px;color:var(--hit)}
+  p code,td code,li code{color:var(--hit)}
+
+  .note{margin:17px 0;padding:15px 17px 15px 19px;border-radius:10px;background:var(--panel);border:1px solid var(--line)}
+  .note.trap{border-left:3px solid var(--danger)} .note.principle{border-left:3px solid var(--hit)}
+  .note .lbl{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;display:block;margin-bottom:7px}
+  .note.trap .lbl{color:var(--danger)} .note.principle .lbl{color:var(--hit)}
+  .note p{margin:6px 0;color:var(--soft)}
+
+  /* augmentation layers (NOT original notes) */
+  .aug{margin:21px 0;border-radius:13px;background:linear-gradient(180deg,rgba(139,155,255,.06),rgba(139,155,255,.02));border:1px solid rgba(139,155,255,.26);border-left:3px solid var(--aug);overflow:hidden}
+  .aug__tag{display:flex;align-items:center;gap:10px;padding:10px 17px;background:rgba(139,155,255,.09);border-bottom:1px solid rgba(139,155,255,.16);font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--aug)}
+  .aug__tag .badge{margin-left:auto;font-size:10px;color:#a6aee0;border:1px solid rgba(139,155,255,.34);border-radius:20px;padding:3px 10px;letter-spacing:.05em;text-transform:none}
+  .aug__body{padding:15px 19px 19px}
+  .aug__body h4{font-family:var(--display);font-size:18px;color:var(--ink);margin:0 0 8px;font-weight:600}
+  .aug__body p{color:var(--soft);margin:10px 0;max-width:var(--measure)}
+  .aug__body strong{color:#d3d8f2} .aug__body em{font-style:normal;color:var(--aug);font-weight:600}
+  .aug__body ul{margin:10px 0 10px 4px;list-style:none}
+  .aug__body li{color:var(--soft);margin:7px 0;padding-left:19px;position:relative}
+  .aug__body li::before{content:"▸";position:absolute;left:0;color:var(--aug)}
+  .aug--cost{border-left-color:var(--sign);background:linear-gradient(180deg,rgba(246,183,86,.06),rgba(246,183,86,.02));border-color:rgba(246,183,86,.24)}
+  .aug--cost .aug__tag{background:rgba(246,183,86,.1);color:var(--sign);border-bottom-color:rgba(246,183,86,.16)}
+  .aug--cost .aug__body em{color:var(--sign)} .aug--cost .aug__tag .badge{color:#d9b478;border-color:rgba(246,183,86,.34)}
+  .aug--biz{border-left-color:var(--hit);background:linear-gradient(180deg,rgba(94,234,212,.055),rgba(94,234,212,.02));border-color:rgba(94,234,212,.22)}
+  .aug--biz .aug__tag{background:rgba(94,234,212,.1);color:var(--hit);border-bottom-color:rgba(94,234,212,.16)}
+  .aug--biz .aug__body em{color:var(--hit)} .aug--biz .aug__tag .badge{color:#7fd9c8;border-color:rgba(94,234,212,.34)}
+  .aug--intv{border-left-color:var(--intv);background:linear-gradient(180deg,rgba(92,208,242,.06),rgba(92,208,242,.02));border-color:rgba(92,208,242,.24)}
+  .aug--intv .aug__tag{background:rgba(92,208,242,.1);color:var(--intv);border-bottom-color:rgba(92,208,242,.16)}
+  .aug--intv .aug__body em{color:var(--intv)} .aug--intv .aug__tag .badge{color:#8bd2ee;border-color:rgba(92,208,242,.34)}
+  .aug--war{border-left-color:var(--war);background:linear-gradient(180deg,rgba(255,122,138,.06),rgba(255,122,138,.02));border-color:rgba(255,122,138,.24)}
+  .aug--war .aug__tag{background:rgba(255,122,138,.1);color:var(--war);border-bottom-color:rgba(255,122,138,.16)}
+  .aug--war .aug__body em{color:var(--war)} .aug--war .aug__tag .badge{color:#f0a6b0;border-color:rgba(255,122,138,.34)}
+
+  .rubric{margin:8px 0 0;border-top:1px solid var(--line)}
+  .rubric>div{display:grid;grid-template-columns:100px 1fr;gap:14px;padding:10px 0;border-bottom:1px solid var(--line)}
+  .rubric>div:last-child{border-bottom:none}
+  .rubric .k{font-family:var(--mono);font-size:10.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);padding-top:3px}
+  .rubric .v{color:var(--soft);font-size:14.5px;line-height:1.5}
+  .rubric .weak .k{color:var(--danger)} .rubric .strong .k{color:var(--hit)} .rubric .staff .k{color:var(--sign)} .rubric .red .k{color:var(--danger)}
+  .rubric .v b{color:var(--ink)}
+
+  .xlink{margin:13px 0;font-family:var(--mono);font-size:12.5px;color:var(--soft);background:rgba(255,255,255,.022);border:1px dashed rgba(255,255,255,.14);border-radius:8px;padding:9px 13px;line-height:1.6}
+  .xlink b{color:var(--ink);font-weight:600} .xlink .ic{color:var(--accent);margin-right:8px}
+
+  .recall--soc .recall__q{color:#d3d8f2}
+  .recall--soc .recall__q .qn{color:var(--aug);border-color:rgba(139,155,255,.4)}
+  .recall--soc details.reveal{border-color:rgba(139,155,255,.24);background:linear-gradient(180deg,rgba(139,155,255,.04),transparent)}
+  .recall--soc details.reveal>summary:hover{color:var(--aug);background:rgba(139,155,255,.06)}
+  .recall--soc details.reveal[open]{border-color:rgba(139,155,255,.4)}
+  .recall--soc details.reveal[open]>summary .lock{background:var(--aug);box-shadow:0 0 13px var(--aug)}
+  .socbadge{display:inline-block;font-family:var(--mono);font-size:10px;letter-spacing:.04em;color:#a6aee0;border:1px solid rgba(139,155,255,.34);border-radius:20px;padding:2px 9px;margin-left:9px;vertical-align:2px}
+
+  .chart{margin:15px 0 6px;background:#070a10;border:1px solid var(--line);border-radius:11px;padding:15px 13px 11px}
+  .chart svg{display:block;width:100%;height:auto}
+  .chart figcaption{font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:9px;text-align:center;line-height:1.55}
+  .chart .axis{stroke:var(--dim);stroke-width:1} .chart .grid{stroke:rgba(255,255,255,.05);stroke-width:1}
+  .chart text{font-family:var(--mono);fill:var(--muted);font-size:11px}
+  .chart .lbl{fill:var(--soft);font-size:12px} .chart .ttl{fill:var(--ink);font-size:13px;font-family:var(--display)}
+
+  .mistake{margin:13px 0;border:1px solid var(--line);border-radius:11px;overflow:hidden}
+  .mistake__bad{padding:13px 17px;background:rgba(255,122,138,.07);border-left:3px solid var(--danger)}
+  .mistake__bad .lbl{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--danger);display:block;margin-bottom:5px}
+  .mistake details{border-top:1px solid var(--line)}
+  .mistake summary{list-style:none;cursor:pointer;padding:12px 17px;font-family:var(--mono);font-size:12px;color:var(--muted);display:flex;gap:11px;align-items:center;transition:.16s}
+  .mistake summary::-webkit-details-marker{display:none}
+  .mistake summary:hover{color:var(--hit);background:var(--panel-2)}
+  .mistake summary:focus-visible{outline:2px solid var(--hit);outline-offset:-2px}
+  .mistake__good{padding:4px 17px 15px;border-top:1px solid var(--line);border-left:3px solid var(--hit)}
+  .mistake details[open] .mistake__good{animation:decrypt .45s}
+  .mistake__good .lbl{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--hit);display:block;margin:11px 0 5px}
+
+  /* vocab = cache entries: KEY (zh) flips to VALUE (en) */
+  .vgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(218px,1fr));gap:13px;margin-top:8px}
+  .vcard{display:block;width:100%;background:none;border:none;padding:0;cursor:pointer;perspective:1100px;font:inherit;text-align:left}
+  .vcard__in{display:block;position:relative;height:104px;width:100%;transition:transform .55s cubic-bezier(.3,.7,.2,1);transform-style:preserve-3d}
+  .vcard[aria-pressed="true"] .vcard__in{transform:rotateY(180deg)}
+  .vface{position:absolute;inset:0;backface-visibility:hidden;display:flex;flex-direction:column;justify-content:center;gap:7px;padding:15px 17px;border-radius:11px;border:1px solid var(--line);overflow:hidden}
+  .vface .tick{font-family:var(--mono);font-size:10px;letter-spacing:.13em;text-transform:uppercase;color:var(--muted)}
+  .vface.zh{background:var(--panel)} .vface.zh .tick{color:var(--accent)}
+  .vface.zh .term{font-family:var(--display);font-size:20px;color:var(--ink);font-weight:600}
+  .vface.en{background:var(--panel-2);transform:rotateY(180deg);border-color:rgba(94,234,212,.3)} .vface.en .tick{color:var(--hit)}
+  .vface.en .term{font-family:var(--mono);font-size:15px;color:var(--hit);line-height:1.4}
+  .vcard:focus-visible{outline:2px solid var(--hit);outline-offset:3px;border-radius:12px}
+
+  footer{margin-top:84px;padding-top:24px;border-top:1px solid var(--line);font-family:var(--mono);font-size:11.5px;color:var(--dim);line-height:1.85}
+  footer b{color:var(--muted)} footer code{background:none;color:var(--muted);font-size:1em;padding:0}
+  a{color:var(--link);text-decoration:none;border-bottom:1px solid rgba(127,176,255,.3)} a:hover{border-color:var(--link)}
+
+  .anim{opacity:0;animation:rise .7s cubic-bezier(.2,.7,.2,1) forwards}
+  @keyframes rise{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+  .d1{animation-delay:.05s} .d2{animation-delay:.15s} .d3{animation-delay:.25s} .d4{animation-delay:.35s}
+
+  @media (max-width:580px){
+    body{font-size:16px} .wrap{padding:0 16px 110px}
+    header.bar{margin:0 -16px} .bar__progress{width:100%;margin:5px 0 0;order:3}
+    h1{font-size:44px} .rubric>div{grid-template-columns:1fr;gap:3px}
+    .rung{grid-template-columns:1fr auto;gap:8px} .rung .barwrap{grid-column:1/-1}
+  }
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;scroll-behavior:auto}.anim{opacity:1}.vcard__in{transition:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="bar">
+    <span class="bar__id"><span class="dot"></span>SD&nbsp;·&nbsp;<b>DAY 06-07</b>&nbsp;·&nbsp;MEMORY HIERARCHY</span>
+    <div class="bar__progress">
+      <span id="pcount">命中 0 / 0</span>
+      <span class="meter"><i id="pbar"></i></span>
+    </div>
+    <div class="bar__btns">
+      <button class="ctl" id="revealAll">全部命中</button>
+      <button class="ctl" id="resetAll">清空 cache</button>
+    </div>
+  </header>
+
+  <div class="hero anim d1">
+    <div class="eyebrow">Day 06-07 · Chunk 1-10 + PoC</div>
+    <h1>Caching <em>&amp;</em> CDN</h1>
+    <p class="sub">把熱資料放到<b>更快、更近</b>的層，擋住大部分 request 不打 DB。整頁是一趟往下穿過<b>記憶體階層</b>的旅程：上面快而近，下面慢而深。回憶卡點開 = 一次 <b>cache HIT</b>。</p>
+
+    <div class="ladder">
+      <div class="ladder__cap"><span>← faster · nearer · smaller</span><span>worst-case latency</span></div>
+      <div class="rung r0"><span class="nm">Browser<small>client 端</small></span><span class="lat">0 ms</span><span class="barwrap"><i style="width:3%"></i></span></div>
+      <div class="rung r1"><span class="nm">CDN<small>edge server</small></span><span class="lat">1–10 ms</span><span class="barwrap"><i style="width:20%"></i></span></div>
+      <div class="rung r2"><span class="nm">App Cache<small>redis / memcached</small></span><span class="lat">0.5–2 ms</span><span class="barwrap"><i style="width:6%"></i></span></div>
+      <div class="rung r3"><span class="nm">DB Cache<small>query cache</small></span><span class="lat">1–5 ms</span><span class="barwrap"><i style="width:12%"></i></span></div>
+      <div class="rung r4"><span class="nm">DB Disk<small>storage · 真相來源</small></span><span class="lat">5–50 ms</span><span class="barwrap"><i style="width:100%"></i></span></div>
+      <div class="ladder__cap"><span>slower · farther · bigger →</span><span>越深越慢</span></div>
+    </div>
+
+    <div class="formula">
+<span class="c"># Effective Latency = (Hit × Cache) + (Miss × DB)</span>
+90% hit, cache 1ms, DB 20ms  =  (<span class="hl">0.9</span>×1) + (<span class="hl">0.1</span>×20)  =  <b>2.9 ms</b>　<span class="c">← vs 20ms 沒 cache</span></div>
+
+    <div class="chips">
+      <span class="chip ok">✅ 完成 · Chunk 1-10 + PoC</span>
+      <span class="chip">原始筆記逐字保留</span>
+      <span class="chip go">PoC: caching-poc/main.go</span>
+    </div>
+
+    <div class="legend">
+      <span><i style="background:var(--hit)"></i>原始筆記 · 回憶卡</span>
+      <span><i style="background:var(--aug)"></i>🏛 架構師觀點</span>
+      <span><i style="background:var(--intv)"></i>🎯 面試官視角</span>
+      <span><i style="background:var(--war)"></i>💥 真實事故</span>
+      <span><i style="background:var(--sign)"></i>💰 成本拐點 + 圖</span>
+      <span><i style="background:var(--hit);opacity:.7"></i>💼 業務情境</span>
+      <span><i style="background:var(--aug);opacity:.7"></i>❓ 蘇格拉底深掘</span>
+      <span><i style="background:#9aa0b0"></i>🔗 跨主題連結</span>
+    </div>
+  </div>
+
+  <section class="anim d3">
+    <div class="kick"><span class="ar">▸</span><span class="n">00</span> Coverage</div>
+    <h2>這兩天做完了什麼</h2>
+    <ul class="manifest">
+      <li><b>✓ 為什麼有效</b>&nbsp;&nbsp;locality / 80-20 / Effective Latency 公式</li>
+      <li><b>✓ Cache Levels</b>&nbsp;&nbsp;Browser → CDN → Redis → DB cache → DB Disk</li>
+      <li><b>✓ 讀寫策略</b>&nbsp;&nbsp;Cache-Aside / Read-Through / Write-Through / Write-Behind</li>
+      <li><b>✓ Eviction</b>&nbsp;&nbsp;LRU / LFU / TTL</li>
+      <li><b>✓ Invalidation + Stampede</b>&nbsp;&nbsp;TTL / event / version + 驚群三解</li>
+      <li><b>✓ CDN</b>&nbsp;&nbsp;Pull vs Push / Origin Shield / Versioned URLs</li>
+      <li><b>✓ ElastiCache + Observability + Go PoC</b></li>
+    </ul>
+  </section>
+
+  <section>
+    <div class="kick"><span class="ar">▸</span><span class="n">01</span> One-Liner · Trade-off · Scale</div>
+    <h2>底層直覺 <span class="tag">先講，再核對</span></h2>
+    <p class="lead">Cache 把常用的資料放在更快、更近的儲存層（如 Redis），擋住大部分 request 不用打到 DB，大幅降低 latency 和 DB 負載。</p>
+
+    <div class="recall">
+      <div class="recall__q"><span class="qn">Trade-off</span>Cache 的三個關鍵 trade-off 你能講出來嗎？</div>
+      <details class="reveal"><summary><span class="lock"></span><span class="cue"></span></summary>
+        <div class="reveal__body">
+          <ul style="list-style:none;padding:0;margin:0">
+            <li style="margin:10px 0;padding-left:18px;position:relative"><span style="position:absolute;left:0;color:var(--accent)">▸</span>Cache-Aside write 時「<strong>刪除</strong>」而不是「更新」cache：避免 race condition 導致 cache 和 DB 不一致</li>
+            <li style="margin:10px 0;padding-left:18px;position:relative"><span style="position:absolute;left:0;color:var(--accent)">▸</span>Write-Through vs Write-Behind：一致性 vs 寫入速度。資料不能丟用 Write-Through，高寫入量可容忍短暫遺失用 Write-Behind</li>
+            <li style="margin:10px 0;padding-left:18px;position:relative"><span style="position:absolute;left:0;color:var(--accent)">▸</span>先寫 DB 再刪 cache vs 先刪 cache 再寫 DB：先寫 DB 再刪 cache 比較安全，反過來有 race condition 風險</li>
+          </ul>
+        </div>
+      </details>
+    </div>
+
+    <div class="recall">
+      <div class="recall__q"><span class="qn">Scale</span>什麼時候該加 cache？目標是什麼？</div>
+      <details class="reveal"><summary><span class="lock"></span><span class="cue"></span></summary>
+        <div class="reveal__body"><p>當 DB query latency 成為瓶頸（P99 &gt; 50ms）或 QPS 超過單機 DB 上限 → 加 Redis cache layer，目標 hit ratio &gt; 90%。</p></div>
+      </details>
+    </div>
+
+    <div class="recall">
+      <div class="recall__q"><span class="qn">DevOps</span>ElastiCache 要監控什麼？hit ratio 突降代表什麼？</div>
+      <details class="reveal"><summary><span class="lock"></span><span class="cue"></span></summary>
+        <div class="reveal__body">
+          <ul style="list-style:none;padding:0;margin:0">
+            <li style="margin:8px 0;padding-left:18px;position:relative"><span style="position:absolute;left:0;color:var(--accent)">▸</span>ElastiCache (Redis) 監控重點：cache hit ratio、eviction rate、memory usage</li>
+            <li style="margin:8px 0;padding-left:18px;position:relative"><span style="position:absolute;left:0;color:var(--accent)">▸</span>Cache hit ratio 突然下降 &gt; 10% → 可能是 key pattern 改變或 deploy 導致 cold start</li>
+            <li style="margin:8px 0;padding-left:18px;position:relative"><span style="position:absolute;left:0;color:var(--accent)">▸</span>CloudFront 的 cache hit ratio 可在 CloudWatch 看到</li>
+          </ul>
+        </div>
+      </details>
+    </div>
+  </section>
+
+  <section>
+    <div class="kick"><span class="ar">▸</span><span class="n">02</span> 核心概念 · Why It Works</div>
+    <h2>Cache 為什麼有效 <span class="tag">locality</span></h2>
+
+    <div class="recall">
+      <div class="recall__q"><span class="qn">回想</span>Cache 為什麼有效？靠哪個性質？什麼情況下它沒用？</div>
+      <details class="reveal"><summary><span class="lock"></span><span class="cue"></span></summary>
+        <div class="reveal__body">
+          <p>靠 <strong>locality of access（存取局部性）</strong>：</p>
+          <ul style="list-style:none;padding:0;margin:0">
+            <li style="margin:8px 0;padding-left:18px;position:relative"><span style="position:absolute;left:0;color:var(--accent)">▸</span><strong>Temporal locality</strong>：最近存取的資料很可能很快再被存取</li>
+            <li style="margin:8px 0;padding-left:18px;position:relative"><span style="position:absolute;left:0;color:var(--accent)">▸</span><strong>80/20 rule</strong>：80% 的 request 打 20% 的資料（hot data）</li>
+            <li style="margin:8px 0;padding-left:18px;position:relative"><span style="position:absolute;left:0;color:var(--accent)">▸</span>如果每個 request 都存取不同資料，cache 就沒用了</li>
+          </ul>
+        </div>
+      </details>
+    </div>
+
+    <div class="note principle">
+      <span class="lbl">Effective Latency 公式（原始筆記）</span>
+      <p style="font-family:var(--mono);font-size:14px;color:var(--soft);line-height:1.7">Effective Latency = (Hit Rate × Cache Latency) + (Miss Rate × DB Latency)<br>90% hit, cache 1ms, DB 20ms = (0.9 × 1) + (0.1 × 20) = <strong style="color:var(--hit)">2.9ms</strong> ← vs 20ms without cache</p>
+    </div>
+
+    <div class="recall recall--soc">
+      <div class="recall__q"><span class="qn">深掘</span>公式算出 90% hit → 2.9ms。如果 hit 從 90% 掉到 80%，latency 變多少？為什麼 miss rate 一點點變化影響這麼大？<span class="socbadge">蘇格拉底深掘 · 非原始筆記</span></div>
+      <details class="reveal"><summary><span class="lock"></span><span class="cue"></span></summary>
+        <div class="reveal__body">
+          <p>80% hit = (0.8×1) + (0.2×20) = 0.8 + 4 = <strong>4.8ms</strong>，從 2.9 跳到 4.8，差約 65%。</p>
+          <p>原因：miss 的代價（20ms）是 hit（1ms）的 <em>20 倍</em>，所以 effective latency 幾乎被「miss rate × DB latency」這一項主宰。hit 從 90→80，miss 從 10%→20% 是翻倍，那條昂貴項就翻倍。這跟 Day 27 那張「hit ratio 跌 5% → DB 流量翻倍」是同一件事的兩面：<strong>miss rate 同時決定 latency 和 DB 成本</strong>。所以 hit ratio 不是虛榮指標，是 latency 和成本的共同槓桿。</p>
+        </div>
+      </details>
+    </div>
+  </section>
+
+  <section>
+    <div class="kick"><span class="ar">▸</span><span class="n">03</span> Cache Levels</div>
+    <h2>由快到慢 <span class="tag">hero 那座階梯的細節</span></h2>
+
+    <div class="recall">
+      <div class="recall__q"><span class="qn">回想</span>5 層 cache，各自 latency、放哪、適合存什麼？</div>
+      <details class="reveal"><summary><span class="lock"></span><span class="cue"></span></summary>
+        <div class="reveal__body">
+          <table>
+            <tr><th>Level</th><th>Where</th><th>Latency</th><th>適合</th></tr>
+            <tr><td><strong>Browser</strong></td><td>Client 端</td><td>0ms</td><td>Static assets, <code>Cache-Control</code> header</td></tr>
+            <tr><td><strong>CDN</strong></td><td>Edge server</td><td>1-10ms</td><td>圖片、CSS/JS、public static content</td></tr>
+            <tr><td><strong>App Cache</strong></td><td>Redis/Memcached</td><td>0.5-2ms</td><td>User profile, session, feed data</td></tr>
+            <tr><td><strong>DB Cache</strong></td><td>DB 內建</td><td>1-5ms</td><td>Query result cache</td></tr>
+            <tr><td><strong>DB Disk</strong></td><td>Storage</td><td>5-50ms</td><td>所有資料</td></tr>
+          </table>
+        </div>
+      </details>
+    </div>
+
+    <div class="recall">
+      <div class="recall__q"><span class="qn">判斷</span>Static/Public vs Dynamic/Per-user，各該 cache 在哪一層？</div>
+      <details class="reveal"><summary><span class="lock"></span><span class="cue"></span></summary>
+        <div class="reveal__body">
+          <table>
+            <tr><th></th><th>Static / Public</th><th>Dynamic / Per-user</th></tr>
+            <tr><td><strong>變動頻率</strong></td><td>低</td><td>高</td></tr>
+            <tr><td><strong>最佳 cache level</strong></td><td><strong>CDN + Browser</strong></td><td><strong>Redis (App cache)</strong></td></tr>
+            <tr><td><strong>例子</strong></td><td>大頭貼、圖片、CSS</td><td>Feed、cart、session</td></tr>
+          </table>
+        </div>
+      </details>
+    </div>
+  </section>
+
+  <section>
+    <div class="kick"><span class="ar">▸</span><span class="n">04</span> 讀取策略 · Read Patterns</div>
+    <h2>Cache-Aside vs Read-Through <span class="tag">最常考</span></h2>
+
+    <div class="recall">
+      <div class="recall__q"><span class="qn">Cache-Aside</span>讀流程、寫流程？為什麼刪不更新？順序為什麼重要？</div>
+      <details class="reveal"><summary><span class="lock"></span><span class="cue"></span></summary>
+        <div class="reveal__body">
+          <p>App 自己管 cache，DB 和 cache 之間沒有直接連結。</p>
+<pre><span class="c">Read flow:</span>
+App → Cache (hit?) → Yes → 回傳
+                   → No (miss) → App → DB → App → 寫回 Cache → 回傳
+
+<span class="c">Write flow:</span>
+App → 寫 DB → 刪除 Cache key</pre>
+          <ul style="list-style:none;padding:0;margin:0">
+            <li style="margin:8px 0;padding-left:18px;position:relative"><span style="position:absolute;left:0;color:var(--accent)">▸</span>寫入時<strong>刪除</strong>而不是更新：避免兩個 thread 同時更新造成 race condition</li>
+            <li style="margin:8px 0;padding-left:18px;position:relative"><span style="position:absolute;left:0;color:var(--accent)">▸</span><strong>順序很重要：先寫 DB 再刪 cache</strong>（反過來有 race condition 風險）</li>
+            <li style="margin:8px 0;padding-left:18px;position:relative"><span style="position:absolute;left:0;color:var(--accent)">▸</span>優點：只 cache 真正被讀的資料（lazy），不浪費記憶體</li>
+            <li style="margin:8px 0;padding-left:18px;position:relative"><span style="position:absolute;left:0;color:var(--accent)">▸</span>缺點：第一次 read 一定 miss（cold start）</li>
+          </ul>
+        </div>
+      </details>
+    </div>
+
+    <div class="recall">
+      <div class="recall__q"><span class="qn">Read-Through</span>跟 Cache-Aside 差在哪？一個比喻？</div>
+      <details class="reveal"><summary><span class="lock"></span><span class="cue"></span></summary>
+        <div class="reveal__body">
+          <p>Cache 自己管 DB 讀取，App 只跟 Cache 說話。</p>
+<pre>App → Cache (hit?) → Yes → 回傳
+                   → No (miss) → Cache → DB → Cache (store) → 回傳</pre>
+          <ul style="list-style:none;padding:0;margin:0">
+            <li style="margin:8px 0;padding-left:18px;position:relative"><span style="position:absolute;left:0;color:var(--accent)">▸</span>比喻：Cache-Aside 是自己去超市買，Read-Through 是叫管家去買</li>
+            <li style="margin:8px 0;padding-left:18px;position:relative"><span style="position:absolute;left:0;color:var(--accent)">▸</span>App code 更簡潔，但需要 cache library 支援（如 Guava Cache, AWS DAX）</li>
+          </ul>
+        </div>
+      </details>
+    </div>
+
+    <figure class="aug aug--intv">
+      <figcaption class="aug__tag">🎯 面試官視角 · 「先寫 DB 還是先刪 cache / 刪還是更新」<span class="badge">面試官增補 · 非原始筆記</span></figcaption>
+      <div class="aug__body">
+        <h4>這題我在探什麼、怎麼打分</h4>
+        <div class="rubric">
+          <div><span class="k">在探什麼</span><span class="v">你知不知道 cache 一致性是<b>機率問題</b>不是對錯問題，講不講得出 race 的時間窗。</span></div>
+          <div class="weak"><span class="k">弱答</span><span class="v">「寫的時候 <code>update</code> cache 就好」。沒意識到並發 update 會把舊值蓋新值。<b>mid 以下。</b></span></div>
+          <div class="strong"><span class="k">強答</span><span class="v">「<b>刪</b>不更新（避免並發 update race），而且<b>先寫 DB 再刪 cache</b>」，並講得出反順序的 race。</span></div>
+          <div class="staff"><span class="k">Staff 答</span><span class="v">主動點出「先寫 DB 再刪」<b>仍有</b>讀回填舊值的殘餘 race，給 short TTL / delayed double-delete 兜底；並說「要強一致就別用 cache-aside，改 write-through」。</span></div>
+          <div><span class="k">致命追問</span><span class="v">「刪 cache 失敗怎麼辦？」「兩台機器同時寫同一 key？」「你能保證 cache 跟 DB 永遠一致嗎？」（正解：不能，只能 bounded staleness）</span></div>
+          <div class="red"><span class="k">紅旗</span><span class="v">堅稱 cache-aside 能做到強一致；或 write 時 update cache 還說沒問題。</span></div>
+        </div>
+      </div>
+    </figure>
+
+    <figure class="aug">
+      <figcaption class="aug__tag">🏛 架構師觀點 · 「先寫 DB 再刪 cache」仍有一個經典 race<span class="badge">架構師增補 · 非原始筆記</span></figcaption>
+      <div class="aug__body">
+        <h4>它比反過來安全，但不是 100% 安全</h4>
+        <p>你筆記講對了方向。但「先寫 DB 再刪 cache」不是萬無一失。剩餘的經典 race：一個 read thread 在你寫 DB <em>之前</em>就 miss、從 DB 拿到<strong>舊值</strong>、然後卡住；這時你把 DB 寫新、cache 也刪了；read thread 才醒來，把手上那個<strong>舊值回填進 cache</strong> → cache 又髒了。機率低（要求那個 read 剛好跨過你整個寫入），但高併發會踩到。</p>
+        <ul>
+          <li>給刪掉的 key 一個<strong>短 TTL</strong> 當 safety net：髒值最多活一個 TTL</li>
+          <li><strong>delayed double-delete</strong>：寫完 DB、刪 cache，延遲幾百毫秒<em>再刪一次</em>，蓋掉那個遲到的回填</li>
+          <li>真要強一致就別用 cache-aside，改 read-through + write-through，或熱路徑直接讀 DB</li>
+        </ul>
+      </div>
+    </figure>
+
+    <div class="recall recall--soc">
+      <div class="recall__q"><span class="qn">深掘</span>為什麼寫入要「刪」cache 不「更新」？如果改成更新，兩個 thread 並發寫同一 key 會發生什麼？<span class="socbadge">蘇格拉底深掘 · 非原始筆記</span></div>
+      <details class="reveal"><summary><span class="lock"></span><span class="cue"></span></summary>
+        <div class="reveal__body">
+          <p>兩個寫入：A 要把值改成 X、B 改成 Y。DB 那邊有鎖會定序（假設最後落地是 Y）。但 cache 的 <code>update</code> 沒鎖：A 算完去寫 cache(X)、B 算完去寫 cache(Y)，這兩個 update 到達 cache 的順序可能跟 DB 的提交順序<strong>相反</strong> → DB 是 Y、cache 卻被 A 慢一步蓋成 X → 髒。</p>
+          <p>改成「<strong>刪</strong>」就沒這問題：兩個寫都只是刪 key，下一次讀 miss 會從 DB 拿到正確的 Y 回填。刪是<em>冪等</em>的、不帶值，所以不可能把舊值寫進去。往回扣「先寫 DB 再刪」那個順序題。</p>
+        </div>
+      </details>
+    </div>
+  </section>
+
+  <section>
+    <div class="kick"><span class="ar">▸</span><span class="n">05</span> 寫入策略 · Write Patterns</div>
+    <h2>Write-Through vs Write-Behind</h2>
+
+    <div class="recall">
+      <div class="recall__q"><span class="qn">Write-Through</span>流程、優缺點、適合場景？</div>
+      <details class="reveal"><summary><span class="lock"></span><span class="cue"></span></summary>
+        <div class="reveal__body">
+<pre>App → Cache (write) → Cache → DB (write) → 回傳 success</pre>
+          <ul style="list-style:none;padding:0;margin:0">
+            <li style="margin:8px 0;padding-left:18px;position:relative"><span style="position:absolute;left:0;color:var(--accent)">▸</span>優點：Cache 和 DB <strong>永遠一致</strong></li>
+            <li style="margin:8px 0;padding-left:18px;position:relative"><span style="position:absolute;left:0;color:var(--accent)">▸</span>缺點：write latency 高（要等兩邊都寫完）、可能 cache 了沒人讀的資料</li>
+            <li style="margin:8px 0;padding-left:18px;position:relative"><span style="position:absolute;left:0;color:var(--accent)">▸</span>適合：資料一致性要求高、讀多寫少</li>
+          </ul>
+        </div>
+      </details>
+    </div>
+
+    <div class="recall">
+      <div class="recall__q"><span class="qn">Write-Behind</span>流程、優缺點、適合場景？最大風險是什麼？</div>
+      <details class="reveal"><summary><span class="lock"></span><span class="cue"></span></summary>
+        <div class="reveal__body">
+<pre>App → Cache (write) → 回傳 success（馬上！）
+      Cache → (async batch) → DB（之後再寫）</pre>
+          <ul style="list-style:none;padding:0;margin:0">
+            <li style="margin:8px 0;padding-left:18px;position:relative"><span style="position:absolute;left:0;color:var(--accent)">▸</span>優點：write latency 極低、batch write 減少 DB 壓力</li>
+            <li style="margin:8px 0;padding-left:18px;position:relative"><span style="position:absolute;left:0;color:var(--accent)">▸</span>缺點：<strong>Cache 掛了 → 未 flush 的資料遺失</strong></li>
+            <li style="margin:8px 0;padding-left:18px;position:relative"><span style="position:absolute;left:0;color:var(--accent)">▸</span>適合：高寫入量、可容忍短暫遺失（如 game score、analytics、page view counter）</li>
+          </ul>
+        </div>
+      </details>
+    </div>
+
+    <div class="recall">
+      <div class="recall__q"><span class="qn">比較</span>三種寫入策略：流程 / latency / 一致性 / 風險？</div>
+      <details class="reveal"><summary><span class="lock"></span><span class="cue"></span></summary>
+        <div class="reveal__body">
+          <table>
+            <tr><th>Pattern</th><th>寫入流程</th><th>Latency</th><th>一致性</th><th>風險</th></tr>
+            <tr><td><strong>Cache-Aside</strong></td><td>App → DB → 刪 cache</td><td>中</td><td>最終一致</td><td>Cold read after write</td></tr>
+            <tr><td><strong>Write-Through</strong></td><td>App → Cache → DB（同步）</td><td>高</td><td>強一致</td><td>Write slow</td></tr>
+            <tr><td><strong>Write-Behind</strong></td><td>App → Cache → DB（異步）</td><td>低</td><td>弱一致</td><td>Data loss on crash</td></tr>
+          </table>
+          <p style="margin-top:14px"><strong>搭配：</strong>Read-Through + Write-Through → App 完全不碰 DB，只跟 Cache 互動（例：AWS DAX）。</p>
+        </div>
+      </details>
+    </div>
+
+    <figure class="aug aug--biz">
+      <figcaption class="aug__tag">💼 真實業務情境 · 同一個 per-user 數字，TTL 選相反<span class="badge">架構師增補 · 非原始筆記</span></figcaption>
+      <div class="aug__body">
+        <h4>銀行餘額和按讚數，cache 策略剛好相反</h4>
+        <p><strong>情境 A · 銀行餘額 / 庫存數：</strong>服務到 stale 餘額 = 真實財務錯誤（超賣、透支顯示）。TTL 要極短甚至寫路徑不 cache，或走 <em>write-through 同步</em>，寧可吃 DB 成本和 write latency。</p>
+        <p><strong>情境 B · 貼文按讚數 / 觀看次數：</strong>顯示的數字晚 30 秒更新沒人在意。TTL 拉長、甚至 <em>write-behind 批次寫</em>，把 hit ratio 和寫入吞吐拉滿。<strong>同樣是「per-user 計數」，因為 business 容不容忍 stale，策略完全相反。</strong>面試官想看你先問「這個數字 stale 幾秒會怎樣」再決定，而不是背一套策略到處套。</p>
+      </div>
+    </figure>
+
+    <div class="recall recall--soc">
+      <div class="recall__q"><span class="qn">深掘</span>Write-Behind 說 cache 掛了沒 flush 的資料會掉。可是 DB 自己的 WAL 也是「先寫記憶體後落盤」，為什麼一個我們說危險、一個我們信任？<span class="socbadge">蘇格拉底深掘 · 非原始筆記</span></div>
+      <details class="reveal"><summary><span class="lock"></span><span class="cue"></span></summary>
+        <div class="reveal__body">
+          <p>差在「<strong>落盤承諾</strong>」。DB 的 WAL 是：先把變更<em>順序寫進持久化的 log（fsync 落盤）</em>才回 client success，記憶體裡的 page 之後慢慢刷；crash 後用 log 重放，已確認的寫不丟。</p>
+          <p>Write-Behind 的 cache 通常是：寫進<strong>揮發性記憶體</strong>就回 success，還沒落任何持久層，crash = 真的不見。所以同樣「先記憶體後落盤」，WAL 在回 success <em>前</em>已經有持久紀錄，write-behind 沒有。要讓 write-behind 安全，就得給 cache 一個持久 log（等於把它變成半個 DB）。這就是為什麼 write-behind 只敢用在「可容忍少量遺失」的場景。</p>
+        </div>
+      </details>
+    </div>
+  </section>
+
+  <section>
+    <div class="kick"><span class="ar">▸</span><span class="n">06</span> Eviction Policies</div>
+    <h2>滿了踢誰 <span class="tag">LRU / LFU / TTL</span></h2>
+
+    <div class="recall">
+      <div class="recall__q"><span class="qn">回想</span>LRU / LFU / TTL 各踢誰、各適合什麼？LRU 和 LFU 的關鍵差別？</div>
+      <details class="reveal"><summary><span class="lock"></span><span class="cue"></span></summary>
+        <div class="reveal__body">
+          <table>
+            <tr><th>Policy</th><th>踢誰</th><th>適合</th></tr>
+            <tr><td><strong>LRU</strong> (Least Recently Used)</td><td>最久沒被用的</td><td><strong>最常用</strong>，通用場景（Redis 預設）</td></tr>
+            <tr><td><strong>LFU</strong> (Least Frequently Used)</td><td>被用最少次的</td><td>有明確 hot data 不想被偶爾 cold request 洗掉（如熱門商品頁）</td></tr>
+            <tr><td><strong>TTL</strong> (Time To Live)</td><td>過期的</td><td>資料有明確過期時間</td></tr>
+          </table>
+          <ul style="list-style:none;padding:0;margin:10px 0 0">
+            <li style="margin:8px 0;padding-left:18px;position:relative"><span style="position:absolute;left:0;color:var(--accent)">▸</span>LRU 看「最後一次」存取時間，LFU 看「總共」存取次數</li>
+            <li style="margin:8px 0;padding-left:18px;position:relative"><span style="position:absolute;left:0;color:var(--accent)">▸</span>LFU 問題：過去很熱門但現在沒人用的 key 會一直留著 → 解法：加 decay 衰減 count</li>
+            <li style="margin:8px 0;padding-left:18px;position:relative"><span style="position:absolute;left:0;color:var(--accent)">▸</span>Redis 預設：<code>maxmemory-policy allkeys-lru</code></li>
+          </ul>
+        </div>
+      </details>
+    </div>
+
+    <figure class="aug">
+      <figcaption class="aug__tag">🏛 架構師觀點 · Redis 的 LRU 不是真 LRU<span class="badge">架構師增補 · 非原始筆記</span></figcaption>
+      <div class="aug__body">
+        <h4>approximated LRU + LFU 的 decay，生產要知道的兩個細節</h4>
+        <p>筆記分清 LRU（看最後一次）vs LFU（看次數）是對的。生產細節：Redis 的 <code>allkeys-lru</code> 是 <em>approximated LRU</em>，它不維護全域精確排序（太貴），而是每次<strong>隨機抽樣</strong>幾個 key、踢掉樣本裡最久沒用的。樣本數 <code>maxmemory-samples</code>（預設 5）越大越接近真 LRU、越耗 CPU。</p>
+        <p>LFU（<code>allkeys-lfu</code>）則用一個<strong>對數計數器 + 時間衰減</strong>，正好解你筆記寫的「過去很熱現在沒人用的 key 賴著不走」。</p>
+        <ul>
+          <li>approximated 是拿「一點點不精準」換 CPU/記憶體，通用場景夠用就好</li>
+          <li>有明確長期 hot data 才選 LFU；其餘 LRU 是安全預設</li>
+          <li><code>TTL eviction</code>（過期刪）跟 <code>maxmemory eviction</code>（滿了踢）是兩件事，別混</li>
+        </ul>
+      </div>
+    </figure>
+
+    <div class="recall recall--soc">
+      <div class="recall__q"><span class="qn">深掘</span>一個剛被瘋傳的新 key（才被讀幾次但正在狂熱），記憶體滿要 evict 時，LRU 和 LFU 誰比較可能誤殺它？<span class="socbadge">蘇格拉底深掘 · 非原始筆記</span></div>
+      <details class="reveal"><summary><span class="lock"></span><span class="cue"></span></summary>
+        <div class="reveal__body">
+          <p><strong>LFU 比較可能誤殺。</strong>LFU 看「累積次數」，新 key 再熱次數也還小，容易被一個「歷史總次數高但其實已退燒」的老 key 比下去而被踢。LRU 看「最後一次存取」，剛被讀過的新熱 key 排在最不該踢的那端，反而保得住。</p>
+          <p>這正是 LFU 的盲點（要配 decay 衰減老 key 的計數才公平），也是為什麼 Redis 預設給 LRU。連到 <strong>Day 27 的「熱 key」</strong>：一條病毒短碼就是這種「新但極熱」的 key，cache 策略要保得住它。</p>
+        </div>
+      </details>
+    </div>
+  </section>
+
+  <section>
+    <div class="kick"><span class="ar">▸</span><span class="n">07</span> Invalidation · The Hard Problem</div>
+    <h2>失效與驚群 <span class="tag">cache 最難的一塊</span></h2>
+
+    <div class="recall">
+      <div class="recall__q"><span class="qn">回想</span>三種 invalidation 策略？最常見的組合是哪兩個搭？</div>
+      <details class="reveal"><summary><span class="lock"></span><span class="cue"></span></summary>
+        <div class="reveal__body">
+          <table>
+            <tr><th>Strategy</th><th>做法</th><th>優缺點</th></tr>
+            <tr><td><strong>TTL-based</strong></td><td>設過期時間，自動刪</td><td>最簡單，但 TTL 內可能 stale</td></tr>
+            <tr><td><strong>Event-based</strong></td><td>資料變更時主動刪 cache</td><td>即時一致，但實作複雜</td></tr>
+            <tr><td><strong>Version-based</strong></td><td>key 帶版本號 <code>user:123:v5</code></td><td>不用刪舊的，但 key 膨脹</td></tr>
+          </table>
+          <p style="margin-top:14px"><strong>最常見組合：TTL + Event-based</strong> — event 主動刪 + TTL 當 safety net。</p>
+          <p><strong>TTL trade-off：</strong>短 TTL (30s) → 資料新，但 hit ratio 低 → DB 壓力大；長 TTL (24hr) → hit ratio 高，但資料 stale 久。</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="recall">
+      <div class="recall__q"><span class="qn">Stampede</span>Cache Stampede 是什麼？三種解法？</div>
+      <details class="reveal"><summary><span class="lock"></span><span class="cue"></span></summary>
+        <div class="reveal__body">
+<pre>Hot key TTL 到期 → 1000 個 request 同時 cache miss → 全部打 DB → DB 爆了</pre>
+          <ol style="margin:10px 0 0 4px;padding-left:18px">
+            <li style="margin:8px 0"><strong>Lock</strong>：第一個 miss 拿 lock 查 DB，其他人等</li>
+            <li style="margin:8px 0"><strong>隨機 TTL</strong>：<code>TTL = 300s + random(0-60s)</code> 分散過期</li>
+            <li style="margin:8px 0"><strong>Stale-while-revalidate</strong>：先回舊資料，背景更新</li>
+          </ol>
+        </div>
+      </details>
+    </div>
+
+    <figure class="aug aug--cost">
+      <figcaption class="aug__tag">💰 成本拐點 · TTL 旋鈕同時動三個量<span class="badge">架構師增補 · 非原始筆記</span></figcaption>
+      <div class="aug__body">
+        <h4>短 TTL 新鮮但貴，長 TTL 便宜但 stale</h4>
+        <p>TTL 是 cache 最直接的旋鈕，但它一次動三個量。TTL 拉長 → <em>hit ratio 上升</em>（但邊際遞減）→ 打到 DB 的流量下降（省錢）；代價是資料 stale 的時間上限跟著 TTL <strong>線性</strong>拉長。所以沒有「最佳 TTL」，只有「你能容忍多 stale」決定的拐點。</p>
+        <figure class="chart">
+          <svg viewBox="0 0 600 320" role="img" aria-label="hit ratio 與 staleness 隨 TTL 變化，標出甜蜜區">
+            <text class="ttl" x="300" y="20" text-anchor="middle">TTL 旋鈕：hit ratio（趨飽和）vs staleness（線性）</text>
+            <line class="axis" x1="64" y1="270" x2="560" y2="270"/>
+            <line class="axis" x1="64" y1="270" x2="64" y2="44"/>
+            <text x="312" y="304" text-anchor="middle">TTL 拉長 →</text>
+            <text x="20" y="160" text-anchor="middle" transform="rotate(-90 20 160)">hit ratio / staleness →</text>
+            <line class="grid" x1="64" y1="213" x2="560" y2="213"/>
+            <line class="grid" x1="64" y1="156" x2="560" y2="156"/>
+            <line class="grid" x1="64" y1="99" x2="560" y2="99"/>
+            <text x="100" y="288" text-anchor="middle">30s</text>
+            <text x="312" y="288" text-anchor="middle">5 min</text>
+            <text x="525" y="288" text-anchor="middle">1 hr</text>
+            <polyline points="90,248 170,176 255,132 345,108 450,92 545,84" fill="none" stroke="var(--verify)" stroke-width="2.5"/>
+            <text class="lbl" x="545" y="76" fill="var(--verify)" text-anchor="end">hit ratio（凹、趨飽和）</text>
+            <polyline points="90,256 545,72" fill="none" stroke="var(--sign)" stroke-width="2.5"/>
+            <text class="lbl" x="300" y="150" fill="var(--sign)" text-anchor="middle">staleness 上限（線性 ∝ TTL）</text>
+            <circle cx="345" cy="108" r="6" fill="#fff"/>
+            <text x="335" y="96" fill="var(--ink)" text-anchor="end">← 甜蜜區：hit 接近飽和</text>
+          </svg>
+          <figcaption>示意：成本結構與決策拐點，非報價。沒有最佳 TTL，只有「能容忍多 stale」決定往左（新鮮、付 DB 成本）還是往右（省、容忍 stale）。</figcaption>
+        </figure>
+        <p><strong>面試一句話：</strong>「TTL 我會先問能容忍多久 stale。能容忍就把 TTL 推到 hit-ratio 曲線變平那段拿便宜；不能容忍就配 event-based 主動刪 + 短 TTL 當 safety net，別只靠 TTL。」</p>
+      </div>
+    </figure>
+
+    <figure class="aug aug--war">
+      <figcaption class="aug__tag">💥 真實事故 · Cache Stampede / 冷快取驚群<span class="badge">公開事故類別 · 非原始筆記</span></figcaption>
+      <div class="aug__body">
+        <h4>打垮 origin 的公開故障類別，不是假設題</h4>
+        <p><strong>症狀：</strong>平常 95% 打 cache、DB 很閒。某一刻大量 request 同時 miss → 全部回源打 DB/origin → DB 連線打滿、latency 爆，可能雪崩到整站。</p>
+        <p><strong>根因（兩種反覆出現）：</strong></p>
+        <ul>
+          <li><em>熱 key 的 TTL 同時到期</em>（尤其大家用同一個固定 TTL），那一瞬間上千個 request 一起 miss</li>
+          <li><em>冷啟動</em> — 部署/重啟/cache flush 後 cache 是空的，流量瞬間全打 DB</li>
+        </ul>
+        <p>這是公開、被反覆寫進 SRE 教材的故障類別（thundering herd / dogpile / cache stampede）。<strong>事後修法</strong>正是你筆記那三招：隨機 jitter TTL（別讓大家同時過期）、single-flight lock（只放一個回源、其他等）、stale-while-revalidate（先回舊的、背景刷新）；冷啟動再加 cache warming（部署前預熱熱 key）。本質：把「同時、全部回源」打散成「錯開、少量回源」。</p>
+      </div>
+    </figure>
+
+    <div class="xlink"><span class="ic">🔗</span><b>跨主題連結：</b>Stampede 的 single-flight lock = <b>Day 27 熱 key 的 service 本地 cache</b>、<b>thundering herd / singleflight</b> 同一個家族 — 把「同時全部回源」收斂成「一個回源、其他等」。看到「一堆人同時撲同一個資源」就想這招。</div>
+  </section>
+
+  <section>
+    <div class="kick"><span class="ar">▸</span><span class="n">08</span> CDN Deep Dive</div>
+    <h2>邊緣快取 <span class="tag">Pull / Push / Origin Shield</span></h2>
+
+    <div class="recall">
+      <div class="recall__q"><span class="qn">回想</span>Pull CDN vs Push CDN：運作、第一次請求、適合、維護？</div>
+      <details class="reveal"><summary><span class="lock"></span><span class="cue"></span></summary>
+        <div class="reveal__body">
+          <table>
+            <tr><th></th><th>Pull CDN</th><th>Push CDN</th></tr>
+            <tr><td><strong>運作</strong></td><td>第一次請求時 edge 去 origin 拿</td><td>主動上傳到所有 edge</td></tr>
+            <tr><td><strong>第一次請求</strong></td><td>慢（回 origin）</td><td>快（已在 edge）</td></tr>
+            <tr><td><strong>適合</strong></td><td>流量大、內容多</td><td>內容少、可預測（CSS/JS）</td></tr>
+            <tr><td><strong>維護</strong></td><td>簡單，CDN 自動管</td><td>複雜，要管上傳邏輯</td></tr>
+          </table>
+        </div>
+      </details>
+    </div>
+
+    <div class="recall">
+      <div class="recall__q"><span class="qn">回想</span>Origin Shield 是什麼？解決什麼問題？</div>
+      <details class="reveal"><summary><span class="lock"></span><span class="cue"></span></summary>
+        <div class="reveal__body">
+          <p>Edge 和 Origin 中間的共用 cache 層，避免多個 Edge 同時打 Origin（類似 cache stampede 概念）。</p>
+<pre>User → Edge (miss) → Origin Shield (shared cache) → Origin Server</pre>
+        </div>
+      </details>
+    </div>
+
+    <div class="xlink"><span class="ic">🔗</span><b>跨主題連結：</b>Pull CDN（edge 自己去 origin 拿、本地 cache、配 TTL）= <b>Day 14 JWKS pull 模型</b>、<b>DNS resolver cache</b> 同型。三件套：<b>pull + 本地快取 + TTL</b>，代價都是「新鮮度 ≈ TTL」。</div>
+
+    <div class="recall recall--soc">
+      <div class="recall__q"><span class="qn">深掘</span>Origin Shield 是 edge 和 origin 中間的共用 cache。這跟 cache stampede 的 lock 解法是不是同一招？差在哪？<span class="socbadge">蘇格拉底深掘 · 非原始筆記</span></div>
+      <details class="reveal"><summary><span class="lock"></span><span class="cue"></span></summary>
+        <div class="reveal__body">
+          <p>同精神、不同層。兩者都是「<strong>收斂回源</strong>」：別讓 N 個下游同時打同一個上游。差別在<em>誰收斂、收斂什麼</em>。</p>
+          <p>Stampede lock 是在<strong>單一 cache 節點內</strong>收斂同一個 key 的並發 miss（只放一個 request 查 DB）。Origin Shield 是在<strong>跨地理的多個 edge 之間</strong>多加一層共用 cache：原本 50 個 edge 各自 miss 就打 50 次 origin，現在它們先打同一個 shield，shield miss 才打 origin 一次。一個收斂「同節點同 key 的並發」，一個收斂「多節點對同內容的回源」。本質都是「在撲向源頭的路上插一個收斂點」。</p>
+        </div>
+      </details>
+    </div>
+  </section>
+
+  <section>
+    <div class="kick"><span class="ar">▸</span><span class="n">09</span> CDN Invalidation</div>
+    <h2>三種刷新 <span class="tag">為什麼 Versioned 最香</span></h2>
+
+    <div class="recall">
+      <div class="recall__q"><span class="qn">回想</span>CDN 三種 invalidation：做法 / 速度 / 費用？</div>
+      <details class="reveal"><summary><span class="lock"></span><span class="cue"></span></summary>
+        <div class="reveal__body">
+          <table>
+            <tr><th>Strategy</th><th>做法</th><th>速度</th><th>費用</th></tr>
+            <tr><td><strong>TTL-based</strong></td><td>設 <code>Cache-Control: max-age</code>，等過期</td><td>慢（小時）</td><td>免費</td></tr>
+            <tr><td><strong>Purge (Invalidation API)</strong></td><td>呼叫 API 刪除所有 edge 上的特定 path</td><td>快（5-15 分鐘）</td><td><strong>$$</strong>（CloudFront: 前 1000 次/月免費，之後按 path 收費）</td></tr>
+            <tr><td><strong>Versioned URLs</strong></td><td>檔名帶 hash（<code>style.a1b2c3.css</code>）</td><td><strong>即時</strong></td><td>免費</td></tr>
+          </table>
+        </div>
+      </details>
+    </div>
+
+    <div class="recall">
+      <div class="recall__q"><span class="qn">Best Practice</span>Static assets 和 HTML pages 各用什麼組合？為什麼 Versioned 優於 Purge？</div>
+      <details class="reveal"><summary><span class="lock"></span><span class="cue"></span></summary>
+        <div class="reveal__body">
+          <ul style="list-style:none;padding:0;margin:0 0 12px">
+            <li style="margin:8px 0;padding-left:18px;position:relative"><span style="position:absolute;left:0;color:var(--accent)">▸</span>Static assets (CSS/JS/images)：<strong>Versioned URLs + 長 TTL（1 年）</strong> — build tool 產生 hash filename → 新版本 = 新 URL → 不用 invalidate</li>
+            <li style="margin:8px 0;padding-left:18px;position:relative"><span style="position:absolute;left:0;color:var(--accent)">▸</span>HTML pages：<strong>短 TTL (60s) + Purge 當 fallback</strong> — HTML 裡引用新 asset URL，所以 user 自動拿到新檔案</li>
+          </ul>
+          <p><strong>為什麼 Versioned URLs 優於 Purge：</strong></p>
+          <ol style="margin:8px 0 12px;padding-left:18px">
+            <li style="margin:6px 0">即時生效（Purge 要 5-15 分鐘 propagation）</li>
+            <li style="margin:6px 0">免費（Purge 要付錢）</li>
+            <li style="margin:6px 0">保證不會拿到舊版（新 filename = 不可能 cache hit 到舊的）</li>
+          </ol>
+<pre><span class="c"># CloudFront Invalidation API</span>
+aws cloudfront create-invalidation \
+  --distribution-id E1234 \
+  --paths "/*"    <span class="c"># wildcard 算 1 path，省錢</span></pre>
+        </div>
+      </details>
+    </div>
+
+    <div class="xlink"><span class="ic">🔗</span><b>跨主題連結：</b>Versioned URL（content-hash 檔名）= <b>Day 27 的 immutable mapping</b>：內容不變 → URL 不變 → cache 永久有效、零 invalidation。同一個「不可變 = 免失效」原則，一個用在短碼、一個用在資產檔名。</div>
+
+    <div class="recall recall--soc">
+      <div class="recall__q"><span class="qn">深掘</span>Versioned URL 即時又免費，那為什麼 HTML 本身不也用 versioned 檔名，還要短 TTL + Purge？<span class="socbadge">蘇格拉底深掘 · 非原始筆記</span></div>
+      <details class="reveal"><summary><span class="lock"></span><span class="cue"></span></summary>
+        <div class="reveal__body">
+          <p>因為 HTML 是<strong>入口</strong>，它的 URL 必須穩定 — 使用者打 <code>example.com/</code>、書籤、SEO 連的都是固定網址，你不能每次部署就換首頁網址。</p>
+          <p>所以策略是兩段式：<strong>固定 URL 的 HTML 吃短 TTL</strong>（讓它很快更新），HTML 內容裡<strong>引用的 CSS/JS/圖用 versioned URL</strong>。部署後 HTML 一更新（短 TTL 過後），裡面就指向新的 <code>app.3f9a.js</code>，使用者自動連到新 asset。會變的入口吃短 TTL、不可變的資產吃 versioned，各取所長。往回扣 best practice 組合。</p>
+        </div>
+      </details>
+    </div>
+  </section>
+
+  <section>
+    <div class="kick"><span class="ar">▸</span><span class="n">10</span> ElastiCache &amp; Observability</div>
+    <h2>運維面 <span class="tag">cluster mode / 監控</span></h2>
+
+    <div class="recall">
+      <div class="recall__q"><span class="qn">回想</span>Cluster Mode vs Non-Cluster Mode 差在哪？最常見的 operational gotcha？</div>
+      <details class="reveal"><summary><span class="lock"></span><span class="cue"></span></summary>
+        <div class="reveal__body">
+          <table>
+            <tr><th></th><th>Non-Cluster Mode</th><th>Cluster Mode</th></tr>
+            <tr><td><strong>Sharding</strong></td><td>❌ 單一 shard</td><td>✅ 最多 500 shards</td></tr>
+            <tr><td><strong>Max data</strong></td><td>~100GB</td><td>理論上無限</td></tr>
+            <tr><td><strong>Scale writes</strong></td><td>❌</td><td>✅（資料分散到不同 shard）</td></tr>
+            <tr><td><strong>Multi-key ops</strong></td><td>✅ 任意 keys</td><td>⚠️ keys 必須同 slot（用 <code>{hash_tag}</code>）</td></tr>
+            <tr><td><strong>適合</strong></td><td>中小型 cache</td><td>大規模、高吞吐量</td></tr>
+          </table>
+          <p style="margin-top:12px"><strong>Operational gotcha：</strong>Cluster mode 的 <code>MGET</code>/<code>MSET</code> — keys 分散在不同 shard 會 error。解法：用 hash tag <code>{user:123}:profile</code>, <code>{user:123}:settings</code> 確保同 user 的 keys 在同 shard。</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="recall">
+      <div class="recall__q"><span class="qn">Observability</span>Caching 的 SLI / SLO / Alert / Dashboard？</div>
+      <details class="reveal"><summary><span class="lock"></span><span class="cue"></span></summary>
+        <div class="reveal__body">
+          <table class="lined">
+            <tr><th>Element</th><th>What to monitor</th></tr>
+            <tr><td>SLIs</td><td>Cache hit ratio, origin latency, eviction rate</td></tr>
+            <tr><td>SLO target</td><td>Hit ratio &gt; 90%, P99 &lt; 50ms</td></tr>
+            <tr><td>Alerts</td><td>Hit ratio drop &gt; 10% in 5min, eviction spike, memory &gt; 80%</td></tr>
+            <tr><td>Dashboards</td><td>3 graphs: hit/miss ratio, eviction rate, memory usage</td></tr>
+          </table>
+        </div>
+      </details>
+    </div>
+  </section>
+
+  <section>
+    <div class="kick"><span class="ar">▸</span><span class="n">11</span> PoC · Redis Cache Layer</div>
+    <h2>Go 實作 <span class="tag">graceful degradation</span></h2>
+    <p>專案位置：<code>projects/caching-poc/main.go</code></p>
+<pre>Client → Go App (:8085) → Redis (cache hit?) → Yes → return
+                                              → No → simulateDB (50ms) → write Redis (TTL 30s) → return</pre>
+    <div class="note principle">
+      <span class="lbl">測試結果（原始筆記）</span>
+      <p>Cache enabled: 1st request miss, 2nd request hit → hit ratio 50%</p>
+      <p>Cache disabled (<code>CACHE_DISABLED=true</code>): 所有 request 都 miss → hit ratio 0%</p>
+      <p><strong>Graceful degradation：</strong>Redis 掛了 app 不 crash，只是每個 request 都打 DB（變慢）</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="kick"><span class="ar">▸</span><span class="n">12</span> 🔴 My Mistakes &amp; Misconceptions</div>
+    <h2>糾錯 <span class="tag">先看錯的，再翻正解</span></h2>
+
+    <div class="mistake">
+      <div class="mistake__bad"><span class="lbl">✗ 當初的錯</span>先刪 cache 再寫 DB 沒問題</div>
+      <details><summary><span class="lock"></span><span class="cue">想一下正確理解 → 點開</span></summary>
+        <div class="mistake__good"><span class="lbl">✓ 正確理解</span>先刪 cache 再寫 DB 有 race condition：刪完 cache 後、寫 DB 前，另一個 thread 可能讀到舊的 DB 值寫回 cache。我沒考慮到 concurrent read 在 delete 和 write 之間的時間窗口。</div>
+      </details>
+    </div>
+
+    <div class="mistake">
+      <div class="mistake__bad"><span class="lbl">✗ 當初的錯</span>Write-Behind 的風險是 DB shutdown</div>
+      <details><summary><span class="lock"></span><span class="cue">想一下正確理解 → 點開</span></summary>
+        <div class="mistake__good"><span class="lbl">✓ 正確理解</span>風險是 <strong>Cache</strong> shutdown — 資料先寫在 cache 還沒 flush 到 DB，cache 掛了資料就不見了。我搞反了哪個元件掛掉才是危險的。</div>
+      </details>
+    </div>
+
+    <div class="mistake">
+      <div class="mistake__bad"><span class="lbl">✗ 當初的錯</span>不懂 <code>ctx</code> 為什麼要傳給 Redis</div>
+      <details><summary><span class="lock"></span><span class="cue">想一下正確理解 → 點開</span></summary>
+        <div class="mistake__good"><span class="lbl">✓ 正確理解</span><code>ctx</code> 是操作的「控制遙控器」— Redis 是網路呼叫，可能會卡住，ctx 讓你設 timeout 或取消。PoC 用 <code>context.Background()</code>（不設限），生產用 <code>context.WithTimeout</code>。我沒意識到 Redis call 是網路操作，需要超時控制機制。</div>
+      </details>
+    </div>
+
+    <div class="mistake">
+      <div class="mistake__bad"><span class="lbl">✗ 當初的錯</span>Cache-aside 的 nested if/else 寫錯（少了內層 <code>if err == nil</code>）</div>
+      <details><summary><span class="lock"></span><span class="cue">想一下正確理解 → 點開</span></summary>
+        <div class="mistake__good"><span class="lbl">✓ 正確理解</span>兩層 if：外層判斷 cache 開/關，內層判斷 hit/miss。漏掉內層 = hit 和 miss 的 code 沒有分開。我不熟悉 Go 的 nested if/else 結構，把兩個判斷混在一起。</div>
+      </details>
+    </div>
+  </section>
+
+  <section>
+    <div class="kick"><span class="ar">▸</span><span class="n">13</span> 🗣️ English Practice</div>
+    <h2>先用英文講一次，再看 polish</h2>
+
+    <div class="recall">
+      <div class="recall__q">caching is put more faster store like redis in slow store like DB frontend let less client hit DB can less latency</div>
+      <details class="reveal"><summary><span class="lock"></span><span class="cue"></span></summary>
+        <div class="reveal__body"><p style="font-family:var(--mono);font-size:14px;color:var(--hit);line-height:1.6">"Caching places a faster store like Redis in front of a slower store like a DB, so fewer client requests hit the database, reducing overall latency."</p></div>
+      </details>
+    </div>
+    <div class="recall">
+      <div class="recall__q">cache memory usually more expensive then DB store, and have more limit but we can 分配 data like hot or cold data...</div>
+      <details class="reveal"><summary><span class="lock"></span><span class="cue"></span></summary>
+        <div class="reveal__body"><p style="font-family:var(--mono);font-size:14px;color:var(--hit);line-height:1.6">"Cache memory is more expensive and has limited capacity compared to DB storage. But we can classify data as hot or cold — hot data that's frequently accessed by many clients goes into cache, while cold data stays in the DB."</p></div>
+      </details>
+    </div>
+    <div class="recall">
+      <div class="recall__q">Cache-Aside is app manages cache, app will read cache if miss will read db and write cache use delete...</div>
+      <details class="reveal"><summary><span class="lock"></span><span class="cue"></span></summary>
+        <div class="reveal__body"><p style="font-family:var(--mono);font-size:14px;color:var(--hit);line-height:1.6">"Cache-Aside means the app manages the cache. On a read miss, the app reads from DB and writes to cache. On writes, we delete the cache key instead of updating to avoid race conditions."</p></div>
+      </details>
+    </div>
+    <div class="recall">
+      <div class="recall__q">Read-Through is cache self manage data, app > cache if miss cache will read DB and write cache, app can more simple</div>
+      <details class="reveal"><summary><span class="lock"></span><span class="cue"></span></summary>
+        <div class="reveal__body"><p style="font-family:var(--mono);font-size:14px;color:var(--hit);line-height:1.6">"Read-Through means the cache itself manages data loading. On a miss, the cache reads from DB and stores it — the app just talks to cache, keeping code simpler."</p></div>
+      </details>
+    </div>
+    <div class="recall">
+      <div class="recall__q">Write-Behind over Write-Through, if need very a lot write can use Write-Behind, like online game...</div>
+      <details class="reveal"><summary><span class="lock"></span><span class="cue"></span></summary>
+        <div class="reveal__body"><p style="font-family:var(--mono);font-size:14px;color:var(--hit);line-height:1.6">"When there's a very high volume of writes, I'd choose Write-Behind — like in an online game where player actions write to cache first, then batch flush to DB asynchronously."</p></div>
+      </details>
+    </div>
+    <div class="recall">
+      <div class="recall__q">risk is if cache shutdown will loss data</div>
+      <details class="reveal"><summary><span class="lock"></span><span class="cue"></span></summary>
+        <div class="reveal__body"><p style="font-family:var(--mono);font-size:14px;color:var(--hit);line-height:1.6">"The risk is if the cache goes down before the batch write, we lose data that hasn't been persisted to DB yet."</p></div>
+      </details>
+    </div>
+    <div class="recall">
+      <div class="recall__q">LFU is least frequently use, so will count use, so if app usually use same data, can use LFU</div>
+      <details class="reveal"><summary><span class="lock"></span><span class="cue"></span></summary>
+        <div class="reveal__body"><p style="font-family:var(--mono);font-size:14px;color:var(--hit);line-height:1.6">"LFU counts access frequency, so it keeps consistently popular data in cache. Choose LFU over LRU when you have clear hot data that shouldn't be evicted by occasional cold requests."</p></div>
+      </details>
+    </div>
+    <div class="recall">
+      <div class="recall__q">cache stampede is if hot key TTL 過期 many request read and miss will all request hit DB, DB will crush...</div>
+      <details class="reveal"><summary><span class="lock"></span><span class="cue"></span></summary>
+        <div class="reveal__body"><p style="font-family:var(--mono);font-size:14px;color:var(--hit);line-height:1.6">"Cache stampede happens when a hot key's TTL expires and many requests simultaneously cache miss, all hitting the DB at once. Solutions: 1) Use a lock so only one request queries DB while others wait. 2) Add random jitter to TTL to avoid simultaneous expiration. 3) Return stale data first while refreshing from DB in the background."</p></div>
+      </details>
+    </div>
+    <div class="recall">
+      <div class="recall__q">purge is call api to delete path let cache get new data, versioned URLs is static assets set redom name...</div>
+      <details class="reveal"><summary><span class="lock"></span><span class="cue"></span></summary>
+        <div class="reveal__body"><p style="font-family:var(--mono);font-size:14px;color:var(--hit);line-height:1.6">"Purge calls the CDN API to delete specific paths from all edge servers so they fetch new data on the next request. Versioned URLs embed a hash in the filename — when you deploy a new version, the filename changes, so it's automatically a cache miss and edges fetch the new file."</p></div>
+      </details>
+    </div>
+    <div class="recall">
+      <div class="recall__q">we prefer versioned URLs because speed is fast than other strategy</div>
+      <details class="reveal"><summary><span class="lock"></span><span class="cue"></span></summary>
+        <div class="reveal__body"><p style="font-family:var(--mono);font-size:14px;color:var(--hit);line-height:1.6">"We prefer versioned URLs because they're instant, free, and guarantee no stale content — it's a new URL entirely, so there's nothing to invalidate. Purge is a fallback for content that can't change URLs, like index.html."</p></div>
+      </details>
+    </div>
+    <div class="recall">
+      <div class="recall__q">because if port is other prosses use just shut server so use log.Fatal, call os.exit</div>
+      <details class="reveal"><summary><span class="lock"></span><span class="cue"></span></summary>
+        <div class="reveal__body"><p style="font-family:var(--mono);font-size:14px;color:var(--hit);line-height:1.6">"Because if the port is already in use by another process, the server can't start at all, so we use log.Fatal which calls os.Exit(1) to shut down the program."</p></div>
+      </details>
+    </div>
+  </section>
+
+  <section>
+    <div class="kick"><span class="ar">▸</span><span class="n">14</span> 📌 Key Vocab · Cache Entries</div>
+    <h2>翻卡：中 → 英 <span class="tag">點 KEY 查 VALUE</span></h2>
+    <div class="vgrid" id="vgrid">
+      <button class="vcard" aria-pressed="false"><span class="vcard__in">
+        <span class="vface zh"><span class="tick">KEY · 中文 · 點查</span><span class="term">存取局部性</span></span>
+        <span class="vface en"><span class="tick">VALUE · EN</span><span class="term">locality of access</span></span></span></button>
+      <button class="vcard" aria-pressed="false"><span class="vcard__in">
+        <span class="vface zh"><span class="tick">KEY · 中文 · 點查</span><span class="term">時間局部性</span></span>
+        <span class="vface en"><span class="tick">VALUE · EN</span><span class="term">temporal locality</span></span></span></button>
+      <button class="vcard" aria-pressed="false"><span class="vcard__in">
+        <span class="vface zh"><span class="tick">KEY · 中文 · 點查</span><span class="term">有效延遲</span></span>
+        <span class="vface en"><span class="tick">VALUE · EN</span><span class="term">effective latency</span></span></span></button>
+      <button class="vcard" aria-pressed="false"><span class="vcard__in">
+        <span class="vface zh"><span class="tick">KEY · 中文 · 點查</span><span class="term">命中率</span></span>
+        <span class="vface en"><span class="tick">VALUE · EN</span><span class="term">cache hit ratio</span></span></span></button>
+      <button class="vcard" aria-pressed="false"><span class="vcard__in">
+        <span class="vface zh"><span class="tick">KEY · 中文 · 點查</span><span class="term">旁路快取 / 延遲載入</span></span>
+        <span class="vface en"><span class="tick">VALUE · EN</span><span class="term">cache-aside / lazy loading</span></span></span></button>
+      <button class="vcard" aria-pressed="false"><span class="vcard__in">
+        <span class="vface zh"><span class="tick">KEY · 中文 · 點查</span><span class="term">直寫 / 回寫</span></span>
+        <span class="vface en"><span class="tick">VALUE · EN</span><span class="term">write-through / write-behind</span></span></span></button>
+      <button class="vcard" aria-pressed="false"><span class="vcard__in">
+        <span class="vface zh"><span class="tick">KEY · 中文 · 點查</span><span class="term">逐出策略</span></span>
+        <span class="vface en"><span class="tick">VALUE · EN</span><span class="term">eviction policy (LRU / LFU)</span></span></span></button>
+      <button class="vcard" aria-pressed="false"><span class="vcard__in">
+        <span class="vface zh"><span class="tick">KEY · 中文 · 點查</span><span class="term">快取失效</span></span>
+        <span class="vface en"><span class="tick">VALUE · EN</span><span class="term">cache invalidation</span></span></span></button>
+      <button class="vcard" aria-pressed="false"><span class="vcard__in">
+        <span class="vface zh"><span class="tick">KEY · 中文 · 點查</span><span class="term">驚群效應</span></span>
+        <span class="vface en"><span class="tick">VALUE · EN</span><span class="term">cache stampede / thundering herd</span></span></span></button>
+      <button class="vcard" aria-pressed="false"><span class="vcard__in">
+        <span class="vface zh"><span class="tick">KEY · 中文 · 點查</span><span class="term">先回舊值、背景刷新</span></span>
+        <span class="vface en"><span class="tick">VALUE · EN</span><span class="term">stale-while-revalidate</span></span></span></button>
+      <button class="vcard" aria-pressed="false"><span class="vcard__in">
+        <span class="vface zh"><span class="tick">KEY · 中文 · 點查</span><span class="term">拉取 / 推送 CDN</span></span>
+        <span class="vface en"><span class="tick">VALUE · EN</span><span class="term">pull CDN / push CDN</span></span></span></button>
+      <button class="vcard" aria-pressed="false"><span class="vcard__in">
+        <span class="vface zh"><span class="tick">KEY · 中文 · 點查</span><span class="term">源站護盾</span></span>
+        <span class="vface en"><span class="tick">VALUE · EN</span><span class="term">origin shield</span></span></span></button>
+      <button class="vcard" aria-pressed="false"><span class="vcard__in">
+        <span class="vface zh"><span class="tick">KEY · 中文 · 點查</span><span class="term">版本化網址</span></span>
+        <span class="vface en"><span class="tick">VALUE · EN</span><span class="term">versioned URLs (content hash)</span></span></span></button>
+      <button class="vcard" aria-pressed="false"><span class="vcard__in">
+        <span class="vface zh"><span class="tick">KEY · 中文 · 點查</span><span class="term">清除 / 失效 API</span></span>
+        <span class="vface en"><span class="tick">VALUE · EN</span><span class="term">purge / invalidation API</span></span></span></button>
+      <button class="vcard" aria-pressed="false"><span class="vcard__in">
+        <span class="vface zh"><span class="tick">KEY · 增補 · 點查</span><span class="term">近似 LRU</span></span>
+        <span class="vface en"><span class="tick">VALUE · EN</span><span class="term">approximated LRU (sampling)</span></span></span></button>
+      <button class="vcard" aria-pressed="false"><span class="vcard__in">
+        <span class="vface zh"><span class="tick">KEY · 增補 · 點查</span><span class="term">延遲雙刪</span></span>
+        <span class="vface en"><span class="tick">VALUE · EN</span><span class="term">delayed double-delete</span></span></span></button>
+    </div>
+  </section>
+
+  <footer>
+    Caching &amp; CDN Strategies — Day 06-07 · <b>The Memory Hierarchy</b><br>
+    原始筆記逐字保留並以主動回憶呈現；🏛/🎯/💥/💰/💼/❓/🔗 為增補(非原始筆記)，皆標徽章區隔。<br>
+    成本圖為示意:呈現成本結構與決策拐點，非實際報價。💥 為公開且反覆出現的故障類別，非杜撰特定公司事故。<br>
+    單檔離線 · 無外部相依。 source: <code>notes/day06-07-caching.md</code>
+  </footer>
+
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var reveals = Array.prototype.slice.call(document.querySelectorAll("details"));
+  var pc = document.getElementById("pcount");
+  var pb = document.getElementById("pbar");
+  function refresh(){
+    var open = reveals.filter(function(d){return d.open;}).length;
+    var total = reveals.length;
+    pc.textContent = "命中 " + open + " / " + total;
+    pb.style.width = (total ? (open/total*100) : 0) + "%";
+  }
+  reveals.forEach(function(d){ d.addEventListener("toggle", refresh); });
+  document.getElementById("revealAll").addEventListener("click", function(){
+    reveals.forEach(function(d){ d.open = true; }); refresh();
+  });
+  document.getElementById("resetAll").addEventListener("click", function(){
+    reveals.forEach(function(d){ d.open = false; }); refresh();
+    window.scrollTo({top:0, behavior:"smooth"});
+  });
+  function flip(card){
+    card.setAttribute("aria-pressed", card.getAttribute("aria-pressed")==="true" ? "false" : "true");
+  }
+  var vg = document.getElementById("vgrid");
+  vg.addEventListener("click", function(e){
+    var c = e.target.closest(".vcard"); if(c) flip(c);
+  });
+  vg.addEventListener("keydown", function(e){
+    if(e.key!=="Enter" && e.key!==" ") return;
+    var c = e.target.closest(".vcard"); if(!c) return;
+    e.preventDefault(); flip(c);
+  });
+  refresh();
+})();
+</script>
+</body>
+</html>
