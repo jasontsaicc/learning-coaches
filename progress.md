@@ -207,6 +207,7 @@ Rules going forward:
 | Gossip Protocol | Gossip is a decentralized way for nodes to share state — each node periodically tells a few random peers, so information spreads exponentially and converges in O(log N) rounds with no central master to become a single point of failure; the trade-off is eventual rather than instant consistency. |
 | Multi-Region Session Store | A multi-region session store keeps each user's small KV session in their home region (Redis + TTL for self-healing staleness) and routes via geo-DNS, fetching on miss; for region-failure DR it async-replicates sessions to a backup region — an AP choice that accepts a few seconds of replication lag because a stale session is fine but logging out 100M users is not. |
 | URL Shortener | A URL shortener is an extremely read-heavy key-value system; short codes are generated collision-free by base62-encoding a globally unique counter (not by hashing), stored in a NoSQL KV store for simple point lookups, and served through a cache that needs no invalidation because the mapping is immutable. |
+| Cache vs Queue | Cache solves a read problem (same data read many times, serve it fast, losing it is fine because the DB is source of truth); Queue solves a work-handoff problem (decouple producer from consumer, each message consumed once, losing it is bad because the work may have no backup). Both often run on Redis but use different structures and have opposite durability needs. |
 
 ---
 
