@@ -59,4 +59,4 @@
 
 **正確做法:** `ImagePullBackOff` 第一個動作 = `kubectl describe pod <name>` 看 Events。Events 會直接印 `Pulling image "ngimx:1.25"` + 拒絕原因,一眼看到打錯字。分辨三類:`i/o timeout`=網路/egress、`401`/`toomanyrequests`=認證/限流、`repository does not exist`/`not found`=名稱或 tag 打錯。
 
-**下次抽考日:** 2026-06-26
+**下次抽考日:** 2026-07-03 (2026-06-26 抽考通過,三類根因訊號 repository-not-exist/connection-refused/401-toomanyrequests 一次答全對,推 +7)

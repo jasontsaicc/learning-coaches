@@ -9,7 +9,7 @@
 | reconcile loop | /ˈrek.ən.saɪl luːp/ | A controller's continuous loop that compares the desired state with the actual state and takes action to close the gap. | 「差距偵測 + 自動修正」的無限迴圈,是 Kubernetes 一切自動化的底層引擎 | 2026-06-17 | 2026-06-27 |
 | desired state | /dɪˈzaɪərd steɪt/ | The end state you declare you want; controllers work to make the actual state match it. | 你宣告「想要的樣子」,是 reconcile loop 比對的基準 | 2026-06-17 | 2026-06-20 |
 | control plane | /kənˈtroʊl pleɪn/ | The set of components that manage the cluster and make global decisions (API Server, etcd, scheduler, controllers). | 叢集的「大腦團隊」,負責管理與決策,不是單一元件 | 2026-06-17 | 2026-07-01 |
-| API Server | /ˌeɪ.piːˈaɪ ˈsɝː.vɚ/ | The single front door to the cluster; every component reads and writes state only through it. | 唯一入口/守門人,萬物皆透過它,彼此不直接溝通 | 2026-06-17 | 2026-06-20 |
+| API Server | /ˌeɪ.piːˈaɪ ˈsɝː.vɚ/ | The single front door to the cluster; every component reads and writes state only through it. | 唯一入口/守門人,萬物皆透過它,彼此不直接溝通 | 2026-06-17 | 2026-07-03 (2026-06-26 英文抽考通過,櫃檯比喻+唯一碰etcd;唯一錯 control panel→plane,推+7) |
 | etcd | /ˈet.siː.diː/ | The cluster's key-value store; the single source of truth holding the desired state. | 叢集的帳本/唯一真相,掛了等於叢集失憶 | 2026-06-17 | 2026-06-20 |
 | controller | /kənˈtroʊl.ɚ/ | A control-plane component running a reconcile loop: it watches desired state and drives actual state to match. | reconcile loop 的主人,k8s 自動化的執行單位 | 2026-06-17 | 2026-06-20 |
 | scheduler | /ˈsked.juː.lɚ/ | A control-plane component that assigns each unscheduled Pod to a suitable node via filter then score. | 幫孤兒 Pod 挑 node 的排程器,挑完只寫綁定(透過 API Server)、不啟動容器 | 2026-06-17 | 2026-07-01 |
@@ -18,6 +18,8 @@
 | incompressible resource | /ˌɪn.kəmˈpres.ə.bəl/ | A resource that can't be reclaimed once handed out: you either have the byte or you don't (memory), so exceeding the limit means the process gets killed. | 不可壓縮資源(memory),還不回來,超 limit 只能砍 → OOMKilled | 2026-06-24 | 2026-06-27 |
 | OOMKilled | /ˌoʊ.oʊˈem kɪld/ | A container killed by the kernel's OOM killer (exit code 137 = SIGKILL) for exceeding its cgroup memory limit. | 容器吃爆自己 cgroup 的 memory limit,被 kernel OOM killer 砍,exit 137 | 2026-06-24 | 2026-06-27 |
 | thundering herd | /ˈθʌn.dər.ɪŋ hɝːd/ | Many clients hit the same resource at the exact same moment and overwhelm it (e.g. all pods restart and reconnect to one DB at once). | 羊群效應:大量請求同時湧向同一資源把它壓垮(如全 Pod 同時重連 DB);錨定 liveness 誤設→集體重啟雪崩 | 2026-06-25 | 2026-06-28 |
+| DNAT | /ˌdiːˈnæt/ | Destination NAT: rewriting a packet's destination IP. kube-proxy uses it so a packet sent to a virtual ClusterIP gets its destination rewritten to a real Pod IP. | 改寫封包的「目的地 IP」。ClusterIP 虛擬不存在於任何網卡,封包在出發 node 本地被 DNAT 成某個真實 Pod IP,這就是 Service 能轉發的底層 | 2026-06-26 | 2026-06-29 |
+| kube-proxy | /kjuːb ˈprɑːk.si/ | A per-node DaemonSet that programs iptables/IPVS rules in each node's kernel to implement Service ClusterIP routing (no central proxy, no bottleneck). | 每台 node 跑一隻,在本地 kernel 寫 iptables/ipvs 規則實作 ClusterIP 轉發;去中心化、無中央瓶頸;注意它「寫規則」不是「過流量」 | 2026-06-26 | 2026-06-29 |
 
 <!-- 2026-06-22 移除 kubeconfig / context / kind 三張卡:定義型瑣碼詞/工具名,面試不考,違反價值門檻(見 SKILL.md 術語卡)。current-context 改記為 ops 安全習慣,不當單字卡。 -->
 <!-- ops 安全習慣(非術語卡): `kubectl config current-context` = 動手前先確認指到哪個叢集,避免誤打 prod EKS。 -->
