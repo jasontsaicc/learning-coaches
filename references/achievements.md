@@ -64,7 +64,7 @@ Achievements must reward behaviors that align with genuine learning:
 |----|------|-----------------|-------------|
 | E1 | Perfect Drill | Score 100% on any Interview Drill (3/3, 6/6, or 9/9 depending on phase) | 面試模擬滿分 |
 | E2 | Deep Diver | Complete a Full PoC (Go + Docker Compose) | 真正動手寫了完整的 PoC |
-| E3 | The Mentor | Phase 2+: Student correctly answers a question Yuki asked | 教會別人才是真的懂 |
+| E3 | The Mentor | In Teach Yuki Mode (any phase), student teaches a topic to Yuki and correctly fields at least one of her boundary follow-ups | 教會別人才是真的懂 |
 
 ### 🎭 STORY (3) — Narrative
 
