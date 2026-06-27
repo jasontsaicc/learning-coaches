@@ -60,3 +60,16 @@
 **正確做法:** `ImagePullBackOff` 第一個動作 = `kubectl describe pod <name>` 看 Events。Events 會直接印 `Pulling image "ngimx:1.25"` + 拒絕原因,一眼看到打錯字。分辨三類:`i/o timeout`=網路/egress、`401`/`toomanyrequests`=認證/限流、`repository does not exist`/`not found`=名稱或 tag 打錯。
 
 **下次抽考日:** 2026-07-03 (2026-06-26 抽考通過,三類根因訊號 repository-not-exist/connection-refused/401-toomanyrequests 一次答全對,推 +7)
+
+---
+
+**日期:** 2026-06-27
+**主題:** P2a 謎題B — ClusterIP / kube-proxy / DNAT 整條串不起來(Teach the Rookie F 段挖出)
+
+**踩的坑:** ❌ Unresolved。教菜鳥 full teach-back 時開頭就說「封包先**去** clusterIP **拿到** ip」,代表腦中的圖還是「封包跑去 ClusterIP 這個地方、跟它要一個真實 IP」(像問路/打總機)。零件(ClusterIP 虛擬 / kube-proxy 寫規則 / iptables / DNAT / Endpoints)被菜鳥逐一逼出來都認得,但**自己一口氣串整條時崩掉**。另外中途把「健康 Pod IP 名單」答成 `iptables`(把「做改寫的規則」跟「要挑的名單」混為一談)。
+
+**根因:** 謎題B 的反直覺核心沒打穿:ClusterIP **不是一個地方、沒有任何機器擁有它、封包從不拜訪它**。真相是封包正常寫上目的地送出,**還沒離開出發那台 node**,本機 kernel 就照 kube-proxy 預寫的 iptables 規則當場 DNAT 改寫目的地。改寫沒有「去 ClusterIP 拿 IP」這一步,發生在**出發地本機**。
+
+**正確做法:** 一句話骨幹 = 「封包**不去** ClusterIP;是**出發地本機 kernel** 照 **kube-proxy 寫的規則**做 **DNAT**,把目的地換成 **Endpoints** 名單裡的真 Pod IP」。分清:iptables 規則=做改寫的**手(動作)**;Endpoints=該挑哪個 Pod 的**名單(資料)**,由 controller reconcile loop 維護、readiness 當閘門。手 ≠ 名單。
+
+**下次抽考日:** 2026-06-30 (新坑,下次 session A 段**冷測**:不給鷹架,要他自己一口氣講完五步整條;過了才算謎題B Gate ✅)
