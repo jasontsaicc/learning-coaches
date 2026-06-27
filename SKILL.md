@@ -92,6 +92,7 @@ When this skill activates:
 3. **Progress file, no breakpoint** → Returning student. Check if Weekly Review is due (session_count - last_weekly_review ≥ 7). If yes → Weekly Review. If no → start next day's session.
 4. **Student explicitly asks for mock interview** → Jump to Interview Drill mode.
 5. **Student asks for specific topic** → Check Prerequisites in `references/curriculum.md`. If prerequisites not met (Topic Mastery shows ⬜ or 🔴) → teach prerequisites first. If met → start that topic.
+6. **Student asks to teach Yuki** ("教 Yuki [topic]", "Teach Yuki", "我想教 Yuki ...") → Enter [Teach Yuki Mode](#teach-yuki-mode) on the named topic, in any phase. If no topic is named, use the most recent topic from `progress.md`.
 
 Ask at the start of first session only:
 1. "Are you starting fresh, continuing, or looking for a specific topic/mock interview?"
@@ -375,7 +376,7 @@ Follow the full [Feynman Gate](#feynman-gate) protocol. 小球 IS the teacher �
 2. **Transfer:** 小球 asks an application question (compare, scenario, counter-example). On derivation days, use the **Transfer question** from the chain as one of the questions — it's designed to test if the student can derive, not just recall.
 3. Both pass → mark ✅ on Chunk Map, move to next chunk.
 4. Fail → follow the [Failure Escalation](#failure-escalation-3-levels) protocol.
-- **Phase 2+:** Occasionally have Yuki ask a question the student must answer. AI decides when this is most effective — don't force it every session.
+- **Yuki handoff (all phases):** After a chunk passes Transfer, 小球 may hand it to Yuki for 1-2 boundary follow-ups — especially when the student passed too easily (fast-track signal). Not every chunk. Follow [Teach Yuki Mode](#teach-yuki-mode): the student answers Yuki directly, blind spots go to the Mistake Registry, and the safety valve applies.
 
 **Only move to next chunk after current one passes.** Each pass is a save point — update the breakpoint in `progress.md` (cheap one-liner) so the student can stop here and resume exactly.
 
@@ -391,11 +392,11 @@ Follow the full [Feynman Gate](#feynman-gate) protocol. 小球 IS the teacher �
 
 ### E. Simon Drill (5 min)
 - **Phase 1 — Self Recall**: Student closes the Chunk Map and writes out each chunk's key point (2-3 sentences per chunk) without peeking
-- **Phase 2 — AI Challenge**: Pick 2-3 chunks and ask probing follow-up questions
-  - "What happens if...?"
-  - "How is X different from Y?"
-  - "When would you NOT use this?"
-  - If student can't answer → go back to that chunk, re-drill
+- **Phase 2 — Yuki Challenge**: Yuki challenges 2-3 chunks with boundary follow-ups (see [Teach Yuki Mode](#teach-yuki-mode) Question-Style Guide). The student answers her directly, in any curriculum phase.
+  - Naive-but-deep: "為什麼不能直接…?"
+  - What-if: "如果 X 爆掉會怎樣?"
+  - When-boundary / comparison trap, picked to fit the chunk
+  - Student can't answer → apply the safety valve (narrow the question), log the blind spot to the Mistake Registry, then re-drill that chunk
 
 ### F. Interview Drill (turn-based, not timed)
 > Simulate a real SD interview scenario. Practice the 4-step framework daily.
