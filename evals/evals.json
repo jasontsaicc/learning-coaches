@@ -161,7 +161,7 @@
       "id": 25,
       "category": "rpg-yuki",
       "prompt": "We're on Day 19 (Consistency Models, Phase 2). Yuki asks me: 'eventual consistency 就是不一致，對嗎？' How should I respond to her?",
-      "expected_output": "Should encourage student to correct Yuki's misconception themselves, not give the answer. This IS the Feynman method — if you can teach Yuki, you understand it. Should guide: 'How would you explain to Yuki why eventual consistency is NOT the same as inconsistency?' Should NOT use Yuki in Phase 0-1."
+      "expected_output": "Should encourage student to correct Yuki's misconception themselves, not give the answer. This IS the Feynman method — if you can teach Yuki, you understand it. Should guide: 'How would you explain to Yuki why eventual consistency is NOT the same as inconsistency?' Yuki is available in all phases via Teach Yuki Mode, so do not refuse on phase grounds."
     },
     {
       "id": 26,
@@ -286,6 +286,30 @@
         "Treats the streak as weekly and continues it (3 → 4 weeks since last week was active); does NOT reset to 1",
         "Does NOT trigger the Comeback Protocol (gap is under 7 days)",
         "Expresses streak in weeks wherever displayed"
+      ]
+    },
+    {
+      "id": 42,
+      "category": "teach-yuki-mode",
+      "prompt": "教 Yuki 我剛學的 URL shortener 設計。我現在 Phase 1。",
+      "expected_output": "Should enter Teach Yuki Mode even though the student is Phase 1 (the mechanic is not phase-locked). Should first ask the student to teach/explain the design to Yuki in their own words (teach-back, no notes), then have Yuki fire 2-4 boundary follow-ups (naive-but-deep / what-if / when-boundary / comparison trap / deliberately-wrong suggestion). The student must answer Yuki; the AI must NOT answer for them. Blind spots get logged to the Mistake Registry. Should NOT refuse because the student is in Phase 1.",
+      "expectations": [
+        "Enters Teach Yuki Mode in Phase 1 without refusing on phase grounds",
+        "Asks the student to teach-back the design in their own words first (no notes)",
+        "Has Yuki ask boundary follow-ups; does not answer them for the student",
+        "States or implies blind spots are logged to the Mistake Registry for retest"
+      ]
+    },
+    {
+      "id": 43,
+      "category": "teach-yuki-safety-valve",
+      "prompt": "(In Teach Yuki Mode) Yuki keeps asking me why a long TTL is dangerous for permissions, and I've now failed to answer twice in a row. 太難了。",
+      "expected_output": "Should apply the safety valve: stop repeating the same hard question, narrow it to a smaller step (e.g., compare the consequence of stale blog content vs stale permission data), rebuild, then re-pressure. Should NOT keep hammering the same boundary question. Should NOT dump the full answer outright — guide with a smaller step. Should log the blind spot to the Mistake Registry for later retest.",
+      "expectations": [
+        "Applies the safety valve after 2 stalls / 太難了 instead of repeating the same question",
+        "Narrows to a smaller step (e.g., compare stale blog vs stale permission consequence)",
+        "Does not dump the full answer; guides incrementally",
+        "Logs the blind spot to the Mistake Registry"
       ]
     }
   ]
