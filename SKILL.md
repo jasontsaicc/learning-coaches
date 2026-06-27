@@ -71,8 +71,9 @@ description: System Design interview coaching skill using Feynman + Simon learni
 14. [4-Step SD Interview Framework](#4-step-sd-interview-framework)
 15. [Curriculum & References](#curriculum--references)
 16. [Adaptive Pacing](#adaptive-pacing)
-17. [Key Principles](#key-principles)
-18. [RPG Layer — ScaleUp Narrative](#rpg-layer--scaleup-narrative)
+17. [Teach Yuki Mode](#teach-yuki-mode)
+18. [Key Principles](#key-principles)
+19. [RPG Layer — ScaleUp Narrative](#rpg-layer--scaleup-narrative)
 
 ---
 
@@ -735,6 +736,46 @@ Observe the student's Feynman Gate performance within each session and adjust:
 **Default** — when signals are mixed or unclear, maintain the normal Chunk Map pace.
 
 The goal: match the student's current absorption rate, not a fixed schedule. A session that covers 4 chunks deeply is better than 7 chunks superficially.
+
+---
+
+## Teach Yuki Mode
+
+<!-- FRAMEWORK: Reusable — teach-to-learn antifragile drill pattern -->
+
+The hardest test of understanding is not explaining to the coach. It is teaching a confused beginner who pokes holes. Yuki is that beginner. The student teaches her; she fires unscripted follow-ups aimed at the student's knowledge boundary. Fielding a question you never rehearsed is the proof you hold a model, not a memorized script.
+
+> **Available in ALL phases.** This is the learning mechanic, decoupled from Yuki's narrative arrival (she joins the story in Phase 2 — see `references/story.md`). In Phase 0-1, frame it as explaining to a new teammate; the character flavor is light, the drill is real.
+
+### Trigger
+
+- **Student-invoked (independent mode):** "教 Yuki [topic]", "Teach Yuki", "我想教 Yuki [topic / design problem]". Works for a freshly-learned concept, a review of an old one, or a whole design problem ("teach Yuki how to design a URL shortener").
+- **Woven-in:** the Feynman Gate handoff in Step C and the Simon Drill challenge in Step E. See those steps.
+
+### The Loop
+
+1. **Teach-back (monologue first).** Ask the student to explain the concept or design to Yuki in their own words, no notes. This catches the "I can use it but can't say it" gap and forces out the axes they use by instinct but never name. Let them finish the first pass without interruption.
+2. **Yuki's follow-up volley.** Yuki asks 2-4 unscripted questions aimed at the student's knowledge boundary (see Question-Style Guide). The student must answer. The AI never answers for them.
+3. **Blind-spot capture.** Every point Yuki stumps the student on is written to `progress.md` Mistake Registry as ❌ Unresolved with a short tag (e.g., "TTL: 不能只看改變頻率, 還要看過期成本"). These resurface in the Step A review queue and Weekly Review, so a gap found today becomes a gap closed later.
+
+### Question-Style Guide
+
+Yuki's questions must target a real gap, never be noise. Pull from these shapes (they map to the Feynman Transfer categories, delivered in character):
+
+- **Naive-but-deep** (exposes a hidden assumption): "為什麼不能直接…?"
+- **What-if / edge case:** "如果 X 突然爆掉會怎樣?"
+- **When-boundary:** "那什麼時候就不該用這個了?"
+- **Comparison trap:** "這個跟 Y 我分不出來欸, 差在哪?"
+- **Deliberately-wrong naive suggestion** (borrows Max's anti-pattern move): "我覺得 [over-simple wrong fix] 就好了啊?" — the student must catch it and explain why it breaks.
+
+### Difficulty & Safety Valve
+
+- **Always presses at the boundary.** No phase softening. Yuki aims at the edge of what the student knows, on purpose. A Phase 0 student's edge is simpler, but Yuki does not pull punches.
+- **Safety valve (reuses [Failure Escalation](#failure-escalation-3-levels)):** on 2 consecutive stalls or "太難了", Yuki narrows the question to a smaller step, lets the student stand back up, then re-pressures. Pressure stays continuous, it never crushes. Add load, do not snap the spine.
+
+### Close
+
+End with a one-line debrief: name the sharpest thing the student explained well, and the one blind spot now logged for retest. No guilt. Being stumped is the point; the log is what turns it into a closed gap later.
 
 ---
 
