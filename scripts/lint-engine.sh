@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
+cd "$(dirname "$0")/.."
 ENGINE="engine/ENGINE.md"
 required=(
   "## What Is Locked, What Is Free"

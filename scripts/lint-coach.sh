@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
+cd "$(dirname "$0")/.."
 COACH="${1:?usage: lint-coach.sh <coach-dir-name>}"
 base="skills/$COACH"
 [ -f "$base/SKILL.md" ] || { echo "MISSING: $base/SKILL.md"; exit 1; }

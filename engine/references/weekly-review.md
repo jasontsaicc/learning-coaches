@@ -118,7 +118,7 @@ Review with at least one gap actively closed, not just identified.
 ## Artifact and Portfolio Audit
 
 At the end of the Weekly Review, check that each completed phase or learning unit has
-produced its expected artifact as defined by the coach's curriculum hook.
+produced its expected artifact as defined by the coach's portfolio hook (`portfolio.md`, PLUGIN-INTERFACE.md hook 9).
 
 For each completed phase:
 - Confirm the expected artifact exists (for example, a notes file, a completed lab
@@ -132,7 +132,7 @@ mode. A student who can recall a topic in Blind Recall but has no artifact from 
 they first learned it has no durable evidence of that learning. The artifact is the
 external record.
 
-What counts as an artifact is defined in the coach's curriculum hook. The engine
+What counts as an artifact is defined in the coach's portfolio hook (`portfolio.md`, PLUGIN-INTERFACE.md hook 9). The engine
 specifies only that the check must happen at Weekly Review and that missing artifacts
 are flagged, not silently ignored.
 

@@ -7,16 +7,37 @@ A Claude Code plugin providing a family of first-principles learning coaches bui
 ```
 learning-coaches/
 ├── .claude-plugin/
-│   └── plugin.json          # Plugin manifest
+│   └── plugin.json                          # Plugin manifest
 ├── .gitignore
 ├── README.md
 ├── engine/
-│   ├── ENGINE.md            # Shared teaching engine (stub, read by each coach)
-│   └── references/          # Engine reference materials
+│   ├── ENGINE.md                            # Shared teaching engine
+│   ├── PLUGIN-INTERFACE.md                  # Coach hook contract
+│   └── references/                          # Engine reference materials
+│       ├── feynman-gate.md
+│       ├── gap-mode.md
+│       ├── scorecard-frame.md
+│       ├── spaced-repetition.md
+│       ├── teach-to-learn.md
+│       └── weekly-review.md
+├── scripts/
+│   ├── lint-all.sh
+│   ├── lint-coach.sh
+│   └── lint-engine.sh
 └── skills/
-    ├── _probe/
-    │   └── SKILL.md         # Temporary probe to validate engine reads (removed at Task 8)
-    └── terraform-coach/     # first coach (to follow)
+    └── terraform-coach/
+        ├── SKILL.md
+        ├── references/
+        │   ├── curriculum.md
+        │   ├── lab-manager.md
+        │   ├── north-star.md
+        │   ├── phase-gates.md
+        │   ├── portfolio.md
+        │   ├── scorecard-dims.md
+        │   └── teaching-elements.md
+        └── scripts/
+            ├── lab-iac.sh
+            └── lab-iac.test.sh
 ```
 
 ## Engine Read Mechanism

@@ -124,7 +124,7 @@ student needed the narrower step; that note is the data point for the next sessi
 ## Persona / No-Persona Switch (Coach Hook)
 
 Whether the confused peer has a name, backstory, and domain-specific flavor is a
-decision made in the coach's teaching-elements hook, not by this engine reference.
+decision made in the coach's narrative hook (`narrative.md`, PLUGIN-INTERFACE.md hook 8), not by this engine reference.
 
 The engine specifies only:
 - The loop structure (monologue, volley, blind-spot capture).

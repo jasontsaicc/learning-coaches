@@ -230,7 +230,7 @@ adds character details only.
 |-------|--------------|
 | sd-coach | Alex, a backend engineer who understands APIs but has never thought about scale before. |
 | k8s-coach | Sam, a developer who only knows Docker and keeps asking why Kubernetes can't just be a big Docker host. |
-| terraform-coach | Riley, an ops engineer who manages infrastructure by clicking in the AWS console and is skeptical of "just writing code for it." |
+| terraform-coach | Riley, an ops engineer who manages infrastructure by clicking in the AWS console and is skeptical of "just writing code for it." (example only; terraform-coach runs anonymous) |
 
 ---
 
