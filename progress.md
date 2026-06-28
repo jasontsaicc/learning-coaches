@@ -12,9 +12,9 @@
 |-------|-------|
 | **Start date** | 2026-03-04 |
 | **Current phase** | Phase 3 🏗️ |
-| **Current day** | **Day 27 Interview Drill 完成 (S34, 8/9 PASS)** → 下一步 = Day 28 Full PoC (Go: base62 + KGS, pending) |
+| **Current day** | **Day 29 Unique ID Generator 設計+理論完成 (S36, Snowflake 全 chunk 過 + Drill ~4/7)** → 下一步 = Day 30 Snowflake Light PoC |
 | **Language mode** | Bilingual — S27 切回繁中為主（學生英文閱讀疲勞），術語保留英文 |
-| **Session count** | 34 |
+| **Session count** | 36 |
 | **Last weekly review** | 33 (S33 = WR4 完成) |
 
 ---
@@ -36,18 +36,22 @@ Rules going forward:
 
 ## Current Session (Breakpoint)
 
-✅ **Session 34 完成（gap-mode 工作空擋）。兩段：**
-- **Bloom + Cache 組合重講**(S33 學生點名模糊)：用 request flow(User→Bloom→Cache→DB)走兩路徑,學生**自己講出**:位置(Bloom 最前)、cache 結構上擋不住不存在 key(只存有的→永遠 miss→放行 DB)、Bloom 敢擋因 no false negative(真實 key 絕不誤殺,錯誤單向倒向 false positive)、bit 層機制(insert 設 1 永不歸零)。Feynman PASS + 新增 one-liner。三件套(penetration/stampede/avalanche)複習。
-- **Day 27 URL Shortener Interview Drill (Phase 3 Bar Raiser, 8/9 PASS)**：capacity 反推(學會 62≈2⁶ 估算,6 碼=640億夠)、counter+base62(主動講足 trade-off=R3 解鎖)、NoSQL KV 用 access-pattern 理由(非資料量,頭號 DB 弱點再次答對)、讀路徑(Bloom→cache→DB)自己擺對 Bloom。**三次被質疑都自修正**(Redis 當 DB→cache、LB 歸位、6vs7 碼)。唯一 ❌ = Operational/監控全程沒主動提(S29/S30 重複盲點)。
+✅ **Session 36 完成（Day 29 Unique ID Generator 設計+理論,Snowflake)。** 筆記 `notes/day29-unique-id-generator.md`。
+- **問題錨定教法奏效**:從 KGS(上場)橋接 — 「不准中央配號,100 台各自發唯一 ID」→ 學生**自己推出** Snowflake 三段骨架(machineID 不撞跨機器 → 加 counter 同台不撞 → 重啟撞號 → 加 timestamp)。timestamp 放最高位用「日期格式 `2026-06-28` vs `28-06-2026`」比喻打通(「排序由最高位主宰」)。
+- **Clock skew(最大雷)**:學生卡在「只覺得很危險」講不出機制 → 用具體數字走「倒退→重入舊毫秒→seq 歸零→重發已發號=撞號」釘死。解法拒發>等>借位,連回 Day27「丟得起 vs 丟不起」。
+- **兩條 coaching 設定本場建立(已存 memory)**:[[coaching-no-mechanical-gate-labels]](學生點名「Recall/Transfer」標籤太機械 → 收回,自然問) + [[coaching-aggressive-interviewer-drills]](學生主動要求 Drill 當 bar-raiser 用力追問,他真面試常被追問考倒)。
+- **Interview Drill ~4/7(未達 Phase3 線 5/7,練習非 Gate)**:✅ think aloud/scope(主動想到 enumeration 洩漏營業額=architect 級,加分)/用 Snowflake;🟡 trade-off WHY(給結論不給論證,被追問才展開=老毛病)/failure modes(SPOF 有 clock skew 沒主動帶);❌ operational(第4次監控掛蛋)+ capacity(「直接放棄」,我拆 1024×4 才跟上)。
 
-**Next session = Day 28 Full PoC（Go：base62 編碼 + KGS 發號,驗證生碼無碰撞）。** 學生選了先做 Drill,PoC 留著。
+**Next session = Day 30 Snowflake Light PoC**(Go 實作 bit packing + clock skew 偵測;學生堅持手打,參 [[poc-student-types-everything]]+[[poc-go-drill-style]])。
 
-**Pending PoC(park):** Day 28 base62+KGS PoC(下次)。Circuit Breaker PoC + 分散式 Redis rate limiter → Day 31-32。Replication lag + Consistent hashing 獨立 PoC + distributed cache 完整實作 → Day 38-39。
+**Pending PoC(park):** Circuit Breaker PoC + 分散式 Redis rate limiter → Day 31-32。Replication lag + Consistent hashing 獨立 PoC + distributed cache 完整實作 → Day 38-39。
 
 **Pending review(下次 Step A 帶):**
 - **Security 廣度(OAuth/JWT/session)** 只測了 crypto-primitives 一塊,full recall 仍欠 → Box 維持 2,下次補。
 - **Review Schedule 多筆逾期**：Consistent Hashing(6/05)/Load Balancer(6/05)/Rate Limiting(6/10)/Observability(6/16)/Database B-tree-LSM(6/17)。
-- **🔴 頭號習慣弱點（S8→S34 主線）**:「答太精簡,被追問才展開」+「主動要提示而非先嘗試」。**S34 進展(好)**:counter trade-off + NoSQL 理由**主動講足沒等追問**(R3);但讀路徑 trace/LB/DB 選擇仍被追問才展開,**未根除**。**新固定要求**:Drill Step 4 收尾必講「怎麼監控」(治 operational 重複盲點)。
+- **🔴 頭號習慣弱點（S8→S36 主線）**:「答太精簡,被追問才展開」+「主動要提示而非先嘗試」。**S36**:Drill 給結論不給論證再現(DB auto-increment 一句帶過、Snowflake「最適合」沒論證)。已啟動 bar-raiser 模式加壓。
+- **🔴 operational 監控盲點(S29/30/34/36 第4次)**:Drill 從不主動提監控。固定要求:設計收尾必加一句監控(對 ID 服務=clock skew alert + 發號 QPS + sequence 打滿率)。
+- **capacity 心理障礙**:被 `2^n` 寫法嚇到就放棄,非真不會。固定提醒「拆 1024×2^(n-10)」。
 
 ---
 
@@ -74,8 +78,8 @@ Rules going forward:
 | 25 | Observability | 🟢 | — | S29。3 chunk 全過 at interview depth。自推三支柱(Metrics→想到 CPU/mem、Logs→想到查原因、Traces→用 traceroute 點到方向對工具錯)。盲區互補表+debug 動線「Metrics 報警→Traces 指路→Logs 挖根因」。Correlation ID 機制(入口生成→header 傳遞→斷鏈風險)手寫 Go snippet。SLI/SLO/SLA 弱點鞏固(考試比喻:實際分/目標分/合約罰則,SLO 比 SLA 嚴格留 buffer)。Drill 5/6。理論日 Discussion tier 無 Full PoC。S30 cross-verify 補上 Saturation(第四 Golden Signal,leading indicator)。|
 | 26 | Bloom Filter & Gossip | 🟢 | — | S30。5 chunk 全過 at interview depth。Bloom:燈泡/蓋章比喻打通機制,親手踩 false positive 陷阱(全亮≠一定在,hash 碰撞重疊),DB 當最終裁判。空間 8GB→1.2GB 省85%。落地 local/RedisBloom/SSTable 內建三放法+快取穿透應用。Gossip:八卦接力擴散 O(N²)→O(log N)回合,隨機挑 peer 抗分區,去中心化無 SPOF。共同哲學「近似/最終換效率」自己抽不出但兩實例講全。Interview Drill「爬蟲 100億 URL 去重」5/6,自己把 local Bloom 同步問題連到 Gossip(零提示)。理論日 Discussion tier。**S34**: Bloom+Cache 組合(S33 點名模糊)重講打通 — Bloom 位置/cache 為何擋不住/no false negative 為何敢擋/bit 機制全自己講出,Feynman PASS。|
 | — | Multi-Region Session Store (design) | 🟢 | **Phase 2 Gate ✅** | S31. Transfer 題(沒設計過)。自組 home-region + Redis(TTL self-heal) + geo-routing + fetch-on-miss；中途改需求(US region 掛)→ 自戳設計洞(無 source of truth=被登出)→ async 複製到 backup(replication lag=資料遺失窗口)+ AP 選擇。Operational: P99 + replication lag。5/6 PASS。弱點: 答太精簡靠追問 + 兩次主動要提示。|
-| 27-28 | URL Shortener | 🟢 | — | S32 設計 + S33 地基 + **S34 Interview Drill 8/9 PASS**(Phase 3 Bar Raiser)。capacity 反推學會 62≈2⁶ 估算(6碼=640億夠,7=保險)、counter+base62 主動講足 trade-off、NoSQL 用 access-pattern 理由、讀路徑自己擺對 Bloom、三次被質疑自修正(Redis→cache/LB歸位/6vs7)、KGS range allocation(中央配號器每block打一次+丟block=空洞OK)。唯一弱:operational 監控沒主動提。升 🟢。Full PoC(base62+KGS)仍待 Day 28。|
-| 29-30 | Unique ID Generator | ⬜ | — | |
+| 27-28 | URL Shortener | 🟢 | — | S32 設計 + S33 地基 + **S34 Interview Drill 8/9 PASS** + **S35 Full PoC 全綠**。capacity 反推學會 62≈2⁶、counter+base62 主動講足 trade-off、NoSQL access-pattern 理由、讀路徑擺對 Bloom、三次被質疑自修正、KGS range allocation。**S35 PoC**:`projects/day28-url-shortener/main.go` 跑 50 萬碼 0 碰撞 + `-race` 零警告 + 失敗注入丟空洞號仍 0 碰撞,把設計從「我相信」變「程式證明」。盲點:operational 監控仍是真實 Drill 中要證明的習慣。|
+| 29-30 | Unique ID Generator | 🟢 | — | S36 設計+理論。從 KGS 橋接,**自己推出** Snowflake 三段(machineID/seq/timestamp)+ timestamp 放最高位(日期格式比喻)+ clock skew 機制(倒退→重入毫秒→seq 歸零→撞號,拒發>等)+ machineID 開機協調一次(ZooKeeper 不變瓶頸)+ 四路線光譜(協調越少越 scale)+ KGS vs Snowflake(集中產值=短 vs 本地算=可排序)。理論一次過幾乎沒卡。PoC(bit packing + clock skew 偵測)park 到 Day 30。Drill ~4/7:operational/capacity 仍弱。|
 | 31-32 | Distributed Rate Limiter | ⬜ | — | |
 | 33-34 | Notification System | ⬜ | — | |
 | 35-37 | Chat System | ⬜ | — | |
@@ -112,6 +116,7 @@ Rules going forward:
 | 31 | Gate | **Phase 2 Gate** — Multi-Region Session Store (transfer) | **5/6 ✅ PASS** | ✅ Think Aloud, ✅ Scope, ✅ 用 Phase 2 零件(consistency/CAP/replication/TTL/AP), 🟡 Trade-off WHY(對但靠追問才展開), ✅ Operational(P99+replication lag,連到資料遺失窗口), ✅ Hint response(US-down 設計洞被 challenge 後自戳自修正). 弱點(頭號主線): 答太精簡 + 兩次主動要提示(本來都會,暖身講過). Best: 自己戳破單一 home-region 在 region 掛掉時的洞。|
 | 33 | WR4 | Weekly Review (URL Shortener / Caching / Database + Bloom bonus) | Caching 6/6, Bloom recall restored, DB trap避開 | **Caching** WR1 0/4 → WR4 六維滿分(capacity 盲區當場補)→ 升 🟢。**URL Shortener** base62≠hash 回退再修 + encoding/hashing/encryption 三件套地基。**Bloom** recall 模糊→Feynman PASS。**Database** 避陷阱+一口氣講足選 SQL → 頭號主線弱點本場練成功。意外複習掉 Security 一塊(crypto primitives)。|
 | 34 | 27 | URL Shortener (Interview Drill, Phase 3 Bar Raiser) | **8/9 ✅ PASS** | ✅ Think Aloud, ✅ Scope, ✅ 用 Bloom+cache(自己擺對讀路徑), ✅ Trade-off WHY(counter 取捨+NoSQL access-pattern 主動講足=R3), ❌ Operational(全程沒主動提監控,S29/S30 重複盲點), ✅ Failure modes(Redis durability+counter SPOF), ✅ Capacity(學會 62≈2⁶,6碼=640億), ✅ Hint response(Redis→cache/LB歸位/6vs7 三次自修正), ✅ Time/breadth(4步走完). Best: 被質疑「Redis當DB」自己想起重啟掉資料改 cache + 今天打通的 Bloom 自己擺進讀路徑。改善: operational 監控當固定收尾;讀路徑/LB/DB 仍被追問才展開。|
+| 36 | 29 | Unique ID Generator (Interview Drill, bar-raiser 首場) | **~4/7（練習,未達 Phase3 線）** | ✅ Think Aloud, ✅ Scope(**主動想到 enumeration 洩漏營業額**=architect 級加分), ✅ 用 Snowflake, 🟡 Trade-off WHY(給結論不給論證:DB auto-increment 一句帶過、「Snowflake 最適合」沒論證,被追問才展開), 🟡 Failure modes(SPOF 有提,clock skew 沒主動帶進設計), ❌ Operational(第4次監控掛蛋), ❌ Capacity(「直接放棄」,拆 1024×4 後才跟上). Best: enumeration 洩漏觀點零提示自己冒出。改善: 結論要附論證、收尾固定提監控、capacity 別被 2^n 嚇退。本場啟動 bar-raiser 加壓模式。|
 
 ---
 
@@ -185,7 +190,18 @@ Rules going forward:
 | 34 | 27 | URL Shortener (storage) | Redis 當 source of truth(S32 老錯回退) | ✅ Resolved (S34, 被質疑「半夜 Redis 重啟」自己想起掉資料→改 cache + durable DB 當真相來源) |
 | 34 | 27 | Capacity estimation | 算不出 62ⁿ(預設背「7 碼」) | ✅ Resolved (S34, 學會 62≈2⁶ + 2³⁰≈10億 估算錨;算出 6 碼=640億已是需求10倍) |
 | 34 | 27 | URL Shortener (KGS) | 配號器去哪領範圍/機器掛掉剩號碼怎辦(知識邊界,沒想過) | ✅ Resolved (S34, 中央配號器每 block 領一次非 per-request;掛掉剩號丟掉=空洞=OK,短碼不需連續) |
-| 34 | 27 | Interview habit (operational) | Drill 全程沒主動提監控(S29/S30 重複盲點) | ❌ Unresolved (新固定要求:Step 4 收尾必講 cache hit rate/P99/配號器存活/Bloom FP rate) |
+| 34 | 27 | Interview habit (operational) | Drill 全程沒主動提監控(S29/S30 重複盲點) | 🟡 Improving (S35 PoC 收尾主動建監控表+講 batching trade-off,但漏「不領block→KGS瓶頸」由我補;真實 Drill 主動提監控仍待證明,維持固定要求) |
+| 35 | 28 | URL Shortener (base62) | base62 把「長網址」encoding 成固定長度(S34 resolved 後 2 天回退) | ✅ Resolved (S35, 拆 POST 四步流程:base62 輸入是 counter 數字,長網址原封不動存 DB 當 value;counter 負責唯一,base62 只換進制) |
+| 35 | 28 | URL Shortener (code length) | 以為短碼要「固定 7 位數」 | ✅ Resolved (S35, 碼自然長大不補0;「7」是命名空間天花板 62⁷ 非固定長度;補0 浪費+洩漏發號量。PoC 長度分布實證:1碼62個→4碼數十萬) |
+| 35 | 28 | Go (string/byte) | 以為 `s[i]` 拿到字串(Python 思維) | ✅ Resolved (S35, 親手跑 alphabet[1]=49 vs string(alphabet[1])="1";Go string=byte 序列,抓一格=byte 編號) |
+| 35 | 28 | KGS (operational) | 以為丟掉 1 萬個空洞號是 bug 要修 | 🟡 Partial (S35, 答對「命名空間大丟得起」但漏「不領block→KGS 變瓶頸+每碼多一次 round-trip」的 batching 代價,由我補) |
+| 36 | 29 | Unique ID | 「不准中央配號」→ 想「每台有自己的區間範圍」(區間誰分?又需中央+會用完+重疊) | ✅ Resolved (S36, 跳到「切身分非切號碼空間」:把 machineID 揉進 ID,每台自己算) |
+| 36 | 29 | Unique ID | 防撞反射想用 hash(machine 名) | ✅ Resolved (S36, hash 只「大概不撞」;直接給門牌號 machineID=保證不撞,同 Day27 counter≠hash) |
+| 36 | 29 | Unique ID (bit order) | Transfer 卡:timestamp 放哪位無所謂 | ✅ Resolved (S36, 日期格式 `2026-06-28` vs `28-06-2026` 比喻打通「排序由最高位主宰」,放錯→丟 time-ordering→DB index 退化) |
+| 36 | 29 | Unique ID (clock skew) | 時鐘倒退「只覺得很危險」講不出機制 | ✅ Resolved (S36, 具體數字走「倒退→重入毫秒→seq 歸零→重發已發號=撞號」;解法拒發>等) |
+| 36 | 29 | Interview habit (trade-off) | Drill 給結論不給論證(「Snowflake 最適合」/ DB auto-increment 一句帶過) | 🟡 Improving (S36, 啟動 bar-raiser 加壓;被追問後能補足 DB SPOF + Snowflake 機制,但仍未做到第一次開口就附論證) |
+| 36 | 29 | Interview habit (operational) | Drill 全程沒主動提監控(第4次重複) | ❌ Unresolved (S29/30/34/36;固定要求:設計收尾必加監控句=clock skew alert+發號QPS+sequence打滿率) |
+| 36 | 29 | Capacity estimation | 算 2^12/秒「直接放棄」 | 🟡 Improving (S36, 拆 `1024×4×1000≈400萬/秒` 後跟上;非真不會,是被 2^n 寫法嚇退,固定提醒拆次方) |
 
 ---
 
@@ -212,6 +228,7 @@ Rules going forward:
 | URL Shortener | A URL shortener is an extremely read-heavy key-value system; short codes are generated collision-free by base62-encoding a globally unique counter (not by hashing), stored in a NoSQL KV store for simple point lookups, and served through a cache that needs no invalidation because the mapping is immutable. |
 | Cache vs Queue | Cache solves a read problem (same data read many times, serve it fast, losing it is fine because the DB is source of truth); Queue solves a work-handoff problem (decouple producer from consumer, each message consumed once, losing it is bad because the work may have no backup). Both often run on Redis but use different structures and have opposite durability needs. |
 | Cache Penetration (Bloom + Cache) | Cache penetration is a flood of queries for keys that don't exist — the cache only stores real keys, so every such request misses and crushes the DB; a Bloom filter in front rejects definitely-absent keys safely, because it has no false negatives (a real key is never wrongly blocked) and the worst case is a rare false positive that just wastes one lookup. |
+| Unique ID Generator (Snowflake) | A unique ID generator produces globally unique IDs with no per-ID coordination; Snowflake packs a timestamp + machineID + sequence into a 64-bit number — collision-free and roughly time-sortable at millions/sec per node, coordinating only once at boot to assign machine IDs. It beats UUID (long, unsortable), DB auto-increment (single-point bottleneck + SPOF), and KGS (centralized) — the catch is clock skew: if the clock rewinds, a node can re-issue an ID, so on detected rewind it must refuse rather than risk a duplicate. |
 
 ---
 
@@ -220,10 +237,10 @@ Rules going forward:
 | Field | Value |
 |-------|-------|
 | **Title** | 🏗️ Staff Architect |
-| **Current streak** | 2 週 🔥 (連續活躍週：上週 S31 + 本週 S32-S34,同週不加碼) |
+| **Current streak** | 2 週 🔥 (連續活躍週：上週 S31 + 本週 S32-S36,同週不加碼) |
 | **Longest streak** | 4 (days, pre-weekly) |
-| **Last session date** | 2026-06-26 |
-| **Last story summary** | Session 34。小球先把學生 S33 點名「Bloom + Cache 怎麼組在一起還是模糊」的疙瘩解掉:用一條讀路徑(User→Bloom→Cache→DB)走兩遍,學生自己講出 cache 結構上擋不住「不存在的 key」(只存有的→永遠 miss→砸 DB),而 Bloom 敢當門神是因為 no false negative(真實 key 絕不誤殺,錯誤只單向倒向 false positive)。接著小球切成 Bar Raiser 面試官,跑完整 Day 27 URL Shortener Drill:學生學會 62≈2⁶ 心算容量、主動講足 counter+base62 的取捨(R3 解鎖)、被連續質疑三次(Redis 當 DB、LB 放錯、6 vs 7 碼)都自己修正回來,還把今天剛打通的 Bloom 自己擺進讀路徑正確位置。8/9 PASS,唯一漏的是 operational 監控(老盲點)。|
+| **Last session date** | 2026-06-28 |
+| **Last story summary** | Session 36。Day 29 Unique ID Generator(Snowflake)。從上場 KGS 橋接出招「不准中央配號,100 台各自發唯一 ID」,學生**自己一步步推出** Snowflake 三段骨架:machineID 跨機器不撞 → 加 counter 同台不撞 → 重啟撞號 → 加 timestamp 永遠往前。timestamp 為何放最高位用「日期 `2026-06-28` 排得對、`28-06-2026` 排亂掉」打通。最大雷 clock skew 從「只覺得很危險」被逼出精確機制(倒退→重入毫秒→seq 歸零→重發=撞號)。本場學生點名兩件事改 coaching:嫌「Recall/Transfer」標籤太機械(收回)、主動要求 Drill 當 bar-raiser 用力追問(他真面試常被考倒)。Drill ~4/7,enumeration 洩漏營業額的資安觀點零提示自己冒出(亮點),但 operational 監控第 4 次掛蛋、capacity 一看 2^12 就放棄(拆 1024×4 才跟上)。|
 
 ---
 
