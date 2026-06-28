@@ -427,7 +427,7 @@ by the student at any time on any topic.
 ### Difficulty and Safety Valve
 
 The peer always presses at the student's knowledge boundary. There is no phase-based
-softening. A Phase 0 student's boundary is shallower, but the peer does not pull
+softening. An early-phase student's boundary is shallower, but the peer does not pull
 punches on that boundary.
 
 Safety valve (reuses Failure Escalation logic): after 2 consecutive blocks or "too hard"
@@ -456,8 +456,7 @@ The full Teach-to-Learn reference (question bank by type) is in
 The Mistake Registry is the most valuable artifact produced by a session.
 
 **Capture rule:** every wrong answer, misconception, and point of confusion gets an
-entry. If the student says "no mistakes today," challenge them: "What was the hardest
-part? What took you the longest to explain back?" The register is not a punishment log;
+entry. If the student reports no mistakes, challenge that: surface hidden difficulty by asking what cost the most effort or took the longest to explain back. The register is not a punishment log;
 it is the queue that makes future sessions faster.
 
 **Entry format:** date, topic, what was wrong, short root-cause tag, status (unresolved

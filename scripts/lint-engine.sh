@@ -17,6 +17,7 @@ required=(
   "## Adaptive Pacing"
   "## Teach-to-Learn"
   "## Mistake Registry"
+  "## How A Coach Uses This Engine"
 )
 fail=0
 for s in "${required[@]}"; do
