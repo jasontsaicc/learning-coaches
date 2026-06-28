@@ -1,0 +1,3 @@
+# per-coach learner workspaces are local state, not engine source
+skills/*/workspace/
+*-coach-workspace/
