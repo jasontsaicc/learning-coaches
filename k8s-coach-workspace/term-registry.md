@@ -20,6 +20,7 @@
 | thundering herd | /ˈθʌn.dər.ɪŋ hɝːd/ | Many clients hit the same resource at the exact same moment and overwhelm it (e.g. all pods restart and reconnect to one DB at once). | 羊群效應:大量請求同時湧向同一資源把它壓垮(如全 Pod 同時重連 DB);錨定 liveness 誤設→集體重啟雪崩 | 2026-06-25 | 2026-06-28 |
 | DNAT | /ˌdiːˈnæt/ | Destination NAT: rewriting a packet's destination IP. kube-proxy uses it so a packet sent to a virtual ClusterIP gets its destination rewritten to a real Pod IP. | 改寫封包的「目的地 IP」。ClusterIP 虛擬不存在於任何網卡,封包在出發 node 本地被 DNAT 成某個真實 Pod IP,這就是 Service 能轉發的底層 | 2026-06-26 | 2026-06-29 |
 | kube-proxy | /kjuːb ˈprɑːk.si/ | A per-node DaemonSet that programs iptables/IPVS rules in each node's kernel to implement Service ClusterIP routing (no central proxy, no bottleneck). | 每台 node 跑一隻,在本地 kernel 寫 iptables/ipvs 規則實作 ClusterIP 轉發;去中心化、無中央瓶頸;注意它「寫規則」不是「過流量」 | 2026-06-26 | 2026-06-29 |
+| conntrack | /ˈkɒn.træk/ | The Linux kernel netfilter table that remembers each NAT'd connection so reply packets can be rewritten back. When it fills up, NEW connections get dropped while existing ones keep working. | NAT 的「記憶體」:去程 DNAT 改了 A→B 就記一筆,回程才反向改回去;table full=新連線被 drop、舊連線不受影響;屬 node kernel 層,kubectl 看不到(查法 conntrack -L / nf_conntrack_count vs _max / dmesg) | 2026-06-28 | 2026-07-01 |
 
 <!-- 2026-06-22 移除 kubeconfig / context / kind 三張卡:定義型瑣碼詞/工具名,面試不考,違反價值門檻(見 SKILL.md 術語卡)。current-context 改記為 ops 安全習慣,不當單字卡。 -->
 <!-- ops 安全習慣(非術語卡): `kubectl config current-context` = 動手前先確認指到哪個叢集,避免誤打 prod EKS。 -->

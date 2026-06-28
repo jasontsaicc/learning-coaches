@@ -66,10 +66,24 @@
 **日期:** 2026-06-27
 **主題:** P2a 謎題B — ClusterIP / kube-proxy / DNAT 整條串不起來(Teach the Rookie F 段挖出)
 
-**踩的坑:** ❌ Unresolved。教菜鳥 full teach-back 時開頭就說「封包先**去** clusterIP **拿到** ip」,代表腦中的圖還是「封包跑去 ClusterIP 這個地方、跟它要一個真實 IP」(像問路/打總機)。零件(ClusterIP 虛擬 / kube-proxy 寫規則 / iptables / DNAT / Endpoints)被菜鳥逐一逼出來都認得,但**自己一口氣串整條時崩掉**。另外中途把「健康 Pod IP 名單」答成 `iptables`(把「做改寫的規則」跟「要挑的名單」混為一談)。
+**踩的坑:** ✅ RESOLVED (2026-06-28)。原坑:教菜鳥 full teach-back 時開頭就說「封包先**去** clusterIP **拿到** ip」,代表腦中的圖還是「封包跑去 ClusterIP 這個地方、跟它要一個真實 IP」(像問路/打總機)。零件被逐一逼出來都認得,但**自己一口氣串整條時崩掉**。另外中途把「健康 Pod IP 名單」答成 `iptables`(把「做改寫的規則」跟「要挑的名單」混為一談)。
+**2026-06-28 解坑:** D段 lab 親手 `docker exec <node> iptables-save` 追完整鏈(KUBE-SERVICES 比對目的地→KUBE-SVC 機率LB→KUBE-SEP `DNAT --to-destination PodIP`),worker/worker2 兩台規則一致 → 實體看到「ClusterIP 只是規則裡的比對字串、封包從不拜訪它、改寫發生在出發地本機」。F段壓軸無鷹架全鏈 teach-back PASS。
 
 **根因:** 謎題B 的反直覺核心沒打穿:ClusterIP **不是一個地方、沒有任何機器擁有它、封包從不拜訪它**。真相是封包正常寫上目的地送出,**還沒離開出發那台 node**,本機 kernel 就照 kube-proxy 預寫的 iptables 規則當場 DNAT 改寫目的地。改寫沒有「去 ClusterIP 拿 IP」這一步,發生在**出發地本機**。
 
 **正確做法:** 一句話骨幹 = 「封包**不去** ClusterIP;是**出發地本機 kernel** 照 **kube-proxy 寫的規則**做 **DNAT**,把目的地換成 **Endpoints** 名單裡的真 Pod IP」。分清:iptables 規則=做改寫的**手(動作)**;Endpoints=該挑哪個 Pod 的**名單(資料)**,由 controller reconcile loop 維護、readiness 當閘門。手 ≠ 名單。
 
-**下次抽考日:** 2026-06-30 (新坑,下次 session A 段**冷測**:不給鷹架,要他自己一口氣講完五步整條;過了才算謎題B Gate ✅)
+**下次抽考日:** 2026-06-30 (新坑,下次 session A 段**冷測**:不給鷹架,要他自己一口氣講完五步整條;過了才算謎題B Gate ✅) → **已於 2026-06-28 D段+F段達成,Gate ✅,改抽考全鏈精度(誰寫 resolv.conf=kubelet、機率LB、conntrack 回程)**
+
+---
+
+**日期:** 2026-06-28
+**主題:** P2a CoreDNS — busybox nslookup 測叢集 DNS 被工具自身的 bug 騙
+
+**踩的坑:** `kubectl run dnstest --image=busybox:1.36 ... -- nslookup backend` 回 NXDOMAIN「server can't find backend.svc.cluster.local」,差點以為 CoreDNS 壞了。但同一個 Service 用 FQDN `nslookup backend.default.svc.cluster.local` 立刻解析成功(→ ClusterIP 10.96.254.186)。
+
+**根因:** CoreDNS 與 Service 註冊**完全正常**,是 **busybox(musl libc)的 nslookup 處理 `search` 清單不可靠**,漏試了該試的 `backend.default.svc.cluster.local`(resolv.conf 第一條搜尋網域)。一個用 glibc 的真實 app 在同 namespace 寫 `backend` 會成功。另外兩個現象:`options ndots:5` → 短名字(點<5)會把整串 search 網域一條條試過才放棄(高 QPS 會變 DNS 延遲坑);主機的 `*.oraclevcn.com`/`*.ts.net` 漏進 Pod 的 search 清單,沒中的查詢多繞外部 DNS。
+
+**正確做法:** DNS 解析失敗的排障第一刀 = **先用 FQDN 測一次**,把「伺服器壞 vs 發問端(client/search/工具)壞」二分:FQDN 通 → CoreDNS 沒事,往 client/resolver 查;FQDN 不通 → 才查 CoreDNS。別拿 busybox 測叢集 DNS,用 `nicolaka/netshoot`(正規 dig/nslookup)。絕不因 nslookup 失敗就亂砍/重啟 CoreDNS。
+
+**下次抽考日:** 2026-07-01
