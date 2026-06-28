@@ -12,7 +12,7 @@ case "$cmd" in
   destroy)
     echo "SAFETY: destroy is not run for you. run this yourself, then verify nothing is left:"
     echo "  cd \"$dir\" && terraform destroy"
-    echo "  then verify: terraform state list   (expect empty)"
+    echo "  then verify: cd \"$dir\" && terraform state list   (expect empty)"
     ;;
   *) echo "unknown subcommand: $cmd" >&2; exit 2 ;;
 esac

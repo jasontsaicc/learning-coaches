@@ -9,7 +9,19 @@ check() { if eval "$1"; then pass=$((pass+1)); else echo "FAIL: $2"; fail=$((fai
 out="$($SH apply ./nonexistent-dir 2>&1 || true)"
 check '[[ "$out" == *"terraform apply"* ]]' "apply prints the command"
 check '[[ "$out" == *"run this yourself"* ]]' "apply tells user to run it"
-check '[[ "$out" != *"Error acquiring the state lock"* ]]' "apply did not actually execute"
+# Tripwire: a fake terraform on PATH that records if it is ever called.
+TRIP="$(mktemp -d)"
+export TRIP_SENTINEL="$TRIP/invoked"
+cat > "$TRIP/terraform" <<'SH'
+#!/usr/bin/env bash
+echo called > "$TRIP_SENTINEL"
+exit 0
+SH
+chmod +x "$TRIP/terraform"
+PATH="$TRIP:$PATH" $SH apply ./somedir >/dev/null 2>&1 || true
+PATH="$TRIP:$PATH" $SH destroy ./somedir >/dev/null 2>&1 || true
+check '[[ ! -f "$TRIP_SENTINEL" ]]' "apply/destroy never invoke terraform (tripwire)"
+rm -rf "$TRIP"
 
 # destroy must print a command and a verification reminder
 out="$($SH destroy ./nonexistent-dir 2>&1 || true)"
