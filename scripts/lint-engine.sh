@@ -27,4 +27,17 @@ done
 grep -qF "3 -> 7 -> 14" "$ENGINE" || { echo "MISSING: spaced repetition rhythm 3 -> 7 -> 14"; fail=1; }
 # guard against the pass threshold drifting
 grep -qF "60%" "$ENGINE" || { echo "MISSING: 60% pass threshold"; fail=1; }
+refs=(
+  engine/references/feynman-gate.md
+  engine/references/teach-to-learn.md
+  engine/references/spaced-repetition.md
+  engine/references/gap-mode.md
+  engine/references/scorecard-frame.md
+  engine/references/weekly-review.md
+)
+for f in "${refs[@]}"; do
+  [ -s "$f" ] || { echo "MISSING or EMPTY: $f"; fail=1; }
+  grep -qiE 'kubernetes|k8s|kube-proxy|system design interview|terraform' "$f" \
+    && { echo "DOMAIN LEAK in engine reference: $f"; fail=1; }
+done
 exit $fail
