@@ -14,14 +14,15 @@ management without prompting, and correctly states what the state file is for.
 Specifically, the student must be able to:
 1. Distinguish declarative ("describe what you want") from imperative ("describe what to
    do") without looking at notes.
-2. Explain why Terraform needs a state file at all: what problem does it solve that a
-   pure declarative diff against live cloud would not? (Expected: it avoids expensive
-   API calls on every run and provides a stable source of truth for dependency tracking.)
+2. Explain why Terraform needs a state file even though it already queries the cloud on
+   every plan run. (Expected: the state file tracks resource identities, metadata,
+   cross-resource reference values, and destroy ordering -- information that a blind
+   cloud enumeration cannot reconstruct.)
 3. Name one real consequence of losing the state file.
 
-**Suggested gate question:** "Explain to me what the state file is for. Then tell me:
-if Terraform is declarative, why can't it just query the cloud on every plan run instead
-of keeping state?"
+**Suggested gate question:** "Explain to me what the state file is for. Terraform
+already queries the cloud on every plan run -- so why is the state file still
+necessary?"
 
 ---
 
@@ -40,7 +41,7 @@ Specifically, the student must:
    state contains fields that were not in the HCL (e.g., private IP, ARN, security
    group defaults assigned by AWS).
 
-Scoring against Tier 1 scorecard; must reach 60%.
+Scoring against Tier 1 scorecard; must meet the engine's scorecard pass threshold on the Tier 1 scorecard.
 
 ---
 
@@ -116,8 +117,8 @@ Additionally:
 ## P6 Gate - Interview and Hands-On Sprint
 
 **Pass condition:** The student completes a timed mock session (scope: design a
-production Terraform layout for a standard three-tier web app on AWS) and scores at
-least 60% on the Tier 4 scorecard without reference material.
+production Terraform layout for a standard three-tier web app on AWS) and meets the
+engine's scorecard pass threshold on the Tier 4 scorecard without reference material.
 
 The mock covers:
 - Module structure for the layout.

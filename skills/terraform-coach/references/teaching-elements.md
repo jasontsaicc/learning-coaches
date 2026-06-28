@@ -6,14 +6,38 @@ the Feynman Gate protocol; this file supplies what is Terraform-specific.
 
 ---
 
+## Step B: Scenario Intro
+
+Brief production scenarios (one to two lines each) that make each phase topic feel
+concrete before the first-principles explanation. The engine surfaces these at step B;
+keep them terse.
+
+| Phase | Scenario hook |
+|-------|--------------|
+| P0 - IaC Mental Model | A new engineer hand-creates an EC2 instance in the console; six months later no one knows it exists, it can't be updated safely, and deleting it would break prod. |
+| P1 - HCL and Providers | You clone a repo and run `terraform apply` but get "provider not found"; `terraform init` was never run after the provider version changed. |
+| P2 - Modularization | Three teams copied the same VPC block into their configs; a CIDR typo in one copy caused an outage, and the other two copies still have the bug. |
+| P3 - State Management | A teammate ran `terraform apply` from their laptop using a local state file; your apply overwrote their state entry, and Terraform no longer tracks their resources. |
+| P4 - Multi-Environment and CI/CD | A dev `terraform apply` accidentally ran against the prod backend because the workspace was not switched; the prod database was replaced. |
+| P5 - Policy, Security, and Drift | A support engineer opened port 22 to `0.0.0.0/0` in the console to debug a prod issue; the next `terraform apply` would have reverted it, but the team only noticed three weeks later during a security audit. |
+| P6 - Interview Sprint | You're asked in an on-site: "walk me through how you'd design Terraform state for a team of 20 engineers across dev, staging, and prod." |
+
+---
+
 ## Step C: First-Principles Chain
 
 ### Core First-Principles Chain (applies to all phases)
 
-Cloud APIs are stateful: creating a resource does not return a way to re-derive its
-attributes later. Terraform maintains a state file so it can compute a diff between
-the desired configuration and what it previously recorded as actual, rather than
-querying every resource on every run or re-creating everything from scratch.
+Cloud APIs are stateful: creating a resource returns an ID and initial attributes,
+but there is no way to enumerate all cloud resources and reconstruct the full picture
+of what Terraform manages. Terraform maintains a state file to track resource
+identities (IDs), metadata, cross-resource reference values, and destroy ordering --
+information that a blind cloud enumeration cannot reconstruct.
+
+The state file is not there to avoid API calls. `terraform plan` calls the provider's
+read APIs on every run by default (implicit refresh) to detect drift. State exists so
+Terraform knows *which* resources to call those APIs for, and can reconstruct
+references and ordering without scanning every resource in the account.
 
 This single constraint explains why the state file exists, why remote state matters,
 why locking matters, and why drift is dangerous.
@@ -22,16 +46,22 @@ why locking matters, and why drift is dangerous.
 
 1. Cloud resources have IDs, ARNs, and attributes that must be tracked to manage them
    later (delete, update, reference from other resources).
-2. Without a record, Terraform would have to describe every possible resource every
-   run (expensive and API-rate-limited) or give up on updates entirely.
+2. Without a state record, Terraform could not know which cloud resources it manages
+   (the API has no "list everything Terraform created" endpoint), could not resolve
+   cross-resource references at plan time, and could not determine destroy order.
 3. The state file is that record: it maps each resource block in HCL to a real cloud
-   object with its current attributes.
-4. The diff (the plan) is computed between the state file and the desired config, not
-   between the config and live cloud state. This is fast but means the plan can be
-   wrong if state drifts.
-5. A shared team using the same state file without a lock can produce two conflicting
-   plans simultaneously, corrupting the state. That is why remote state + locking is
-   not optional at team scale.
+   object with its identity and last-known attributes.
+4. `terraform plan` performs an implicit refresh by default (since Terraform 0.15.2):
+   it reads the state file for resource IDs, calls the provider's read APIs for each
+   tracked resource to get live actual state, then diffs that refreshed-actual against
+   the desired HCL, then emits the plan. Use `-refresh=false` to skip the live API
+   calls. The standalone `terraform refresh` command was deprecated in Terraform 1.0
+   because it writes refreshed state back without a reviewable plan.
+5. A shared team using the same state file without a lock can run two concurrent
+   `apply` operations: both read the same state, compute their changes, and both write
+   an updated state file back -- last write wins, silently dropping the other apply's
+   tracked changes from state. That is why remote state + locking is not optional at
+   team scale.
 
 ### Dependency Graph and Plan Order (step C deep-dive for P1-P2)
 
@@ -43,9 +73,12 @@ creates an edge from the subnet to the route table).
 **Key points for student understanding:**
 - A resource that references another can only be created after the referenced resource
   exists. The DAG captures this constraint and orders the apply accordingly.
-- Resources with no dependency relationship can be applied in parallel. The engine
-  runs parallel `apply` operations by default; this is why apply is often faster than
-  plan for large configs.
+- Resources with no dependency relationship can be applied in parallel. Terraform runs
+  parallel `apply` operations by default, which makes large applies tractable by
+  reducing wall-clock time compared to a strictly sequential apply. Plan itself makes
+  read-only API calls and is generally faster than apply, which provisions resources
+  and waits on creation (often minutes per resource); parallelism narrows the gap but
+  does not reverse it.
 - `terraform graph | dot -Tpng > graph.png` produces a visual DAG. Teach this in P1
   so students have a concrete way to reason about apply order.
 - If the DAG contains a cycle, Terraform errors before apply. Cycles usually indicate
@@ -99,8 +132,10 @@ After a resource is applied and state is clean, inject out-of-band drift:
   instance, modify a security group rule).
 - Have the student predict: "What will `terraform plan` show now, and why?"
 - Run `terraform plan` and compare the student's prediction to the actual output.
-- Discuss: how does Terraform detect the change? (It calls DescribeXxx APIs and
-  compares the live attributes to the state file, not to the HCL directly.)
+- Discuss: how does Terraform detect the change? (Plan performs an implicit refresh:
+  it uses the resource IDs in state to call provider read APIs, gets the current live
+  attributes, then diffs those against the desired HCL. Drift appears because the live
+  attribute no longer matches what the HCL declares.)
 
 This drill converts the abstract concept of drift into a concrete observable.
 
@@ -153,7 +188,7 @@ Key Terraform vocabulary, with the underlying concept each term points to.
 | resource | A single managed cloud object (an EC2 instance, an S3 bucket); the unit of state tracking |
 | data source | A read-only reference to an existing resource not managed by this config; does not appear in state as a managed object |
 | state file (`terraform.tfstate`) | The mapping between HCL resource addresses and real cloud resource IDs and attributes |
-| plan | A diff between desired config (HCL) and recorded actual state; does not query live cloud unless `terraform refresh` is run |
+| plan | A diff between desired HCL and live actual state; by default performs an implicit refresh (calls provider read APIs for each tracked resource) before computing the diff; skip the refresh with `-refresh=false` |
 | apply | Execute the plan: call provider APIs to create/modify/destroy resources and update state |
 | module | A reusable bundle of resources with declared inputs (variables) and outputs; can be called multiple times with different inputs |
 | remote backend | Where the state file is stored (e.g., S3); enables team use by making state shareable |

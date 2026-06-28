@@ -81,10 +81,11 @@ cost.
 **Blast radius:** Does the student read the plan before applying and flag any
 destruction or replacement that could affect production?
 
-Pass: before running apply, the student reads the plan for `-` (destroy) and `~`
-(replace-forces-new) symbols, names what will be destroyed, and confirms the impact is
-intentional. For a plan that destroys a database or a running instance, the student
-pauses and asks whether this is expected.
+Pass: before running apply, the student reads the plan for `-` (destroy), `~`
+(in-place update), and `-/+` (destroy then create, i.e., replace; shown as `+/-` when
+`create_before_destroy` is set) symbols, names what will be destroyed or replaced, and
+confirms the impact is intentional. For a plan that destroys or replaces a database or
+a running instance, the student pauses and asks whether this is expected.
 
 Fail: the student runs `terraform apply` without reading the plan, or does not notice
 a forced replacement of a stateful resource.
