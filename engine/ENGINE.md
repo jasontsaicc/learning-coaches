@@ -269,7 +269,8 @@ When triggered, replace the normal session flow with the Weekly Review flow.
 4. Mistake Registry Review: test every unresolved item. Pass moves it to resolved; fail
    keeps it in the queue and triggers a brief re-drill.
 5. Quick Drill: re-drill the weakest topic until the student is fluent.
-6. Update the progress file: set `last_weekly_review` to the current session count,
+6. Artifact audit: confirm each learned phase produced the artifact its coach expects; if a coach defines no artifact for a phase, skip.
+7. Update the progress file: set `last_weekly_review` to the current session count,
    update mastery levels based on recall performance.
 
 The full Weekly Review reference (suggested prompts and flow variants) is in

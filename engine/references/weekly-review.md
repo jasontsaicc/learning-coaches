@@ -122,7 +122,7 @@ produced its expected artifact as defined by the coach's curriculum hook.
 
 For each completed phase:
 - Confirm the expected artifact exists (for example, a notes file, a completed lab
-  output, a commit, a written answer to a Phase Gate question).
+  output, a written answer to a Phase Gate question).
 - If the artifact is missing: flag it. The student learned the material but did not
   produce the evidence. Decide together whether to produce it now or in the next session.
 - If the artifact exists: no action needed.
