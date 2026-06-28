@@ -17,7 +17,7 @@ keep them terse.
 | P0 - IaC Mental Model | A new engineer hand-creates an EC2 instance in the console; six months later no one knows it exists, it can't be updated safely, and deleting it would break prod. |
 | P1 - HCL and Providers | You clone a repo and run `terraform apply` but get "provider not found"; `terraform init` was never run after the provider version changed. |
 | P2 - Modularization | Three teams copied the same VPC block into their configs; a CIDR typo in one copy caused an outage, and the other two copies still have the bug. |
-| P3 - State Management | A teammate ran `terraform apply` from their laptop using a local state file; your apply overwrote their state entry, and Terraform no longer tracks their resources. |
+| P3 - State Management | Your team shares one remote state file with no lock. A teammate's apply and yours ran close together; last write won, and the other apply's tracked changes silently vanished from state. |
 | P4 - Multi-Environment and CI/CD | A dev `terraform apply` accidentally ran against the prod backend because the workspace was not switched; the prod database was replaced. |
 | P5 - Policy, Security, and Drift | A support engineer opened port 22 to `0.0.0.0/0` in the console to debug a prod issue; the next `terraform apply` would have reverted it, but the team only noticed three weeks later during a security audit. |
 | P6 - Interview Sprint | You're asked in an on-site: "walk me through how you'd design Terraform state for a team of 20 engineers across dev, staging, and prod." |
@@ -51,11 +51,11 @@ why locking matters, and why drift is dangerous.
    cross-resource references at plan time, and could not determine destroy order.
 3. The state file is that record: it maps each resource block in HCL to a real cloud
    object with its identity and last-known attributes.
-4. `terraform plan` performs an implicit refresh by default (since Terraform 0.15.2):
+4. `terraform plan` performs an implicit refresh by default:
    it reads the state file for resource IDs, calls the provider's read APIs for each
    tracked resource to get live actual state, then diffs that refreshed-actual against
    the desired HCL, then emits the plan. Use `-refresh=false` to skip the live API
-   calls. The standalone `terraform refresh` command was deprecated in Terraform 1.0
+   calls. The standalone `terraform refresh` command was deprecated as unsafe
    because it writes refreshed state back without a reviewable plan.
 5. A shared team using the same state file without a lock can run two concurrent
    `apply` operations: both read the same state, compute their changes, and both write
