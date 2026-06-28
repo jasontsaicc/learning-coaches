@@ -94,8 +94,6 @@ the lab script, and the drill format for each topic.
   - Chunk list: the ordered sub-units for this topic, each with its own Feynman Gate.
   - Hands-on lab (step D): the specific commands or tasks to run; see also hook 4.
   - Drill format (step E): the failure or recall drill for this topic.
-  - Teach-to-Learn peer flavor (step F): optional character details for the confused
-    peer (name, domain personality); the engine provides the loop structure.
 - A term registry if the domain has a dense vocabulary.
 
 **Examples:**

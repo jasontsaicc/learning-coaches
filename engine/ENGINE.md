@@ -444,7 +444,7 @@ point; the log is what turns the gap into a closed gap.
 ### Persona
 
 Whether the confused peer has a name, a backstory, and domain-specific flavor is a
-coach hook decision, defined in the coach's `teaching-elements.md`. The engine specifies
+coach hook decision, defined in the coach's optional narrative hook (PLUGIN-INTERFACE.md hook 8); coaches that skip it use the no-persona default. The engine specifies
 only the loop structure and the safety valve; character details are free.
 
 The full Teach-to-Learn reference (question bank by type) is in

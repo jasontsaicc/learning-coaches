@@ -18,7 +18,7 @@ done
 # the thin SKILL.md must read the engine, not re-implement it
 grep -qF "engine/ENGINE.md" "$base/SKILL.md" || { echo "SKILL.md does not read the engine"; fail=1; }
 # guard against engine mechanics being copied into the coach
-if grep -qiE 'failure escalation|two-stage verification|3 -> 7 -> 14' "$base/SKILL.md"; then
+if grep -qiE 'failure escalation|two stages|3 -> 7 -> 14' "$base/SKILL.md"; then
   echo "ENGINE LEAK: $base/SKILL.md re-implements engine mechanics"; fail=1
 fi
 exit $fail
