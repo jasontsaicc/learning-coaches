@@ -15,11 +15,14 @@ learning-coaches/
 │   └── references/          # Engine reference materials
 └── skills/
     ├── _probe/
-    │   └── SKILL.md         # Temporary probe to validate engine reads (human-triggered)
-    ├── devops-iac-engineer/
-    └── [other coaches to follow]
+    │   └── SKILL.md         # Temporary probe to validate engine reads (removed at Task 8)
+    └── terraform-coach/     # first coach (to follow)
 ```
 
 ## Engine Read Mechanism
 
-Engine read mechanism: PENDING human probe (Task 1 Step 5).
+A coach reads the shared engine via `${CLAUDE_SKILL_DIR}/../../engine/ENGINE.md` (bash
+injection), with markdown link `../../engine/ENGINE.md` as a human-readable backup.
+`${CLAUDE_SKILL_DIR}` is the skill's own directory and resolves regardless of the session
+working directory (per official Claude Code skills docs). `${CLAUDE_PLUGIN_ROOT}` does not
+exist for skills. Local testing: `claude --plugin-dir <repo>`, reload with `/reload-plugins`.
