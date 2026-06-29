@@ -11,6 +11,8 @@ what "pass" means for each phase. See ENGINE.md for the gate mechanics.
 **Pass condition:** The student explains declarative vs. imperative infrastructure
 management without prompting, and correctly states what the state file is for.
 
+**Examiner inputs:** the student's verbatim spoken/written answer to the gate question (no lab artifact for P0).
+
 Specifically, the student must be able to:
 1. Distinguish declarative ("describe what you want") from imperative ("describe what to
    do") without looking at notes.
@@ -32,6 +34,8 @@ necessary?"
 EC2 instance from scratch, plans it, and explains what the state file contains after
 apply — without referring to notes.
 
+**Examiner inputs:** the student's `.tf` files (fenced), the `terraform plan` output, the `terraform state show aws_instance.<name>` output, and the student's verbatim explanation.
+
 Specifically, the student must:
 1. Write the provider block, VPC resource, subnet resource, and EC2 instance resource
    with correct references between them (e.g., `vpc_id = aws_vpc.this.id`).
@@ -51,6 +55,8 @@ Scoring against Tier 1 scorecard; must meet the engine's scorecard pass threshol
 different input variables (e.g., dev and prod CIDRs), and explains the difference
 between a root module and a child module.
 
+**Examiner inputs:** the student's module code (variable and output blocks, fenced) and the two root-module calls with different CIDRs (fenced), plus the verbatim answer to the "why a module not copy-paste" question.
+
 Specifically:
 1. Module has declared `variable` inputs and at least one `output` that the root module
    uses.
@@ -66,6 +72,8 @@ Specifically:
 **Pass condition:** The student designs a remote backend configuration using S3 + DynamoDB
 for an AWS project, explains what the DynamoDB table is for, and explains what happens
 if the lock is lost mid-apply.
+
+**Examiner inputs:** the student's `backend "s3"` block (fenced), and the verbatim answer to the two-engineers-same-second lock question.
 
 Specifically:
 1. Writes a valid `backend "s3"` block with `dynamodb_table` set.
@@ -84,6 +92,8 @@ Specifically:
 dev and prod environments with separate state, and explains how `terraform plan` fits
 into a CI/CD pipeline with a manual approval gate before apply.
 
+**Examiner inputs:** the student's env layout (directory-per-env structure or workspace config, fenced), the described CI pipeline with the plan-review-then-approve gate, and the verbatim answers to the workspaces-vs-directory justification and the non-zero plan exit question.
+
 Specifically:
 1. Chooses between workspaces and directory-per-env and justifies the choice for a
    given scenario (key trade-off: workspaces share backend config; directory-per-env
@@ -100,6 +110,8 @@ Specifically:
 **Pass condition:** The student runs tfsec against a config with at least one known
 misconfiguration, identifies the finding, explains the underlying security risk, and
 writes the remediation in HCL.
+
+**Examiner inputs:** the tfsec finding output (fenced), the remediated HCL, and the verbatim drift explanation.
 
 Additionally:
 1. Explains what drift is and gives a concrete example of how it could appear in a
@@ -119,6 +131,8 @@ Additionally:
 **Pass condition:** The student completes a timed mock session (scope: design a
 production Terraform layout for a standard three-tier web app on AWS) and meets the
 engine's scorecard pass threshold on the Tier 4 scorecard without reference material.
+
+**Examiner inputs:** the completed portfolio layout and the verbatim mock-session answers covering module structure, remote state with locking, CI plan approval, the tfsec security item, and the RDS-replacement blast-radius analysis.
 
 The mock covers:
 - Module structure for the layout.
