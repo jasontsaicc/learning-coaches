@@ -76,7 +76,7 @@ An append-only list. One entry per Interview Q&A (step G) and per Phase Gate att
 
 - `date`
 - `context` — `step G` or `phase gate (phase N, attempt K)`.
-- `score` — `n/total` (the 60% threshold applies to the current tier's total).
+- `score` — `n/total`. For `certifier: coach` rows (step G) the total is the current scorecard tier's dimension count; for `certifier: examiner` rows (Phase Gate) the total is the gate's numbered-criteria count. The 60% threshold applies either way.
 - `top-improvement` — the footer's actionable suggestion.
 - `best-moment` — the footer's real positive moment.
 - `certifier` — `examiner | coach`. Phase Gate entries are `examiner` (issued by the Examiner
@@ -162,7 +162,7 @@ Each entry:
 - `date`
 - `phase` — the phase the gate certified.
 - `verdict` — `pass | fail`.
-- `score` — `n/total` against the tier scorecard at the time.
+- `score` — `n/total` numbered criteria met, mirroring the corresponding `certifier: examiner` row in scorecard history (section 6).
 - `attempt` — which attempt (1-3) produced this verdict.
 
 The ledger is read by the Phase Gate third-attempt diagnosis and by Weekly Review trend
