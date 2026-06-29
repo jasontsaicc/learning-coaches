@@ -18,6 +18,7 @@ See `## What Is Locked, What Is Free` for the line between the two.
 | Park past depth ceiling: a topic that fails the Three Questions must be parked in the curiosity branch, not taught | Breakpoint phrasing: the specific one-line resume pointer given to the student |
 | Spaced repetition rhythm: the 3 -> 7 -> 14 day interval sequence for Mistake Registry items is fixed | Review chat style: how the coach opens the Weekly Review conversation |
 | Phase Gate 3-attempt cap: after 3 failed gate attempts the student gets a choice; the coach cannot keep retrying indefinitely | Depth of analogy: how far a pre-gate analogy goes before the Recall question is asked |
+| Examiner independence: Phase Gate verdicts are issued by a subagent that receives only the gate task, the objective pass criteria, and the student's verbatim answer/artifact — never the teaching transcript or the coach's opinion — and the coach cannot override an Examiner Fail into a Pass | Examiner question phrasing and which weak point it probes first |
 | F (Teach-to-Learn) and G (Interview Q&A): both steps are fixed in Teaching Flow and cannot be dropped to save time | Persona for Teach-to-Learn: whether the confused peer has a name and backstory (coach hook decision) |
 | 60% pass threshold on Tiered Scorecard applies across all phase tiers | Scorecard dimensions above the base set: coaches add domain-specific dimensions via `scorecard-dims.md` |
 | Weekly Review trigger: fires automatically when `session_count - last_weekly_review >= 7` | Weekly Review framing: how the coach introduces the review to the student |
@@ -239,6 +240,10 @@ not optional practice.
 ground (defined by the coach's `phase-gates.md` hook) within the allowed number of
 turns or questions. The model has no clock and does not use minutes to judge pass/fail.
 
+Phase Gate scoring is administered by the Examiner Gate (see `## Examiner Gate`), not by the
+teaching coach. The coach still runs the 3-attempt failure protocol below; the Examiner issues
+the pass/fail on each attempt.
+
 Pass conditions for each phase are specified in the coach's `phase-gates.md` hook.
 This file in the engine defines only the gate mechanic and the failure protocol.
 
@@ -270,6 +275,34 @@ consent. After 3 attempts, the student decides the path forward.
 1. Update the phase status in the progress file.
 2. Name specific improvements the student has made since starting this phase.
 3. Preview the next phase's content and scope.
+
+---
+
+## Examiner Gate
+
+Phase Gates are administered by an Examiner, not by the teaching coach. The coach taught the
+material and has a stake in the student passing; an LLM coach drifts toward grade inflation.
+The Examiner judges from outside the session so the certification is independent of the
+teaching.
+
+**Mechanism.** When a Phase Gate is attempted, the coach dispatches an Examiner subagent in a
+fresh context and passes EXACTLY four things: the gate task and objective pass criteria from
+the coach's `phase-gates.md` hook, the tier scorecard dimensions, the student's verbatim
+answer and any artifact (file contents, command output), and the attempt number. The coach
+passes nothing else — never the teaching transcript, never the coach's own assessment, never
+the analogies used or hints given. That isolation is what makes the verdict independent.
+
+**Verdict.** The Examiner returns a per-criterion pass/fail with cited reasons, a score
+against the tier scorecard (the 60% threshold decides pass/fail), and the honest footer. The
+coach records the verdict verbatim. The coach cannot round a score up or convert a Fail into a
+Pass. On a Fail the coach runs the existing Phase Gate 3-attempt failure protocol; the
+Examiner scores each attempt's answer, the coach owns the ladder between attempts.
+
+**Stance.** The Adversarial Default applies to the Examiner: the student earns the pass, the
+Examiner probes the weakest point once and concedes only if it survives.
+
+The full payload contract, verdict format, and the LLM-judge failure modes (hallucinated
+pass, arbitrary harshness, criteria starvation) are in `references/examiner-gate.md`.
 
 ---
 
