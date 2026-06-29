@@ -7,6 +7,7 @@ required=(
   "## Routing"
   "## Teaching Flow (A to H)"
   "## Feynman Gate"
+  "## Adversarial Default"
   "## Failure Escalation"
   "## Phase Gates"
   "## Tiered Scorecard"
@@ -28,6 +29,17 @@ done
 grep -qF "3 -> 7 -> 14" "$ENGINE" || { echo "MISSING: spaced repetition rhythm 3 -> 7 -> 14"; fail=1; }
 # guard against the pass threshold drifting
 grep -qF "60%" "$ENGINE" || { echo "MISSING: 60% pass threshold"; fail=1; }
+# guard the anti-sycophancy invariant against being gutted
+grep -qF "Refutation-first" "$ENGINE" || { echo "MISSING: Refutation-first LOCK row"; fail=1; }
+grep -qiF "burden of proof" "$ENGINE" || { echo "MISSING: Adversarial Default burden-of-proof rule"; fail=1; }
+# guard the engine-owned progress schema (shared by every coach)
+SCHEMA="engine/PROGRESS-SCHEMA.md"
+[ -s "$SCHEMA" ] || { echo "MISSING or EMPTY: $SCHEMA"; fail=1; }
+grep -qiE 'kubernetes|k8s|kube-proxy|system design interview|terraform' "$SCHEMA" \
+  && { echo "DOMAIN LEAK in $SCHEMA"; fail=1; }
+for s in "Mistake Registry" "Spaced-repetition" "breakpoint" "Curiosity branch" "Scorecard history"; do
+  grep -qiF "$s" "$SCHEMA" || { echo "MISSING in $SCHEMA: $s"; fail=1; }
+done
 refs=(
   engine/references/feynman-gate.md
   engine/references/teach-to-learn.md
@@ -35,6 +47,7 @@ refs=(
   engine/references/gap-mode.md
   engine/references/scorecard-frame.md
   engine/references/weekly-review.md
+  engine/references/anti-sycophancy.md
 )
 for f in "${refs[@]}"; do
   [ -s "$f" ] || { echo "MISSING or EMPTY: $f"; fail=1; }

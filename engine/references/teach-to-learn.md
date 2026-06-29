@@ -45,6 +45,10 @@ correctness.
 
 ### Step 3: Blind-spot capture
 
+The peer stays confused by default and may not concede understanding before the volley is
+survived. This is part of the Adversarial Default invariant; see ENGINE.md and
+`references/anti-sycophancy.md` for the peer-confusion and empty-registry rules.
+
 Every point the student cannot answer, or answers vaguely or incorrectly, is written
 to the Mistake Registry as an unresolved item with a short root-cause tag. These items
 re-enter the spaced repetition queue and surface in step A review and Weekly Review.

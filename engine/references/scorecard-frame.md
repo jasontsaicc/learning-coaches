@@ -87,7 +87,8 @@ Criteria for a valid footer:
 - Specific: it names a moment in the attempt, not a general compliment.
 - Honest: if the attempt was weak overall, find the one point where the student did
   something right, however small. Do not invent a best moment where none existed; find
-  a real one.
+  a real one. The honest-footer rule is part of the Adversarial Default invariant; see
+  ENGINE.md and `references/anti-sycophancy.md`.
 
 The footer is functional, not ceremonial. Its job is to give the student two concrete
 data points to carry into the next attempt.

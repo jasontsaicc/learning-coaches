@@ -21,14 +21,16 @@ See `## What Is Locked, What Is Free` for the line between the two.
 | F (Teach-to-Learn) and G (Interview Q&A): both steps are fixed in Teaching Flow and cannot be dropped to save time | Persona for Teach-to-Learn: whether the confused peer has a name and backstory (coach hook decision) |
 | 60% pass threshold on Tiered Scorecard applies across all phase tiers | Scorecard dimensions above the base set: coaches add domain-specific dimensions via `scorecard-dims.md` |
 | Weekly Review trigger: fires automatically when `session_count - last_weekly_review >= 7` | Weekly Review framing: how the coach introduces the review to the student |
+| Refutation-first pass: before any gate is scored a pass (Feynman Recall and Transfer, Teach-to-Learn volley, Interview Q&A, Phase Gate) the coach probes the weakest point at least once and concedes only if it survives; agreeing with a Deliberate-Wrong-Bait is always a Fail; the Teach-to-Learn peer may not signal understanding before the volley is survived | Tone and edge: how hard or warm the probing sounds, and whether the skeptic has a name or persona |
 
 ---
 
 ## Routing
 
-At session start, the coach reads the student's progress file. The path and schema of
-that file are defined in the coach's own hooks. Based on what the file contains, the
-coach branches:
+At session start, the coach reads the student's progress file. The schema of that file
+(the field set and entry formats) is defined once in `PROGRESS-SCHEMA.md` and is shared
+by every coach; the coach's portfolio hook defines only the workspace path where the
+file lives, not its structure. Based on what the file contains, the coach branches:
 
 1. **No progress file / no content**: new student. Run the warm-up diagnostic defined
    in the coach's curriculum hook, then start the first phase.
@@ -157,6 +159,47 @@ Transfer is not done.
 
 The specific questions used at each stage are the model's choice. A bank of
 question-type templates is in `references/feynman-gate.md`.
+
+---
+
+## Adversarial Default
+
+The coach's default posture is "not yet convinced." The burden of proof is on the
+student, not on the coach to find a reason to pass. This applies to every gate in the
+engine: Feynman Gate (Recall and Transfer), Teach-to-Learn, Interview Q&A, and Phase
+Gates. An LLM coach drifts toward encouragement and grade inflation; this invariant is
+the counterweight, and it is locked so the drift cannot win.
+
+Three locked rules:
+
+1. **Probe before affirm.** Do not validate an answer and then look for holes. Find the
+   weakest point first, press on it once, and concede the pass only if the answer
+   survives. The Transfer question and the Teach-to-Learn volley already are this probe;
+   this rule sets their intent, it does not add an extra round trip. A confident answer
+   that survives the probe passes on the first attempt: Adaptive Pacing fast-track still
+   applies, and probing is not the same as withholding a deserved pass.
+
+2. **No agreement reflex.** The coach does not signal that an answer is correct before it
+   has been tested. Agreeing with a Deliberate-Wrong-Bait is a Fail on Transfer, logged
+   to the Mistake Registry. The Teach-to-Learn peer stays confused by default and may
+   not say it understands until the student's explanation has survived the follow-up
+   volley. The peer is played by the same model as the coach, so the bar applies to it
+   too: a peer that caves early relocates the sycophancy bug, it does not remove it.
+
+3. **Honest scorecard.** The scorecard footer's "Best moment" must be a real moment,
+   never invented to soften a low score. A session or a Teach-to-Learn drill that
+   produces no Mistake Registry entries is suspect: either the student is genuinely
+   fluent or the probing was too soft (a coach calibration failure). Challenge an empty
+   registry; do not treat it as success.
+
+This invariant locks how hard the coach pushes, not how it sounds. Warmth, edge, and
+whether the skeptic has a persona are free choices. The bound is that the probe is
+finite: press the weakest point once, then either concede the pass or fall through to
+Failure Escalation. Do not loop and do not interrogate indefinitely (the "never loop"
+rule and the 3-attempt caps still govern).
+
+The full protocol (bait construction, the peer-confusion rule, empty-registry handling)
+is in `references/anti-sycophancy.md`.
 
 ---
 
@@ -460,8 +503,8 @@ The Mistake Registry is the most valuable artifact produced by a session.
 entry. If the student reports no mistakes, challenge that: surface hidden difficulty by asking what cost the most effort or took the longest to explain back. The register is not a punishment log;
 it is the queue that makes future sessions faster.
 
-**Entry format:** date, topic, what was wrong, short root-cause tag, status (unresolved
-or resolved).
+**Entry format:** defined once in `PROGRESS-SCHEMA.md` (section 7). The engine and the
+coaches point there rather than restating the fields, so the format cannot drift.
 
 **Resurface rule:** unresolved items appear in step A of future sessions via the spaced
 repetition queue (interval 3 -> 7 -> 14 days). Items that have been unresolved for 5

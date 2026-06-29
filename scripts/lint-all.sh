@@ -13,4 +13,12 @@ for d in skills/*/; do
 done
 echo "== terraform lab =="
 ./skills/terraform-coach/scripts/lab-iac.test.sh >/dev/null && echo "lab-iac OK"
+echo "== templates =="
+tmpl_fail=0
+for t in templates/coach/SKILL.md.tmpl \
+         templates/coach/references/{north-star,curriculum,teaching-elements,scorecard-dims,phase-gates,portfolio,lab-manager,language,narrative}.md.tmpl; do
+  [ -s "$t" ] || { echo "MISSING template: $t"; tmpl_fail=1; }
+  grep -qF "TODO:" "$t" || { echo "template lost its TODO sentinels: $t"; tmpl_fail=1; }
+done
+[ "$tmpl_fail" -eq 0 ] && echo "templates OK" || exit 1
 echo "ALL PASS"

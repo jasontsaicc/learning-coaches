@@ -13,7 +13,9 @@ learning-coaches/
 ├── engine/
 │   ├── ENGINE.md                            # Shared teaching engine
 │   ├── PLUGIN-INTERFACE.md                  # Coach hook contract
+│   ├── PROGRESS-SCHEMA.md                   # Engine-owned progress-file schema (shared by all coaches)
 │   └── references/                          # Engine reference materials
+│       ├── anti-sycophancy.md
 │       ├── feynman-gate.md
 │       ├── gap-mode.md
 │       ├── scorecard-frame.md
@@ -23,7 +25,12 @@ learning-coaches/
 ├── scripts/
 │   ├── lint-all.sh
 │   ├── lint-coach.sh
-│   └── lint-engine.sh
+│   ├── lint-engine.sh
+│   └── new-coach.sh                         # Scaffold a new coach from templates/
+├── templates/
+│   └── coach/                               # Fill-in-the-blank hook templates (TODO markers)
+│       ├── SKILL.md.tmpl
+│       └── references/*.md.tmpl
 └── skills/
     └── terraform-coach/
         ├── SKILL.md

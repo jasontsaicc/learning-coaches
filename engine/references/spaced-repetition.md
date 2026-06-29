@@ -11,8 +11,8 @@ pulls items.
 ### Mistake Registry (required in every coach)
 
 Every wrong answer, misconception, and point of confusion is captured as an unresolved
-item. The entry format is: date, topic, what was wrong, short root-cause tag, status
-(unresolved or resolved), next review date.
+item. The entry format is defined once in `PROGRESS-SCHEMA.md` (section 7); this
+reference points there rather than restating the fields, so the format cannot drift.
 
 The Mistake Registry is the most important artifact produced by a session. It converts
 errors into scheduled practice. A registry with no entries is suspect: the coach should

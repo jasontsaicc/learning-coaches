@@ -88,6 +88,9 @@ false?"
 
 ### Deliberate-Wrong-Bait
 
+This shape is part of the Adversarial Default invariant; the full bait-construction and
+scoring rules are in `references/anti-sycophancy.md`.
+
 Template: "[Plausible but broken approach]... that would work, right?"
 
 Intent: the student must catch the error and explain why it fails. This tests the

@@ -9,10 +9,12 @@ Progress files, registries, and in-progress work live in:
 ```
 
 This directory is not a public repo. It holds:
-- `progress.md`: the engine's progress file (phase status, scorecard history, Mistake
-  Registry, spaced repetition queue, breakpoints).
-- `term-registry.md`: the student's personal term registry, built incrementally from
-  the term cards in `teaching-elements.md`.
+- `progress.md`: the engine's progress file. Its schema is engine-owned and defined in
+  `engine/PROGRESS-SCHEMA.md`; this coach does not redefine it.
+- `term-registry.md`: this coach's domain registry, built incrementally from the term
+  cards in `teaching-elements.md`. It reuses the registry fields from
+  `PROGRESS-SCHEMA.md` section 7 (interval, next-review-date, status) plus the term and
+  its definition.
 - Phase working directories (`p0/`, `p1/`, etc.): scratch space for lab exercises
   that have not yet been promoted to the portfolio.
 

@@ -9,6 +9,10 @@ A coach is a directory under `skills/<coach-name>/` with a thin `SKILL.md` entry
 point and a `references/` folder containing hook files. The engine reads the hook
 files to fill its steps with domain content. The coach does not re-implement mechanics.
 
+The per-student progress file is engine-owned: its schema is defined once in
+`PROGRESS-SCHEMA.md`. A coach must not redefine its fields; it supplies only the
+workspace path (via the portfolio hook) and any optional domain registries.
+
 ---
 
 ## Required vs Optional
@@ -240,12 +244,19 @@ adds character details only.
 end of each phase and the workspace directory where they live. The engine checks these
 during Weekly Review step 6 (artifact audit).
 
+This hook also names the workspace path for the progress file, but it does NOT define
+the progress file's schema. That schema is engine-owned and lives in
+`PROGRESS-SCHEMA.md`; the coach points there and only adds optional domain registries
+(which reuse the schema's registry format).
+
 **Contents:**
 - Per-phase artifact list: what the student should have written, built, or produced.
 - Workspace directory name: the path (relative to the student's own workspace root)
-  where the coach expects artifacts to live.
+  where the coach expects artifacts and the `progress.md` file to live.
 - Artifact format notes (file extension, naming convention, etc.) if the engine
   needs to locate them automatically.
+- Optional domain registries the coach declares (term, command, etc.), each reusing the
+  registry fields from `PROGRESS-SCHEMA.md` section 7.
 
 **Examples:**
 
@@ -290,9 +301,15 @@ Read hooks:
 
 ## Adding a New Coach
 
-1. Create `skills/<coach-name>/references/`.
-2. Write all required hooks (1-6, 9). Add hook 4 if the domain has hands-on execution.
-3. Add hooks 7 and 8 if the defaults do not fit.
-4. Write a thin `SKILL.md` that reads the engine and the hooks.
-5. Run `./scripts/lint-coach.sh <coach-name>` and fix any reported issues before
-   committing.
+1. Scaffold the skeleton: `./scripts/new-coach.sh <coach-name>` (add `--no-lab` for a
+   conceptual domain, `--with-language` / `--with-narrative` for the optional hooks).
+   This stamps `SKILL.md` and the hook files from `templates/coach/`, pre-filled with the
+   required structure and `<!-- TODO: -->` markers.
+2. Fill every TODO marker with domain content. The engine owns all mechanics and the
+   progress-file schema (`PROGRESS-SCHEMA.md`); the hooks supply only domain content.
+3. Run `./scripts/lint-coach.sh <coach-name>`. It fails while any TODO remains and checks
+   that each hook has its required structure, so a scaffolded-but-unfilled coach cannot
+   pass. Fix any reported issues before committing.
+
+Doing it by hand instead of scaffolding is fine; the lint enforces the same contract
+either way.
