@@ -79,6 +79,9 @@ An append-only list. One entry per Interview Q&A (step G) and per Phase Gate att
 - `score` — `n/total` (the 60% threshold applies to the current tier's total).
 - `top-improvement` — the footer's actionable suggestion.
 - `best-moment` — the footer's real positive moment.
+- `certifier` — `examiner | coach`. Phase Gate entries are `examiner` (issued by the Examiner
+  Gate); formative step-G scores are `coach`. Lets trend tracking separate certified outcomes
+  from in-session formative scores.
 
 The history is the longitudinal signal used by the Phase Gate third-attempt diagnosis and
 by trend tracking. Never overwrite past entries; append.
@@ -148,6 +151,27 @@ the registry and its payload.
 
 ---
 
+## 11. Examiner ledger
+
+An append-only outcome record, one entry per Examiner Gate verdict. This is the longitudinal
+signal that answers "is the student actually getting stronger" independent of the teaching
+session. Never overwrite; append.
+
+Each entry:
+
+- `date`
+- `phase` — the phase the gate certified.
+- `verdict` — `pass | fail`.
+- `score` — `n/total` against the tier scorecard at the time.
+- `attempt` — which attempt (1-3) produced this verdict.
+
+The ledger is read by the Phase Gate third-attempt diagnosis and by Weekly Review trend
+tracking. Unlike per-topic mastery (self-reported, §5), the ledger records only
+Examiner-issued outcomes, so a rising mastery level that is not backed by ledger passes is a
+calibration flag.
+
+---
+
 ## Example skeleton
 
 Every coach serializes to the same shape. A minimal `progress.md`:
@@ -173,7 +197,10 @@ Every coach serializes to the same shape. A minimal `progress.md`:
 - topic-b: low (s3)
 
 ## Scorecard history
-- 2026-06-27 | step G | 4/6 | name the trade-off before proposing | clear failure-mode walkthrough
+- 2026-06-27 | step G | 4/6 | name the trade-off before proposing | clear failure-mode walkthrough | coach
+
+## Examiner ledger
+- 2026-06-28 | Phase 1 | pass | 5/6 | 2
 
 ## Mistake Registry
 - 2026-06-27 | topic-b | conflated X with Y | missing-boundary-condition | unresolved | 3 | 2026-06-30 | 1
