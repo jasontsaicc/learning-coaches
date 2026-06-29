@@ -14,29 +14,26 @@
 | **Current phase** | Phase 0 |
 | **Current pattern** | Stack |
 | **Language** | Python |
-| **Session count** | 11 |
+| **Session count** | 13 |
 | **Last weekly review** | — |
-| **Problems solved** | 10 / 136 |
+| **Problems solved** | 11 / 136 |
 
 ---
 
 ## Current Session (Breakpoint)
 
-> ✅ Session 11 完成 (2026-06-10) — Evaluate Reverse Polish Notation (#150) 拿下
-> Pattern: **Stack** (Phase 0 最後一個 pattern, Phase 0 Gate 前)
-> Problem: Evaluate RPN (#150) Medium — Stack 第 2 題, **Drill 冷寫** ✅ DONE
+> ✅ Session 13 完成 (2026-06-29) — Daily Temperatures (#739) 拿下，**Stack 升 🟢**
+> Pattern: **Stack → Monotonic Stack** (Phase 0 最後一個 pattern, Phase 0 Gate 前)
+> Problem: Daily Temperatures (#739) Medium — Stack 第 4 題
 >
-> ✅ Drill 冷寫全程自己寫 (workspace/18)，5/5 tests 全綠。4 個 bug 全自己 debug:
->    少 `)` (括號成對) / 忘 return (第4次, 症狀=None) / return 縮排進迴圈 (只處理第一個 token) / `//` floor vs `int(l/r)` truncate (除法向0取整地雷)
-> ✅ 複雜度自推 (修正後): Time O(n) / Space O(n) — 教訓「複雜度 = 做幾次 × 每次多貴」, 學生原本漏掉「做幾次=n」
-> ✅ Feynman Gate **全過**:
->    - Recall: 進去是(左,右)、FILO 出來鏡像成(右,左) → 先 pop = 右運算元
->    - 設計選擇: 白名單判運算子 (有限固定) 勝過黑名單 isdigit (負數 "-132".isdigit()=False 會誤判)
->    - 變題 (input 不保證合法): ["1","+"] 第二次 pop 空 stack → IndexError; 面試要主動講假設 / len>=2 檢查
+> ✅ Brute force O(n²) 已綠 (workspace/20)；引導發現「重複往前掃同一段小的」浪費 → 翻轉成 monotonic stack
+> ✅ 8 格動畫親手跑完 (i=5 踢 69/71、i=6 76 清掉 75/72)，理解「等待區遞減 = 中間那串小的在排隊」
+> ✅ 第一次寫 (workspace/20) 5 個語法洞 (is Not / .top / 缺冒號 / answes 手滑 / append 縮排進 while)，**邏輯零錯**
+> ✅ **Cold solve 過** (workspace/20b)：整套從零默出 100% 正確，唯一 1 字元手滑 `stack, append` (逗點⇄點)，**自己讀 NameError 抓出來修好** → Stack 升 🟢 達標
 >
-> ⏭️ Next: Stack 升 🟢 條件 = 冷做 #20 skeleton 0-bug + 一題 Cold Solve; 或續做 Stack 第 3 題 (Min Stack #155 / Daily Temperatures #739)
->
-> ⏸️ Weekly Review 嚴重到期 (≥11 session 未做)，建議下次優先補
+> ⏭️ Next: Phase 0 Gate (4 大 pattern 都摸過, Stack 是 Phase 0 最後 pattern)；或補 Feynman 債
+> ⏸️ 未收尾: #739 Feynman O(n) 攤還題 (這次跳過沒答)
+> ⏸️ Weekly Review 嚴重到期 (≥13 session 未做)，建議下次優先補
 > ⏸️ Parked Feynman 債務 (Transfer Q2/Q3 未收尾): #239 Sliding Window Maximum, #42 Trapping Rain Water, #11 Container With Most Water
 > ⏸️ Queued: Sliding Window 基礎題 #121 / #3 (workspace/14 有 brute) / #567 (workspace/15 到 Step E)
 
@@ -49,7 +46,7 @@
 | Arrays & Hashing | 5/11 | 🟡 | — | Frequency Counter + Bucket Sort + Length-Prefix + HashSet per row/col/box + Sequence Start Detection learned. #238 (Product of Array Except Self) skipped, revisit later |
 | Two Pointers | 2.5/5 | 🟡 | — | + #42 Trapping Rain Water (Hard) 三層算法全綠 (Brute/DP/Two Pointers 18/18) — 加分: 自抓 6 個 bug 全修對；扣分: Q2/Q3 Feynman 沒自答 (看答案)。升 🟢 條件: Day 3 完成 F + G |
 | Sliding Window | 1/5 | 🟡 | — | #239 Sliding Window Maximum (Hard, jump-to 跳關做最難的第 6 題): Brute O(n·k) + Optimal Monotonic Deque O(n) 都親手寫過 12/12 tests; Feynman 只過 Q1 (O(n) amortized 講得出); Q2/Q3 + Mock 待補。基礎 5 題 (#121, #3, #424, #567...) 尚未做 |
-| Stack | 3/6 | 🟡 | Phase 0 Gate | #20 ✅ + #150 ✅ + #155 Min Stack ✅ (分享會速成，自己寫出 [val,min] 雙層結構，Feynman 一句話通過). 升 🟢 條件: 冷做 #20 skeleton 0-bug + 一題 Cold Solve |
+| Stack | 4/6 | 🟢 | Phase 0 Gate | #20 ✅ + #150 ✅ + #155 ✅ + #739 Daily Temperatures ✅ (Monotonic Stack). 🟢 達標: #739 cold solve 從零默出 0 邏輯錯, 自讀 NameError 修掉唯一字元手滑. Feynman O(n) 攤還待補 |
 | Binary Search | 0/6 | ⬜ | — | |
 | Linked List | 0/9 | ⬜ | — | |
 | Trees | 0/13 | ⬜ | — | |
@@ -73,6 +70,7 @@
 
 | Session | Problem | Difficulty | Pattern | Solved? | Brute | Optimal | Notes |
 |---------|---------|-----------|---------|---------|-------|---------|-------|
+| 13 | Daily Temperatures (739) | Medium | Stack (Monotonic) | ✅ | O(n²) / O(1) | **O(n) / O(n)** ⭐ | Brute (workspace/20) + Monotonic Stack 都寫；引導發現重複掃描→翻轉；8 格動畫親手跑；cold solve (workspace/20b) 從零默 100% 對, 唯一 `stack, append` 逗點⇄點手滑自讀 NameError 修好; **Stack 升 🟢**; Feynman O(n) 攤還跳過待補 |
 | 12 | Min Stack (155) | Medium | Stack | ✅ | — | O(1) all ops / O(n) space | 分享會前速成；自己寫出完整 code；理解 [val,min] 雙層結構、self、stack[-1][0/1]；Feynman: 每個元素進來時記錄當下 min |
 | 1 | Valid Anagram (242) | Easy | Arrays & Hashing | ✅ | O(n log n) / O(n) | O(n) / O(1) | Feynman Gate pass, Drill 3/3 |
 | 2 | Top K Frequent Elements (347) | Medium | Arrays & Hashing | ✅ | O(n log n) / O(n) | O(n) / O(n) | Feynman Gate pass, Mock skipped (no time), jump-to |
@@ -150,6 +148,13 @@
 | 11 | Evaluate RPN | Stack | 忘記 `return`（**第 4 次**, 同 Palindrome×2 + Container）— 症狀: 答案全 `None` | 🟡 Recurring - 反射: 看到 None 先查 return |
 | 11 | Evaluate RPN | Stack | `return stack.pop()` 縮排進 `for` 迴圈內 → 只處理第一個 token 就回傳 | ✅ Resolved (S11) - **同 #42 縮排決定 block**; 症狀「只處理第一元素」先查縮排 |
 | 11 | Evaluate RPN | Stack | 除法用 `l // r`（floor 向負無窮）→ 負數錯; 正解 `int(l / r)`（truncate 向 0） | ✅ Resolved (S11) - **新坑**: `//`≠砍小數, 是 floor; 面試常考 |
+| 13 | Daily Temperatures | Stack (Monotonic) | `while stack is Not` — `is Not` 非 Python 語法, 空 list 本身 falsy | ✅ Resolved (S13) - 慣用語 `while stack:` |
+| 13 | Daily Temperatures | Stack (Monotonic) | `stack.top` — Python list 沒有 `.top`; 頂端溫度要 `temperatures[stack[-1]]` | ✅ Resolved (S13) - 存 index 回查溫度 |
+| 13 | Daily Temperatures | Stack (Monotonic) | `stack.append(i)` 縮排進 while → 每 pop 一次就 append, stack 清不完 | ✅ Resolved (S13) - append 與 while 平行 (這天最後才排隊) |
+| 13 | Daily Temperatures | Stack (Monotonic) | `answes[prev]` 變數名手滑 | 🟡 Recurring - 同 num/nums, paris, window/windows 家族 |
+| 13 | Daily Temperatures | Stack (Monotonic) | cold solve `stack, append(i)` 逗點⇄點 → NameError; **自讀錯誤訊息抓出來修好** | 🟡 Recurring - 字元精準度; 但 debug 反射 ✅ 養成中 |
+| 13 | Daily Temperatures | Stack (Monotonic) | Yuki 拷問盲點: 把「while 不執行」誤歸因成「ans 初始化=0」(真因是溫度條件為假, 與答案值無關); 攤還 O(n) 需動畫才懂 | 🟡 Re-test (+3d) - 抽問: ① while條件 vs 答案值是兩條獨立線 ② 攤還「每元素一生 pop 一次 → 總 pop ≤ n」 |
+| 13 | Daily Temperatures | Stack (Monotonic) | Yuki spot-my-bug: 縮排雷達對 (聞到 return 區塊有問題) 但**指錯行** — 指 `stack.append(i)`(其實對的), 真兇是 `return answer` 卡在 for 內 | 🟡 Re-test (+3d) - 抓蟲下刀要精準到「行」; 方法: 每行問「這動作該做幾次」每圈的留 for 內、只做一次的踢出去 |
 
 ---
 
@@ -169,6 +174,7 @@
 | Monotonic Deque (Sliding Window) | deque 存「可能當 max 的候選 index」呈遞減排列；新元素進場時把右邊比它小的 pop 掉、過期的從左 popleft，最左永遠是當前窗戶 max；每元素一生進出各一次 → O(n) 攤還 |
 | Stack 配對 (Stack) | 巢狀結構「最後開的最先關」= FILO；開括號 push、閉括號比對 stack 頂端配不配 (不配/空→False) 再 pop，掃完 stack 空才有效；計數器只管數量會漏型別+順序 (`([)]`)，所以要 Stack — O(n) 時間 O(n) 空間 |
 | Stack 後綴求值 / RPN (Stack) | 數字 push 進 stack、運算子來就 pop 兩個 (先 pop=右、後 pop=左, FILO 鏡像) 算完 push 回去，掃完 stack 剩一個=答案；判運算子用白名單 (4 個固定) 別用 isdigit (負數會誤判)；除法 `int(l/r)` 向 0 取整非 `//` — O(n) 時間 O(n) 空間 |
+| Monotonic Stack (Stack) | 維護「遞減的等待區」存還沒等到更大值的 index；新元素把頂端比它小的全 pop 掉並結算 (距離 = i - prev) 再 push 自己；存 index 不存值 (要算距離, 用 `temperatures[stack[-1]]` 回查)；每個 index 一進一出 → **O(n) 攤還** (同 #239 deque 論證) — O(n) 時間 O(n) 空間 |
 
 ---
 
