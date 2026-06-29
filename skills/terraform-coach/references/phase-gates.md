@@ -55,7 +55,7 @@ Scoring against Tier 1 scorecard; must meet the engine's scorecard pass threshol
 different input variables (e.g., dev and prod CIDRs), and explains the difference
 between a root module and a child module.
 
-**Examiner inputs:** the student's module code (variable and output blocks, fenced) and the two root-module calls with different CIDRs (fenced), plus the verbatim answer to the "why a module not copy-paste" question.
+**Examiner inputs:** the student's module code (variable and output blocks, fenced) and the two root-module calls with different CIDRs (fenced), plus the verbatim answer to the "why a module not copy-paste" question, and the verbatim answer to what `terraform init` does when a new local module path is added.
 
 Specifically:
 1. Module has declared `variable` inputs and at least one `output` that the root module
