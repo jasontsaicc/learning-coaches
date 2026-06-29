@@ -74,6 +74,35 @@ Rules:
 - Must include at least one operational/production concern
 - This section feeds directly into interview muscle memory
 
+## 🧠 Mind Map (every session — separate file)
+
+> Student preference: a SHORT hand-writable mind map, in ADDITION to the full notes above (does not replace them).
+> Save to `notes/dayXX-topic-mindmap.md`. Goal: student copies it onto paper in 2-3 min to drill memory + practice writing English.
+
+**Format** — HORIZONTAL mind map: center node on the LEFT, branches fan out to the RIGHT. Use box-drawing connectors `┌ ├ └ ─ ┤ │` and arrows `→` / `──→` for flow/cause. Simple English (doubles as English-writing practice — do NOT make it Chinese-dominant). This matches the student's preferred style (see `~/jason/k8s-coach/portfolio/notes/*-diagram.md`).
+
+**Rules:**
+- Center label on the left (mark it `(center)`); 3-6 branches, each one UPPERCASE keyword + 1-3 short leaf lines
+- Box-drawing chars ARE wanted here — they read far cleaner than `+ | >` for hand-copy
+- Use `→` for cause/flow/result inside a leaf
+- Keywords, not sentences — must fit on one notebook page
+- Optional `One line: ...` summary at the bottom
+- Multi-topic / Weekly Review session → one mini mind map per topic
+
+**Example** (Caching):
+
+```
+              ┌─ WHEN ──→ read-heavy + hot keys
+              │
+              ├─ TRADE ─→ +fast / −small, costly, volatile
+  CACHING  ───┤
+  (center)    ├─ SIZE ──→ 80/20 → store hot 20% (1TB → 256GB)
+              │
+              ├─ WRITE ─→ DELETE cache, not update (avoid race)
+              │
+              └─ FAIL ──→ stampede / penetration (Bloom) / avalanche (random TTL)
+```
+
 ## Sync to Progress File
 
 After writing notes:

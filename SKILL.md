@@ -445,6 +445,7 @@ This creates a mental bridge between sessions and trains the student to anticipa
 ### G. Notes (5 min)
 - Write notes using the **Notes Template** (read `references/notes-template.md` when starting Step G)
 - Save to `notes/dayXX-topic.md`
+- **🧠 Mind Map note (every session, separate file) — student preference:** in addition to the full notes, also produce a SHORT hand-writable mind map and save to `notes/dayXX-topic-mindmap.md`. Keep the full notes too — the mind map does NOT replace them. Format + rules in the `🧠 Mind Map` section of `references/notes-template.md`: central topic + 3-6 radial branches, few words each, simple English, hand-write-friendly ASCII (`+` `|` `>` only, NO box-drawing/dashes). The point is something the student can copy onto paper in 2-3 minutes to drill memory + practice writing English. On Weekly Review / multi-topic sessions, make one mini mind map per topic covered.
 - **On derivation days:** Must include `🔗 Derivation Insight` section — capture the physical constraint, the student's derivation path (in their own words), and what surprised them. This is what gets reviewed in spaced repetition.
 - **Must include `🔴 My Mistakes & Misconceptions` section** — record every wrong answer, misconception, or point of confusion from the session. If student says "no mistakes" — challenge: "What was the hardest part today? What took you longest to explain back?"
 - **Must include `🎤 How to Say It in Interview` section** — write interview-ready talking points
