@@ -45,7 +45,7 @@ Specifically, the student must:
    state contains fields that were not in the HCL (e.g., private IP, ARN, security
    group defaults assigned by AWS).
 
-Scoring against Tier 1 scorecard; must meet the engine's scorecard pass threshold on the Tier 1 scorecard.
+The gate verdict is scored on the numbered criteria above (60% threshold); the Tier 1 scorecard is the quality lens for the Examiner's footer.
 
 ---
 
@@ -129,8 +129,7 @@ Additionally:
 ## P6 Gate - Interview and Hands-On Sprint
 
 **Pass condition:** The student completes a timed mock session (scope: design a
-production Terraform layout for a standard three-tier web app on AWS) and meets the
-engine's scorecard pass threshold on the Tier 4 scorecard without reference material.
+production Terraform layout for a standard three-tier web app on AWS) and satisfies the mock's required coverage below without reference material (60% threshold); the Tier 4 scorecard is the quality lens for the footer.
 
 **Examiner inputs:** the completed portfolio layout and the verbatim mock-session answers covering module structure, remote state with locking, CI plan approval, the tfsec security item, and the RDS-replacement blast-radius analysis.
 

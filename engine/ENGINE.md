@@ -292,11 +292,7 @@ answer and any artifact (file contents, command output), and the attempt number.
 passes nothing else — never the teaching transcript, never the coach's own assessment, never
 the analogies used or hints given. That isolation is what makes the verdict independent.
 
-**Verdict.** The Examiner returns a per-criterion pass/fail with cited reasons, a score
-against the tier scorecard (the 60% threshold decides pass/fail), and the honest footer. The
-coach records the verdict verbatim. The coach cannot round a score up or convert a Fail into a
-Pass. On a Fail the coach runs the existing Phase Gate 3-attempt failure protocol; the
-Examiner scores each attempt's answer, the coach owns the ladder between attempts.
+**Verdict.** The Examiner scores the answer against the gate's numbered objective criteria (the coach's `phase-gates.md` "Specifically" list): the score is `n/total` criteria met, and the engine's 60% threshold decides pass/fail. Where the gate names a scorecard tier, that tier is the quality lens for the footer, not a second denominator. The Examiner returns a per-criterion pass/fail with cited reasons plus the honest footer. The coach records the verdict verbatim: it appends the verdict to the Examiner ledger (`PROGRESS-SCHEMA.md` section 11) and, for a Phase Gate, also records the score in scorecard history (section 6) with `certifier` set to `examiner`. The coach cannot round a score up or convert a Fail into a Pass. On a Fail the coach runs the existing Phase Gate 3-attempt failure protocol; the Examiner scores each attempt's answer, the coach owns the ladder between attempts.
 
 **Stance.** The Adversarial Default applies to the Examiner: the student earns the pass, the
 Examiner probes the weakest point once and concedes only if it survives.

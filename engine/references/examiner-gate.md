@@ -20,7 +20,7 @@ The Examiner dispatch prompt contains EXACTLY these four parts and nothing else:
 1. **The gate task** — the pass condition and suggested question(s) copied verbatim from the
    coach's `phase-gates.md` hook for the phase under test.
 2. **The objective pass criteria** — the numbered "Specifically, the student must..." list
-   from that same hook, and the tier scorecard dimensions from `scorecard-dims.md`.
+   from that same hook, and, where the gate names a tier, that tier's scorecard dimensions from `scorecard-dims.md` as the quality lens for the footer.
 3. **The student's answer, verbatim** — the student's words, and any artifact they produced,
    fenced and unedited: file contents, command output (e.g. a plan or a status), a written
    explanation. The coach does not summarize or improve it.
@@ -45,8 +45,7 @@ The Examiner returns a structured verdict the coach records without alteration:
 
 - **Per-criterion result** — for each numbered objective criterion: pass / fail + one-line
   reason citing what in the answer satisfied or missed it.
-- **Score** — `n/total` against the tier scorecard; the engine's 60% threshold decides
-  pass/fail. The coach cannot round up.
+- **Score** — `n/total` of the gate's numbered objective criteria met; the engine's 60% threshold decides pass/fail. The coach cannot round up. Where the gate names a scorecard tier, that tier is the quality lens for the footer, not a second denominator.
 - **Footer** — top-improvement (specific, actionable) and best-moment (real, grounded only
   in the answer the Examiner saw; never invented to soften a fail), per `anti-sycophancy.md`.
 

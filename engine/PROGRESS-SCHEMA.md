@@ -170,6 +170,8 @@ tracking. Unlike per-topic mastery (self-reported, §5), the ledger records only
 Examiner-issued outcomes, so a rising mastery level that is not backed by ledger passes is a
 calibration flag.
 
+Each ledger entry mirrors the score of its corresponding `certifier: examiner` row in scorecard history (section 6); section 6 is the full record, section 11 is the outcome projection, and the two scores must agree.
+
 ---
 
 ## Example skeleton
@@ -199,9 +201,6 @@ Every coach serializes to the same shape. A minimal `progress.md`:
 ## Scorecard history
 - 2026-06-27 | step G | 4/6 | name the trade-off before proposing | clear failure-mode walkthrough | coach
 
-## Examiner ledger
-- 2026-06-28 | Phase 1 | pass | 5/6 | 2
-
 ## Mistake Registry
 - 2026-06-27 | topic-b | conflated X with Y | missing-boundary-condition | unresolved | 3 | 2026-06-30 | 1
 
@@ -213,4 +212,7 @@ Every coach serializes to the same shape. A minimal `progress.md`:
 
 ## Domain registries
 (coach-defined; e.g. term registry)
+
+## Examiner ledger
+- 2026-06-28 | Phase 1 | pass | 5/6 | 2
 ```
