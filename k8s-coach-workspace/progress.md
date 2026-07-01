@@ -7,8 +7,8 @@
 |------|------|
 | 目前 phase | **P2a 網路深水區**(P1 已畢業 2026-06-25,P0 2026-06-22)|
 | 目前主題 | **P2a chunk 1 全畢業 ✅(Service/kube-proxy/CoreDNS,含 D段 lab)**。謎題A/B/C + CoreDNS 全 ✅。**謎題B 已雙重封印**:2026-06-28 D段 lab 用 `docker exec <node> iptables-save` 親手追完整鏈(KUBE-SERVICES→KUBE-SVC 機率LB→KUBE-SEP DNAT--to-destination PodIP),worker/worker2 規則一致證去中心化 → 實體鐵證 + F段壓軸無鷹架全鏈 teach-back PASS(昨天崩的「封包先去ClusterIP拿IP」今天親口接對)。**Weekly Review #1 已完成(2026-06-29 session 10)三主題全 PASS**,謎題B 二度無鷹架冷測再 PASS、Gate 徹底結案。**下一步=chunk 2 Ingress** |
-| 上次 session 日期 | 2026-06-29 |
-| session 累計次數 (session_count) | 10 |
+| 上次 session 日期 | 2026-07-01 |
+| session 累計次數 (session_count) | 11 |
 | 上次 Weekly Review (last_weekly_review) | 10 |
 
 ## 診斷結果 (New Student Warm-Up)
@@ -27,7 +27,8 @@
 
 ## 下一步
 
-> 下次繼續(一句話):**P2a chunk 2 Ingress 開講**(chunk 1 Service/kube-proxy/CoreDNS 已全畢業 + Weekly Review #1 二度封印謎題B)。Ingress 從第一性原理切:為什麼有了 Service 還需要 Ingress(L4 vs L7、一個 LB 入口 host/path 分流)、Ingress 物件只是「規則」誰來執行(Ingress Controller=實際的 nginx/traefik Pod)、跟 Service 的接力關係。phase-2a 教材檔仍未建,從第一性原理教。**English Ramp:user 全域已改 70% EN/30% 中(2026-06-28 CLAUDE.md),但學員今天明說「中文佔比多一些」→ 中文為主、術語錨點英文,Say-it-in-English 輕推不硬逼**。EKS P2a 起可進場(terraform 指令由 user 親手跑,命名 `billing-dev-eks-*`)。**⚠️ Weekly Review 已到期(9-0≥7),chunk 1 收完(或下次 A 段)該插一次**。
+> 下次繼續(一句話):**P2a chunk 2 Ingress — 概念(C 段)已打穿,下次直接進 D 段動手 lab**。lab 內容=kind 裝 ingress-nginx controller → 寫一個 Ingress 物件(host/path 規則)→ `curl -H "Host: shop.com" .../api` 實測按 path 分流 → **重點親眼驗證「沒裝 controller 時 apply Ingress 完全沒反應、裝了才會動」**。
+> **session 11 (2026-07-01) 教學紀錄**:走 Service type 階梯把 Ingress 用第一性原理長出來,全程 Feynman 引導他自己推。① A 段抽考:conntrack(英文,概念+映射方向對,但「table full 新 vs 舊」精度掉了→復述問題沒定案,教練直接補「舊連線照常/新連線被 drop」,推 07-04);busybox DNS 排障坑一開始**把 conntrack 誤拉進 NXDOMAIN 題=層級混淆**(DNS 解析層 vs 連線/NAT 層),拆解後守住「先用 FQDN 測→測得到就別重啟 CoreDNS」的操作判斷(推 07-08)。② 中途一度「不太懂」→ 退回更小步、改用 ASCII 圖(NodePort 三痛點視覺化)重帶,恢復。③ **階梯全自己推對**:node IP 是外部唯一摸得到的 → NodePort 複用 kube-proxy DNAT(自答)→ NodePort 痛點(醜網址/單點/port 受限)→ NodePort 真實場景(他問「只有測試?」→補地端 F5/HAProxy、雲上疊在 NodePort 上)→ type:LoadBalancer(他把 provisioner 答成「controller」**其實半對**=cloud-controller reconcile loop 去雲上生 LB,複利回扣 P0)→ 痛點 A(N 服務=N 台 LB×成本)+ 痛點 B(**他自答 L4/NLB 看不到 URL path**=最關鍵一刀)→ Ingress 兩個第一性理由(省 LB + L4→L7)。④ **keystone 誘答 PASS**:「apply Ingress 物件流量就自動分流嗎?」→ 他秒答 No,並從 kube-proxy「寫規則 vs 搬封包」遷移推出執行者=**Ingress Controller (nginx/traefik Pod)**,自己講出 nginx-ingress。定型三合一對照表(kube-proxy/type:LB/Ingress 都是「規則=資料 vs 執行=引擎」同模式)。新術語卡:Ingress Controller(07-04 抽)。**未做 D 段 lab(學員選 b 收工)**。phase-2a 教材檔仍未建,從第一性原理教。**English Ramp:user 全域已改 70% EN/30% 中(2026-06-28 CLAUDE.md),但學員今天明說「中文佔比多一些」→ 中文為主、術語錨點英文,Say-it-in-English 輕推不硬逼**。EKS P2a 起可進場(terraform 指令由 user 親手跑,命名 `billing-dev-eks-*`)。**⚠️ Weekly Review 已到期(9-0≥7),chunk 1 收完(或下次 A 段)該插一次**。
 > ⚠️ **安全鐵律(2026-06-25 現場抓到)**:user 的 prod kubeconfig `KUBECONFIG=/home/ec2-user/.kube/eks/config.yaml` 的 context `eks` 指向公司 PROD `billing-devops-prod-platform`。**本地 kind 的 context 實際叫 `kind-k8s-coach-p0`**(lab-cluster.sh up 自動設成這個,非舊筆記寫的 `kind`)。每次動手 lab 前先 `kubectl config current-context` 確認是 `kind-k8s-coach-p0` 才 apply。**2026-06-28 開 lab 時實測 current-context 為空(此 shell 未載入 prod kubeconfig),起完 kind 後自動指向 `kind-k8s-coach-p0`,已確認安全**。
 > 環境(2026-06-28 重建):舊叢集已不在,用 `bash scripts/lab-cluster.sh up p0` 重新建好,**3 節點全 Ready**(control-plane + worker + worker2),CoreDNS 2 副本 Running。**⚠️ metrics-server 沒了**(隨舊叢集消失),P3 HPA 前要重裝(kind 需 `--kubelet-insecure-tls` 旗標)。無殘留 Pod(乾淨)。lab 檔放 `portfolio/manifests/`。學員偏好自己敲指令,YAML 預設給規格。學員用英文作答時附 `💬 English Polish`;教完流程主動附英文 mind map 供手抄默畫。
 > commit 規則:user 全域禁止任何 trailer/Co-Authored-By,commit message 一行。

@@ -86,4 +86,4 @@
 
 **正確做法:** DNS 解析失敗的排障第一刀 = **先用 FQDN 測一次**,把「伺服器壞 vs 發問端(client/search/工具)壞」二分:FQDN 通 → CoreDNS 沒事,往 client/resolver 查;FQDN 不通 → 才查 CoreDNS。別拿 busybox 測叢集 DNS,用 `nicolaka/netshoot`(正規 dig/nslookup)。絕不因 nslookup 失敗就亂砍/重啟 CoreDNS。
 
-**下次抽考日:** 2026-07-01
+**下次抽考日:** 2026-07-08 (2026-07-01 抽考:一開始把 conntrack 誤拉進 DNS 題=層級混淆,經拆解後守住「全名測得到→CoreDNS 沒壞→別重啟」的操作判斷;為什麼由教練補成完整因果。過,推 +7)
