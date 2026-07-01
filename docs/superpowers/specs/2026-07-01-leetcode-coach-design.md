@@ -92,15 +92,7 @@ Hybrid rule: the first problem of a pattern is taught fully brute-to-optimal (st
 
 Script: `scripts/lab-lc.sh` (leetcode analog of `scripts/lab-iac.sh`).
 
-Per-problem directory layout under the student workspace:
-
-```
-~/leetcode-coach/p1-arrays/two-sum/
-  solution.py        # student writes (or co-writes via fill-in-the-blank)
-  test_two_sum.py    # provided: normal cases + edge cases + one large-N case
-```
-
-`lab-lc.sh <problem-slug>` runs pytest against the problem directory and reports per-case pass/fail plus execution time.
+It operates on the per-problem folder defined in the Portfolio section (`<phase>/<problem-slug>/` holding `solution.py` + `test_<slug>.py`). `lab-lc.sh <problem-slug>` runs pytest against that folder and reports per-case pass/fail plus execution time.
 
 **Complexity tripwire (the key design):** each problem's test file includes a large-N case (for example n = 10^5) with a wall-clock timeout. A brute-force O(n^2) solution passes the small cases but times out on the large-N case and therefore fails. This is the leetcode counterpart of terraform-coach's cost-safety guardrail: it makes "is this actually optimal" objectively testable instead of a coach judgment call, and it removes the sycophancy path where a soft coach waves through a passing-but-brute-force solution.
 
@@ -130,9 +122,24 @@ The engine owns the 3-attempt cap, the failure protocol, and Examiner independen
 
 ## Portfolio (hook 9)
 
-- Workspace directory: `~/leetcode-coach/`.
-- Per-phase artifact: the solved problem directories (`solution.py` files) plus a `patterns.md` playbook where the student writes, in their own words, each pattern's reusable skeleton, the 4-question bridge for it, and when to use it. The playbook is the real pre-interview review artifact and the target of Weekly Review step 6 (artifact audit).
-- `progress.md` also lives here. Its schema is engine-owned (`PROGRESS-SCHEMA.md`); the coach supplies only the path.
+Workspace directory: `~/leetcode-coach/` by default. Following the standalone skill's rule (artifacts are the student's practice data, kept apart from the coach tool), the coach may relocate this to the student's own practice repo; if the location is unclear it asks once and records the chosen path at the top of `progress.md` so later sessions reuse it.
+
+Canonical workspace layout (this is the single source of truth; the Lab-Manager section reuses it):
+
+```
+~/leetcode-coach/
+  progress.md                    # engine-owned schema (PROGRESS-SCHEMA.md); coach supplies only the path
+  patterns.md                    # cross-pattern playbook (portfolio artifact, audited in Weekly Review)
+  p1-arrays/
+    two-sum/
+      solution.py                # the student's solution (or co-written via fill-in-the-blank)
+      test_two_sum.py            # provided tests, incl. the large-N timing case
+      notes.md                   # per-problem notes: the diagram drawn, the code, the red mistakes
+```
+
+- **Solution path:** `~/leetcode-coach/<phase>/<problem-slug>/solution.py`. This is what `lab-lc.sh <problem-slug>` runs and what the Examiner receives.
+- **Notes path:** `~/leetcode-coach/<phase>/<problem-slug>/notes.md`, written in engine step H using the ported `notes-template`. Co-located with the problem so a problem folder is self-contained (diagram + solution + tests + notes together), rather than a separate parallel `notes/` tree.
+- **Per-phase artifact:** the solved problem folders plus a `patterns.md` playbook where the student writes, in their own words, each pattern's reusable skeleton, the 4-question bridge for it, and when to use it. The playbook is the real pre-interview review artifact and the target of Weekly Review step 6 (artifact audit).
 
 ## Optional Hooks
 
