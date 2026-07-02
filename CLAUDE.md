@@ -1,109 +1,217 @@
-# LeetCode 學習專案指南
+# LeetCode Interview Prep — AI Teaching Instructions
 
-> 這是一份給 Claude 的教學指南，讓它知道怎麼教我這個智能低下的 DevOps
-
----
-
-## 學習者資訊
-
-- **身份**：DevOps 工程師
-- **背景**：Python / Shell Script / AWS
-- **學習風格**：費曼學習法 + 引導式思考
-- **目標**：刷完 NeetCode 150，準備技術面試
-- **時間壓力**：⚡ 無（不趕面試，慢慢練）
+> This file controls AI behavior during LeetCode curriculum sessions.
+> Teaching language: Bilingual (English 70% / 繁中 30%). Technical terms: Always English.
 
 ---
 
-## 目前學習策略（2026-01 更新）
+## Language Rules (English 70% / 繁中 30%)
 
-### 優先順序
-1. **先把 Arrays & Hashing 練到很熟** — 不急著往下一章跳
-2. **加強基礎語法和手感** — 多做 Easy 題打底
-3. **可以做 NeetCode 150 以外的題目** — 只要是 Array / Hash Table 相關都可以
-4. **一步一步來** — 寧可慢但紮實，不要快但漏洞
-
-### 額外練習題（不在 NeetCode 150）
-
-| # | 題目 | 難度 | 核心技巧 | 狀態 |
-|---|------|------|----------|------|
-| E1 | Single Number | Easy | Set / XOR | ✅ 完成 |
-| E2 | Intersection of Two Arrays | Easy | Set 交集 | ✅ 完成 |
-| E3 | Missing Number | Easy | 數學 / Set | ✅ 完成 |
-| E4 | Majority Element | Easy | Hash Map 計數 | ✅ 完成 |
+- **AI output**: Default to English, switch to 繁中 only when needed for clarity
+  - Concept explanations: English first — only use 繁中 for Feynman-style "白話解釋" when concept is hard to grasp
+  - Questions to student: Primarily in English
+  - Tables and comparisons: Headers in English, content bilingual
+- **Student responses**: Try English first, fall back to 繁中 for unknown parts
+  - AI should gently prompt: "Can you try explaining that in English?"
+  - If student mixes 繁中 in their English response → that's OK and expected
+  - **English Polish**: After each student response, AI provides a brief polished version:
+    ```
+    💬 English Polish: "[natural English version of what you said]"
+    ```
+  - Only show the polished version — don't explain grammar rules unless asked
+- **Notes**: Section headers in English, content 以繁中為主 + 英文術語
+  - 筆記是給自己複習用的，中文比重高一點提升複習意願
+  - **必須包含 `🗣️ English Practice` section**
+- **Technical terms**: Always English (unchanged)
+- **Goal**: Build the habit of thinking and articulating algorithm concepts in English for interviews
 
 ---
 
-## 教學原則（超級重要！）
+## Learner Profile
 
-### 1. 我是智能低下的 DevOps，請用白痴都懂的語言
+- **Identity**: DevOps Engineer
+- **Background**: Python / Shell Script / AWS
+- **Learning Style**: Feynman + Simon Method, guided thinking
+- **Goal**: DevOps 精選 ~50 題，準備 DevOps 技術面試，build pattern recognition for interviews
+- **Timeline**: 6+ months, no rush — deep understanding over speed
+- **Biggest Gap**: "Starting from scratch" — doesn't know where to begin on new problems
 
-- 複雜概念要用**生活化比喻**解釋
-- 用 DevOps 場景舉例（server、container、AWS...）
-- 不要用學術術語嚇我
+---
 
-### 2. 引導思考，不要直接給答案
+## Learning Strategy (2026-03)
 
-- 用問題引導我自己發現解法
-- 讓我先嘗試，錯了再引導修正
-- 確認我真的理解，不是只會背答案
+> 從 NeetCode 150 精簡為 DevOps 精選 ~50 題。深度 > 廣度。
 
-### 3. 費曼學習法流程
+**Priority order:**
+1. 完成 Arrays & Hashing 最後 2 題（Encode/Decode Strings, Longest Consecutive Sequence）
+2. Two Pointers 加 Container With Most Water，跳 Trapping Rain Water (Hard)
+3. Sliding Window → Stack → Binary Search，每章 3-4 題
+4. Graphs 是 DevOps 殺手鐧（依賴解析、拓撲排序）— 加強到 7 題
+5. 跳過整章：Math & Geometry, 2-D DP, Backtracking, Bit Manipulation
+6. 總量控制在 ~50 題，專注 pattern recognition 和面試口述能力
+
+---
+
+## DevOps 精選 — Why Only ~50 Problems?
+
+DevOps 面試考的是：
+- **腳本能力** — 能不能用 Python 快速解決自動化問題
+- **基礎資料結構** — Hash Map, Stack, Queue, Tree traversal
+- **系統思維** — dependency resolution, graph traversal, scheduling
+- **不考什麼** — 不考 2-D DP, 不考 Backtracking 排列組合, 不考數學幾何
+
+### 各章 DevOps 關聯度
+
+| Chapter | DevOps Relevance | DevOps 場景 | 精選題數 | 跳過題數 |
+|---------|:---:|------------|:---:|:---:|
+| Arrays & Hashing | ⭐⭐⭐ | Config lookup, log parsing, frequency counting | 9 | 0 |
+| Two Pointers | ⭐⭐ | Log comparison, sorted data | 4 | 1 |
+| Sliding Window | ⭐⭐⭐ | Monitoring windows, rolling metrics | 3 | 3 |
+| Stack | ⭐⭐⭐ | Config parsing, call stacks, Terraform undo | 4 | 3 |
+| Binary Search | ⭐⭐⭐ | git bisect, threshold finding, log search | 3 | 4 |
+| Linked List | ⭐ | Middleware pipeline (Easy only) | 3 | 8 |
+| Trees | ⭐⭐ | Directory traversal, DNS hierarchy | 6 | 9 |
+| Tries | — | ⏭️ 跳過 | 0 | 3 |
+| Graphs | ⭐⭐⭐⭐ | Terraform dependency, network topology, incident blast radius | **7** | 6 |
+| Advanced Graphs | — | ⏭️ 跳過 | 0 | 6 |
+| Heap | ⭐ | PagerDuty priority queue (Easy only) | 2 | 5 |
+| Backtracking | — | ⏭️ 整章跳過 | 0 | 9 |
+| 1-D DP | ⭐ | 入門概念就好 | 2 | 10 |
+| 2-D DP | — | ⏭️ 整章跳過 | 0 | 11 |
+| Greedy | ⭐⭐ | Autoscaling, resource allocation | 2 | 6 |
+| Intervals | ⭐⭐⭐ | Maintenance windows, on-call rotation | 3 | 3 |
+| Math & Geometry | — | ⏭️ 整章跳過 | 0 | 8 |
+| Bit Manipulation | — | ⏭️ 整章跳過（額外練習已做過） | 0 | 7 |
+| | | **Total** | **~48** | **~102** |
+
+### 學習順序（5 Phases）
+
+**Phase 1 — 收尾 Arrays & Hashing + Two Pointers（~3 題）**
+- Encode and Decode Strings, Longest Consecutive Sequence
+- Container With Most Water
+- ⏭️ Skip: Trapping Rain Water (Hard)
+
+**Phase 2 — Sliding Window + Stack + Binary Search（~10 題）**
+- Sliding Window: Best Time to Buy/Sell Stock, Longest Substring Without Repeating, Longest Repeating Character Replacement
+- Stack: Valid Parentheses, Min Stack, Evaluate Reverse Polish Notation, Daily Temperatures
+- Binary Search: Binary Search, Search a 2D Matrix, Koko Eating Bananas
+
+**Phase 3 — Linked List (Easy) + Trees (Easy)（~9 題）**
+- Linked List: Reverse Linked List, Merge Two Sorted Lists, Linked List Cycle
+- Trees: Invert Binary Tree, Maximum Depth, Diameter, Balanced Binary Tree, Same Tree, Subtree of Another Tree
+
+**Phase 4 — Graphs: DevOps 重點章節（~7 題）**
+- Number of Islands — 獨立的 VPC / 網路分區有幾個？
+- Clone Graph — 複製一整套環境（staging → production）
+- Max Area of Island — 哪個 cluster 規模最大？
+- Rotting Oranges (BFS) — Incident 擴散：一台掛了會影響多少台？
+- Course Schedule I — CI/CD pipeline 的 job 能不能全跑完？（偵測 circular dependency）
+- Course Schedule II — 決定 Terraform 資源的建立順序（拓撲排序）
+- Number of Connected Components — 有幾組獨立的微服務群？
+
+**Phase 5 — Heap + 1-D DP + Greedy + Intervals（~9 題）**
+- Heap: Kth Largest Element in a Stream, Last Stone Weight
+- 1-D DP: Climbing Stairs, House Robber
+- Greedy: Maximum Subarray, Jump Game
+- Intervals: Insert Interval, Merge Intervals, Meeting Rooms
+
+### 各章精選題目明細
+
+| 章節 | 做 | 跳 | 保留的題目 |
+|------|:--:|:--:|-----------|
+| Arrays & Hashing | 9 | 0 | 全做（已完成 7 題） |
+| Two Pointers | 4 | 1 | 跳 Trapping Rain Water (Hard) |
+| Sliding Window | 3 | 3 | Buy/Sell Stock, Longest Substring, Longest Repeating |
+| Stack | 4 | 3 | Valid Parentheses, Min Stack, Evaluate RPN, Daily Temperatures |
+| Binary Search | 3 | 4 | Binary Search, Search 2D Matrix, Koko Eating Bananas |
+| Linked List | 3 | 8 | Reverse, Merge Two, Linked List Cycle（只做 Easy） |
+| Trees | 6 | 9 | 前 6 題 Easy |
+| Heap | 2 | 5 | Kth Largest in Stream, Last Stone Weight（只做 Easy） |
+| Graphs | **7** | 6 | Islands, Clone Graph, Max Area, Rotting Oranges, Course Schedule I & II, Connected Components |
+| 1-D DP | 2 | 10 | Climbing Stairs, House Robber（入門就好） |
+| Greedy | 2 | 6 | Maximum Subarray, Jump Game |
+| Intervals | 3 | 3 | Insert Interval, Merge Intervals, Meeting Rooms |
+
+### DevOps 精選進度
 
 ```
-1. 先用白話解釋題目
-2. 問我「笨方法」怎麼做（暴力解）
-3. 引導我發現笨方法的問題
-4. 問問題讓我自己想出優化方向
-5. 讓我寫 code，錯了就 debug
-6. 最後整理成學習筆記
+DevOps 精選進度：14 / ~48 題 (29%)
+⏭️ 已跳過：~102 題（非 DevOps 核心）
+目前階段：Phase 1 — 收尾 Arrays & Hashing + Two Pointers
+下一題：Encode and Decode Strings
 ```
 
-### 4. 每題結束後的筆記格式
+---
 
-每完成一題，建立 `XXX_題目名_notes.md`，包含：
-- 這是什麼？（一句話白話解釋）
-- 用什麼比喻理解？
-- 踩過什麼雷？
-- 最終正確 Code
-- 複雜度分析
-- 面試怎麼回答？
+## Learning Framework: Feynman + Simon
 
-### 5. 模擬面試練習
+| Method | Purpose | Applied In |
+|--------|---------|------------|
+| **Feynman** | Deep understanding — explain simply, verify comprehension | Step C (core teaching) |
+| **Simon** | Mastery through chunking — decompose, focus, drill until breakthrough | Step C (chunk map) + Step E (drill) |
 
-學完每題後，可以請 Claude 模擬面試官：
-- 問解題思路
-- 問複雜度分析
-- 問 trade-off
-- 問 edge case
-- 問延伸題目
+---
 
-### 6. 程式檔案格式（超重要！）
+## Teaching Flow A-G (每堂課必須遵守)
 
-建立練習檔案時，模擬真實面試情境：
+每次教學互動，按以下順序進行。**不可跳步驟。**
 
-```
-✅ 要有的：
-- LeetCode 題目網址（方便解完貼回去測試）
-- 題目說明和範例
-- 思路提示（在 docstring 裡）
-- TODO(human) 標記
-- 本地測試案例
+### A. 複習（5 min）
 
-❌ 不要預先寫好：
-- 框架程式碼（如 groups = {}, for loop, return）
-- 任何實作細節
-- 讓我從零開始寫，才像面試！
-```
+- 第一堂課跳過此步驟
+- Ask: "What did we learn last time? Can you walk me through the approach you used?"
+- Check: Does the student remember the **pattern** used, not just the code?
+- 確認上次筆記中 `🔴 My Mistakes` 的錯誤是否已修正
+- If student can't explain → go back and review, don't continue
 
-範例格式：
+### B. 引入 — Pattern Introduction（3 min）
+
+- Use a **DevOps analogy** to introduce today's pattern (see DevOps Analogy Bank below)
+- Build intuition FIRST — no jargon, no code yet
+- Example: "Sliding Window is like a CloudWatch dashboard — you're always looking at the last 5 minutes of metrics, and as time moves forward, old data points drop off and new ones come in."
+- If teaching a new problem within a known pattern: "We already know [pattern]. Today's problem adds a twist: [what's different]."
+
+### C. 核心教學 — Pattern Chunk Map（12 min, Feynman + Simon）
+
+- **Step 1 — Chunk Map（1 min）**: List today's 3-7 core chunks as a numbered checklist
+  - Example: `☐ What is Sliding Window` / `☐ Fixed vs Variable window` / `☐ Template code` / `☐ When to use` / `☐ Edge cases`
+- **Step 2 — Teach each chunk**: 用白話解釋，確保白癡都能懂
+  - Use the 6-Step Problem-Solving Framework when walking through examples
+  - Show template code for the pattern (generic, not problem-specific)
+  - Use tables to compare variations (e.g., fixed vs variable window)
+- **Step 3 — Feynman Gate（per chunk）**:
+  - **Don't ask "你懂嗎？"** — instead ask "Can you explain X in your own words?"
+  - If wrong: **don't correct directly**, guide them to find the mistake
+  - If right but imprecise: supplement the missing parts
+  - **Confirm understanding before moving to next chunk** — mark ✅ on Chunk Map
+  - If a chunk fails the gate → drill it again (Simon: 鑽透再走)
+
+### D. 動手做 — Solve Problems（20 min）
+
+Solve 1-2 problems using the **6-Step Problem-Solving Framework**:
+
+1. **UNDERSTAND**: Read problem, identify inputs/outputs/constraints
+2. **EXAMPLES**: Work through examples by hand (small inputs)
+3. **PATTERN**: Check Pattern Recognition Checklist → identify candidate pattern
+4. **PLAN**: Pseudocode the approach (say it out loud)
+5. **CODE**: Implement (student writes, AI guides)
+6. **TEST**: Edge cases — empty input, single element, duplicates, large input
+
+**Problem flow**:
+- Step 1: Let student attempt brute force first
+- Step 2: Guide toward optimization using today's pattern
+- Step 3: Student writes the code (TODO(human) in file)
+- After solving: Simulate a mini interview — "How would you explain this to an interviewer?"
+
+**Code file format** (模擬面試情境):
 ```python
 """
-LeetCode XX. 題目名稱
-https://leetcode.com/problems/題目名稱/
+LeetCode XX. Problem Name
+https://leetcode.com/problems/problem-name/
 
-[原始英文題目描述]
-[Example 1, 2, 3...]
-[Constraints...]
+[Original English problem description]
+[Examples]
+[Constraints]
 
 ---
 中文翻譯：...
@@ -121,311 +229,242 @@ def functionName(params) -> ReturnType:
     # TODO(human): 從頭實作你的解法
     pass
 
-
 # 本地測試
 if __name__ == "__main__":
-    # 測試案例...
+    # Test cases...
+```
+
+### E. Simon Drill — Pattern Recognition（5 min）
+
+- **Phase 1 — Self Recall**: Review today's Chunk Map, then **close it**
+  - Describe the pattern's template in English (2-3 sentences)
+  - Name the key signals that indicate this pattern
+  - Mark chunks you couldn't explain → weak points
+- **Phase 2 — AI Challenge**: AI gives 2-3 **unseen** problem descriptions
+  - Student must identify the pattern in < 30 sec (no coding, just pattern ID)
+  - Questions alternate between English and 繁中
+  - If student can't identify → go back to that chunk, re-drill
+- **Goal**: Recognize pattern from problem description alone, before coding
+
+### F. 整理筆記（5 min）
+
+Notes file: `{chapter_dir}/XXX_{problem_name}_notes.md`
+
+**Notes template**:
+```markdown
+# Problem Name — Notes
+
+## 這是什麼？
+（一句話白話解釋）
+
+## 用什麼比喻理解？
+（DevOps / 生活化比喻）
+
+## Pattern 是什麼？
+（用到的 pattern + 為什麼選這個 pattern）
+
+## 踩過什麼雷？
+（學習過程中犯的錯，附 code）
+
+## 最終正確 Code
+（working solution）
+
+## 複雜度分析
+- Time: O(?)
+- Space: O(?)
+
+## 面試怎麼回答？
+（30 秒版本的面試口述稿）
+
+## 🔴 My Mistakes & Misconceptions
+
+| What I Thought | Reality | Why I Was Wrong |
+|---|---|---|
+| ... | ... | ... |
+
+## 🗣️ English Practice
+
+| My Answer | English Polish |
+|---|---|
+| 我的原始回答 | 優化過的面試建議回答 |
+```
+
+### G. 更新進度 + 預覽明天（5 min）
+
+- Update `CURRICULUM.md`: change `⬜` → `✅` for completed problems
+- Update `docs/curriculum-roadmap.md`: update Done column and counters
+- Preview tomorrow's problem to let the brain warm up
+
+---
+
+## 6-Step Problem-Solving Framework
+
+> The antidote to "I don't know where to start."
+
+```
+Step 1: UNDERSTAND — Read problem, identify inputs/outputs/constraints
+         → "What am I given? What do I need to return?"
+
+Step 2: EXAMPLES — Work through examples by hand (small inputs)
+         → "Let me trace through Example 1 step by step..."
+
+Step 3: PATTERN  — Check Pattern Recognition Checklist → identify candidate
+         → "The problem says 'sorted array' + 'find target' → Binary Search?"
+
+Step 4: PLAN     — Pseudocode the approach (say it out loud)
+         → "First I'll... then I'll... the tricky part is..."
+
+Step 5: CODE     — Implement
+         → Write it, run it, fix syntax errors
+
+Step 6: TEST     — Edge cases: empty input, single element, duplicates, max size
+         → "What if the array is empty? What if all elements are the same?"
 ```
 
 ---
 
-## NeetCode 150 學習規劃
+## Pattern Recognition Checklist
 
-### 第 1 章：Arrays & Hashing（陣列與雜湊）
+> When you see this signal in a problem → consider this pattern.
+> This checklist grows as you learn new patterns.
 
-| # | 題目 | 難度 | 狀態 | 筆記 |
-|---|------|------|------|------|
-| 1 | Contains Duplicate | Easy | ✅ 完成 | [筆記](arrays_and_hashing/002_contains_duplicate_notes.md) |
-| 2 | Valid Anagram | Easy | ✅ 完成 | [筆記](arrays_and_hashing/003_valid_anagram_notes.md) |
-| 3 | Two Sum | Easy | ✅ 完成 | [筆記](arrays_and_hashing/001_two_sum_notes.md) |
-| 4 | Group Anagrams | Medium | ✅ 完成 | [筆記](arrays_and_hashing/004_group_anagrams_notes.md) |
-| 5 | Top K Frequent Elements | Medium | ✅ 完成 | [筆記](arrays_and_hashing/005_top_k_frequent_notes.md) |
-| 6 | Product of Array Except Self | Medium | ✅ 完成 | [筆記](arrays_and_hashing/006_product_of_array_except_self_notes.md) |
-| 7 | Valid Sudoku | Medium | ✅ 完成 | [筆記](arrays_and_hashing/011_valid_sudoku_notes.md) |
-| 8 | Encode and Decode Strings | Medium | ⬜ | |
-| 9 | Longest Consecutive Sequence | Medium | ⬜ | |
-
----
-
-### 第 2 章：Two Pointers（雙指針）
-
-| # | 題目 | 難度 | 狀態 | 筆記 |
-|---|------|------|------|------|
-| 1 | Valid Palindrome | Easy | ✅ 完成 | [筆記](two_pointers/001_valid_palindrome_notes.md) |
-| 2 | Two Sum II | Medium | ✅ 完成 | [筆記](two_pointers/002_two_sum_ii_notes.md) |
-| 3 | 3Sum | Medium | ✅ 完成 | [筆記](two_pointers/003_3sum_notes.md) |
-| 4 | Container With Most Water | Medium | ⬜ | |
-| 5 | Trapping Rain Water | Hard | ⬜ | |
+| Signal in Problem | Pattern | Example Problems |
+|-------------------|---------|-----------------|
+| "Count frequency / group by key" | **Hash Map** | Group Anagrams, Top K Frequent |
+| "Find pair/triplet that satisfies..." + sorted | **Two Pointers** | 3Sum, Two Sum II |
+| "Contiguous subarray/substring of size K" | **Sliding Window** | Max Sum Subarray, Longest Substring |
+| "Matching/nesting brackets" or LIFO order | **Stack** | Valid Parentheses, Daily Temps |
+| "Sorted array + find target" or "minimize max" | **Binary Search** | Search Rotated Array, Koko Bananas |
+| "Reverse/reorder nodes in sequence" | **Linked List** | Reverse LL, Remove Nth Node |
+| "Hierarchical structure / ancestor / depth" | **Tree (DFS/BFS)** | Max Depth, Validate BST |
+| "Prefix matching / autocomplete / dictionary" | **Trie** | Implement Trie, Word Search II |
+| "Shortest path in unweighted graph" | **BFS** | Rotting Oranges |
+| "Connected components / explore all paths" | **DFS** | Number of Islands |
+| "Dependency ordering" | **Topological Sort** | Course Schedule |
+| "Shortest path with weights / min cost" | **Advanced Graphs (Dijkstra/MST)** | Network Delay Time |
+| "Top K / Kth largest / priority" | **Heap** | Kth Largest Element |
+| "Overlapping ranges / scheduling" | **Intervals (Sort + Sweep)** | Merge Intervals |
+| "Local optimal → global optimal" | **Greedy** | Jump Game, Max Subarray |
+| "Try all combinations / generate all" | **Backtracking** | Subsets, Permutations |
+| "Optimal substructure + overlapping subproblems" | **DP** | Climbing Stairs, Coin Change |
 
 ---
 
-### 第 3 章：Sliding Window（滑動視窗）
+## DevOps Analogy Bank
 
-| # | 題目 | 難度 | 狀態 | 筆記 |
-|---|------|------|------|------|
-| 1 | Best Time to Buy and Sell Stock | Easy | ⬜ | |
-| 2 | Longest Substring Without Repeating | Medium | ⬜ | |
-| 3 | Longest Repeating Character Replacement | Medium | ⬜ | |
-| 4 | Permutation in String | Medium | ⬜ | |
-| 5 | Minimum Window Substring | Hard | ⬜ | |
-| 6 | Sliding Window Maximum | Hard | ⬜ | |
+> One analogy per pattern — use in Step B (Pattern Introduction).
 
----
-
-### 第 4 章：Stack（堆疊）
-
-| # | 題目 | 難度 | 狀態 | 筆記 |
-|---|------|------|------|------|
-| 1 | Valid Parentheses | Easy | ⬜ | |
-| 2 | Min Stack | Medium | ⬜ | |
-| 3 | Evaluate Reverse Polish Notation | Medium | ⬜ | |
-| 4 | Generate Parentheses | Medium | ⬜ | |
-| 5 | Daily Temperatures | Medium | ⬜ | |
-| 6 | Car Fleet | Medium | ⬜ | |
-| 7 | Largest Rectangle in Histogram | Hard | ⬜ | |
+| Pattern | DevOps Analogy |
+|---------|---------------|
+| Hash Map | **DNS lookup table** — domain → IP, O(1) resolution. Config store (key→value). |
+| Two Pointers | **Comparing two server logs** — one pointer at start, one at end, moving inward to find discrepancies. |
+| Sliding Window | **CloudWatch monitoring** — always showing the last 5-min window of metrics. Old data drops off, new data enters. |
+| Stack | **Terraform state changes (LIFO)** — undo stack. Last change applied is first to rollback. Call stack in debugging. |
+| Binary Search | **`git bisect`** — finding the breaking commit by halving the search space each step. |
+| Linked List | **Middleware pipeline** — each handler points to the next. Request flows through the chain. |
+| Tree | **Directory tree / DNS hierarchy** — root → branches → leaves. `ls -R` is DFS, `find -maxdepth` is BFS. |
+| Graph | **Service dependency DAG** — `terraform graph` shows which resources depend on which. Network topology map. |
+| Trie | **URL router / prefix matching** — like how nginx matches location blocks by prefix. Autocomplete in CLI tools. |
+| Advanced Graphs | **Network latency optimization** — Dijkstra finds shortest path = least-latency route between data centers. |
+| Heap | **PagerDuty incident queue** — P1 incidents always get handled before P2, regardless of arrival order. |
+| Intervals | **Maintenance windows / on-call rotation** — overlapping shifts need merging, gaps need covering. |
+| Greedy | **Autoscaling** — always pick the cheapest instance type that meets current requirements. Don't plan ahead. |
+| Backtracking | **Config permutation testing** — try every combination of settings, undo and try next when one fails. |
+| DP | **Redis memoization** — cache computed results so you never recompute the same subproblem. |
+| Bit Manipulation | **chmod permissions** — rwx = 111 in binary = 7. Subnet masks use AND operations. |
 
 ---
 
-### 第 5 章：Binary Search（二分搜尋）
+## Progress Tracking Rules
 
-| # | 題目 | 難度 | 狀態 | 筆記 |
-|---|------|------|------|------|
-| 1 | Binary Search | Easy | ⬜ | |
-| 2 | Search a 2D Matrix | Medium | ⬜ | |
-| 3 | Koko Eating Bananas | Medium | ⬜ | |
-| 4 | Find Minimum in Rotated Sorted Array | Medium | ⬜ | |
-| 5 | Search in Rotated Sorted Array | Medium | ⬜ | |
-| 6 | Time Based Key-Value Store | Medium | ⬜ | |
-| 7 | Median of Two Sorted Arrays | Hard | ⬜ | |
+| Symbol | Meaning |
+|--------|---------|
+| ⬜ | Not started |
+| 🔄 | In progress (multi-day topic, partially done) |
+| ✅ | Completed |
 
----
-
-### 第 6 章：Linked List（鏈結串列）
-
-| # | 題目 | 難度 | 狀態 | 筆記 |
-|---|------|------|------|------|
-| 1 | Reverse Linked List | Easy | ⬜ | |
-| 2 | Merge Two Sorted Lists | Easy | ⬜ | |
-| 3 | Reorder List | Medium | ⬜ | |
-| 4 | Remove Nth Node From End | Medium | ⬜ | |
-| 5 | Copy List with Random Pointer | Medium | ⬜ | |
-| 6 | Add Two Numbers | Medium | ⬜ | |
-| 7 | Linked List Cycle | Easy | ⬜ | |
-| 8 | Find the Duplicate Number | Medium | ⬜ | |
-| 9 | LRU Cache | Medium | ⬜ | |
-| 10 | Merge K Sorted Lists | Hard | ⬜ | |
-| 11 | Reverse Nodes in K-Group | Hard | ⬜ | |
+- `CURRICULUM.md` is the problem-level progress source (checkboxes per problem)
+- `docs/curriculum-roadmap.md` is the phase-level dashboard (daily tracker)
+- Keep both in sync — update after every session
+- AI must proactively update both at end of each session (Step G)
 
 ---
 
-### 第 7 章：Trees（樹）
+## Notes — Mistakes Section Format
 
-| # | 題目 | 難度 | 狀態 | 筆記 |
-|---|------|------|------|------|
-| 1 | Invert Binary Tree | Easy | ⬜ | |
-| 2 | Maximum Depth of Binary Tree | Easy | ⬜ | |
-| 3 | Diameter of Binary Tree | Easy | ⬜ | |
-| 4 | Balanced Binary Tree | Easy | ⬜ | |
-| 5 | Same Tree | Easy | ⬜ | |
-| 6 | Subtree of Another Tree | Easy | ⬜ | |
-| 7 | Lowest Common Ancestor of BST | Medium | ⬜ | |
-| 8 | Binary Tree Level Order Traversal | Medium | ⬜ | |
-| 9 | Binary Tree Right Side View | Medium | ⬜ | |
-| 10 | Count Good Nodes in Binary Tree | Medium | ⬜ | |
-| 11 | Validate Binary Search Tree | Medium | ⬜ | |
-| 12 | Kth Smallest Element in a BST | Medium | ⬜ | |
-| 13 | Construct Binary Tree | Medium | ⬜ | |
-| 14 | Binary Tree Max Path Sum | Hard | ⬜ | |
-| 15 | Serialize and Deserialize Binary Tree | Hard | ⬜ | |
+Every notes file must include:
 
----
+```markdown
+## 🔴 My Mistakes & Misconceptions
 
-### 第 8 章：Heap / Priority Queue（堆積）
-
-| # | 題目 | 難度 | 狀態 | 筆記 |
-|---|------|------|------|------|
-| 1 | Kth Largest Element in a Stream | Easy | ⬜ | |
-| 2 | Last Stone Weight | Easy | ⬜ | |
-| 3 | K Closest Points to Origin | Medium | ⬜ | |
-| 4 | Kth Largest Element in an Array | Medium | ⬜ | |
-| 5 | Task Scheduler | Medium | ⬜ | |
-| 6 | Design Twitter | Medium | ⬜ | |
-| 7 | Find Median from Data Stream | Hard | ⬜ | |
-
----
-
-### 第 9 章：Backtracking（回溯）
-
-| # | 題目 | 難度 | 狀態 | 筆記 |
-|---|------|------|------|------|
-| 1 | Subsets | Medium | ⬜ | |
-| 2 | Combination Sum | Medium | ⬜ | |
-| 3 | Permutations | Medium | ⬜ | |
-| 4 | Subsets II | Medium | ⬜ | |
-| 5 | Combination Sum II | Medium | ⬜ | |
-| 6 | Word Search | Medium | ⬜ | |
-| 7 | Palindrome Partitioning | Medium | ⬜ | |
-| 8 | Letter Combinations of a Phone Number | Medium | ⬜ | |
-| 9 | N-Queens | Hard | ⬜ | |
-
----
-
-### 第 10 章：Graphs（圖）
-
-| # | 題目 | 難度 | 狀態 | 筆記 |
-|---|------|------|------|------|
-| 1 | Number of Islands | Medium | ⬜ | |
-| 2 | Clone Graph | Medium | ⬜ | |
-| 3 | Max Area of Island | Medium | ⬜ | |
-| 4 | Pacific Atlantic Water Flow | Medium | ⬜ | |
-| 5 | Surrounded Regions | Medium | ⬜ | |
-| 6 | Rotting Oranges | Medium | ⬜ | |
-| 7 | Walls and Gates | Medium | ⬜ | |
-| 8 | Course Schedule | Medium | ⬜ | |
-| 9 | Course Schedule II | Medium | ⬜ | |
-| 10 | Redundant Connection | Medium | ⬜ | |
-| 11 | Number of Connected Components | Medium | ⬜ | |
-| 12 | Graph Valid Tree | Medium | ⬜ | |
-| 13 | Word Ladder | Hard | ⬜ | |
-
----
-
-### 第 11 章：Dynamic Programming 1-D（一維動態規劃）
-
-| # | 題目 | 難度 | 狀態 | 筆記 |
-|---|------|------|------|------|
-| 1 | Climbing Stairs | Easy | ⬜ | |
-| 2 | Min Cost Climbing Stairs | Easy | ⬜ | |
-| 3 | House Robber | Medium | ⬜ | |
-| 4 | House Robber II | Medium | ⬜ | |
-| 5 | Longest Palindromic Substring | Medium | ⬜ | |
-| 6 | Palindromic Substrings | Medium | ⬜ | |
-| 7 | Decode Ways | Medium | ⬜ | |
-| 8 | Coin Change | Medium | ⬜ | |
-| 9 | Maximum Product Subarray | Medium | ⬜ | |
-| 10 | Word Break | Medium | ⬜ | |
-| 11 | Longest Increasing Subsequence | Medium | ⬜ | |
-| 12 | Partition Equal Subset Sum | Medium | ⬜ | |
-
----
-
-### 第 12 章：Dynamic Programming 2-D（二維動態規劃）
-
-| # | 題目 | 難度 | 狀態 | 筆記 |
-|---|------|------|------|------|
-| 1 | Unique Paths | Medium | ⬜ | |
-| 2 | Longest Common Subsequence | Medium | ⬜ | |
-| 3 | Best Time to Buy and Sell Stock with Cooldown | Medium | ⬜ | |
-| 4 | Coin Change II | Medium | ⬜ | |
-| 5 | Target Sum | Medium | ⬜ | |
-| 6 | Interleaving String | Medium | ⬜ | |
-| 7 | Longest Increasing Path in a Matrix | Hard | ⬜ | |
-| 8 | Distinct Subsequences | Hard | ⬜ | |
-| 9 | Edit Distance | Hard | ⬜ | |
-| 10 | Burst Balloons | Hard | ⬜ | |
-| 11 | Regular Expression Matching | Hard | ⬜ | |
-
----
-
-### 第 13 章：Greedy（貪婪）
-
-| # | 題目 | 難度 | 狀態 | 筆記 |
-|---|------|------|------|------|
-| 1 | Maximum Subarray | Medium | ⬜ | |
-| 2 | Jump Game | Medium | ⬜ | |
-| 3 | Jump Game II | Medium | ⬜ | |
-| 4 | Gas Station | Medium | ⬜ | |
-| 5 | Hand of Straights | Medium | ⬜ | |
-| 6 | Merge Triplets to Form Target | Medium | ⬜ | |
-| 7 | Partition Labels | Medium | ⬜ | |
-| 8 | Valid Parenthesis String | Medium | ⬜ | |
-
----
-
-### 第 14 章：Intervals（區間）
-
-| # | 題目 | 難度 | 狀態 | 筆記 |
-|---|------|------|------|------|
-| 1 | Insert Interval | Medium | ⬜ | |
-| 2 | Merge Intervals | Medium | ⬜ | |
-| 3 | Non-overlapping Intervals | Medium | ⬜ | |
-| 4 | Meeting Rooms | Easy | ⬜ | |
-| 5 | Meeting Rooms II | Medium | ⬜ | |
-| 6 | Minimum Interval to Include Each Query | Hard | ⬜ | |
-
----
-
-### 第 15 章：Math & Geometry（數學與幾何）
-
-| # | 題目 | 難度 | 狀態 | 筆記 |
-|---|------|------|------|------|
-| 1 | Rotate Image | Medium | ⬜ | |
-| 2 | Spiral Matrix | Medium | ⬜ | |
-| 3 | Set Matrix Zeroes | Medium | ⬜ | |
-| 4 | Happy Number | Easy | ⬜ | |
-| 5 | Plus One | Easy | ⬜ | |
-| 6 | Pow(x, n) | Medium | ⬜ | |
-| 7 | Multiply Strings | Medium | ⬜ | |
-| 8 | Detect Squares | Medium | ⬜ | |
-
----
-
-### 第 16 章：Bit Manipulation（位元操作）
-
-| # | 題目 | 難度 | 狀態 | 筆記 |
-|---|------|------|------|------|
-| 1 | Single Number | Easy | ⬜ | |
-| 2 | Number of 1 Bits | Easy | ⬜ | |
-| 3 | Counting Bits | Easy | ⬜ | |
-| 4 | Reverse Bits | Easy | ⬜ | |
-| 5 | Missing Number | Easy | ⬜ | |
-| 6 | Sum of Two Integers | Medium | ⬜ | |
-| 7 | Reverse Integer | Medium | ⬜ | |
-
----
-
-## 學習進度總覽
-
-```
-NeetCode 150 進度：10 / 150 題 (6.7%)
-額外練習題：4 題
-
-✅ 已完成：14 題（NeetCode 10 + 額外 4）
-⬜ 未開始：140 題
-
-目前階段：第 2 章 - Two Pointers
+| What I Thought | Reality | Why I Was Wrong |
+|---|---|---|
+| 例：用 list 查找以為是 O(1) | list 的 `in` 是 O(n)，set 的 `in` 才是 O(1) | 搞混了 list 和 set 的底層結構 |
 ```
 
----
-
-## 學習紀錄
-
-| 日期 | 完成題目 | 學到什麼 |
-|------|----------|----------|
-| 2026-01-05 | Two Sum | 反向索引、用空間換時間、Hash Table O(1) 查詢 |
-| 2026-01-06 | Contains Duplicate | Set vs Dict、set.add() 語法、建立 O(n) vs 查詢 O(1)、early return 的價值 |
-| 2026-01-06 | Valid Anagram | Dict 計數、.get(key, 0) 處理不存在的 key、Python 縮排決定邏輯、list comprehension |
-| 2026-01-07 | Group Anagrams | 排序當標籤、dict value 是 list、if + append 組合、O(n × k log k) 複雜度分析 |
-| 2026-01-12 | Top K Frequent（部分）| tuple index（x[0], x[1]）、lambda 不能寫 for loop、list comprehension 取特定欄位 |
-| 2026-01-13 | Single Number | Set 配對消除法、XOR 位元運算（a^a=0）、discard vs remove、面試先講簡單解法再優化 |
-| 2026-01-13 | Intersection of Two Arrays | Set 交集 `&`、`in set` O(1) vs `in list` O(n)、intersection/union/difference |
-| 2026-01-14 | Missing Number | Set 差集 `-`、`set()` vs `{}` vs `()`、括號位置影響運算順序、`.pop()` 從 set 取值 |
-| 2026-01-14 | Top K Frequent（完成）| Counter.most_common(k)、複習 dict.items() 排序、Bucket Sort 概念（O(n)）|
-| 2026-01-14 | Majority Element | dict key vs value 區別、`dict[key]` 取 value、`.keys()` 不是 `.key()`、手動 dict 計數 |
-| 2026-01-16 | Product of Array Except Self | Prefix/Suffix 預處理、`append()` vs index 賦值、倒著跑的 `range(n-1, -1, -1)`、不能用除法時分開算再合併 |
-| 2026-01-19 | Valid Sudoku | 整數除法 `//` 分組、Dict of Sets 追蹤多維度、tuple 當 dict key、O(1) 固定大小 board |
-| 2026-01-19 | Valid Palindrome | Two Pointers 雙指針模式、`.isalnum()` 跳過無效字元、`.lower()` 方法要加括號、O(1) 空間優勢 |
-| 2026-01-20 | Two Sum II | 排序 array 用 Two Pointers 省空間 O(1)、大於小於的邏輯要對應正確動作、1-indexed 兩邊都要 +1 |
-| 2026-02-10 | 3Sum | 3Sum = 固定一個數 + Two Sum II、去重兩個地方（外層 i + 內層 l/r）、找到答案後 while 跳重複要加 l < r 防越界 |
+Rules:
+- 記錄教學過程中**答錯、卡住、或有錯誤直覺**的地方
+- 「What I Thought」必須寫出**原本的錯誤理解**，不是空白
+- 如果整堂課都沒答錯 → 寫「No mistakes this session」（但很少見）
+- 這個 section 是 Active Recall 複習時的重點
 
 ---
 
-## 快捷指令
+## Weekly Review Flow（每週六）
 
-跟 Claude 說這些話可以快速開始：
+1. **Pick 3 Topics**: 1 from this week + 2 from past weeks (random)
+2. **Blind Recall**: For each pattern:
+   - What is this pattern? When do you use it? (signal → pattern)
+   - Walk through the template/approach
+   - Name 2 problems that use it
+3. **Score**: `Pattern Name: X/3` (pattern ID, approach, examples)
+4. **Gap Check**: Open notes, compare with recall, mark blind spots
+5. **Quick Drill**: Re-solve 1 problem from weakest pattern (no peeking)
 
-- `開始今天的課程` → 繼續下一題
-- `check` → 檢查我寫的 code
-- `模擬面試` → 練習面試問答
-- `整理筆記` → 把今天學的存成筆記
-- `更新進度` → 更新 CLAUDE.md 的進度表
+---
+
+## Quick Commands
+
+Tell Claude these to get started quickly:
+
+- `開始今天的課程` → Continue next problem (follows A-G flow)
+- `check` → Check my code
+- `模擬面試` → Practice interview questions for current problem
+- `整理筆記` → Save today's learning as notes
+- `更新進度` → Update CURRICULUM.md + roadmap
+- `練習 pattern drill` → AI gives 3 unseen problems, student identifies pattern
+- `blind recall` → Close notes, explain a pattern from memory
+- `weekly review` → Run the full weekly review flow
+- `查看精選清單` → 顯示 DevOps 精選的所有題目和進度
+
+---
+
+## Reference
+
+- Problem curriculum: `CURRICULUM.md`
+- Progress dashboard: `docs/curriculum-roadmap.md`
+- Notes directory: `notes/` (for Phase 0) and chapter directories (for problems)
+- Code files: `{chapter_dir}/XXX_{problem_name}.py`
+- Notes files: `{chapter_dir}/XXX_{problem_name}_notes.md`
+
+---
+
+## Learning Record
+
+| Date | Problem | Key Concepts |
+|------|---------|-------------|
+| 2026-01-05 | Two Sum | Reverse index, space-time trade-off, Hash Table O(1) lookup |
+| 2026-01-06 | Contains Duplicate | Set vs Dict, early return |
+| 2026-01-06 | Valid Anagram | Dict counting, `.get(key, 0)` |
+| 2026-01-07 | Group Anagrams | Sorting as key, O(n x k log k) |
+| 2026-01-12 | Top K Frequent (partial) | Tuple index, lambda, list comprehension |
+| 2026-01-13 | Single Number | XOR (a^a=0), discard vs remove |
+| 2026-01-13 | Intersection of Two Arrays | Set `&`, `in set` O(1) vs `in list` O(n) |
+| 2026-01-14 | Missing Number | Set `-`, `set()` vs `{}` |
+| 2026-01-14 | Top K Frequent (done) | Counter.most_common(k), Bucket Sort O(n) |
+| 2026-01-14 | Majority Element | Dict key vs value, manual counting |
+| 2026-01-16 | Product of Array Except Self | Prefix/Suffix, reverse range |
+| 2026-01-19 | Valid Sudoku | `//` grouping, Dict of Sets, tuple key |
+| 2026-01-19 | Valid Palindrome | Two Pointers, `.isalnum()`, O(1) space |
+| 2026-01-20 | Two Sum II | Sorted + Two Pointers, O(1) space |
+| 2026-02-10 | 3Sum | Fix one + Two Sum II, dedup at 2 places |
