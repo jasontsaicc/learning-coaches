@@ -32,7 +32,7 @@ Rules going forward:
 3. **題目驅動 (pull)** — 用 **Design a Distributed Cache** 當錨,把 CAP(Day 17-18)、Consistency Models(Day 19-20)、Replication & Leader Election(Day 21-22)折進這個設計題,理論在設計需要時才 just-in-time 拉進來,capped 在面試深度。
 4. 面試考的是 breadth of mental models + trade-off reasoning,**不是** CS 理論深度(linearizability 形式證明、consistency 數學模型 = PhD 範圍,不學)。
 
-**Scope decision (2026-07-02, S36 後 plan review):** 無明確面試日期 → 深度優先,全課表照走。從外部訓練營課表補進 3 個缺的 archetype(Day 54-59: Ticket Booking / Top-K / Ride Matching),Phase 4 順延為 Day 60-67(課表總長 67 天)。其餘訓練營題目(Dropbox/YouTube/Twitter/A-B Testing 等)= 既有 pattern 組裝,不排課,對照表見 `docs/pattern-map.md`。照目前 ~2.2 session/週的節奏,預估 2026 年 12 月初完課。Parked PoC triage:留 distributed cache(Day 38-39)+ rate limiter(Day 31-32),放掉 Circuit Breaker 獨立 PoC(概念已 5/5,邊際回報低)。
+**Scope decision (2026-07-02, S36 後 plan review):** 無明確面試日期 → 深度優先,全課表照走。從外部訓練營課表補進 3 個缺的 archetype(Day 54-59: Ticket Booking / Top-K / Ride Matching),Phase 4 順延為 Day 60-69(課表總長 69 units;含 skill 新版的 Brownfield Migration Day 62-63)。本機 sd-coach skill 原落後 remote 24 commits,2026-07-02 已同步至新版(Teach Yuki/RPG/Fast Path/Brownfield),3 個 archetype 是重放在新版上。其餘訓練營題目(Dropbox/YouTube/Twitter/A-B Testing 等)= 既有 pattern 組裝,不排課,對照表見 `docs/pattern-map.md`。照目前 ~2.2 session/週的節奏,預估 2026 年 12 月初完課。Parked PoC triage:留 distributed cache(Day 38-39)+ rate limiter(Day 31-32),放掉 Circuit Breaker 獨立 PoC(概念已 5/5,邊際回報低)。
 
 ---
 
@@ -96,9 +96,10 @@ Rules going forward:
 | 56-57 | Top-K / Leaderboard | ⬜ | — | 訓練營補強：Count-Min Sketch（Bloom 的兄弟結構）|
 | 58-59 | Ride Matching (Uber) | ⬜ | Phase 3 Gate | Geo capstone：matching + dispatch + 狀態機，含 Delivery/Tinder 變體 |
 | 60-61 | Trade-off Deep Dive | ⬜ | — | |
-| 62-63 | Mock Interview Round 1 | ⬜ | — | |
-| 64-65 | Weak Spot Reinforcement | ⬜ | — | |
-| 66-67 | Final Mock (Brutal) | ⬜ | Phase 4 Gate | |
+| 62-63 | Brownfield / Legacy Migration | ⬜ | — | skill 新版新增：Strangler Fig、dual-write、cutover/rollback |
+| 64-65 | Mock Interview Round 1 | ⬜ | — | |
+| 66-67 | Weak Spot Reinforcement | ⬜ | — | |
+| 68-69 | Final Mock (Brutal) | ⬜ | Phase 4 Gate | |
 
 ---
 
