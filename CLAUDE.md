@@ -135,10 +135,16 @@ DevOps 面試考的是：
 ### DevOps 精選進度
 
 ```
-DevOps 精選進度：14 / ~48 題 (29%)
+DevOps 精選進度：18 / ~48 題 (38%)
+  ├─ Arrays & Hashing   9/9  ✅
+  ├─ Two Pointers       4/4  ✅
+  ├─ Sliding Window     1/3  🔄（Longest Substring 有 brute，待收尾）
+  └─ Stack              4/4  ✅
+➕ Bonus（精選外已做）：Trapping Rain Water, Permutation in String,
+    Sliding Window Maximum, Car Fleet, Largest Rectangle in Histogram
 ⏭️ 已跳過：~102 題（非 DevOps 核心）
-目前階段：Phase 1 — 收尾 Arrays & Hashing + Two Pointers
-下一題：Encode and Decode Strings
+目前階段：Phase 2 — Stack 完成，準備進 Binary Search
+下一題：Binary Search
 ```
 
 ---

@@ -46,8 +46,8 @@
 | 5 | Top K Frequent Elements | Medium | 1 | ✅ | [筆記](arrays_and_hashing/005_top_k_frequent_notes.md) |
 | 6 | Product of Array Except Self | Medium | 1 | ✅ | [筆記](arrays_and_hashing/006_product_of_array_except_self_notes.md) |
 | 7 | Valid Sudoku | Medium | 1 | ✅ | [筆記](arrays_and_hashing/011_valid_sudoku_notes.md) |
-| 8 | Encode and Decode Strings | Medium | 1 | ⬜ | |
-| 9 | Longest Consecutive Sequence | Medium | 1 | ⬜ | |
+| 8 | Encode and Decode Strings | Medium | 1 | ✅ | [筆記](arrays_and_hashing/012_encode_and_decode_strings_notes.md) |
+| 9 | Longest Consecutive Sequence | Medium | 1 | ✅ | [筆記](arrays_and_hashing/013_longest_consecutive_sequence_notes.md) |
 
 **Extra Practice (Hash Map)**:
 | # | Problem | Difficulty | Status | Notes |
@@ -68,8 +68,8 @@
 | 1 | Valid Palindrome | Easy | 1 | ✅ | [筆記](two_pointers/001_valid_palindrome_notes.md) |
 | 2 | Two Sum II | Medium | 1 | ✅ | [筆記](two_pointers/002_two_sum_ii_notes.md) |
 | 3 | 3Sum | Medium | 1 | ✅ | [筆記](two_pointers/003_3sum_notes.md) |
-| 4 | Container With Most Water | Medium | 1 | ⬜ | |
-| 5 | Trapping Rain Water | Hard | 2 | ⬜ | |
+| 4 | Container With Most Water | Medium | 1 | ✅ | [筆記](two_pointers/004_container_with_most_water_notes.md) |
+| 5 | Trapping Rain Water | Hard | 2 | ✅ | [筆記](two_pointers/005_trapping_rain_water_notes.md) |
 
 ---
 
@@ -80,11 +80,11 @@
 | # | Problem | Difficulty | Tier | Status | Notes |
 |---|---------|-----------|------|--------|-------|
 | 1 | Best Time to Buy and Sell Stock | Easy | 1 | ⬜ | |
-| 2 | Longest Substring Without Repeating | Medium | 1 | ⬜ | |
+| 2 | Longest Substring Without Repeating | Medium | 1 | 🔄 | [code](sliding_window/001_longest_substring_without_repeating.py) (brute, 待收尾) |
 | 3 | Longest Repeating Character Replacement | Medium | 2 | ⬜ | |
-| 4 | Permutation in String | Medium | 1 | ⬜ | |
+| 4 | Permutation in String | Medium | 1 | 🔄 | [code](sliding_window/002_permutation_in_string.py) (到 Step E) |
 | 5 | Minimum Window Substring | Hard | 2 | ⬜ | |
-| 6 | Sliding Window Maximum | Hard | 2 | ⬜ | |
+| 6 | Sliding Window Maximum | Hard | 2 | ✅ | [筆記](sliding_window/003_sliding_window_maximum_notes.md) |
 
 ---
 
@@ -94,13 +94,13 @@
 
 | # | Problem | Difficulty | Tier | Status | Notes |
 |---|---------|-----------|------|--------|-------|
-| 1 | Valid Parentheses | Easy | 1 | ⬜ | |
-| 2 | Min Stack | Medium | 1 | ⬜ | |
-| 3 | Evaluate Reverse Polish Notation | Medium | 1 | ⬜ | |
-| 4 | Generate Parentheses | Medium | 2 | ⬜ | |
-| 5 | Daily Temperatures | Medium | 1 | ⬜ | |
-| 6 | Car Fleet | Medium | 2 | ⬜ | |
-| 7 | Largest Rectangle in Histogram | Hard | 2 | ⬜ | |
+| 1 | Valid Parentheses | Easy | 1 | ✅ | [code](stack/001_valid_parentheses.py) |
+| 2 | Min Stack | Medium | 1 | ✅ | [筆記](stack/003_min_stack_notes.md) |
+| 3 | Evaluate Reverse Polish Notation | Medium | 1 | ✅ | [code](stack/002_evaluate_rpn.py) |
+| 4 | Generate Parentheses | Medium | 2 | ⬜ | (屬 backtracking，先跳) |
+| 5 | Daily Temperatures | Medium | 1 | ✅ | [code](stack/004_daily_temperatures.py) |
+| 6 | Car Fleet | Medium | 2 | ✅ | [code](stack/005_car_fleet.py) |
+| 7 | Largest Rectangle in Histogram | Hard | 2 | ✅ | [筆記](stack/006_largest_rectangle_in_histogram_notes.md)（stack optimal 未冷寫，待 re-do） |
 
 ---
 
@@ -438,9 +438,9 @@ Given 10 problem descriptions (unseen), identify the correct pattern in < 30 sec
 ## Progress Summary
 
 ```
-NeetCode 150 Progress: 10 / 150 (6.7%)
+NeetCode 150 Progress: 21 / 150 (14%)
 Extra Practice:         4 / 4   (100%)
-Total Completed:        14 problems
+Total Completed:        25 problems (+2 in progress: Sliding Window #2, #4)
 
 Total Duration:         ~95 days (flexible)
 NeetCode 150:           150 problems (60 Tier 1 + 90 Tier 2)
@@ -448,10 +448,13 @@ Checkpoints:            1 pattern drill (Day 34) + 1 mock (Day 68)
 Mock Interviews:        3 (Day 68, Day 90-91, Day 94-95)
 
 Phase 0: ⬜ Not started (Days 1-3)
-Phase 1: 🔄 In progress (Days 4-34) — Hash Map 7/9 + Extra 4/4, Two Pointers 3/5
+Phase 1: 🔄 In progress (Days 4-34)
+         Hash Map 9/9 ✅ + Extra 4/4 ✅ | Two Pointers 5/5 ✅
+         Sliding Window 1/6 (+2 in progress) | Stack 6/7 ✅ (Generate Parentheses skipped)
+         Binary Search 0/7 ⬜ | Linked List 0/11 ⬜
 Phase 2: ⬜ Not started (Days 35-68)
 Phase 3: ⬜ Not started (Days 69-87)
 Phase 4: ⬜ Not started (Days 88-95)
 
-Current: Phase 1 — Hash Map (2 remaining) + Two Pointers (2 remaining)
+Current: Phase 1 — finish Sliding Window, then Binary Search
 ```

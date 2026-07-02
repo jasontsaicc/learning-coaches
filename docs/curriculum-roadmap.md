@@ -74,10 +74,10 @@ Recursion (Trees) ──→ Dynamic Programming (recursion + memoization)
 
 | Day | Pattern / Topic | Problems | Tier 1 Done | Total Done | Done |
 |-----|----------------|----------|:-----------:|:----------:|------|
-| 4-8 | Hash Map Patterns | 9 NeetCode + 4 Extra | 7/9 | 11/13 | 🔄 |
-| 9-12 | Two Pointers | 5 | 3/4 | 3/5 | 🔄 |
-| 13-17 | Sliding Window | 6 | 0/3 | 0/6 | ⬜ |
-| 18-22 | Stack | 7 | 0/4 | 0/7 | ⬜ |
+| 4-8 | Hash Map Patterns | 9 NeetCode + 4 Extra | 9/9 | 13/13 | ✅ |
+| 9-12 | Two Pointers | 5 | 4/4 | 5/5 | ✅ |
+| 13-17 | Sliding Window | 6 | 0/3 | 1/6 (+2 wip) | 🔄 |
+| 18-22 | Stack | 7 | 4/4 | 6/7 | ✅ |
 | 23-27 | Binary Search | 7 | 0/5 | 0/7 | ⬜ |
 | 28-33 | Linked List | 11 | 0/5 | 0/11 | ⬜ |
 | **34** | **🎯 Pattern ID Checkpoint** | **10 blind IDs** | **—** | **—** | ⬜ |
@@ -142,5 +142,5 @@ Extra Practice:        4 problems (completed)
 Checkpoints:           1 pattern drill (Day 34)
 Mock Interviews:       3 (Day 68, Day 90-91, Day 94-95)
 Patterns Covered:      16 (Hash Map through Bit Manipulation, incl. Tries + Advanced Graphs)
-Current Progress:      14/154 completed (9.1%)
+Current Progress:      25/154 completed (16%)  (+2 in progress: Sliding Window)
 ```
