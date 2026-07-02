@@ -14,27 +14,29 @@
 | **Current phase** | Phase 0 |
 | **Current pattern** | Stack |
 | **Language** | Python |
-| **Session count** | 13 |
+| **Session count** | 15 |
 | **Last weekly review** | — |
-| **Problems solved** | 11 / 136 |
+| **Problems solved** | 13 / 136 |
 
 ---
 
 ## Current Session (Breakpoint)
 
-> ✅ Session 13 完成 (2026-06-29) — Daily Temperatures (#739) 拿下，**Stack 升 🟢**
-> Pattern: **Stack → Monotonic Stack** (Phase 0 最後一個 pattern, Phase 0 Gate 前)
-> Problem: Daily Temperatures (#739) Medium — Stack 第 4 題
+> ✅ Session 15 完成 (2026-07-02) — Largest Rectangle in Histogram (#84) **Learn 模式** (Hard, NeetCode Stack 最後一題/大魔王)
+> Pattern: **Monotonic Stack (遞增)** — 與 #739 完美鏡像 (pop 條件決定方向)
+> Problem: #84 Hard — workspace/22, brute + stack 兩版 5/5 pass
 >
-> ✅ Brute force O(n²) 已綠 (workspace/20)；引導發現「重複往前掃同一段小的」浪費 → 翻轉成 monotonic stack
-> ✅ 8 格動畫親手跑完 (i=5 踢 69/71、i=6 76 清掉 75/72)，理解「等待區遞減 = 中間那串小的在排隊」
-> ✅ 第一次寫 (workspace/20) 5 個語法洞 (is Not / .top / 缺冒號 / answes 手滑 / append 縮排進 while)，**邏輯零錯**
-> ✅ **Cold solve 過** (workspace/20b)：整套從零默出 100% 正確，唯一 1 字元手滑 `stack, append` (逗點⇄點)，**自己讀 NameError 抓出來修好** → Stack 升 🟢 達標
+> ✅ Warm-up 補結 #739 欠的 **O(n) 攤還債** (每 index 一進一出 → 總 pop ≤ n)
+> ✅ Brute force **學生自己寫** (fill-in-the-blank 鷹架): 每根當最矮天花板往左右撞矮牆, `width=right-left-1`; 5/5 pass; 這次沒忘 return、max_area 初始化沒忘 (老坑未踩)
+> ✅ 「A佔2/B佔1」深挖: 靈魂「撞比我矮的才停、比我高的可鑽過」自己想通; 排隊故事 (push/pop, 右牆=逼你離場的新人、左牆=pop 後新隊尾) 逐步建立
+> 🟡 Stack optimal **code 是我給的** (學生累了+趕讀書會、主動要 code 直接看) → **未冷寫**, 下次要 cold re-do 才算 fluency 達標
+> 🟡 過程數次「看不懂/太難了」→ 退回純白話故事 (排隊比喻) + 具體例子重建, 有效 (符合視覺 trace 學法)
+> 🟡 Mock / 完整 Feynman gate / 教 Yuki closer 都**未做** (時間壓力), 下次補
+> 📄 產出讀書會簡報: notes/pattern22-largest-rectangle-histogram.md (講稿) + .html (Fable 視覺版, CSS 長條圖 + 逐格 trace, 已交付)
 >
-> ⏭️ Next: Phase 0 Gate (4 大 pattern 都摸過, Stack 是 Phase 0 最後 pattern)；或補 Feynman 債
-> ⏸️ 未收尾: #739 Feynman O(n) 攤還題 (這次跳過沒答)
-> ⏸️ Weekly Review 嚴重到期 (≥13 session 未做)，建議下次優先補
-> ⏸️ Parked Feynman 債務 (Transfer Q2/Q3 未收尾): #239 Sliding Window Maximum, #42 Trapping Rain Water, #11 Container With Most Water
+> ⏭️ Next: ① **#84 stack cold re-do** (今天是看的、沒冷寫 → fluency 未達標) ② 教 Yuki (#84 + Car Fleet 兩筆欠) ③ Phase 0 Gate (Stack 6/6 完成可開) ④ Binary Search
+> ⏸️ Weekly Review 嚴重到期 (≥15 session 未做)，強烈建議下次優先補
+> ⏸️ Parked Feynman 債務 (Transfer Q2/Q3): #239 Sliding Window Maximum, #42 Trapping Rain Water, #11 Container With Most Water
 > ⏸️ Queued: Sliding Window 基礎題 #121 / #3 (workspace/14 有 brute) / #567 (workspace/15 到 Step E)
 
 ---
@@ -46,7 +48,7 @@
 | Arrays & Hashing | 5/11 | 🟡 | — | Frequency Counter + Bucket Sort + Length-Prefix + HashSet per row/col/box + Sequence Start Detection learned. #238 (Product of Array Except Self) skipped, revisit later |
 | Two Pointers | 2.5/5 | 🟡 | — | + #42 Trapping Rain Water (Hard) 三層算法全綠 (Brute/DP/Two Pointers 18/18) — 加分: 自抓 6 個 bug 全修對；扣分: Q2/Q3 Feynman 沒自答 (看答案)。升 🟢 條件: Day 3 完成 F + G |
 | Sliding Window | 1/5 | 🟡 | — | #239 Sliding Window Maximum (Hard, jump-to 跳關做最難的第 6 題): Brute O(n·k) + Optimal Monotonic Deque O(n) 都親手寫過 12/12 tests; Feynman 只過 Q1 (O(n) amortized 講得出); Q2/Q3 + Mock 待補。基礎 5 題 (#121, #3, #424, #567...) 尚未做 |
-| Stack | 4/6 | 🟢 | Phase 0 Gate | #20 ✅ + #150 ✅ + #155 ✅ + #739 Daily Temperatures ✅ (Monotonic Stack). 🟢 達標: #739 cold solve 從零默出 0 邏輯錯, 自讀 NameError 修掉唯一字元手滑. Feynman O(n) 攤還待補 |
+| Stack | 6/6 | 🟢 | Phase 0 Gate | #20 + #150 + #155 + #739 + #853 + **#84 Largest Rectangle (Hard) ✅** = NeetCode Stack 全清 (Generate Parentheses 屬 backtracking 先跳). #84 stack code 是看的、**未冷寫** (下次 cold re-do). #739 O(n) 攤還債結清. 教 Yuki (#84 + Car Fleet) 待補 |
 | Binary Search | 0/6 | ⬜ | — | |
 | Linked List | 0/9 | ⬜ | — | |
 | Trees | 0/13 | ⬜ | — | |
@@ -70,6 +72,8 @@
 
 | Session | Problem | Difficulty | Pattern | Solved? | Brute | Optimal | Notes |
 |---------|---------|-----------|---------|---------|-------|---------|-------|
+| 15 | Largest Rectangle in Histogram (84) | **Hard** | Stack (Monotonic, 遞增) | ✅ | O(n²) / O(1) | **O(n) / O(n)** ⭐ | **Learn 模式**, NeetCode Stack 大魔王; brute 學生自寫 fill-in-blank 5/5 (每根當最矮天花板撞左右矮牆, `width=right-left-1`); stack optimal **code 我給的** (累了要直接看) **未冷寫**; 深挖「A佔2/B佔1」+ 排隊故事 (右牆=新人/左牆=隊尾) 通了; 補結 #739 O(n) 攤還債; 數次「看不懂」退回純白話重建有效; 產出讀書會 HTML (Fable) |
+| 14 | Car Fleet (853) | Medium | Stack + Sort | ✅ | O(n²) 模擬 / — | **O(n log n) / O(n)** ⭐ | **Cold Solve** (沒看過的題, workspace/21, 6/6 pass); 龜兔比喻自己提; 手算 fleet=3 全對; pattern 自對應 stack + 自己想通「不用 pop/while」靈魂推理; zip/unpacking 學會; **cars.sort 縮排老毛病自救**; 3 bug 提示後修 (少冒號/`if stack`應`not stack`/`.push()`應`.append`); Cold Solve 3/4 (brute 沒自講); 教 Yuki 跳過待補 |
 | 13 | Daily Temperatures (739) | Medium | Stack (Monotonic) | ✅ | O(n²) / O(1) | **O(n) / O(n)** ⭐ | Brute (workspace/20) + Monotonic Stack 都寫；引導發現重複掃描→翻轉；8 格動畫親手跑；cold solve (workspace/20b) 從零默 100% 對, 唯一 `stack, append` 逗點⇄點手滑自讀 NameError 修好; **Stack 升 🟢**; Feynman O(n) 攤還跳過待補 |
 | 12 | Min Stack (155) | Medium | Stack | ✅ | — | O(1) all ops / O(n) space | 分享會前速成；自己寫出完整 code；理解 [val,min] 雙層結構、self、stack[-1][0/1]；Feynman: 每個元素進來時記錄當下 min |
 | 1 | Valid Anagram (242) | Easy | Arrays & Hashing | ✅ | O(n log n) / O(n) | O(n) / O(1) | Feynman Gate pass, Drill 3/3 |
@@ -155,6 +159,13 @@
 | 13 | Daily Temperatures | Stack (Monotonic) | cold solve `stack, append(i)` 逗點⇄點 → NameError; **自讀錯誤訊息抓出來修好** | 🟡 Recurring - 字元精準度; 但 debug 反射 ✅ 養成中 |
 | 13 | Daily Temperatures | Stack (Monotonic) | Yuki 拷問盲點: 把「while 不執行」誤歸因成「ans 初始化=0」(真因是溫度條件為假, 與答案值無關); 攤還 O(n) 需動畫才懂 | 🟡 Re-test (+3d) - 抽問: ① while條件 vs 答案值是兩條獨立線 ② 攤還「每元素一生 pop 一次 → 總 pop ≤ n」 |
 | 13 | Daily Temperatures | Stack (Monotonic) | Yuki spot-my-bug: 縮排雷達對 (聞到 return 區塊有問題) 但**指錯行** — 指 `stack.append(i)`(其實對的), 真兇是 `return answer` 卡在 for 內 | 🟡 Re-test (+3d) - 抓蟲下刀要精準到「行」; 方法: 每行問「這動作該做幾次」每圈的留 for 內、只做一次的踢出去 |
+| 14 | Car Fleet | Stack + Sort | `if` 開頭行結尾少冒號 `:` | 🟡 Recurring - 同 #42; 反射: 寫完 if/for/while/def 先補 `:` |
+| 14 | Car Fleet | Stack + Sort | 邏輯反: 寫 `if stack`(=stack有東西) 但本意「stack 空」應 `not stack`; 且空 stack 時 `stack[-1]` 會 IndexError → `not stack` **必須排第一個**短路才不會爆 | 🟡 Re-test (+3d) - 抽問: ① `if stack:` 是空還是有東西? ② 為什麼 `not stack` 要放 `or` 的左邊 (短路保護 stack[-1]) |
+| 14 | Car Fleet | Stack + Sort | `stack.push()` — Python list 沒 `.push` 應 `.append`; 且括號內空的, 要 `stack.append(time)` | 🟡 Recurring - 同 #739 `.top` 錯方法名家族 |
+| 14 | Car Fleet | Stack + Sort | (WIN 非錯誤) `cars.sort` 一度縮排在 for 內 → 自己抓出移到外面 | ✅ 老毛病 #42/#150/#739 縮排家族, 這次**自救成功** |
+| 15 | Largest Rectangle | Stack (Monotonic) | 時間複雜度反射成 `n log n` (真相 n×n=**n²**); **第 2 次亂加 log** (S1 排序記成 O(log n)) | 🟡 Re-test (+3d) - 抽問: 有砍半/排序才有 log; 巢狀線性掃是相乘 = n² |
+| 15 | Largest Rectangle | Stack (Monotonic) | 猜 stack 是「遞減」(其實**遞增**); 沒連結「pop 條件決定方向」 | 🟡 Re-test (+3d) - 抽問: pop「更矮」→遞增、pop「更大」→遞減 (#739 完美鏡像) |
+| 15 | Largest Rectangle | Stack (Monotonic) | 右邊界 guard 鏡像錯: 寫 `right <= 0` (把左界的 0 直接抄過來), 應 `right < n` | ✅ Resolved (S15) - 左界 index 0、右界 index n-1 (`< n`) |
 
 ---
 
@@ -175,6 +186,8 @@
 | Stack 配對 (Stack) | 巢狀結構「最後開的最先關」= FILO；開括號 push、閉括號比對 stack 頂端配不配 (不配/空→False) 再 pop，掃完 stack 空才有效；計數器只管數量會漏型別+順序 (`([)]`)，所以要 Stack — O(n) 時間 O(n) 空間 |
 | Stack 後綴求值 / RPN (Stack) | 數字 push 進 stack、運算子來就 pop 兩個 (先 pop=右、後 pop=左, FILO 鏡像) 算完 push 回去，掃完 stack 剩一個=答案；判運算子用白名單 (4 個固定) 別用 isdigit (負數會誤判)；除法 `int(l/r)` 向 0 取整非 `//` — O(n) 時間 O(n) 空間 |
 | Monotonic Stack (Stack) | 維護「遞減的等待區」存還沒等到更大值的 index；新元素把頂端比它小的全 pop 掉並結算 (距離 = i - prev) 再 push 自己；存 index 不存值 (要算距離, 用 `temperatures[stack[-1]]` 回查)；每個 index 一進一出 → **O(n) 攤還** (同 #239 deque 論證) — O(n) 時間 O(n) 空間 |
+| Largest Rectangle in Histogram (Stack) | 每根長條問「當最矮高度能拉多寬」= 往左右撞到比它矮的牆才停 (比它高的可鑽過去); 單調**遞增** stack 存 index, 新來的比隊尾矮就把高的 pop 結算 (**右牆 = 逼你離場的新人 i、左牆 = pop 後新隊尾 `stack[-1]`, 空則 -1**), `width = 右-左-1`, `area = heights[top]×width`; 收尾剩的右牆當 n; 每 index 一進一出 → **O(n) 攤還** (同 #739); pop「更矮」→遞增, 對比 #739 pop「更大」→遞減 = 完美鏡像 — O(n) 時間 O(n) 空間 |
+| Stack + Sort 車隊 / Car Fleet (Stack) | `zip(position,speed)` 綁成車、按位置由大到小排 (靠終點先處理)；從前往後掃, 每台算到達時間 `(target-p)/s`, 比 stack 頂端**慢** (`time > stack[-1]`) → 追不到 → push 一坨新車隊, 否則被前面那坨吸收 (不動)；`len(stack)` = 車隊數；**只看頂端、從不 pop** (後車不可能讓前車消失) → 不用內層 while, 單向 for 即可 (跟 #739 monotonic stack 的差別); 其實一個變數記頂端就夠, stack 只是讓 len 數答案更直覺 — O(n log n) 時間 (排序主導) O(n) 空間 |
 
 ---
 
