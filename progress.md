@@ -3,6 +3,7 @@
 > This file is the single source of truth for student progress.
 > Updated by Claude at the end of every session (Step H) and when sessions are interrupted.
 > Read by Claude at the start of every session to determine where to resume.
+> **Coach 必讀：`docs/coaching-brief.md`**（S1-S36 蒸餾的作戰手冊：五個 chronic 弱點的對治協議、有效/無效手法、強項槓桿。開場讀完再教）。
 
 ---
 
