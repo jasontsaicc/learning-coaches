@@ -463,24 +463,24 @@ k8s-coach/  (= k8s-mastery-lab-skill.git)
 | Phase | 一句話焦點(往內部機制走) | 教材 reference |
 |-------|------------------------|----------------|
 | **P0 心智模型** | 聲明式 / reconcile loop / control plane 拆解 / apply→Running 全流程 | `references/phase-0-mental-model.md` |
-| **P1 核心物件 + 容器底層** | Pod/probe、Deployment/rollout、StatefulSet/Job、resource/QoS + namespace/cgroup/OOM | `references/phase-1-*.md` (後續 plan) |
-| **P2a 網路深水區** ⭐ | Service/kube-proxy/CoreDNS、Ingress、NetworkPolicy、CNI + 封包全鏈路 | `references/phase-2a-*.md` (後續 plan) |
-| **P2b 儲存 + 權限** | PV/PVC/CSI、StorageClass、RBAC/SA、IRSA、Secrets 管理、Pod Security Standards | `references/phase-2b-*.md` (後續 plan) |
-| **P3 調度 + 高並發 + 排障** ⭐ | scheduler、affinity/taints、HPA/VPA/Karpenter、PDB、capacity planning | `references/phase-3-*.md` (後續 plan) |
-| **P4 可觀測性工程** | 三本柱、Prometheus/PromQL、SLI/SLO/Error Budget、OTel/Jaeger | `references/phase-4-*.md` (後續 plan) |
-| **P5 平台工程 / GitOps** | Helm、ArgoCD/GitOps、EKS prod terraform、progressive delivery、CRD/operator 模式、admission webhook、cluster upgrade 策略、etcd 運維(backup/restore/DR,含 park 已久的 Raft 深入) | `references/phase-5-*.md` (後續 plan) |
-| **P6 面試衝刺** | SRE 故障 mock、k8s × system design 交集、behavioral story bank 提煉(STAR、英文版)、CKA/CKAD 限時(副線) | `references/phase-6-*.md` (後續 plan) |
+| **P1 核心物件 + 容器底層** | Pod/probe、Deployment/rollout、StatefulSet/Job、resource/QoS + namespace/cgroup/OOM | P1 已畢業,無獨立教材檔;底層深化在 `references/foundations-linux-network.md` §2 |
+| **P2a 網路深水區** ⭐ | Service/kube-proxy/CoreDNS、Ingress、NetworkPolicy、CNI + 封包全鏈路 | `references/phase-2a-networking.md` |
+| **P2b 儲存 + 權限** | PV/PVC/CSI、StorageClass、RBAC/SA、IRSA、Secrets 管理、Pod Security Standards | `references/phase-2b-storage-rbac.md` |
+| **P3 調度 + 高並發 + 排障** ⭐ | scheduler、affinity/taints、HPA/VPA/Karpenter、PDB、capacity planning | `references/phase-3-scheduling-resilience.md` |
+| **P4 可觀測性工程** | 三本柱、Prometheus/PromQL、SLI/SLO/Error Budget、OTel/Jaeger | `references/phase-4-observability.md` |
+| **P5 平台工程 / GitOps** | Helm、ArgoCD/GitOps、EKS prod terraform、progressive delivery、CRD/operator 模式、admission webhook、cluster upgrade 策略、etcd 運維(backup/restore/DR,含 park 已久的 Raft 深入) | `references/phase-5-platform-gitops.md` |
+| **P6 面試衝刺** | SRE 故障 mock、k8s × system design 交集、behavioral story bank 提煉(STAR、英文版)、CKA/CKAD 限時(副線) | `references/phase-6-interview-sprint.md` |
 
-⭐ = Linux/網路底層集中重練區。目前**只有 `references/phase-0-mental-model.md` 已存在**,P1-P6 為後續 plan。
+⭐ = Linux/網路底層集中重練區。**P2a-P6 教材與跨 phase 題庫已全數建檔**(2026-07 Fable 產出);教材是彈藥庫不是逐字稿,runtime 以 `progress.md` / `mistake-registry.md` 即時狀態決定怎麼用,檔內 `[RUNTIME: ...]` 標記處需現場客製。
 
-### 跨 phase references(後續 plan)
+### 跨 phase references(已全數建檔)
 | 檔案 | 內容 |
 |------|------|
-| `references/foundations-linux-network.md` | 跨 phase 底層:TCP 狀態機 / DNS 全流程 / Linux 性能排查 |
-| `references/chaos-drills.md` | 故障注入腳本 / 劇本庫(E 段用) |
-| `references/real-world-scenarios.md` | 現實場景庫(C 段四段式範本) |
+| `references/foundations-linux-network.md` | 跨 phase 底層:控制理論 / namespace+cgroup 深入 / TCP 狀態機 / DNS 全流程 / Linux 性能排查(USE + 60 秒清單) |
+| `references/chaos-drills.md` | 故障注入劇本庫 20 drills(P0-P5,E 段用;P3 起附 runbook 產出要求) |
+| `references/real-world-scenarios.md` | 現實場景庫 23 scenes(P0-P5,C 段四段式範本) |
 | `references/term-glossary.md` | 英文術語總表 |
-| `references/interview-bank.md` | CKA + SRE mock 題庫 |
+| `references/interview-bank.md` | 面試題庫:原理題 why-chain 追問樹(Q-P-01~26)/ 故障排除(Q-T-01~10)/ k8s×SD(Q-SD-01~05)/ 誘答庫(P0-P5)/ Behavioral(Q-B-01~06)/ CKA 副線(Q-CKA-01~06) |
 
 ## Key Principles
 
