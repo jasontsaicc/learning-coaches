@@ -375,6 +375,20 @@ A 段(複習,3min)固定從兩本簿抽考(spaced repetition):
 - **Term 抽考**:挑到期術語,要學員**用英文**講定義(順帶餵 English Ramp)。過了往後推,沒過拉回近期。
 - A 段控制在約 2 題以內,別讓複習吃掉新教學時間。
 
+## Story Bank(behavioral 素材庫)
+
+第三本登記簿:`k8s-coach-workspace/story-bank.md`。Senior loop 必有 behavioral round(「講一個你處理過的重大 incident」「講一個你推動的技術決策」),素材不會自動變成好故事,所以現在起便宜入帳、P6 才提煉。
+
+### 寫入時機(機會式,不另闢段落)
+- 任何 session 中學員提到**真實工作經歷**(prod incident、on-call、架構決策、跨團隊推動、上線翻車)→ 教練當場補一行 raw 紀錄(日期 + 一句話 + tag),**不打斷教學流**,一行就走。
+- 學員開場閒聊「昨天 on-call 遇到...」也算觸發。寧可多記,提煉時再篩。
+
+### 價值門檻(同 Portfolio 原則)
+提煉時才篩,篩準:有**衝突或壓力**(半夜掛掉、期限、意見不合)、有**學員自己的判斷**(不是照 runbook 走)、有**可量化結果**(MTTR、成本、影響面)。三者至少佔二才值得做成 STAR;流水帳不提煉。
+
+### P6 提煉
+每則過門檻的 raw 素材 → STAR 格式英文版(Situation/Task/Action/Result),接 mock 的 behavioral 段演練。提煉時用課程學到的底層原理**回注 Action 段**(e.g. 當年只會「調大 limit」,現在能講出 incompressible resource 與治標/治本),這是課程對 behavioral round 的複利。
+
 ## Weekly Review
 
 ### 觸發
@@ -451,11 +465,11 @@ k8s-coach/  (= k8s-mastery-lab-skill.git)
 | **P0 心智模型** | 聲明式 / reconcile loop / control plane 拆解 / apply→Running 全流程 | `references/phase-0-mental-model.md` |
 | **P1 核心物件 + 容器底層** | Pod/probe、Deployment/rollout、StatefulSet/Job、resource/QoS + namespace/cgroup/OOM | `references/phase-1-*.md` (後續 plan) |
 | **P2a 網路深水區** ⭐ | Service/kube-proxy/CoreDNS、Ingress、NetworkPolicy、CNI + 封包全鏈路 | `references/phase-2a-*.md` (後續 plan) |
-| **P2b 儲存 + 權限** | PV/PVC/CSI、StorageClass、RBAC/SA、IRSA | `references/phase-2b-*.md` (後續 plan) |
+| **P2b 儲存 + 權限** | PV/PVC/CSI、StorageClass、RBAC/SA、IRSA、Secrets 管理、Pod Security Standards | `references/phase-2b-*.md` (後續 plan) |
 | **P3 調度 + 高並發 + 排障** ⭐ | scheduler、affinity/taints、HPA/VPA/Karpenter、PDB、capacity planning | `references/phase-3-*.md` (後續 plan) |
 | **P4 可觀測性工程** | 三本柱、Prometheus/PromQL、SLI/SLO/Error Budget、OTel/Jaeger | `references/phase-4-*.md` (後續 plan) |
-| **P5 平台工程 / GitOps** | Helm、ArgoCD/GitOps、EKS prod terraform、progressive delivery | `references/phase-5-*.md` (後續 plan) |
-| **P6 面試衝刺** | SRE 故障 mock、k8s × system design 交集、CKA/CKAD 限時(副線) | `references/phase-6-*.md` (後續 plan) |
+| **P5 平台工程 / GitOps** | Helm、ArgoCD/GitOps、EKS prod terraform、progressive delivery、CRD/operator 模式、admission webhook、cluster upgrade 策略、etcd 運維(backup/restore/DR,含 park 已久的 Raft 深入) | `references/phase-5-*.md` (後續 plan) |
+| **P6 面試衝刺** | SRE 故障 mock、k8s × system design 交集、behavioral story bank 提煉(STAR、英文版)、CKA/CKAD 限時(副線) | `references/phase-6-*.md` (後續 plan) |
 
 ⭐ = Linux/網路底層集中重練區。目前**只有 `references/phase-0-mental-model.md` 已存在**,P1-P6 為後續 plan。
 
