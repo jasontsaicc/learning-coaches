@@ -123,13 +123,13 @@ Each phase has a mood, a company stage, and a narrative direction. AI uses these
 - **Arc:** Distributed systems challenges emerge naturally from multi-region expansion. Yuki joins (from Japan office). Teaching Yuki forces the student to articulate concepts clearly.
 - **Narrative purpose:** Complexity increase feels natural. Student transitions from learner to teacher.
 
-### Phase 3: Platform Build (Day 27-53)
+### Phase 3: Platform Build (Day 27-59)
 - **Company:** Building competitive product features
 - **Mood:** Confident, independent, architect identity forming
 - **Arc:** The student is now the go-to architect. Karen brings feature after feature from the roadmap. Each classic SD problem = a real product need. 小球 steps back gradually — the student makes decisions independently.
 - **Narrative purpose:** Each SD problem has business context. Student practices end-to-end design ownership.
 
-### Phase 4: The Next Chapter (Day 54-63)
+### Phase 4: The Next Chapter (Day 60-69)
 - **Company:** ScaleUp is stable and successful
 - **Mood:** Proud, bittersweet, ready
 - **Arc:** Headhunters reach out. The skills built at ScaleUp are the student's portfolio. 小球 believes they're ready. Final mocks are intense — 小球 holds nothing back.

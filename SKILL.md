@@ -29,7 +29,9 @@ description: System Design interview coaching skill using Feynman + Simon learni
 │    ├── New student ──→ Warm-Up ──→ Phase 0 Day 1             │
 │    ├── Returning ──→ Next day / Weekly Review                │
 │    ├── Mock only ──→ Interview Drill                         │
+│    ├── Teach Yuki ──→ Teach Yuki Mode (any phase)            │
 │    └── Specific topic ──→ Check Prerequisites ──→ Teach      │
+│  (7+ day gap → Comeback Protocol first)                      │
 │                                                              │
 │  Teaching Flow (A → H)                                       │
 │    A. Review (read Mistake Registry)                         │
@@ -45,8 +47,12 @@ description: System Design interview coaching skill using Feynman + Simon learni
 │  Gates                                                       │
 │    ├── Feynman Gate: per-chunk (Recall → Transfer)            │
 │    │   └── Failure: reteach → check prereqs → split chunk    │
-│    └── Phase Gate: per-phase (mini-mock, score threshold)     │
+│    └── Phase Gate: per-phase mock, graded by blind           │
+│        Examiner subagent (payload = mock Q&A only)           │
 │        └── Failure: targeted drill → retry (max 3)           │
+│                                                              │
+│  Cross-cutting modes: Depth Ceiling │ Problem-Anchored │     │
+│    Gap Mode / Comeback │ Adaptive Pacing │ RPG Layer         │
 │                                                              │
 │  Weekly Review (auto-trigger every 7 sessions)               │
 │  Progress Report (on-demand + at Phase Gates)                │
@@ -257,6 +263,26 @@ Attempt 3: Fail
   → Student decides — record choice in progress.md Phase Gate Results
 ```
 
+### Examiner Gate — Blind Grading (invariant)
+
+The coach and the student build shared context all session; by gate time the coach has a stake in the student passing, and an LLM coach drifts toward grade inflation. So at every Phase Gate: **the coach administers the mock, but a blind Examiner grades it.**
+
+The Examiner is a real subagent (Agent tool, fresh context) — context isolation, not a same-session hat-swap. Dispatch it after the mock ends, with EXACTLY this payload and nothing else:
+
+1. **The gate format + pass threshold** — copied verbatim from the gate table above.
+2. **The scoring dimensions** — the phase's scorecard dimensions (they ARE the objective criteria for sd-coach gates).
+3. **The mock Q&A, verbatim** — every interviewer question/redirect and the student's answers, unedited. NOT the teaching transcript, NOT the coach's opinion, NOT hints from earlier in the session, NOT prior attempts.
+4. **The attempt number** (1-3; the coach owns the failure ladder, the Examiner only scores what's in front of it).
+
+The Examiner's verdict (recorded in `progress.md` unaltered):
+- Per-dimension pass/fail, each citing what in the answer satisfied or missed it — a pass with no citation is not a valid pass.
+- Score `n/total`; the gate table's threshold decides. The coach cannot round up or override a Fail into a Pass.
+- Footer: top-improvement + best-moment, grounded only in the answer it saw.
+
+Burden of proof is on the student: the Examiner leads with the weakest point in the transcript and probes it in its verdict reasoning. What stays free: the Examiner's phrasing and which weakness it examines first. Full contract + failure-mode bounds: `references/examiner-gate.md`.
+
+Record gate results with `certifier: examiner` in Phase Gate Results — self-graded gates (pre-S37 history) stay marked as coach-graded.
+
 ### On Gate Pass
 
 When a student passes a Phase Gate:
@@ -426,7 +452,7 @@ Rules:
 - **Student talks ~80%, interviewer ~20%.** Keep interviewer turns ≤ 3 lines (except final feedback). If you're explaining more than asking, you've stopped being the interviewer.
 - Pressure tests *response under stress*, not recall. The goal is to see how they recover, not to make them fail.
 - Always debrief: name one moment they handled pressure well, one where they crumbled.
-- Pull follow-up questions from `references/follow-up-bank.md` when it exists.
+- Pull follow-up questions from `references/follow-up-bank.md` (covers Phase 1-2 blocks, Tier 1-2 problems, and Brownfield).
 
 #### Interviewer Follow-Up Preview
 
@@ -445,7 +471,7 @@ This creates a mental bridge between sessions and trains the student to anticipa
 ### G. Notes (5 min)
 - Write notes using the **Notes Template** (read `references/notes-template.md` when starting Step G)
 - Save to `notes/dayXX-topic.md`
-- **🧠 Mind Map note (every session, separate file) — student preference:** in addition to the full notes, also produce a SHORT hand-writable mind map and save to `notes/dayXX-topic-mindmap.md`. Keep the full notes too — the mind map does NOT replace them. Format + rules in the `🧠 Mind Map` section of `references/notes-template.md`: central topic + 3-6 radial branches, few words each, simple English, hand-write-friendly ASCII (`+` `|` `>` only, NO box-drawing/dashes). The point is something the student can copy onto paper in 2-3 minutes to drill memory + practice writing English. On Weekly Review / multi-topic sessions, make one mini mind map per topic covered.
+- **🧠 Mind Map note (every session, separate file) — student preference:** in addition to the full notes, also produce a SHORT hand-writable mind map and save to `notes/dayXX-topic-mindmap.md`. Keep the full notes too — the mind map does NOT replace them. Format + rules live ONLY in the `🧠 Mind Map` section of `references/notes-template.md` (horizontal layout, box-drawing connectors, simple English) — follow that file, don't improvise a different format. The point is something the student can copy onto paper in 2-3 minutes to drill memory + practice writing English. On Weekly Review / multi-topic sessions, make one mini mind map per topic covered.
 - **On derivation days:** Must include `🔗 Derivation Insight` section — capture the physical constraint, the student's derivation path (in their own words), and what surprised them. This is what gets reviewed in spaced repetition.
 - **Must include `🔴 My Mistakes & Misconceptions` section** — record every wrong answer, misconception, or point of confusion from the session. If student says "no mistakes" — challenge: "What was the hardest part today? What took you longest to explain back?"
 - **Must include `🎤 How to Say It in Interview` section** — write interview-ready talking points
@@ -622,7 +648,7 @@ Generate from `progress.md` data:
 ═══════════════════════════════════════════
 
 Interview Readiness:
-  Mental models:    X/14 building blocks 🟢
+  Mental models:    X/13 building blocks 🟢
   Classic problems: X practiced (Tier 1 core: URL Shortener, Chat, News Feed, Payment)
   Mock trend:       X.X → X.X 📈/📉 (last 3 drills)
 
@@ -717,6 +743,10 @@ Do NOT read all references at session start. Load them when needed:
 | `references/8-block-skeleton.md` | Step D, when drawing architecture diagrams |
 | `references/notes-template.md` | Step G, when writing session notes |
 | `references/phase4-drills.md` | Phase 4 sessions — trap scenarios and pivot drill examples |
+| `references/first-principles-chains.md` | Step C Step 0, first day of any topic with a derivation chain |
+| `references/follow-up-bank.md` | Step F — pull interviewer follow-up questions for today's topic |
+| `references/answer-comparisons.md` | Phase 3+ mock prep, or when the student asks "what does a good answer look like" — L4 vs L6 side-by-side |
+| `references/examiner-gate.md` | Phase Gates — payload contract and verdict format for the blind Examiner |
 
 ---
 

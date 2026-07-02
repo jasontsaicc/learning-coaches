@@ -603,3 +603,118 @@ Token Bucket vs Sliding Window → 突發友好 vs 精確計數 → 分散式場
 
 **Transfer question (Teach):**
 「向 Yuki 解釋：為什麼 Cassandra 用 Gossip Protocol 而不是中心化的 membership service？」
+
+---
+
+# Phase 3 Chains（新 archetype，Day 54-59）
+
+---
+
+## 推導鏈 #14: Inventory Consistency（Day 54-55 Ticket Booking）
+
+**Physical constraints:**
+- 一個 DB row 同一時刻只能被一個 transaction 修改（鎖 = 序列化點，吞吐上限 ~千 TPS/row）
+- check 和 act 是兩個動作，中間的瞬間世界會變（TOCTOU: time-of-check to time-of-use）
+- 網路請求可能在流程的任意一步之後失敗（部分完成是常態）
+
+**Launch question:**
+「庫存剩 1，兩個人同時讀到『1 > 0』，各自扣 1——最後庫存是多少？賣出了幾件？」
+
+### 基礎層
+
+**Derivation direction:**
+並發下 check-then-act 兩人都通過 check → lost update / 超賣 → 必須把 check+act 變成一個原子動作 → 三條路線：鎖（悲觀）、CAS（樂觀）、單線程序列化（queue）→ 選擇取決於競爭激烈度
+
+**Expected insight:** 超賣不是程式寫錯，是「檢查和動作之間有時間縫隙」這個物理事實；所有解法都是在消滅這個縫隙。
+
+### 進階層
+
+**Additional constraints:**
+- 原子扣減只保護「單步」；下單流程跨多步（預扣 → 付款 → 確認），沒有跨步原子性
+- 付款要等第三方，秒級延遲，期間庫存被佔用
+
+**Derivation direction:**
+扣減後 crash → 庫存漏（少賣）→ 預扣是租約不是所有權 → TTL 到期自動歸還 + 對帳兜底 → 「傾向少賣」是刻意選的偏向（連回 Payment 的 SAGA/補償思路）
+
+**Micro-exercise (Build):**
+小球給出偽碼，學生指出爆點在哪一行、怎麼修：
+```go
+stock := redis.GET("stock")   // A
+if stock > 0 {                // B
+    redis.DECR("stock")       // C
+    db.CreateOrder(...)       // D
+}
+// Q1: 兩個 goroutine 同時跑，哪兩行之間出事？
+// Q2: 就算 A-C 原子化了，C 和 D 之間 crash 會怎樣？
+```
+
+**Transfer question (Teach):**
+「向 Yuki 解釋：為什麼『先檢查庫存再扣』在並發下會超賣，就算程式邏輯完全正確？」
+
+---
+
+## 推導鏈 #15: Probabilistic Counting（Day 56-57 Top-K）
+
+**Physical constraints:**
+- 精確計數每個 key 需要一個獨立 counter → 記憶體 O(unique keys)
+- 十億級 key 空間 × 每個 counter 幾十 bytes = 記憶體放不下
+- hash 可以把任意大的 key 空間壓進固定大小的陣列（代價：碰撞）
+
+**Launch question:**
+「十億個不同的 URL，要統計每個被訪問幾次，只給你 100MB 記憶體——怎麼辦？」
+
+### 基礎層
+
+**Derivation direction:**
+精確計數記憶體 O(N) 放不下 → 用精確度換空間 → hash 到固定格數的陣列累加 → 碰撞 = 多個 key 共享同一格 → 讀出來的數字只會偏大不會偏小 → 多組獨立 hash 各記一份、查詢取 min → Count-Min Sketch
+
+**Expected insight:** CMS 是 Bloom Filter 的兄弟——同一招（hash 進固定陣列 + 接受單向誤差），Bloom 回答「在不在」，CMS 回答「大概幾次」。
+
+### 進階層
+
+**Additional constraints:**
+- CMS 只能回答「這個 key 大概幾次」，不能回答「哪些 key 最大」（Top-K 要的是後者）
+- 「最近一小時」的需求 vs CMS 不能減量（decrement 會破壞不低估性質）
+
+**Derivation direction:**
+Top-K = CMS（計數）+ min-heap（追蹤候選最大值）→ 時間窗需求 → 分桶 sketch、過期整桶丟 → 分散式：CMS 同參數逐格相加可合併（這是它比 exact 結構好合併的原因）
+
+**Micro-exercise (Build):**
+「3 組 hash、每組 4 格。key A 落在格 (0,1,2)，key B 落在格 (0,3,2)。A 出現 5 次、B 出現 3 次。畫出陣列內容，然後查詢 A——讀到多少？為什麼取 min 還是可能高估？」
+
+**Transfer question (Teach):**
+「向 Yuki 解釋：為什麼 CMS 永遠不會低估、但可能高估？跟 Bloom Filter 的 no false negative 是什麼關係？」
+
+---
+
+## 推導鏈 #16: Geo Matching（Day 58-59 Ride Matching）
+
+**Physical constraints:**
+- 「附近」是 2D 概念，但索引本質是 1D 排序——經緯度兩個維度無法同時排序
+- 移動物體的位置持續失效（每 4 秒一次心跳 = 讀到的永遠是幾秒前的世界）
+- 一個司機同一時刻只能接一張單（互斥資源）
+
+**Launch question:**
+「10 萬個移動中的司機，怎麼在 100ms 內找出離乘客最近的 10 個？逐一算距離可以嗎？」
+
+### 基礎層
+
+**Derivation direction:**
+暴力算距離 O(N) 太慢 → 需要空間索引 → geohash 把 2D 切成格子、前綴相同 = 空間相鄰（連回 Day 52-53）→ 查自己 + 8 個鄰格 → 候選集縮到幾十個 → 精排（真實距離/ETA）
+
+**Expected insight:** 兩階段是關鍵——索引負責「粗篩候選」（可以 stale、可以近似），精排負責「準確決策」（查最新 KV）。
+
+### 進階層
+
+**Additional constraints:**
+- 找到最近的 ≠ 派給他：多張訂單同時看到同一個「最近司機」
+- 司機可以拒單/不回應（offer 不是指派）
+
+**Derivation direction:**
+候選集 → 互斥搶佔（司機狀態 CAS，本質 = 推導鏈 #14 的庫存問題，司機是庫存量 1 的 SKU）→ offer + timeout 狀態機 → 拒絕/超時釋放重派 → matching 從「查詢問題」升級成「資源分配問題」→ 批次配對優於逐單貪心
+
+**Micro-exercise (Build):**
+「畫出訂單狀態機：requested → matched → picked_up → completed。現在加入兩個並發事件：rider cancel 和 driver accept 同時到達——標出哪個轉移需要 CAS 保護、誰贏、輸的一方怎麼補償。」
+
+**Transfer question (Teach):**
+「向 Yuki 解釋：為什麼找出最近的司機之後，還不能直接把單派給他？」

@@ -116,16 +116,19 @@
 | 35-37 | Chat System | ⬜ | — | |
 | 38-39 | Distributed Cache | ⬜ | — | |
 | 40-42 | News Feed | ⬜ | — | |
-| 43-45 | Payment System | ⬜ | Phase 3 Gate | |
+| 43-45 | Payment System | ⬜ | — | |
 | 46-47 | Metrics & Logging | ⬜ | — | |
 | 48-49 | Search Autocomplete | ⬜ | — | |
 | 50-51 | Web Crawler | ⬜ | — | |
 | 52-53 | Proximity Service | ⬜ | — | |
-| 54-55 | Trade-off Deep Dive | ⬜ | — | |
-| 56-57 | Brownfield / Legacy Migration | ⬜ | — | |
-| 58-59 | Mock Interview Round 1 | ⬜ | — | |
-| 60-61 | Weak Spot Reinforcement | ⬜ | — | |
-| 62-63 | Final Mock (Brutal) | ⬜ | Phase 4 Gate | |
+| 54-55 | Ticket Booking / Flash Sale | ⬜ | — | |
+| 56-57 | Top-K / Leaderboard | ⬜ | — | |
+| 58-59 | Ride Matching (Uber) | ⬜ | Phase 3 Gate | |
+| 60-61 | Trade-off Deep Dive | ⬜ | — | |
+| 62-63 | Brownfield / Legacy Migration | ⬜ | — | |
+| 64-65 | Mock Interview Round 1 | ⬜ | — | |
+| 66-67 | Weak Spot Reinforcement | ⬜ | — | |
+| 68-69 | Final Mock (Brutal) | ⬜ | Phase 4 Gate | |
 
 > Mastery levels: ⬜ Not started │ 🔴 Needs work │ 🟡 Developing │ 🟢 Solid
 > Update mastery after each session based on Feynman Gate + Drill performance.

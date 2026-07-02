@@ -1,6 +1,6 @@
 # Phase 4 — Trap Scenarios & Pivot Drills
 
-> Reference material for Phase 4 sessions (Day 54-61).
+> Reference material for Phase 4 sessions (Day 60-69).
 > These are examples and patterns, not scripts. AI should adapt, remix, and create new traps based on the student's weakness profile from `progress.md`.
 
 ---
@@ -61,7 +61,7 @@ A pivot drill trains the student to gracefully change direction when the intervi
 | Payment system with sync processing | "Merchants complain about 5s latency" | Async processing with webhooks, optimistic UI |
 | Search with Elasticsearch | "Search index is 2 hours stale" | Near-real-time indexing, change data capture, cache invalidation |
 
-### Double Pivot (Day 61 — Brutal Mode)
+### Double Pivot (Day 61 intro / Day 68-69 Brutal Mode)
 
 Chain two pivots in sequence without letting the student fully stabilize:
 1. Start: "Design a ticket booking system"
@@ -74,10 +74,10 @@ The student must maintain composure and build incrementally rather than restarti
 
 ## Interviewer Behavior in Phase 4
 
-In Phase 4, 小球 shifts from teacher to tough interviewer:
-- **No hints.** If the student is stuck, wait silently for 30 seconds before offering a nudge.
-- **Redirect aggressively.** If the student spends too long on one component, say "Let's move on to X."
+In Phase 4, 小球 shifts from teacher to tough interviewer. All drills follow SKILL.md's scope-based (no clock) invariant:
+- **No hints.** If the student is stuck, hand the ball back ("I'll wait — talk me through what you're weighing") and let them hold it. Nudge only after they explicitly give up or produce nothing for a full exchange.
+- **Redirect aggressively.** If the student spends too many exchanges on one component, say "Let's move on to X."
 - **Challenge weak points.** Read the student's Mistake Registry — ask about their historically weak areas.
-- **Time pressure.** Enforce the 45-minute limit strictly. Announce "You have 10 minutes left" at the 35-minute mark.
+- **Scope pressure.** Enforce the scope budget instead of a clock: "We have room for one more deep dive — pick the component that matters most." A real interview's time pressure is simulated by limiting turns and forcing prioritization, not by announcing minutes.
 
 But after the drill, 小球 returns to mentor mode for detailed feedback.

@@ -228,6 +228,54 @@
 
 ---
 
+## Tier 2 Problems（Day 54-59 新增 archetype）
+
+### Ticket Booking / Flash Sale
+
+| 面試官追問 | 好答案要抓的重點（骨架） | 常見地雷 |
+|-----------|------------------------|---------|
+| "1000 件庫存、10 萬人同時搶，你的第一道防線在哪？" | 分層漏斗：大部分流量根本不該碰到庫存層——前端排隊頁/驗證碼打散、gateway rate limit、排隊 token（拿到才能進下單流程），真正到扣減層的只剩千分之一；講出每一層漏斗的目的 | 直接從 DB 鎖講起，沒意識到最好的解法是讓流量根本到不了 DB |
+| "Redis DECR 成功了、訂單還沒寫入，service crash——庫存少了但沒有訂單，怎麼辦？" | 預扣是租約不是所有權：預扣 + TTL reservation（付款超時自動歸還）、對帳 job 掃 dangling 預扣、冪等 key 讓 client 重試安全；狀態機要有 reserved 中間態 | 以為 DECR 原子 = 整條鏈安全；沒有歸還機制，庫存慢慢漏光 |
+| "為什麼不直接 DB row lock？`SELECT FOR UPDATE` 不行嗎？" | 可以但吞吐有天花板：hot row 上千並發排隊、鎖等待堆積、連線池耗盡；單 row 鎖是千級 TPS，搶購瞬間是十萬級 QPS——所以把競爭前移到 Redis 原子操作或 queue 序列化，DB 只收序列化後的結果；低並發場景 row lock 反而是最簡單正解 | 不知道 hot-row 鎖的吞吐上限在哪；或全盤否定 DB 鎖（過度設計的反向錯誤） |
+| "超賣和少賣，哪個可以接受？" | 這是 business 決策不是工程決策：超賣 = 賠償/公關災難（演唱會票不可超）、少賣 = 收入損失但可補救（歸還的庫存再放出）；多數場景寧可少賣，「預扣傾向少賣」是刻意設計的偏向 | 沒意識到這是可選的 trade-off；或兩個都說不能接受（工程上做不到絕對兩全） |
+| "拍賣（auction）出價跟搶購有什麼不同？" | 同是 hot-row 併發寫但語義不同：auction 是 max(bid) 不是 decrement，可用樂觀鎖/CAS（版本號），輸了重讀重試；最後一秒 sniping 造成尖峰；「展示目前最高價」可以 stale（最終一致），「判定得標」不可以 | 照搬庫存扣減方案；分不清展示路徑和成交判定的一致性需求不同 |
+| "這個系統你監控什麼？" | 漏斗每層通過率（突變 = 有人繞過）、庫存 invariant check（Redis 水位 + 已成訂單 + 預扣中 = 初始庫存，對不上 = 超賣或漏）、預扣歸還率、429 率、DB lock wait time | 只講 QPS/latency，沒有「庫存 invariant」這個 business 正確性監控 |
+
+### Top-K / Real-Time Leaderboard
+
+| 面試官追問 | 好答案要抓的重點（骨架） | 常見地雷 |
+|-----------|------------------------|---------|
+| "為什麼不每分鐘跑一次 `COUNT + ORDER BY`？" | 全表聚合 O(N)，高頻刷新 × 大表 = DB 被自己人打爆；先反問兩件事：要多即時、容忍多少誤差——答案直接決定架構複雜度差一個數量級 | 沒先問精確度需求就選方案；不知道「允許近似」是這題最大的設計槓桿 |
+| "Redis ZSET 什麼時候夠用、什麼時候不夠？" | ZINCRBY + ZREVRANGE 精確且 O(log N)，key 空間放得進單節點記憶體（百萬級 key）就夠用；十億級 key（全站 URL、搜尋詞）記憶體爆炸，這時才需要 CMS 近似 | 一上來就 CMS（過度設計）；或不知道 ZSET 的記憶體天花板大概在哪個量級 |
+| "Count-Min Sketch 為什麼只會高估、不會低估？" | hash 碰撞讓多個 key 累加到同一格，查詢取所有 hash 格的 min——min 仍可能含別人的計數（偏大）但絕不會少算自己的；跟 Bloom 同構（no false negative ↔ 永不低估）；高估的後果：長尾誤入榜，用 heap + 二次驗證緩解 | 講不出「為什麼取 min」；不知道單向誤差這個關鍵性質 |
+| "要『最近一小時』的 Top-K，sliding window 怎麼做？" | CMS 不能減量（decrement 會破壞不低估性質）→ 時間分桶：每桶一個 sketch，查詢合併最近 N 桶，過期桶整桶丟棄；桶粒度 vs 記憶體的 trade-off | 想對 CMS 做 decrement（做不到）；或每次滑動全量重算 |
+| "50 台機器各自統計，全局 Top-K 怎麼合併？" | CMS 同參數可逐格相加（線性可合併，map-reduce 友好）；各節點上送局部 top-N 候選集合併排序——但局部 top-10 的併集不保證涵蓋全局 top-10（某 key 在每台都排 11 名），候選數要放寬 | 以為各節點 top-10 合併取 top-10 就是對的（分佈式聚合的經典陷阱） |
+
+### Ride Matching (Uber / Delivery)
+
+| 面試官追問 | 好答案要抓的重點（骨架） | 常見地雷 |
+|-----------|------------------------|---------|
+| "百萬司機每 4 秒回報位置，這個寫入流怎麼扛？" | ~25 萬 writes/s；抓住資料特性：只要最新值（last-write-wins KV）、丟一筆無所謂（4 秒後又來）→ in-memory geo index + KV，不進 durable DB；歷史軌跡另走 async pipeline 進冷儲存 | 把位置更新寫進 PostgreSQL——把 ephemeral 資料當 durable 資料處理 |
+| "兩張訂單同時派給同一個司機，怎麼辦？" | matching 的核心是司機狀態的互斥：dispatch 時原子標記 busy（CAS），搶到的才發 offer；offer 有 timeout，拒絕/超時就釋放重派——本質跟搶庫存同構（司機 = 庫存量 1） | 只做「查附近」沒做狀態互斥；沒有 offer timeout 導致司機被幽靈訂單鎖死 |
+| "司機一直在移動，geo index 怎麼保持新鮮？" | geohash bucket：跨 cell 才更新 index（多數移動不跨 cell）、讀取容忍 4 秒 stale（業務無感）；兩階段：index 只出「候選集」，精確位置和排序查 KV | 每次位置更新都動 index；不區分候選篩選和精排兩個階段 |
+| "最近的司機就是最好的選擇嗎？" | 直線距離 ≠ 到達時間（河對岸問題）→ ETA 要路網；貪心逐單派會讓整體等待惡化 → 批次配對（每 2 秒一批做二分圖匹配）；fairness（司機收入分佈）也是隱含目標 | 只答「找最近的」；不知道批次匹配這個優化層次存在 |
+| "訂單狀態機哪些轉移最容易出 bug？" | 併發轉移：rider cancel 和 driver accept 同時到達（定義誰贏 + 輸方補償）、timeout 自動轉移和人為操作 race；解法：狀態轉移做成 CAS（帶 from-state 檢查），非法轉移拒絕 + 審計 log | 狀態機只畫 happy path；沒想過兩個「都合法」的事件同時發生 |
+| "Tinder 跟 Uber 的 matching 差在哪？" | 同骨架（geo 候選 + 雙向確認）但參數全變：非即時（異步 like）、N×N 不是 1×1 搶佔、無互斥需求、多了偏好排序/推薦層——展示「同 pattern 改約束」的遷移能力 | 硬搬 dispatch 機制；講不出哪些約束變了所以哪些元件可以拿掉 |
+
+## Phase 4 專題
+
+### Brownfield / Legacy Migration
+
+| 面試官追問 | 好答案要抓的重點（骨架） | 常見地雷 |
+|-----------|------------------------|---------|
+| "挑流量低谷停機切換不行嗎？" | 全球服務沒有共同半夜、資料量大到 copy 時間 > 可接受停機窗口；更本質：一次性切換 = 一次性風險，失敗連回滾都要再停一次機——漸進遷移是把一個大風險拆成 N 個可獨立回滾的小風險 | 只說「停機不好」講不出為什麼；沒抓到「風險拆分」這個核心論證 |
+| "dual-write 期間兩邊怎麼保證一致？" | 誠實回答：不能強一致（跨兩系統沒有共同 transaction）；設計上：舊系統是 source of truth 直到 cutover、寫新系統失敗只記 log 不擋主流程、靠 verification job 持續比對修復；提 CDC/binlog 是 dual-write 的替代路線（少一份雙寫程式碼） | 宣稱 dual-write 兩邊一定一致（分散式基本功破綻）；不知道要指定誰是 truth |
+| "backfill 歷史資料時線上還在寫，怎麼不漏不重？" | 順序關鍵：先開 dual-write 再 backfill（反過來中間的寫入會漏）；backfill 冪等（upsert）+ 用 version/updated_at 確保不覆蓋更新的資料；分批 + 限速保護線上 DB | 先 backfill 再 dual-write（經典漏資料順序錯誤）；backfill 全速跑把線上 DB 打掛 |
+| "你怎麼證明新系統是對的、敢切？" | 三層證據：shadow traffic 比對 response diff（不影響用戶）、資料層 verification（row count / checksum / 抽樣全比對）、金絲雀漸進 1%→10%→100%——每階段事先定義回滾觸發條件（diff rate / error rate 閾值） | 「測試都過了就切」；金絲雀沒有預先定義的回滾條件（出事時現場吵要不要回滾） |
+| "切到一半出事怎麼回滾？哪個階段最難回滾？" | 每階段回滾手段不同：proxy 切回（秒級）、停新寫（分鐘級）；最難是 cutover 之後——新系統已接受「只存在於新系統的寫入」，直接切回 = 資料遺失，所以 cutover 後要反向 dual-write（new→old）保留回滾窗口，直到信心足夠才 decommission | 以為回滾永遠只是「切回去」；不知道 cutover 後有資料回填問題 |
+
+---
+
 ## 使用建議（給 skill / 自學）
 
 | 模式 | 做法 |

@@ -46,7 +46,7 @@ Achievements must reward behaviors that align with genuine learning:
 |----|------|-----------------|-------------|
 | K1 | One-Liner ×10 | One-Liner Library in progress.md reaches 10 entries | 面試快答庫初具規模 |
 | K2 | One-Liner ×30 | One-Liner Library reaches 30 entries | 面試快答庫豐富了 |
-| K3 | Encyclopedia | One-Liner Library reaches 63 entries (complete) | 完整的面試百科 |
+| K3 | Encyclopedia | One-Liner Library reaches 69 entries (complete) | 完整的面試百科 |
 | K4 | Bug Squasher ×5 | 5 mistakes resolved (❌→✅) in Mistake Registry | 錯誤是最好的老師 |
 
 ### 🔥 CONSISTENCY (4) — Habit building

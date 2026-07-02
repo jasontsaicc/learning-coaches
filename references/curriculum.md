@@ -546,6 +546,7 @@ A student may still request standalone days ("教我 CAP 就好"); honor it, wit
 - **PoC**: Go simulation — N goroutines racing for limited stock, with/without locking; demonstrate oversell first, then fix it
 - Full architecture diagram
 - Notes with interview template
+- **📖 Cross-verify**: DDIA Ch 7 (Transactions) — compare the lost-update section with our TOCTOU derivation
 
 #### Day 56-57: Top-K / Real-Time Leaderboard ★★★
 **Prerequisites:** Day 26 (Bloom Filter — probabilistic structures family)
@@ -562,6 +563,7 @@ A student may still request standalone days ("教我 CAP 就好"); honor it, wit
 - **PoC**: Count-Min Sketch in Go, compare approximate vs exact counts under skewed traffic
 - Full architecture diagram
 - Notes with interview template
+- **📖 Cross-verify**: RedisBloom TOPK docs — check how their heavy-keeper variant differs from plain CMS + heap
 
 #### Day 58-59: Ride Matching (Uber) ★★★★ — Geo Capstone
 **Prerequisites:** Day 52-53 (Proximity Service)
@@ -579,6 +581,7 @@ A student may still request standalone days ("教我 CAP 就好"); honor it, wit
 - **PoC**: Geohash-bucketed matching simulator in Go
 - Full architecture diagram
 - Notes with interview template
+- **📖 Cross-verify**: Uber engineering blog on H3 — compare hex-grid vs geohash squares for neighbor lookup
 
 ### Phase 3 Gate
 > Full mock (scope-based, not timed) on a Tier 1 problem — all 4 steps + follow-ups pushed to the student's knowledge boundary. Scorecard ≥ 6/9.
@@ -634,7 +637,7 @@ These are pattern compositions of Tier 1/2 blocks — pull one in on demand rath
 ### Day 64-65: Mock Interview Round 1
 **Prerequisites:** All Phase 1-3
 **Story:** 模擬面試。小球不再提示。（角色：小球）
-**Story beats:** 1. 小球換了一種語氣，冷靜、禮貌但不給任何暗示——完全的面試官模式 2. 你中途卡住，習慣性看向小球求助，但他只是沉默等待 3. 結束後小球恢復正常：「你剛才有 30 秒的沉默，面試中這很致命。我們來練怎麼買時間」
+**Story beats:** 1. 小球換了一種語氣，冷靜、禮貌但不給任何暗示——完全的面試官模式 2. 你中途卡住，習慣性看向小球求助，但她只是沉默等待 3. 結束後小球恢復正常：「你剛才有 30 秒的沉默，面試中這很致命。我們來練怎麼買時間」
 
 **Day 64 — Mock 1:**
 - Full scope-based mock interview (no clock — interviewer drives via turns, redirects, and follow-ups)

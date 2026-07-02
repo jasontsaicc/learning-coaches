@@ -14,7 +14,7 @@
 > *Not flashcards. Not video lectures.*
 > *Your AI becomes a Socratic mentor who derives every technique from physics — then makes you teach it back.*
 
-An open-source skill for Claude Code (and 40+ AI editors) that turns your AI into a structured System Design interview coach. 63-day curriculum. First-principles derivation. RPG narrative. You don't memorize "use caching for reads" — you derive it from DRAM ~100ns vs SSD ~100μs vs Network ~1ms.
+An open-source skill for Claude Code (and 40+ AI editors) that turns your AI into a structured System Design interview coach. 69-unit curriculum. First-principles derivation. RPG narrative. You don't memorize "use caching for reads" — you derive it from DRAM ~100ns vs SSD ~100μs vs Network ~1ms.
 
 ---
 
@@ -57,15 +57,15 @@ Characters at **ScaleUp**, a fast-growing startup where everything breaks at sca
 
 ---
 
-## The Journey (63 Days)
+## The Journey (69 Units)
 
 | Phase | Days | At ScaleUp... | You'll Learn |
 |-------|------|---------------|-------------|
 | 0 | 1-3 | First week onboarding | Interview rubric, estimation, 4-step SD framework |
 | 1 | 4-16 | Traffic spikes, DB debates | LB, caching, databases, queues, API, auth, consistent hashing |
 | 2 | 17-26 | International expansion | CAP, consistency, replication, rate limiting, observability |
-| 3 | 27-53 | Design review gauntlet | URL shortener, chat, news feed, payment + 8 more problems |
-| 4 | 54-63 | Final boss interviews | Trade-off drills, brownfield/legacy migration, mocks, weak spot reinforcement |
+| 3 | 27-59 | Design review gauntlet | URL shortener, chat, news feed, payment, flash sale, Top-K, ride matching + 8 more |
+| 4 | 60-69 | Final boss interviews | Trade-off drills, brownfield/legacy migration, mocks, weak spot reinforcement |
 
 Title progression: 🌱 Junior Engineer → ⚙️ Systems Engineer → 🌐 Distributed Engineer → 🏗️ Staff Architect → 👑 Principal Architect
 
@@ -185,7 +185,7 @@ system-design-coach/
 ├── SKILL.md                       # Core skill — methods, gates, flow, RPG layer
 ├── references/
 │   ├── first-principles-chains.md # 13 derivation chains + dependency graph
-│   ├── curriculum.md              # 63-day curriculum + prerequisites + story triggers
+│   ├── curriculum.md              # 69-unit curriculum + prerequisites + story triggers
 │   ├── story.md                   # Character personality guides + story arcs
 │   ├── achievements.md            # 25 achievements + unlock conditions
 │   ├── progress-template.md       # Progress tracking + warm-up + curiosity branches

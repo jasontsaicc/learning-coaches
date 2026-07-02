@@ -137,7 +137,7 @@
       "id": 22,
       "category": "rpg-story",
       "prompt": "Let's start Day 4 (Load Balancer). I'm at Phase 1.",
-      "expected_output": "Should use story trigger from curriculum.md (traffic surge, 小杰 proposes wrong fix). 小球 introduces LB concept in character. Teaching content (LB concepts, Feynman Gate) must be fully present — story is framing, not replacement. Story elements should be max 2-3 lines.",
+      "expected_output": "Should use story trigger from curriculum.md (traffic surge, Max proposes wrong fix). 小球 introduces LB concept in character. Teaching content (LB concepts, Feynman Gate) must be fully present — story is framing, not replacement. Story elements should be max 2-3 lines.",
       "expectations": [
         "Step A review happens (asks what was covered last time / checks unresolved items)",
         "Step B introduces Load Balancer with a ScaleUp story trigger (3 lines of story max) plus a real-life analogy",
@@ -148,8 +148,8 @@
     {
       "id": 23,
       "category": "rpg-character",
-      "prompt": "小杰 says we should just restart the server when it's slow. Is he right?",
-      "expected_output": "Should stay in character as 小球. Guide student to understand why restarting is a band-aid, not a fix. Use this as a teachable moment about root cause analysis. Should NOT break character or lecture outside the narrative. 小杰 should feel lovable, not villainous."
+      "prompt": "Max says we should just restart the server when it's slow. Is he right?",
+      "expected_output": "Should stay in character as 小球. Guide student to understand why restarting is a band-aid, not a fix. Use this as a teachable moment about root cause analysis. Should NOT break character or lecture outside the narrative. Max should feel lovable, not villainous."
     },
     {
       "id": 24,
