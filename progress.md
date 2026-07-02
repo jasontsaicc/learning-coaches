@@ -32,6 +32,8 @@ Rules going forward:
 3. **題目驅動 (pull)** — 用 **Design a Distributed Cache** 當錨,把 CAP(Day 17-18)、Consistency Models(Day 19-20)、Replication & Leader Election(Day 21-22)折進這個設計題,理論在設計需要時才 just-in-time 拉進來,capped 在面試深度。
 4. 面試考的是 breadth of mental models + trade-off reasoning,**不是** CS 理論深度(linearizability 形式證明、consistency 數學模型 = PhD 範圍,不學)。
 
+**Scope decision (2026-07-02, S36 後 plan review):** 無明確面試日期 → 深度優先,全課表照走。從外部訓練營課表補進 3 個缺的 archetype(Day 54-59: Ticket Booking / Top-K / Ride Matching),Phase 4 順延為 Day 60-67(課表總長 67 天)。其餘訓練營題目(Dropbox/YouTube/Twitter/A-B Testing 等)= 既有 pattern 組裝,不排課,對照表見 `docs/pattern-map.md`。照目前 ~2.2 session/週的節奏,預估 2026 年 12 月初完課。Parked PoC triage:留 distributed cache(Day 38-39)+ rate limiter(Day 31-32),放掉 Circuit Breaker 獨立 PoC(概念已 5/5,邊際回報低)。
+
 ---
 
 ## Current Session (Breakpoint)
@@ -42,9 +44,9 @@ Rules going forward:
 - **兩條 coaching 設定本場建立(已存 memory)**:[[coaching-no-mechanical-gate-labels]](學生點名「Recall/Transfer」標籤太機械 → 收回,自然問) + [[coaching-aggressive-interviewer-drills]](學生主動要求 Drill 當 bar-raiser 用力追問,他真面試常被追問考倒)。
 - **Interview Drill ~4/7(未達 Phase3 線 5/7,練習非 Gate)**:✅ think aloud/scope(主動想到 enumeration 洩漏營業額=architect 級,加分)/用 Snowflake;🟡 trade-off WHY(給結論不給論證,被追問才展開=老毛病)/failure modes(SPOF 有 clock skew 沒主動帶);❌ operational(第4次監控掛蛋)+ capacity(「直接放棄」,我拆 1024×4 才跟上)。
 
-**Next session = Day 30 Snowflake Light PoC**(Go 實作 bit packing + clock skew 偵測;學生堅持手打,參 [[poc-student-types-everything]]+[[poc-go-drill-style]])。
+**Next session = 先清逾期複習(5 筆: Consistent Hashing / Load Balancer / Rate Limiting / Observability / Database B-tree-LSM,其中 Rate Limiting + Observability 是 Box 1 從未確認過,優先),再進 Day 30 Snowflake Light PoC**(Go 實作 bit packing + clock skew 偵測;學生堅持手打,參 [[poc-student-types-everything]]+[[poc-go-drill-style]])。複習清不完就佔滿整場,PoC 順延,不趕。
 
-**Pending PoC(park):** Circuit Breaker PoC + 分散式 Redis rate limiter → Day 31-32。Replication lag + Consistent hashing 獨立 PoC + distributed cache 完整實作 → Day 38-39。
+**Pending PoC(park):** 分散式 Redis rate limiter → Day 31-32。Consistent hashing 獨立 PoC + distributed cache 完整實作 → Day 38-39。~~Circuit Breaker PoC~~ + ~~Replication lag PoC~~ → 2026-07-02 triage 放掉(概念皆已 drill 至 5/5,邊際回報低;Day 38-39 replication 設計時若自然需要再拉回)。
 
 **Pending review(下次 Step A 帶):**
 - **Security 廣度(OAuth/JWT/session)** 只測了 crypto-primitives 一塊,full recall 仍欠 → Box 維持 2,下次補。
@@ -85,15 +87,18 @@ Rules going forward:
 | 35-37 | Chat System | ⬜ | — | |
 | 38-39 | Distributed Cache | ⬜ | — | |
 | 40-42 | News Feed | ⬜ | — | |
-| 43-45 | Payment System | ⬜ | Phase 3 Gate | |
+| 43-45 | Payment System | ⬜ | — | |
 | 46-47 | Metrics & Logging | ⬜ | — | |
 | 48-49 | Search Autocomplete | ⬜ | — | |
 | 50-51 | Web Crawler | ⬜ | — | |
 | 52-53 | Proximity Service | ⬜ | — | |
-| 54-55 | Trade-off Deep Dive | ⬜ | — | |
-| 56-57 | Mock Interview Round 1 | ⬜ | — | |
-| 58-59 | Weak Spot Reinforcement | ⬜ | — | |
-| 60-61 | Final Mock (Brutal) | ⬜ | Phase 4 Gate | |
+| 54-55 | Ticket Booking / Flash Sale | ⬜ | — | 訓練營補強：高並發庫存一致性 + distributed lock，含 Auction 變體 |
+| 56-57 | Top-K / Leaderboard | ⬜ | — | 訓練營補強：Count-Min Sketch（Bloom 的兄弟結構）|
+| 58-59 | Ride Matching (Uber) | ⬜ | Phase 3 Gate | Geo capstone：matching + dispatch + 狀態機，含 Delivery/Tinder 變體 |
+| 60-61 | Trade-off Deep Dive | ⬜ | — | |
+| 62-63 | Mock Interview Round 1 | ⬜ | — | |
+| 64-65 | Weak Spot Reinforcement | ⬜ | — | |
+| 66-67 | Final Mock (Brutal) | ⬜ | Phase 4 Gate | |
 
 ---
 
