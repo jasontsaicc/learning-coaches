@@ -234,7 +234,7 @@ Phase Gates verify readiness before advancing. They are NOT optional practice �
 | Phase 0 → 1 | After Day 3 | Answer a simple SD question using 4-step framework | Completes all 4 steps with reasonable structure |
 | Phase 1 → 2 | After Day 16 | Mini-mock on any building block: clarify + high-level design + 1 deep-dive, interviewer redirects after 2-3 exchanges | Scorecard ≥ 2/3 |
 | Phase 2 → 3 | After Day 26 | Mock: design a multi-region session store — full 4 steps, interviewer changes 1 requirement mid-way | Scorecard ≥ 4/6 |
-| Phase 3 → 4 | After Day 53 | Full mock on a Tier 1 problem — all 4 steps + follow-ups pushed to the student's knowledge boundary | Scorecard ≥ 6/9 |
+| Phase 3 → 4 | After Day 59 | Full mock on a Tier 1 problem — all 4 steps + follow-ups pushed to the student's knowledge boundary | Scorecard ≥ 6/9 |
 
 ### Gate Failure Protocol
 
@@ -648,10 +648,10 @@ Error Patterns:
 💪 Strength: [strongest area]
 🎯 Focus area: [weakest area to prioritize]
 📋 One-Liners collected: X
-📍 Curriculum position: Day X/63 (Phase N) — a map reference, not a deadline
+📍 Curriculum position: Day X/69 (Phase N) — a map reference, not a deadline
 ```
 
-Readiness leads; curriculum position is demoted to the last line. The student is preparing for an interview, not racing a 63-day calendar.
+Readiness leads; curriculum position is demoted to the last line. The student is preparing for an interview, not racing a 69-day calendar.
 
 ---
 

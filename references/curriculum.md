@@ -2,13 +2,13 @@
 
 > Target: Big tech SD interviews (FAANG, AWS, Google, etc.)
 > Pace: progress by **content units**, not by clock or calendar. Each "Day" is one Learning Unit
->   that may span several work-gaps. **63 learning units ≠ 63 calendar days**, expect 12-14 weeks
+>   that may span several work-gaps. **69 learning units ≠ 69 calendar days**, expect 12-14 weeks
 >   for a working engineer studying in spare time. Deep learning over memorization.
 > Approach: Discussion → PoC → Notes → Reflect
 
 ## Fast Path (3-6 months, 1-2 sessions/week)
 
-For a student with a real interview window, "finish all 63 units" is the wrong target; "interview-ready" is. The Fast Path:
+For a student with a real interview window, "finish all 69 units" is the wrong target; "interview-ready" is. The Fast Path:
 
 1. **Phase 0-1 as written** (thinking framework + building blocks) — these are the mental models everything else stands on.
 2. **Phase 2 via the Anchor Problem** (see Phase 2 header below) — theory pulled just-in-time at interview depth, not taught as standalone days.
@@ -311,7 +311,7 @@ A student may still request standalone days ("教我 CAP 就好"); honor it, wit
 
 ---
 
-## Phase 3: Classic SD Problems (Day 27-53)
+## Phase 3: Classic SD Problems (Day 27-59)
 
 > All Phase 3 topics require completion of Phase 1 + Phase 2 (enforced by Phase Gate).
 > Format: Day 1 = Discussion & Design | Day 2 = PoC + Diagram + Notes
@@ -462,7 +462,7 @@ A student may still request standalone days ("教我 CAP 就好"); honor it, wit
 - Notes with interview template
 - **📖 Cross-verify**: Stripe engineering blog on idempotency — check idempotency key lifecycle
 
-### Tier 2: Should Do (Day 46-53)
+### Tier 2: Should Do (Day 46-59)
 
 #### Day 46-47: Metrics & Logging System
 **Key Concepts:** Time-series DB, aggregation, sampling
@@ -528,30 +528,87 @@ A student may still request standalone days ("教我 CAP 就好"); honor it, wit
 - Notes with interview template
 - **📖 Cross-verify**: Alex Xu Vol 2 Ch 1 — compare Geohash precision levels
 
+#### Day 54-55: Ticket Booking / Flash Sale ★★★★
+**Prerequisites:** Day 8-9 (Database), Day 23-24 (Rate Limiting), Day 43-45 (Payment — idempotency)
+**Key Concepts:** Inventory consistency, hot-row contention, distributed lock, oversell prevention
+**Story:** 限量搶購活動，開賣 3 分鐘就超賣。（角色：Karen、Max、小球）
+**Story beats:** 1. Karen：「限量 1000 件，系統賣出了 1500 件，客服炸了」 2. Max：「加個 if 檢查庫存不就好了？」 3. 小球：「1000 個人同時通過那個 if 的瞬間，發生了什麼？」
+
+⚠️ **Common Misconception:** "Redis DECR alone solves overselling." No — DECR is atomic per command, but the reserve→pay→confirm flow spans multiple steps; without idempotency and a reconciliation path, crashes between steps still leak or double-sell inventory.
+
+**Day 54 — Design:**
+- 高並發搶票 flow: queue at the gate vs fight at the row
+- Approaches: DB row lock vs Redis atomic DECR vs queue serialization — trade-offs
+- Oversell 防線: pre-deduct + async confirm, reservation TTL, reconciliation
+- Covers the **Online Auction** variant: concurrent bids = hot-row writes + final consistency
+
+**Day 55 — PoC + Diagram:**
+- **PoC**: Go simulation — N goroutines racing for limited stock, with/without locking; demonstrate oversell first, then fix it
+- Full architecture diagram
+- Notes with interview template
+
+#### Day 56-57: Top-K / Real-Time Leaderboard ★★★
+**Prerequisites:** Day 26 (Bloom Filter — probabilistic structures family)
+**Key Concepts:** Count-Min Sketch, heavy hitters, Redis sorted sets, hot-key handling, windowing
+**Story:** Karen 要「即時熱銷排行榜」，你的第一版把 DB 打爆了。（角色：Karen、小球）
+**Story beats:** 1. Karen：「首頁要放即時 Top 10 熱銷榜」 2. 你每分鐘跑一次 `COUNT + ORDER BY`，流量一大 DB 就哀嚎 3. 小球：「你需要的是近似但即時，不是精確但遲到——想想 Bloom filter 教過你什麼」
+
+**Day 56 — Design:**
+- Exact (Redis ZSET) vs approximate (Count-Min Sketch + min-heap) — when scale forces the trade
+- CMS as Bloom filter's sibling: same hash-array trick, counts instead of membership
+- Time windows: tumbling vs sliding; merging per-node sketches
+
+**Day 57 — PoC + Diagram:**
+- **PoC**: Count-Min Sketch in Go, compare approximate vs exact counts under skewed traffic
+- Full architecture diagram
+- Notes with interview template
+
+#### Day 58-59: Ride Matching (Uber) ★★★★ — Geo Capstone
+**Prerequisites:** Day 52-53 (Proximity Service)
+**Key Concepts:** Real-time location ingest (write-heavy), supply-demand matching, dispatch, trip state machine, ETA
+**Story:** 附近取貨點上線後，Karen 想做即時配送——查詢只是一半。（角色：Karen、小球）
+**Story beats:** 1. Karen：「合作騎手要能即時接單，用戶要看到騎手在哪」 2. 你用 Day 52 的 geo index 查到附近騎手，但兩張單派給了同一個人，現場大亂 3. 小球：「proximity 回答『誰在附近』，matching 要回答『誰該接這單』——這是狀態機問題」
+
+**Day 58 — Design:**
+- Location update pipeline: millions of drivers pinging every few seconds — geo index refresh strategy
+- Matching: nearest-N candidates → dispatch → accept/timeout → re-dispatch
+- Trip state machine: requested → matched → picked_up → completed (+ cancel paths)
+- Covers **Local Delivery** and **Tinder** variants — same geo + matching 骨架, different matching rules
+
+**Day 59 — PoC + Diagram:**
+- **PoC**: Geohash-bucketed matching simulator in Go
+- Full architecture diagram
+- Notes with interview template
+
 ### Phase 3 Gate
 > Full mock (scope-based, not timed) on a Tier 1 problem — all 4 steps + follow-ups pushed to the student's knowledge boundary. Scorecard ≥ 6/9.
 
 ### Tier 3: Nice to Have (Optional)
 
-Video Streaming, Cloud Storage, Distributed Task Scheduler, Ticket/Booking System — concepts already covered by Tier 1/2.
+These are pattern compositions of Tier 1/2 blocks — pull one in on demand rather than scheduling it:
+- **Cloud Storage (Dropbox/Drive)**: chunking, delta sync, metadata DB, version conflicts (= consistency models applied)
+- **Video Streaming (YouTube) / Instagram**: media upload + transcode pipeline (= async queue) + CDN + feed (Day 40-42)
+- **Distributed Task Scheduler**: DAG dependencies, retries, exactly-once firing (= queue + idempotency)
+- **A/B Testing Platform**: traffic splitting + feature flags + metrics collection (= Day 25/46-47 applied)
+- **Twitter**: News Feed (Day 40-42) at higher scale with hot-content distribution
 
 ---
 
-## Phase 4: Advanced & Mock Interviews (Day 54-63)
+## Phase 4: Advanced & Mock Interviews (Day 60-69)
 
-### Day 54-55: Trade-off Analysis Deep Dive
+### Day 60-61: Trade-off Analysis Deep Dive
 **Prerequisites:** All Phase 1-3
 **Story:** 回顧成長。準備面對最難的挑戰。（角色：小球）
 **Story beats:** 1. 小球拿出你 Day 1 的筆記跟現在對比：「你看你走了多遠」 2. 但隨即嚴肅：「面試不考你會多少，考的是你能不能在壓力下做正確的取捨」 3. 小球開始用快節奏丟 trade-off 情境，不給你太多思考時間——這就是面試的節奏
 
-**Day 54 — Trade-off Scenarios:**
+**Day 60 — Trade-off Scenarios:**
 - Practice specific trade-off scenarios (rapid-fire, a few exchanges each)
 - Cost estimation for designs
 
-**Day 55 — Trap & Pivot Drills:**
+**Day 61 — Trap & Pivot Drills:**
 - Trap & Pivot Drills — practice graceful pivots when initial design hits a wall
 
-### Day 56-57: Brownfield / Legacy Migration ★★★★
+### Day 62-63: Brownfield / Legacy Migration ★★★★
 **Prerequisites:** All Phase 1-3
 **Story:** ScaleUp 的單體訂單系統撐不住了，但不能停機重寫。（角色：小球、Karen）
 
@@ -559,7 +616,7 @@ Video Streaming, Cloud Storage, Distributed Task Scheduler, Ticket/Booking Syste
 
 ⚠️ **Common Misconception:** 「migration 就是把資料 copy 到新系統」。錯。難的是「遷移期間新舊系統並存、資料持續變動」下的一致性與可回滾性。
 
-**Day 56 — Migration Strategy & Patterns:**
+**Day 62 — Migration Strategy & Patterns:**
 - Greenfield vs Brownfield：為什麼改造比新建難（不能停機、有舊資料、有既有依賴與呼叫方）
 - **Strangler Fig**：用 proxy/router 逐步把流量從舊系統導到新系統，舊系統慢慢「被絞殺」
 - **Dual-write + backfill**：新舊資料庫雙寫 + 回填歷史資料，怎麼保證一致、怎麼驗證
@@ -567,51 +624,51 @@ Video Streaming, Cloud Storage, Distributed Task Scheduler, Ticket/Booking Syste
 - **Cutover & rollback**：漸進切換（canary %）、出事怎麼安全退回
 - **DevOps**：feature flag、藍綠/金絲雀部署、遷移期的雙重監控（新舊系統同時看）
 
-**Day 57 — PoC + Design:**
+**Day 63 — PoC + Design:**
 - **Design exercise**：把 ScaleUp 的 monolith 訂單模組拆成獨立的 event-driven Order Service，零停機
 - 畫出 migration 階段圖：strangler proxy → dual-write → backfill → shadow → cutover → decommission
 - **PoC**：用 Go 寫一個 strangler proxy（依 feature flag / % 把請求路由到舊 or 新 handler）+ dual-write 範例
 - Notes：每個階段的 failure mode 與 rollback 計畫
 - **🔗 連回你的工作**：對照你現在維護的某個系統，這套手法哪一步用得上、哪一步最危險
 
-### Day 58-59: Mock Interview Round 1
+### Day 64-65: Mock Interview Round 1
 **Prerequisites:** All Phase 1-3
 **Story:** 模擬面試。小球不再提示。（角色：小球）
 **Story beats:** 1. 小球換了一種語氣，冷靜、禮貌但不給任何暗示——完全的面試官模式 2. 你中途卡住，習慣性看向小球求助，但他只是沉默等待 3. 結束後小球恢復正常：「你剛才有 30 秒的沉默，面試中這很致命。我們來練怎麼買時間」
 
-**Day 58 — Mock 1:**
+**Day 64 — Mock 1:**
 - Full scope-based mock interview (no clock — interviewer drives via turns, redirects, and follow-ups)
 - Detailed feedback on 4 dimensions
 
-**Day 59 — Feedback + Re-do:**
+**Day 65 — Feedback + Re-do:**
 - Practice thinking aloud, following interviewer hints
-- Re-do weak sections from Day 58's mock
+- Re-do weak sections from Day 64's mock
 
-### Day 60-61: Weak Spot Reinforcement
+### Day 66-67: Weak Spot Reinforcement
 **Prerequisites:** All Phase 1-3
 **Story:** 弱點補強衝刺。（角色：小球）
-**Story beats:** 1. 小球拿出 Day 56 的 scorecard：「你的 trade-off 分析還是太淺，每次都只講優缺點，沒有量化」 2. 你回頭翻之前的筆記，發現有些概念以為懂了其實只記了表面 3. 小球：「離面試剩不到一週。現在不是學新東西的時候，是把會的磨到刀刃利」
+**Story beats:** 1. 小球拿出 Day 64 的 scorecard：「你的 trade-off 分析還是太淺，每次都只講優缺點，沒有量化」 2. 你回頭翻之前的筆記，發現有些概念以為懂了其實只記了表面 3. 小球：「離面試剩不到一週。現在不是學新東西的時候，是把會的磨到刀刃利」
 
-**Day 60 — Review Patterns:**
+**Day 66 — Review Patterns:**
 - Review all notes, identify patterns in mistakes
 
-**Day 61 — Re-do Designs:**
+**Day 67 — Re-do Designs:**
 - Re-do 2-3 difficult designs
 - Practice articulating trade-offs in 2-3 sentences
 
-### Day 62-63: Final Mock Interview (Brutal Mode)
+### Day 68-69: Final Mock Interview (Brutal Mode)
 **Prerequisites:** All Phase 1-3
 **Story:** 最終模擬。全力以赴。（角色：小球）
 **Story beats:** 1. 小球：「今天我不是你的導師，我是 Google L5 面試官。準備好了嗎？」 2. 面試進行到一半，小球突然改需求：「剛剛說的日活從 10 萬變成 1 億，你的設計還撐得住嗎？」 3. 結束後小球笑了：「不管結果怎樣，你已經不是 Day 1 那個愣住的人了」
 
-**Day 62 — Final Mock 1:**
+**Day 68 — Final Mock 1:**
 - Full mock with interruptions and requirement changes (interviewer interrupts mid-thought, swaps a requirement, pushes follow-ups to the knowledge boundary)
 
-**Day 63 — Final Mock 2:**
+**Day 69 — Final Mock 2:**
 - Full mock, double trap drills — chaining pivots without losing composure
 
 ### Phase 4 Gate
-> Full final mock (scope-based, not timed — Day 62 or 63). Scorecard ≥ 6/9 on both final mocks.
+> Full final mock (scope-based, not timed — Day 68 or 69). Scorecard ≥ 6/9 on both final mocks.
 
 ---
 
