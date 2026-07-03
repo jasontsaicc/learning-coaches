@@ -46,7 +46,7 @@
 
 **正確做法:** 判斷句「**Would a restart fix this?**」Yes(自己 deadlock/卡死)→ liveness 可管;No(DB/下游/外部依賴,重啟也修不好)→ 那是 readiness,頂多切流量等恢復。liveness 只檢查「我這個 process 還活著嗎」。
 
-**下次抽考日:** 2026-07-02 (2026-06-25 抽考通過,核心判斷句即答對;worst-case 連鎖經 3 段引導後完整講出:慢 DB → 全 Pod liveness 同時失敗 → 同時 restart「羊群效應/thundering herd」→ 服務從『慢』跳級成 CrashLoopBackOff 全掛 → reconnection 風暴回壓 DB 正回饋。推 +7)
+**下次抽考日:** 2026-07-10 (2026-06-25 抽考通過核心判斷句;**2026-07-03 再抽 PASS**:自己講出判斷句「重啟能不能解決」+ 正回饋迴圈(重啟修不好→持續重啟→DB 更重)+ 羊群效應「同時失效」概念,唯英文詞 thundering herd 忘了(概念本懂,已當場撈回)。推 +7)
 
 ---
 
@@ -87,3 +87,16 @@
 **正確做法:** DNS 解析失敗的排障第一刀 = **先用 FQDN 測一次**,把「伺服器壞 vs 發問端(client/search/工具)壞」二分:FQDN 通 → CoreDNS 沒事,往 client/resolver 查;FQDN 不通 → 才查 CoreDNS。別拿 busybox 測叢集 DNS,用 `nicolaka/netshoot`(正規 dig/nslookup)。絕不因 nslookup 失敗就亂砍/重啟 CoreDNS。
 
 **下次抽考日:** 2026-07-08 (2026-07-01 抽考:一開始把 conntrack 誤拉進 DNS 題=層級混淆,經拆解後守住「全名測得到→CoreDNS 沒壞→別重啟」的操作判斷;為什麼由教練補成完整因果。過,推 +7)
+
+---
+
+**日期:** 2026-07-03
+**主題:** P2a Ingress lab — `--dry-run=client` 綠燈騙人 + port vs targetPort 靜默不通
+
+**踩的坑:** 手打 shop-ingress.yaml 有多個 bug(`numer`拼錯 number、`pathType: prefix` 小寫、`name`/`port` 少縮一層掉到 `service:` 外)。`kubectl apply --dry-run=client` 卻印 `created (dry run)` 說沒事,實際 `kubectl apply` 失敗、`get ingress` 空的(沒建起來,還誤以為成功)。另外 backend Service 少寫 `targetPort`(預設=port=80,但 container 聽 5678)/ 或 targetPort 打錯數字(5680)→ apply 成功但 curl connection refused。
+
+**根因:** ① `--dry-run=client` 只在本機做 YAML 解析 + 基本結構檢查,**不認 kind 的完整 schema**,unknown field / enum 大小寫一律放行。真正的 strict decoding(unknown field 藏寶圖,同 2026-06-18 那條坑)發生在 **API Server = server 端**。② `port`(Service 對外門牌)vs `targetPort`(真正轉進 container 的 port)兩個都是合法數字,schema 不會擋,只有真的 curl 下去才現形。targetPort 填錯 = kube-proxy 的 DNAT 把封包送到沒人聽的 port → connection refused。
+
+**正確做法:** 擋 typo 的那關要用 `kubectl apply --dry-run=server`(或 CI 用 kubeconform 帶 schema),client 會漏。讀 server 噴的 `unknown field "spec.rules[0]...numer"` 完整路徑 → 回檔案定位那一層那個欄位改。記 port=門牌、targetPort=真正的 container port,不確定就 `kubectl get svc -o yaml` 對 container 實際 listen port。
+
+**下次抽考日:** 2026-07-06
