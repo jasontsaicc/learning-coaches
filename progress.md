@@ -13,9 +13,9 @@
 |-------|-------|
 | **Start date** | 2026-03-04 |
 | **Current phase** | Phase 3 🏗️ |
-| **Current day** | **Day 29 Unique ID Generator 設計+理論完成 (S36, Snowflake 全 chunk 過 + Drill ~4/7)** → 下一步 = Day 30 Snowflake Light PoC |
+| **Current day** | **S37 = Meta Review 完成 → 轉 execution-heavy。** 下一步 = 清逾期複習 + Drill Gauntlet 第一場（Day 30 PoC 順延） |
 | **Language mode** | Bilingual — S27 切回繁中為主（學生英文閱讀疲勞），術語保留英文 |
-| **Session count** | 36 |
+| **Session count** | 37 |
 | **Last weekly review** | 33 (S33 = WR4 完成) |
 
 ---
@@ -33,11 +33,24 @@ Rules going forward:
 3. **題目驅動 (pull)** — 用 **Design a Distributed Cache** 當錨,把 CAP(Day 17-18)、Consistency Models(Day 19-20)、Replication & Leader Election(Day 21-22)折進這個設計題,理論在設計需要時才 just-in-time 拉進來,capped 在面試深度。
 4. 面試考的是 breadth of mental models + trade-off reasoning,**不是** CS 理論深度(linearizability 形式證明、consistency 數學模型 = PhD 範圍,不學)。
 
+**Execution-Heavy overlay (2026-07-03, S37 meta review):** 在深度優先課表之上疊一層 — 暫停「每場一個新 archetype」的 acquisition 節奏,改 drill 為主（Drill Gauntlet）。理由:Phase 2 後已無知識缺口只有執行缺口。首攻 #1 結論不給論證。完整 protocol 見 `docs/coaching-brief.md` [Execution-Heavy Mode]。unprompted 三指標各 3 連達標後可回課表節奏。
+
 **Scope decision (2026-07-02, S36 後 plan review):** 無明確面試日期 → 深度優先,全課表照走。從外部訓練營課表補進 3 個缺的 archetype(Day 54-59: Ticket Booking / Top-K / Ride Matching),Phase 4 順延為 Day 60-69(課表總長 69 units;含 skill 新版的 Brownfield Migration Day 62-63)。本機 sd-coach skill 原落後 remote 24 commits,2026-07-02 已同步至新版(Teach Yuki/RPG/Fast Path/Brownfield),3 個 archetype 是重放在新版上。其餘訓練營題目(Dropbox/YouTube/Twitter/A-B Testing 等)= 既有 pattern 組裝,不排課,對照表見 `docs/pattern-map.md`。照目前 ~2.2 session/週的節奏,預估 2026 年 12 月初完課。Parked PoC triage:留 distributed cache(Day 38-39)+ rate limiter(Day 31-32),放掉 Circuit Breaker 獨立 PoC(概念已 5/5,邊際回報低)。
 
 ---
 
 ## Current Session (Breakpoint)
+
+✅ **Session 37 = Meta Review（教學模式檢討，非教學場）。** 全量分析 36 場 → 見 `docs/coaching-brief.md` 更新。
+- **核心 reframe：** 五弱點裡四個共用一個底層機制 = 壓力下只輸出「結論」、藏「推導」。教學段場場能推導，drill 段品質斷崖下跌。差別只在有沒有人盯。
+- **學生拍板兩個決定：** (1) 節奏轉 **execution-heavy**（暫停新 archetype，插 Drill Gauntlet 純加壓 mock）;(2) 首攻 **#1 結論不給論證**。
+- **新機制（已寫進 brief）：** drill 現行格式在獎勵壞習慣（裸結論→追問→補完→給分）。改三條硬規則：第一句就評分 / 裸結論打回不接「為什麼」/ 追蹤 unprompted-complete rate。監控焊進框架當第 5 步「3AM page test」。強先驗劫持概念進「+2 天 re-check」格。
+
+**Next session = execution-heavy 開跑。** 先清逾期複習（5 筆，Rate Limiting + Observability 是 Box 1 從未確認,優先），再進 **Drill Gauntlet 第一場**（混合舊題 bar-raiser，用三條硬規則練 unprompted-argument）。Day 30 Snowflake Light PoC 順延（PoC 屬 execution 性質可保留,但排在 Gauntlet 之後）。
+
+---
+
+## 📦 S37 前的原 breakpoint（保留參考）
 
 ✅ **Session 36 完成（Day 29 Unique ID Generator 設計+理論,Snowflake)。** 筆記 `notes/day29-unique-id-generator.md`。
 - **問題錨定教法奏效**:從 KGS(上場)橋接 — 「不准中央配號,100 台各自發唯一 ID」→ 學生**自己推出** Snowflake 三段骨架(machineID 不撞跨機器 → 加 counter 同台不撞 → 重啟撞號 → 加 timestamp)。timestamp 放最高位用「日期格式 `2026-06-28` vs `28-06-2026`」比喻打通(「排序由最高位主宰」)。
@@ -246,7 +259,7 @@ Rules going forward:
 | **Title** | 🏗️ Staff Architect |
 | **Current streak** | 2 週 🔥 (連續活躍週：上週 S31 + 本週 S32-S36,同週不加碼) |
 | **Longest streak** | 4 (days, pre-weekly) |
-| **Last session date** | 2026-06-28 |
+| **Last session date** | 2026-07-03 (S37 meta review) |
 | **Last story summary** | Session 36。Day 29 Unique ID Generator(Snowflake)。從上場 KGS 橋接出招「不准中央配號,100 台各自發唯一 ID」,學生**自己一步步推出** Snowflake 三段骨架:machineID 跨機器不撞 → 加 counter 同台不撞 → 重啟撞號 → 加 timestamp 永遠往前。timestamp 為何放最高位用「日期 `2026-06-28` 排得對、`28-06-2026` 排亂掉」打通。最大雷 clock skew 從「只覺得很危險」被逼出精確機制(倒退→重入毫秒→seq 歸零→重發=撞號)。本場學生點名兩件事改 coaching:嫌「Recall/Transfer」標籤太機械(收回)、主動要求 Drill 當 bar-raiser 用力追問(他真面試常被考倒)。Drill ~4/7,enumeration 洩漏營業額的資安觀點零提示自己冒出(亮點),但 operational 監控第 4 次掛蛋、capacity 一看 2^12 就放棄(拆 1024×4 才跟上)。|
 
 ---
