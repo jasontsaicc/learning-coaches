@@ -41,12 +41,15 @@ Rules going forward:
 
 ## Current Session (Breakpoint)
 
-✅ **Session 37 = Meta Review（教學模式檢討，非教學場）。** 全量分析 36 場 → 見 `docs/coaching-brief.md` 更新。
-- **核心 reframe：** 五弱點裡四個共用一個底層機制 = 壓力下只輸出「結論」、藏「推導」。教學段場場能推導，drill 段品質斷崖下跌。差別只在有沒有人盯。
-- **學生拍板兩個決定：** (1) 節奏轉 **execution-heavy**（暫停新 archetype，插 Drill Gauntlet 純加壓 mock）;(2) 首攻 **#1 結論不給論證**。
-- **新機制（已寫進 brief）：** drill 現行格式在獎勵壞習慣（裸結論→追問→補完→給分）。改三條硬規則：第一句就評分 / 裸結論打回不接「為什麼」/ 追蹤 unprompted-complete rate。監控焊進框架當第 5 步「3AM page test」。強先驗劫持概念進「+2 天 re-check」格。
+🔄 **Session 38 = execution-heavy 開跑，進行中（跨機器接續：學生換公司電腦繼續）。** 模型改用 Opus（學生偏好，見 [[coaching-model-opus-ok]]）。
+- **Part 1 逾期複習進行中（5 筆）。已完成 1/5：**
+  - ✅ **Rate Limiting failure-timeline PASS**：本地計數陷阱「10 台 ×1000 = 10000/min」冷推出來（S28 的 N×limit 28 天後仍在），DB 超載→timeout 結論補一個提示就到。補了「無聲失敗」點（每台全綠但合計 10 倍 = 監控盲點反例）。→ **Box 1→2**。但 one-liner 機制層（Token Bucket/Sliding Window/兩層/CB）掉了，下次再測。
+  - ⏳ **下一題 = Observability（複習 2/5）**。已出題等學生答：(1) one-liner 三支柱各答什麼問題；(2) failure-timeline「30 微服務、結帳轉 8 秒失敗，Metrics/Logs/Traces 按什麼順序查、為什麼」。
+- **剩餘複習：** Observability(2) → Database B-tree/LSM(3) → Consistent Hashing(4) → Load Balancer(5)。清完才進 Drill Gauntlet。
 
-**Next session = execution-heavy 開跑。** 先清逾期複習（5 筆，Rate Limiting + Observability 是 Box 1 從未確認,優先），再進 **Drill Gauntlet 第一場**（混合舊題 bar-raiser，用三條硬規則練 unprompted-argument）。Day 30 Snowflake Light PoC 順延（PoC 屬 execution 性質可保留,但排在 Gauntlet 之後）。
+**三條硬規則本場生效（execution-heavy）：** 第一句就評分 / 裸結論直接打回不接「為什麼」/ 追蹤 unprompted-argument·ops·no-freeze-capacity 三指標。監控收尾＝3AM page test 當第 5 步硬關卡。
+
+**Next（接續點）：** 學生回答 Observability 兩題 → 判過/退 Box → 續清 Database/CH/LB 三筆 → **Drill Gauntlet 第一場**（混合舊題 bar-raiser）。Day 30 Snowflake Light PoC 排在 Gauntlet 之後。
 
 ---
 
@@ -303,7 +306,7 @@ Rules going forward:
 | Load Balancer | 2 | 2026-06-05 (WR3 recall 4/5 pass, Box 1→2) |
 | Consistency Models | 2 | 2026-06-21 (S31 暖身 recall PASS「光譜+等同步 trade-off」無需 scaffolding,Box 1→2) |
 | Replication & Leader Election | 2 | 2026-06-19 (S30 recall PASS「read replica≠strong 因 replication lag」,Box 1→2) |
-| Rate Limiting & Circuit Breaker | 1 | 2026-06-10 (S28 新學,Box 1, overdue) |
+| Rate Limiting & Circuit Breaker | 2 | 2026-07-06 (S38 failure-timeline PASS: 本地計數 N×limit 冷推出,Box 1→2;但 one-liner 機制層掉,下次補測) |
 | Observability | 1 | 2026-06-16 (S29 新學,Box 1, overdue) |
 | Bloom Filter & Gossip | 3 | 2026-07-03 (S34 Bloom+Cache 組合重講 Feynman PASS,no false negative/bit 機制自講,Box 2→3) |
 | Database (B-tree/LSM) | 1 | 2026-06-17 (S30 LSM 一度遺忘→喚回,backfill Box 1;S33 測的是 selection 軸非 LSM 內部,此項仍欠) |
