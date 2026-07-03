@@ -13,9 +13,9 @@
 |-------|-------|
 | **Start date** | 2026-03-04 |
 | **Current phase** | Phase 3 🏗️ |
-| **Current day** | **S37 = Meta Review 完成 → 轉 execution-heavy。** 下一步 = 清逾期複習 + Drill Gauntlet 第一場（Day 30 PoC 順延） |
+| **Current day** | **S38 完成（跨機器接續）= Rate Limiting 複習 + Day 31 Distributed Rate Limiter 完整設計自推。** 下一步 = 續清 execution-heavy 逾期複習（Observability/DB/CH/LB）+ Drill Gauntlet（含 rate limiter bar-raiser） |
 | **Language mode** | Bilingual — S27 切回繁中為主（學生英文閱讀疲勞），術語保留英文 |
-| **Session count** | 37 |
+| **Session count** | 38 |
 | **Last weekly review** | 33 (S33 = WR4 完成) |
 
 ---
@@ -41,15 +41,19 @@ Rules going forward:
 
 ## Current Session (Breakpoint)
 
-🔄 **Session 38 = execution-heavy 開跑，進行中（跨機器接續：學生換公司電腦繼續）。** 模型改用 Opus（學生偏好，見 [[coaching-model-opus-ok]]）。
-- **Part 1 逾期複習進行中（5 筆）。已完成 1/5：**
-  - ✅ **Rate Limiting failure-timeline PASS**：本地計數陷阱「10 台 ×1000 = 10000/min」冷推出來（S28 的 N×limit 28 天後仍在），DB 超載→timeout 結論補一個提示就到。補了「無聲失敗」點（每台全綠但合計 10 倍 = 監控盲點反例）。→ **Box 1→2**。但 one-liner 機制層（Token Bucket/Sliding Window/兩層/CB）掉了，下次再測。
-  - ⏳ **下一題 = Observability（複習 2/5）**。已出題等學生答：(1) one-liner 三支柱各答什麼問題；(2) failure-timeline「30 微服務、結帳轉 8 秒失敗，Metrics/Logs/Traces 按什麼順序查、為什麼」。
-- **剩餘複習：** Observability(2) → Database B-tree/LSM(3) → Consistent Hashing(4) → Load Balancer(5)。清完才進 Drill Gauntlet。
+✅ **Session 38 完成（跨機器接續，模型 Opus）。兩段跨機器：**
+- **(工作 PC) execution-heavy Part 1 逾期複習 1/5：** ✅ **Rate Limiting failure-timeline PASS** — 本地計數陷阱「10 台 ×1000 = 10000/min」冷推出來（S28 的 N×limit 28 天後仍在），補「無聲失敗」點（每台全綠但合計 10 倍 = 監控盲點反例）。→ **Box 1→2**。但 one-liner 機制層（Token Bucket/Sliding Window/兩層/CB）掉了，下次再測。
+- **(這台) Day 31 Distributed Rate Limiter 完整設計 —— 全鏈自推：** 從 Rate Limiting 暖身(同上,順接)→ 100 台各跑各的 = 孤島 → N×limit=10,000 → 共享 Redis counter(選對「共享計數器」非「一台限流機器」=SPOF)→ 搶票超賣比喻教 race condition → 學生**自己跳到** Redis 單執行緒 DECR 原子性 → TTL 過期(Fixed Window)取代排程手動補 → 抓到邊界 2 倍破綻 → sliding window「往回看 60s」補洞 → 多步 race 重演 → Lua 捆多步成原子收口。主軸就一個字 atomicity。筆記 `notes/day31-distributed-rate-limiter.md`+mindmap。
+  - 🌟 **頭號弱點突破**：收尾 One-Liner 主動把「選 sliding window **因為**往回算 request」結論+論證綁一起,沒等追問(execution-heavy 首攻目標本場有一次達標)。
+  - 🌟 自抽「**主動 vs 被動**」遷移心法(TTL 過期 > 排程主動清),連到 DevOps 半夜 job 掛。
+  - ⚠️ **給我自己的教訓**:本場 3 次「有點亂/什麼意思」= 我一次塞太多 + 抽象 meta 問句;退小步+具象比喻(搶票、計數紙自燒)後全通。非概念不懂,是 pacing。
 
-**三條硬規則本場生效（execution-heavy）：** 第一句就評分 / 裸結論直接打回不接「為什麼」/ 追蹤 unprompted-argument·ops·no-freeze-capacity 三指標。監控收尾＝3AM page test 當第 5 步硬關卡。
+**execution-heavy 三條硬規則仍生效：** 第一句就評分 / 裸結論直接打回不接「為什麼」/ 追蹤 unprompted-argument·ops·no-freeze-capacity 三指標。監控收尾＝3AM page test 當第 5 步硬關卡。
 
-**Next（接續點）：** 學生回答 Observability 兩題 → 判過/退 Box → 續清 Database/CH/LB 三筆 → **Drill Gauntlet 第一場**（混合舊題 bar-raiser）。Day 30 Snowflake Light PoC 排在 Gauntlet 之後。
+**Next（接續點，優先序）：**
+1. **execution-heavy 續清逾期複習（剩 4 筆）**：Observability(2/5,已出題:①三支柱各答什麼問題 ②30 微服務結帳轉 8 秒失敗 Metrics/Logs/Traces 查序) → Database B-tree/LSM(3) → Consistent Hashing(4) → Load Balancer(5)。清完才進 Gauntlet。
+2. **Drill Gauntlet 第一場**（混合舊題 bar-raiser）—— **新增一題 Distributed Rate Limiter bar-raiser**（本場只教概念未 pressure-test,capacity 也沒做,一起補）。
+3. Day 30 Snowflake Light PoC 排在 Gauntlet 之後（park）。
 
 ---
 
@@ -99,7 +103,7 @@ Rules going forward:
 | — | Multi-Region Session Store (design) | 🟢 | **Phase 2 Gate ✅** | S31. Transfer 題(沒設計過)。自組 home-region + Redis(TTL self-heal) + geo-routing + fetch-on-miss；中途改需求(US region 掛)→ 自戳設計洞(無 source of truth=被登出)→ async 複製到 backup(replication lag=資料遺失窗口)+ AP 選擇。Operational: P99 + replication lag。5/6 PASS。弱點: 答太精簡靠追問 + 兩次主動要提示。|
 | 27-28 | URL Shortener | 🟢 | — | S32 設計 + S33 地基 + **S34 Interview Drill 8/9 PASS** + **S35 Full PoC 全綠**。capacity 反推學會 62≈2⁶、counter+base62 主動講足 trade-off、NoSQL access-pattern 理由、讀路徑擺對 Bloom、三次被質疑自修正、KGS range allocation。**S35 PoC**:`projects/day28-url-shortener/main.go` 跑 50 萬碼 0 碰撞 + `-race` 零警告 + 失敗注入丟空洞號仍 0 碰撞,把設計從「我相信」變「程式證明」。盲點:operational 監控仍是真實 Drill 中要證明的習慣。|
 | 29-30 | Unique ID Generator | 🟢 | — | S36 設計+理論。從 KGS 橋接,**自己推出** Snowflake 三段(machineID/seq/timestamp)+ timestamp 放最高位(日期格式比喻)+ clock skew 機制(倒退→重入毫秒→seq 歸零→撞號,拒發>等)+ machineID 開機協調一次(ZooKeeper 不變瓶頸)+ 四路線光譜(協調越少越 scale)+ KGS vs Snowflake(集中產值=短 vs 本地算=可排序)。理論一次過幾乎沒卡。PoC(bit packing + clock skew 偵測)park 到 Day 30。Drill ~4/7:operational/capacity 仍弱。|
-| 31-32 | Distributed Rate Limiter | ⬜ | — | |
+| 31-32 | Distributed Rate Limiter | 🟢 | — | S38 設計/理論。全鏈自推:100 台孤島→N×limit=10k→共享 Redis counter→race condition(搶票比喻)→單執行緒 DECR 原子性→TTL 過期(Fixed Window)→邊界 2 倍破綻→sliding window→多步 race→Lua 收口。主軸 atomicity(單一命令 vs Lua 捆多步)。🌟 收尾 One-Liner 主動綁結論+論證(頭號弱點突破)+自抽「主動 vs 被動」心法。**Interview Drill + PoC 未做(概念日,放慢略過)→ Gauntlet 補 rate limiter bar-raiser + capacity。** |
 | 33-34 | Notification System | ⬜ | — | |
 | 35-37 | Chat System | ⬜ | — | |
 | 38-39 | Distributed Cache | ⬜ | — | |
@@ -225,6 +229,8 @@ Rules going forward:
 | 36 | 29 | Interview habit (trade-off) | Drill 給結論不給論證(「Snowflake 最適合」/ DB auto-increment 一句帶過) | 🟡 Improving (S36, 啟動 bar-raiser 加壓;被追問後能補足 DB SPOF + Snowflake 機制,但仍未做到第一次開口就附論證) |
 | 36 | 29 | Interview habit (operational) | Drill 全程沒主動提監控(第4次重複) | ❌ Unresolved (S29/30/34/36;固定要求:設計收尾必加監控句=clock skew alert+發號QPS+sequence打滿率) |
 | 36 | 29 | Capacity estimation | 算 2^12/秒「直接放棄」 | 🟡 Improving (S36, 拆 `1024×4×1000≈400萬/秒` 後跟上;非真不會,是被 2^n 寫法嚇退,固定提醒拆次方) |
+| 38 | 31 | Rate Limiter (counter reset) | counter 扣到 0 後想用 INCR「手動補回去」 | ✅ Resolved (S38, 改用 TTL 被動過期:key 塞當前分鐘+EXPIRE 60s,每分鐘天生新 key,舊的自燒;學生自抽「主動 vs 被動」心法) |
+| 38 | 31 | Interview habit (commit) | 中段「使用一個統一的限流器**嗎**?」用問句把球丟回 AI(不敢 commit + 沒說哪一層) | 🟡 Improving (S38 頭號主線**當場突破**:收尾 One-Liner 主動把「選 sliding window + 因為往回算」結論+論證綁一起講,沒等追問;續逼第一次開口就講足) |
 
 ---
 
@@ -252,6 +258,7 @@ Rules going forward:
 | Cache vs Queue | Cache solves a read problem (same data read many times, serve it fast, losing it is fine because the DB is source of truth); Queue solves a work-handoff problem (decouple producer from consumer, each message consumed once, losing it is bad because the work may have no backup). Both often run on Redis but use different structures and have opposite durability needs. |
 | Cache Penetration (Bloom + Cache) | Cache penetration is a flood of queries for keys that don't exist — the cache only stores real keys, so every such request misses and crushes the DB; a Bloom filter in front rejects definitely-absent keys safely, because it has no false negatives (a real key is never wrongly blocked) and the worst case is a rare false positive that just wastes one lookup. |
 | Unique ID Generator (Snowflake) | A unique ID generator produces globally unique IDs with no per-ID coordination; Snowflake packs a timestamp + machineID + sequence into a 64-bit number — collision-free and roughly time-sortable at millions/sec per node, coordinating only once at boot to assign machine IDs. It beats UUID (long, unsortable), DB auto-increment (single-point bottleneck + SPOF), and KGS (centralized) — the catch is clock skew: if the clock rewinds, a node can re-issue an ID, so on detected rewind it must refuse rather than risk a duplicate. |
+| Distributed Rate Limiter | A distributed rate limiter keeps each user's counter in a shared store like Redis (local per-node counters would let a user get N×limit across N servers). The hard part is concurrency, not counting: multiple servers racing on read-modify-write cause over-admission, so check-and-update must be atomic — a single atomic command (DECR/INCR) for a simple counter, or a Lua script when the logic is multi-step. Counters reset by passive TTL expiry (not an active refill job), and the algorithm is a sliding window over a fixed window to close the 2× boundary-burst hole. |
 
 ---
 
@@ -260,10 +267,10 @@ Rules going forward:
 | Field | Value |
 |-------|-------|
 | **Title** | 🏗️ Staff Architect |
-| **Current streak** | 2 週 🔥 (連續活躍週：上週 S31 + 本週 S32-S36,同週不加碼) |
+| **Current streak** | 3 週 🔥 (連續活躍週：S31 / S32-S36 / 本週 S37-S38,同週不加碼) |
 | **Longest streak** | 4 (days, pre-weekly) |
-| **Last session date** | 2026-07-03 (S37 meta review) |
-| **Last story summary** | Session 36。Day 29 Unique ID Generator(Snowflake)。從上場 KGS 橋接出招「不准中央配號,100 台各自發唯一 ID」,學生**自己一步步推出** Snowflake 三段骨架:machineID 跨機器不撞 → 加 counter 同台不撞 → 重啟撞號 → 加 timestamp 永遠往前。timestamp 為何放最高位用「日期 `2026-06-28` 排得對、`28-06-2026` 排亂掉」打通。最大雷 clock skew 從「只覺得很危險」被逼出精確機制(倒退→重入毫秒→seq 歸零→重發=撞號)。本場學生點名兩件事改 coaching:嫌「Recall/Transfer」標籤太機械(收回)、主動要求 Drill 當 bar-raiser 用力追問(他真面試常被考倒)。Drill ~4/7,enumeration 洩漏營業額的資安觀點零提示自己冒出(亮點),但 operational 監控第 4 次掛蛋、capacity 一看 2^12 就放棄(拆 1024×4 才跟上)。|
+| **Last session date** | 2026-07-03 (S38, Day 31 Distributed Rate Limiter) |
+| **Last story summary** | Session 38（跨機器接續）。Day 31 Distributed Rate Limiter。Karen 要開放第三方 API,Max 想「加個 rate limiter 就收工」。學生從 Rate Limiting 暖身一路**自己推完整條鏈**:100 台各跑各的 = 100 座孤島 → 惡意 user 實際打 N×limit=10,000 → 共享 counter 放 Redis(選對「共享計數器」非「一台限流機器」=SPOF)→ 搶票超賣比喻打通 race condition → 學生自己跳到 Redis 單執行緒 DECR 原子性 → 「讓 key 自己 TTL 過期」取代「派 job 手動補」(自抽主動 vs 被動心法)→ 抓到 Fixed Window 邊界 2 倍破綻 → sliding window「往回看 60 秒」補洞 → 多步 race 重演 → Lua 把多步捆成原子收口。全天主軸就一個字:atomicity。🌟 收尾 One-Liner 主動把「選 sliding window + 因為往回算」結論與論證綁一起講,頭號主線弱點(結論不給論證,execution-heavy 首攻目標)當場突破一次。教訓在我這邊:中段塞太多害學生 3 次卡住,退小步+具象比喻後全通。|
 
 ---
 
@@ -311,6 +318,7 @@ Rules going forward:
 | Bloom Filter & Gossip | 3 | 2026-07-03 (S34 Bloom+Cache 組合重講 Feynman PASS,no false negative/bit 機制自講,Box 2→3) |
 | Database (B-tree/LSM) | 1 | 2026-06-17 (S30 LSM 一度遺忘→喚回,backfill Box 1;S33 測的是 selection 軸非 LSM 內部,此項仍欠) |
 | URL Shortener (design) | 3 | 2026-07-03 (S34 Day 27 Drill 8/9,整套設計實戰過一遍,Box 2→3) |
+| Distributed Rate Limiter (design) | 1 | 2026-07-04 (S38 新學,Box 1) |
 
 ---
 
