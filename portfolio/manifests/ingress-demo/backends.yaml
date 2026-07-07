@@ -1,0 +1,65 @@
+# ingress-demo backends: two http-echo apps behind ClusterIP Services.
+# P1 boilerplate — today's real work is the Ingress object (ingress.yaml).
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: shop-api
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: shop-api
+  template:
+    metadata:
+      labels:
+        app: shop-api
+    spec:
+      containers:
+        - name: echo
+          image: hashicorp/http-echo
+          args: ["-text=api", "-listen=:5678"]
+          ports:
+            - containerPort: 5678
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: shop-api
+spec:
+  selector:
+    app: shop-api
+  ports:
+    - port: 80
+      targetPort: 5678
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: shop-web
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: shop-web
+  template:
+    metadata:
+      labels:
+        app: shop-web
+    spec:
+      containers:
+        - name: echo
+          image: hashicorp/http-echo
+          args: ["-text=web", "-listen=:5678"]
+          ports:
+            - containerPort: 5678
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: shop-web
+spec:
+  selector:
+    app: shop-web
+  ports:
+    - port: 80
+      targetPort: 5678
