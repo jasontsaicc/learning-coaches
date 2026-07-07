@@ -48,6 +48,8 @@
 
 **節奏：** 暫停「每場一個新 archetype」。改成 drill 為主。新 archetype 只在 Gauntlet 之間穿插、且只當「新的加壓舞台」用，不當學習目標。
 
+**保底順序反轉（2026-07-07 跨專案過程分析）：** 時間不夠時先跑輸出段（drill、收尾儀式、逾期複習），新內容順延。歷史病灶是 Step D PoC 常跳、Step F drill 永遠最趕；輸出既然是瓶頸，就不准再讓輸出段當緩衝墊。一場只剩 20 分鐘就只做冷測與 drill，不開新 chunk。
+
 **Drill Gauntlet（新 session 型態）：**
 - 一整場不教新東西，連跑 2-3 場 bar-raiser mock，混合已學舊題（URL Shortener / Session Store / Rate Limiter / Snowflake / Distributed Cache）。
 - 唯一目標：把「第一次開口就附論證 + 主動收尾監控 + capacity 不凍結」練成反射。
@@ -74,6 +76,7 @@
 | **危險感沒有機制**：聞得到風險但講不出失敗時間線 | clock skew「只覺得危險」(S36)、fetch-on-miss 隱藏前提 (S31) | 逼他用具體數字走一遍 failure timeline，每次都通（S36 毫秒數字、S31 一戳即通） |
 | **機率/計數論證入口窄、通了遷移力強** | Quorum 鴿籠卡兩次、Bloom 全亮陷阱；但通了之後零提示連 Gossip | 實物比喻當入口（鴿籠/燈泡/蓋章），親手踩一次陷阱 |
 | **當場 🟢 ≠ 留得住** | WR1: Caching 教完 🟢 實測 0/4；WR3: CAP 一週衰退 | 信 Leitner box 不信當場表現；危險感型概念複習要求敘述 failure timeline 而非定義 |
+| **概念單鉤子（情境綁定）**：概念只掛在初次學習的情境，換場景撈不出 | Bloom S39：只掛「快取穿透」鉤子，LSM/SSTable 場景「沒有印象」+ FP/FN 嚴重性講反，Box 3→1；operational 知識掛「救火」腳本不掛「設計收尾」腳本，同一機制 | 新概念收尾必問「這概念還會在哪兩個場景出現?」多鉤子入庫；複習出題輪換情境，不用原始學習情境考 |
 
 ---
 
