@@ -25,7 +25,7 @@ Skills load fresh each session. Start by reading `progress.md` if it exists.
 - **`progress.md` has a Resume point** → "Last time we stopped at [X]. Pick up there?"
 - **`progress.md` exists, no resume point** → returning student. Default to **Drill** on the next weak pattern (lowest fluency in the Pattern Fluency log).
 
-**Warm-up (returning students, ≤2 min):** before the main mode, re-test any Mistake Registry rows whose **Re-test** date is due — 1-2 max, never more. Re-pose the exact slip (re-write the line cold, or re-answer the "why"); don't re-explain it *for* them. Pass → push the date out (+3d → +7d → +14d → flip Status ✅). Fail → reset to +3 days, keep ❌. This is the whole reason mistakes get logged: a logged mistake that never resurfaces is dead weight. Skip in Fast mode.
+**Warm-up (returning students, ≤2 min):** before the main mode, re-test any Mistake Registry rows whose **Re-test** date is due — 1-2 max, never more. Re-pose the exact slip (re-write the line cold, or re-answer the "why"); don't re-explain it *for* them. Pass → push the date out (+3d → +7d → +14d → flip Status ✅). Fail → reset to +3 days, keep ❌. This is the whole reason mistakes get logged: a logged mistake that never resurfaces is dead weight. In Fast mode compress to 1 item, never zero (evidence 2026-07: every study-group sprint skipped the warm-up entirely and 5 due re-tests sat unresolved for weeks). Anything Fast mode drops (Feynman transfer Qs, full Yuki, the weekly review) gets one debt line in the Mistake Registry with a due date, and the next non-Fast session clears debts before any new content.
 
 Then route on **two independent axes** — don't conflate them:
 
@@ -89,6 +89,8 @@ The unit of practice is the **pattern skeleton**, not the whole problem. ~8-10 s
 4. **Flag mechanical 手感 details precisely but lightly** — name the category, don't scold. (`!=` is one token; Python indentation is load-bearing; `dict.get(k, 0)` beats a `KeyError` guard.) These are the actual friction points where fluent typing breaks down.
 
 5. **Set the real acceptance test: one blind success ≠ learned.** The pattern is drilled when they re-do it **cold the next day, 0 bugs, crutches off**. Log the cold-rep in the Pattern Fluency table. "Repeat-until-cold": same skeleton, blank file, until zero bugs.
+
+6. **Seeing the answer creates a debt.** If the student views solution code they did not produce cold (tired, deadline, "just show me"), allow it, but log it immediately in the Mistake Registry as a **cold re-do debt** due +3d, and the pattern cannot be marked fluent until that cold re-do passes with 0 bugs. (Evidence 2026-07: #84 was viewed under study-group pressure, never cold-redone, and fluency stalled with no trace.)
 
 **Drill's only artifact is the Mistake Registry.** No analogy, no long notes, no 7-row scorecard. The drill is the point; ceremony *around each rep* is not. The one exception is the session **closer**: end with **Teach Yuki** (Shared Tools) on the pattern you drilled — a cool-down that runs once, after the reps, never between them. That's a fixed closer, not rep ceremony.
 
