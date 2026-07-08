@@ -11,31 +11,31 @@
 | Field | Value |
 |-------|-------|
 | **Start date** | 2026-03-17 |
-| **Current phase** | Phase 0 |
-| **Current pattern** | Stack |
+| **Current phase** | Phase 1 |
+| **Current pattern** | Binary Search |
 | **Language** | Python |
-| **Session count** | 15 |
+| **Session count** | 16 |
 | **Last weekly review** | — |
-| **Problems solved** | 13 / 136 |
+| **Problems solved** | 14 / 136 |
 
 ---
 
 ## Current Session (Breakpoint)
 
-> ✅ Session 15 完成 (2026-07-02) — Largest Rectangle in Histogram (#84) **Learn 模式** (Hard, NeetCode Stack 最後一題/大魔王)
-> Pattern: **Monotonic Stack (遞增)** — 與 #739 完美鏡像 (pop 條件決定方向)
-> Problem: #84 Hard — workspace/22, brute + stack 兩版 5/5 pass
+> ✅ Session 16 完成 (2026-07-08) — Binary Search (#704) **Learn 模式** (Easy, Phase 1 開場, 全新 pattern)
+> Pattern: **Binary Search (標準模板, 閉區間 `[l,r]`)** — workspace/23, all pass + 3 hostile inputs 驗證
 >
-> ✅ Warm-up 補結 #739 欠的 **O(n) 攤還債** (每 index 一進一出 → 總 pop ≤ n)
-> ✅ Brute force **學生自己寫** (fill-in-the-blank 鷹架): 每根當最矮天花板往左右撞矮牆, `width=right-left-1`; 5/5 pass; 這次沒忘 return、max_area 初始化沒忘 (老坑未踩)
-> ✅ 「A佔2/B佔1」深挖: 靈魂「撞比我矮的才停、比我高的可鑽過」自己想通; 排隊故事 (push/pop, 右牆=逼你離場的新人、左牆=pop 後新隊尾) 逐步建立
-> 🟡 Stack optimal **code 是我給的** (學生累了+趕讀書會、主動要 code 直接看) → **未冷寫**, 下次要 cold re-do 才算 fluency 達標
-> 🟡 過程數次「看不懂/太難了」→ 退回純白話故事 (排隊比喻) + 具體例子重建, 有效 (符合視覺 trace 學法)
-> 🟡 Mock / 完整 Feynman gate / 教 Yuki closer 都**未做** (時間壓力), 下次補
-> 📄 產出讀書會簡報: notes/pattern22-largest-rectangle-histogram.md (講稿) + .html (Fable 視覺版, CSS 長條圖 + 逐格 trace, 已交付)
+> ✅ Warm-up 回測: 複雜度亂加 log 老坑 → 用「兩層線性迴圈=n² / log 只在砍半」問答**過關**, 順勢當 Binary Search 引子 (100萬→20步=log₂n)
+> ✅ 學生**拒絕**「#739 是遞增還遞減」這種看題號背答案的回測 → 認同並存 memory (以後只考可遷移原理)
+> ✅ **skeleton 冷寫第一次就 100% 對** (l/r init, while, mid, 三分支, mid±1 方向, return -1) — 全新 pattern 卻像 Drill 冷寫等級, 概念部分完勝
+> ✅ 3 個 bug 全自 debug (讀錯誤訊息定位): ① `else` 帶條件→SyntaxError ② `mid=(l+r)/2` 用 `/` float 索引→TypeError (該 `//`, #11 // 的鏡像) ③ `r=len(nums)` 越界→改 `len-1`
+> ✅ **綠燈不是終點**: 手動 trace hostile input (target>全部) 抓出 `r=len` 的 IndexError, 學到「all pass≠正確」
+> ✅ Feynman Gate **全過**: Q1 排序→丟掉那半保證全大/全小→安全; Q2 沒排序命根子沒了→砍半瞎猜; 複雜度 O(log n)/O(1) 自推
+> ✅ 教 Yuki closer **完成** (首次沒跳過): `<=` vs `<` (單元素 [5] 會漏) + spot-my-bug `l=mid` 死迴圈 **這次指到精準的行** (補回 S13 弱點) + 為什麼卡死 (mid 被 // 壓在 l)
+> 🟡 今天是 Learn (有鷹架+我陪 debug) → **未冷寫 re-do**, 下次 cold re-do 0-bug 才算 Binary Search fluency 達標
 >
-> ⏭️ Next: ① **#84 stack cold re-do** (今天是看的、沒冷寫 → fluency 未達標) ② 教 Yuki (#84 + Car Fleet 兩筆欠) ③ Phase 0 Gate (Stack 6/6 完成可開) ④ Binary Search
-> ⏸️ Weekly Review 嚴重到期 (≥15 session 未做)，強烈建議下次優先補
+> ⏭️ Next: ① **#704 Binary Search cold re-do** (驗證 fluency) ② #74 Search a 2D Matrix 或 #875 Koko (Binary Search on Answer) ③ 舊債: #84 stack cold re-do / 教 Yuki (#84+Car Fleet) / Phase 0 Gate
+> ⏸️ Weekly Review 嚴重到期 (≥16 session 未做)，強烈建議下次優先補
 > ⏸️ Parked Feynman 債務 (Transfer Q2/Q3): #239 Sliding Window Maximum, #42 Trapping Rain Water, #11 Container With Most Water
 > ⏸️ Queued: Sliding Window 基礎題 #121 / #3 (workspace/14 有 brute) / #567 (workspace/15 到 Step E)
 
@@ -49,7 +49,7 @@
 | Two Pointers | 2.5/5 | 🟡 | — | + #42 Trapping Rain Water (Hard) 三層算法全綠 (Brute/DP/Two Pointers 18/18) — 加分: 自抓 6 個 bug 全修對；扣分: Q2/Q3 Feynman 沒自答 (看答案)。升 🟢 條件: Day 3 完成 F + G |
 | Sliding Window | 1/5 | 🟡 | — | #239 Sliding Window Maximum (Hard, jump-to 跳關做最難的第 6 題): Brute O(n·k) + Optimal Monotonic Deque O(n) 都親手寫過 12/12 tests; Feynman 只過 Q1 (O(n) amortized 講得出); Q2/Q3 + Mock 待補。基礎 5 題 (#121, #3, #424, #567...) 尚未做 |
 | Stack | 6/6 | 🟢 | Phase 0 Gate | #20 + #150 + #155 + #739 + #853 + **#84 Largest Rectangle (Hard) ✅** = NeetCode Stack 全清 (Generate Parentheses 屬 backtracking 先跳). #84 stack code 是看的、**未冷寫** (下次 cold re-do). #739 O(n) 攤還債結清. 教 Yuki (#84 + Car Fleet) 待補 |
-| Binary Search | 0/6 | ⬜ | — | |
+| Binary Search | 1/6 | 🟡 | — | #704 Binary Search (Easy) **Learn** — skeleton **冷寫第一次就 100% 對** (l/r/while/mid/三分支/mid±1/return-1); 3 bug 自 debug (else帶條件 / `/`應`//` / `r=len`應`len-1`); hostile input 抓 IndexError (all pass≠正確); Feynman + 教 Yuki 全過. **未冷寫 re-do** → 下次 cold re-do 才算 fluency |
 | Linked List | 0/9 | ⬜ | — | |
 | Trees | 0/13 | ⬜ | — | |
 | Heap / Priority Queue | 0/6 | ⬜ | Phase 1 Gate | |
@@ -72,6 +72,7 @@
 
 | Session | Problem | Difficulty | Pattern | Solved? | Brute | Optimal | Notes |
 |---------|---------|-----------|---------|---------|-------|---------|-------|
+| 16 | Binary Search (704) | Easy | Binary Search (標準模板, 閉區間) | ✅ | O(n) linear scan | **O(log n) / O(1)** ⭐ | **Learn 模式**, Phase 1 開場全新 pattern; **skeleton 冷寫第一次 100% 對** (l/r/while/mid/三分支/mid±1/return-1); 3 bug 自 debug 讀錯誤訊息 (`else`帶條件SyntaxError / `mid=(l+r)/2`用`/`float索引TypeError→`//` / `r=len`越界→`len-1`); hostile input (target>全部) trace 出 IndexError, 學到 all pass≠正確; Feynman 全過 (排序→丟半安全 / 沒排序命根子); 教 Yuki 全過 (`<=`vs`<` 單元素會漏 / spot-my-bug `l=mid` 死迴圈**指對行**); **未冷寫 re-do** 下次補 |
 | 15 | Largest Rectangle in Histogram (84) | **Hard** | Stack (Monotonic, 遞增) | ✅ | O(n²) / O(1) | **O(n) / O(n)** ⭐ | **Learn 模式**, NeetCode Stack 大魔王; brute 學生自寫 fill-in-blank 5/5 (每根當最矮天花板撞左右矮牆, `width=right-left-1`); stack optimal **code 我給的** (累了要直接看) **未冷寫**; 深挖「A佔2/B佔1」+ 排隊故事 (右牆=新人/左牆=隊尾) 通了; 補結 #739 O(n) 攤還債; 數次「看不懂」退回純白話重建有效; 產出讀書會 HTML (Fable) |
 | 14 | Car Fleet (853) | Medium | Stack + Sort | ✅ | O(n²) 模擬 / — | **O(n log n) / O(n)** ⭐ | **Cold Solve** (沒看過的題, workspace/21, 6/6 pass); 龜兔比喻自己提; 手算 fleet=3 全對; pattern 自對應 stack + 自己想通「不用 pop/while」靈魂推理; zip/unpacking 學會; **cars.sort 縮排老毛病自救**; 3 bug 提示後修 (少冒號/`if stack`應`not stack`/`.push()`應`.append`); Cold Solve 3/4 (brute 沒自講); 教 Yuki 跳過待補 |
 | 13 | Daily Temperatures (739) | Medium | Stack (Monotonic) | ✅ | O(n²) / O(1) | **O(n) / O(n)** ⭐ | Brute (workspace/20) + Monotonic Stack 都寫；引導發現重複掃描→翻轉；8 格動畫親手跑；cold solve (workspace/20b) 從零默 100% 對, 唯一 `stack, append` 逗點⇄點手滑自讀 NameError 修好; **Stack 升 🟢**; Feynman O(n) 攤還跳過待補 |
@@ -163,8 +164,13 @@
 | 14 | Car Fleet | Stack + Sort | 邏輯反: 寫 `if stack`(=stack有東西) 但本意「stack 空」應 `not stack`; 且空 stack 時 `stack[-1]` 會 IndexError → `not stack` **必須排第一個**短路才不會爆 | 🟡 Re-test (+3d) - 抽問: ① `if stack:` 是空還是有東西? ② 為什麼 `not stack` 要放 `or` 的左邊 (短路保護 stack[-1]) |
 | 14 | Car Fleet | Stack + Sort | `stack.push()` — Python list 沒 `.push` 應 `.append`; 且括號內空的, 要 `stack.append(time)` | 🟡 Recurring - 同 #739 `.top` 錯方法名家族 |
 | 14 | Car Fleet | Stack + Sort | (WIN 非錯誤) `cars.sort` 一度縮排在 for 內 → 自己抓出移到外面 | ✅ 老毛病 #42/#150/#739 縮排家族, 這次**自救成功** |
-| 15 | Largest Rectangle | Stack (Monotonic) | 時間複雜度反射成 `n log n` (真相 n×n=**n²**); **第 2 次亂加 log** (S1 排序記成 O(log n)) | 🟡 Re-test (+3d) - 抽問: 有砍半/排序才有 log; 巢狀線性掃是相乘 = n² |
-| 15 | Largest Rectangle | Stack (Monotonic) | 猜 stack 是「遞減」(其實**遞增**); 沒連結「pop 條件決定方向」 | 🟡 Re-test (+3d) - 抽問: pop「更矮」→遞增、pop「更大」→遞減 (#739 完美鏡像) |
+| 15 | Largest Rectangle | Stack (Monotonic) | 時間複雜度反射成 `n log n` (真相 n×n=**n²**); **第 2 次亂加 log** (S1 排序記成 O(log n)) | ✅ Resolved (S16) - 回測「兩層線性迴圈=?」答 O(n²) 對; 且透過 Binary Search 徹底鎖住「log 觸發器=每步砍半/排序」 |
+| 15 | Largest Rectangle | Stack (Monotonic) | 猜 stack 是「遞減」(其實**遞增**); 沒連結「pop 條件決定方向」 | 🟡 Re-test (+7d) - **改考機制不考題號** (學生 S16 拒絕看題號背答案): 抽問「pop 條件是『比隊尾矮就踢』時 stack 維持遞增還遞減?」 |
+| 16 | Binary Search | Binary Search | `else nums[mid] < target:` — `else` 不能帶條件 → SyntaxError; 三分支最後一種直接 `else:` 或 `elif` | ✅ Resolved (S16) - `else`=以上皆非, 後面不接條件 |
+| 16 | Binary Search | Binary Search | `mid = (l + r) / 2` 用 `/` (float) → `nums[float]` TypeError; list 索引要整數, 該用 `//` | 🟡 Recurring 觀察 - **#11 `//` 的鏡像** (那題 `//` 是坑, 這題 `//` 是解藥); 反射: 算索引/中點一律 `//` |
+| 16 | Binary Search | Binary Search | `r = len(nums)` 越界 (合法索引到 `len-1`) → target 比全部大時 mid 踩 index n → IndexError; **all pass 沒抓到** (測試沒 hostile input) | 🟡 Re-test (+3d) - 抽問: 閉區間 `[l,r]` + `while l<=r` 時 r 初始該 `len-1`; 且「綠燈≠正確, 要自己找 hostile input」 |
+| 16 | Binary Search | Binary Search | (debug 教訓, 非 code 錯) 改完錯誤訊息**行號沒變**卻以為改到了 (實際誤觸別行) | ✅ 教訓建立 (S16) - 反射: 行號沒變 = 沒改到 Python 指的那行 |
+| 16 | Binary Search | Binary Search | (WIN) spot-my-bug `l=mid` 死迴圈 **這次指到精準的行 + 講出為什麼卡死** (mid 被 `//` 壓在 l 不動) | ✅ 補回 S13 弱點 (指錯行) - 精準抓蟲反射養成中 |
 | 15 | Largest Rectangle | Stack (Monotonic) | 右邊界 guard 鏡像錯: 寫 `right <= 0` (把左界的 0 直接抄過來), 應 `right < n` | ✅ Resolved (S15) - 左界 index 0、右界 index n-1 (`< n`) |
 
 ---
@@ -188,6 +194,7 @@
 | Monotonic Stack (Stack) | 維護「遞減的等待區」存還沒等到更大值的 index；新元素把頂端比它小的全 pop 掉並結算 (距離 = i - prev) 再 push 自己；存 index 不存值 (要算距離, 用 `temperatures[stack[-1]]` 回查)；每個 index 一進一出 → **O(n) 攤還** (同 #239 deque 論證) — O(n) 時間 O(n) 空間 |
 | Largest Rectangle in Histogram (Stack) | 每根長條問「當最矮高度能拉多寬」= 往左右撞到比它矮的牆才停 (比它高的可鑽過去); 單調**遞增** stack 存 index, 新來的比隊尾矮就把高的 pop 結算 (**右牆 = 逼你離場的新人 i、左牆 = pop 後新隊尾 `stack[-1]`, 空則 -1**), `width = 右-左-1`, `area = heights[top]×width`; 收尾剩的右牆當 n; 每 index 一進一出 → **O(n) 攤還** (同 #739); pop「更矮」→遞增, 對比 #739 pop「更大」→遞減 = 完美鏡像 — O(n) 時間 O(n) 空間 |
 | Stack + Sort 車隊 / Car Fleet (Stack) | `zip(position,speed)` 綁成車、按位置由大到小排 (靠終點先處理)；從前往後掃, 每台算到達時間 `(target-p)/s`, 比 stack 頂端**慢** (`time > stack[-1]`) → 追不到 → push 一坨新車隊, 否則被前面那坨吸收 (不動)；`len(stack)` = 車隊數；**只看頂端、從不 pop** (後車不可能讓前車消失) → 不用內層 while, 單向 for 即可 (跟 #739 monotonic stack 的差別); 其實一個變數記頂端就夠, stack 只是讓 len 數答案更直覺 — O(n log n) 時間 (排序主導) O(n) 空間 |
+| Binary Search 標準模板 (Binary Search) | **前提: 資料已排序 (或單調)**。閉區間 `[l, r]`: `l=0, r=len-1`, `while l <= r`；`mid=(l+r)//2` (必用 `//` 整除當索引)；`nums[mid]==target`→回 mid、`<target`→答案在右 `l=mid+1`、`>target`→在左 `r=mid-1`；沒找到跳出回 `-1`。三個死穴: ① `r=len-1` 不是 `len` (否則 target 比全部大時 mid 越界 IndexError) ② `while l<=r` 的 `=` 不能少 (縮到單一元素還要檢查, 少了 `[5]` 找 5 會漏) ③ `mid±1` 的 `+1/-1` 不能少 (跳過已比過的 mid + 保證每圈前進, `l=mid` 會死迴圈)；每圈砍半 → **O(log n)** 時間 O(1) 空間 (log 的正主: 100萬→20步) |
 
 ---
 
