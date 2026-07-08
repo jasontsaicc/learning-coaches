@@ -13,10 +13,10 @@
 |-------|-------|
 | **Start date** | 2026-03-04 |
 | **Current phase** | Phase 3 🏗️ |
-| **Current day** | **S38 完成（跨機器接續）= Rate Limiting 複習 + Day 31 Distributed Rate Limiter 完整設計自推。** 下一步 = 續清 execution-heavy 逾期複習（Observability/DB/CH/LB）+ Drill Gauntlet（含 rate limiter bar-raiser） |
+| **Current day** | **S40 完成 = 逾期複習清倉 4/4 全清(Bloom Box1→2 / Rate Limiting 機制層 / Consistent Hashing Box2→3 / Load Balancer)+ Drill Gauntlet 首場(Distributed Rate Limiter bar-raiser ~3/9)。** 下一步 = **S41 Weekly Review #5 到期** |
 | **Language mode** | Bilingual — S27 切回繁中為主（學生英文閱讀疲勞），術語保留英文 |
-| **Session count** | 38 |
-| **Last weekly review** | 33 (S33 = WR4 完成) |
+| **Session count** | 40 |
+| **Last weekly review** | 33 (S33 = WR4 完成) — ⚠️ **S41 WR5 到期(40-33=7)** |
 
 ---
 
@@ -40,6 +40,32 @@ Rules going forward:
 ---
 
 ## Current Session (Breakpoint)
+
+✅ **Session 40 完成(execution-heavy:逾期複習清倉收尾 + Drill Gauntlet 首場,模型 Opus)。**
+
+**Part 1 — 逾期複習清倉 4/4 全清(換情境冷測,防概念單鉤子假陽性):**
+- **Bloom 重測 ✅ (Box 1→2)**:①FP/FN 嚴重性用**全新通知場景**問 → **答對了**(FP=多查一次可接受 / FN=loss 重要信息不可接受),S39 講反的洞在新情境撈得出 = 真修好。②SSTable 跳讀一開始還是漏「每個 SSTable 配一個」+ 又把「DB 兜底」搬進來(軸摺疊),教完「守門員站每道門」+「省的是讀硬碟不是查 DB」後播放過。多鉤子入庫(快取穿透/通知/SSTable 三場景)。
+- **Rate Limiting 機制層 ✅ (Box 2)**:S38 欠的 one-liner 機制補齊。Token Bucket(允許 burst)/Sliding Window(嚴格封頂,自己講出「0:59+1:00 邊界 2×」洞)/兩層(per-user 公平+global 護系統)全對;**CB 三狀態忘了**(S28 resolved 後又掉)→ 用「配電箱電路通不通」重焊 Closed/Open/Half-Open,自己用 AWS 大崩潰例子撞出 Half-Open 防 retry storm。
+- **Consistent Hashing ✅ (Box 2→3)**:失敗時間線走出來(換 %11→幾乎全 remap→99% miss→DB 過載雪崩);ring vs vnode **兩軸拆開**(ring=只動 1/N、vnode=負載均勻),vnode 數學自己喊「這是數學題」→ depth ceiling park。
+- **Load Balancer ✅ (Box 2)**:S4 四筆老錯結掉三筆(sticky vs Redis 相反策略 / sticky 不均風險 / least robin 命名)。sticky server 死=session 陪葬(非系統 SPOF)校正。**Least Connections 一開始想不起英文名**(WR3 resolved 後 33 天又掉)→ 給演算法對照表重錨。8.8.8.8 trivia 沒測。
+
+**Part 2 — 🥊 Drill Gauntlet 第一場(Distributed Rate Limiter bar-raiser, L3, ~3/9 訓練場):**
+- 涵蓋:local counter→5000/min 破表→shared Redis(單一真相來源)→capacity 500K/100K=5 shards(no-freeze ✅ 有給錨)→shard by user_id→race condition/超賣→原子性→INCR(單一命令自足) vs Lua(捆多步 sliding window)。多區域全球限流 preview(A 單一全球 counter 準但跨區延遲 / B 本地+對帳快但近似)後**過載喊停**(我一次疊太多,pacing 失誤)。
+- 🌟 **反脆弱時刻**:「謝謝你拒絕我,逃避心態又來了」+ 頂回去自推 5000/min。知識沒問題,病灶 100% 在「壓力下第一句就縮」。
+- ⚠️ **三指標**:unprompted-argument ❌(第一句都裸:"use Redis, cost is low";追問才有論證)/ unprompted-ops ❌(**第 5 次**沒主動收尾監控)/ no-freeze-capacity 🟡✅(沒凍結但半扶)。
+- ⚠️ **Step 1 跳過 clarify 直接報解法** + 把剛複習的 LB 演算法亂套(recency bias)。"cost is low" = 初階 tell,已焊「cost 格禁用低/高,一律換具體會咬你的東西」。
+
+**execution-heavy 三條硬規則仍生效:** 第一句就評分 / 裸結論直接打回不接「為什麼」/ 追蹤 unprompted-argument·ops·no-freeze-capacity 三指標。3AM page test = 設計第 5 步硬關卡。
+
+**Next（接續點,優先序）:**
+1. **S41 = Weekly Review #5 到期**(40 - 33 = 7)。多筆 Review Schedule 逾期(Session Store / Consistency Models / Replication / Security 廣度),WR5 一起收。
+2. **Gauntlet 續跑**:多區域全球限流專門 drill(本場 park)+ 換題 bar-raiser(URL Shortener / Session Store / Snowflake / Distributed Cache),續盯三指標各求 3 連。
+3. **鐵律**:第一句就附論證、設計收尾自己跑 3AM page test、capacity 撤掉錨自己拆次方。
+4. Day 30 Snowflake Light PoC park。
+
+---
+
+## 📦 S38 breakpoint（保留參考）
 
 ✅ **Session 38 完成（跨機器接續，模型 Opus）。兩段跨機器：**
 - **(工作 PC) execution-heavy Part 1 逾期複習 1/5：** ✅ **Rate Limiting failure-timeline PASS** — 本地計數陷阱「10 台 ×1000 = 10000/min」冷推出來（S28 的 N×limit 28 天後仍在），補「無聲失敗」點（每台全綠但合計 10 倍 = 監控盲點反例）。→ **Box 1→2**。但 one-liner 機制層（Token Bucket/Sliding Window/兩層/CB）掉了，下次再測。
@@ -144,6 +170,7 @@ Rules going forward:
 | 33 | WR4 | Weekly Review (URL Shortener / Caching / Database + Bloom bonus) | Caching 6/6, Bloom recall restored, DB trap避開 | **Caching** WR1 0/4 → WR4 六維滿分(capacity 盲區當場補)→ 升 🟢。**URL Shortener** base62≠hash 回退再修 + encoding/hashing/encryption 三件套地基。**Bloom** recall 模糊→Feynman PASS。**Database** 避陷阱+一口氣講足選 SQL → 頭號主線弱點本場練成功。意外複習掉 Security 一塊(crypto primitives)。|
 | 34 | 27 | URL Shortener (Interview Drill, Phase 3 Bar Raiser) | **8/9 ✅ PASS** | ✅ Think Aloud, ✅ Scope, ✅ 用 Bloom+cache(自己擺對讀路徑), ✅ Trade-off WHY(counter 取捨+NoSQL access-pattern 主動講足=R3), ❌ Operational(全程沒主動提監控,S29/S30 重複盲點), ✅ Failure modes(Redis durability+counter SPOF), ✅ Capacity(學會 62≈2⁶,6碼=640億), ✅ Hint response(Redis→cache/LB歸位/6vs7 三次自修正), ✅ Time/breadth(4步走完). Best: 被質疑「Redis當DB」自己想起重啟掉資料改 cache + 今天打通的 Bloom 自己擺進讀路徑。改善: operational 監控當固定收尾;讀路徑/LB/DB 仍被追問才展開。|
 | 36 | 29 | Unique ID Generator (Interview Drill, bar-raiser 首場) | **~4/7（練習,未達 Phase3 線）** | ✅ Think Aloud, ✅ Scope(**主動想到 enumeration 洩漏營業額**=architect 級加分), ✅ 用 Snowflake, 🟡 Trade-off WHY(給結論不給論證:DB auto-increment 一句帶過、「Snowflake 最適合」沒論證,被追問才展開), 🟡 Failure modes(SPOF 有提,clock skew 沒主動帶進設計), ❌ Operational(第4次監控掛蛋), ❌ Capacity(「直接放棄」,拆 1024×4 後才跟上). Best: enumeration 洩漏觀點零提示自己冒出。改善: 結論要附論證、收尾固定提監控、capacity 別被 2^n 嚇退。本場啟動 bar-raiser 加壓模式。|
+| 40 | 31 | Distributed Rate Limiter (Drill Gauntlet #1, L3 bar-raiser) | **~3/9（訓練場,非 Gate）** | ✅ Think Aloud, ❌ Scope(**跳過 clarify 直接報解法** + 亂套剛複習的 LB 演算法=recency bias), ✅ 用 rate limiter, ❌ Trade-off WHY(第一句評分:"use Redis, cost is low"=初階 tell + "because it fixes"循環), ❌ Operational(**第 5 次**沒主動收尾監控), 🟡 Failure modes(race/超賣自推出,多區域過載 bail), ✅ Capacity(500K/100K=5 shards **沒凍結**,有給 100K 錨=半扶), 🟡 Hint response(吃挑戰能自修 but 兩次要答案), ❌ Time/breadth(沒走完設計). **三指標:unprompted-argument ❌(第一句都裸)/ unprompted-ops ❌(第5次)/ no-freeze-capacity 🟡✅**. 🌟 Best: 「謝謝你拒絕我,逃避心態又來了」頂回去自推 5000/min=反脆弱本身。診斷:知識全在(race→atomicity 冷推出),病灶 100% 「壓力下第一句就縮」。tier-1: no-hire 不因不會,因第一句永遠裸結論、弱面試官不追問→signal 靜默流失。|
 
 ---
 
@@ -231,6 +258,17 @@ Rules going forward:
 | 36 | 29 | Capacity estimation | 算 2^12/秒「直接放棄」 | 🟡 Improving (S36, 拆 `1024×4×1000≈400萬/秒` 後跟上;非真不會,是被 2^n 寫法嚇退,固定提醒拆次方) |
 | 38 | 31 | Rate Limiter (counter reset) | counter 扣到 0 後想用 INCR「手動補回去」 | ✅ Resolved (S38, 改用 TTL 被動過期:key 塞當前分鐘+EXPIRE 60s,每分鐘天生新 key,舊的自燒;學生自抽「主動 vs 被動」心法) |
 | 38 | 31 | Interview habit (commit) | 中段「使用一個統一的限流器**嗎**?」用問句把球丟回 AI(不敢 commit + 沒說哪一層) | 🟡 Improving (S38 頭號主線**當場突破**:收尾 One-Liner 主動把「選 sliding window + 因為往回算」結論+論證綁一起講,沒等追問;續逼第一次開口就講足) |
+| 39 | 8-9 | Database (LSM read) | LSM 讀優化撈不出 Bloom filter(「沒有印象」)— 情境綁定:Bloom 只掛在「快取穿透」鉤子,換 LSM/SSTable 場景撈不出 | ✅ Resolved (S39, 補「每個 SSTable 配 Bloom,說『一定不在』就跳過不讀硬碟」+ 落地 Cassandra/RocksDB/HBase;學生自悟「分開學沒融合」) |
+| 39 | 26 | Bloom Filter (FP/FN severity) | 「漏報頂多 DB 沒找到而已」把 false negative 當無害 + 搬「快取穿透有 DB 兜底」心智模型進 LSM(SSTable 就是資料本體無兜底) | ✅ Resolved (S39, FP=浪費一次讀[可接受] vs FN=弄丟真實資料[災難]對照表;Bloom 消滅 FN 才是敢跳 SSTable 的底氣) |
+| 39 | 8-9 | Interview habit (argument) | Database drill 連 3 次「問兩件事只答一件」:random/sequential 給標籤不給為什麼、讀 trade-off 只答為什麼慢漏「用什麼救」 | 🟡 Improving (S39, 逼問後每次都補得出;頭號主線[結論不給論證]在複習題持續再現,execution-heavy 續盯) |
+| 40 | 26 | Bloom Filter (severity, 換情境重測) | S39 講反的 FP/FN 嚴重性,換全新通知場景重測 | ✅ Resolved (S40, FP=多查一次可接受/FN=loss 重要信息不可接受,新情境撈得出=真修好非背場景;多鉤子入庫快取穿透/通知/SSTable) |
+| 40 | 26 | Bloom Filter (SSTable 跳讀) | 又漏「每 SSTable 配一個」+ 再搬「DB 兜底」進 LSM(軸摺疊,S39 未補完的另一半) | ✅ Resolved (S40, 守門員站每道門[粒度對齊要跳過的單位]+「省的是讀硬碟不是查 DB,SSTable 就是資料本體」;INCR-style 播放過) |
+| 40 | 23-24 | Circuit Breaker (三狀態) | CB 三狀態術語又忘(S28 resolved 後又掉,當場先跳過沒答) | ✅ Resolved (S40, 配電箱「電路通=Closed正常/斷=Open擋住」重焊 + 學生自舉 AWS 大崩潰撞出 Half-Open 防 retry storm) |
+| 40 | 4-5 | Load Balancer (Least Connections 命名) | 場景該用 Least Connections 卻選 latency + 想不起英文名(WR3 resolved 後 33 天又掉) | 🟡 Improving (S40, 演算法對照表重錨 + 拆穿「least robin」= Least Connections × Round Robin 命名軸摺疊;屬語音近似+當場🟢≠留得住型,續複習) |
+| 40 | 4-5 | Load Balancer (sticky vs Redis) | S4 老錯:sticky session 與 Redis external store 當成同一招 | ✅ Resolved (S40, 焊「sticky=狀態留 server 把人釘住[往內壓] vs Redis=狀態搬出 server 讓無狀態[往外拉],方向相反但都解換台登出」) |
+| 40 | 31 | Interview habit (Step 1) | Drill 跳過 clarify 直接報解法 + 把剛複習的 LB 亂套進 rate limiter(recency bias) | ❌ Unresolved (S40, redirect 回 clarify 後靠教;下次 drill 開場自己要跑完 clarify 才准進 Step 2) |
+| 40 | 31 | Interview habit (cost 格) | Trade-off 的 cost 格填「low」(初階 tell,沒想過營運代價) | 🟡 Improving (S40, 焊「cost 格禁用低/高/還好,一律換一個具體會咬你的東西:network hop/critical dependency/throughput」;L4 vs L6 對照演示) |
+| 40 | 31 | Interview habit (unprompted-ops) | Drill 全程沒主動收尾監控(第 5 次重複掛蛋) | ❌ Unresolved (S26/30/34/36/40;3AM page test 焊進框架當第 5 步硬關卡,rate limiter=Redis掛/reject率暴衝/Redis P99) |
 
 ---
 
@@ -267,10 +305,10 @@ Rules going forward:
 | Field | Value |
 |-------|-------|
 | **Title** | 🏗️ Staff Architect |
-| **Current streak** | 3 週 🔥 (連續活躍週：S31 / S32-S36 / 本週 S37-S38,同週不加碼) |
+| **Current streak** | 4 週 🔥 (連續活躍週：S31 / S32-S36 / S37-S38 / 本週 S39-S40,同週不加碼) |
 | **Longest streak** | 4 (days, pre-weekly) |
-| **Last session date** | 2026-07-03 (S38, Day 31 Distributed Rate Limiter) |
-| **Last story summary** | Session 38（跨機器接續）。Day 31 Distributed Rate Limiter。Karen 要開放第三方 API,Max 想「加個 rate limiter 就收工」。學生從 Rate Limiting 暖身一路**自己推完整條鏈**:100 台各跑各的 = 100 座孤島 → 惡意 user 實際打 N×limit=10,000 → 共享 counter 放 Redis(選對「共享計數器」非「一台限流機器」=SPOF)→ 搶票超賣比喻打通 race condition → 學生自己跳到 Redis 單執行緒 DECR 原子性 → 「讓 key 自己 TTL 過期」取代「派 job 手動補」(自抽主動 vs 被動心法)→ 抓到 Fixed Window 邊界 2 倍破綻 → sliding window「往回看 60 秒」補洞 → 多步 race 重演 → Lua 把多步捆成原子收口。全天主軸就一個字:atomicity。🌟 收尾 One-Liner 主動把「選 sliding window + 因為往回算」結論與論證綁一起講,頭號主線弱點(結論不給論證,execution-heavy 首攻目標)當場突破一次。教訓在我這邊:中段塞太多害學生 3 次卡住,退小步+具象比喻後全通。|
+| **Last session date** | 2026-07-08 (S40, 逾期複習清倉收尾 4/4 + Drill Gauntlet 首場) |
+| **Last story summary** | Session 40。前半清倉場後半開打。逾期複習 4/4 全清(換情境冷測防假陽性):Bloom 用**通知場景**重測 FP/FN 嚴重性答對[S39 講反的洞真修好] + SSTable 每檔配 Bloom/省讀硬碟補完(多鉤子入庫);Rate Limiting 機制層補齊 + CB 三狀態用配電箱重焊(學生自舉 AWS 大崩潰撞出 Half-Open);Consistent Hashing 失敗時間線走出 + ring/vnode 兩軸拆開;LB 結掉三筆 S4 老錯。後半進 **Drill Gauntlet 第一場**(Distributed Rate Limiter bar-raiser, L3):全鏈 local→Redis→5 shards→race→原子性→INCR vs Lua 自產,但暴露頭號病灶——第一句永遠裸結論("use Redis, cost is low")、跳過 clarify、第 5 次沒主動收尾監控。**最亮一刻**:學生「謝謝你拒絕我,逃避心態又來了」頂回去自推 5000/min=反脆弱本身。診斷定案:知識全在,病灶 100% 「壓力下第一句就縮」,execution-heavy 續盯三指標。|
 
 ---
 
@@ -306,19 +344,19 @@ Rules going forward:
 | Topic | Box | Next Review |
 |-------|-----|-------------|
 | Security & Auth | 2 | 2026-06-27 (S33 WR4 測了 crypto-primitives slice: encoding/hashing/encryption + 密碼存法 PASS;但 OAuth/JWT/session 廣度未測 → Box 維持 2,下次補 full recall) |
-| Consistent Hashing | 2 | 2026-06-05 |
+| Consistent Hashing | 3 | 2026-07-15 (S40 逾期複習 PASS: 失敗時間線走出[%11→99% miss→DB雪崩] + ring/vnode 兩軸拆開 + vnode 數學 depth-ceiling park。Box 2→3) |
 | Distributed Cache + CAP | 3 | 2026-06-25 (S31 暖身 recall PASS「平常 C+A,只有 partition 才選 AP/CP」,CAP misconception 收掉,Box 2→3) |
 | Multi-Region Session Store (design) | 1 | 2026-06-19 (S31 Gate,新 design pattern,Box 1) |
 | Caching & CDN | 3 | 2026-07-01 (S33 WR4 六維度全收 zero退化 + 補 capacity 盲區,Box 2→3) |
-| Load Balancer | 2 | 2026-06-05 (WR3 recall 4/5 pass, Box 1→2) |
+| Load Balancer | 2 | 2026-07-11 (S40 逾期複習: sticky vs Redis 相反策略 + sticky 不均風險 S4 老錯結掉;但 **Least Connections 英文名想不起**[WR3 resolved 後 33 天又掉,語音近似+當場🟢≠留得住]→ Box 維持 2,下次重測演算法命名) |
 | Consistency Models | 2 | 2026-06-21 (S31 暖身 recall PASS「光譜+等同步 trade-off」無需 scaffolding,Box 1→2) |
 | Replication & Leader Election | 2 | 2026-06-19 (S30 recall PASS「read replica≠strong 因 replication lag」,Box 1→2) |
-| Rate Limiting & Circuit Breaker | 2 | 2026-07-06 (S38 failure-timeline PASS: 本地計數 N×limit 冷推出,Box 1→2;但 one-liner 機制層掉,下次補測) |
-| Observability | 1 | 2026-06-16 (S29 新學,Box 1, overdue) |
-| Bloom Filter & Gossip | 3 | 2026-07-03 (S34 Bloom+Cache 組合重講 Feynman PASS,no false negative/bit 機制自講,Box 2→3) |
-| Database (B-tree/LSM) | 1 | 2026-06-17 (S30 LSM 一度遺忘→喚回,backfill Box 1;S33 測的是 selection 軸非 LSM 內部,此項仍欠) |
+| Rate Limiting & Circuit Breaker | 2 | 2026-07-11 (S40 機制層補測: Token Bucket/Sliding Window[邊界 2×]/兩層 全對;**CB 三狀態又忘**[S28 resolved 後又掉]→ 配電箱重焊 + AWS 例撞出 Half-Open。CB 屬強先驗劫持型,Box 維持 2 下次重測三狀態) |
+| Observability | 2 | 2026-07-10 (S39 逾期複習 PASS: 三支柱問題框架重講後過 + 30微服務結帳查序全鏈出來[Metrics報警→Traces定位payment-service 7s→Logs同trace-id找gateway timeout];但執行習慣漏[Logs論證縮/Max伏筆漏/主菜要追問=花3次推],知識到位輸出待練。Box 1→2) |
+| Bloom Filter & Gossip | 2 | 2026-07-11 (S40 換情境重測 PASS: FP/FN 嚴重性用**通知場景**答對[新情境撈得出=真修好] + SSTable 每檔配一個/省讀硬碟 補完。多鉤子入庫[快取穿透/通知/SSTable]。Box 1→2) |
+| Database (B-tree/LSM) | 2 | 2026-07-10 (S39 逾期複習 PASS 核心:read/LSM=write 映射一次答對[WR1 老錯 resolved]+ random-seek vs sequential-append 機制講出 + 讀 trade-off[散多處慢]。逼問才補全論證。Box 1→2) |
 | URL Shortener (design) | 3 | 2026-07-03 (S34 Day 27 Drill 8/9,整套設計實戰過一遍,Box 2→3) |
-| Distributed Rate Limiter (design) | 1 | 2026-07-04 (S38 新學,Box 1) |
+| Distributed Rate Limiter (design) | 2 | 2026-07-11 (S40 Gauntlet drill 實戰過:local→5000/min→Redis 單一真相源→5 shards→shard by user_id→race/超賣→原子性→INCR vs Lua 全自產。多區域全球限流 park。設計知識到位,病灶在輸出習慣非知識。Box 1→2) |
 
 ---
 
