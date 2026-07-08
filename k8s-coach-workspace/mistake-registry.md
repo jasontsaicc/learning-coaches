@@ -99,4 +99,17 @@
 
 **正確做法:** 擋 typo 的那關要用 `kubectl apply --dry-run=server`(或 CI 用 kubeconform 帶 schema),client 會漏。讀 server 噴的 `unknown field "spec.rules[0]...numer"` 完整路徑 → 回檔案定位那一層那個欄位改。記 port=門牌、targetPort=真正的 container port,不確定就 `kubectl get svc -o yaml` 對 container 實際 listen port。
 
-**下次抽考日:** 2026-07-06
+**下次抽考日:** 2026-07-09 (2026-07-06 抽考:client=本機查語法 ✅ 有引導答出;但 server dry-run 答成「走完 etcd 整個流程」=第三次在 etcd 角色滑掉。已釘:審查在櫃檯、落帳才算數,dry-run=server=審完不落帳(strict decoding+admission 全走、唯獨不寫 etcd)。半過,拉近期重抽「停在哪之前」)
+
+---
+
+**日期:** 2026-07-06
+**主題:** P2a — L4 vs L7 分不清(什麼時候 L4 夠、什麼時候必須 L7)
+
+**踩的坑:** 全鏈複習時把 L4/L7 記成「場景標籤」,以為「叢集內=L4、外部=L7」是規則;被問「shop.com/ 和 shop.com/api 兩個外部請求的信封(IP+port)差在哪」連卡兩次,自陳「L4 和 L7 永遠搞不清楚」。
+
+**根因:** 沒抓住 L4/L7 的本質差別 = **做轉發決定需要讀到哪一層的資訊**。L4 只看得到信封(IP + port);L7 要拆信讀 HTTP 內容(Host header、URL path)。跟流量從內或外來完全無關。
+
+**正確做法:** 唯一判準:「轉發決定需不需要讀 HTTP 內容?」不需要 → L4 夠(叢集內 caller 已自己決定目的地 / 一個 LB 對一個 Service / 非 HTTP 協定如 MySQL 3306)。需要 → 必須 L7(一個入口按 Host/path 分流多後端、canary by header、TLS termination)。關鍵例:shop.com/ 與 /api 信封完全相同,唯一差異在信紙(path),不拆信物理上不可能分流 = Ingress 存在理由。可遷移:ALB(L7) vs NLB(L4) 選型同一條判準。
+
+**下次抽考日:** 2026-07-09
