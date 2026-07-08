@@ -86,7 +86,7 @@
 
 **正確做法:** DNS 解析失敗的排障第一刀 = **先用 FQDN 測一次**,把「伺服器壞 vs 發問端(client/search/工具)壞」二分:FQDN 通 → CoreDNS 沒事,往 client/resolver 查;FQDN 不通 → 才查 CoreDNS。別拿 busybox 測叢集 DNS,用 `nicolaka/netshoot`(正規 dig/nslookup)。絕不因 nslookup 失敗就亂砍/重啟 CoreDNS。
 
-**下次抽考日:** 2026-07-08 (2026-07-01 抽考:一開始把 conntrack 誤拉進 DNS 題=層級混淆,經拆解後守住「全名測得到→CoreDNS 沒壞→別重啟」的操作判斷;為什麼由教練補成完整因果。過,推 +7)
+**下次抽考日:** 2026-07-10 (2026-07-01 抽考:一開始把 conntrack 誤拉進 DNS 題=層級混淆,拆解後守住「全名測得到→CoreDNS 沒壞→別重啟」,為什麼由教練補,推 +7 到 07-08。**2026-07-07 提早再測:核心第一刀『先用 FQDN 二分』一時忘記,給梯子後自己定位到「問題在 resolv/search 補全端」→ 口頭型 + 需鷹架,拉回近期 07-10**)
 
 ---
 
@@ -113,3 +113,29 @@
 **正確做法:** 唯一判準:「轉發決定需不需要讀 HTTP 內容?」不需要 → L4 夠(叢集內 caller 已自己決定目的地 / 一個 LB 對一個 Service / 非 HTTP 協定如 MySQL 3306)。需要 → 必須 L7(一個入口按 Host/path 分流多後端、canary by header、TLS termination)。關鍵例:shop.com/ 與 /api 信封完全相同,唯一差異在信紙(path),不拆信物理上不可能分流 = Ingress 存在理由。可遷移:ALB(L7) vs NLB(L4) 選型同一條判準。
 
 **下次抽考日:** 2026-07-09
+
+---
+
+**日期:** 2026-07-07
+**主題:** Ingress YAML — service 寫成字串 + pathType 大小寫 + client dry-run 假安心
+
+**踩的坑:** 手寫 ingress.yaml 兩個 schema 錯:① `backend.service: shop-api`(把 service 寫成字串,該是 object `service: {name, port}`)② `pathType: prefix`(小寫,enum 只收 `Exact`/`Prefix`/`ImplementationSpecific`)。而且 `kubectl apply --dry-run=client` 回 `created (dry run)` **說「過」**,騙人。
+
+**根因:** ① `service` 是 `IngressServiceBackend` 型別(object),塞字串 → decode 失敗(server 報 `cannot unmarshal string into ... IngressServiceBackend`;decode 錯擋在第一個、後面的 enum 錯還驗不到)② enum 值**大小寫敏感**,`prefix` ≠ `Prefix` ③ `--dry-run=client` 只做本機淺檢查、**不驗型別/enum**;`--dry-run=server` 才把 YAML 塞進 API Server 的 Go struct 真驗。
+
+**正確做法:** 驗 k8s YAML 一律用 `--dry-run=server`(client 給假安心)。讀 `ValidationError(...路徑...)` / `cannot unmarshal ... of type X` 括號裡的**路徑**=藏寶圖,直指錯的欄位與該有的型別(同 P1 `unknown field` 那招)。修法:對照同檔已寫對的另一條規則照抄結構(他 `/web` 寫對、`/api` 寫錯)。
+
+**下次抽考日:** 2026-07-10
+
+---
+
+**日期:** 2026-07-07
+**主題:** Ingress 404 排障 — 兇手是壞掉的 port-forward、不是規則
+
+**踩的坑:** curl 走 Ingress 拿 404(還先回過空白)。差點以為 Ingress 規則寫錯、要去改 YAML。
+
+**根因:** 規則其實全對。照 404 階梯查:`get ingress` ADDRESS=`localhost`(已認領)、`get ingressclass` `nginx` 存在、nginx.conf 有 `server_name shop.com` = **規則層全綠**。真兇是**被 `Ctrl-C` 打斷的那條 port-forward 半死**,回假 404 / 空白。換一條乾淨的(不同 port 8081)→ 全 200。
+
+**正確做法:** ① 404 先分層:規則層(host/path/ingressClass 認領)vs 後端層(endpoints/port)。規則層全綠 → 兇手在「**你測試所經過的那層**」,不在規則,別去改沒壞的東西。② `kubectl port-forward` 是會抖的除錯夾具、不是正式流量;不可信就先換乾淨再下結論。③ 延伸:任何人的「猜測」(含教練猜 trailing slash)都要先驗證再採信。
+
+**下次抽考日:** 2026-07-11
