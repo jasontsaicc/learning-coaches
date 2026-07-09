@@ -44,7 +44,7 @@ Achievements must reward behaviors that align with genuine learning:
 
 | ID | Name | Unlock Condition | Description |
 |----|------|-----------------|-------------|
-| K1 | One-Liner ×10 | One-Liner Library in progress.md reaches 10 entries | 面試快答庫初具規模 |
+| K1 | One-Liner ×10 | One-Liner Library (`workspaces/sd/one-liner-library.md`) reaches 10 entries | 面試快答庫初具規模 |
 | K2 | One-Liner ×30 | One-Liner Library reaches 30 entries | 面試快答庫豐富了 |
 | K3 | Encyclopedia | One-Liner Library reaches 69 entries (complete) | 完整的面試百科 |
 | K4 | Bug Squasher ×5 | 5 mistakes resolved (❌→✅) in Mistake Registry | 錯誤是最好的老師 |
@@ -105,7 +105,7 @@ Order: Milestones first, then Mastery, then others.
 
 ## Checking Logic (for AI at Step H)
 
-At the end of each session, check these conditions against progress.md:
+At the end of each session, check these conditions against progress.md, `workspaces/sd/rpg-state.md`, and `workspaces/sd/one-liner-library.md`:
 
 1. **Milestones (M1-M6):** Did a Phase Gate pass this session? Did Day 1 complete?
 2. **Mastery (C1-C5):** Track Feynman Gate results during session. C5 requires student to have brought something from cross-verification.

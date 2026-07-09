@@ -1,6 +1,6 @@
 # Notes Template
 
-Use this template for every session's notes. Save as `notes/dayXX-topic.md`.
+Use this template for every session's notes. Save as `portfolio/sd/notes/dayXX-topic.md`.
 
 ---
 
@@ -77,7 +77,7 @@ Rules:
 ## 🧠 Mind Map (every session — separate file)
 
 > Student preference: a SHORT hand-writable mind map, in ADDITION to the full notes above (does not replace them).
-> Save to `notes/dayXX-topic-mindmap.md`. Goal: student copies it onto paper in 2-3 min to drill memory + practice writing English.
+> Save to `portfolio/sd/notes/dayXX-topic-mindmap.md`. Goal: student copies it onto paper in 2-3 min to drill memory + practice writing English.
 
 **Format** — HORIZONTAL mind map: center node on the LEFT, branches fan out to the RIGHT. Use box-drawing connectors `┌ ├ └ ─ ┤ │` and arrows `→` / `──→` for flow/cause. Simple English (doubles as English-writing practice — do NOT make it Chinese-dominant). This matches the student's preferred style (see `~/jason/k8s-coach/portfolio/notes/*-diagram.md`).
 

@@ -48,7 +48,7 @@ Read `references/achievements.md` for full definitions (25 achievements). Core r
 - Check at Step H (end of session)
 - Display inline when unlocked: `🏆 Achievement Unlocked: [Name] — [Description]`
 - AI may add 1 line of personalized encouragement
-- Track in `progress.md` Achievements table
+- Track in `workspaces/sd/rpg-state.md` Achievements table
 - **Achievements reward UNDERSTANDING, never speed**
 
 ---
@@ -79,16 +79,9 @@ Streak counts by WEEK, not by day. The student's real cadence is short sessions 
 
 ## Old Format Migration
 
-**Day-based streak → weekly streak:** if the RPG Profile streak predates the weekly rule (any streak recorded before this rule existed, or a reset note citing a multi-day gap), convert: current streak = 1 (this week), `longest_streak` keeps its historical value annotated "(days, pre-weekly)". Don't shame the conversion — mention it once, move on.
-
-**Review Schedule backfill:** scan Topic Mastery for 🟡/🟢 topics missing from the Review Schedule and add each to Box 1 (Next Review = tomorrow). This re-enrolls topics that finished their days before auto-enroll existed — without it, they stay outside the spaced-repetition loop forever.
-
-If `progress.md` exists but lacks RPG Profile or Achievements sections:
-- Add RPG Profile with defaults (Title based on current phase, streak = 1)
-- **Retroactive unlock:** Scan existing progress data and unlock achievements that are already earned:
-  - Check Phase Gate Results → unlock corresponding M achievements (M2-M6) and title
-  - Check Topic Mastery for 🟢 count → unlock K1/K2/K3 based on One-Liner Library count
-  - Check Mistake Registry ✅ count → unlock K4 if ≥ 5 resolved
-  - Check Scorecard History for perfect scores → unlock E1 if any
-  - Show a "Welcome to ScaleUp!" message listing all retroactively unlocked achievements
-- Do not interrupt the learning flow — migrate and continue
+Completed 2026-07-10: RPG state (Profile, Achievements, last story summary) now lives in
+`workspaces/sd/rpg-state.md`, separate from the engine-owned `progress.md`. The day-to-weekly
+streak conversion and the retroactive achievement unlock both ran during the standalone era
+and are done; `longest_streak` keeps its historical value annotated "(days, pre-weekly)".
+No further backfill logic is needed — if a state field is missing from rpg-state.md, add it
+with defaults and continue, without interrupting the learning flow.
