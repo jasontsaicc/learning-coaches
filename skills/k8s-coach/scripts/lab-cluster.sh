@@ -4,7 +4,8 @@
 [[ "${BASH_SOURCE[0]}" == "$0" ]] && set -euo pipefail
 
 PREFIX="k8s-coach"
-CONFIG_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../k8s-coach-workspace/clusters" && pwd)"
+# -P: resolve symlinks so this works when the coach dir is reached via ~/.claude/skills
+CONFIG_DIR="${K8S_COACH_CLUSTERS_DIR:-$(cd -P "$(dirname "${BASH_SOURCE[0]}")/../../../workspaces/k8s/clusters" && pwd)}"
 
 cluster_name() { echo "${PREFIX}-${1:-default}"; }
 

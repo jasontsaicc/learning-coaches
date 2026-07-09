@@ -13,6 +13,8 @@ for d in skills/*/; do
 done
 echo "== terraform lab =="
 ./skills/terraform-coach/scripts/lab-iac.test.sh >/dev/null && echo "lab-iac OK"
+echo "== k8s lab =="
+./skills/k8s-coach/scripts/lab-cluster.test.sh >/dev/null && echo "lab-cluster OK"
 echo "== templates =="
 tmpl_fail=0
 for t in templates/coach/SKILL.md.tmpl \
