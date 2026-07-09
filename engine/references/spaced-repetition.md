@@ -45,6 +45,19 @@ The 3 -> 7 -> 14 rhythm is fixed and cannot be changed by coach hooks. The ratio
 is that the intervals are calibrated to the forgetting curve for the study cadence this
 engine assumes. Diverging from the rhythm breaks the compounding effect.
 
+### Provisional +2-Day Slot (verbal-only resolutions)
+
+A resolution that is verbal-only — the student explained the fix correctly but never
+pinned it with a hands-on lab, an objective verification, or other physical evidence —
+does not enter the 3 -> 7 -> 14 rhythm immediately. It gets one provisional review
+2 days after the verbal pass. Pass that +2-day check and the item enters the normal
+rhythm at 3 days; fail and it stays at the provisional interval.
+
+Rationale: live coaching showed verbal-only fixes decaying in about 2 days, faster than
+the 3-day first interval assumes. Evidence-backed resolutions (the student reproduced or
+observed the mechanism directly) skip the provisional slot and start at 3 days. This is
+a pre-entry step, not a change to the locked rhythm.
+
 ---
 
 ## Priority Override
