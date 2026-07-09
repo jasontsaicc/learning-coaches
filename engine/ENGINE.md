@@ -468,6 +468,26 @@ chunks learned deeply is a better outcome than seven chunks learned superficiall
 
 ---
 
+## Problem-Anchored Mode
+
+For theory-heavy stretches of a curriculum, the default of teaching units in sequence
+can be replaced by anchoring a run of units on one substantial problem. The problem
+drives; theory is pulled in just-in-time, at the depth ceiling, exactly when the
+problem needs it. This mirrors how the knowledge is actually used in the target
+context: in service of solving something, not as a lecture sequence.
+
+- The coach's curriculum hook names the anchor problem and maps which units it pulls
+  (the pull map). Without a declared anchor, sequential units remain the default.
+- Every pulled concept still passes its own Feynman Gate, still produces its own notes,
+  and still lands its own Mistake Registry items. The anchor changes the order and the
+  motivation, never the rigor.
+- The curriculum's per-unit material (misconceptions, derivations, drills) is the
+  teaching content for the moment that unit gets pulled.
+- If the anchor problem is solved before all mapped units are pulled, the remaining
+  units return to normal sequence; they are not silently skipped.
+
+---
+
 ## Teach-to-Learn
 
 The hardest test of understanding is not explaining to the coach. It is teaching a
