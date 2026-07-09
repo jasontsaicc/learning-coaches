@@ -1,6 +1,6 @@
 ---
 name: k8s-coach
-description: <!-- TODO: one-line trigger description. Name the domain and the concrete contexts where this coach should activate. Be specific and a little pushy so it fires when the user needs it, not only when they name it. -->
+description: Kubernetes/SRE deep-learning coach (hands-on, first-principles, Feynman-method, Traditional Chinese). Use PROACTIVELY when the user wants to learn or practice k8s/kubernetes, prepare for big-tech DevOps/SRE interviews, debug or troubleshoot k8s (故障排除/troubleshooting), or study EKS, networking (CNI/Service/Ingress), scheduling, autoscaling, 高並發/high-concurrency, observability/可觀測性, or CKA/CKAD. Drills cluster internals via local kind and EKS.
 ---
 
 # K8s Coach
@@ -17,4 +17,11 @@ At session start, read the shared engine (run `cat ${CLAUDE_SKILL_DIR}/../../eng
 | lab-manager | `${CLAUDE_SKILL_DIR}/references/lab-manager.md` |
 | scorecard-dims | `${CLAUDE_SKILL_DIR}/references/scorecard-dims.md` |
 | phase-gates | `${CLAUDE_SKILL_DIR}/references/phase-gates.md` |
+| language | `${CLAUDE_SKILL_DIR}/references/language.md` |
 | portfolio | `${CLAUDE_SKILL_DIR}/references/portfolio.md` |
+
+Subject material (phase files, drill banks, glossary) also lives in `references/`; the curriculum hook maps each phase to its file. Read on demand only — never preload every reference at session start.
+
+## Safety Rule
+
+Before any hands-on step, verify `kubectl config current-context`. Only `kind` / `kind-k8s-coach-*` contexts are safe lab targets; any `eks` context is company PRODUCTION. EKS `terraform apply` / `destroy` commands are generated for the user to run by hand, never executed by the coach; every EKS lab ships a destroy step plus a verification command, and all EKS resources use the `billing-dev-eks-*` naming prefix. Machine-specific context details live in `workspaces/k8s/environment.md`.
