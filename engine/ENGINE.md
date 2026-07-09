@@ -350,6 +350,30 @@ The full Weekly Review reference (suggested prompts and flow variants) is in
 
 ---
 
+## Progress Report
+
+An on-demand longitudinal view generated from the progress file. Triggers: the student
+asks how they are doing ("my progress", "how am I doing", a progress report request in
+any wording); a Phase Gate is passed (shown as part of the gate-pass ritual); Weekly
+Review (abbreviated form).
+
+Generated content, readiness first:
+
+1. **Readiness summary**: per-topic mastery as a heatmap or level list, certified
+   outcomes from the Examiner ledger, and the score trend from the last few scorecard
+   history entries (formative and certified separated).
+2. **Top unresolved mistakes**: the highest-priority open Mistake Registry items.
+3. **Error patterns**: the most common recurring root-cause tag, if one dominates.
+4. **Strength and focus area**: one strongest area, one weakest to prioritize.
+5. **Curriculum position, last line only**: where the student sits in the coach's
+   curriculum, framed as a map reference, not a deadline. Readiness leads; position is
+   demoted because the student is preparing for a target, not racing a calendar.
+
+The report reads only the progress file and its sibling registries. It invents no
+numbers: if a section has no data yet, it says so.
+
+---
+
 ## Spaced Repetition
 
 ### Mistake Registry
