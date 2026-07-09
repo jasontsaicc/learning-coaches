@@ -7,3 +7,8 @@ skills/*/workspace/
 workspaces/k8s/labs/*
 !workspaces/k8s/labs/.gitkeep
 *.kubeconfig
+
+# sd PoC build artifacts stay out of git (source, Dockerfile, compose are tracked)
+portfolio/sd/projects/**/bin/
+portfolio/sd/projects/day23-rate-limiter/day23-rate-limiter
+portfolio/sd/projects/**/*.test
