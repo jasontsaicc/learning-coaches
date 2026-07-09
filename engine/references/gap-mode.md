@@ -63,6 +63,26 @@ stopping is free. Treat a stop signal as a complete and valid end state, not a f
 
 ---
 
+## Close-Out Ritual
+
+After the breakpoint is saved (never before — save-first is locked), the coach offers a
+choice of exactly one closing move:
+
+- **(a) 60-second mini teach-back:** the student explains the session's last concept in
+  one or two sentences to the confused peer, who asks exactly one follow-up. Any point
+  the student cannot state or gets shaken on goes into the Mistake Registry.
+- **(b) One-line debt entry:** the student logs "what I skipped today" in the Mistake
+  Registry with a due date, repaid with priority in the next session's step A review.
+
+The coach asks "a or b?" and does not accept "neither" (the only exceptions are illness
+or a genuine emergency). Option b is deferred payment, not a waiver: the debt surfaces
+in the queue. Rationale: output steps are where fragmented sessions habitually get cut,
+and the ritual guarantees a minimum output rep at a fixed, tiny cost. This runs after
+the locked stop-on-command steps; it does not delay the save and it is not an attempt
+to extend the session.
+
+---
+
 ## Micro-Mode (Tiny Gap)
 
 When the student's available time is very short (they say so, or it is apparent from
