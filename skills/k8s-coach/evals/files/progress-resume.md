@@ -1,26 +1,53 @@
-# 學習進度卡 (斷點續傳)
+# progress
 
-## 基本資訊
+<!-- Eval fixture: mid-P1 student with a live breakpoint. Engine schema (engine/PROGRESS-SCHEMA.md). -->
 
-| 欄位 | 內容 |
-|------|------|
-| 目前 phase | P1 核心物件 + 容器底層 |
-| 目前主題 | Pod liveness / readiness probe |
-| 上次 session 日期 | 2026-06-15 |
-| session 累計次數 (session_count) | 4 |
-| 上次 Weekly Review (last_weekly_review) | 0 |
+## Meta
 
-## 未完成 lab
+- session_count: 4
+- last_weekly_review: 0
+- last_session_date: 2026-06-15
+- warm_up_classification: mid
 
-- [ ] probe-lab:設了 livenessProbe 後 Pod 一直被重啟,卡在「為什麼 readiness 一直 fail」的 step,還沒找到根因
-- [ ] 還沒跑 E 段 chaos drill(故意把 probe 路徑設錯)
+## Current Session breakpoint
 
-## 下一步
+P1, step C, chunk 3 (probe), next: 釐清 liveness vs readiness 語意差異(失敗各自會怎樣),然後跑 readiness 失敗的 chaos drill(step E,故意把 probe 路徑設錯);probe-lab 上次卡在「為什麼 readiness 一直 fail」未找到根因。
 
-> 下次繼續:接續 probe chunk 3 — 釐清 liveness vs readiness 的語意差異(失敗各自會怎樣),再跑 readiness 失敗的 chaos drill
+## Phase status
 
-## 補充筆記
+- P0 心智模型: gate-passed
+- P1 核心物件 + 容器底層: in-progress(chunk 3 probe 進行中)
+- P2a 之後: not-started
 
-- liveness 失敗 → kubelet 重啟 container;readiness 失敗 → 從 Service endpoints 移除,但不重啟
-- 還沒搞懂 initialDelaySeconds / periodSeconds 怎麼影響「重啟風暴」
-- Term Registry 有 3 張卡今天到期要抽考:probe / endpoint / kubelet
+## Mastery
+
+- P0 apply→Running control flow: med (s3)
+- P1 container/namespace/cgroup: med (s4)
+
+## Scorecard history
+
+- 2026-06-15 | step G (s4, tier 1) | 2/3 | 用詞精準度 | 自己推出 probe 需要獨立於 app 邏輯 | coach
+
+## Mistake Registry
+
+- 2026-06-15 | probe 語意 | 以為 readiness 失敗也會重啟 container | 兩種 probe 失敗後動作不同(重啟 vs 切流量) | unresolved | 3 | 2026-06-18 | 1
+  - 備註:liveness 失敗 → kubelet 重啟 container;readiness 失敗 → 從 Service endpoints 移除,不重啟。還沒搞懂 initialDelaySeconds / periodSeconds 怎麼影響「重啟風暴」。
+
+## Spaced-repetition queue
+
+- term:probe | term | 3 | 2026-06-18(今天到期)| active
+- term:endpoint | term | 3 | 2026-06-18(今天到期)| active
+- term:kubelet | term | 3 | 2026-06-18(今天到期)| active
+- mistake:probe-語意 | mistake | 3 | 2026-06-18 | active
+
+## Curiosity branch
+
+(none)
+
+## Domain registries
+
+- `term-registry.md`:3 張卡(probe / endpoint / kubelet),今天到期要抽考。
+
+## Examiner ledger
+
+(empty)

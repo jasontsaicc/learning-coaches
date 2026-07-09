@@ -1,6 +1,6 @@
 # learning-coaches
 
-A Claude Code plugin providing a family of first-principles learning coaches built on a shared teaching engine. Each coach uses Feynman and Simon methods (incremental layering, asking you to articulate understanding, teaching by breaking down complex topics into foundational pieces) to guide deep learning in DevOps domains. Initial focus: Terraform/Infrastructure-as-Code, with kubernetes, system design, and leetcode to follow.
+A Claude Code plugin providing a family of first-principles learning coaches built on a shared teaching engine. Each coach uses Feynman and Simon methods (incremental layering, asking you to articulate understanding, teaching by breaking down complex topics into foundational pieces) to guide deep learning in DevOps domains. Live coaches: Terraform/Infrastructure-as-Code and Kubernetes/SRE, with system design and leetcode to follow.
 
 ## Repository Structure
 
@@ -31,21 +31,36 @@ learning-coaches/
 │   └── coach/                               # Fill-in-the-blank hook templates (TODO markers)
 │       ├── SKILL.md.tmpl
 │       └── references/*.md.tmpl
-└── skills/
-    └── terraform-coach/
-        ├── SKILL.md
-        ├── references/
-        │   ├── curriculum.md
-        │   ├── lab-manager.md
-        │   ├── north-star.md
-        │   ├── phase-gates.md
-        │   ├── portfolio.md
-        │   ├── scorecard-dims.md
-        │   └── teaching-elements.md
-        └── scripts/
-            ├── lab-iac.sh
-            └── lab-iac.test.sh
+├── skills/
+│   ├── terraform-coach/
+│   │   ├── SKILL.md
+│   │   ├── references/                      # 7 hook files
+│   │   └── scripts/                         # lab-iac.sh + test
+│   └── k8s-coach/
+│       ├── SKILL.md
+│       ├── references/                      # 8 hook files + subject material
+│       │                                    #   (phase-0..6, foundations, chaos-drills,
+│       │                                    #    real-world-scenarios, interview-bank, term-glossary)
+│       ├── scripts/                         # lab-cluster.sh (kind lifecycle) + test
+│       └── evals/                           # behavioral evals + fixtures
+├── workspaces/                              # per-coach learner state — git-TRACKED
+│   └── k8s/                                 # progress.md (engine schema), term-registry,
+│                                            #   story-bank, session-log, environment,
+│                                            #   curriculum-plan, clusters/, notes/
+└── portfolio/                               # recruiter-facing artifacts
+    └── k8s/                                 # notes/ + manifests/ (+ observability/,
+                                             #   gitops/, terraform-eks/ as phases grow)
 ```
+
+## Tracked Workspaces
+
+`workspaces/` holds per-student learning state (progress file, registries, session log) and
+is deliberately git-tracked: the student syncs it across machines by committing after each
+session and pulling before the next. This differs from `skills/*/workspace/`, which stays
+untracked scratch space. `portfolio/` is the curated, shareable output area; only artifacts
+that clear the coach's quality bar land there. The k8s learner state was migrated from the
+standalone `k8s-mastery-lab-skill` repo (history merged via git subtree; pre-migration
+originals kept verbatim in `workspaces/k8s/archive/pre-migration/`).
 
 ## Engine Read Mechanism
 

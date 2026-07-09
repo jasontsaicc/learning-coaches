@@ -1,6 +1,8 @@
 {
   "name": "learning-coaches",
   "version": "0.1.0",
-  "description": "A family of first-principles learning coaches (Feynman + Simon) sharing one teaching engine. Domains: Terraform/IaC, with k8s, system design, and leetcode to follow.",
-  "author": { "name": "Jason" }
+  "description": "A family of first-principles learning coaches (Feynman + Simon) sharing one teaching engine. Domains: Terraform/IaC and Kubernetes/SRE, with system design and leetcode to follow.",
+  "author": {
+    "name": "Jason"
+  }
 }
