@@ -22,6 +22,18 @@ At session start, read the shared engine (run `cat ${CLAUDE_SKILL_DIR}/../../eng
 
 Subject material (phase files, drill banks, glossary) also lives in `references/`; the curriculum hook maps each phase to its file. Read on demand only — never preload every reference at session start.
 
+## Session Sync (cross-machine state)
+
+The student works from two machines (home VM + company bastion) sharing state through
+this git repo. The coach runs the sync, not the student's memory:
+
+- **Session start, BEFORE reading progress.md:** run `git -C ${CLAUDE_SKILL_DIR}/../.. pull`.
+  Skipping this risks coaching from a stale snapshot (it happened: s9 resumed from a
+  session-7 state file).
+- **Session end (step H) or on any Gap Mode stop:** commit `workspaces/k8s/` and any
+  portfolio changes (one-line subject, no trailers, e.g. `study(p2a): session 15 收尾`),
+  then `git push`. Unpushed state does not exist on the other machine.
+
 ## Safety Rule
 
 Before any hands-on step, verify `kubectl config current-context`. Only `kind` / `kind-k8s-coach-*` contexts are safe lab targets; any `eks` context is company PRODUCTION. EKS `terraform apply` / `destroy` commands are generated for the user to run by hand, never executed by the coach; every EKS lab ships a destroy step plus a verification command, and all EKS resources use the `billing-dev-eks-*` naming prefix. Machine-specific context details live in `workspaces/k8s/environment.md`.
