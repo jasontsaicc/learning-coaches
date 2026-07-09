@@ -1,0 +1,6 @@
+# workspace runtime 產物(學員上課時產生)
+k8s-coach-workspace/labs/*
+!k8s-coach-workspace/labs/.gitkeep
+# kind kubeconfig / 暫存
+*.kubeconfig
+.DS_Store

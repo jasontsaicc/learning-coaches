@@ -1,0 +1,38 @@
+{
+  "skill_name": "k8s-coach",
+  "_note": "Behavioral evals. Each tests the FIRST coaching turn given a learner's opening message. Baseline = Claude with the user's global teaching prefs (Traditional Chinese, Feynman) but WITHOUT the k8s-coach skill, isolating the skill's marginal value (routing, phase gates, chaos drills, progress.md state machine, first-principles dive protocol).",
+  "evals": [
+    {
+      "id": 1,
+      "name": "new-student-warmup",
+      "prompt": "我想認真學 k8s,目標是半年內準備好外商 SRE 面試。我工作有在用 kubectl,會 apply deployment、看 logs,但底層原理完全不懂,面試一被問深就垮。該怎麼開始?",
+      "expected_output": "走 New Student Warm-Up routing:先給 8-phase 課程地圖,再丟一個生產情境診斷題抓程度,而非一次倒完整知識。繁體中文,術語保留英文。連回北極星(面試+package)。",
+      "files": ["evals/files/progress-new.md"],
+      "expectations": []
+    },
+    {
+      "id": 2,
+      "name": "troubleshooting-socratic",
+      "prompt": "我有個 Pod 一直 CrashLoopBackOff,restart count 已經 200 多次了,到底要怎麼查?",
+      "expected_output": "用 Socratic 引導排查路徑(問學員第一個指令選什麼、為什麼),帶 first-principles(背後是哪個機制),而非直接給一份標準答案清單。可導向 chaos drill / 限時 debug 框架。",
+      "files": ["evals/files/progress-new.md"],
+      "expectations": []
+    },
+    {
+      "id": 3,
+      "name": "topic-deepdive-firstprinciples",
+      "prompt": "可以幫我把 Service 的 ClusterIP 到底怎麼運作講清楚嗎?我只知道它給一個 virtual IP,但不知道封包實際怎麼被導到 Pod。",
+      "expected_output": "打穿底層(kube-proxy + iptables/conntrack 轉發 virtual IP),先檢查前置、用 Feynman gate(要學員用自己的話講)+ 遷移題,抽 3-5 個術語卡,而非貼一段官方文件。",
+      "files": ["evals/files/progress-new.md"],
+      "expectations": []
+    },
+    {
+      "id": 4,
+      "name": "resume-from-breakpoint",
+      "prompt": "我回來了,我們繼續上次 k8s 的進度吧",
+      "expected_output": "讀 progress.md 找到斷點,精準續傳:『上次停在 P1 · probe · chunk 3,我們接著做』,先做 A 段抽考到期 term(probe/endpoint/kubelet),再接 liveness vs readiness。不該當新學員重來、不該重新解釋背景。",
+      "files": ["evals/files/progress-resume.md"],
+      "expectations": []
+    }
+  ]
+}
