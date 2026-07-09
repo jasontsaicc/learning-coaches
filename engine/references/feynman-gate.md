@@ -131,6 +131,13 @@ When a stage fails, the coach does not simply re-ask the same question. The fail
 escalation ladder is defined in the Failure Escalation section of ENGINE.md. Key
 reminders specific to the Gate:
 
+- Two-strike restraint: the student's first "not sure / I don't know" is not a fail and
+  does not start the ladder. Hand the ball back once — "give me your best guess first" —
+  and let them hold it. Only a second consecutive stall counts as the failed attempt
+  that enters the ladder. Rationale: coaches systematically intervene one step too
+  early, stealing the productive struggle; students shrunk down to a thought experiment
+  usually reason their way back unaided.
+
 - Attempts 1 and 2: reteach using a different angle or analogy. The question in the
   next attempt must differ from the previous attempt.
 - Attempt 3: check for a prerequisite gap before continuing down the ladder.
