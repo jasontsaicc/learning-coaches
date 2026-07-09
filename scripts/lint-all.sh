@@ -11,10 +11,12 @@ for d in skills/*/; do
   [ "$name" = "_probe" ] && continue
   ./scripts/lint-coach.sh "$name" && echo "$name OK"
 done
+# NOTE: set -e does not fire on the left side of an && list, so lab tests use
+# explicit if/else — otherwise a failing (or non-executable) test is silently swallowed.
 echo "== terraform lab =="
-./skills/terraform-coach/scripts/lab-iac.test.sh >/dev/null && echo "lab-iac OK"
+if ./skills/terraform-coach/scripts/lab-iac.test.sh >/dev/null; then echo "lab-iac OK"; else echo "lab-iac FAIL"; exit 1; fi
 echo "== k8s lab =="
-./skills/k8s-coach/scripts/lab-cluster.test.sh >/dev/null && echo "lab-cluster OK"
+if ./skills/k8s-coach/scripts/lab-cluster.test.sh >/dev/null; then echo "lab-cluster OK"; else echo "lab-cluster FAIL"; exit 1; fi
 echo "== templates =="
 tmpl_fail=0
 for t in templates/coach/SKILL.md.tmpl \
