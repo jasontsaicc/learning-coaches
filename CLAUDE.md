@@ -42,6 +42,8 @@
 | `projects/` | Go PoC 專案 |
 | `docs/` | 規劃文件 |
 
+這個 repo 只放學習產出。課綱與教學模板（`curriculum.md`、`story.md`、`notes-template.md` 等）屬於 skill，唯一來源是 `system-design-coach/references/`。不要在這裡放副本，之前放過一份，結果三個地方都有 curriculum，改課綱時分不清該動哪個。
+
 ---
 
 ## PoC 偏好
