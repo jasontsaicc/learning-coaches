@@ -1,0 +1,86 @@
+{
+  "skill_name": "sd-coach",
+  "_note": "Behavioral evals. Each tests the FIRST coaching turn given a learner's opening message. The coach runs on the shared learning-coaches engine (engine/ENGINE.md) with progress files in workspaces/sd/ following engine/PROGRESS-SCHEMA.md. Ported 2026-07-10 from the standalone sd-coach's 43 cases: cases testing engine-owned mechanics (feynman gate, escalation, breakpoints, weekly review, comeback, depth ceiling, examiner gate, RPG bookkeeping) were dropped; these 8 test coach-owned behavior (hooks: curriculum warm-up, language, PoC tiers, problem-anchored mode, narrative/Yuki, RPG story rules).",
+  "evals": [
+    {
+      "id": 1,
+      "name": "new-student-warmup",
+      "prompt": "I want to start preparing for system design interviews. I have about 6 months. I'm a DevOps engineer, comfortable with AWS, but I've never done an SD interview. Where do we start?",
+      "expected_output": "走 New Student Warm-Up routing:先給 5-phase 課程地圖,再出 URL shortener 2-3 分鐘診斷題抓程度(strong/medium/blank),而非直接開始上課或倒完整知識。結果寫進 progress.md 的 warm-up classification。",
+      "files": [
+        "evals/files/progress-new.md"
+      ],
+      "expectations": []
+    },
+    {
+      "id": 2,
+      "name": "resume-from-breakpoint",
+      "prompt": "我回來了,繼續上次 system design 的進度。",
+      "expected_output": "讀 progress.md:S40 完成收尾、40-33=7 → S41 = Weekly Review #5 到期,應以 Weekly Review 取代普通 session(多筆複習到期一起收),而不是開新主題或當新學員重來。開場前先 git pull(Session Sync)。",
+      "files": [
+        "evals/files/progress-resume.md"
+      ],
+      "expectations": []
+    },
+    {
+      "id": 3,
+      "name": "bilingual-english-polish",
+      "prompt": "我們現在在 Day 4 Load Balancer。我試著用英文講:LB is like a restaurant host, it decide which server take the request, so no server is overwhelm.",
+      "expected_output": "依 language hook:內容判定照走(比喻方向對),並緊接一行 💬 English Polish 給自然的面試可用版本(修 decide→decides、take→takes、overwhelm→overwhelmed 之類),不開文法課。討論繼續繁中。",
+      "files": [
+        "evals/files/progress-p1.md"
+      ],
+      "expectations": []
+    },
+    {
+      "id": 4,
+      "name": "poc-tier-fallback",
+      "prompt": "I don't have Docker set up on this machine right now. We're supposed to build the consistent hashing PoC today. What do we do?",
+      "expected_output": "依 teaching-elements step D:consistent hashing 的價值在演算法 → 降到 🟡 Light Code(Go 核心演算法+測試,不需 Docker),不是取消動手也不是硬上 Full PoC。PoC 落點 portfolio/sd/projects/。",
+      "files": [
+        "evals/files/progress-resume.md"
+      ],
+      "expectations": []
+    },
+    {
+      "id": 5,
+      "name": "problem-anchored-entry",
+      "prompt": "I just passed the Phase 1 Gate. Starting Phase 2 today — what's the plan for the distributed systems theory days?",
+      "expected_output": "依 curriculum hook 的 Problem-Anchored Mode:P2 理論不逐日上課,用錨定設計題(Design a Distributed Cache)驅動,CAP/consistency/replication 在設計需要時 just-in-time 拉進來,capped at interview depth。",
+      "files": [
+        "evals/files/progress-p2-entry.md"
+      ],
+      "expectations": []
+    },
+    {
+      "id": 6,
+      "name": "teach-yuki-mode",
+      "prompt": "教 Yuki 我剛學的 URL shortener 設計。",
+      "expected_output": "進 Teach-to-Learn(engine loop + narrative hook 的 Yuki persona):先讓學員完整 monologue 教一遍不打斷,然後 Yuki 發 2-4 個未排練的邊界追問(naive-but-deep / what-if / comparison trap),AI 不代答;被問倒的點入 Mistake Registry,收尾一行 debrief。",
+      "files": [
+        "evals/files/progress-resume.md"
+      ],
+      "expectations": []
+    },
+    {
+      "id": 7,
+      "name": "rpg-story-restraint",
+      "prompt": "Let's start Day 4 (Load Balancer). I'm at Phase 1.",
+      "expected_output": "開場可帶 ScaleUp 劇情(小球/Karen 帶出為什麼今天需要 LB),但每 step 劇情 ≤3 行,之後立刻進 step B 生活化類比與教學。劇情不佔教學時間。",
+      "files": [
+        "evals/files/progress-p1.md"
+      ],
+      "expectations": []
+    },
+    {
+      "id": 8,
+      "name": "rpg-opt-out",
+      "prompt": "Skip the story stuff, just teach me about CAP theorem directly.",
+      "expected_output": "Opt-out 立即生效(narrative hook 核心規則):純教學模式,不再出現角色與劇情,教學品質不變(Feynman Gate、first-principles 照走),也不勸學員留在故事模式。",
+      "files": [
+        "evals/files/progress-resume.md"
+      ],
+      "expectations": []
+    }
+  ]
+}
