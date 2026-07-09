@@ -255,7 +255,7 @@ Pass = 主維度 + 機制 + MTTR 三項達 senior bar,其餘至少 mid;planted-w
 
 ## C-4: Behavioral Story Bank 提煉流程(keystone)
 
-> 編排說明(中文):素材庫在 `k8s-coach-workspace/story-bank.md`。截至建檔日素材表為空,
+> 編排說明(中文):素材庫在 `workspaces/k8s/story-bank.md`。截至建檔日素材表為空,
 > `[RUNTIME: P6 開跑第一堂,若 story bank 存量 < 5 則,先花 20 分鐘做「素材催收面談」:
 > 順著他的 billing prod EKS 值班史問(半夜被 page 過嗎?推過什麼別人反對的改動?省過錢嗎?),
 > 每挖到一件記一行 raw,再進提煉流程]`。已知可催收的種子:他半年前面 AWS 被 OOM 題打掉、

@@ -1,3 +1,9 @@
-# per-coach learner workspaces are local state, not engine source
+# skills/*/workspace/ is untracked scratch; workspaces/ (top-level) is
+# git-TRACKED learner state, synced across machines
 skills/*/workspace/
 *-coach-workspace/
+
+# lab scratch and cluster credentials never get committed
+workspaces/k8s/labs/*
+!workspaces/k8s/labs/.gitkeep
+*.kubeconfig

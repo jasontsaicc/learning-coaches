@@ -640,7 +640,7 @@ kubectl -n pss-lab run naked-nginx --image=nginx   # 預期被拒
 
 ## P2b 英文 Ramp
 
-檔位(P2a-P2b):中文為主,術語卡 + 每個機制一兩句英文短句(已嵌在各 chunk 的 Say it in English)。學員 2026-07-01 明說中文佔比多一些:Say-it-in-English 用「你能不能用英文把這句講給面試官」輕推,不硬逼。全部術語同步進 `k8s-coach-workspace/term-registry.md` 做間隔抽考。
+檔位(P2a-P2b):中文為主,術語卡 + 每個機制一兩句英文短句(已嵌在各 chunk 的 Say it in English)。學員 2026-07-01 明說中文佔比多一些:Say-it-in-English 用「你能不能用英文把這句講給面試官」輕推,不硬逼。全部術語同步進 `workspaces/k8s/term-registry.md` 做間隔抽考。
 
 本 phase 累積術語:
 

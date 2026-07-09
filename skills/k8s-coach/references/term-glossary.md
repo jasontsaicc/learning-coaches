@@ -2,7 +2,7 @@
 
 > **如何使用此檔:** 這是跨所有 phase 的術語 master list。
 > Teaching Flow C 段每做一張術語卡,同步把術語加進來(格式如下)。
-> 間隔複習的詳細追蹤(學習日/下次抽考日)放在 `k8s-coach-workspace/term-registry.md`;
+> 間隔複習的詳細追蹤(學習日/下次抽考日)放在 `workspaces/k8s/term-registry.md`;
 > 本檔是「定義的唯一正確來源」,term-registry.md 是「抽考排程的追蹤簿」。
 >
 > 使用規則: 新術語先查本檔有沒有;有的話用本檔定義,不要另起一個版本(避免定義分歧)。

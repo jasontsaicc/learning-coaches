@@ -2,7 +2,7 @@
 
 > **如何使用此檔:** 對應 Teaching Flow E 段(故障注入 Drill)。每個 drill 是一個獨立的「弄壞→限時 debug」單元。
 > 學員在 D 段看過正常狀態後,E 段注入故障,限時定位根因。
-> 每次 drill 踩坑記進 `k8s-coach-workspace/mistake-registry.md`。
+> 每次 drill 踩坑記進 `workspaces/k8s/progress.md` 的 Mistake Registry 區段。
 
 ---
 

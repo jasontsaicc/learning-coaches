@@ -15,7 +15,7 @@
 | **k8s x system design** | k8s 機制和大系統設計的交集 | senior SRE 視角:能不能設計可靠的系統 |
 | **CKA/CKAD 限時(副線)** | timed 操作題,手速 + 語法記憶 | P6 才密集練,前期不是重點 |
 | **誘答庫** | 似是而非的完整說法,要學員抓錯並講清楚錯在哪一層 | 反脆弱:不被聽起來合理的錯誤說法帶走(學員真實職場弱點) |
-| **Behavioral(Q-B-*)** | senior 面試 behavioral 題,英文題幹 | 敘事結構 + 判斷力,素材從 `k8s-coach-workspace/story-bank.md` 提煉 |
+| **Behavioral(Q-B-*)** | senior 面試 behavioral 題,英文題幹 | 敘事結構 + 判斷力,素材從 `workspaces/k8s/story-bank.md` 提煉 |
 
 ---
 
@@ -1002,7 +1002,7 @@ spec:
 ## Behavioral(Q-B-*)
 
 > **用法**: 題幹全英文(senior 面試現場就是英文)。每題給「好答案的形狀」(結構要點,不是範文,素材必須是學員自己的);追問方向給 Coach 加壓用。
-> **素材流水線**: 平時把事件存進 `k8s-coach-workspace/story-bank.md`(P3 起隨手記),P6 照 `references/phase-6-interview-sprint.md` C-4 的 STAR 提煉流程 drill 成 2-3 則主力故事,一則故事通常可以覆蓋 2-3 題。
+> **素材流水線**: 平時把事件存進 `workspaces/k8s/story-bank.md`(P3 起隨手記),P6 照 `references/phase-6-interview-sprint.md` C-4 的 STAR 提煉流程 drill 成 2-3 則主力故事,一則故事通常可以覆蓋 2-3 題。
 > [RUNTIME: mock 時先看 story-bank.md 當下有什麼素材,挑最貼的題;素材空的題先當「回去補故事」的作業,不硬掰]
 
 ### Q-B-01: Biggest incident you handled

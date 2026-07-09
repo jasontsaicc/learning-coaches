@@ -707,7 +707,7 @@ git commit -m "init: k8s-portfolio, P0 apply-to-running diagram"
 
 ## P0 英文 Ramp (術語卡總結)
 
-P0 階段只做術語卡(EN term + 發音 + 英文定義 + 中文點破),全部同步進 `k8s-coach-workspace/term-registry.md`。
+P0 階段只做術語卡(EN term + 發音 + 英文定義 + 中文點破),全部同步進 `workspaces/k8s/term-registry.md`。
 
 本 phase 累積的術語:
 

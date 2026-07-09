@@ -296,7 +296,7 @@ NetworkPolicy 是**白名單宣告**:一旦有任何 policy 選中某個 Pod,該
 
 **前置:開 p2a 叢集**(kindnet 換 Calico 不能原地換,要新叢集)
 
-先建 `k8s-coach-workspace/clusters/kind-p2a.yaml`:
+先建 `workspaces/k8s/clusters/kind-p2a.yaml`:
 
 ```yaml
 # P2a: no default CNI, install Calico for NetworkPolicy + packet-path labs

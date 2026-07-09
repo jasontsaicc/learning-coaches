@@ -1014,7 +1014,7 @@ P5 檔位 = 主教材大量英文,本檔正文即閱讀材料。執行方式:
   - "failurePolicy is a fail-open versus fail-closed decision on every API write."
   - "A write is committed only once a majority has persisted it, because any two
     majorities overlap."
-- **術語卡總結**(同步進 `k8s-coach-workspace/term-registry.md` 做間隔抽考):
+- **術語卡總結**(同步進 `workspaces/k8s/term-registry.md` 做間隔抽考):
 
 | 主題 | 術語 |
 |------|------|
