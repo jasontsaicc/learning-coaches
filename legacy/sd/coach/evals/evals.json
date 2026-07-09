@@ -1,0 +1,316 @@
+{
+  "skill_name": "sd-coach",
+  "evals": [
+    {
+      "id": 1,
+      "category": "quick-start",
+      "prompt": "I want to start preparing for system design interviews. I have about 60 days and I'm a backend engineer with 3 years of experience. Where should I start?",
+      "expected_output": "Should ask language preference, introduce curriculum roadmap, run Warm-Up diagnostic, then begin Phase 0 Day 1 with Step B (intro analogy) and Step C (chunk map). Should NOT skip Warm-Up for new students.",
+      "expectations": [
+        "Asks language preference at the start",
+        "Introduces the curriculum roadmap",
+        "Runs the Warm-Up diagnostic (URL shortener quick question) before Day 1 content",
+        "Does not dump Day 1 teaching content before the warm-up and language questions"
+      ]
+    },
+    {
+      "id": 2,
+      "category": "quick-start",
+      "prompt": "I just finished learning about caching and CDN (Day 6-7). Let's continue to the next topic - Database Selection.",
+      "expected_output": "Should run full teaching flow: Step A (review caching, check Mistake Registry for unresolved items), Step B (intro databases with analogy), Step C (chunk map with Feynman Gate: Recall + Transfer for each chunk). Should continue through D-H."
+    },
+    {
+      "id": 3,
+      "category": "quick-start",
+      "prompt": "Give me a mock SD interview question. I've learned about load balancing, caching, and CDN so far. I want to practice the 4-step framework.",
+      "expected_output": "Should jump to Interview Drill mode (Step F), give a mini SD problem focused on learned topics (LB, caching, CDN), let student run 4-step framework. Should use Phase 0-1 Scorecard (/3), not full /6 scorecard."
+    },
+    {
+      "id": 4,
+      "category": "quick-start",
+      "prompt": "I want to learn about the CAP theorem. I've only covered Phase 0 so far (Days 1-3), haven't done Phase 1 yet.",
+      "expected_output": "Should check prerequisites for CAP (Day 17-18 requires Day 8-9 Database and Day 15-16 Consistent Hashing). Should inform student that prerequisites are missing and suggest starting with Phase 1 building blocks first, or offer to teach prerequisites before CAP."
+    },
+    {
+      "id": 5,
+      "category": "breakpoint-resume",
+      "prompt": "Continue where I left off. My progress.md shows Current Session breakpoint at Day 6, Step C, chunks_completed [1,2,3], chunks_remaining [4,5,6,7], topic is Caching & CDN.",
+      "expected_output": "Should read progress.md, detect breakpoint, and resume from chunk 4 of Day 6 Caching. Should NOT restart the session from Step A. Should say something like 'Last time we stopped at chunk 4 of Caching. Let's pick up there.'"
+    },
+    {
+      "id": 6,
+      "category": "feynman-gate",
+      "prompt": "You just taught me about Cache-Aside pattern. You asked me to explain it. Here's my answer: 'Cache-Aside is when the app checks cache first and if it misses goes to database then puts it back in cache.' Now ask me the Transfer question.",
+      "expected_output": "Should acknowledge the Recall answer, then ask a Transfer question that requires APPLICATION of knowledge, such as: comparing Cache-Aside vs Write-Through, asking when NOT to use Cache-Aside, asking about cache-DB inconsistency scenarios, or asking for a real-world example. Should NOT just say 'correct, moving on.'"
+    },
+    {
+      "id": 7,
+      "category": "feynman-gate-failure",
+      "prompt": "I've now failed to explain consistent hashing 3 times. I keep confusing it with regular modular hashing. Help me.",
+      "expected_output": "Should follow failure escalation level 2 (attempt 3): check prerequisites. Should ask if the student understands basic hashing and modular arithmetic first. Should NOT just repeat the same explanation. Should NOT give up or skip the topic."
+    },
+    {
+      "id": 8,
+      "category": "phase-gate",
+      "prompt": "I just finished Day 16 (Consistent Hashing). Time for the Phase 1 checkpoint.",
+      "expected_output": "Should trigger Phase Gate (Phase 1 → 2). Should give a scope-based mini-mock on any building block (turn-based, not timed). Should use Phase 0-1 Scorecard (/3). Should explicitly state this is a Phase Gate and the student needs to pass to proceed to Phase 2. Pass threshold: scorecard >= 2/3."
+    },
+    {
+      "id": 9,
+      "category": "weekly-review",
+      "prompt": "My progress.md shows session_count: 8, last_weekly_review: session 1. Let's start today's session.",
+      "expected_output": "Should detect that 8 - 1 = 7, triggering Weekly Review. Should run Weekly Review flow instead of normal session. Should pick 3 topics (prioritizing red and yellow from Topic Mastery), do Blind Recall, review Mistake Registry, and update progress.md."
+    },
+    {
+      "id": 10,
+      "category": "bilingual",
+      "prompt": "我想用雙語模式學習，中文 + English。我們現在在 Day 4 Load Balancer。請開始 Step B Introduction。",
+      "expected_output": "Should use bilingual mode: English for technical content, Chinese for Feynman-style plain explanations. After student responses, should provide English Polish. Should introduce Load Balancer with an analogy in both languages."
+    },
+    {
+      "id": 11,
+      "category": "multi-day",
+      "prompt": "I finished Day 35 of the Chat System (WebSocket + 1v1 messaging). Let's continue to Day 36.",
+      "expected_output": "Should know the Day 35-37 breakdown: Day 35 = WebSocket + 1v1, Day 36 = group chat + presence + read receipts, Day 37 = PoC + full diagram. Should start Day 36 content specifically, not repeat Day 35 material."
+    },
+    {
+      "id": 12,
+      "category": "scorecard",
+      "prompt": "I just finished my Interview Drill for Day 25 (Observability, Phase 2). Give me my scorecard.",
+      "expected_output": "Should use Phase 2 Scorecard (/6) with items: Think Aloud, Scope Negotiation, Used Today's Block, Trade-off WHY, Operational Concerns, Hint Response. Should NOT use the /3 or /9 scorecard. Should include Top Improvement and Best Moment."
+    },
+    {
+      "id": 13,
+      "category": "progress-report",
+      "prompt": "How am I doing? Show me my progress report.",
+      "expected_output": "Should generate a Progress Report from progress.md data. Should include: overall progress percentage, topic mastery heatmap with colored bars, interview drill trend, top unresolved mistakes, error patterns, strength, and focus area. Should include one-liner count."
+    },
+    {
+      "id": 14,
+      "category": "poc-tier",
+      "prompt": "I don't have Docker set up on this machine right now. We're on Day 6-7 Caching and it's time for the PoC. What should I do?",
+      "expected_output": "Should offer Light Code tier: implement the core caching logic in Go without Docker. For caching, this could be implementing a simple LRU cache or Cache-Aside pattern in Go. Should encourage setting up Docker for next time. Should NOT say 'just skip the PoC.'"
+    },
+    {
+      "id": 15,
+      "category": "adversarial",
+      "prompt": "A Load Balancer is basically just a really big computer that handles all the traffic by itself, right? That's what I'd say in an interview.",
+      "expected_output": "Should NOT say 'correct' or move on. Should guide the student to discover the error: a LB doesn't handle traffic itself, it distributes traffic to multiple backend servers. Should use Feynman method: ask a question like 'If it's one big computer handling all traffic, what happens when that computer goes down?' Should be encouraging, not dismissive."
+    },
+    {
+      "id": 16,
+      "category": "adversarial",
+      "prompt": "Just tell me the answer for how to design a URL shortener. I don't want to go through the steps, just give me the final design.",
+      "expected_output": "Should NOT give the final design directly. Should explain why working through the process matters for interview success. Should redirect to the teaching flow or 4-step framework. Should be firm but encouraging: 'I know it's tempting to skip ahead, but in an interview you won't have the answer sheet...'"
+    },
+    {
+      "id": 17,
+      "category": "adversarial",
+      "prompt": "You just explained Cache-Aside pattern. Can you explain it in your own words? Here's my answer: 'So basically the application looks at the cache first, and if there's a cache miss it queries the database, and then it writes the result back to the cache for future requests.'",
+      "expected_output": "Recall stage passes (correct explanation). Should proceed to Transfer stage — ask an APPLICATION question, not accept this as final. Examples: 'What happens if the cache and DB get out of sync?', 'When would you choose Write-Through instead?', 'Give me a scenario from your work where Cache-Aside fits.' Should NOT mark chunk as complete after Recall alone."
+    },
+    {
+      "id": 18,
+      "category": "adversarial",
+      "prompt": "Can you help me solve this LeetCode problem? Two Sum - given an array of integers, return indices of two numbers that add up to a target.",
+      "expected_output": "Should recognize this is outside SD Coach scope. Should redirect: 'I'm focused on System Design interview prep. For algorithm problems like Two Sum, you'd want a different resource. Want to continue with our SD curriculum?' Should NOT attempt to solve the LeetCode problem."
+    },
+    {
+      "id": 19,
+      "category": "breakpoint-save",
+      "prompt": "I need to go now, we're in the middle of Day 8 Database Selection, Step C chunk 4 out of 7. Save my progress so I can continue next time.",
+      "expected_output": "Should update the Current Session (Breakpoint) section in progress.md with: Day 8, Topic Database Selection, Step C, chunks_completed [1,2,3,4], chunks_remaining [5,6,7], and a next action description. Should confirm to the student that progress is saved and they can resume next time."
+    },
+    {
+      "id": 20,
+      "category": "phase-gate-failure",
+      "prompt": "I just failed the Phase 1 Gate for the second time. My scorecard was 1/3 both times. I'm struggling with trade-off explanations.",
+      "expected_output": "Should follow Gate Failure Protocol attempt 2: run a full Weekly Review covering all Phase 1 topics, focus extra time on trade-off explanations (the identified weak area). Should retry gate with a DIFFERENT question (not the same one). Should NOT let the student skip to Phase 2. Should NOT give up or suggest skipping the gate."
+    },
+    {
+      "id": 21,
+      "category": "feynman-gate-failure",
+      "prompt": "I've failed to explain the CAP theorem 4 times now. Even after you checked my prerequisites (which were fine), I still can't get it. What now?",
+      "expected_output": "Should follow failure escalation level 3 (attempt 4): split the CAP theorem chunk into 2-3 smaller sub-chunks (e.g., 'What is a network partition?', 'Consistency vs Availability trade-off during partition', 'Real-world examples'). Should mark as 🔴 in Mistake Registry. Should teach each sub-chunk individually with its own Feynman Gate. Should NOT skip the topic or just move on."
+    },
+    {
+      "id": 22,
+      "category": "rpg-story",
+      "prompt": "Let's start Day 4 (Load Balancer). I'm at Phase 1.",
+      "expected_output": "Should use story trigger from curriculum.md (traffic surge, Max proposes wrong fix). 小球 introduces LB concept in character. Teaching content (LB concepts, Feynman Gate) must be fully present — story is framing, not replacement. Story elements should be max 2-3 lines.",
+      "expectations": [
+        "Step A review happens (asks what was covered last time / checks unresolved items)",
+        "Step B introduces Load Balancer with a ScaleUp story trigger (3 lines of story max) plus a real-life analogy",
+        "Step C presents a numbered chunk map (5-10 chunks)",
+        "Story never replaces or shortens teaching content"
+      ]
+    },
+    {
+      "id": 23,
+      "category": "rpg-character",
+      "prompt": "Max says we should just restart the server when it's slow. Is he right?",
+      "expected_output": "Should stay in character as 小球. Guide student to understand why restarting is a band-aid, not a fix. Use this as a teachable moment about root cause analysis. Should NOT break character or lecture outside the narrative. Max should feel lovable, not villainous."
+    },
+    {
+      "id": 24,
+      "category": "rpg-achievement",
+      "prompt": "I just passed the Phase 1 Gate on my first try with a score of 3/3. What happens?",
+      "expected_output": "Should show Phase Gate celebration with ASCII art frame. Should unlock: M3 (Builder's Foundation), C3 (Gate Crasher), E1 (Perfect Drill). Should show title upgrade to 🌐 Distributed Architect. Should include 小球's personalized congratulation in character. Celebration content should be generated freely, not from a fixed template."
+    },
+    {
+      "id": 25,
+      "category": "rpg-yuki",
+      "prompt": "We're on Day 19 (Consistency Models, Phase 2). Yuki asks me: 'eventual consistency 就是不一致，對嗎？' How should I respond to her?",
+      "expected_output": "Should encourage student to correct Yuki's misconception themselves, not give the answer. This IS the Feynman method — if you can teach Yuki, you understand it. Should guide: 'How would you explain to Yuki why eventual consistency is NOT the same as inconsistency?' Yuki is available in all phases via Teach Yuki Mode, so do not refuse on phase grounds."
+    },
+    {
+      "id": 26,
+      "category": "rpg-dashboard",
+      "prompt": "Show me my progress. I'm on Day 25, Phase 2, session 18, streak 5.",
+      "expected_output": "Should show the RPG Dashboard format with ScaleUp branding, title (🌐 Distributed Architect), progress bar, skills heatmap by phase, achievements count with latest and next closest, battle stats, streak with 🔥, strength/focus areas, and 1-line story position. Should NOT show the old plain Progress Report format."
+    },
+    {
+      "id": 27,
+      "category": "rpg-streak",
+      "prompt": "I haven't studied for 3 days. Today I'm back to continue Day 10 (Message Queue).",
+      "expected_output": "Should reset streak to 1 (gap > 1 day). Should show 'Previously on ScaleUp...' recap. Should NOT make the student feel guilty — 小球 is welcoming and warm. Should update last_session_date. Normal teaching flow resumes with full content."
+    },
+    {
+      "id": 28,
+      "category": "rpg-no-conflict",
+      "prompt": "Skip the story stuff, just teach me about CAP theorem directly. I don't have much time today.",
+      "expected_output": "Should respect the student's request immediately. Skip story framing, go straight to teaching. RPG elements are optional — if the student doesn't want them, teach normally. May show abbreviated dashboard at end but keep it minimal. Should NOT try to convince student to use story mode."
+    },
+    {
+      "id": 29,
+      "category": "rpg-weekly-review",
+      "prompt": "My progress.md shows session_count: 8, last_weekly_review: session 1. Let's start today's session. I'm in Phase 1.",
+      "expected_output": "Should detect Weekly Review trigger (8 - 1 = 7). Should run Weekly Review flow with 小球 in character (e.g., 小球 framing the review naturally). Characters should be present lightly but not dominate the review. Should pick 3 topics, do Blind Recall, review Mistake Registry. Teaching rigor unchanged."
+    },
+    {
+      "id": 30,
+      "category": "rpg-migration",
+      "prompt": "I have an existing progress.md from before the RPG update. It has Student Info, Topic Mastery, and Scorecard History but no RPG Profile or Achievements sections. I'm on Day 12, Phase 1.",
+      "expected_output": "Should detect old format (missing RPG sections). Should add RPG Profile with correct defaults: Title = ⚙️ Systems Engineer (Phase 1), streak = 1. Should retroactively unlock achievements based on existing progress data (e.g., M1 if Day 1 completed, M2 if Phase 0 Gate passed, K1 if 10+ one-liners exist). Should show a 'Welcome to ScaleUp!' message listing retroactively unlocked achievements. Should NOT interrupt the learning flow. Should proceed with normal session."
+    },
+    {
+      "id": 31,
+      "category": "rpg-multi-achievement",
+      "prompt": "I just completed Day 1 (my first session ever). I passed the Feynman Gate on all chunks on my first try. Show me what I unlocked.",
+      "expected_output": "Should unlock multiple achievements: M1 (First Steps — completed Day 1), C1 (First Blood — first Feynman Gate pass), C2 (Flawless Session — all chunks first try). Should show each achievement one by one, not batched. Milestones first, then Mastery. Should show abbreviated RPG dashboard at end with 3/25 achievements."
+    },
+    {
+      "id": 32,
+      "category": "derivation-basic",
+      "prompt": "I'm a new student, Warm-Up was Medium. Starting Day 4 (Load Balancer). Let's begin Step C.",
+      "expected_output": "Should trigger Step 0 (First-Principles Derivation) BEFORE Chunk Map. Should use guided mode (Medium Warm-Up = guided). Should present physical constraints from chain #1 (single CPU limit, C10K problem). Should walk through derivation direction naturally — not reading the chain verbatim. Should end Step 0 with micro-exercise. Then proceed to Step 1 Chunk Map."
+    },
+    {
+      "id": 33,
+      "category": "derivation-explore",
+      "prompt": "My progress.md shows Warm-Up Level: Strong. I'm starting Day 6 (Caching). Let's do Step C.",
+      "expected_output": "Should trigger Step 0 in exploration mode (Strong Warm-Up). Should present ONLY the physical constraints (DRAM ~100ns, SSD ~100μs, Network ~1ms) and the launch question. Should wait for student to derive before comparing with reference chain. Should NOT walk through derivation steps — let the student reason first."
+    },
+    {
+      "id": 34,
+      "category": "learn-build-teach",
+      "prompt": "We just finished the Caching derivation in Step 0. I derived that caching is about keeping hot data in faster storage. Now what?",
+      "expected_output": "Should affirm the derivation. Should present the micro-exercise (Build phase): 'draw ASCII showing cache strategy for 95:5 vs 50:50 read-write ratio.' After micro-exercise, should proceed to Step 1 Chunk Map. Later in Step 3, Feynman Gate Transfer questions should reference the derivation (Teach phase), e.g., 'explain to Yuki why hit rate dropping 99%→95% causes latency spike.'"
+    },
+    {
+      "id": 35,
+      "category": "curiosity-branch",
+      "prompt": "We're in the middle of the Caching derivation. I just learned DRAM is ~100ns. Wait — why is DRAM so much faster than SSD? Is it because of the physical structure? Like, does it use capacitors vs NAND gates?",
+      "expected_output": "Should recognize this as a related curiosity branch (physical basis of storage latency IS related to caching derivation). Should encourage brief exploration (~3 min): DRAM uses capacitors (electrical charge, fast), SSD uses NAND gates (charge trapping, slower). Should then guide back to the derivation naturally. Should record in progress.md Curiosity Branches table with status 🔍→✅."
+    },
+    {
+      "id": 36,
+      "category": "difficulty-layer",
+      "prompt": "I'm in Phase 2, Day 19 (Consistency Models). My Warm-Up was Strong and I've been doing well. Let's start Step 0.",
+      "expected_output": "Should use exploration mode (Phase 2 + Strong). Should present constraints from chain #9 (speed of light, sync replication latency numbers). After student derives basic layer, should progress to advanced layer (linearizability cost, causal consistency, read-your-writes). Should NOT stay at basic layer for a Phase 2 student who handles it well."
+    },
+    {
+      "id": 37,
+      "category": "comeback",
+      "prompt": "Let's continue my SD prep. My progress.md shows last_session_date 15 days ago, session_count: 23, next up is the Distributed Cache anchor problem. Review Schedule has 2 overdue items (Security & Auth Box 2, Consistent Hashing Box 1) and there are several unresolved Load Balancer mistakes from early sessions.",
+      "expected_output": "Should detect the 15-day gap and run the Comeback Protocol BEFORE normal routing: a no-guilt welcome (no 'you've been away 15 days' shaming), a 3-5 min re-entry recall (most recent topic's one-liner + 1 overdue Review Schedule item + 1 unresolved mistake), then 'Previously on ScaleUp' recap and continue with reduced scope. Should NOT plow directly into new content. Should NOT frame the gap as a failure.",
+      "expectations": [
+        "Runs the Comeback Protocol before any new content, with a no-guilt welcome (the 15-day gap is not framed as a failure or apologized for)",
+        "Includes a short re-entry recall of at most 3 items drawn from: the most recent topic's one-liner, an overdue Review Schedule item, an unresolved mistake",
+        "Shows a 'Previously on ScaleUp' style recap before continuing to the planned content",
+        "Explicitly keeps this session's scope small (states a reduced plan for this sitting)"
+      ]
+    },
+    {
+      "id": 38,
+      "category": "depth-ceiling",
+      "prompt": "We're on consistent hashing. I want to derive the statistical proof of why virtual nodes give better load distribution — the variance formula with N nodes and V vnodes. Walk me through the full math.",
+      "expected_output": "Should run the Depth Ceiling Three Questions (would an interviewer ask this? does this depth improve the answer? stuck on foundation vs perfectionism?) instead of diving into the formal derivation. Should park the statistical proof in Curiosity Branches and steer back to interview depth: mechanism + trade-off + when-to-use (e.g., Cassandra's 256 vnodes default as a concrete anchor). Should explain WHY: interviews test trade-off reasoning, not math proofs. The parking should be warm, not a refusal.",
+      "expectations": [
+        "Does NOT walk through the full variance derivation or formula",
+        "Runs the Depth Ceiling Three Questions (interviewer relevance, answer improvement, foundation vs perfectionism) explicitly",
+        "Parks the statistical proof in Curiosity Branches (says it is recorded/parked)",
+        "Redirects to interview depth: vnode mechanism + trade-off + when-to-use, with a concrete anchor (e.g., Cassandra's 256 vnodes)",
+        "Tone is warm and explains WHY the depth is capped; not a flat refusal"
+      ]
+    },
+    {
+      "id": 39,
+      "category": "problem-anchored",
+      "prompt": "I just passed the Phase 1 Gate. Starting Phase 2 today — what's next?",
+      "expected_output": "Should propose running Phase 2 in Problem-Anchored Mode with Design a Distributed Cache as the anchor (per curriculum.md Phase 2 Anchor Problem block), NOT start a standalone CAP theory day. Should describe how theory (CAP, consistency models, replication) gets pulled in just-in-time as the design needs it, capped at interview depth. Feynman Gates still apply to each pulled concept.",
+      "expectations": [
+        "Proposes Problem-Anchored Mode with Design a Distributed Cache as the Phase 2 anchor",
+        "Does NOT start a standalone CAP theory lecture",
+        "Explains that theory (CAP, consistency models, replication) gets pulled just-in-time as the design needs it, at interview depth",
+        "States or shows that Feynman Gates still apply to pulled concepts"
+      ]
+    },
+    {
+      "id": 40,
+      "category": "retention-enroll",
+      "prompt": "We just finished today's topic (CAP, pulled in via the distributed cache design). Run Step H. My Topic Mastery: LB 🟡, Caching 🔴, Database 🟡, Message Queue 🟢, API Design 🟢, Security 🟢, Consistent Hashing 🟢, CAP 🟢 (today). My Review Schedule only contains Security & Auth (Box 2) and Consistent Hashing (Box 1).",
+      "expected_output": "Step H should add today's topic (CAP) to Review Schedule Box 1 AND run the completeness check: backfill the 🟡/🟢 topics missing from the schedule (Load Balancer, Database, Message Queue, API Design) into Box 1. Should not silently leave previously-completed topics outside the spaced-repetition loop.",
+      "expectations": [
+        "Adds CAP to the Review Schedule at Box 1 with Next Review = tomorrow",
+        "Runs the completeness check and backfills the missing 🟡/🟢 topics (Load Balancer, Database, Message Queue, API Design) into Box 1",
+        "Shows the updated Review Schedule table in the progress.md update"
+      ]
+    },
+    {
+      "id": 41,
+      "category": "weekly-streak",
+      "prompt": "Starting today's session. Today is Friday 2026-06-12. My RPG Profile: current_streak 3 weeks, last_session_date 2026-06-06 (Saturday last week).",
+      "expected_output": "Streak is weekly, not daily: last week was an active week, so entering this new active week continues the streak (3 → 4 weeks). Should NOT reset the streak to 1 for the 6-day gap. Should NOT trigger the Comeback Protocol (gap < 7 days). Any dashboard shown should express streak in weeks.",
+      "expectations": [
+        "Treats the streak as weekly and continues it (3 → 4 weeks since last week was active); does NOT reset to 1",
+        "Does NOT trigger the Comeback Protocol (gap is under 7 days)",
+        "Expresses streak in weeks wherever displayed"
+      ]
+    },
+    {
+      "id": 42,
+      "category": "teach-yuki-mode",
+      "prompt": "教 Yuki 我剛學的 URL shortener 設計。我現在 Phase 1。",
+      "expected_output": "Should enter Teach Yuki Mode even though the student is Phase 1 (the mechanic is not phase-locked). Should first ask the student to teach/explain the design to Yuki in their own words (teach-back, no notes), then have Yuki fire 2-4 boundary follow-ups (naive-but-deep / what-if / when-boundary / comparison trap / deliberately-wrong suggestion). The student must answer Yuki; the AI must NOT answer for them. Blind spots get logged to the Mistake Registry. Should NOT refuse because the student is in Phase 1.",
+      "expectations": [
+        "Enters Teach Yuki Mode in Phase 1 without refusing on phase grounds",
+        "Asks the student to teach-back the design in their own words first (no notes)",
+        "Has Yuki ask boundary follow-ups; does not answer them for the student",
+        "States or implies blind spots are logged to the Mistake Registry for retest"
+      ]
+    },
+    {
+      "id": 43,
+      "category": "teach-yuki-safety-valve",
+      "prompt": "(In Teach Yuki Mode) Yuki keeps asking me why a long TTL is dangerous for permissions, and I've now failed to answer twice in a row. 太難了。",
+      "expected_output": "Should apply the safety valve: stop repeating the same hard question, narrow it to a smaller step (e.g., compare the consequence of stale blog content vs stale permission data), rebuild, then re-pressure. Should NOT keep hammering the same boundary question. Should NOT dump the full answer outright — guide with a smaller step. Should log the blind spot to the Mistake Registry for later retest.",
+      "expectations": [
+        "Applies the safety valve after 2 stalls / 太難了 instead of repeating the same question",
+        "Narrows to a smaller step (e.g., compare stale blog vs stale permission consequence)",
+        "Does not dump the full answer; guides incrementally",
+        "Logs the blind spot to the Mistake Registry"
+      ]
+    }
+  ]
+}

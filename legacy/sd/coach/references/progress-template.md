@@ -1,0 +1,242 @@
+# Student Progress Tracking
+
+> This file is the single source of truth for student progress.
+> Updated by Claude at the end of every session (Step H) and when sessions are interrupted.
+> Read by Claude at the start of every session to determine where to resume.
+
+---
+
+## Student Info
+
+| Field | Value |
+|-------|-------|
+| **Start date** | YYYY-MM-DD |
+| **Current phase** | Phase 0 / 1 / 2 / 3 / 4 |
+| **Current day** | Day X |
+| **Language mode** | English / Bilingual (language) |
+| **Session count** | N |
+| **Last weekly review** | Session #N (YYYY-MM-DD) |
+
+---
+
+## Warm-Up Result
+
+> Filled during first session's diagnostic. Used by 小球 to select guided vs exploration mode for Step 0 derivation.
+
+| Field | Value |
+|-------|-------|
+| **Level** | Strong / Medium / Blank |
+| **Date** | YYYY-MM-DD |
+| **Notes** | (AI writes 1-line summary of diagnostic result) |
+
+---
+
+## 🎚️ Learning Mode
+
+> Per-student overrides of skill defaults, written when the student and 小球 agree on a different way of working
+> (depth, pacing, PoC tiers, mode preferences). Read in Step A; honor over skill defaults.
+> Interview-depth ceiling and problem-anchored Phase 2 are already skill defaults and don't need an entry here.
+
+*(empty — no overrides)*
+
+---
+
+## Curiosity Branches
+
+> Tracks student questions that diverge from the curriculum. ⏸ Parked branches are revisited in Step A when the topic becomes relevant.
+
+| Session | Day | Topic | Branch Question | Status |
+|---------|-----|-------|----------------|--------|
+| | | | | 🔍 Exploring / ✅ Resolved / ⏸ Parked |
+
+---
+
+## RPG Profile
+
+<!-- FRAMEWORK: Reusable — RPG profile tracking pattern -->
+
+| Field | Value |
+|-------|-------|
+| **Title** | 🌱 Junior Engineer |
+| **Company** | ScaleUp |
+| **Story phase** | Phase 0 — First Week |
+| **Last story summary** | (first session) |
+| **Current streak** | 0 weeks |
+| **Longest streak** | 0 weeks |
+| **Last session date** | YYYY-MM-DD |
+
+---
+
+## Current Session (Breakpoint)
+
+> Updated **continuously** — after each chunk passes its Feynman Gate (Step C) and whenever the
+> student stops. Fragmented work-gaps are the norm, so this is the mechanism that makes any-length
+> session resumable. Cleared only when a Learning Unit (Day) completes fully.
+
+| Field | Value |
+|-------|-------|
+| **Day** | Day X |
+| **Topic** | Topic name |
+| **Step** | A / B / C / D / E / F / G / H |
+| **Chunks completed** | [1, 2, 3] |
+| **Chunks remaining** | [4, 5, 6, 7] |
+| **Next action** | One line: exactly what to do next when resuming |
+
+> When this section has content, Claude should resume from here instead of starting a new session.
+> Resume pointer format on stop: "下次從 Day X · Step C · chunk N 接續。"
+
+---
+
+## Topic Mastery
+
+<!-- FRAMEWORK: Reusable — mastery tracking pattern -->
+
+| Day | Topic | Mastery | Phase Gate | Notes |
+|-----|-------|---------|------------|-------|
+| 1 | SD Interview Rubric | ⬜ | — | |
+| 2 | Back-of-Envelope Estimation | ⬜ | — | |
+| 3 | 4-Step Framework | ⬜ | Phase 0 Gate | |
+| 4-5 | Load Balancer | ⬜ | — | |
+| 6-7 | Caching & CDN | ⬜ | — | |
+| 8-9 | Database Selection | ⬜ | — | |
+| 10-11 | Message Queue | ⬜ | — | |
+| 12-13 | API Design | ⬜ | — | |
+| 14 | Security & Auth | ⬜ | — | |
+| 15-16 | Consistent Hashing | ⬜ | Phase 1 Gate | |
+| 17-18 | CAP Theorem | ⬜ | — | |
+| 19-20 | Consistency Models | ⬜ | — | |
+| 21-22 | Replication & Leader Election | ⬜ | — | |
+| 23-24 | Rate Limiting & Circuit Breaker | ⬜ | — | |
+| 25 | Observability | ⬜ | — | |
+| 26 | Bloom Filter, Gossip, etc. | ⬜ | Phase 2 Gate | |
+| 27-28 | URL Shortener | ⬜ | — | |
+| 29-30 | Unique ID Generator | ⬜ | — | |
+| 31-32 | Distributed Rate Limiter | ⬜ | — | |
+| 33-34 | Notification System | ⬜ | — | |
+| 35-37 | Chat System | ⬜ | — | |
+| 38-39 | Distributed Cache | ⬜ | — | |
+| 40-42 | News Feed | ⬜ | — | |
+| 43-45 | Payment System | ⬜ | — | |
+| 46-47 | Metrics & Logging | ⬜ | — | |
+| 48-49 | Search Autocomplete | ⬜ | — | |
+| 50-51 | Web Crawler | ⬜ | — | |
+| 52-53 | Proximity Service | ⬜ | — | |
+| 54-55 | Ticket Booking / Flash Sale | ⬜ | — | |
+| 56-57 | Top-K / Leaderboard | ⬜ | — | |
+| 58-59 | Ride Matching (Uber) | ⬜ | Phase 3 Gate | |
+| 60-61 | Trade-off Deep Dive | ⬜ | — | |
+| 62-63 | Brownfield / Legacy Migration | ⬜ | — | |
+| 64-65 | Mock Interview Round 1 | ⬜ | — | |
+| 66-67 | Weak Spot Reinforcement | ⬜ | — | |
+| 68-69 | Final Mock (Brutal) | ⬜ | Phase 4 Gate | |
+
+> Mastery levels: ⬜ Not started │ 🔴 Needs work │ 🟡 Developing │ 🟢 Solid
+> Update mastery after each session based on Feynman Gate + Drill performance.
+
+---
+
+## Review Schedule (Leitner Box)
+
+> Spaced repetition for completed topics. 小球 checks this in Step A — if a topic is due, do a 2-min quick recall before new content.
+> **Auto-enroll:** every topic reaching 🟡/🟢 enters Box 1 at Step H, no exceptions. Step H also backfills
+> any 🟡/🟢 topic missing from this table — a topic outside the schedule is a topic the system agreed to forget.
+
+| Topic | Mastery | Last Review | Box | Next Review |
+|-------|---------|-------------|-----|-------------|
+| | | | | |
+
+> **Box rules:**
+> Box 1 → next review in +1 day (just learned / review failed)
+> Box 2 → +3 days (Box 1 passed)
+> Box 3 → +7 days (Box 2 passed)
+> Box 4 → +14 days (Box 3 passed, then retired)
+>
+> **Quick recall format:** 小球 asks the student to state the one-liner + the physical constraint that drives this technique. Pass → Box +1. Fail → back to Box 1.
+
+---
+
+## Interview Drill Scorecard History
+
+<!-- FRAMEWORK: Reusable — scored assessment history pattern -->
+
+| Session | Day | Topic | Score | Details |
+|---------|-----|-------|-------|---------|
+| | | | /3 or /6 or /9 | |
+
+> Phase 0-1: /3 (Think Aloud, Scope Negotiation, Used Today's Block)
+> Phase 2: /6 (+ Trade-off WHY, Operational Concerns, Hint Response)
+> Phase 3+: /9 (+ Failure Modes, Capacity Estimation, Hint Response, Time/Breadth Mgmt)
+
+---
+
+## 🔴 Mistake Registry
+
+<!-- FRAMEWORK: Reusable — mistake tracking pattern -->
+
+> Synced from each session's notes. This is the central record for weakness analysis.
+
+| Session | Day | Topic | Mistake | Status |
+|---------|-----|-------|---------|--------|
+| | | | | ❌ Unresolved / ✅ Resolved |
+
+> Review priority: All ❌ Unresolved items are the first target in Weekly Reviews and Step A.
+
+---
+
+## 🎯 One-Liner Library (Interview Quick-Answer Bank)
+
+<!-- FRAMEWORK: Reusable — knowledge summary pattern -->
+
+> One sentence per topic. Must be your own words, interview-ready.
+
+| Topic | One-Liner |
+|-------|-----------|
+| | |
+
+> Built incrementally: one new entry per session in Step G.
+> Use this as a speed-review before mock interviews and real interviews.
+
+---
+
+## Phase Gate Results
+
+| Phase | Date | Score | Result | Weak spots |
+|-------|------|-------|--------|------------|
+| | | | ✅ Pass / ❌ Retry | |
+
+---
+
+## Achievements
+
+<!-- FRAMEWORK: Reusable — achievement tracking pattern -->
+
+| ID | Achievement | Status | Date |
+|----|------------|--------|------|
+| M1 | First Steps | 🔒 | |
+| M2 | Framework Forged | 🔒 | |
+| M3 | Builder's Foundation | 🔒 | |
+| M4 | Distributed Mind | 🔒 | |
+| M5 | System Architect | 🔒 | |
+| M6 | Ready for Anything | 🔒 | |
+| C1 | First Blood | 🔒 | |
+| C2 | Flawless Session | 🔒 | |
+| C3 | Gate Crasher | 🔒 | |
+| C4 | Comeback Kid | 🔒 | |
+| C5 | Myth Buster | 🔒 | |
+| K1 | One-Liner ×10 | 🔒 | |
+| K2 | One-Liner ×30 | 🔒 | |
+| K3 | Encyclopedia | 🔒 | |
+| K4 | Bug Squasher ×5 | 🔒 | |
+| S1 | Three-peat | 🔒 | |
+| S2 | Weekly Warrior | 🔒 | |
+| S3 | Streak: 7 | 🔒 | |
+| S4 | Iron Will | 🔒 | |
+| E1 | Perfect Drill | 🔒 | |
+| E2 | Deep Diver | 🔒 | |
+| E3 | The Mentor | 🔒 | |
+| R1 | Max's Nightmare | 🔒 | |
+| R2 | Karen's Hero | 🔒 | |
+| R3 | 小球's Pride | 🔒 | |
+
+> Status: 🔒 Locked / 🏆 Unlocked
+> Updated by AI at Step H when achievement conditions are met.
