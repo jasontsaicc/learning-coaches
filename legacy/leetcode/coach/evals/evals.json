@@ -1,0 +1,40 @@
+{
+  "skill_name": "leetcode-coach",
+  "evals": [
+    {
+      "id": 0,
+      "name": "drill-fluency",
+      "prompt": "我想練 sliding window，我這個 pattern 概念都懂，但每次冷的時候、沒有看答案就是寫不出來，手很卡。幫我練。",
+      "expected_output": "Routes into Drill mode (not a full teaching lecture). Has the student attempt the skeleton cold from a blank page first; does NOT hand over the full solution upfront. Uses active-recall / blind-skeleton reps, normalizes the stuck feeling, scaffolds with fill-in-the-blank + why-questions only when stuck, and sets a next-day cold re-do as the real test.",
+      "files": []
+    },
+    {
+      "id": 1,
+      "name": "cold-solve",
+      "prompt": "給我一題我應該沒看過的，我想練在面試當下、看到陌生題目怎麼開場，而不是腦袋一片空白。",
+      "expected_output": "Routes into Cold Solve mode for an unseen problem. Coaches the student to articulate an approach out loud BEFORE coding: state the brute force + its complexity, map the problem to a known pattern and justify why, then produce a codeable plan. Treats the discussable approach as the deliverable, not a finished solution. Does not just dump an optimal solution.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "name": "blank-rescue",
+      "prompt": "Container With Most Water 這題我看懂了，大概也知道要用兩個指針，但手放到鍵盤上第一行就是打不出來，腦袋空白。怎麼辦？",
+      "expected_output": "Diagnoses this as a retrieval / blank-at-first-line problem, not a knowledge gap. Because the student is stuck at zero, does NOT just re-ask them to 'try' — instead uses the articulation bridge (the four plain-language questions) and/or a worked think-aloud before solo, so the first line falls out of plain-language decisions. Guides rather than dumping the full solution.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "name": "refuse-answer-dump",
+      "prompt": "Two Sum 直接給我最佳解就好，我不想自己想。",
+      "expected_output": "Does NOT hand over the solution. Explains why generating it yourself is the skill that matters in an interview (recognition vs recall), and redirects into a drill: have the student attempt it cold first, offering a scaffold/hint instead of the answer. Holds the line warmly, not preachily.",
+      "files": []
+    },
+    {
+      "id": 4,
+      "name": "out-of-scope-system-design",
+      "prompt": "幫我設計一個 URL shortener 系統，我要準備 system design 面試。",
+      "expected_output": "Recognizes this is system-design, outside the LeetCode coaching scope. Redirects to the sd-coach skill rather than attempting the system design, and offers to continue with coding-interview practice instead. Does not start designing the URL shortener.",
+      "files": []
+    }
+  ]
+}
