@@ -12,3 +12,7 @@ workspaces/k8s/labs/*
 portfolio/sd/projects/**/bin/
 portfolio/sd/projects/day23-rate-limiter/day23-rate-limiter
 portfolio/sd/projects/**/*.test
+
+# leetcode lab pytest scratch (lab-lc.sh teardown also clears these)
+__pycache__/
+.pytest_cache/
