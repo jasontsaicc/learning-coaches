@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LeetCode #84 Largest Rectangle in Histogram 讀書會簡報</title>
+<style>
+  :root {
+    --ink: #1f2933;
+    --ink-soft: #52606d;
+    --bg: #f5f7f9;
+    --card: #ffffff;
+    --line: #e0e6ea;
+    --accent: #0f766e;
+    --accent-soft: #e6f4f1;
+    --gold: #b45309;
+    --gold-soft: #fef3c7;
+    --bar: #9db4c0;
+    --code-bg: #1e293b;
+    --code-ink: #e2e8f0;
+    --code-cm: #86efac;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 40px 20px 80px;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "PingFang TC", "Microsoft JhengHei", "Noto Sans TC", "Helvetica Neue", Arial, sans-serif;
+    line-height: 1.75;
+    font-size: 17px;
+  }
+  main { max-width: 980px; margin: 0 auto; }
+
+  header.hero {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 36px 40px;
+    margin-bottom: 28px;
+  }
+  .hero .tag {
+    display: inline-block;
+    background: var(--accent-soft);
+    color: var(--accent);
+    font-weight: 700;
+    font-size: 14px;
+    padding: 3px 12px;
+    border-radius: 999px;
+    margin-bottom: 10px;
+  }
+  h1 { margin: 0 0 6px; font-size: 30px; line-height: 1.35; }
+  .hero .sub { color: var(--ink-soft); margin: 0; }
+
+  section {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 32px 40px;
+    margin-bottom: 28px;
+  }
+  h2 {
+    font-size: 23px;
+    margin: 0 0 18px;
+    padding-left: 14px;
+    border-left: 5px solid var(--accent);
+    line-height: 1.4;
+  }
+  h3 { font-size: 18px; margin: 26px 0 10px; }
+  p { margin: 10px 0; }
+  strong { color: var(--ink); }
+  .hl { color: var(--accent); font-weight: 700; }
+  .gold-hl { color: var(--gold); font-weight: 700; }
+
+  .callout {
+    background: var(--accent-soft);
+    border-left: 5px solid var(--accent);
+    border-radius: 0 10px 10px 0;
+    padding: 14px 20px;
+    margin: 18px 0;
+  }
+  .callout.gold {
+    background: var(--gold-soft);
+    border-left-color: var(--gold);
+  }
+
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    margin: 16px 0;
+    font-size: 16px;
+  }
+  th, td {
+    border: 1px solid var(--line);
+    padding: 9px 14px;
+    text-align: left;
+  }
+  th { background: #eef2f5; font-weight: 700; }
+  tr.champ td { background: var(--gold-soft); font-weight: 700; }
+
+  /* ===== histogram ===== */
+  .chart-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 26px 0 10px;
+  }
+  .chart {
+    display: flex;
+    align-items: flex-end;
+    gap: 10px;
+  }
+  .bar-col { display: flex; flex-direction: column; align-items: center; }
+  .bar-h-label { font-size: 15px; font-weight: 700; color: var(--ink-soft); margin-bottom: 4px; }
+  .bar {
+    width: 58px;
+    background: var(--bar);
+    border-radius: 4px 4px 0 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    overflow: hidden;
+  }
+  .bar .seg-top { background: var(--bar); width: 100%; }
+  .bar .seg-hl { background: var(--accent); width: 100%; }
+  .bar.all-hl { background: var(--accent); }
+  .bar-idx {
+    margin-top: 8px;
+    font-size: 14px;
+    color: var(--ink-soft);
+    font-family: Consolas, Menlo, monospace;
+  }
+  .chart-caption { margin-top: 14px; color: var(--ink-soft); font-size: 15px; text-align: center; }
+  .chart-caption b { color: var(--accent); }
+
+  /* ===== queue story ===== */
+  .queue-rules { display: flex; gap: 18px; flex-wrap: wrap; margin: 18px 0; }
+  .rule-card {
+    flex: 1 1 320px;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 18px 22px;
+    background: #fbfcfd;
+  }
+  .rule-card .rule-title { font-weight: 800; font-size: 17px; margin-bottom: 6px; }
+  .rule-card.in .rule-title { color: var(--accent); }
+  .rule-card.out .rule-title { color: var(--gold); }
+  .mini-chart {
+    display: flex;
+    align-items: flex-end;
+    gap: 6px;
+    height: 96px;
+    margin: 14px 0 6px;
+  }
+  .mini-bar {
+    width: 30px;
+    background: var(--bar);
+    border-radius: 3px 3px 0 0;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 700;
+    padding-top: 2px;
+  }
+  .mini-bar.new { background: var(--accent); }
+  .mini-bar.leaving { background: var(--gold); opacity: 0.85; }
+  .mini-arrow { align-self: center; font-size: 20px; color: var(--ink-soft); padding: 0 4px; }
+  .mini-note { font-size: 14px; color: var(--ink-soft); }
+
+  /* ===== trace ===== */
+  .step {
+    display: flex;
+    gap: 18px;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 18px 22px;
+    margin: 14px 0;
+    background: #fbfcfd;
+    align-items: flex-start;
+  }
+  .step.champ-step { border-color: var(--gold); background: #fffdf4; }
+  .step-badge {
+    flex: 0 0 auto;
+    background: var(--accent);
+    color: #fff;
+    font-weight: 800;
+    font-family: Consolas, Menlo, monospace;
+    font-size: 15px;
+    border-radius: 8px;
+    padding: 6px 12px;
+    white-space: nowrap;
+  }
+  .step.champ-step .step-badge { background: var(--gold); }
+  .step-badge.tail { background: #52606d; }
+  .step-body { flex: 1; min-width: 0; }
+  .step-action { margin: 0 0 8px; }
+  .pop-calc {
+    display: inline-block;
+    background: #eef2f5;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 4px 12px;
+    margin: 3px 6px 3px 0;
+    font-family: Consolas, Menlo, monospace;
+    font-size: 14.5px;
+  }
+  .pop-calc.champ {
+    background: var(--gold-soft);
+    border-color: var(--gold);
+    font-weight: 700;
+  }
+  .stack-view {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 10px;
+    flex-wrap: wrap;
+  }
+  .stack-label { font-size: 13px; color: var(--ink-soft); }
+  .stack-cell {
+    background: var(--accent-soft);
+    border: 1.5px solid var(--accent);
+    color: var(--accent);
+    border-radius: 8px;
+    padding: 3px 11px;
+    font-family: Consolas, Menlo, monospace;
+    font-size: 14.5px;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+  .stack-cell.empty {
+    background: #eef2f5;
+    border-color: var(--line);
+    color: var(--ink-soft);
+    font-weight: 400;
+  }
+
+  /* ===== code ===== */
+  pre {
+    background: var(--code-bg);
+    color: var(--code-ink);
+    border-radius: 12px;
+    padding: 22px 26px;
+    overflow-x: auto;
+    font-size: 15px;
+    line-height: 1.65;
+    margin: 14px 0;
+  }
+  code { font-family: Consolas, Menlo, "Courier New", monospace; }
+  pre .cm { color: var(--code-cm); }
+  .inline-code {
+    background: #eef2f5;
+    border: 1px solid var(--line);
+    border-radius: 5px;
+    padding: 1px 7px;
+    font-family: Consolas, Menlo, monospace;
+    font-size: 15px;
+  }
+  .complexity { color: var(--ink-soft); font-size: 15.5px; }
+
+  /* ===== memory points ===== */
+  .mem-list { counter-reset: mem; list-style: none; padding: 0; margin: 14px 0 0; }
+  .mem-list li {
+    counter-increment: mem;
+    position: relative;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: #fbfcfd;
+    padding: 16px 20px 16px 62px;
+    margin: 12px 0;
+  }
+  .mem-list li::before {
+    content: counter(mem);
+    position: absolute;
+    left: 18px;
+    top: 16px;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: #fff;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+  }
+  .mem-list li.star { border-color: var(--gold); background: #fffdf4; }
+  .mem-list li.star::before { background: var(--gold); }
+
+  footer { text-align: center; color: var(--ink-soft); font-size: 14px; margin-top: 40px; }
+</style>
+</head>
+<body>
+<main>
+
+<header class="hero">
+  <span class="tag">讀書會 · Monotonic Stack</span>
+  <h1>LeetCode #84 Largest Rectangle in Histogram<br>直方圖最大矩形</h1>
+  <p class="sub">從白話直覺到 O(n) 解法，一步一步講給沒看過這題的你</p>
+</header>
+
+<!-- 1. 題意 -->
+<section>
+  <h2>一句話題意</h2>
+  <p>給一排長條（每根寬 1、高度是 <span class="inline-code">heights[i]</span>），請在直方圖裡框出<strong>面積最大的矩形</strong>。</p>
+  <p>矩形規則：一旦跨越多根，<strong>高度只能取這段區間裡最矮那根</strong>（超過就凸出去了）。</p>
+
+  <div class="chart-wrap">
+    <div class="chart">
+      <div class="bar-col">
+        <div class="bar-h-label">2</div>
+        <div class="bar" style="height:72px"></div>
+        <div class="bar-idx">0</div>
+      </div>
+      <div class="bar-col">
+        <div class="bar-h-label">1</div>
+        <div class="bar" style="height:36px"></div>
+        <div class="bar-idx">1</div>
+      </div>
+      <div class="bar-col">
+        <div class="bar-h-label">5</div>
+        <div class="bar all-hl" style="height:180px"></div>
+        <div class="bar-idx">2</div>
+      </div>
+      <div class="bar-col">
+        <div class="bar-h-label">6</div>
+        <div class="bar" style="height:216px">
+          <div class="seg-top" style="height:36px"></div>
+          <div class="seg-hl" style="height:180px"></div>
+        </div>
+        <div class="bar-idx">3</div>
+      </div>
+      <div class="bar-col">
+        <div class="bar-h-label">2</div>
+        <div class="bar" style="height:72px"></div>
+        <div class="bar-idx">4</div>
+      </div>
+      <div class="bar-col">
+        <div class="bar-h-label">3</div>
+        <div class="bar" style="height:108px"></div>
+        <div class="bar-idx">5</div>
+      </div>
+    </div>
+    <p class="chart-caption">
+      範例 <span class="inline-code">heights = [2,1,5,6,2,3]</span>，答案 = <b>10</b><br>
+      綠色區塊就是最大矩形：跨 index 2 和 3，高取較矮的 5，<b>5 × 2 = 10</b>
+    </p>
+  </div>
+</section>
+
+<!-- 2. 核心直覺 -->
+<section>
+  <h2>核心直覺（整題就這一句）</h2>
+  <div class="callout">
+    <strong>每根長條都問自己一次：「以我的高度當最矮天花板，我能往左右拉多寬？」</strong><br>
+    往左往右伸手，<strong>撞到比我矮的長條就停</strong>（那根擋住我）；比我高的可以鑽過去。<br>
+    掃過每一根、各算一次面積、取最大。
+  </div>
+  <p>為什麼每根都要試？因為<strong>高和寬在互相拉扯</strong>，用範例看三根：</p>
+  <table>
+    <thead>
+      <tr><th>站在</th><th>高度</th><th>往左撞牆</th><th>往右撞牆</th><th>寬</th><th>面積</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>index 3</td><td>6（最高）</td><td>5&lt;6 立刻停</td><td>2&lt;6 立刻停</td><td>1</td><td>6</td></tr>
+      <tr class="champ"><td>index 2</td><td>5</td><td>1&lt;5 停</td><td>6&gt;5 鑽過去、到 2&lt;5 才停</td><td>2</td><td>10</td></tr>
+      <tr><td>index 1</td><td>1（最矮）</td><td>到底</td><td>一路到底</td><td>6</td><td>6</td></tr>
+    </tbody>
+  </table>
+  <p>重點：<span class="gold-hl">冠軍是中間的 index 2（高5、寬2）</span>，不是最高的、也不是最寬的。所以不能只挑一根，要每根都試。</p>
+  <div class="callout gold">
+    口訣：<strong>越高越容易被困窄，越矮越能拉寬。</strong>
+  </div>
+</section>
+
+<!-- 3. 排隊故事 -->
+<section>
+  <h2>排隊故事（全篇靈魂，聽懂這段就贏了）</h2>
+  <p>先忘掉 stack 這個詞，想像長條是一群人，<strong>一根一根照順序進場排隊</strong>。</p>
+  <p>隊伍只有一條規則：<strong>只有比隊尾高才排得進來</strong>，所以隊伍高度永遠由前到後遞增（矮的在前、高的在後）。</p>
+
+  <div class="queue-rules">
+    <div class="rule-card in">
+      <div class="rule-title">✅ 新來的比隊尾高 → 自己排進去等</div>
+      <div class="mini-chart">
+        <div class="mini-bar" style="height:20px">1</div>
+        <div class="mini-bar" style="height:70px">5</div>
+        <div class="mini-arrow">←</div>
+        <div class="mini-bar new" style="height:90px">6</div>
+      </div>
+      <p class="mini-note">6 比隊尾的 5 高，乖乖排到後面。它還不知道自己的右牆在哪，先等。</p>
+    </div>
+    <div class="rule-card out">
+      <div class="rule-title">🚪 新來的比隊尾矮 → 把高的結算離場</div>
+      <div class="mini-chart">
+        <div class="mini-bar" style="height:20px">1</div>
+        <div class="mini-bar leaving" style="height:70px">5</div>
+        <div class="mini-bar leaving" style="height:90px">6</div>
+        <div class="mini-arrow">←</div>
+        <div class="mini-bar new" style="height:32px">2</div>
+      </div>
+      <p class="mini-note">2 來了，它就是隊尾那根的<strong>右牆</strong>！把比它高的（6、5）一個個<strong>結算離場</strong>（算面積），可能連續踢好幾根，誰比它高就踢誰。</p>
+    </div>
+  </div>
+
+  <p>最妙的地方：結算離場那一刻，兩道牆<strong>自動送上門</strong>，完全不用回頭掃：</p>
+  <table>
+    <thead>
+      <tr><th>牆</th><th>是誰</th><th>原因</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><strong>右牆</strong></td><td>逼你離場的那個新人</td><td>就是它比你矮才觸發結算</td></tr>
+      <tr><td><strong>左牆</strong></td><td>踢掉你之後的新隊尾</td><td>隊伍遞增，你身後那根正是左邊最近一個比你矮的（空了就代表沒左牆、延伸到最左）</td></tr>
+    </tbody>
+  </table>
+  <div class="callout">
+    寬度公式跟 brute force 一模一樣：<span class="inline-code">寬 = 右牆index - 左牆index - 1</span>
+  </div>
+</section>
+
+<!-- 4. 逐格 trace -->
+<section>
+  <h2>逐格 trace：<span class="inline-code">[2,1,5,6,2,3]</span> 完整走一遍</h2>
+  <p>stack 存的是 <strong>index</strong>（對應高度由底到頂遞增）。跟著每一步看隊伍怎麼變。</p>
+
+  <div class="step">
+    <div class="step-badge">i=0 h=2</div>
+    <div class="step-body">
+      <p class="step-action">隊伍是空的，直接 <span class="hl">push 0</span>。</p>
+      <div class="stack-view">
+        <span class="stack-label">stack 底 →</span>
+        <span class="stack-cell">0 (h2)</span>
+        <span class="stack-label">← 頂</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-badge">i=1 h=1</div>
+    <div class="step-body">
+      <p class="step-action">頂端 0 (h2) &gt; 1，新人比較矮 → <span class="gold-hl">pop 0 結算</span>：</p>
+      <span class="pop-calc">右=1　左=空(-1)　寬=1　面積=2×1=<b>2</b></span>
+      <p class="step-action">結算完 <span class="hl">push 1</span>。</p>
+      <div class="stack-view">
+        <span class="stack-label">stack 底 →</span>
+        <span class="stack-cell">1 (h1)</span>
+        <span class="stack-label">← 頂</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-badge">i=2 h=5</div>
+    <div class="step-body">
+      <p class="step-action">頂端 1 (h1) &gt; 5？否，新人比較高 → 直接 <span class="hl">push 2</span>。</p>
+      <div class="stack-view">
+        <span class="stack-label">stack 底 →</span>
+        <span class="stack-cell">1 (h1)</span>
+        <span class="stack-cell">2 (h5)</span>
+        <span class="stack-label">← 頂</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-badge">i=3 h=6</div>
+    <div class="step-body">
+      <p class="step-action">頂端 2 (h5) &gt; 6？否 → 直接 <span class="hl">push 3</span>。隊伍持續遞增。</p>
+      <div class="stack-view">
+        <span class="stack-label">stack 底 →</span>
+        <span class="stack-cell">1 (h1)</span>
+        <span class="stack-cell">2 (h5)</span>
+        <span class="stack-cell">3 (h6)</span>
+        <span class="stack-label">← 頂</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="step champ-step">
+    <div class="step-badge">i=4 h=2</div>
+    <div class="step-body">
+      <p class="step-action">2 一來就連踢兩根！頂端 3 (h6) &gt; 2 → <span class="gold-hl">pop 3 結算</span>：</p>
+      <span class="pop-calc">右=4　左=位置2　寬=4-2-1=1　面積=6×1=<b>6</b></span>
+      <p class="step-action">新頂端 2 (h5) 還是 &gt; 2 → <span class="gold-hl">pop 2 結算</span>：</p>
+      <span class="pop-calc champ">右=4　左=位置1　寬=4-1-1=2　面積=5×2=<b>10</b>　🏆 冠軍</span>
+      <p class="step-action">頂端 1 (h1) &gt; 2？否 → 停止結算，<span class="hl">push 4</span>。</p>
+      <div class="stack-view">
+        <span class="stack-label">stack 底 →</span>
+        <span class="stack-cell">1 (h1)</span>
+        <span class="stack-cell">4 (h2)</span>
+        <span class="stack-label">← 頂</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-badge">i=5 h=3</div>
+    <div class="step-body">
+      <p class="step-action">頂端 4 (h2) &gt; 3？否 → 直接 <span class="hl">push 5</span>。掃描結束。</p>
+      <div class="stack-view">
+        <span class="stack-label">stack 底 →</span>
+        <span class="stack-cell">1 (h1)</span>
+        <span class="stack-cell">4 (h2)</span>
+        <span class="stack-cell">5 (h3)</span>
+        <span class="stack-label">← 頂</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-badge tail">收尾</div>
+    <div class="step-body">
+      <p class="step-action">還留在隊伍裡的，右邊沒遇到更矮的 → 右牆一律當 <span class="inline-code">n=6</span>，逐一結算：</p>
+      <span class="pop-calc">pop 5 (h3)　左=位置4　寬=1　面積=<b>3</b></span>
+      <span class="pop-calc">pop 4 (h2)　左=位置1　寬=6-1-1=4　面積=<b>8</b></span>
+      <span class="pop-calc">pop 1 (h1)　左=空(-1)　寬=6　面積=<b>6</b></span>
+      <div class="stack-view">
+        <span class="stack-label">stack</span>
+        <span class="stack-cell empty">空</span>
+      </div>
+      <div class="callout gold" style="margin-bottom:0">
+        全部結算過的面積：2、6、<strong>10</strong>、3、8、6 → <strong>答案 = 10</strong>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 5. 兩份 code -->
+<section>
+  <h2>解法一：Brute Force　O(n²)</h2>
+  <p>把核心直覺直接翻成 code：對每根 <span class="inline-code">i</span>，往左延伸到第一根比它矮的、往右延伸到第一根比它矮的，<span class="inline-code">寬 = 右 - 左 - 1</span>，<span class="inline-code">面積 = 高[i] × 寬</span>，取最大。</p>
+<pre><code>def largest_rectangle_area(heights):
+    n = len(heights)
+    max_area = 0
+    for i in range(n):
+        left = i
+        while left &gt;= 0 and heights[left] &gt;= heights[i]:
+            left -= 1                 <span class="cm"># 停在左邊第一根比我矮的（界外一格）</span>
+        right = i
+        while right &lt; n and heights[right] &gt;= heights[i]:
+            right += 1                <span class="cm"># 停在右邊第一根比我矮的（界外一格）</span>
+        width = right - left - 1      <span class="cm"># 兩端都界外，中間才是我的 → 再 -1</span>
+        max_area = max(max_area, heights[i] * width)
+    return max_area</code></pre>
+  <p class="complexity">複雜度：外層 n 根 × 每根往左右各掃最多 n 格 = <strong>O(n²)</strong>，空間 <strong>O(1)</strong>。<br>
+  瓶頸：同一段長條被重複掃很多次。這就是 stack 要解決的問題。</p>
+</section>
+
+<section>
+  <h2>解法二：Monotonic Stack（單調堆疊）　O(n)</h2>
+  <p>就是把排隊故事翻成 code：<strong>比隊尾高就 push 進去等，比隊尾矮就把高的 pop 出來結算</strong>。</p>
+<pre><code>def largest_rectangle_area(heights):
+    n = len(heights)
+    max_area = 0
+    stack = []                                  <span class="cm"># 存 index，高度由底到頂遞增</span>
+
+    for i in range(n):
+        <span class="cm"># 頂端比目前這根「高」→ i 就是它的右牆 → 結算它</span>
+        while stack and heights[stack[-1]] &gt; heights[i]:
+            top = stack.pop()
+            left = stack[-1] if stack else -1   <span class="cm"># 新隊尾=左牆；空→-1(延伸到最左)</span>
+            width = i - left - 1                 <span class="cm"># 右(i) - 左 - 1</span>
+            max_area = max(max_area, heights[top] * width)
+        stack.append(i)
+
+    <span class="cm"># 收尾：還留在隊伍的，右邊沒遇到更矮的 → 右牆當 n</span>
+    while stack:
+        top = stack.pop()
+        left = stack[-1] if stack else -1
+        width = n - left - 1
+        max_area = max(max_area, heights[top] * width)
+
+    return max_area</code></pre>
+  <p class="complexity">時間 <strong>O(n)</strong>（攤還 amortized，下一段解釋），空間 <strong>O(n)</strong>（stack 最多裝 n 個 index）。</p>
+</section>
+
+<!-- 6. 攤還 -->
+<section>
+  <h2>等等，明明有雙層迴圈，為什麼還是 O(n)？</h2>
+  <p>看起來 for 裡面包 while，直覺會以為是 O(n²)。但換個角度數：不要數「每一輪 while 跑幾次」，改數「<strong>每個 index 一生被操作幾次</strong>」。</p>
+  <div class="callout">
+    每個 index <strong>一生只進隊一次（push）、只離隊一次（pop）</strong>。<br>
+    所以就算某一輪 while 連踢好幾根，全程 pop 的總次數加起來 <span class="inline-code">&lt;= n</span>。<br>
+    總工作量就是 n 次 push + 最多 n 次 pop = <strong>O(n)</strong>。
+  </div>
+  <p>回頭看 trace 就能驗證：i=4 那輪雖然一口氣踢了兩根，但被踢的 3 和 2 之後再也不會被碰到。<strong>某一輪特別忙，是用之後的清閒換來的。</strong></p>
+  <p class="complexity">這種算法叫<strong>攤還（amortized）</strong>：不看單次最壞，看「總操作量 ÷ 次數」。</p>
+</section>
+
+<!-- 7. 記憶點 -->
+<section>
+  <h2>帶回家的 4 個記憶點</h2>
+  <ol class="mem-list">
+    <li>每根當最矮天花板，往左右撞矮牆，<span class="inline-code">寬 = 右 - 左 - 1</span>。</li>
+    <li>Stack 排隊：<strong>比隊尾高就排進去、比隊尾矮就把高的結算離場</strong>。</li>
+    <li>結算時：<strong>右牆 = 逼你離場的新人、左牆 = 你身後的隊尾</strong>（空了就到最左）。</li>
+    <li class="star"><strong>pop 條件決定 stack 方向</strong>：pop「更矮的」→ 遞增 stack（本題）；pop「更大的」→ 遞減 stack（Daily Temperatures #739）。兩題完美鏡像。</li>
+  </ol>
+</section>
+
+<footer>
+  LeetCode #84 Largest Rectangle in Histogram · 讀書會簡報 · 範例 [2,1,5,6,2,3] 答案 10
+</footer>
+
+</main>
+</body>
+</html>
