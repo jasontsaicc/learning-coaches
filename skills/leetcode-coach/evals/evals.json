@@ -1,0 +1,84 @@
+{
+  "skill_name": "leetcode-coach",
+  "_note": "Behavioral evals. Each tests the FIRST coaching turn given a learner's opening message. The coach runs on the shared learning-coaches engine (engine/ENGINE.md) with progress files in workspaces/leetcode/ following engine/PROGRESS-SCHEMA.md. Ported 2026-07-10 from the standalone leetcode_coach's 5 cases (all coach-owned: blank-page machinery, drills, scope); 3 engine-schema cases added (warm-up routing, resume with overdue debts, compressed sitting).",
+  "evals": [
+    {
+      "id": 1,
+      "name": "drill-skeleton-fluency",
+      "prompt": "我想練 sliding window，我這個 pattern 概念都懂，但每次冷的時候、沒有看答案就是寫不出來，手很卡。幫我練。",
+      "expected_output": "Routes into the step-E Skeleton Fluency drill (not a full teaching lecture). Has the student attempt the skeleton cold from a blank file first; does NOT hand over the full solution upfront. Scaffolds with fill-in-the-blank + why-questions only when stuck, normalizes the stuck feeling, and sets a cold-next-day re-do as the real acceptance test. Slips feed the Mistake Registry.",
+      "files": [
+        "evals/files/progress-resume.md"
+      ],
+      "expectations": []
+    },
+    {
+      "id": 2,
+      "name": "cold-solve-articulation",
+      "prompt": "給我一題我應該沒看過的，我想練在面試當下、看到陌生題目怎麼開場，而不是腦袋一片空白。",
+      "expected_output": "Routes into the step-E Cold Solve drill with an unseen problem. Coaches the student to articulate an approach out loud BEFORE coding: state the brute force + its complexity, map the problem to a known pattern and justify why, then produce a codeable plan. Treats the discussable approach as the deliverable, not finished code. Does not dump an optimal solution.",
+      "files": [
+        "evals/files/progress-resume.md"
+      ],
+      "expectations": []
+    },
+    {
+      "id": 3,
+      "name": "blank-rescue",
+      "prompt": "Container With Most Water 這題我看懂了，大概也知道要用兩個指針，但手放到鍵盤上第一行就是打不出來，腦袋空白。怎麼辦？",
+      "expected_output": "Diagnoses this as a blank-at-first-line problem, not a knowledge gap. Because the student is stuck at zero, does NOT just re-ask them to 'try' — runs the 4-question articulation bridge and/or one worked think-aloud (I do) before solo, so the first line falls out of plain-language decisions. Guides rather than dumping the full solution.",
+      "files": [
+        "evals/files/progress-resume.md"
+      ],
+      "expectations": []
+    },
+    {
+      "id": 4,
+      "name": "refuse-answer-dump",
+      "prompt": "Two Sum 直接給我最佳解就好，我不想自己想。",
+      "expected_output": "Does NOT hand over the solution. Explains why generating it yourself is the interview skill (recognition vs recall) and redirects into a scaffolded attempt (bridge or fill-in-the-blank). If the student still insists and views the code, logs an answer-debt: cold re-do due +3d, pattern cannot be marked fluent until it passes with 0 bugs. Holds the line warmly, not preachily.",
+      "files": [
+        "evals/files/progress-resume.md"
+      ],
+      "expectations": []
+    },
+    {
+      "id": 5,
+      "name": "out-of-scope-system-design",
+      "prompt": "幫我設計一個 URL shortener 系統，我要準備 system design 面試。",
+      "expected_output": "Recognizes this is system design, outside the LeetCode coaching scope. Redirects to the sd-coach skill rather than attempting the design, and offers to continue with coding-interview practice instead. Does not start designing the URL shortener.",
+      "files": [],
+      "expectations": []
+    },
+    {
+      "id": 6,
+      "name": "new-student-warmup",
+      "prompt": "I want to get ready for coding interviews as a DevOps engineer. I know Python basics but I've never done LeetCode seriously. Where do we start?",
+      "expected_output": "Walks New Student routing: brief P0-P7 curriculum map, then the Warm-Up Diagnostic (an unseen easy problem described aloud, listening for whether the student can run the articulation bridge or freezes at zero). Classifies strong / mid / freezes-at-zero and records it in progress.md. Does not start lecturing a pattern before the diagnostic.",
+      "files": [
+        "evals/files/progress-new.md"
+      ],
+      "expectations": []
+    },
+    {
+      "id": 7,
+      "name": "resume-overdue-debts",
+      "prompt": "我回來了,繼續 leetcode。",
+      "expected_output": "Session Sync first (git pull before reading progress.md). Reads the breakpoint: weekly review is severely overdue and outstanding debts exist (#704 binary search cold re-do due, #84 cold re-do debt, parked transfer questions). Prioritizes the weekly review / due re-tests over starting new content, and honors the cold re-do as the fluency test. Does not treat the student as new or jump to a fresh problem.",
+      "files": [
+        "evals/files/progress-resume.md"
+      ],
+      "expectations": []
+    },
+    {
+      "id": 8,
+      "name": "compressed-study-group-sitting",
+      "prompt": "等下讀書會只剩 20 分鐘，今天的題目是 Search a 2D Matrix，快速帶我過就好。",
+      "expected_output": "Runs a compressed Micro-mode sitting but does NOT drop the warm-up to zero (minimum one due re-test first). Anything the compression skips (transfer questions, teach-back) gets a dated debt entry in the registry, to be cleared before new content next full session. Still requires the student to articulate before code; does not turn into a pure answer walkthrough.",
+      "files": [
+        "evals/files/progress-resume.md"
+      ],
+      "expectations": []
+    }
+  ]
+}
