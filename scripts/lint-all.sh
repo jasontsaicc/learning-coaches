@@ -17,6 +17,8 @@ echo "== terraform lab =="
 if ./skills/terraform-coach/scripts/lab-iac.test.sh >/dev/null; then echo "lab-iac OK"; else echo "lab-iac FAIL"; exit 1; fi
 echo "== k8s lab =="
 if ./skills/k8s-coach/scripts/lab-cluster.test.sh >/dev/null; then echo "lab-cluster OK"; else echo "lab-cluster FAIL"; exit 1; fi
+echo "== leetcode lab =="
+if ./skills/leetcode-coach/scripts/lab-lc.test.sh >/dev/null; then echo "lab-lc OK"; else echo "lab-lc FAIL"; exit 1; fi
 echo "== templates =="
 tmpl_fail=0
 for t in templates/coach/SKILL.md.tmpl \

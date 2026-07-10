@@ -1,6 +1,6 @@
 # learning-coaches
 
-A Claude Code plugin providing a family of first-principles learning coaches built on a shared teaching engine. Each coach uses Feynman and Simon methods (incremental layering, asking you to articulate understanding, teaching by breaking down complex topics into foundational pieces) to guide deep learning in DevOps domains. Live coaches: Terraform/Infrastructure-as-Code, Kubernetes/SRE, and System Design interview prep, with leetcode to follow.
+A Claude Code plugin providing a family of first-principles learning coaches built on a shared teaching engine. Each coach uses Feynman and Simon methods (incremental layering, asking you to articulate understanding, teaching by breaking down complex topics into foundational pieces) to guide deep learning in DevOps domains. Live coaches: Terraform/Infrastructure-as-Code, Kubernetes/SRE, System Design interview prep, and LeetCode coding-interview prep.
 
 ## Repository Structure
 
@@ -43,19 +43,29 @@ learning-coaches/
 │   │   │                                    #    real-world-scenarios, interview-bank, term-glossary)
 │   │   ├── scripts/                         # lab-cluster.sh (kind lifecycle) + test
 │   │   └── evals/                           # behavioral evals + fixtures
-│   └── sd-coach/
+│   ├── sd-coach/
+│   │   ├── SKILL.md
+│   │   ├── references/                      # 8 hook files (incl. language + narrative) + subject
+│   │   │                                    #   material (curriculum-detail, first-principles-chains,
+│   │   │                                    #    follow-up-bank, answer-comparisons, story, rpg-rules)
+│   │   └── evals/                           # behavioral evals + fixtures
+│   └── leetcode-coach/
 │       ├── SKILL.md
-│       ├── references/                      # 8 hook files (incl. language + narrative) + subject
-│       │                                    #   material (curriculum-detail, first-principles-chains,
-│       │                                    #    follow-up-bank, answer-comparisons, story, rpg-rules)
+│       ├── references/                      # 8 hook files (incl. language) + cheatsheets
+│       │                                    #   (problem-solving-framework, pattern,
+│       │                                    #    complexity, python-dsa)
+│       ├── scripts/                         # lab-lc.sh (pytest + large-N tripwire) + test
 │       └── evals/                           # behavioral evals + fixtures
 ├── workspaces/                              # per-coach learner state — git-TRACKED
 │   ├── k8s/                                 # progress.md (engine schema), term-registry,
 │   │                                        #   story-bank, session-log, environment,
 │   │                                        #   curriculum-plan, clusters/, notes/
-│   └── sd/                                  # progress.md (engine schema), one-liner-library,
-│                                            #   rpg-state, session-log, coaching-brief,
-│                                            #   curriculum-plan, pattern-map
+│   ├── sd/                                  # progress.md (engine schema), one-liner-library,
+│   │                                        #   rpg-state, session-log, coaching-brief,
+│   │                                        #   curriculum-plan, pattern-map
+│   └── leetcode/                            # progress.md (engine schema), one-liner-library,
+│                                            #   skeleton-registry, patterns.md,
+│                                            #   <phase>/<slug>/ problem folders
 └── portfolio/                               # recruiter-facing artifacts
     ├── k8s/                                 # notes/ + manifests/ (+ observability/,
     │                                        #   gitops/, terraform-eks/ as phases grow)
@@ -73,7 +83,11 @@ that clear the coach's quality bar land there. The k8s learner state was migrate
 standalone `k8s-mastery-lab-skill` repo (history merged via git subtree; pre-migration
 originals kept verbatim in `workspaces/k8s/archive/pre-migration/`). The sd learner state,
 notes, and Go PoCs were migrated the same way from the standalone `system-design-coach` +
-`system-design-notes` repos (originals in `workspaces/sd/archive/pre-migration/`).
+`system-design-notes` repos (originals in `workspaces/sd/archive/pre-migration/`). The
+leetcode learner state (16 sessions of progress, mistake registry, one-liner library,
+solved problems) was migrated from the standalone `leetcode-notes` repo, and the coach's
+teaching philosophy from the standalone `leetcode_coach` skill repo (originals in
+`workspaces/leetcode/archive/pre-migration/`; full histories under `legacy/leetcode/`).
 
 ## Engine Read Mechanism
 
