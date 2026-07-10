@@ -13,6 +13,16 @@
      - docs/curriculum-roadmap.md、docs/planning-review.md → workspaces/sd/archive/pre-migration/
      - sd-coach skill 本體         → skills/sd-coach/(curriculum 詳文=references/curriculum-detail.md) -->
 
+## S41(2026-07-10,WR5 前半:Multi-Region Session Store 重打,中斷存檔)
+
+- **WR5 觸發(40-33=7),只推進 Topic 1/3 即收**。選題:Session Store(欠最久 Box 1)/ Security & Auth / Unique ID(後兩題未開)。registry sweep、quick drill、artifact audit 全未跑,last_weekly_review 維持 33,下場續。
+- ⚠️ **教練失誤 ×2(開場)**:盲測沒給完整題目敘述,學生兩度炸鍋。規則已焊進 memory(`drill-full-problem-statement`)+ coaching-brief 無效手法:**任何 drill/recall/mock 開場必附完整面試情境,clarify 用具體數字回**。
+- 🌟 **Step 1 自己跑了**(S40 跳過 clarify 的洞,本場修正):撤銷即時性(自己拿銀行黑名單類比,正中後半最深的雷)、跨區人數、重登可接受度。
+- **設計鏈(盲測不過 → 導引重打,全鏈推得動)**:commit 兩區互抄(why=failover 不可群體重登)→ sync vs async 兩邊標價(150ms×每請求×全體+故障跨區傳染 vs 1s 窗口×個位數人×重登)→ async 勝 → **LWW 殭屍 session 自己推出「死不掉」**(LWW 術語陌生,機制通)→ 撤銷=獨立寫入類 → 量級先估(幾筆到幾百筆)否決 Bloom → in-memory set 副本(**why+代價完整句,今日第一句合格 trade-off**)→ pull over push(預算寬+全量自愈,論證完整)→ N=20 被戳(一次 timeout 即 39s>30s)→ **停在 1+2N≤30 解 N**。
+- **通用原則落袋**:傷害=窗口×人口×症狀;sync/async per-write-type 各選;先估量級再選工具;pull=全量自愈(Prometheus scrape / reconcile loop 同構)。
+- ⚠️ **三指標**:unprompted-argument 🟡(前半兩球裸:「block 黑名單嗎?」問句+「bloom filter」兩字;後半兩句完整=同場修正)/ unprompted-ops 未測(沒走到收尾)/ no-freeze-capacity ❌(「不太確定要怎麼算」棄權句;拆解式給了,中斷未完成)。連續達成計數:argument 歸零重數、capacity 歸零。
+- **收帳**:Session Store mastery high→med(誠實降級:盲測未能獨立產出);SR 卡重置 interval 3(07-13);新 registry 5 筆(LWW 術語、危險感沒機制再現、裸結論×2、量級先估反射、不等式凍結)。
+
 ## S40(2026-07-08,execution-heavy:逾期複習清倉收尾 + Drill Gauntlet 首場)
 
 **Part 1 — 逾期複習清倉 4/4 全清(換情境冷測,防概念單鉤子假陽性):**

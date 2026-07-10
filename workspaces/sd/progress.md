@@ -11,14 +11,22 @@
 
 ## Meta
 
-- session_count: 40
-- last_weekly_review: 33 — ⚠️ S41 = Weekly Review #5 到期(40-33=7)
-- last_session_date: 2026-07-08
+- session_count: 41
+- last_weekly_review: 33 — ⚠️ WR5 於 S41 開跑未完成(Topic 1/3),trigger 持續成立,下場續跑;完成時才把本欄更新為當時 session_count
+- last_session_date: 2026-07-10
 - warm_up_classification: (standalone 時期未記錄;學員已 P3,Step 0 模式預設 Exploration)
 
 ## Current Session breakpoint
 
-(none — S40 完成收尾) next: S41 = Weekly Review #5(多筆複習到期一起收)→ 之後 Drill Gauntlet 續跑(多區域全球限流專門 drill + 換題 bar-raiser:URL Shortener / Session Store / Snowflake / Distributed Cache,三指標各求 3 連)→ Day 30 Snowflake Light PoC(park)。execution-heavy 三條硬規則生效中(見 coaching-brief.md [Execution-Heavy Mode]):第一句就評分 / 裸結論直接打回 / 盯 unprompted-argument・unprompted-ops・no-freeze-capacity。
+**S41 中斷存檔(2026-07-10)— WR5 進行中,Topic 1/3(Multi-Region Session Store)盲測轉導引重打。**
+
+下一場開場順序:
+1. **第一球:解 1+2N≤30 選 N**(黑名單 pull 間隔;拆解式已給:複製 1s + 錯過一輪 N + 失敗一輪 N ≤ 30s;要挑工程餘裕的整數並講 why)→ 補 pull 的代價一句。
+2. 殭屍免疫格:TTL 更新復活了 session,為什麼咬不動黑名單?(目標答案方向:黑名單 append-only、與 session 資料不同寫入路徑/keyspace,LWW 無從打架)
+3. 監控收尾:3AM page test 學生自己跑(unprompted-ops 即測;pull loop 自身死掉誰發現 = 現成答案素材)。
+4. 收 Topic 1 計分 + One-Liner Challenge(新句已入庫待口頭抽考)→ 續 WR5:Topic 2 Security & Auth(OAuth/JWT/session 廣度)→ Topic 3 Unique ID Generator → registry sweep(到期條目)→ quick drill → artifact audit → 收帳(last_weekly_review 更新)。
+
+WR5 收完後恢復原佇列:Drill Gauntlet 續跑(多區域全球限流專門 drill + 換題 bar-raiser:URL Shortener / Session Store / Snowflake / Distributed Cache,三指標各求 3 連)→ Day 30 Snowflake Light PoC(park)。execution-heavy 三條硬規則生效中(見 coaching-brief.md [Execution-Heavy Mode]):第一句就評分 / 裸結論直接打回 / 盯 unprompted-argument・unprompted-ops・no-freeze-capacity。S41 指標:argument 🟡(前裸後全)/ ops 未測 / capacity ❌ — argument、capacity 連續計數歸零。
 
 ## Phase status
 
@@ -53,7 +61,7 @@ Weak-topic flags: 無(至今沒有帶 flag 過 gate 的紀錄)。
 - Rate Limiting & Circuit Breaker (Day 23-24): high (s40)— CB 三狀態 S28 resolved 後又掉,S40 配電箱重焊,續盯
 - Observability (Day 25): high (s39)— 知識到位、drill 輸出習慣待練
 - Bloom Filter & Gossip (Day 26): high (s40)— FP/FN 嚴重性換情境重測過=真修好
-- Multi-Region Session Store design (Phase 2 Gate 題): high (s31)
+- Multi-Region Session Store design (Phase 2 Gate 題): med (s41)— WR5 盲測未能獨立產出(誠實降級);clarify 強、核心軸 commit 對,機制層需逐格導引;導引後全鏈推得動,WR5 續跑時複測
 - URL Shortener (Day 27-28): high (s35)— S34 Drill 8/9 + S35 PoC 全綠(50 萬碼 0 碰撞 + -race 零警告)
 - Unique ID Generator (Day 29-30): high (s36)— PoC(bit packing + clock skew 偵測)park
 - Distributed Rate Limiter (Day 31-32): high (s40)— 設計知識到位;S40 Gauntlet 暴露輸出習慣病灶
@@ -90,7 +98,7 @@ Weak-topic flags: 無(至今沒有帶 flag 過 gate 的紀錄)。
      無卡的設 3 天(2026-07-13)。unresolved-session-count = 40 - 建立 session(近似;≥5 依 engine
      Priority Override 置頂,step A 每堂上限內逐步清)。 -->
 
-### Live(unresolved,25 筆)
+### Live(unresolved,30 筆)
 
 - (s4) | Load Balancer | "least robin":RR 與 Least Connections 名字揉成一個 | 演算法「行為」與「名字」沒綁定 | unresolved | 3 | 2026-07-11 | 36
 - (s4) | Load Balancer | 以為 8.8.8.8 是 ISP DNS(是 Google Public DNS) | trivia 型;冷知識未錨定 | unresolved | 3 | 2026-07-11 | 36
@@ -119,6 +127,11 @@ Weak-topic flags: 無(至今沒有帶 flag 過 gate 的紀錄)。
 - (s40) | Interview habit (Step 1) | 跳過 clarify 直接報解法 + LB 亂套進 rate limiter(recency bias) | Step 1 未成硬關卡 | unresolved — 下次 drill 開場自己跑完 clarify 才准進 Step 2 | 3 | 2026-07-11(每場 drill 即測) | 0
 - (s40) | Interview habit (cost 格) | trade-off 的 cost 格填「low」(初階 tell) | 沒想過營運代價;cost 格禁用低/高,換具體會咬人的東西 | unresolved(原 🟡 Improving:L4 vs L6 對照演示過) | 3 | 2026-07-11(每場 drill 即測) | 0
 - (s40) | Interview habit (unprompted-ops) | 沒主動收尾監控(第 5 次:S26/30/34/36/40) | 監控收尾未成反射;3AM page test 已焊進框架當第 5 步硬關卡 | unresolved | 3 | 2026-07-11(每場 drill 即測) | 14
+- (s41) | Multi-Region Session Store | 「兩區互抄會有同步的問題」講到這就卡,一致性妥協無法量化 | 危險感沒機制(S31/S36 同款);公式「傷害=窗口×人口×症狀」已教,換場景複測 | unresolved | 3 | 2026-07-13 | 0
+- (s41) | 分散式術語 | last-writer-wins 不認識(殭屍機制推得動,純標籤缺) | 術語-概念未綁定;LWW/tombstone 對照表待建 | unresolved | 3 | 2026-07-13 | 0
+- (s41) | Interview habit | 裸結論×2:「多一種 block 黑名單嗎?」問句丟球 +「bloom filter」兩字答案 | 頭號主線;同場後半自修正(in-memory、pull 兩句完整) | unresolved | 3 | 2026-07-11(每場 drill 即測) | 0
+- (s41) | 工具選擇反射 | 量級沒估先丟 Bloom filter(幾百筆名單 set 就夠) | 「先估量級再選工具」反射缺;S24 開放題反射變體;S40 才練的 FP/FN 判斷沒先跑 | unresolved | 3 | 2026-07-13 | 0
+- (s41) | Capacity | 1+2N≤30 解 N 喊「不太確定要怎麼算」 | capacity-freeze 家族:被式子外觀嚇退非不會算;拆解式已給,中斷未完成 | unresolved | 3 | 2026-07-11(下次開場第一球) | 0
 
 ### Resolved history(66 筆,遷移照錄)
 
@@ -132,7 +145,7 @@ Weak-topic flags: 無(至今沒有帶 flag 過 gate 的紀錄)。
      Box→interval 對映:Box1→3、Box2→3、Box3→7、Box4→14(Box1 的「隔天」檔位 engine 無,
      取最近的 3;到期日照原檔 verbatim,過期就是過期,S41 WR5 收)。type=chunk(主題級 recall)。 -->
 
-- chunk:Multi-Region-Session-Store(design) | chunk | 3 | 2026-06-19(過期;原 Box 1) | active
+- chunk:Multi-Region-Session-Store(design) | chunk | 3 | 2026-07-13(S41 WR5 重打:盲測不過、導引後全鏈通;interval 重置 3) | active
 - chunk:Consistency-Models | chunk | 3 | 2026-06-21(過期;原 Box 2) | active
 - chunk:Distributed-Cache+CAP | chunk | 7 | 2026-06-25(過期;原 Box 3) | active
 - chunk:Security-&-Auth | chunk | 3 | 2026-06-27(過期;原 Box 2;WR4 只測了 crypto-primitives,OAuth/JWT/session 廣度未測) | active
