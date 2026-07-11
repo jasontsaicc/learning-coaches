@@ -18,15 +18,14 @@
 
 ## Current Session breakpoint
 
-**S41 中斷存檔(2026-07-10)— WR5 進行中,Topic 1/3(Multi-Region Session Store)盲測轉導引重打。**
+**S42 中斷存檔(2026-07-11)— WR5 Topic 1/3 已收,Topic 2 未開。** 球 3(3AM page test)無法獨立組裝:填格「無法使用/有立即性」= 危險感沒機制;SLI 標籤撈不出(素材 lag、上次成功時間第一輪就自己講出);逐步導引通了 A 掛→failover→B 無資料→強制重登全鏈後,學生喊「太拖,直接說完」→ 模範答案直接給(2 pages + dead man's switch + ticket 分層 + 3 圖)。Topic 1 計分 1/6(見 scorecard)。
 
 下一場開場順序:
-1. **第一球:解 1+2N≤30 選 N**(黑名單 pull 間隔;拆解式已給:複製 1s + 錯過一輪 N + 失敗一輪 N ≤ 30s;要挑工程餘裕的整數並講 why)→ 補 pull 的代價一句。
-2. 殭屍免疫格:TTL 更新復活了 session,為什麼咬不動黑名單?(目標答案方向:黑名單 append-only、與 session 資料不同寫入路徑/keyspace,LWW 無從打架)
-3. 監控收尾:3AM page test 學生自己跑(unprompted-ops 即測;pull loop 自身死掉誰發現 = 現成答案素材)。
-4. 收 Topic 1 計分 + One-Liner Challenge(新句已入庫待口頭抽考)→ 續 WR5:Topic 2 Security & Auth(OAuth/JWT/session 廣度)→ Topic 3 Unique ID Generator → registry sweep(到期條目)→ quick drill → artifact audit → 收帳(last_weekly_review 更新)。
+1. One-Liner Challenge 口頭抽考:S41 新句 Session Revocation + 抽 2 條舊句。
+2. **3AM page test 複測(直接給的留沒留住)**:換題(URL Shortener 或 Rate Limiter),學生自己跑 page 句型 "Page me when [SLI] > [threshold] for [duration], because [harm]" + page/ticket/dashboard 分層。
+3. 續 WR5:Topic 2 Security & Auth(OAuth/JWT/session 廣度盲測,完整題目敘述開場)→ Topic 3 Unique ID Generator → registry sweep(到期條目)→ quick drill → artifact audit → 收帳(last_weekly_review 更新)。
 
-WR5 收完後恢復原佇列:Drill Gauntlet 續跑(多區域全球限流專門 drill + 換題 bar-raiser:URL Shortener / Session Store / Snowflake / Distributed Cache,三指標各求 3 連)→ Day 30 Snowflake Light PoC(park)。execution-heavy 三條硬規則生效中(見 coaching-brief.md [Execution-Heavy Mode]):第一句就評分 / 裸結論直接打回 / 盯 unprompted-argument・unprompted-ops・no-freeze-capacity。S41 指標:argument 🟡(前裸後全)/ ops 未測 / capacity ❌ — argument、capacity 連續計數歸零。
+WR5 收完後恢復原佇列:Drill Gauntlet 續跑(多區域全球限流專門 drill + 換題 bar-raiser:URL Shortener / Session Store / Snowflake / Distributed Cache,三指標各求 3 連)→ Day 30 Snowflake Light PoC(park)。execution-heavy 三條硬規則生效中(見 coaching-brief.md [Execution-Heavy Mode]):第一句就評分 / 裸結論直接打回 / 盯 unprompted-argument・unprompted-ops・no-freeze-capacity。S41 指標:argument 🟡(前裸後全)/ ops 未測 / capacity ❌ — argument、capacity 連續計數歸零。S42 指標:argument 🟡(導引段句子多半完整,但四格填空兩度交白/半句)/ ops ❌(第 6 記:即測都跑不動,遑論 unprompted)/ capacity 🟡(球 1:29+N=10 自解,cost 代打)— 三項連續計數全部為 0。
 
 ## Phase status
 
@@ -61,7 +60,7 @@ Weak-topic flags: 無(至今沒有帶 flag 過 gate 的紀錄)。
 - Rate Limiting & Circuit Breaker (Day 23-24): high (s40)— CB 三狀態 S28 resolved 後又掉,S40 配電箱重焊,續盯
 - Observability (Day 25): high (s39)— 知識到位、drill 輸出習慣待練
 - Bloom Filter & Gossip (Day 26): high (s40)— FP/FN 嚴重性換情境重測過=真修好
-- Multi-Region Session Store design (Phase 2 Gate 題): med (s41)— WR5 盲測未能獨立產出(誠實降級);clarify 強、核心軸 commit 對,機制層需逐格導引;導引後全鏈推得動,WR5 續跑時複測
+- Multi-Region Session Store design (Phase 2 Gate 題): med (s42)— WR5 盲測未能獨立產出(誠實降級);clarify 強、核心軸 commit 對,機制層需逐格導引;S42 收尾:殭屍免疫✅、capacity 🟡、3AM page test 直接給,ops 組裝待複測
 - URL Shortener (Day 27-28): high (s35)— S34 Drill 8/9 + S35 PoC 全綠(50 萬碼 0 碰撞 + -race 零警告)
 - Unique ID Generator (Day 29-30): high (s36)— PoC(bit packing + clock skew 偵測)park
 - Distributed Rate Limiter (Day 31-32): high (s40)— 設計知識到位;S40 Gauntlet 暴露輸出習慣病灶
@@ -88,6 +87,7 @@ Weak-topic flags: 無(至今沒有帶 flag 過 gate 的紀錄)。
 - 2026-06-26 | step G (s34, URL Shortener, P3 bar-raiser) | 8/9 | operational 監控當固定收尾(S29/30 重複盲點,原符號:Operational ❌) | 被質疑「Redis 當 DB」自己想起重啟掉資料;Bloom 自己擺對讀路徑 | coach
 - (未記日期) | step G (s36, Unique ID Generator, bar-raiser) | 3/7(原記 ~4/7;✅=1 正規化,原符號:TWY🟡 FM🟡 Ops❌ Cap❌) | 結論要附論證;收尾固定提監控(第 4 次);capacity 別被 2^n 嚇退 | enumeration 洩漏營業額觀點零提示(architect 級) | coach
 - 2026-07-08 | step G (s40, Distributed Rate Limiter, Gauntlet #1, L3) | 3/9(原記 ~3/9;原符號:Scope❌ TWY❌ Ops❌ FM🟡 Cap🟡✅ Hint🟡 TB❌) | 三指標:unprompted-argument ❌ / unprompted-ops ❌(第 5 次) / no-freeze-capacity 🟡✅ | 「謝謝你拒絕我,逃避心態又來了」頂回去自推 5000/min=反脆弱本身 | coach
+- 2026-07-11 | weekly review (s42, WR5 Topic 1: Multi-Region Session Store, S41-S42 跨場) | 1/6(✅=1 正規化:security/殭屍免疫✅;trade-off🟡 capacity🟡 failure-timeline🟡 one-liner🟡未抽;ops❌;scale trigger 未測) | 3AM page test 句型組裝獨立跑不動;SLI 標籤掉 | 「上一筆成功時間」零提示 = dead man's switch 直覺,素材在缺組裝 | coach
 
 ## Mistake Registry
 
@@ -131,7 +131,10 @@ Weak-topic flags: 無(至今沒有帶 flag 過 gate 的紀錄)。
 - (s41) | 分散式術語 | last-writer-wins 不認識(殭屍機制推得動,純標籤缺) | 術語-概念未綁定;LWW/tombstone 對照表待建 | unresolved | 3 | 2026-07-13 | 0
 - (s41) | Interview habit | 裸結論×2:「多一種 block 黑名單嗎?」問句丟球 +「bloom filter」兩字答案 | 頭號主線;同場後半自修正(in-memory、pull 兩句完整) | unresolved | 3 | 2026-07-11(每場 drill 即測) | 0
 - (s41) | 工具選擇反射 | 量級沒估先丟 Bloom filter(幾百筆名單 set 就夠) | 「先估量級再選工具」反射缺;S24 開放題反射變體;S40 才練的 FP/FN 判斷沒先跑 | unresolved | 3 | 2026-07-13 | 0
-- (s41) | Capacity | 1+2N≤30 解 N 喊「不太確定要怎麼算」 | capacity-freeze 家族:被式子外觀嚇退非不會算;拆解式已給,中斷未完成 | unresolved | 3 | 2026-07-11(下次開場第一球) | 0
+- (s42) | Interview habit | 卡住瞬間質疑題目正當性(「面試不會考吧」+「什麼面試會帶到這裡」,同場兩次) | 逃避家族新面具:攻擊題目而非跑機制;S36 放棄→S41 不確定→S42 質疑題目 | unresolved | 3 | 2026-07-14(每場 drill 即測) | 0
+- (s41) | Capacity | 1+2N≤30 解 N 喊「不太確定要怎麼算」 | capacity-freeze 家族:被式子外觀嚇退非不會算;拆解式已給,中斷未完成 | unresolved | 3 | 2026-07-14(S42 複測 🟡:自己算出 29 並 commit N=10+why;cost 量化喊「直接說明」由 coach 代打,未全過) | 0
+- (s42) | Observability | SLI 標籤現場撈不出(「SLI 是我最不熟悉的」;lag、上次成功時間素材第一輪就自己講出) | 術語-概念未綁定;s39 標 high 複驗打臉 = 當場🟢≠留得住再一例;考試分數比喻重錨過 | unresolved | 3 | 2026-07-14 | 0
+- (s42) | Operational | 3AM page test 無法獨立組裝:「無法使用」「有立即性」交卷 = 症狀/事件/機制拆不開;pager/alarm/ticket 分層概念本身陌生 | 危險感沒機制家族 + 監控知識掛「救火」腳本不掛「設計收尾」腳本;句型模板+模範答案直接給,留沒留住下次換題複測 | unresolved | 3 | 2026-07-14(下次 drill 換題複測) | 0
 
 ### Resolved history(66 筆,遷移照錄)
 
