@@ -10,6 +10,8 @@ learning-coaches/
 │   └── plugin.json                          # Plugin manifest
 ├── .gitignore
 ├── README.md
+├── docs/                                    # design specs + implementation plans
+├── legacy/                                  # frozen pre-merge repo snapshots (k8s, sd, leetcode)
 ├── engine/
 │   ├── ENGINE.md                            # Shared teaching engine
 │   ├── PLUGIN-INTERFACE.md                  # Coach hook contract
@@ -79,15 +81,29 @@ learning-coaches/
 is deliberately git-tracked: the student syncs it across machines by committing after each
 session and pulling before the next. This differs from `skills/*/workspace/`, which stays
 untracked scratch space. `portfolio/` is the curated, shareable output area; only artifacts
-that clear the coach's quality bar land there. The k8s learner state was migrated from the
-standalone `k8s-mastery-lab-skill` repo (history merged via git subtree; pre-migration
-originals kept verbatim in `workspaces/k8s/archive/pre-migration/`). The sd learner state,
-notes, and Go PoCs were migrated the same way from the standalone `system-design-coach` +
-`system-design-notes` repos (originals in `workspaces/sd/archive/pre-migration/`). The
-leetcode learner state (16 sessions of progress, mistake registry, one-liner library,
-solved problems) was migrated from the standalone `leetcode-notes` repo, and the coach's
-teaching philosophy from the standalone `leetcode_coach` skill repo (originals in
-`workspaces/leetcode/archive/pre-migration/`; full histories under `legacy/leetcode/`).
+that clear the coach's quality bar land there.
+
+Each workspace was merged in from standalone pre-monorepo repos (histories merged via git
+subtree). `legacy/` holds frozen pre-merge snapshots; treat it and the `pre-migration`
+archives as read-only.
+
+| workspace | migrated from | originals kept in |
+|---|---|---|
+| k8s | `k8s-mastery-lab-skill` | `workspaces/k8s/archive/pre-migration/` |
+| sd | `system-design-coach` + `system-design-notes` | `workspaces/sd/archive/pre-migration/` |
+| leetcode | `leetcode-notes` (learner state) + `leetcode_coach` (teaching philosophy) | `workspaces/leetcode/archive/pre-migration/`, histories in `legacy/leetcode/` |
+
+## Deployment and Lint
+
+Live coaches run as user-level skills: each is symlinked into `~/.claude/skills/`, e.g.
+`ln -s <repo>/skills/sd-coach ~/.claude/skills/sd-coach`. Currently deployed: k8s-coach,
+sd-coach, leetcode-coach (terraform-coach is not symlinked). Local plugin testing:
+`claude --plugin-dir <repo>`, reload with `/reload-plugins`.
+
+Before commit: `./scripts/lint-all.sh` must pass (validates plugin manifest, engine, and
+every coach; runs lab script tests). Scaffold a new coach with `./scripts/new-coach.sh
+<name> [--no-lab] [--with-language] [--with-narrative]`; it fails lint until every TODO
+marker is filled.
 
 ## Engine Read Mechanism
 
@@ -95,4 +111,4 @@ A coach reads the shared engine via `${CLAUDE_SKILL_DIR}/../../engine/ENGINE.md`
 injection), with markdown link `../../engine/ENGINE.md` as a human-readable backup.
 `${CLAUDE_SKILL_DIR}` is the skill's own directory and resolves regardless of the session
 working directory (per official Claude Code skills docs). `${CLAUDE_PLUGIN_ROOT}` does not
-exist for skills. Local testing: `claude --plugin-dir <repo>`, reload with `/reload-plugins`.
+exist for skills.
