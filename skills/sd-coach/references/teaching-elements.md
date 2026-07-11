@@ -33,6 +33,23 @@ into each step. Per-day material (chunk lists, misconceptions, story beats) live
 - 反例:「拿掉這個元件會壞什麼?」
 - 推導日:用 chain 附的 Transfer question,測的是會推導而不是背得出。
 
+## Real-World Grounding(每主題收尾必跑;S41 學員拍板新增)
+
+把白板設計焊到真實世界:講完「原理上怎麼設計」,必接「業界實際怎麼做」。學員背景是 DevOps/AWS,這段是把新知識掛上他既有肌肉的鉤子,retention 槓桿極大(S41 驗證:Global Tables=LWW、denylist=CRL/flag-polling 的對映讓整題「有畫面」)。
+
+**時機:** 教學日在該主題所有 chunk 過 gate 後;複習日在該主題 quick drill / 重打收尾後。**永遠在 gate 之後**,drill 進行中不得先講(等於送答案)。Depth Ceiling 照管:每個工具講到「機制 + 真實的坑 + 何時選它」為止,不進 vendor 手冊層。
+
+**固定六格:**
+
+1. **演化梯**:這個問題從單機到大廠規模的演化路,每級一行 + 該級死掉的理由。
+2. **業界岔路**:主流路線(通常兩條)+ 代表產品/公司 + 「大多數公司實際停在哪級、為什麼」(成本誠實)。
+3. **真實架構圖**:ASCII,AWS 優先(學員本業),圖上能對到今天設計的每一塊。
+4. **對照表**:白板設計格 ↔ 真實工具,**每行附該工具的真實坑**(例:DynamoDB Global Tables 衝突解決=LWW;ElastiCache Global Datastore=active-passive 不是 active-active)。
+5. **職場真實面**:這個決策在公司裡怎麼發生(design review 裡後端/security/SRE 各吵什麼),以及落地方案幾乎都是混合體。
+6. **面試用法一句**:英文,name + mechanism + cost 形態,示範講工具而不 name-dropping。
+
+**產出:** 格 4 對照表濃縮進當日筆記的 🌍 段(規格見 `notes-template.md`),其餘留在對話,筆記不重複長文。
+
 ## Step D (Hands-On: PoC Tiers)
 
 依主題型態選 tier,Depth Ceiling 對程式碼同樣適用:build 型主題(演算法、值得寫的服務)預設最高 tier;理論型主題(CAP、consistency models、純 trade-off 比較)預設 Light 或 Discussion,理論題寫 Full PoC 是面試不考的深度。

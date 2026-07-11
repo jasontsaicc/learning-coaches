@@ -74,6 +74,20 @@ Rules:
 - Must include at least one operational/production concern
 - This section feeds directly into interview muscle memory
 
+## 🌍 Real World (every topic that ran Real-World Grounding)
+
+> Condensed landing of the Real-World Grounding segment (`teaching-elements.md`). Keep ONLY the
+> mapping table + one line on where most companies actually land; the evolution ladder and
+> architecture diagram stay in the session conversation — do not duplicate long prose here.
+
+```markdown
+| My design block | Real-world tool | Its trap |
+|---|---|---|
+| (whiteboard concept) | (actual product/service) | (the gotcha that bites in production) |
+```
+
+**Industry reality:** one line — which route most companies actually take and why (usually cost).
+
 ## 🧠 Mind Map (every session — separate file)
 
 > Student preference: a SHORT hand-writable mind map, in ADDITION to the full notes above (does not replace them).
