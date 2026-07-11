@@ -13,6 +13,14 @@
      - docs/curriculum-roadmap.md、docs/planning-review.md → workspaces/sd/archive/pre-migration/
      - sd-coach skill 本體         → skills/sd-coach/(curriculum 詳文=references/curriculum-detail.md) -->
 
+## S42(2026-07-11,WR5 Topic 1 收尾:3AM page test 直接給)
+
+- 球 1 capacity 🟡(29、N=10 自解,cost 代打)、球 2 殭屍免疫 ✅(append-only、獨立寫入路徑)。
+- **球 3(3AM page test)無法獨立組裝**:pager/alarm/ticket 分層概念陌生;SLI 標籤撈不出(「SLI 是我最不熟悉的」——但 lag、上次成功時間兩個正解素材第一輪就自己講出);四格填空交「無法使用/有立即性」= 危險感沒機制。逐段導引通了 A 掛→failover→B 無 session→強制重登全鏈(最後兩步自己走完),學生喊「太拖,直接說完」→ 模範答案直接給:replication lag page(60s/5min,窗口=炸藥)、黑名單資料年齡 page(dead man's switch,`now - last_success`)、ticket 分層、dashboard 3 圖。
+- **Topic 1 計分 1/6**(✅ security;🟡 trade-off/capacity/failure-timeline/one-liner 未抽;❌ ops)。新 registry 2 筆(SLI 標籤、page 組裝),均排 07-14 複測。
+- 三指標:argument 🟡 / ops ❌(第 6 記)/ capacity 🟡 — 連續計數全 0。
+- 收尾 Q&A(非 drill):Tier 1=pattern 字母表 vs Tier 2=組裝;品牌題(Twitter/Dropbox/YouTube)=pattern 組裝不排課,唯一真缺口 pattern 12(chunking/delta sync);**學生功課:查目標公司面經,Dropbox 類頻率高就觸發 re-plan 排 pattern 12**。
+
 ## S41(2026-07-10,WR5 前半:Multi-Region Session Store 重打,中斷存檔)
 
 - **WR5 觸發(40-33=7),只推進 Topic 1/3 即收**。選題:Session Store(欠最久 Box 1)/ Security & Auth / Unique ID(後兩題未開)。registry sweep、quick drill、artifact audit 全未跑,last_weekly_review 維持 33,下場續。

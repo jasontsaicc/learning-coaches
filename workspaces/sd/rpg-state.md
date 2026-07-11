@@ -11,11 +11,11 @@
 | **Title** | 🏗️ Staff Architect |
 | **Current streak** | 4 週 🔥 (連續活躍週:S31 / S32-S36 / S37-S38 / 本週 S39-S41,同週不加碼) |
 | **Longest streak** | 4 (days, pre-weekly) |
-| **Last session date** | 2026-07-10 (S41, WR5 前半:Session Store 重打,中斷存檔) |
+| **Last session date** | 2026-07-11 (S42, WR5 Topic 1 收尾,Topic 2 未開) |
 
 ## Last story summary
 
-Session 41。WR5 開跑,Topic 1/3(Multi-Region Session Store)即中斷存檔。小球開場連兩球發壞(盲測沒給題目敘述)被學生直球抗議,規則焊進記憶與作戰手冊。重打過程:學生自跑 clarify(撤銷即時性一問正中最深的雷)、commit 兩區互抄;sync vs async 兩邊標價後 async 勝;自己推出 LWW 殭屍 session「死不掉」;黑名單先估量級否決 Bloom,in-memory 副本+pull 傳播兩句完整 trade-off(今日最亮)。停在 1+2N≤30 解 N。三指標:argument 前裸後全 🟡、ops 未測、capacity ❌。Session Store 誠實降級 med,下場續 WR5。
+Session 42。WR5 Topic 1 收帳(1/6)。半夜 3 點的 pager 響了,學生卻先問「pager 是什麼」——小球把 alarm/page/ticket 分層攤開,考試分數比喻把 SLI 標籤焊回去。學生第一輪就丟出 dead man's switch 的正解素材(上次成功時間),但組裝跑不動,四格填空兩度交白;導引通了 failover→B 無資料→強制重登全鏈後喊「直接說完」,小球把兩頁 page + 三張圖的模範答案全數攤牌。裸結論的病灶換了張臉:零件都有,不肯組裝出貨。下場:One-Liner 抽考、page test 換題複測、Topic 2 Security & Auth。
 
 ## Achievements
 
