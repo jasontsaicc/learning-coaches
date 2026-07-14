@@ -26,6 +26,7 @@
 - **⚠️ metrics-server 缺**(隨舊叢集消失),P3 HPA 前要重裝(kind 需 `--kubelet-insecure-tls`)。
 - chunk 3 NetworkPolicy 需要 **Calico** 叢集(kindnet 不支援 NetworkPolicy),要新建 `clusters/kind-p2a.yaml`(disableDefaultCNI)+ 裝 Calico。
 - lab 檔位置:`portfolio/k8s/manifests/`(ingress-demo/、ingress-lab/ 兩份都在 repo)。
+- (2026-07-14)bastion 的 kind 叢集(context `kind`)也有完整 shop 場景:shop-api/shop-web 各 2/2、shop-ingress(host shop.com)、ingress-nginx controller Running。chunk 2 補做兩台機器都能跑。
 
 ## 跨機器同步(git)
 

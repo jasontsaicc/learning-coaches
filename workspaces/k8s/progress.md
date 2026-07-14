@@ -7,14 +7,14 @@
 
 ## Meta
 
-- session_count: 14
+- session_count: 15
 - last_weekly_review: 10
-- last_session_date: 2026-07-09
+- last_session_date: 2026-07-14
 - warm_up_classification: mid(有地圖形狀,缺演員名字;P0 剛好,不加速)
 
 ## Current Session breakpoint
 
-P2a, step C, chunk 3 (NetworkPolicy), next: 開場先補 chunk 2 選做 30 秒(`kubectl scale deploy shop-api --replicas=0` → curl `/api` 應回 503〔Endpoints 空=後端層 vs 404=規則層兩層對照〕,做完 `--replicas=1` 復原)→ 開 Calico p2a 叢集(kindnet 不支援 NetworkPolicy)→ 進 chunk 3 C 段,教材 `references/phase-2a-networking.md`(NetworkPolicy 段)。s15 另有:M2 三分類牌首發(拿 conntrack 07-09 到期重抽當開刀題,見 curriculum-plan §8)。
+P2a, step D 前置(chunk 2 補做 30 秒), next: 學員先答 why-first 預測題(已出題未答:`kubectl scale deploy shop-api --replicas=0` 後,叢集內 `curl -H "Host: shop.com" http://ingress-nginx-controller.ingress-nginx.svc.cluster.local/api` 回幾?為何不是 404?正解:503=規則層有接但 Endpoints 空、是後端層在說話;404=規則層沒接)→ 跑指令驗證 → `--replicas=1` 復原 → 建 `clusters/kind-p2a.yaml`(disableDefaultCNI)、down p0 / up p2a、裝 Calico → chunk 3 C 段,教材 `references/phase-2a-networking.md` C-3。s16 A 段:cap 2 張、過期+interval 小者優先(07-11 兩張 +2 天口頭卡最急;07-17 有 conntrack 兩個詞+分工句、dry-run 精準版、三分類家族卡)。s15 pacing 訊號:學員趕收工、輸出推兩次即收、兩卡皆未全過 → s16 開場少考,快進 hands-on。
 
 ## Phase status
 
@@ -36,10 +36,10 @@ Weak-topic flags: 無(至今沒有帶 flag 過 gate 的紀錄)。
 - P1 probe(liveness vs readiness): high (s6;判斷句「would a restart fix this?」已多次過)
 - P1 Deployment/rollout: high (s6)
 - P1 resource/QoS/OOM(可壓縮 vs 不可壓縮): high (s10)
-- P2a Service/kube-proxy/DNAT/conntrack/CoreDNS 全鏈: high (s10 二度無鷹架冷測封印)
+- P2a Service/kube-proxy/DNAT/conntrack/CoreDNS 全鏈: high (s10 二度無鷹架冷測封印;s15 注意:規則寫手一度答成 kubelet,鷹架後撈回 kube-proxy)
 - P2a Ingress(規則 vs controller、L7 純字串比對): med (s14;結果預測準、why 第一輪講不出 = W1 隱性會,gate 已過但精度待固化)
 - L4 vs L7 判準(讀不讀 HTTP 內容): med (s14;07-06 坑,07-09 到期)
-- conntrack 精度(table full 新舊連線): med (s11;精度掉過一次)
+- conntrack 精度(table full 新舊連線): med (s15 重抽沒過:三分類經思想實驗後自答「狀態」✅,但去程=目的地/回程=來源 四輪未自產、答案直給;07-17 只考兩個詞+分工句)
 - DNS 排障第一刀(先用 FQDN 二分): med (s13;需鷹架)
 
 ## Scorecard history
@@ -71,8 +71,10 @@ Weak-topic flags: 無(至今沒有帶 flag 過 gate 的紀錄)。
   - 正解一句話:封包不去 ClusterIP;出發地本機 kernel 照 kube-proxy 寫的規則做 DNAT,把目的地換成 Endpoints 名單裡的真 Pod IP。06-28 D 段 iptables-save 實體追鏈 + F 段無鷹架 teach-back PASS;06-29 WR 二度冷測 PASS=封印,推 +14。下次抽全鏈精度:誰寫 resolv.conf=kubelet、KUBE-SVC 機率 LB 怎麼挑 SEP、conntrack 回程反向改寫。
 - 2026-06-28 | 叢集 DNS 排障 | busybox nslookup NXDOMAIN 差點誤判 CoreDNS 壞 | 排障第一刀「先用 FQDN 二分伺服器壞 vs 發問端壞」沒長成肌肉 | unresolved | 3 | 2026-07-10 | 3
   - 正解:FQDN 通 → CoreDNS 沒事查 client/resolver;測叢集 DNS 用 netshoot 不用 busybox(musl search 處理不可靠);絕不因 nslookup 失敗就重啟 CoreDNS。07-01 抽考層級混淆(把 conntrack 拉進 DNS 題);07-07 提早再測第一刀一時忘記、給梯子後定位對 → 口頭型+需鷹架,拉回近期。
-- 2026-07-03 | dry-run 兩層 + Service port | `--dry-run=client` 綠燈騙人;port vs targetPort 靜默不通 | client 只做本機淺檢查;strict decoding 在 API Server(server 端) | unresolved | 3 | 2026-07-09 | 2
-  - 正解:驗 YAML 用 `--dry-run=server`;port=門牌、targetPort=container 實際聽的 port,填錯=DNAT 送到沒人聽的 port→connection refused。07-06 抽考半過:client=本機查語法✅,但 server dry-run 答成「走完 etcd 整個流程」=第三次在 etcd 角色滑掉(已釘:審查在櫃檯、落帳才算數;server dry-run=審完不落帳),拉近期重抽「停在哪之前」。
+- 2026-07-03 | dry-run 兩層 + Service port | `--dry-run=client` 綠燈騙人;port vs targetPort 靜默不通 | client 只做本機淺檢查;strict decoding 在 API Server(server 端) | unresolved | 3 | 2026-07-17 | 3
+  - 正解:驗 YAML 用 `--dry-run=server`;port=門牌、targetPort=container 實際聽的 port,填錯=DNAT 送到沒人聽的 port→connection refused。07-06 抽考半過:client=本機查語法✅,但 server dry-run 答成「走完 etcd 整個流程」=第三次在 etcd 角色滑掉(已釘:審查在櫃檯、落帳才算數;server dry-run=審完不落帳)。07-14 重抽半過:「不會碰 etcd」站住(三滑後首次)✅,但「停在哪一步」精準版沒自收、etcd 三分類(=資料)未自答即喊繼續,教練補完。07-17 只收精準版。
+- 2026-07-14 | 規則/狀態/資料 三分類(W2 家族 pattern 卡,M2 追蹤用) | conntrack 初分類答「規則」;etcd 分類未自答 | 「事先寫好放著 vs 流量跑過才長出 vs 被查的名單」判準沒長成反射 | unresolved | 3 | 2026-07-17 | 1
+  - 判準:規則=靜態宣告(iptables 規則、Ingress 物件、nginx.conf);狀態=runtime 記憶(conntrack);資料=被查名單(Endpoints、etcd 內容)。思想實驗:零流量的 node,iptables 規則在(kube-proxy 事先寫好)、conntrack 空。家族三連過才封印;s15 counter 0/3(conntrack 需鷹架、etcd 未自答)。
 - 2026-07-06 | L4 vs L7 | 記成場景標籤(叢集內=L4、外部=L7),信封題連卡兩次 | 本質=轉發決定需要讀到哪層資訊(信封 IP+port vs 拆信讀 Host/path) | unresolved | 3 | 2026-07-09 | 1
   - 正解:唯一判準「轉發決定需不需要讀 HTTP 內容?」;關鍵例:shop.com/ 與 /api 信封完全相同,不拆信物理上不可能分流=Ingress 存在理由;遷移:ALB(L7) vs NLB(L4) 同判準。
 - 2026-07-07 | Ingress YAML schema | `backend.service` 寫成字串 + `pathType: prefix` 小寫;client dry-run 又給假安心 | service 是 object 型別;enum 大小寫敏感;decode 錯擋在第一個 | unresolved | 3 | 2026-07-10 | 1
@@ -88,9 +90,10 @@ Weak-topic flags: 無(至今沒有帶 flag 過 gate 的紀錄)。
 
 - mistake:YAML-validation | mistake | 7 | 2026-06-30(過期)| active
 - mistake:ImagePullBackOff | mistake | 7 | 2026-07-03(過期;07-09 已重抽 2/3,補「node 出網 i/o timeout」那類即可)| active
-- mistake:dry-run-兩層 | mistake | 3 | 2026-07-09(過期;s15 M2 三分類牌開刀題)| active
+- mistake:dry-run-兩層 | mistake | 3 | 2026-07-17(s15 半過:etcd 不碰✅,停在哪步精準版沒自收)| active
+- mistake:三分類-家族卡 | mistake | 3 | 2026-07-17(s15 首發 counter 0/3)| active
 - mistake:L4-vs-L7 | mistake | 3 | 2026-07-09(過期)| active
-- term:conntrack | term | 3 | 2026-07-09(過期;s15 M2 開刀題,見 term-registry)| active
+- term:conntrack | term | 3 | 2026-07-17(s15 沒過:分類「狀態」✅,兩個詞沒自產,見 term-registry)| active
 - mistake:probe-職責 | mistake | 7 | 2026-07-10 | active
 - mistake:DNS-排障第一刀 | mistake | 3 | 2026-07-10 | active
 - mistake:Ingress-YAML-schema | mistake | 3 | 2026-07-10 | active
