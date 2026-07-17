@@ -11,6 +11,8 @@
 
 **教學模式決定（S37，學生拍板）：轉 execution-heavy。** Phase 2 之後已無知識問題、只有執行問題；繼續 march 新 archetype = 餵已強的吸收肌肉、餓弱的輸出肌肉（drill 永遠是 A→H 最趕的最後一步）。改為「暫停新 archetype 幾場，插 Drill Gauntlet 純加壓 mock，把輸出習慣練到自動化」。學生自選首攻 **#1 結論不給論證**。詳見下方 [Execution-Heavy Mode]。
 
+**Sprint overlay 生效中（2026-07-17 起，詳見 curriculum-plan.md 的 Conditional Sprint overlay）：** 學員已投遞外部 consultant 職缺，等待邀約期間每場 drill 加兩層外皮 — (1) 元件收尾追問 AWS 服務映射 + Well-Architected 支柱詞彙；(2) 題目用產業客戶情境開場（半導體/製造/FSI/公部門，考 clarify 約束的 discovery 流程）。佇列與 execution-heavy 三指標不變。
+
 ---
 
 ## 五個 chronic 弱點與對治協議（按優先序）
