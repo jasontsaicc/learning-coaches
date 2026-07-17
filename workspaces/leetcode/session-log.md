@@ -43,3 +43,23 @@
 > ⏸️ Weekly Review 嚴重到期 (≥16 session 未做)，強烈建議下次優先補
 > ⏸️ Parked Feynman 債務 (Transfer Q2/Q3): #239 Sliding Window Maximum, #42 Trapping Rain Water, #11 Container With Most Water
 > ⏸️ Queued: Sliding Window 基礎題 #121 / #3 (workspace/14 有 brute) / #567 (workspace/15 到 Step E)
+
+## S18 收尾快照 (2026-07-14, verbatim)
+
+> ✅ Session 18 完成 (2026-07-14) — **#153 Find Minimum in Rotated Sorted Array** (Medium, P3, Binary Search 邊界變體)
+> **七步教學 flow 首次啟用** (teaching-elements.md 當日改版):第 0 步模式定位 → 第 1 步換個問法 → 第 2 步視覺化 → 第 3 步推導腳本 → 第 4 步手動模擬 → step D code + harness
+>
+> ✅ **solution.py 手打零 bug**, harness **19/19 green** (對比 #74 有 2 bug) — workspaces/leetcode/p3-binsearch-linkedlist/find-minimum-rotated/
+> ✅ tripwire 改機制:這題計時抓不到 O(n) (掃 10 萬太快) → 改用 `CountingList` 數 `__getitem__` 次數 (budget 100, BS 實測 ~34), 且 `__iter__` 直接 raise 擋掉 `min(nums)`。**計時失效時換可觀測代理指標**
+> ✅ **S17 的核心誤解當場打掉**: 學生自己講出「binary search 的前提是**能確定捨棄的那堆沒有答案**」(不是「array 要 sorted」) → one-liner-library 的 Binary Search 條目已修正
+> ✅ 學生自己抓到「沒旋轉 → 只有一段」的特例,並理解為何比 `nums[r]` 能零行特例吃掉它 (比 `nums[l]` 要多寫一行擋)
+> ✅ 「證人」論證:只比較一次卻能丟掉半邊,靠的是「第一段每個元素 > 第二段每個元素」的結構保證 → `nums[r]` 一人當全部人的證人
+>
+> 🟡 Step A 4 抽問: A1 半對 (拒絕誘餌 ✅ 但誤以為 `//` 也回 float) / A2 ❌ (只會複誦「index 所以 -1」, 給不出反例) / A3 ✅ / A4 未答 → **A2+A4 學生要求直接說明 = answer-debt, 3 天內白紙重考**
+> 🟡 `[5,6,7,1,2,3,4]` mid 誤標第一段 (機制對、標籤反), 靠矛盾點自行修正
+> 🔴 **學生自述最高價值弱點**:「`while` 加不加 `=`、`r=mid` 還是 `mid+1`,還不能直覺搞定」→ 已給配對規則口訣 (兩邊都跳 mid → `l<=r`;有一邊留 mid → `l<r`), 進 one-liner-library, 3 天後抽考
+> ❌ **Chunk 2 Transfer 未答** (學生喊停): #33 的 ① 迴圈條件用哪種 ② check 比 #153 多做什麼 → **下次開場先答**
+>
+> ⏭️ Next: ① #33 Transfer 兩問 (Chunk 2 gate) → step E 用 #33 驗收 ② +2 天 (2026-07-16) 白紙重寫 #153
+> 🔴 **Weekly Review 第 3 次順延** (逾期 18 sessions) — S19 前置, 不能再推
+> ⏸️ 舊債: #704 閉區間版 cold re-do / #74 complexity gate + step E / #84 stack cold re-do / 教 Yuki (#84+Car Fleet) / P0 Gate

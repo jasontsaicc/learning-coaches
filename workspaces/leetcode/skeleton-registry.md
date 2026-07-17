@@ -15,7 +15,7 @@
 | Variable sliding window | #3 只有 brute 半成品 | 3 | 2026-07-11 | active |
 | Monotonic deque | s8 #239 親手寫 12/12 | 7 | 2026-07-17 | active |
 | Monotonic stack | s13 #739 冷寫 100% | 7 | 2026-07-17 | active |
-| Binary search (index) | s16 #704 skeleton 首次冷寫 100%,**整題 cold re-do 未過** | 3 | 2026-07-11 | active |
+| Binary search (index) | s18 #153 手打**零 bug** 19/19 green(`l<r` + `r=mid` 邊界變體);s16 #704 skeleton 首次冷寫 100% 但 **`l<=r` 閉區間版 cold re-do 未過**;🟡 開閉區間配對規則需現場推導、非直覺 | 3 | 2026-07-17 | active |
 | Binary search (answer space) | 未做(#875 排程中)| — | — | not-learned |
 | Tree DFS (recursive) | 未學 | — | — | not-learned |
 | Tree/graph BFS (deque) | 未學 | — | — | not-learned |
