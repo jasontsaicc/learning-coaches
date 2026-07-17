@@ -133,6 +133,7 @@ Weak-topic flags: 無(至今沒有帶 flag 過 gate 的紀錄)。
 - (s41) | 工具選擇反射 | 量級沒估先丟 Bloom filter(幾百筆名單 set 就夠) | 「先估量級再選工具」反射缺;S24 開放題反射變體;S40 才練的 FP/FN 判斷沒先跑 | unresolved | 3 | 2026-07-13 | 0
 - (s42) | Interview habit | 卡住瞬間質疑題目正當性(「面試不會考吧」+「什麼面試會帶到這裡」,同場兩次) | 逃避家族新面具:攻擊題目而非跑機制;S36 放棄→S41 不確定→S42 質疑題目 | unresolved | 3 | 2026-07-14(每場 drill 即測) | 0
 - (s41) | Capacity | 1+2N≤30 解 N 喊「不太確定要怎麼算」 | capacity-freeze 家族:被式子外觀嚇退非不會算;拆解式已給,中斷未完成 | unresolved | 3 | 2026-07-14(S42 複測 🟡:自己算出 29 並 commit N=10+why;cost 量化喊「直接說明」由 coach 代打,未全過) | 0
+- (s43) | One-Liner: Session Revocation | 首次口頭抽考滑掉:LWW 覆蓋機制講得出(中文),英文一句組裝不出,喊「跳過」;fix 半句(blacklist 獨立 data class + in-memory + ~10s full pull)未產出 | 壓力下英文 retrieval + 「零件在、組裝不出貨」同款(S42) | unresolved | 3 | 2026-07-15 | 0
 - (s42) | Observability | SLI 標籤現場撈不出(「SLI 是我最不熟悉的」;lag、上次成功時間素材第一輪就自己講出) | 術語-概念未綁定;s39 標 high 複驗打臉 = 當場🟢≠留得住再一例;考試分數比喻重錨過 | unresolved | 3 | 2026-07-14 | 0
 - (s42) | Operational | 3AM page test 無法獨立組裝:「無法使用」「有立即性」交卷 = 症狀/事件/機制拆不開;pager/alarm/ticket 分層概念本身陌生 | 危險感沒機制家族 + 監控知識掛「救火」腳本不掛「設計收尾」腳本;句型模板+模範答案直接給,留沒留住下次換題複測 | unresolved | 3 | 2026-07-14(下次 drill 換題複測) | 0
 
