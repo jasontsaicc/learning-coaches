@@ -7,20 +7,28 @@
 
 ## Meta
 
-- session_count: 15
+- session_count: 16
 - last_weekly_review: 10
-- last_session_date: 2026-07-14
+- last_session_date: 2026-07-17
 - warm_up_classification: mid(有地圖形狀,缺演員名字;P0 剛好,不加速)
 
 ## Current Session breakpoint
 
-P2a, step D 前置(chunk 2 補做 30 秒), next: 學員先答 why-first 預測題(已出題未答:`kubectl scale deploy shop-api --replicas=0` 後,叢集內 `curl -H "Host: shop.com" http://ingress-nginx-controller.ingress-nginx.svc.cluster.local/api` 回幾?為何不是 404?正解:503=規則層有接但 Endpoints 空、是後端層在說話;404=規則層沒接)→ 跑指令驗證 → `--replicas=1` 復原 → 建 `clusters/kind-p2a.yaml`(disableDefaultCNI)、down p0 / up p2a、裝 Calico → chunk 3 C 段,教材 `references/phase-2a-networking.md` C-3。s16 A 段:cap 2 張、過期+interval 小者優先(07-11 兩張 +2 天口頭卡最急;07-17 有 conntrack 兩個詞+分工句、dry-run 精準版、三分類家族卡)。s15 pacing 訊號:學員趕收工、輸出推兩次即收、兩卡皆未全過 → s16 開場少考,快進 hands-on。
+**P2a chunk 3 NetworkPolicy,D 段 lab 做到 Step 3 收(2026-07-17)。** 叢集 `kind-k8s-coach-p2a`(Calico v3.28.2,podSubnet 192.168.0.0/16);frontend/backend/db 三層 + Service 已佈(labs/netpol-lab.yaml);`default-deny-all` 已 apply(labs/default-deny.yaml)。Step 3 分層實證已收:同一條 policy 兩種死法 — `curl http://db`=`Resolving timed out`(egress 53 被鎖,死在 DNS 層)vs `curl http://<podIP>:5678`=`Connection timed out`(跳過 DNS,死在連線層)。
+
+next(s17):
+1. **Weekly Review 觸發**(17-10≥7),取代正常 flow。WR6 三主題建議:NetworkPolicy default-deny(新)/ L4-vs-L7 判準(逾期+今日兩度失手)/ conntrack 分工句(未收)。
+2. WR 後接 Step 4:開 DNS 洞(規格:egress to `namespaceSelector` kube-system + `podSelector` k8s-app=kube-dns,ports UDP/TCP 53)→ 重測應變 `Connection timed out`(死法從 DNS 層移到連線層)→ Step 5 開業務洞(兩邊都要開,ingress+egress 各一張名單)→ Step 6 驗收矩陣。
+3. **chunk 3-2 語義三坑未教**(AND/OR 差一個 `-`、ingress/egress 兩張獨立名單、ipBlock),s16 因 pacing 砍掉,補在 Step 5 前。
+4. **叢集待辦**:`kind delete cluster --name k8s-coach-p0`(指令已給學員,未執行)。兩叢集共 6 node 把 4 核心吃爆 → p2a control-plane `container runtime is down` NotReady(worker×2 正常,lab 不受影響)。砍掉 p0 後 control-plane 應自癒。shop 場景 manifests 在 `portfolio/k8s/manifests/ingress-lab/`,capstone 規劃是搬到 p2a 重佈。
+
+⚠️ **s16 教練校準失誤三筆(不是學員的問題,寫下來防再犯)**:① 斷點明寫「開場少考、快進 hands-on」,實際整整一小時磨兩張複習卡 → 學員三度要求跳過。② 拿 chunk 4 未教內容(kubelet Ready 條件/CNI 合約)當 chunk 3 的 gate 題,學員答「不確定」是正確反應。③ session-log 教法備忘白紙黑字「學員偏好自己敲指令」,教練整堂搶鍵盤自己跑指令,學員當場糾正「要我自己裝才對」,並回頭要求「請說明前面做了什麼,前面是你做的,所以我不太瞭解」= 搶鍵盤直接造成理解斷層。s17 硬規則:**指令一律由學員敲,教練只給規格與判讀**;YAML 依 s13 慣例可給範本照打。
 
 ## Phase status
 
 - P0 心智模型: gate-passed(2026-06-22;legacy,pre-Examiner,coach 認證)
 - P1 核心物件 + 容器底層: gate-passed(2026-06-25;legacy,pre-Examiner,coach 認證)
-- P2a 網路深水區: in-progress(chunk 1 Service/kube-proxy/CoreDNS ✅、chunk 2 Ingress ✅;chunk 3 NetworkPolicy、chunk 4 CNI+封包全鏈路 未開)
+- P2a 網路深水區: in-progress(chunk 1 Service/kube-proxy/CoreDNS ✅、chunk 2 Ingress ✅〔s16 補完 scale=0→503 實證,全畢業〕;chunk 3 NetworkPolicy in-progress〔3-1 概念 ✅ 教完但 gate 未過、3-2 語義三坑未教、3-3 lab 做到 Step 3〕;chunk 4 CNI+封包全鏈路 未開,s16 已埋伏筆〔無 CNI 叢集 node NotReady / CoreDNS Pending vs hostNetwork 元件照跑〕)
 - P2b 儲存 + 權限: not-started
 - P3 調度 + 高並發 + 排障: not-started
 - P4 可觀測性工程: not-started
@@ -38,7 +46,8 @@ Weak-topic flags: 無(至今沒有帶 flag 過 gate 的紀錄)。
 - P1 resource/QoS/OOM(可壓縮 vs 不可壓縮): high (s10)
 - P2a Service/kube-proxy/DNAT/conntrack/CoreDNS 全鏈: high (s10 二度無鷹架冷測封印;s15 注意:規則寫手一度答成 kubelet,鷹架後撈回 kube-proxy)
 - P2a Ingress(規則 vs controller、L7 純字串比對): med (s14;結果預測準、why 第一輪講不出 = W1 隱性會,gate 已過但精度待固化)
-- L4 vs L7 判準(讀不讀 HTTP 內容): med (s14;07-06 坑,07-09 到期)
+- L4 vs L7 判準(讀不讀 HTTP 內容): **low** (s16 降級;同一天內兩度失手且形狀相同=**結論對、判準錯**:① ALB/NLB 題,內容映射全對〔NLB=TCP/UDP/static IP/fast、ALB=path/TLS/HTTP〕但**L4/L7 標籤整個貼反**;② NetworkPolicy 擋 `/admin` 題,結論「做不到」對但理由答「NetworkPolicy 是針對 namespace」=非機制,且與當堂剛教的「namespace 不做隔離」打架。兩次都是教練直給錨點〔fast=少做事=低層;ALB=Application=L7;from/to 欄位清單裡沒有 path〕→ **直給不算過,未封印**。s17 WR 用新情境冷測)
+- NetworkPolicy(白名單 + default-deny 翻轉 + 第四個引擎): 未評等 (s16 教完 3-1,gate 未過;學員親手實證「陌生 Pod 直連 db」與「同一 policy 兩種死法」)
 - conntrack 精度(table full 新舊連線): med (s15 重抽沒過:三分類經思想實驗後自答「狀態」✅,但去程=目的地/回程=來源 四輪未自產、答案直給;07-17 只考兩個詞+分工句)
 - DNS 排障第一刀(先用 FQDN 二分): med (s13;需鷹架)
 
@@ -54,6 +63,7 @@ Weak-topic flags: 無(至今沒有帶 flag 過 gate 的紀錄)。
 - 2026-06-25 | phase gate (P1, legacy) | 3/3 | 先跳結論要追問才補深度(連三堂同條) | 從 exit 0 反推「app 健康、被 probe 殺」 | coach
 - 2026-06-29 | weekly review (s10, tier 2) | 4/4 | 盲講控制流易漏中間棒次→五棒默數 | 封包全鏈無鷹架冷測 | coach(MTTR 當日未演練,carry 前測✅)
 - 2026-07-09 | step G (s14, tier 2) | 1/4 | 隱性會沒逼成顯性:結果預測準、why 講不出 | `/apiv2`→catch-all 那刀自己串對沒鷹架 | coach(原符號:原理🟡 機制✅ 自己的話🟡 MTTR🟡)
+- 2026-07-17 | A 段+chunk3 gate (s16, tier 2) | 1/4 | 判準/機制講不出:L4-L7 兩度結論對理由錯;分工句未收 | conntrack 去程/回程兩欄位**自產**(給框架不給答案,s15 直給後蒸發,今日一次推出) | coach(原理❌ 機制🟡 自己的話❌ MTTR 未演練。**本場信度低**:教練犯三錯〔過度抽考/考未教內容/搶鍵盤〕,低分含教練污染,不宜單獨採信,s17 WR 重測)
 
 ## Mistake Registry
 
@@ -75,13 +85,18 @@ Weak-topic flags: 無(至今沒有帶 flag 過 gate 的紀錄)。
   - 正解:驗 YAML 用 `--dry-run=server`;port=門牌、targetPort=container 實際聽的 port,填錯=DNAT 送到沒人聽的 port→connection refused。07-06 抽考半過:client=本機查語法✅,但 server dry-run 答成「走完 etcd 整個流程」=第三次在 etcd 角色滑掉(已釘:審查在櫃檯、落帳才算數;server dry-run=審完不落帳)。07-14 重抽半過:「不會碰 etcd」站住(三滑後首次)✅,但「停在哪一步」精準版沒自收、etcd 三分類(=資料)未自答即喊繼續,教練補完。07-17 只收精準版。
 - 2026-07-14 | 規則/狀態/資料 三分類(W2 家族 pattern 卡,M2 追蹤用) | conntrack 初分類答「規則」;etcd 分類未自答 | 「事先寫好放著 vs 流量跑過才長出 vs 被查的名單」判準沒長成反射 | unresolved | 3 | 2026-07-17 | 1
   - 判準:規則=靜態宣告(iptables 規則、Ingress 物件、nginx.conf);狀態=runtime 記憶(conntrack);資料=被查名單(Endpoints、etcd 內容)。思想實驗:零流量的 node,iptables 規則在(kube-proxy 事先寫好)、conntrack 空。家族三連過才封印;s15 counter 0/3(conntrack 需鷹架、etcd 未自答)。
-- 2026-07-06 | L4 vs L7 | 記成場景標籤(叢集內=L4、外部=L7),信封題連卡兩次 | 本質=轉發決定需要讀到哪層資訊(信封 IP+port vs 拆信讀 Host/path) | unresolved | 3 | 2026-07-09 | 1
+- 2026-07-06 | L4 vs L7 | 記成場景標籤(叢集內=L4、外部=L7),信封題連卡兩次 | 本質=轉發決定需要讀到哪層資訊(信封 IP+port vs 拆信讀 Host/path) | unresolved | 3 | 2026-07-20 | 3
   - 正解:唯一判準「轉發決定需不需要讀 HTTP 內容?」;關鍵例:shop.com/ 與 /api 信封完全相同,不拆信物理上不可能分流=Ingress 存在理由;遷移:ALB(L7) vs NLB(L4) 同判準。
+  - **07-17 同日兩度失手,形狀都是「結論對、判準錯」**(mastery 降 low)。① ALB/NLB 題:功能映射全對但 L4/L7 **標籤貼反**。錨點已給(未驗收):**自己寫的 "fast" 就是證明 — 快=做的事少=讀得淺=層數低=L4**;**A**LB=**A**pplication=應用層=L7、**N**LB=**N**etwork=L4,**AWS 把層數寫在名字裡**。② NetworkPolicy 擋 `/admin` 題:答「做不到」對,理由「NetworkPolicy 是針對 namespace」錯。錨點已給(未驗收):**`from`/`to` 底下能寫的欄位只有 podSelector / namespaceSelector / ipBlock / ports+protocol — 清單裡沒有 path、沒有 Host、沒有任何 HTTP 東西,因為它從沒拆過信**。兩次錨點皆教練直給 → 不算過。**s17 WR 用第三種新情境冷測(禁用 ALB/NLB 與 /admin 兩題)**。
+- 2026-07-17 | NetworkPolicy 出廠全通 | why-first 預測「陌生 tmp Pod 連不到 db」→ 實測**連得到**(回 `db`) | k8s 出廠預設全通、namespace 只是邏輯分組不做隔離(P1 已釘過、當堂教練又粗體講過 40 分鐘,仍預測錯) | unresolved | 3 | 2026-07-20 | 0
+  - 正解:出廠任何 Pod 可連任何 Pod、跨 ns 亦然;NetworkPolicy=白名單宣告,**一旦有 policy 選中該 Pod,該方向即從全通翻轉成 default-deny**。生產起手式=每個 ns 先上空白名單(`podSelector: {}` + `policyTypes: [Ingress, Egress]` + 零 rule)再逐條開洞。**此條學員親手撞出(cheap→貴的轉換點),留存預期高,3 天後只做確認性快抽**。
+- 2026-07-17 | default-deny 後的分層(DNS 層 vs 連線層) | 只答「連線不到」,未分辨死在哪一層 | 層級混淆家族(同 s11 把 conntrack 拉進 DNS 題、06-28 排障第一刀) | unresolved | 3 | 2026-07-20 | 0
+  - 正解:`curl http://db` 有先後兩步 —— ① 問 CoreDNS(需 egress UDP/TCP **53**)② 建 TCP 連線。default-deny 鎖 egress **連 53 一起鎖**,所以死在第 ① 步,第 ② 步沒機會發生。實證(s16 親手):`curl http://db` → `curl: (28) **Resolving** timed out`;`curl http://192.168.46.66:5678`(餵 IP 跳過 DNS)→ `curl: (28) **Connection** timed out`。**同一條 policy 兩種死法,差別只在需不需要問名字**。prod 陷阱:app log 噴 `could not resolve host` → 全隊衝去查 CoreDNS,但 CoreDNS 好好的,是 policy 封了「去問路的那條路」。故 default-deny 第一個洞永遠是 DNS。
 - 2026-07-07 | Ingress YAML schema | `backend.service` 寫成字串 + `pathType: prefix` 小寫;client dry-run 又給假安心 | service 是 object 型別;enum 大小寫敏感;decode 錯擋在第一個 | unresolved | 3 | 2026-07-10 | 1
   - 正解:一律 `--dry-run=server`;讀 `ValidationError(路徑)` / `cannot unmarshal ... type X` 定位;對照同檔已寫對的另一條規則照抄結構。
-- 2026-07-07 | Ingress 404 排障 | 差點改沒壞的規則;真兇=被 Ctrl-C 打斷的半死 port-forward 回假 404 | 規則層全綠時兇手在「你測試所經過的那層」 | unresolved | 2 | 2026-07-11 | 2
+- 2026-07-07 | Ingress 404 排障 | 差點改沒壞的規則;真兇=被 Ctrl-C 打斷的半死 port-forward 回假 404 | 規則層全綠時兇手在「你測試所經過的那層」 | parked(2026-07-16 ROI 篩:Q1 半 yes,但「port-forward 半死」是 lab 夾具產物、prod 不長這樣;同一判準已三種問法重問三次=題目壞掉。判準留檔備查,不再抽) | - | - | 3
   - 正解:404 先分層(規則層 vs 後端層);port-forward 是會抖的除錯夾具,不可信就換乾淨再下結論;任何猜測(含教練的)先驗證再採信。07-09 G 段英文重測:方向對但「規則全綠後兇手在哪」連卡兩次、誤猜 nginx-ingress 本身 → 純口頭沒重現,+2 天格重抽。
-- 2026-07-09 | no-Host→404 的 why | 結果預測對,但講不出「curl 自動拿 URL 主機名當 Host」那個字 | 會用/會預測 ≠ 會講 why(W1 隱性會) | unresolved | 2 | 2026-07-11 | 1
+- 2026-07-09 | no-Host→404 的 why | 結果預測對,但講不出「curl 自動拿 URL 主機名當 Host」那個字 | 會用/會預測 ≠ 會講 why(W1 隱性會) | resolved(2026-07-16 ROI 篩:Q1=no,curl 填 header 是 tool trivia,面試不考;學員答「沒帶 domain → Ingress 對應不上」= 機制正確,教練題目壞掉不是學員沒懂。結案) | - | - | 1
   - 正解三步:① curl 無 -H → Host 自動填 URL 主機名 ② 那串長 DNS ≠ `shop.com` ③ 字串比不上→無規則接→404。對照 `/apiv2`:Host 對但 Prefix 以斜線切段,`/apiv2`≠`/api` 段 → 掉 `/` catch-all → web。口頭型+需鷹架,+2 天格。
 
 ## Spaced-repetition queue
@@ -90,16 +105,17 @@ Weak-topic flags: 無(至今沒有帶 flag 過 gate 的紀錄)。
 
 - mistake:YAML-validation | mistake | 7 | 2026-06-30(過期)| active
 - mistake:ImagePullBackOff | mistake | 7 | 2026-07-03(過期;07-09 已重抽 2/3,補「node 出網 i/o timeout」那類即可)| active
-- mistake:dry-run-兩層 | mistake | 3 | 2026-07-17(s15 半過:etcd 不碰✅,停在哪步精準版沒自收)| active
-- mistake:三分類-家族卡 | mistake | 3 | 2026-07-17(s15 首發 counter 0/3)| active
-- mistake:L4-vs-L7 | mistake | 3 | 2026-07-09(過期)| active
-- term:conntrack | term | 3 | 2026-07-17(s15 沒過:分類「狀態」✅,兩個詞沒自產,見 term-registry)| active
+- mistake:dry-run-兩層 | mistake | 3 | 2026-07-20(s16 未口頭抽,但**真場景實用一次**:自寫 default-deny 用 `--dry-run=server` 抓到自己的 apiVersion 錯並讀懂 `no matches for kind ... in version` → 工具已進肌肉,精準版仍未收)| active
+- mistake:三分類-家族卡 | mistake | 3 | 2026-07-20(s15 首發 counter 0/3;s16 未抽,pacing 讓位)| active
+- mistake:L4-vs-L7 | mistake | 3 | 2026-07-20(**s16 同日兩度失手、mastery 降 low**;錨點兩次皆直給=不算過。s17 WR 用第三種新情境冷測)| active
+- mistake:NetworkPolicy-出廠全通 | mistake | 3 | 2026-07-20(s16 預測錯→**親手撞出**,留存預期高,只做確認性快抽)| active
+- mistake:default-deny-分層(DNS vs 連線)| mistake | 3 | 2026-07-20(s16 親手實證兩種 timeout;層級混淆家族)| active
+- term:conntrack | term | 7 | 2026-07-24(**s16 兩個詞過**:給「信封只有兩欄位」框架後一次自產去程=目的地/回程=來源,推 +7。**分工句未收**,s17 補;另注:s15 直給後 3 天完全蒸發,此卡是「給框架 vs 給答案」的對照組證據)| active
 - mistake:probe-職責 | mistake | 7 | 2026-07-10 | active
 - mistake:DNS-排障第一刀 | mistake | 3 | 2026-07-10 | active
 - mistake:Ingress-YAML-schema | mistake | 3 | 2026-07-10 | active
 - term:(07-10 到期各卡) | term | - | 2026-07-10 | active(見 term-registry.md)
-- mistake:404-排障-port-forward | mistake | 2 | 2026-07-11 | active
-- mistake:no-Host-404-why | mistake | 2 | 2026-07-11 | active
+<!-- 2026-07-16 移除兩張 +2 天口頭卡(404-排障-port-forward=parked、no-Host-404-why=resolved):過 ROI 篩不過 Q1,見 teaching-elements.md「ROI 篩」。 -->
 - mistake:ClusterIP-全鏈(謎題B)| mistake | 14 | 2026-07-13 | active(resolved,考精度)
 
 ## Curiosity branch

@@ -1,0 +1,12 @@
+# P2a chunk 3-4: NetworkPolicy + CNI。kindnet 不支援 NetworkPolicy,關掉預設 CNI 換 Calico。
+# podSubnet 對齊 Calico manifest 的預設 IPPool,免得還要 patch IPPool。
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+name: k8s-coach-p2a
+networking:
+  disableDefaultCNI: true
+  podSubnet: "192.168.0.0/16"
+nodes:
+  - role: control-plane
+  - role: worker
+  - role: worker
