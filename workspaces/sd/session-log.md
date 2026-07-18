@@ -13,6 +13,15 @@
      - docs/curriculum-roadmap.md、docs/planning-review.md → workspaces/sd/archive/pre-migration/
      - sd-coach skill 本體         → skills/sd-coach/(curriculum 詳文=references/curriculum-detail.md) -->
 
+## S44(2026-07-18,清帳場 1/2:Sprint re-plan 拍板 + 兩球複測 + migration 詞彙插課)
+
+- **場前拍板 Sprint re-plan**(詳 curriculum-plan.md):目標 AWS 職缺面試(尚未投遞,修正原「已投遞」誤記);廢 Gauntlet 3 連退出條件(S40-S43 零進展=進度緩慢根源),Tier 1 剩 5 題 mock 化,Tier 2 只走 pattern-map,parked PoC 全砍。學生當日累:推理准中文,英文只收最小單位。
+- **球 1 Session Revocation 複測**:LWW 標籤撈出(S41 純標籤債半還);殭屍時間線給填空仍組不出→「直接說」收場(棄權家族第 3 筆:S36 放棄/S42 太拖/S44 卡太久);模範時間線+全景/特寫兩張架構圖+Real-World Grounding(CRL/JWT/feature-flag 同構)給畢。tombstone 新詞入 LWW 對照表待建清單。**英文 one-liner 債已還**:自組 "absence can't propagate → make revoked a positive record" 句,比 library 原句通用,納庫,07-21 再抽才 resolve。
+- **球 2 3AM page test 換題複測(URL Shortener)**:零嘗試喊「直接說」→ 拒給(S42 已直接給過,同題連給兩次=餵棄權迴圈),縮到三空白填空 → **最小單位過**(<99.9% / 5min / user-facing broken link)。dead man's switch(寫入路歸零)/ticket 兩例/dashboard 3 圖由 coach 給,標未複測、mock 內建考。unprompted-ops 連續計數仍 0。
+- 過程觀察:球 2 投出瞬間問「還在複習嗎」= S42 質疑題目家族同位置動作,口頭標記不擴大。
+- **Migration 詞彙插課**(純吸收半場,不成 chunk):3 phases(Assess/Mobilize/Migrate&Modernize)、7 Rs 決策樹、landing zone/Control Tower、產業約束鉤(FSI residency/半導體 IP)。兩句英文 one-liner 入庫待抽。之後靠 mock 外皮重複。
+- 下場 S45 = 清帳場 2/2:WR5 T2/T3 + 過期卡 sweep + artifact audit 收帳 → mock #1 Notification System。
+
 ## S42(2026-07-11,WR5 Topic 1 收尾:3AM page test 直接給)
 
 - 球 1 capacity 🟡(29、N=10 自解,cost 代打)、球 2 殭屍免疫 ✅(append-only、獨立寫入路徑)。

@@ -11,9 +11,9 @@
 
 ## Meta
 
-- session_count: 43 <!-- 2026-07-18 對帳修正:原停在 41,但 S42(2026-07-11 中斷存檔)與 S43(2026-07-17 口頭抽考,git e04a335)已發生 -->
-- last_weekly_review: 33 — ⚠️ WR5 於 S41 開跑未完成(Topic 1/3),trigger 持續成立,下場續跑;完成時才把本欄更新為當時 session_count
-- last_session_date: 2026-07-17
+- session_count: 44
+- last_weekly_review: 33 — ⚠️ WR5 於 S41 開跑未完成(Topic 1/3),trigger 持續成立,S45 收 Topic 2/3;完成時才把本欄更新為當時 session_count
+- last_session_date: 2026-07-18
 - warm_up_classification: (standalone 時期未記錄;學員已 P3,Step 0 模式預設 Exploration)
 
 ## Current Session breakpoint
@@ -22,11 +22,14 @@
 
 **2026-07-18 Sprint re-plan 生效(curriculum-plan.md [Sprint re-plan]):目標 AWS 職缺面試,3 連退出條件廢除,三指標改為 mock 評分維度。**
 
-下一場(S44)開場順序 — 清帳場 1/2:
-1. One-Liner 複測:S43 滑掉的 Session Revocation(英文組裝)+ 抽 2 條舊句。
-2. **3AM page test 換題複測(直接給的留沒留住)**:URL Shortener 或 Rate Limiter,學生自己跑 page 句型 "Page me when [SLI] > [threshold] for [duration], because [harm]" + page/ticket/dashboard 分層。
-3. 續 WR5(quick-fire 壓縮):Topic 2 Security & Auth(OAuth/JWT/session 廣度盲測,完整題目敘述開場)→ Topic 3 Unique ID Generator → 8 張過期卡 sweep → artifact audit → 收帳(last_weekly_review 更新)。
-4. 塞得下就開 migration 詞彙插課(7 Rs、Assess/Mobilize/Migrate、landing zone,半場);塞不下排清帳場 2/2。
+**S44 已收(2026-07-18,清帳場 1/2;敘事見 session-log.md)。無中斷存檔。**
+
+下一場(S45)= 清帳場 2/2:
+1. One-Liner 抽考:Session Revocation 自組新句(07-21 起到期,過才 resolve)+ migration 兩新句(7 Rs、landing zone)+ 抽 1 舊句。
+2. 續 WR5:Topic 2 Security & Auth(OAuth/JWT/session 廣度盲測,完整題目敘述開場)→ Topic 3 Unique ID Generator → 8 張過期卡 sweep → artifact audit → 收帳(last_weekly_review 更新)。
+3. 收完 → **mock #1:Day 33 Notification System**(產業情境開場 + 4-step + AWS 映射 + 三指標計分;3AM page test 四格內建考:dead man's switch/ticket/dashboard 模範答案 S44 給過,這裡驗留存)。
+
+三指標 S44 讀數:argument 🟡(page 句最小單位完整;兩球開局皆裸/棄)/ ops ❌(最小單位過但全程 max scaffold,不算 unprompted;第 6+ 記)/ capacity 未測。連續計數:全部 0。
 
 清帳收完 → 主衝刺:Tier 1 剩 5 題(Day 33 Notification System 起)每題一場 mock(產業情境 + 4-step + AWS 映射),三指標當評分維度續盯:S42 讀數 argument 🟡 / ops ❌(第 6 記)/ capacity 🟡。Gauntlet 專門 drill 與 parked PoC 全部取消。
 
@@ -63,7 +66,7 @@ Weak-topic flags: 無(至今沒有帶 flag 過 gate 的紀錄)。
 - Rate Limiting & Circuit Breaker (Day 23-24): high (s40)— CB 三狀態 S28 resolved 後又掉,S40 配電箱重焊,續盯
 - Observability (Day 25): high (s39)— 知識到位、drill 輸出習慣待練
 - Bloom Filter & Gossip (Day 26): high (s40)— FP/FN 嚴重性換情境重測過=真修好
-- Multi-Region Session Store design (Phase 2 Gate 題): med (s42)— WR5 盲測未能獨立產出(誠實降級);clarify 強、核心軸 commit 對,機制層需逐格導引;S42 收尾:殭屍免疫✅、capacity 🟡、3AM page test 直接給,ops 組裝待複測
+- Multi-Region Session Store design (Phase 2 Gate 題): med (s44)— WR5 盲測未能獨立產出(誠實降級);S44 殭屍時間線複測仍需模範答案,但 LWW 標籤已撈出、英文 one-liner 自組過;革命尚未成功
 - URL Shortener (Day 27-28): high (s35)— S34 Drill 8/9 + S35 PoC 全綠(50 萬碼 0 碰撞 + -race 零警告)
 - Unique ID Generator (Day 29-30): high (s36)— PoC(bit packing + clock skew 偵測)park
 - Distributed Rate Limiter (Day 31-32): high (s40)— 設計知識到位;S40 Gauntlet 暴露輸出習慣病灶
@@ -101,7 +104,7 @@ Weak-topic flags: 無(至今沒有帶 flag 過 gate 的紀錄)。
      無卡的設 3 天(2026-07-13)。unresolved-session-count = 40 - 建立 session(近似;≥5 依 engine
      Priority Override 置頂,step A 每堂上限內逐步清)。 -->
 
-### Live(unresolved,30 筆)
+### Live(unresolved,31 筆)
 
 - (s4) | Load Balancer | "least robin":RR 與 Least Connections 名字揉成一個 | 演算法「行為」與「名字」沒綁定 | unresolved | 3 | 2026-07-11 | 36
 - (s4) | Load Balancer | 以為 8.8.8.8 是 ISP DNS(是 Google Public DNS) | trivia 型;冷知識未錨定 | unresolved | 3 | 2026-07-11 | 36
@@ -130,15 +133,19 @@ Weak-topic flags: 無(至今沒有帶 flag 過 gate 的紀錄)。
 - (s40) | Interview habit (Step 1) | 跳過 clarify 直接報解法 + LB 亂套進 rate limiter(recency bias) | Step 1 未成硬關卡 | unresolved — 下次 drill 開場自己跑完 clarify 才准進 Step 2 | 3 | 2026-07-11(每場 drill 即測) | 0
 - (s40) | Interview habit (cost 格) | trade-off 的 cost 格填「low」(初階 tell) | 沒想過營運代價;cost 格禁用低/高,換具體會咬人的東西 | unresolved(原 🟡 Improving:L4 vs L6 對照演示過) | 3 | 2026-07-11(每場 drill 即測) | 0
 - (s40) | Interview habit (unprompted-ops) | 沒主動收尾監控(第 5 次:S26/30/34/36/40) | 監控收尾未成反射;3AM page test 已焊進框架當第 5 步硬關卡 | unresolved | 3 | 2026-07-11(每場 drill 即測) | 14
-- (s41) | Multi-Region Session Store | 「兩區互抄會有同步的問題」講到這就卡,一致性妥協無法量化 | 危險感沒機制(S31/S36 同款);公式「傷害=窗口×人口×症狀」已教,換場景複測 | unresolved | 3 | 2026-07-13 | 0
+- (s41) | Multi-Region Session Store | 「兩區互抄會有同步的問題」講到這就卡,一致性妥協無法量化 | 危險感沒機制(S31/S36 同款);公式「傷害=窗口×人口×症狀」已教,換場景複測 | unresolved | 3 | 2026-07-21 | 0
+  - S44 複測:殭屍時間線給填空結構仍組不出(「時間差所以被覆蓋」半句)→ 直接說收場;模範時間線+架構圖已給,下次換場景測(interval 重置)
 - (s41) | 分散式術語 | last-writer-wins 不認識(殭屍機制推得動,純標籤缺) | 術語-概念未綁定;LWW/tombstone 對照表待建 | unresolved | 3 | 2026-07-13 | 0
 - (s41) | Interview habit | 裸結論×2:「多一種 block 黑名單嗎?」問句丟球 +「bloom filter」兩字答案 | 頭號主線;同場後半自修正(in-memory、pull 兩句完整) | unresolved | 3 | 2026-07-11(每場 drill 即測) | 0
 - (s41) | 工具選擇反射 | 量級沒估先丟 Bloom filter(幾百筆名單 set 就夠) | 「先估量級再選工具」反射缺;S24 開放題反射變體;S40 才練的 FP/FN 判斷沒先跑 | unresolved | 3 | 2026-07-13 | 0
 - (s42) | Interview habit | 卡住瞬間質疑題目正當性(「面試不會考吧」+「什麼面試會帶到這裡」,同場兩次) | 逃避家族新面具:攻擊題目而非跑機制;S36 放棄→S41 不確定→S42 質疑題目 | unresolved | 3 | 2026-07-14(每場 drill 即測) | 0
 - (s41) | Capacity | 1+2N≤30 解 N 喊「不太確定要怎麼算」 | capacity-freeze 家族:被式子外觀嚇退非不會算;拆解式已給,中斷未完成 | unresolved | 3 | 2026-07-14(S42 複測 🟡:自己算出 29 並 commit N=10+why;cost 量化喊「直接說明」由 coach 代打,未全過) | 0
-- (s43) | One-Liner: Session Revocation | 首次口頭抽考滑掉:LWW 覆蓋機制講得出(中文),英文一句組裝不出,喊「跳過」;fix 半句(blacklist 獨立 data class + in-memory + ~10s full pull)未產出 | 壓力下英文 retrieval + 「零件在、組裝不出貨」同款(S42) | unresolved | 3 | 2026-07-15 | 0
+- (s43) | One-Liner: Session Revocation | 首次口頭抽考滑掉:LWW 覆蓋機制講得出(中文),英文一句組裝不出,喊「跳過」;fix 半句(blacklist 獨立 data class + in-memory + ~10s full pull)未產出 | 壓力下英文 retrieval + 「零件在、組裝不出貨」同款(S42) | unresolved | 3 | 2026-07-21 | 0
+  - S44 複測過:自組新句(absence can't propagate → positive record)納庫;07-21 再抽一次過才 resolve(當場🟢≠留得住規矩)
 - (s42) | Observability | SLI 標籤現場撈不出(「SLI 是我最不熟悉的」;lag、上次成功時間素材第一輪就自己講出) | 術語-概念未綁定;s39 標 high 複驗打臉 = 當場🟢≠留得住再一例;考試分數比喻重錨過 | unresolved | 3 | 2026-07-14 | 0
-- (s42) | Operational | 3AM page test 無法獨立組裝:「無法使用」「有立即性」交卷 = 症狀/事件/機制拆不開;pager/alarm/ticket 分層概念本身陌生 | 危險感沒機制家族 + 監控知識掛「救火」腳本不掛「設計收尾」腳本;句型模板+模範答案直接給,留沒留住下次換題複測 | unresolved | 3 | 2026-07-14(下次 drill 換題複測) | 0
+- (s44) | Interview habit(棄權) | 「直接說」×2:球 1 時間線填空後棄權、球 2 零嘗試就喊(家族第 3 筆:S36 放棄→S42 太拖→S44) | 逃避家族:壓力下棄推導;球 2 拒給後縮三空白即過 = 能力在,是啟動能量問題,不是知識 | unresolved | 3 | 每場 drill 即測 | 0
+- (s42) | Operational | 3AM page test 無法獨立組裝:「無法使用」「有立即性」交卷 = 症狀/事件/機制拆不開;pager/alarm/ticket 分層概念本身陌生 | 危險感沒機制家族 + 監控知識掛「救火」腳本不掛「設計收尾」腳本;句型模板+模範答案直接給,留沒留住下次換題複測 | unresolved | 3 | mock #1 內建考 | 0
+  - S44 換題複測(URL Shortener):零嘗試喊直接說→拒給→縮三空白後 page 句最小單位過;dead man's switch/ticket/dashboard 三格仍 coach 給,mock #1 驗留存
 
 ### Resolved history(66 筆,遷移照錄)
 
@@ -175,7 +182,7 @@ Weak-topic flags: 無(至今沒有帶 flag 過 gate 的紀錄)。
 
 ## Domain registries
 
-- `one-liner-library.md`(同目錄):面試一句話庫,21 條。抽考跟 Weekly Review quick-fire 走(headline first),滑掉 → 開 registry 條目。
+- `one-liner-library.md`(同目錄):面試一句話庫,23 條。抽考跟 Weekly Review quick-fire 走(headline first),滑掉 → 開 registry 條目。
 - `rpg-state.md`(同目錄):RPG 狀態(title/streak/achievements 16/25/last story summary)。非間隔複習型,規則見 narrative hook。
 - 其他 coach 讀取檔:`session-log.md`(session 敘事,S37-S40 自 standalone 遷入)、`coaching-brief.md`(作戰手冊,開場必讀)、`curriculum-plan.md`(戰略層,advisory)、`pattern-map.md`(題目=pattern 組裝對照)。
 
