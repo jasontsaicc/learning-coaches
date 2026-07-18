@@ -60,7 +60,7 @@ learning-coaches/
 │   │   └── evals/                           # behavioral evals + fixtures
 │   └── cloud-architect-coach/
 │       ├── SKILL.md
-│       ├── references/                      # 9 hook files + subject material
+│       ├── references/                      # 7 hook files + subject material
 │       │                                    #   (gap-scan-aws-networking, case-bank,
 │       │                                    #    linux-interview-bank)
 │       └── evals/                           # behavioral evals + fixtures (no scripts)
