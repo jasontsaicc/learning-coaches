@@ -47,9 +47,9 @@ Suggested gate task:抽一個 CASE(migration 類)加一個 CASE(hybrid-networkin
 
 ## Sidecar: Linux Interview Bank Gate
 
-Pass condition:Priority-0 兩題與 Core-20 全部答得到 mechanism layer(講得出底下怎麼動,不是
-背名詞);其中兩題 Priority-0(IRQ/softirq、static vs shared library)要間隔重測兩次,兩次都
+Pass condition:Priority 0 兩題與 Core 20 全部答得到 mechanism layer(講得出底下怎麼動,不是
+背名詞);其中兩題 Priority 0(IRQ/softirq、static vs shared library)要間隔重測兩次,兩次都
 達 mechanism layer 才算收。
 
-Suggested gate task:Priority-0 兩題間隔重問(不是連兩次),Core-20 隨機抽問,聽學員這次是不是
+Suggested gate task:Priority 0 兩題間隔重問(不是連兩次),Core 20 隨機抽問,聽學員這次是不是
 自己講出機制、而不是想起上次被講過的答案。

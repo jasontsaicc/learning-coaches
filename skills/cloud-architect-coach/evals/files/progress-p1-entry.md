@@ -11,7 +11,7 @@
 
 ## Current Session breakpoint
 
-(none — 上次 session 完整收尾) next: P1 Networking Gap-Scan,gap-scan 快問快答起手。
+(none,上次 session 完整收尾) next: P1 Networking Gap-Scan,gap-scan 快問快答起手。
 
 ## Phase status
 

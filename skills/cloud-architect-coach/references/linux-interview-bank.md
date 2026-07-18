@@ -24,7 +24,7 @@
 ### P0-2. 靜態連結 vs 動態 (共享) library
 
 - **(1) 指令層**:靜態連結 (static) 在 **link time** 把 library 的機器碼整包複製進執行檔,產物大但自帶所有依賴、搬到哪都能跑。動態 (shared) 只在執行檔裡留一個「我需要 libc.so.6」的記號,**load time** 才由 dynamic linker (`ld.so`) 去找、映射進記憶體。`ldd <binary>` 列出一個動態執行檔要載哪些 `.so`。
-- **(2) 機制層**:動態連結省磁碟/記憶體 (多個 process 共用同一份 `.so`)、library 修安全漏洞不用重編所有程式;代價是執行時得找得到、且 ABI 要相容。找的順序:`RPATH`/`RUNPATH` → `LD_LIBRARY_PATH` → `ld.so.cache` (`/etc/ld.so.conf`) → 預設路徑。DevOps 最常撞的實體是 **glibc vs musl**:Alpine image 用 musl libc,拿 glibc 環境編的 binary 丟進 Alpine 會 `not found` 或詭異 crash,因為動態依賴的 `.so` 根本不是同一套 C library。所以 Go 靜態編 (`CGO_ENABLED=0`) 的 image 能塞進 `scratch`/`distroless`,就是把動態依賴這條路整個拔掉。
+- **(2) 機制層**:動態連結省磁碟/記憶體 (多個 process 共用同一份 `.so`)、library 修安全漏洞不用重編所有程式;代價是執行時得找得到、且 ABI 要相容。找的順序:`DT_RPATH` (legacy,只有在沒設 `DT_RUNPATH` 時才會被查) → `LD_LIBRARY_PATH` → `DT_RUNPATH` → `ld.so.cache` (`/etc/ld.so.conf`) → 預設路徑 (`/lib`、`/usr/lib`)。注意 `DT_RUNPATH` 一旦存在,`DT_RPATH` 就被忽略。DevOps 最常撞的實體是 **glibc vs musl**:Alpine image 用 musl libc,拿 glibc 環境編的 binary 丟進 Alpine 會 `not found` 或詭異 crash,因為動態依賴的 `.so` 根本不是同一套 C library。所以 Go 靜態編 (`CGO_ENABLED=0`) 的 image 能塞進 `scratch`/`distroless`,就是把動態依賴這條路整個拔掉。
 - **(3) 動手驗證**:`ldd /bin/ls` 看它動態依賴哪些 `.so` (會看到 `libc.so.6`、`ld-linux-*.so`)。對照:`file /bin/ls` 顯示 `dynamically linked`;靜態編的 binary 會顯示 `statically linked` 且 `ldd` 回 `not a dynamic executable`。
 
 ---

@@ -228,7 +228,7 @@ Well-Architected 不是一套架構,是一份 review checklist。它的用途是
 - TCP 狀態機與高並發:§3
 - DNS 遞迴解析內部機制:§4
 - conntrack 深化:§3.5
-- OOM(cgroup OOM vs node eviction):§2.4
+- OOM:cgroup OOM §2.4、node pressure/eviction §5.6
 - Linux 性能排查方法論(USE / 60 秒清單):§5
 
 本檔的 hybrid connectivity(Topic 5)只教雲端 hybrid 設計取捨;封包在 TCP/DNS 層的內部運作到上表章節讀。
