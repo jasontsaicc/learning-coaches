@@ -65,7 +65,7 @@
 
 **Hire bar**:
 - 先評估再談搬法:用 SCT(Schema Conversion Tool)做 assessment,量化有多少 schema / 預存程序 / proprietary 功能能自動轉、多少要手改,產出一份 assessment report 當決策依據。
-- Replatform vs repurchase 的辯論,而且以授權成本當主軸:留 Oracle 引擎搬到 RDS for Oracle(自帶授權 BYOL,包袱還在)vs repurchase 改用 Aurora PostgreSQL / RDS PostgreSQL(擺脫授權但要付出 schema 轉換與應用改動成本),把兩條路的 license 帳算給客戶看。
+- Replatform vs repurchase 的辯論,而且以授權成本當主軸:留 Oracle 引擎搬到 RDS for Oracle 時要分清授權模式,SE2 有 License Included(AWS 把授權包進時數費,客戶得以擺脫原本的 Oracle 合約),EE 只能 BYOL(授權包袱還在);另一條是 repurchase 改用 Aurora PostgreSQL / RDS PostgreSQL(徹底擺脫授權但要付出 schema 轉換與應用改動成本),把每條路的 license 帳算給客戶看。
 - Cutover 用 DMS + CDC:先做 full load 再開 CDC 持續同步,把停機壓到最小,並且一定要有 rollback 計畫(來源保持可用、驗證失敗就切回)。
 - 主動談 downtime window:cutover 需要多長的凍結窗口、跟業務怎麼協商、驗證(資料筆數、checksum、應用煙霧測試)排在窗口裡的哪一段。
 
