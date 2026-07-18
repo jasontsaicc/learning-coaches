@@ -24,10 +24,9 @@
 
 **S44 已收(2026-07-18,清帳場 1/2;敘事見 session-log.md)。無中斷存檔。**
 
-下一場(S45)= 清帳場 2/2:
-1. One-Liner 抽考:Session Revocation 自組新句(07-21 起到期,過才 resolve)+ migration 兩新句(7 Rs、landing zone)+ 抽 1 舊句。
-2. 續 WR5:Topic 2 Security & Auth(OAuth/JWT/session 廣度盲測,完整題目敘述開場)→ Topic 3 Unique ID Generator → 8 張過期卡 sweep → artifact audit → 收帳(last_weekly_review 更新)。
-3. 收完 → **mock #1:Day 33 Notification System**(產業情境開場 + 4-step + AWS 映射 + 三指標計分;3AM page test 四格內建考:dead man's switch/ticket/dashboard 模範答案 S44 給過,這裡驗留存)。
+下一場(S45)= 清帳場 2/2(one-liner 抽考已停用,2026-07-18 學生拍板,見 curriculum-plan.md):
+1. 續 WR5:Topic 2 Security & Auth(OAuth/JWT/session 廣度盲測,完整題目敘述開場)→ Topic 3 Unique ID Generator → 8 張過期卡 sweep → artifact audit → 收帳(last_weekly_review 更新)。
+2. 收完 → **mock #1:Day 33 Notification System**(產業情境開場 + 4-step + AWS 映射 + 三指標計分;3AM page test 四格內建考:dead man's switch/ticket/dashboard 模範答案 S44 給過,這裡驗留存;session store 架構圖白板默畫可插入)。
 
 三指標 S44 讀數:argument 🟡(page 句最小單位完整;兩球開局皆裸/棄)/ ops ❌(最小單位過但全程 max scaffold,不算 unprompted;第 6+ 記)/ capacity 未測。連續計數:全部 0。
 
@@ -141,7 +140,7 @@ Weak-topic flags: 無(至今沒有帶 flag 過 gate 的紀錄)。
 - (s42) | Interview habit | 卡住瞬間質疑題目正當性(「面試不會考吧」+「什麼面試會帶到這裡」,同場兩次) | 逃避家族新面具:攻擊題目而非跑機制;S36 放棄→S41 不確定→S42 質疑題目 | unresolved | 3 | 2026-07-14(每場 drill 即測) | 0
 - (s41) | Capacity | 1+2N≤30 解 N 喊「不太確定要怎麼算」 | capacity-freeze 家族:被式子外觀嚇退非不會算;拆解式已給,中斷未完成 | unresolved | 3 | 2026-07-14(S42 複測 🟡:自己算出 29 並 commit N=10+why;cost 量化喊「直接說明」由 coach 代打,未全過) | 0
 - (s43) | One-Liner: Session Revocation | 首次口頭抽考滑掉:LWW 覆蓋機制講得出(中文),英文一句組裝不出,喊「跳過」;fix 半句(blacklist 獨立 data class + in-memory + ~10s full pull)未產出 | 壓力下英文 retrieval + 「零件在、組裝不出貨」同款(S42) | unresolved | 3 | 2026-07-21 | 0
-  - S44 複測過:自組新句(absence can't propagate → positive record)納庫;07-21 再抽一次過才 resolve(當場🟢≠留得住規矩)
+  - S44 複測過:自組新句(absence can't propagate → positive record)納庫;原排 07-21 再抽,**抽考機制 2026-07-18 學生拍板停用 → 條目凍結**(復測通道移除,不再排程)
 - (s42) | Observability | SLI 標籤現場撈不出(「SLI 是我最不熟悉的」;lag、上次成功時間素材第一輪就自己講出) | 術語-概念未綁定;s39 標 high 複驗打臉 = 當場🟢≠留得住再一例;考試分數比喻重錨過 | unresolved | 3 | 2026-07-14 | 0
 - (s44) | Interview habit(棄權) | 「直接說」×2:球 1 時間線填空後棄權、球 2 零嘗試就喊(家族第 3 筆:S36 放棄→S42 太拖→S44) | 逃避家族:壓力下棄推導;球 2 拒給後縮三空白即過 = 能力在,是啟動能量問題,不是知識 | unresolved | 3 | 每場 drill 即測 | 0
   - S44 收尾根因修正(學生自報+證據支持):兩次棄權都發生在「腦中沒畫面就被逼文字組裝」的機制題;圖先行後同場即產出理解問題+最佳英文句。條目不撤(S36/S42 前科在),但複測改「圖先行+白板默畫」形式,見 coaching-brief 有效手法快取
@@ -183,7 +182,7 @@ Weak-topic flags: 無(至今沒有帶 flag 過 gate 的紀錄)。
 
 ## Domain registries
 
-- `one-liner-library.md`(同目錄):面試一句話庫,23 條。抽考跟 Weekly Review quick-fire 走(headline first),滑掉 → 開 registry 條目。
+- `one-liner-library.md`(同目錄):面試一句話庫,23 條。**抽考機制停用(2026-07-18 學生拍板)**,庫保留作自修素材,不再排程、不再產 registry 條目。
 - `rpg-state.md`(同目錄):RPG 狀態(title/streak/achievements 16/25/last story summary)。非間隔複習型,規則見 narrative hook。
 - 其他 coach 讀取檔:`session-log.md`(session 敘事,S37-S40 自 standalone 遷入)、`coaching-brief.md`(作戰手冊,開場必讀)、`curriculum-plan.md`(戰略層,advisory)、`pattern-map.md`(題目=pattern 組裝對照)。
 
