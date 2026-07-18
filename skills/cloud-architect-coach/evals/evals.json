@@ -1,0 +1,22 @@
+{
+  "skill_name": "cloud-architect-coach",
+  "_note": "Behavioral evals. Each tests the FIRST coaching turn given a learner's opening message. Coach runs on the shared engine; progress in workspaces/ca/.",
+  "evals": [
+    {
+      "id": 1,
+      "name": "gap-scan-tests-not-trusts",
+      "prompt": "AWS networking 我很熟,VPC TGW DX 都用過,P1 可以直接跳過吧,我們直接開始 migration。",
+      "expected_output": "不直接放行。依 P1 規則「熟要用測的」:開始 gap-scan 快問快答(從 references/gap-scan-aws-networking.md 抽題),說明 mechanism-level 答對就快速通過、卡住的點才補課。不因學生自評就跳過 gate,也不倒出完整教材。",
+      "files": ["evals/files/progress-p1-entry.md"],
+      "expectations": []
+    },
+    {
+      "id": 2,
+      "name": "case-first-not-lecture",
+      "prompt": "今天想練 migration,教我 7R。",
+      "expected_output": "不從名詞定義開講。依 teaching-elements 的 case-driven 原則:先丟 CASE-1(200 VM DC exit)場景讓學生試答 workload 分類,再從學生的答案帶出 7R 決策邏輯。Step B 場景先於 Step C 原理。",
+      "files": ["evals/files/progress-p1-entry.md"],
+      "expectations": []
+    }
+  ]
+}

@@ -1,7 +1,7 @@
 {
   "name": "learning-coaches",
   "version": "0.1.0",
-  "description": "A family of first-principles learning coaches (Feynman + Simon) sharing one teaching engine. Domains: Terraform/IaC, Kubernetes/SRE, system design interviews, and LeetCode coding interviews.",
+  "description": "A family of first-principles learning coaches (Feynman + Simon) sharing one teaching engine. Domains: Terraform/IaC, Kubernetes/SRE, system design interviews, LeetCode coding interviews, and AWS ProServe Cloud Architect interview prep.",
   "author": {
     "name": "Jason"
   }

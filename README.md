@@ -1,6 +1,6 @@
 # learning-coaches
 
-A Claude Code plugin providing a family of first-principles learning coaches built on a shared teaching engine. Each coach uses Feynman and Simon methods (incremental layering, asking you to articulate understanding, teaching by breaking down complex topics into foundational pieces) to guide deep learning in DevOps domains. Live coaches: Terraform/Infrastructure-as-Code, Kubernetes/SRE, System Design interview prep, and LeetCode coding-interview prep.
+A Claude Code plugin providing a family of first-principles learning coaches built on a shared teaching engine. Each coach uses Feynman and Simon methods (incremental layering, asking you to articulate understanding, teaching by breaking down complex topics into foundational pieces) to guide deep learning in DevOps domains. Live coaches: Terraform/Infrastructure-as-Code, Kubernetes/SRE, System Design interview prep, LeetCode coding-interview prep, and AWS ProServe Cloud Architect interview prep.
 
 ## Repository Structure
 
@@ -51,13 +51,19 @@ learning-coaches/
 │   │   │                                    #   material (curriculum-detail, first-principles-chains,
 │   │   │                                    #    follow-up-bank, answer-comparisons, story, rpg-rules)
 │   │   └── evals/                           # behavioral evals + fixtures
-│   └── leetcode-coach/
+│   ├── leetcode-coach/
+│   │   ├── SKILL.md
+│   │   ├── references/                      # 8 hook files (incl. language) + cheatsheets
+│   │   │                                    #   (problem-solving-framework, pattern,
+│   │   │                                    #    complexity, python-dsa)
+│   │   ├── scripts/                         # lab-lc.sh (pytest + large-N tripwire) + test
+│   │   └── evals/                           # behavioral evals + fixtures
+│   └── cloud-architect-coach/
 │       ├── SKILL.md
-│       ├── references/                      # 8 hook files (incl. language) + cheatsheets
-│       │                                    #   (problem-solving-framework, pattern,
-│       │                                    #    complexity, python-dsa)
-│       ├── scripts/                         # lab-lc.sh (pytest + large-N tripwire) + test
-│       └── evals/                           # behavioral evals + fixtures
+│       ├── references/                      # 9 hook files + subject material
+│       │                                    #   (gap-scan-aws-networking, case-bank,
+│       │                                    #    linux-interview-bank)
+│       └── evals/                           # behavioral evals + fixtures (no scripts)
 ├── workspaces/                              # per-coach learner state — git-TRACKED
 │   ├── k8s/                                 # progress.md (engine schema), term-registry,
 │   │                                        #   story-bank, session-log, environment,
@@ -65,9 +71,11 @@ learning-coaches/
 │   ├── sd/                                  # progress.md (engine schema), one-liner-library,
 │   │                                        #   rpg-state, session-log, coaching-brief,
 │   │                                        #   curriculum-plan, pattern-map
-│   └── leetcode/                            # progress.md (engine schema), one-liner-library,
-│                                            #   skeleton-registry, patterns.md,
-│                                            #   <phase>/<slug>/ problem folders
+│   ├── leetcode/                            # progress.md (engine schema), one-liner-library,
+│   │                                        #   skeleton-registry, patterns.md,
+│   │                                        #   <phase>/<slug>/ problem folders
+│   └── ca/                                  # progress.md (engine schema), gap-scan records,
+│                                            #   thread-pull list, mock scorecards
 └── portfolio/                               # recruiter-facing artifacts
     ├── k8s/                                 # notes/ + manifests/ (+ observability/,
     │                                        #   gitops/, terraform-eks/ as phases grow)
