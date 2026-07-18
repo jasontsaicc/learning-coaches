@@ -144,6 +144,7 @@ Weak-topic flags: 無(至今沒有帶 flag 過 gate 的紀錄)。
   - S44 複測過:自組新句(absence can't propagate → positive record)納庫;07-21 再抽一次過才 resolve(當場🟢≠留得住規矩)
 - (s42) | Observability | SLI 標籤現場撈不出(「SLI 是我最不熟悉的」;lag、上次成功時間素材第一輪就自己講出) | 術語-概念未綁定;s39 標 high 複驗打臉 = 當場🟢≠留得住再一例;考試分數比喻重錨過 | unresolved | 3 | 2026-07-14 | 0
 - (s44) | Interview habit(棄權) | 「直接說」×2:球 1 時間線填空後棄權、球 2 零嘗試就喊(家族第 3 筆:S36 放棄→S42 太拖→S44) | 逃避家族:壓力下棄推導;球 2 拒給後縮三空白即過 = 能力在,是啟動能量問題,不是知識 | unresolved | 3 | 每場 drill 即測 | 0
+  - S44 收尾根因修正(學生自報+證據支持):兩次棄權都發生在「腦中沒畫面就被逼文字組裝」的機制題;圖先行後同場即產出理解問題+最佳英文句。條目不撤(S36/S42 前科在),但複測改「圖先行+白板默畫」形式,見 coaching-brief 有效手法快取
 - (s42) | Operational | 3AM page test 無法獨立組裝:「無法使用」「有立即性」交卷 = 症狀/事件/機制拆不開;pager/alarm/ticket 分層概念本身陌生 | 危險感沒機制家族 + 監控知識掛「救火」腳本不掛「設計收尾」腳本;句型模板+模範答案直接給,留沒留住下次換題複測 | unresolved | 3 | mock #1 內建考 | 0
   - S44 換題複測(URL Shortener):零嘗試喊直接說→拒給→縮三空白後 page 句最小單位過;dead man's switch/ticket/dashboard 三格仍 coach 給,mock #1 驗留存
 
