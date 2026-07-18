@@ -11,28 +11,31 @@
 
 ## Meta
 
-- session_count: 41
+- session_count: 43 <!-- 2026-07-18 對帳修正:原停在 41,但 S42(2026-07-11 中斷存檔)與 S43(2026-07-17 口頭抽考,git e04a335)已發生 -->
 - last_weekly_review: 33 — ⚠️ WR5 於 S41 開跑未完成(Topic 1/3),trigger 持續成立,下場續跑;完成時才把本欄更新為當時 session_count
-- last_session_date: 2026-07-10
+- last_session_date: 2026-07-17
 - warm_up_classification: (standalone 時期未記錄;學員已 P3,Step 0 模式預設 Exploration)
 
 ## Current Session breakpoint
 
 **S42 中斷存檔(2026-07-11)— WR5 Topic 1/3 已收,Topic 2 未開。** 球 3(3AM page test)無法獨立組裝:填格「無法使用/有立即性」= 危險感沒機制;SLI 標籤撈不出(素材 lag、上次成功時間第一輪就自己講出);逐步導引通了 A 掛→failover→B 無資料→強制重登全鏈後,學生喊「太拖,直接說完」→ 模範答案直接給(2 pages + dead man's switch + ticket 分層 + 3 圖)。Topic 1 計分 1/6(見 scorecard)。
 
-下一場開場順序:
-1. One-Liner Challenge 口頭抽考:S41 新句 Session Revocation + 抽 2 條舊句。
-2. **3AM page test 複測(直接給的留沒留住)**:換題(URL Shortener 或 Rate Limiter),學生自己跑 page 句型 "Page me when [SLI] > [threshold] for [duration], because [harm]" + page/ticket/dashboard 分層。
-3. 續 WR5:Topic 2 Security & Auth(OAuth/JWT/session 廣度盲測,完整題目敘述開場)→ Topic 3 Unique ID Generator → registry sweep(到期條目)→ quick drill → artifact audit → 收帳(last_weekly_review 更新)。
+**2026-07-18 Sprint re-plan 生效(curriculum-plan.md [Sprint re-plan]):目標 AWS 職缺面試,3 連退出條件廢除,三指標改為 mock 評分維度。**
 
-WR5 收完後恢復原佇列:Drill Gauntlet 續跑(多區域全球限流專門 drill + 換題 bar-raiser:URL Shortener / Session Store / Snowflake / Distributed Cache,三指標各求 3 連)→ Day 30 Snowflake Light PoC(park)。execution-heavy 三條硬規則生效中(見 coaching-brief.md [Execution-Heavy Mode]):第一句就評分 / 裸結論直接打回 / 盯 unprompted-argument・unprompted-ops・no-freeze-capacity。S41 指標:argument 🟡(前裸後全)/ ops 未測 / capacity ❌ — argument、capacity 連續計數歸零。S42 指標:argument 🟡(導引段句子多半完整,但四格填空兩度交白/半句)/ ops ❌(第 6 記:即測都跑不動,遑論 unprompted)/ capacity 🟡(球 1:29+N=10 自解,cost 代打)— 三項連續計數全部為 0。
+下一場(S44)開場順序 — 清帳場 1/2:
+1. One-Liner 複測:S43 滑掉的 Session Revocation(英文組裝)+ 抽 2 條舊句。
+2. **3AM page test 換題複測(直接給的留沒留住)**:URL Shortener 或 Rate Limiter,學生自己跑 page 句型 "Page me when [SLI] > [threshold] for [duration], because [harm]" + page/ticket/dashboard 分層。
+3. 續 WR5(quick-fire 壓縮):Topic 2 Security & Auth(OAuth/JWT/session 廣度盲測,完整題目敘述開場)→ Topic 3 Unique ID Generator → 8 張過期卡 sweep → artifact audit → 收帳(last_weekly_review 更新)。
+4. 塞得下就開 migration 詞彙插課(7 Rs、Assess/Mobilize/Migrate、landing zone,半場);塞不下排清帳場 2/2。
+
+清帳收完 → 主衝刺:Tier 1 剩 5 題(Day 33 Notification System 起)每題一場 mock(產業情境 + 4-step + AWS 映射),三指標當評分維度續盯:S42 讀數 argument 🟡 / ops ❌(第 6 記)/ capacity 🟡。Gauntlet 專門 drill 與 parked PoC 全部取消。
 
 ## Phase status
 
 - P0 Thinking Framework: gate-passed(retroactive;legacy,pre-Examiner,coach 認證)
 - P1 Core Building Blocks: gate-passed(2026-05-29,attempt 1,3/3;legacy,pre-Examiner,coach 認證)
 - P2 Distributed Systems Core: gate-passed(2026-06-18,attempt 1,5/6;legacy,pre-Examiner,coach 認證)
-- P3 Classic SD Problems: in-progress(Day 27-32 完成:URL Shortener / Unique ID / Distributed Rate Limiter;Day 33+ 未開;execution-heavy overlay 生效中,暫停新 archetype 改 Drill Gauntlet)
+- P3 Classic SD Problems: in-progress(Day 27-32 完成:URL Shortener / Unique ID / Distributed Rate Limiter;Day 33+ 未開;2026-07-18 起 Sprint re-plan:清帳後 Tier 1 剩 5 題每題一場 mock,Tier 2 不逐題教)
 - P4 Advanced & Mocks: not-started
 
 Weak-topic flags: 無(至今沒有帶 flag 過 gate 的紀錄)。

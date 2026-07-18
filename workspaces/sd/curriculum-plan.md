@@ -8,9 +8,9 @@
 
 ## North Star 對齊
 
-無明確面試日期 → **深度優先**,全課表照走(69 units,Phase Map 見 sd-coach curriculum hook)。
-照 ~2.2 session/週的節奏,預估 **2026 年 12 月初完課**。日期是估算不是死線;readiness 領先
-curriculum position(見 scorecard-dims 的 Readiness Report 規則)。
+~~無明確面試日期 → 深度優先,全課表照走,預估 2026 年 12 月初完課~~
+**(2026-07-18 改向:目標鎖定 AWS 職缺面試,深度優先讓位給面試就緒。見 Sprint re-plan。)**
+Readiness 領先 curriculum position 的原則不變(見 scorecard-dims 的 Readiness Report 規則)。
 
 ## Learning Mode(S23 拍板,仍生效)
 
@@ -24,13 +24,13 @@ curriculum position(見 scorecard-dims 的 Readiness Report 規則)。
 3. **題目驅動(pull)**:理論密集段用一個設計題當錨(P2 用 Design a Distributed Cache),理論 just-in-time 拉進來(現為 curriculum hook 的 Problem-Anchored Mode)。
 4. 面試考 breadth of mental models + trade-off reasoning,不是 CS 理論深度(形式證明 = PhD 範圍,不學)。
 
-## Execution-Heavy overlay(S37 拍板,生效中)
+## Execution-Heavy overlay(S37 拍板;2026-07-18 起被 Sprint re-plan 修改)
 
 Phase 2 後已無知識缺口只有執行缺口 → 暫停「每場一個新 archetype」的 acquisition 節奏,
 改 drill 為主(**Drill Gauntlet**)。首攻 #1「結論不給論證」。完整 protocol 與評分錨
 (tier-1 strong-hire bar、L3 預設)見 `coaching-brief.md` [Execution-Heavy Mode]。
-**退出條件:unprompted-argument / unprompted-ops / no-freeze-capacity 三指標各 3 連達標**
-後回課表節奏(Day 33 Notification System 起)。
+~~退出條件:三指標各 3 連達標後回課表節奏~~ **3 連退出條件廢除(S40-S43 四場零進展,
+擋住所有新內容 = 進度緩慢的根源)。三指標保留為每場 mock 的評分維度,不再擋進度。**
 
 ## Scope decision(2026-07-02,S36 後 plan review)
 
@@ -38,11 +38,11 @@ Phase 2 後已無知識缺口只有執行缺口 → 暫停「每場一個新 arc
 - 其餘訓練營題目(Dropbox/YouTube/Twitter/A-B Testing 等)= 既有 pattern 組裝,不排課;對照表見 `pattern-map.md`(面試前確認每個 pattern 都能講,碰到沒練過的題拆 pattern 再組裝)。
 - Parked PoC triage:留 distributed cache(Day 38-39)+ rate limiter(Day 31-32 的 capacity 補測);放掉 Circuit Breaker 獨立 PoC(概念已 5/5,邊際回報低)。Snowflake Light PoC(Day 30)park 中,排 Gauntlet 之後。
 
-## Conditional Sprint overlay(2026-07-17,外部投遞觸發;邀約未確認,主線不重排)
+## Conditional Sprint overlay(2026-07-17;背景修正 2026-07-18)
 
-背景:學員已投遞一個雲端原廠 consultant 職缺(delivery 導向),可能 4-8 週內收到面試邀約。
-該 loop 型態:behavioral 佔比 ~50%、architecture case 用客戶情境包裝、coding 輕量。
-未確認前佇列不變(WR5 收尾 → Drill Gauntlet),但 drill 全面加兩層外皮:
+背景修正(2026-07-18 現場確認):**尚未投遞**,原記載「已投遞」不符,以本行為準。目標職缺
+仍是雲端原廠 consultant(delivery 導向)。該 loop 型態:behavioral 佔比 ~50%、architecture
+case 用客戶情境包裝、coding 輕量。兩層外皮照常生效於所有 mock/drill:
 
 1. **AWS 服務映射層**:每個元件收尾追問「在 AWS 上這是什麼」(LB→ALB/NLB、cache→ElastiCache、
    MQ→SQS/Kinesis、KV→DynamoDB、blob→S3)。同時綁 Well-Architected 六支柱詞彙:failure
@@ -58,8 +58,31 @@ Phase 2 後已無知識缺口只有執行缺口 → 暫停「每場一個新 arc
 收到具體面試日期 → 走下方 Re-plan triggers 第一條(壓縮 Tier 2、mock 連發)。
 求職材料(履歷、STAR 故事庫)不進本 repo,只在學員私人機器;本 overlay 僅含教學面。
 
+## Sprint re-plan(2026-07-18 拍板,生效中)
+
+學員明確轉向:目標 AWS 職缺面試,快速過完、不糾結。深度優先前提失效,改面試就緒優先。
+
+**砍掉(不再排課):**
+- Gauntlet 三指標 3 連退出條件(見上;三指標降級為 mock 評分維度)。
+- 所有 parked PoC:Snowflake(Day 30)、distributed cache(Day 38-39)、rate limiter capacity 補測。面試前不做。
+- Tier 2 七題逐題教學。改 pattern-map 驗證:碰到沒練過的題能拆 pattern 再組裝即可。
+
+**衝刺排程(~2.2 場/週,估 3-4 週):**
+1. 清帳(1-2 場):WR5 剩餘(Topic 2 Security & Auth、Topic 3 Unique ID)+ 8 張過期卡
+   壓成 quick-fire sweep;One-Liner 複測(Session Revocation)+ 3AM page test 換題複測照跑。
+   Migration 詞彙半場插課(7 Rs、Assess/Mobilize/Migrate、landing zone)併入。
+2. 主衝刺(5 場):Tier 1 剩 5 題(Day 33+ Notification System 起)每題壓成一場 mock:
+   產業情境開場 → 4-step → AWS 映射收尾 → 三指標計分。理論 just-in-time,面試深度封頂,無 PoC。
+3. 之後全 mock 連發(P4 模式提前),混 pattern-map 抽題。
+
+**維持不變:** engine 各 gate 的嚴格度(壓縮的是範圍與順序,不是 rigor)、AWS 映射+產業
+外皮、L3 評分錨、registry/複習卡機制(排程壓縮進清帳場與 mock 開場)。
+
+**Repo 外提醒:** 尚未投遞 → 照 career plan,履歷+內推投遞先於學習衝刺;behavioral/LP
+故事庫與口說(fsi-devops-english)是這個 loop 的另一半,不在本 repo 排程。
+
 ## Re-plan triggers
 
-- 拿到具體面試日期 → 重排:壓縮 Tier 2、提前 Phase 4 mock 連發。
-- 三指標達標退出 execution-heavy → 回 acquisition,但每場 drill 保持 L3。
+- 拿到具體面試日期 → 再壓縮:清帳收斂成 1 場,主衝刺只挑 2-3 題最可能考的,直接 mock 連發。
+- ~~三指標達標退出 execution-heavy~~(2026-07-18 廢除,見 Sprint re-plan)。
 - Weekly Review 連兩次同主題衰退 → 該主題進 Gauntlet 換情境重測(S40 的 Bloom 模式)。
