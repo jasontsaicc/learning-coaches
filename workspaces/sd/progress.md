@@ -11,9 +11,9 @@
 
 ## Meta
 
-- session_count: 44
-- last_weekly_review: 33 — ⚠️ WR5 於 S41 開跑未完成(Topic 1/3),trigger 持續成立,S45 收 Topic 2/3;完成時才把本欄更新為當時 session_count
-- last_session_date: 2026-07-18
+- session_count: 45
+- last_weekly_review: 33 — ⚠️ WR5 於 S41 開跑未完成(Topic 2/3 已收,Topic 3 未答),trigger 持續成立,S46 收 Topic 3 + sweep + audit;完成時才把本欄更新為當時 session_count
+- last_session_date: 2026-07-20
 - warm_up_classification: (standalone 時期未記錄;學員已 P3,Step 0 模式預設 Exploration)
 
 ## Current Session breakpoint
@@ -24,7 +24,13 @@
 
 **S44 已收(2026-07-18,清帳場 1/2;敘事見 session-log.md)。無中斷存檔。**
 
-下一場(S45)= 清帳場 2/2(one-liner 抽考已停用,2026-07-18 學生拍板,見 curriculum-plan.md):
+**S45 中斷存檔(2026-07-20,清帳場 2/2,WR5 Topic 2/3 已收)。** Topic 2 Security & Auth 盲測 1/6(security✅;trade-off🟡 開局裸「JWT token」scaffold 後完整組裝+Max session-表-進-memory 挑戰用量級頂回;failure-timeline🟡 deny list-TTL aging 卡兩輪、通行證期限比喻後自組;capacity/ops/one-liner 未測)。新 registry 2 筆已落檔(s45,見 Live)。問句丟球(「是這樣子嗎?」)+要提示(「Senior 會怎麼答」)各再現一次,計入既有每場即測條目。**Topic 3 Unique ID Generator 題目已出(電商 100 台/50K per s/ID≈時間排序),球 1 Snowflake 64-bit 白板默畫未作答。**
+
+下一場(S46)resume:Topic 3 球 1 默畫起 → 8 張過期卡 sweep → artifact audit → 收帳(last_weekly_review 更新)→ mock #1 Day 33 Notification System(計畫細節見上方 S44 段)。
+
+**2026-07-19 S45 開場學生拍板:清帳場 2/2 押後(「不要再清場了,快沒耐心」),WR5 Topic 2/3 + 過期卡 sweep 移到 Tier 1 mock 跑完後收;S45 直接進 mock #1 Day 33 Notification System。**
+
+原 S45 計畫(押後,Tier 1 mock 後執行;one-liner 抽考已停用,2026-07-18 學生拍板,見 curriculum-plan.md):
 1. 續 WR5:Topic 2 Security & Auth(OAuth/JWT/session 廣度盲測,完整題目敘述開場)→ Topic 3 Unique ID Generator → 8 張過期卡 sweep → artifact audit → 收帳(last_weekly_review 更新)。
 2. 收完 → **mock #1:Day 33 Notification System**(產業情境開場 + 4-step + AWS 映射 + 三指標計分;3AM page test 四格內建考:dead man's switch/ticket/dashboard 模範答案 S44 給過,這裡驗留存;session store 架構圖白板默畫可插入)。
 
@@ -103,7 +109,10 @@ Weak-topic flags: 無(至今沒有帶 flag 過 gate 的紀錄)。
      無卡的設 3 天(2026-07-13)。unresolved-session-count = 40 - 建立 session(近似;≥5 依 engine
      Priority Override 置頂,step A 每堂上限內逐步清)。 -->
 
-### Live(unresolved,31 筆)
+### Live(unresolved,33 筆)
+
+- (s45) | Security & Auth (OAuth) | 術語層撈不出:access token 講成「憑證」、scope 講成「權限」、四角色(Resource Owner/Client/Auth Server/Resource Server)喊忘、OIDC 先搶標籤(挑戰後改選 OAuth 2.0 但沒給理由);機制全通(帳密只進銀行頁面、唯讀授權、改密碼=核彈誤傷全部 App) | 術語-概念未綁定家族;AWS 同構對照表已給(token=STS creds、scope=IAM policy),留存待複測;另計 Deny List 語音滑動 ×2(Dynamic/Denial List,5a 家族) | unresolved | 3 | 2026-07-23 | 0
+- (s45) | Security & Auth (deny list) | 「deny list 為何不膨脹」卡兩輪(「不會了」「不確定」),通行證印期限比喻後自組出 TTL aging(過期 entry 可移除,表≈近 15 min 掛失量) | 機制組裝啟動能量問題(S44 同款);短 TTL 綁 deny list 大小這條鏈換場景複測 | unresolved | 3 | 2026-07-23 | 0
 
 - (s4) | Load Balancer | "least robin":RR 與 Least Connections 名字揉成一個 | 演算法「行為」與「名字」沒綁定 | unresolved | 3 | 2026-07-11 | 36
 - (s4) | Load Balancer | 以為 8.8.8.8 是 ISP DNS(是 Google Public DNS) | trivia 型;冷知識未錨定 | unresolved | 3 | 2026-07-11 | 36

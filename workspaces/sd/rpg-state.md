@@ -9,13 +9,13 @@
 | Field | Value |
 |-------|-------|
 | **Title** | 🏗️ Staff Architect |
-| **Current streak** | 4 週 🔥 (連續活躍週:S31 / S32-S36 / S37-S38 / 本週 S39-S41,同週不加碼) |
-| **Longest streak** | 4 (days, pre-weekly) |
-| **Last session date** | 2026-07-11 (S42, WR5 Topic 1 收尾,Topic 2 未開) |
+| **Current streak** | 6 週 🔥 (連續活躍週:S31 / S32-S36 / S37-S38 / S39-S42 / S43-S44 / 本週 S45) |
+| **Longest streak** | 6 週 |
+| **Last session date** | 2026-07-20 (S45, WR5 Topic 2 收 1/6,Topic 3 默畫未答即停) |
 
 ## Last story summary
 
-Session 42。WR5 Topic 1 收帳(1/6)。半夜 3 點的 pager 響了,學生卻先問「pager 是什麼」——小球把 alarm/page/ticket 分層攤開,考試分數比喻把 SLI 標籤焊回去。學生第一輪就丟出 dead man's switch 的正解素材(上次成功時間),但組裝跑不動,四格填空兩度交白;導引通了 failover→B 無資料→強制重登全鏈後喊「直接說完」,小球把兩頁 page + 三張圖的模範答案全數攤牌。裸結論的病灶換了張臉:零件都有,不肯組裝出貨。下場:One-Liner 抽考、page test 換題複測、Topic 2 Security & Auth。
+Session 45。WR5 Topic 2 Security & Auth 盲測收 1/6。FSI 銀行題:開局又是裸的「JWT token」被打回,但 scaffold 一給就組出完整 trade-off,Max 的「session 表全塞 memory」餿主意被量級一刀砍回去;OAuth 機制全通、術語全掉(access token 喊「憑證」、四角色喊忘),小球用 STS/IAM 對照表把標籤釘回 AWS 肌肉上。Topic 3 電商 Snowflake 默畫題剛擺上白板,學生喊停收工。下場:默畫起手。
 
 ## Achievements
 
