@@ -7,20 +7,28 @@
 
 ## Meta
 
-- session_count: 18
+- session_count: 19
 - last_weekly_review: 18
-- last_session_date: 2026-07-19
+- last_session_date: 2026-07-20
 - warm_up_classification: mid(有地圖形狀,缺演員名字;P0 剛好,不加速)
 
 ## Current Session breakpoint
 
+**s19 micro 已收(2026-07-20 跨夜坐位,緊接 s18 同對話)。chunk 4-1「CNI 是一紙合約」過:hostNetwork 判準(「需不需要獨立網路」)學員自推 ✅;但合約三件事(網卡/IP/路由)Recall 卡兩輪、把選配 NetworkPolicy 混進合約本體 → 簡化重教後預測題(漏路由的下場=timeout)過。新 registry 卡 07-23。F/G 未跑(micro-mode 一單位即收,chunk 4 債另計)。**
+
+next(s20),順序:
+1. step A 過期債(每堂 2 題上限,過期優先):07-20 到期的「出廠全通」確認快抽 + 「default-deny 分層」;更老的 YAML-validation / ImagePullBackOff 依序輪。
+2. 07-22 冷測:靜默無效「一段話組裝版」、兩張名單「兩關檢查程序」、**L4-L7 無框架新情境(禁 postgres/redis,過了才推 7)**、三分類家族第 2 輪(換成員);07-23 CNI 合約三件事快抽。
+3. **chunk 4-2 veth pair 動手起手**(p2a 叢集活著:`kubectl exec <pod> -- ip addr show eth0` 記 `@ifNN` → `docker exec k8s-coach-p2a-worker ip link | grep "^NN:"` 摸到 cali 網線另一頭,指令學員自己敲)→ 4-3 路由對照(tunl0 vs kindnet via)→ 4-4 MASQUERADE → 4-5 七站骨架。
+4. lab **Step 5+Step 6 同一坐位收**(學員決策延後,6 驗收 5 不可拆)→ 3-3 gate → chunk 3 累積 F/G 補跑。
+5. pacing:冷測上限 15 分鐘;低電量改 micro-mode。bastion 待辦不變:砍 p0。
+
+<details>
+<summary>s18 斷點(已消化,留參考)</summary>
+
 **s18 已收(2026-07-19,WR7 冷測專場,短堂)。三主題 3/3 過:L4-L7 新情境(postgres/redis,判準框架教練給)、conntrack 分工句收、三分類家族 counter 1/3。學員決策:lab Step 5+6 延後、綁一起做(6 驗收 5 不可拆)。s17「什麼都沒學到」已用冷測結果回應:s16/s17 的內容有留住。**
 
-next(s19),順序:
-1. step A 過期債(每堂 2 題上限,過期優先):07-20 到期的「出廠全通」確認快抽 + 「default-deny 分層」;更老的 YAML-validation / ImagePullBackOff 依序輪。
-2. 07-22 冷測:靜默無效「一段話組裝版」、兩張名單「兩關檢查程序」、**L4-L7 無框架新情境(過了才推 7)**、三分類家族第 2 輪(換成員)。
-3. lab **Step 5(業務洞:frontend egress + backend ingress 兩條,學員自寫)+ Step 6 驗收矩陣同一坐位收** → 3-3 gate → chunk 3 累積的 F/G 補跑。叢集 `kind-k8s-coach-p2a` 留著,policy 都在,可原地續跑。
-4. pacing:冷測上限 15 分鐘;學員低電量改 micro-mode。bastion 待辦不變:砍 p0。
+</details>
 
 <details>
 <summary>s17 舊斷點(已大部分消化,留參考)</summary>
@@ -56,7 +64,7 @@ next(s17):
 
 - P0 心智模型: gate-passed(2026-06-22;legacy,pre-Examiner,coach 認證)
 - P1 核心物件 + 容器底層: gate-passed(2026-06-25;legacy,pre-Examiner,coach 認證)
-- P2a 網路深水區: in-progress(chunk 1 Service/kube-proxy/CoreDNS ✅、chunk 2 Ingress ✅〔s16 補完 scale=0→503 實證,全畢業〕;chunk 3 NetworkPolicy in-progress〔3-1 概念 ✅ 教完但 gate 未過、3-2 語義三坑未教、3-3 lab 做到 Step 3〕;chunk 4 CNI+封包全鏈路 未開,s16 已埋伏筆〔無 CNI 叢集 node NotReady / CoreDNS Pending vs hostNetwork 元件照跑〕)
+- P2a 網路深水區: in-progress(chunk 1 Service/kube-proxy/CoreDNS ✅、chunk 2 Ingress ✅;chunk 3 NetworkPolicy in-progress〔3-1/3-2 教完、lab 到 Step 4,剩 Step 5+6+gate+F/G,學員決策延後綁一起收〕;chunk 4 in-progress〔**4-1 CNI 合約 ✅ s19**:hostNetwork 判準自推;4-2 veth 起、4-3 路由、4-4 MASQUERADE、4-5 七站骨架 未教〕)
 - P2b 儲存 + 權限: not-started
 - P3 調度 + 高並發 + 排障: not-started
 - P4 可觀測性工程: not-started
@@ -122,6 +130,8 @@ Weak-topic flags: 無(至今沒有帶 flag 過 gate 的紀錄)。
   - 正解:出廠任何 Pod 可連任何 Pod、跨 ns 亦然;NetworkPolicy=白名單宣告,**一旦有 policy 選中該 Pod,該方向即從全通翻轉成 default-deny**。生產起手式=每個 ns 先上空白名單(`podSelector: {}` + `policyTypes: [Ingress, Egress]` + 零 rule)再逐條開洞。**此條學員親手撞出(cheap→貴的轉換點),留存預期高,3 天後只做確認性快抽**。
 - 2026-07-17 | default-deny 後的分層(DNS 層 vs 連線層) | 只答「連線不到」,未分辨死在哪一層 | 層級混淆家族(同 s11 把 conntrack 拉進 DNS 題、06-28 排障第一刀) | unresolved | 3 | 2026-07-20 | 0
   - 正解:`curl http://db` 有先後兩步 —— ① 問 CoreDNS(需 egress UDP/TCP **53**)② 建 TCP 連線。default-deny 鎖 egress **連 53 一起鎖**,所以死在第 ① 步,第 ② 步沒機會發生。實證(s16 親手):`curl http://db` → `curl: (28) **Resolving** timed out`;`curl http://192.168.46.66:5678`(餵 IP 跳過 DNS)→ `curl: (28) **Connection** timed out`。**同一條 policy 兩種死法,差別只在需不需要問名字**。prod 陷阱:app log 噴 `could not resolve host` → 全隊衝去查 CoreDNS,但 CoreDNS 好好的,是 policy 封了「去問路的那條路」。故 default-deny 第一個洞永遠是 DNS。
+- 2026-07-20 | CNI 基本合約 vs 選配 | Recall 合約三件事兩輪講不出,答成「建立網路 networkpolicy 嗎」= 把選配(NetworkPolicy 引擎)混進合約本體 | 新教內容首輪未固化 + chunk 3 靜默無效的 CNI 印象蓋過合約本體 | unresolved | 3 | 2026-07-23 | 0
+  - 正解:合約本體=**網卡、IP、路由**(管「通」,每家 CNI 必做,kubelet 建 Pod 時呼叫);NetworkPolicy 引擎=選配(管「擋」,Calico 有 kindnet 無)。hostNetwork=不蓋孤島直接住 node root netns,故不需 CNI(etcd/apiserver/kube-proxy 照跑=排障訊號「CNI 層壞 vs 整機壞」)。s19 亮點:hostNetwork 判準「需不需要獨立網路」學員自推。07-23 抽三件事+各自缺席的死法。
 - 2026-07-19 | 兩張獨立名單(3-2 坑二) | 「只開 backend ingress,frontend curl backend 通嗎」答「可以吧」 | 規則剛教完但沒跑兩關檢查程序,憑感覺猜;學員隨後喊「直接說明」未自跑重測 | unresolved | 3 | 2026-07-22 | 0
   - 正解:A→B 要過兩關(A egress + B ingress),任一關無洞即 timeout;檢查程序=逐關問「這個 Pod 的這個方向名單上有洞嗎」。重測要看主動跑程序,不是背結論。對照:回程免開(conntrack stateful)當天答對。
 - 2026-07-19 | NetworkPolicy 靜默無效(四引擎第四行) | Transfer 只給零件不組裝:「API Server 只驗 schema → 存 etcd → 無引擎編譯成 kernel 規則 = 靜默無效 = 安全假象」整條鏈講不出,③ 危險比較只答半邊 | 先跳結論等追問才補深度(第四堂同條)+ W1 隱性會;零件全對(apiserver/CNI/馬上發現)但拒組裝 | unresolved | 3 | 2026-07-22 | 0
@@ -145,6 +155,7 @@ Weak-topic flags: 無(至今沒有帶 flag 過 gate 的紀錄)。
 - mistake:NetworkPolicy-出廠全通 | mistake | 3 | 2026-07-20(s16 預測錯→**親手撞出**,留存預期高,只做確認性快抽)| active
 - mistake:default-deny-分層(DNS vs 連線)| mistake | 3 | 2026-07-20(s16 親手實證兩種 timeout;層級混淆家族)| active
 - mistake:NetworkPolicy-靜默無效 | mistake | 3 | 2026-07-22(s17 Transfer 未過,考「一段話完整版」組裝,不考零件)| active
+- mistake:CNI-合約三件事 | mistake | 3 | 2026-07-23(s19 新卡:網卡/IP/路由 + 各自缺席的死法;hostNetwork 判準已自推不用重考)| active
 - mistake:兩張獨立名單 | mistake | 3 | 2026-07-22(s17 新場景重測,驗「兩關檢查程序」有沒有長成反射)| active
 - term:conntrack | term | 7 | 2026-07-26(**s18 分工句收**:骨架〔規則管第一次、conntrack 管之後〕自產,應用一次追問補全〔去程改 Destination/回程改 Source、都查 conntrack〕;07-26 抽完整版〔兩個詞+分工句+查誰〕過即封印。歷史:s16 兩個詞給框架後自產;s15 直給後 3 天蒸發=「給框架 vs 給答案」對照組證據)| active
 - mistake:probe-職責 | mistake | 7 | 2026-07-10 | active
