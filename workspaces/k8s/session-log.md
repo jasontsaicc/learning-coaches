@@ -8,7 +8,7 @@
 ## 學員背景與教法備忘
 
 - 學員背景: DevOps 工程師,hands-on 有 (kubectl apply / 看 logs),底層理論弱;coding 初學。
-- 教法備忘: 多用生活 analogy、用學員原話回扣、一次一個 chunk、語言要白。學員偏好自己敲指令,YAML 預設給規格。學員用英文作答時附 `💬 English Polish`;教完流程主動附英文 mind map 供手抄默畫。
+- 教法備忘: 多用生活 analogy、用學員原話回扣、一次一個 chunk、語言要白。學員偏好自己敲指令,YAML 預設給規格。**(2026-07-19 s17 feedback)**:抽考改「情境/預測題+ASCII 圖上指認」格式,**一次只問一題**(塞多子題→學員只答第一個+煩躁);申論組裝只留 F 段、配學員自畫的圖;開場冷測上限 15 分鐘到點切新內容;格式雜務可代打、決策點留學員。學員用英文作答時附 `💬 English Polish`;教完流程主動附英文 mind map 供手抄默畫。
 - 待補精準度:術語要用「DESIRED vs CURRENT」「reconcile loop 收斂」而非「監控數量」。**已補洞**:只有 API Server 直接讀寫 etcd,其他元件(controller/scheduler/kubelet)都透過 API Server 的 watch/update,不直接碰 etcd(P0 學員口誤「kubelet 寫回 etcd」)。
 - symptom→棒次地圖已教: Pending=scheduler / ContainerCreating=kubelet 網路volume / ImagePullBackOff=runtime拉image / CrashLoopBackOff=容器或probe。
 - P1 已澄清:Linux namespace(kernel 隔離視野)≠ k8s namespace(邏輯分組,**不做隔離**,擋網路要 NetworkPolicy)。學員自己問出這個撞名點,理解力好。
