@@ -9,7 +9,8 @@
 | Context | 意義 | 可以 lab? |
 |---------|------|-----------|
 | `kind-k8s-coach-p0`(家用 VM) | 本地 kind(lab-cluster.sh up 自動設) | ✅ |
-| `kind`(公司 bastion) | 本地 kind(bastion 上的叢集,已實體佐證:node 名 `k8s-coach-p0-worker`、Pod IP `10.244.x.x` kindnet 網段) | ✅ |
+| `kind`(公司 bastion,舊) | 本地 kind(bastion 上的叢集,已實體佐證:node 名 `k8s-coach-p0-worker`、Pod IP `10.244.x.x` kindnet 網段) | ✅ |
+| `kind-k8s-coach-p2a`(公司 bastion,s20) | 本地 kind Calico 叢集(bastion 上也有 p2a;node `k8s-coach-p2a-worker`、Pod IP `192.168.46.x`、tunl0 IPIP) | ✅ |
 | `eks` | **公司 PROD `billing-devops-prod-platform`**(kubeconfig `/home/ec2-user/.kube/eks/config.yaml`) | ❌ 絕對不碰 |
 
 判準:context 是 `kind` 或 `kind-k8s-coach-*` 都安全;只有 `eks` 是公司 PROD。**別因 context 名叫 `kind` 就誤觸警報卡住學員**(2026-07-07 已確認)。
