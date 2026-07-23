@@ -12,21 +12,29 @@
 
 ## Meta
 
-- session_count: 18
-- last_weekly_review: 0 — 🔴 從未跑過;18-0 ≥ 7,**第 3 次順延**(S17 學生選推遲、S18 折衷方案只回收 binary-search 債)。S19 前置:完整 Weekly Review(3 題 blind recall + Mistake Registry 全測 + P0 gate)
-- last_session_date: 2026-07-14
+- session_count: 19
+- last_weekly_review: 0 — 🔴 從未跑過;19-0 ≥ 7,**第 4 次順延**(S19 開場先補 S18 懸著的 Transfer gate,學生體力耗盡於該 gate,Weekly Review 未進場)。S20 前置:完整 Weekly Review(3 題 blind recall + Mistake Registry 全測 + P0 gate)
+- last_session_date: 2026-07-23
 - warm_up_classification: (standalone 時期未記錄;既有證據:blank-page 傾向為主要弱點,S16 顯示 bridge 已能自主運行 — 建議 S17 順帶補跑分類,不當新生重測)
 
 ## Current Session breakpoint
 
-**S18 (2026-07-14) 學生喊停** | phase P3 | topic: #153 Find Minimum in Rotated Sorted Array(七步 flow 首次啟用)
-- Chunk 1 「推導」(第 0-3 步):Recall ✅(五問腳本以 code 形式跑出,零 bug)
-- Chunk 2 「驗證」(第 4 步 + step D):step D **19/19 green,含對數 tripwire(讀取次數 ≤ 100)**,solution.py 手打**零 bug**(對比 #74 有 2 bug)
-- **Transfer ❌ 未答** — 停在 #33 兩問:① `while l < r` 還 `l <= r`,用「mid 要不要留」判準推 ② #33 的 check 比 #153 多做什麼(判斷 target 在不在有序的那半)
-- next: 開場先答 #33 兩問(Transfer gate)→ step E 用 #33 驗收
+**S19 (2026-07-23) 正常收尾** | phase P3 | topic: #153 Chunk 2 Transfer(補 S18 懸債)+ #33 step E 驗收 | 9 天 gap,走 Comeback
 
-⚠️ S18 = Weekly Review 第 3 次順延(學生選折衷:今天 #153 + 只回收 binary-search 債)。順延債務:
-- 🔴 **Weekly Review #1** — 逾期 18 sessions,S19 必須先跑(3 題 blind recall:binary-search / stack / two-pointers)
+前半 · Transfer Q① 迴圈條件(**部分過**):
+- 學生**自力跑出核心機制** — 手算兩例判斷 mid 丟不丟(例 A 丟得掉 / 例 B 丟掉就砍到答案)、自己跑出 `l<=r` 配 `r=mid` 的**無限迴圈**第三圈。
+- 但**串不成規則**(要求填「留 mid → `l<?r`」句型時喊「重新幫我整理」)→ 規則表由 coach 串,登記 answer-debt。
+- 套用到 #33:`r = mid - 1` ✅ 自答;while 條件答成 `l > r`(**把迴圈結束狀態當成 while 填的條件**)❌;「哪一行證明 mid 不是答案」(A/B 執行順序)未答,coach 給出 → answer-debt。
+
+後半 · #33 step E 驗收(**綠**):
+- 學生自行寫出**兩層 check**(哪半有序 → target 在不在那半)並手打完成,harness **31/31 green** 含兩個 O(log n) tripwire。
+- 唯一 bug:`while left < right` 應為 `<=`。**症狀「找得到的全掛、找不到的全綠」,與 S17 #74 的 return 縮排 bug 同型(第 2 次)**。fix 由 coach 指出(學生喊「直接說哪裡有問題」)→ answer-debt。
+- ⚠️ Step E 固定收尾問句 **Q②(#33 的 check 比 #153 多做什麼)未由學生自答**,notes 裡的對照表是 coach 整理版。Chunk 2 Transfer **仍未關**。
+
+- next: S20 先跑 Weekly Review #1;然後 ① 白紙默出邊界配對表 ② 學生自答 Q② → 才關 #153 Chunk 2
+
+⚠️ S19 = Weekly Review 第 4 次順延(非學生選擇,是體力用盡在前一關)。順延債務:
+- 🔴 **Weekly Review #1** — 逾期 19 sessions,S20 必須先跑(3 題 blind recall:binary-search / stack / two-pointers)
 - ① #704 Binary Search cold re-do(fluency 驗收,**逾期**)— 註:#153 手打零 bug 已部分證明 skeleton fluency,但 #153 是 `l<r` 變體,#704 的 `l<=r` 閉區間版仍未冷寫回測
 - ② A2/A4 answer-debt(S18 學生喊「直接說明」,答案由 coach 給出)— 3 天內白紙重考,見 Mistake Registry
 - ③ 舊債:#84 stack cold re-do(answer-debt,逾期)/ 教 Yuki(#84 + Car Fleet)/ P0 Gate 正式驗收
@@ -54,7 +62,7 @@ in-progress。Gate 順序照 curriculum 補齊:P0 gate 先行,P1/P2 缺口補完
 - two-pointers: med (s7;#42 Hard 三層全綠,但 Feynman Q2/Q3 看答案 — 升 high 條件:transfer Q 自答)
 - sliding-window: med (s8;#239 Hard 親手寫完,基礎 5 題未做;Feynman Q2/Q3 + Mock 待補)
 - stack: high (s15;NeetCode Stack 全清,#84 code 未冷寫 — 冷寫過才算穩)
-- binary-search: med (s18;#704 Learn 模式 skeleton 冷寫首次 100%;#74 手打 2 bug;#153 手打**零 bug** 19/19 green。升 high 條件:① #704 閉區間版 cold re-do 零 bug ② 開閉區間配對規則(`l<r` vs `l<=r`)能直覺產出而非現場推導)
+- binary-search: med (s19;#704 Learn 模式 skeleton 冷寫首次 100%;#74 手打 2 bug;#153 手打**零 bug** 19/19 green。S19:配對規則的**機制**已能自力手算(mid 丟不丟 / 死迴圈),但**組裝成規則**仍失敗,且 `while` 條件答成結束狀態。升 high 條件:① #704 閉區間版 cold re-do 零 bug ② 白紙默出配對表、`l<r` vs `l<=r` 直覺產出而非現場推導)
 
 ## Scorecard history
 
@@ -88,13 +96,18 @@ Open 項(15 列)自 standalone 遷入;原始狀態原文引註。Resolved 54 列
 - (2026-07-14, s18) | binary-search #153 | 講不出 `r = len(nums)` 的**具體反例**,只複誦「因為是 index 所以要 -1」| hostile-input-reflex | unresolved(**answer-debt**:coach 給了答案;3 天內白紙重考。抽問:給 `nums=[1,2,3]`, `target=5`,逐圈跑到爆為止)| 3 | 2026-07-17 | 0
 - (2026-07-14, s18) | binary-search #153 | 講不出「這行該在迴圈內還是迴圈後」的判準 | loop-placement-criterion | unresolved(**answer-debt**;🔴 同 return-卡迴圈家族第 3 次接觸。判準:「這動作該做幾次?」每圈一次→內;結束後一次→外。抽問時要學生自己講出判準)| 3 | 2026-07-17 | 0
 - (2026-07-14, s18) | binary-search #153 | `[5,6,7,1,2,3,4]` mid=3(值 1)誤標成「第一段」,但同時答對「mid 不能丟、證人是 mid 自己」→ 機制對、標籤反 | segment-labeling | unresolved(用矛盾點自行修正。抽問:第一段=高的還低的?第一段的元素有可能是最小值嗎?)| 3 | 2026-07-17 | 0
-- (2026-07-14, s18) | binary-search #153 | 學生自述:`while` 加不加 `=`、`r=mid` 還是 `mid+1`,無法直覺產出,要現場想 | interval-openness-pairing | unresolved(**最高價值項**。配對規則:兩邊都跳 mid → `l<=r`;有一邊留 mid → `l<r`。抽問:`l<=r` 配 `r=mid` 會怎樣?為什麼?)| 3 | 2026-07-17 | 0
+- (2026-07-14, s18) | binary-search #153 | 學生自述:`while` 加不加 `=`、`r=mid` 還是 `mid+1`,無法直覺產出,要現場想 | interval-openness-pairing | unresolved(**最高價值項**。S19 進展:機制端**已能自力手算**(mid 丟不丟 + 死迴圈第三圈),缺的是**組裝成規則**。抽問改成:白紙默出「留 mid/丟 mid × 寫法/會不會縮/迴圈條件/結束時」四欄表)| 3 | 2026-07-26 | 1
+- (2026-07-23, s19) | binary-search #33 | 問「`while` 條件寫什麼」答成 `l > r`,把**迴圈結束時的狀態**當成 `while` 裡填的東西 | while-condition-vs-exit-state | unresolved(根因同 loop-placement 家族:對「這行在什麼時機被求值」沒有心智模型。抽問:`while X:` 的 X 為真時程式在做什麼?為假時在做什麼?)| 3 | 2026-07-26 | 0
+- (2026-07-23, s19) | binary-search #33 | 講不出「哪一行、什麼時候把『mid 不是答案』確定下來」(`if ...: return mid` 沒 return 就是驗證通過)| discard-license-instantiation(S17 `discard-license-vs-sorted` 家族第 3 次)| unresolved(**answer-debt**,coach 給出。抽問:code 跑到 `r = mid - 1` 時,前面哪一行已經幫它排除了 mid?)| 3 | 2026-07-26 | 0
+- (2026-07-23, s19) | binary-search 通則 | 每一格機制都自力答對,但**無法把答對的格子串成一條規則**;要求填空句型時喊停要 coach 整理 | chain-assembly(疑同 S17 `principle-instantiation` 反向:那次是規則→實例失敗,這次是實例→規則失敗)| unresolved(**answer-debt**:規則表由 coach 串。3 天內白紙默出配對表。抽問:不給提示,直接「講出決定 `while` 加不加 `=` 的那一句判準」)| 3 | 2026-07-26 | 0
+- (2026-07-23, s19) | binary-search #33 | `while left < right` 寫成開區間,但兩邊都丟 mid → 最後一格永遠沒被檢查 | interval-openness-pairing(**實戰重演**:同一堂剛推完的規則,寫 code 時仍寫錯)| unresolved(**answer-debt**,coach 指出行號。價值:證明「推導過」≠「寫得出來」,要靠白紙重寫才會固化)| 3 | 2026-07-26 | 0
+- (2026-07-23, s19) | binary-search #33 | 14 fail/17 pass 且「找得到的全掛、找不到的全綠」,學生未從 **fail/pass 分布**診斷,直接要答案 | failure-distribution-diagnosis(🔴 **同型第 2 次**,S17 #74 期望 True 全掛/期望 False 全綠)| unresolved(要養成的反射:**harness 掛了先看 fail/pass 分布,不要先看 code**。抽問:給一組 fail 分布,問這是哪一類邏輯錯)| 3 | 2026-07-26 | 0
 
 ## Spaced-repetition queue
 
 Mistake 項引用上表(不重複)。Chunk 型債務:
 
-- chunk:p3/#153 Chunk 2 Transfer 兩問(#33 的迴圈條件 + check 多做什麼)| chunk | — | 2026-07-15(下次開場)| active
+- chunk:p3/#153 Chunk 2 Transfer 重考(① 白紙默出邊界配對表 ② #33 的 check 比 #153 多做什麼)| chunk | 3 | 2026-07-26 | active
 - chunk:p3/binary-search #704 cold re-do(fluency 驗收)| chunk | 3 | 2026-07-11 | active
 - chunk:p2/largest-rectangle #84 cold re-do(answer-debt:S15 code 是看的)| chunk | 3 | 2026-07-05 (approx, 逾期) | active
 - chunk:teach-back #84 + Car Fleet(S14/S15 跳過的 pattern 收尾教學)| chunk | 3 | 2026-07-05 (approx, 逾期) | active
