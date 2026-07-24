@@ -7,12 +7,33 @@
 
 ## Meta
 
-- session_count: 20
+- session_count: 21
 - last_weekly_review: 18
-- last_session_date: 2026-07-20
+- last_session_date: 2026-07-23
 - warm_up_classification: mid(有地圖形狀,缺演員名字;P0 剛好,不加速)
+- **target_role: AWS Delivery Consultant(ProServe),2026-07-23 學員確認**。全部抽考包成客戶顧問情境、每題附 L6 範例答法(memory `aws-delivery-consultant-target` / `aws-mock-and-l6-answer-format`);戰略重排見 curriculum-plan §9。
 
 ## Current Session breakpoint
+
+**s21 已收(2026-07-23,公司 bastion)。三件大事:① 職涯目標確認為 AWS Delivery Consultant,教學格式改制 ② 叢集舊帳爆掉並修好 ③ 4-5 七站冷測 0/4 未過。**
+
+**① 目標與格式改制(最高優先,影響往後每一堂)**:學員確認面試職缺是 **AWS Delivery Consultant (ProServe)**,並要求(a)全部問題用該職位的面試情境模擬、(b)每題附 **L6 senior 範例答法**、(c)**加速課程**。已寫入 memory 兩張卡 + curriculum-plan §9。含意:Amazon LP 佔 loop 近半 → story-bank 從「P6 提煉」提前到每堂機會式入帳;全英文 loop → English ramp 需提前;技術主線不變但 EKS/IRSA/migration 權重拉高。
+
+**② 環境修復(舊帳,s16 拖到今天)**:p2a 兩台 worker 全 NotReady,Reason `container runtime is down`。診斷鏈:node Conditions(排除 mem/disk)→ 宿主機資源(15Gi 剩 9.8Gi,**記憶體不是兇手,推翻 s16 假設**)→ containerd `active (running)`(進程活著)→ kubelet log `Status from runtime service failed: rpc DeadlineExceeded`(真兇)。根因=4 核心上跑 6 個 kind node + terraboard 重啟迴圈,CRI gRPC 被拖過 timeout。修法:學員親手 `kind delete cluster --name k8s-coach-p0` + `docker stop terraboard` + `docker restart` 兩台 worker → 三台全 Ready。**教學價值高**:故障點(worker NotReady)與根因(隔壁叢集搶資源)不在同一個叢集裡。註:worker/worker2 的 node IP 重啟後變動(現 worker=172.21.0.4)。lab 三層 Pod 全部復活在 worker2(frontend .210 / backend .209 / db .211),舊 Terminating 殘骸未清。**`allow-dns` netpol 已不存在,只剩 `default-deny-all`**。
+
+**③ 4-5 七站骨架冷測:0/4,明確未過。** 學員只給出 3 個碎片(CoreDNS 的 ClusterIP / kube-proxy iptables / 回程 conntrack),漏掉 veth 出 Pod、過濾層、**跨 node 路由**、抵達 node2。追問「封包怎麼從 node1 到 node2、第一個指令是什麼」→ 答「查 iptables」→ 縮小重問 → 答「查 resolv.conf」(跨層到 DNS)。**結論:s19/s20 親手驗過的四塊零件,三天後無鷹架組裝不起來 = 會用 ≠ 會講,隔堂冷測的價值當場實證。** 事後給正解七站表 + L6 級範例答法(含間歇性假設排序:conntrack table full / ENA `conntrack_allowance_exceeded` / DNS UDP 競態 / rollout endpoint 過時),學員親手 `docker exec ... ip route` 摸到第 5 站,自己挑對 `192.168.20.192/26 via 172.21.0.2 dev tunl0` 那一行(但判準要追兩次才給,且最後答「不用特別算」= 拒絕 show work)。
+
+next(s22),順序:
+1. **開場即改制**:A 段抽考一律包成 AWS Delivery Consultant 客戶情境,答完給 L6 對照版。順手挖一則 story-bank raw(LP 佔比高,每堂都挖)。
+2. **4-5 七站重測(第 2 次)**,這是 P2a gate 的答案卷,沒過不進 gate。重點盯第 2/4/5/6 站(今天全漏)與「每站誰做的」。要求先宣告四層框架再走路徑。
+3. **判準句型專項**:學員今天三次只給結論不給判準(第六、七堂同條)。強制句型「我看的是 X,**因為** [判準]」,每個答案都要有「因為」後半句。
+4. step A 過期債(每堂 2 題):07-22 一批(靜默無效一段話組裝版、兩張名單兩關檢查程序、L4-L7 無框架新情境、三分類第 2 輪)、07-23(CNI 合約三件事、出廠全通重抽,今日均未跑)、以及 06-30/07-03/07-10 的長期積欠。**佇列嚴重積壓,WR8 在 s25 觸發時要清一次。**
+5. chunk 3+4 F/G 累積債仍未跑;lab Step 5+6 未動(叢集已就緒,`allow-dns` 需重建)。
+6. **加速課程的處理**:學員要求加速,但今日冷測 0/4。正確做法是**重新配重不是趕進度**(P2b IRSA / P5 EKS terraform / migration 拉高,P3/P4 深度可修剪),並確認面試日期才能倒推。**s22 開場先問面試時間點。**
+7. pacing:今日出現慢下訊號(回答變短、貼回原文、「不用特別算」),已縮 scope 收場。
+
+<details>
+<summary>s20 斷點(已消化,留參考)</summary>
 
 **s20 已收(2026-07-20,公司 bastion,一日三 chunk 紮實堂)。C-4 封包全鏈四塊本堂全收:4-2 veth pair、4-3 node 路由表、4-4 MASQUERADE(4-1 CNI 合約 s19 已收)。全程學員親手敲指令、教練只給規格與判讀(鍵盤鐵律遵守)。開場給了 4-1 CNI 左→右英文思維導圖複習(學員白板用),NIC 一詞當場問答補上。**
 
@@ -74,7 +95,7 @@ next(s17):
 
 - P0 心智模型: gate-passed(2026-06-22;legacy,pre-Examiner,coach 認證)
 - P1 核心物件 + 容器底層: gate-passed(2026-06-25;legacy,pre-Examiner,coach 認證)
-- P2a 網路深水區: in-progress(chunk 1 Service/kube-proxy/CoreDNS ✅、chunk 2 Ingress ✅;chunk 3 NetworkPolicy in-progress〔3-1/3-2 教完、lab 到 Step 4,剩 Step 5+6+gate+F/G,學員決策延後綁一起收〕;chunk 4 in-progress〔**4-1 CNI 合約 ✅ s19、4-2 veth ✅ s20、4-3 路由 ✅ s20、4-4 MASQUERADE ✅ s20**;剩 4-5 七站骨架盲講(gate 答案卷)〕。C-4 封包全鏈四塊已備妥,4-5 串起來即進 phase gate)
+- P2a 網路深水區: in-progress(chunk 1 Service/kube-proxy/CoreDNS ✅、chunk 2 Ingress ✅;chunk 3 NetworkPolicy in-progress〔3-1/3-2 教完、lab 到 Step 4,剩 Step 5+6+gate+F/G,學員決策延後綁一起收〕;chunk 4 in-progress〔**4-1 CNI 合約 ✅ s19、4-2 veth ✅ s20、4-3 路由 ✅ s20、4-4 MASQUERADE ✅ s20**;**4-5 七站骨架盲講 ❌ s21 冷測 0/4 未過**〕。四塊零件備妥但串不起來,4-5 重測過了才進 phase gate)
 - P2b 儲存 + 權限: not-started
 - P3 調度 + 高並發 + 排障: not-started
 - P4 可觀測性工程: not-started
@@ -96,7 +117,7 @@ Weak-topic flags: 無(至今沒有帶 flag 過 gate 的紀錄)。
 - NetworkPolicy(白名單 + default-deny 翻轉 + 第四個引擎): low-med (s17:3-1 Recall ✅〔policyTypes 方向性重教一輪後情境題全對〕、坑一 AND/OR ✅〔含 batch-job 案例〕、坑三 ipBlock ✅;坑二兩張名單 ❌、3-1 Transfer 組裝 ❌,兩筆 07-22 冷測。Step 4 親手完成:allow-dns 一張卡決策自己做對,死法 Resolving→Connection 搬家實證)
 - conntrack 精度(table full 新舊連線): med (s18 **分工句收**:「iptables 第一次決定、conntrack 之後記住」骨架自產,應用經一次追問補全〔第 50 個去程=查 conntrack 改 Destination、回程=改 Source 反向〕;07-26 抽完整版〔兩個詞+分工句+查誰〕過即封印。歷史:s15 重抽沒過、答案直給;s16 給框架後兩個詞自產)
 - DNS 排障第一刀(先用 FQDN 二分): med (s13;需鷹架)
-- P2a CNI 封包全鏈 data plane(veth/路由表/MASQUERADE/conntrack): med (s20 一堂三 chunk 全親手驗:veth ifindex 兩頭互指、路由表三岔路〔via/dev 尺〕、MASQUERADE 換臉規則自讀出「Pod 打 Pod 不換」。排障尺〔跨 node 不通查對面網段那行〕經三段逼問鎖精準;conntrack 治標/治本仍需扶〔調 max=治標歸錯邊,s5/s6 老條〕。**未經無鷹架冷測**,4-5 七站盲講過了才升 high)
+- P2a CNI 封包全鏈 data plane(veth/路由表/MASQUERADE/conntrack): **low-med** (**s21 降級**:無鷹架七站冷測 0/4,只吐出 3 個碎片〔CoreDNS 的 ClusterIP / kube-proxy iptables / 回程 conntrack〕,漏 veth 出 Pod、過濾層、跨 node 路由、抵達對面 node。追問跨 node 第一個指令 → 答 iptables → 縮小重問 → 答 resolv.conf〔跨層〕。**s20 自己推出的排障尺「跨 node 不通查對面網段那行」三天後完全蒸發**。診斷:零件記憶 ≠ 旅程記憶,四塊各自驗過但從未串講。事後給正解 + L6 範例後親手 `ip route` 挑對 `192.168.20.192/26 via 172.21.0.2 dev tunl0`。s20 原始紀錄:一堂三 chunk 全親手驗:veth ifindex 兩頭互指、路由表三岔路〔via/dev 尺〕、MASQUERADE 換臉規則自讀出「Pod 打 Pod 不換」。排障尺〔跨 node 不通查對面網段那行〕經三段逼問鎖精準;conntrack 治標/治本仍需扶〔調 max=治標歸錯邊,s5/s6 老條〕。**未經無鷹架冷測**,4-5 七站盲講過了才升 high)
 
 ## Scorecard history
 
@@ -111,6 +132,7 @@ Weak-topic flags: 無(至今沒有帶 flag 過 gate 的紀錄)。
 - 2026-06-29 | weekly review (s10, tier 2) | 4/4 | 盲講控制流易漏中間棒次→五棒默數 | 封包全鏈無鷹架冷測 | coach(MTTR 當日未演練,carry 前測✅)
 - 2026-07-09 | step G (s14, tier 2) | 1/4 | 隱性會沒逼成顯性:結果預測準、why 講不出 | `/apiv2`→catch-all 那刀自己串對沒鷹架 | coach(原符號:原理🟡 機制✅ 自己的話🟡 MTTR🟡)
 - 2026-07-19 | weekly review (s18, tier 2) | 3/4 | 判準句慣性省略、只給結論(第五堂同條);L4-L7 兩步框架仍靠教練給才套用 | conntrack「去程改 Destination/回程改 Source+都查 conntrack」自產;redis 題「要拆開的是 redis 的指令」自己的話 | coach(原理✅ 機制✅ 自己的話✅ MTTR 未演練=0;冷測專場,s17 低信度 1/4 之後的乾淨重測)
+- 2026-07-23 | step G (s21, tier 2, **AWS Delivery Consultant 面試模擬首場**) | 0/4 | 判準句缺席:三次只給結論(kube-proxy yes/no、選路由那行、CIDR「不用特別算」),第六堂同條 | 回程 conntrack 主動講出來,無提示,而且那是 gate 歷史漏點清單上的站 | coach(原理❌ 機制❌ 自己的話❌ MTTR❌。七站只給 3 碎片;MTTR 兩次選錯指令且第二次跨層到 DNS。**信度高**:純冷測、教練全程未給鷹架)
 - 2026-07-17 | A 段+chunk3 gate (s16, tier 2) | 1/4 | 判準/機制講不出:L4-L7 兩度結論對理由錯;分工句未收 | conntrack 去程/回程兩欄位**自產**(給框架不給答案,s15 直給後蒸發,今日一次推出) | coach(原理❌ 機制🟡 自己的話❌ MTTR 未演練。**本場信度低**:教練犯三錯〔過度抽考/考未教內容/搶鍵盤〕,低分含教練污染,不宜單獨採信,s17 WR 重測)
 
 ## Mistake Registry
@@ -139,7 +161,13 @@ Weak-topic flags: 無(至今沒有帶 flag 過 gate 的紀錄)。
   - **s18(07-19)WR 冷測:過,但帶星號**。postgres 讀寫分流題:結論 ✅、判準半(「沒辦法針對 SQL 內部分流」有指到讀內容方向);教練補完整兩步判準(①讀到哪層 ②工具懂不懂該協定,L7=協定特定翻譯官、nginx 只懂 HTTP 語,pgpool 懂 postgres 語所以做得到)後,redis key 前綴換皮題兩步全對、「要拆開的是 redis 的指令」自產。標籤貼反未重現。**框架教練給故不推 7;07-22 無框架第四情境(禁 postgres/redis)過了才封印**。
 - 2026-07-17 | NetworkPolicy 出廠全通 | why-first 預測「陌生 tmp Pod 連不到 db」→ 實測**連得到**(回 `db`) | k8s 出廠預設全通、namespace 只是邏輯分組不做隔離(P1 已釘過、當堂教練又粗體講過 40 分鐘,仍預測錯) | unresolved | 3 | 2026-07-23 | 1
   - 正解:出廠任何 Pod 可連任何 Pod、跨 ns 亦然;NetworkPolicy=白名單宣告,**一旦有 policy 選中該 Pod,該方向即從全通翻轉成 default-deny**。生產起手式=每個 ns 先上空白名單(`podSelector: {}` + `policyTypes: [Ingress, Egress]` + 零 rule)再逐條開洞。**s20 重抽半過**:情境題(新 ns 無 policy 互打通不通)結論靠提示撈回、關鍵 why「podSelector 只在自己 ns 內選人,勢力範圍不跨 ns;from/to 名單可跨 ns=放行誰,podSelector=翻轉誰」沒站住 → 07-23 再抽(與 CNI 卡同天),過了才推 7。
-- 2026-07-17 | default-deny 後的分層(DNS 層 vs 連線層) | 只答「連線不到」,未分辨死在哪一層 | 層級混淆家族(同 s11 把 conntrack 拉進 DNS 題、06-28 排障第一刀) | unresolved | 3 | 2026-07-20 | 0
+- 2026-07-23 | 跨 node 走路由表不是 iptables(層級混淆家族) | 「封包怎麼從 node1 到 node2?第一個指令是什麼」→ 答「查 iptables」;縮小重問「node1 怎麼知道這個 IP 在哪台機器」→ 答「查 resolv.conf」 | 改寫層(NAT)與轉送層(routing)混為一談;第二次還跨到解析層 | unresolved | 3 | 2026-07-26 | 0
+  - 正解:**`ip route`**。判準句「**iptables 管改寫成什麼,路由表管往哪裡送。改寫完之後,封包還是得問路。**」排障尺:跨 node 不通 → 拿目標 Pod IP 去路由表對網段,看那一行在不在、`via` 誰、走哪個 dev。s21 親手驗:`192.168.20.192/26 via 172.21.0.2 dev tunl0 proto bird onlink`(`via`=跨機器、`tunl0`=IPIP overlay、`proto bird`=Calico 的 BGP daemon 自動佈的,不是人寫的)。**此卡是 s20「排障尺」蒸發的直接證據**。
+- 2026-07-23 | kube-proxy 不在 Pod 啟動路徑上 | ① 把 kube-proxy 列為 kubelet 建 Pod 的三件事之一 ② 「Pod 啟動過程有封包打 ClusterIP 嗎」答 yes | 控制路徑 vs 資料路徑混淆;規則 vs 引擎家族 | unresolved | 3 | 2026-07-26 | 0
+  - 正解:Pod 啟動全程 **0 次 ClusterIP**(kubelet 連 kubeconfig 裡的真實 endpoint、拉 image 連 registry 真 IP、CNI 是本機執行 binary 不過網路、掛 volume 是本機檔案系統)。分工句:**「kube-proxy 管的是 Pod 出生之後拿 Service 名字互打那條路;Pod 怎麼出生跟它一點關係都沒有。」** 症狀對照:kube-proxy 掛=現有連線照跑、規則不再更新;CoreDNS 掛=新解析全滅。
+- 2026-07-23 | 只給結論不給判準(pattern 卡,升級追蹤) | 同一堂三次:kube-proxy 題只答 yes、選路由那行不給計算、CIDR 直接說「不用特別算」 | 輸出習慣問題不是能力問題:算得出來但不 show work,面試官無法區分「會」與「猜對」 | unresolved | 3 | 2026-07-26 | 5
+  - 對治句型(每個答案強制):**「我看的是 X,因為 [判準]。」**「因為」後半句就是固定掉分的地方。歷史:s5、s14、s16、s18 scorecard 的「最該改進」都是這一條,s21 升級為獨立卡追蹤。ProServe 加權:顧問工作有一半是在客戶面前 show work,這條在目標職位上是重罪。
+- 2026-07-17 | default-deny 後的分層(DNS 層 vs 連線層) | 只答「連線不到」,未分辨死在哪一層;**s21 重抽未過**:情境題答「這問題應該是 app 層」,縮小到圖上指認又答「被鎖的是連線那步」(漏掉①先發生) | 層級混淆家族(同 s11 把 conntrack 拉進 DNS 題、06-28 排障第一刀);s21 新形狀=**兩步都被鎖時不問哪一步先發生** | unresolved | 3 | 2026-07-26 | 1
   - 正解:`curl http://db` 有先後兩步 —— ① 問 CoreDNS(需 egress UDP/TCP **53**)② 建 TCP 連線。default-deny 鎖 egress **連 53 一起鎖**,所以死在第 ① 步,第 ② 步沒機會發生。實證(s16 親手):`curl http://db` → `curl: (28) **Resolving** timed out`;`curl http://192.168.46.66:5678`(餵 IP 跳過 DNS)→ `curl: (28) **Connection** timed out`。**同一條 policy 兩種死法,差別只在需不需要問名字**。prod 陷阱:app log 噴 `could not resolve host` → 全隊衝去查 CoreDNS,但 CoreDNS 好好的,是 policy 封了「去問路的那條路」。故 default-deny 第一個洞永遠是 DNS。
 - 2026-07-20 | CNI 基本合約 vs 選配 | Recall 合約三件事兩輪講不出,答成「建立網路 networkpolicy 嗎」= 把選配(NetworkPolicy 引擎)混進合約本體 | 新教內容首輪未固化 + chunk 3 靜默無效的 CNI 印象蓋過合約本體 | unresolved | 3 | 2026-07-23 | 0
   - 正解:合約本體=**網卡、IP、路由**(管「通」,每家 CNI 必做,kubelet 建 Pod 時呼叫);NetworkPolicy 引擎=選配(管「擋」,Calico 有 kindnet 無)。hostNetwork=不蓋孤島直接住 node root netns,故不需 CNI(etcd/apiserver/kube-proxy 照跑=排障訊號「CNI 層壞 vs 整機壞」)。s19 亮點:hostNetwork 判準「需不需要獨立網路」學員自推。07-23 抽三件事+各自缺席的死法。
@@ -164,7 +192,10 @@ Weak-topic flags: 無(至今沒有帶 flag 過 gate 的紀錄)。
 - mistake:三分類-家族卡 | mistake | 3 | 2026-07-22(**s18 counter 1/3**:零流量思想實驗全對、conntrack 站對「狀態」;第 2 輪換家族成員)| active
 - mistake:L4-vs-L7 | mistake | 3 | 2026-07-22(**s18 新情境過但框架教練給**:postgres/redis 兩題連過、標籤貼反未重現;07-22 無框架第四情境〔禁 postgres/redis〕過了才推 7)| active
 - mistake:NetworkPolicy-出廠全通 | mistake | 3 | 2026-07-23(s20 重抽半過:結論靠提示、「podSelector 只在自家 ns 選人」why 沒站住;與 CNI 卡同天再抽)| active
-- mistake:default-deny-分層(DNS vs 連線)| mistake | 3 | 2026-07-20(s16 親手實證兩種 timeout;層級混淆家族)| active
+- mistake:default-deny-分層(DNS vs 連線)| mistake | 3 | 2026-07-26(**s21 重抽未過**,interval 歸零;新形狀=兩步都鎖時不問先後順序)| active
+- mistake:跨-node-走路由表 | mistake | 3 | 2026-07-26(s21 新卡:`ip route`,判準句「iptables 管改寫成什麼、路由表管往哪裡送」;s20 排障尺蒸發的證據)| active
+- mistake:kube-proxy-不在-Pod-啟動路徑 | mistake | 3 | 2026-07-26(s21 新卡:分工句 + kube-proxy 掛 vs CoreDNS 掛症狀對照)| active
+- mistake:只給結論不給判準(pattern)| mistake | 3 | 2026-07-26(**s21 升級為獨立卡**,已跨 s5/s14/s16/s18/s21 五堂;考的是有沒有主動說出「因為 [判準]」,不是結論對不對)| active
 - mistake:NetworkPolicy-靜默無效 | mistake | 3 | 2026-07-22(s17 Transfer 未過,考「一段話完整版」組裝,不考零件)| active
 - mistake:CNI-合約三件事 | mistake | 3 | 2026-07-23(s19 新卡:網卡/IP/路由 + 各自缺席的死法;hostNetwork 判準已自推不用重考)| active
 - mistake:兩張獨立名單 | mistake | 3 | 2026-07-22(s17 新場景重測,驗「兩關檢查程序」有沒有長成反射)| active
