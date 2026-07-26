@@ -28,6 +28,13 @@
 
 下一場(S46)resume:Topic 3 球 1 默畫起 → 8 張過期卡 sweep → artifact audit → 收帳(last_weekly_review 更新)→ mock #1 Day 33 Notification System(計畫細節見上方 S44 段)。
 
+**S46 進行中(2026-07-19→20,本機)= mock #1 Day 33 Notification System(學生 07-19 拍板跳過清帳直接開打;WR5 Topic 3 + sweep 順延至 Tier 1 mock 後,與上行清帳 resume 合併排程)。Step 1 clarify 已收(存檔點)。** 拍板約束:詐騙警示 P99 60s 雙供應商自動切換(3-5 萬/日,尖峰 200-300/s);交易通知 500 萬/日分鐘級;行銷 2-3 檔/週×100-300 萬則、可暫停、24h TTL 作廢、頻率上限;scope=SMS MVP+MQ 解耦(多通道=加 worker)、系統側 rate limit 先行、用戶偏好設定頁延後。過程:clarify 全程重 scaffold(公式 1/2 教學+填空);「直接說」棄權家族第 4 筆(S36→S42→S44→S46,SNS 填空卡住);LB 亂入中間格=S40 recency bias 再現+「low balance」語音滑動;數字戳破(300 萬÷1000/s=50min)後自答 Queue/SQS。下一步:Step 2 高層設計,圖先行,學生自擺鏈路。
+
+**S46 續場(2026-07-26,本機,間隔 6 天):Step 2 三度棄權後模範答案給畢。** 開場冷回憶球(三類約束哪一條決定架構)→「不確定這題要怎麼回答」;給判準結構+反問(單一 queue 300 萬則排隊,詐騙警示何時送出,要數字)→「不會算 使用 L6 等級的 DevOps 會怎麼回答」(proxy 問法,S45 後第 2 次)→ 拒給並縮到一步除法 →「不會有面試問這個吧 直接說明 不要浪費時間」(質疑題目正當性家族第 2 筆,S42 後)→ 舉三證據(scorecard 維度 8、Ch 10 唯一考點、07-03 拍板 bar)並開交易「給我這個除法,Step 2 模範答案一次給完」→ **學生答 3000(正確)**。⚠️ 關鍵留存問題:`300萬÷1000=50min` 這個除法 07-19 同一題已在他面前算過並由他自答 Queue,6 天後變「不會算」。模範答案已給畢:三條獨立 queue + 獨立 worker pool(隔離資源非順序)、詐騙 P99 60s 容量 ≈30 worker、24h TTL 寫 payload expire_at、暫停=消費端旗標、per-user daily counter 頻率上限、dedupe conditional write、provider CB 自動切換、retry 預算受 SLO 綁、data model 4 表、API 4 支、AWS 映射表 8 行含坑、3AM page test 完整四格、英文 one-liner(用他自己算的 50 分鐘當論證)。
+三指標本場:argument ❌(第一句棄權,零嘗試)/ capacity ❌(拒給+縮到單步除法才過,非 unprompted)/ ops 未測(沒走到收尾,模範答案是 coach 給)。連續計數全部維持 0。
+**同場後半(語言規則+難度回檔+核心 chunk 過關):** (1) 學生點名「中文敘述+技術名詞留英文」,已入 memory(keep-technical-terms-in-english)+ coaching-brief 語言策略;之後所有 coach 適用。(2) 全中文對話版完整 mock 逐字稿+速記卡給畢。(3) 學生喊「太難了/會考嗎/圖看不懂」→ safety valve 回檔:校準「逐字稿=天花板非及格線,及格線只有三件事(clarify 三類時效/50min 推 queue 隔離/3AM page)」;11 框圖棄用,改三層漸進圖(第 0 層現狀→第 1 層加 queue→第 2 層一變三)。(4) **核心 chunk 過關**:「三 queue 共用一組 worker 解決了嗎?」→ 學生「還是沒有解決」(裸)→ 要機制 →「會卡在在跑大量的 marketing」= 最小單位過;鏈已拼完整(隔離要隔 queue+worker 兩層)。🌟 本場最佳:學生主動問「worker 可以用 Lambda 嗎」= 主動 AWS 映射(sprint overlay 目標),且 reserved concurrency per-function 正好同構 per-pool 隔離。
+下一步(S47):開場白板默畫**三層簡化圖**(0→1→2 層,非 11 框大圖)+ 自己講「為什麼 queue 和 worker 都要分」→ 過了才進 Step 3 deep dive(provider failover / dedupe 位置)→ 收尾自己跑 3AM page test。
+
 **2026-07-19 S45 開場學生拍板:清帳場 2/2 押後(「不要再清場了,快沒耐心」),WR5 Topic 2/3 + 過期卡 sweep 移到 Tier 1 mock 跑完後收;S45 直接進 mock #1 Day 33 Notification System。**
 
 原 S45 計畫(押後,Tier 1 mock 後執行;one-liner 抽考已停用,2026-07-18 學生拍板,見 curriculum-plan.md):
@@ -109,7 +116,11 @@ Weak-topic flags: 無(至今沒有帶 flag 過 gate 的紀錄)。
      無卡的設 3 天(2026-07-13)。unresolved-session-count = 40 - 建立 session(近似;≥5 依 engine
      Priority Override 置頂,step A 每堂上限內逐步清)。 -->
 
-### Live(unresolved,33 筆)
+### Live(unresolved,36 筆)
+
+- (s46) | Capacity estimation | `300 萬 ÷ 1000/s` 喊「不會算」;同一個除法 07-19 同一題已在他面前算過且他當場自答「要 Queue」,6 天後掉 | capacity-freeze 家族 + 「當場🟢≠留得住」;縮到單步除法即答對(3000)= 算術沒問題,是壓力下棄權;複測用同題不同數字冷起手 | unresolved | 3 | 2026-07-29 | 0
+- (s46) | Interview habit(棄權) | 一場內三連棄權:「不確定怎麼回答」→「不會算,L6 會怎麼答」→「面試不會問吧,直接說明」;拒給+縮小步+舉證後才動 | 逃避家族第 5 筆(S36/S42/S44/S46);proxy 問法(「Senior 會怎麼答」)S45 後第 2 次;質疑題目正當性 S42 後第 2 次 | unresolved | 3 | 每場 drill 即測 | 0
+- (s46) | Notification System(priority) | 「一條 queue 塞滿時高優先通知的延遲」無法自行量化,因此 priority queue 只剩名詞沒有論證 | 危險感沒機制家族;論證=他自己算的 50 分鐘,已示範綁進 one-liner,留存待 S47 白板默畫複測 | unresolved | 3 | 2026-07-29 | 0
 
 - (s45) | Security & Auth (OAuth) | 術語層撈不出:access token 講成「憑證」、scope 講成「權限」、四角色(Resource Owner/Client/Auth Server/Resource Server)喊忘、OIDC 先搶標籤(挑戰後改選 OAuth 2.0 但沒給理由);機制全通(帳密只進銀行頁面、唯讀授權、改密碼=核彈誤傷全部 App) | 術語-概念未綁定家族;AWS 同構對照表已給(token=STS creds、scope=IAM policy),留存待複測;另計 Deny List 語音滑動 ×2(Dynamic/Denial List,5a 家族) | unresolved | 3 | 2026-07-23 | 0
 - (s45) | Security & Auth (deny list) | 「deny list 為何不膨脹」卡兩輪(「不會了」「不確定」),通行證印期限比喻後自組出 TTL aging(過期 entry 可移除,表≈近 15 min 掛失量) | 機制組裝啟動能量問題(S44 同款);短 TTL 綁 deny list 大小這條鏈換場景複測 | unresolved | 3 | 2026-07-23 | 0
