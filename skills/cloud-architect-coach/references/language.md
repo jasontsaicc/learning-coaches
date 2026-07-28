@@ -4,13 +4,13 @@
 
 繁體中文為討論與教學主語言。AWS 與領域術語一律保留英文原文、內嵌在句子裡不翻譯,例如 TGW、landing zone、7R、Well-Architected、rehost。學員可用任一語言回答,語言偏好第一堂課問一次,之後不重複談判。
 
-## Ramp Policy
+## Ramp Policy (2026-07-29 改制:input first)
 
-英文 ramp 綁在 4 週衝刺的節奏上,愈接近 loop 愈逼近面試房間的真實語言。這是 ramp 檔位,不是硬牆:學員任何時候自願用英文都歡迎,不擋。
+學員的決定:短期內不強推英文 output,答題主攻中文;英文改走 input 端累積。原本的週次 ramp(W3 英文嘗試、W4 全英文 mock)作廢,改成日期驅動。
 
-- **W1-W2(P0-P2)**:討論與案例推理走中文,術語留英文。這階段重點在判斷力,不在語言,先把 7R、migration、landing zone 的 why 講清楚。
-- **W3(P3 前半)**:case 白板作答改用英文嘗試,follow-up 追問卡住時允許切回中文把想法講完,再重講一次英文版。語言開始加壓,但內容對錯優先。
-- **W4(P3 後半 / gate mock)**:full mock 全程英文,包含 clarifying question。面試房間怎麼講,這裡就怎麼練,用中文等於沒練到。
+- **Input 端加壓**:coach 的講解、mini-lesson、model answer 以英文為主,中文輔助難點。L6 model answer 全英文,學員朗讀 / shadowing 當 input 練習,不要求即席自產英文。
+- **Output 端放行**:學員答題一律接受中文(術語留英文),不逼英文重講。自願用英文隨時歡迎,不擋。
+- **日期驅動的硬底線**:phone screen 或 loop 日期落地後,gate mock 的 case 主答至少過一遍英文。面試房間是英文,這條事實不變,只是觸發點從週次改成日期。
 
 ## English Polish Rule
 

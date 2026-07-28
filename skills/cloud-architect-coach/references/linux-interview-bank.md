@@ -157,6 +157,58 @@
 - **(2) 機制層**:封包設了 DF (Don't Fragment) bit 又超過路徑上某段 MTU 時,那台設備該回一個 ICMP `type 3 code 4` (fragmentation needed) 告訴來源「縮小封包」,這就是 Path MTU Discovery。若 SG/NACL/防火牆把這個 ICMP 擋掉,大封包被丟又沒人通知來源 → 連線建得起來、一傳大資料就 hang。症狀:SSH 登入 OK 但 `ls` 大輸出卡死、TLS 握手成功但傳 body 逾時。
 - **(3) 動手驗證**:`ip link show eth0 | grep -o 'mtu [0-9]*'` 看本機 MTU;`ping -M do -s 1472 <host>` 帶 DF 打滿 1500 (1472 payload + 8 ICMP + 20 IP),不通就縮 `-s` 找出真正能過的 Path MTU。
 
+### D. 加密與身分 (2026-07-29 增補,學員自報弱點)
+
+> 這八題不是 Linux 題,掛在這裡是因為走同一套三層答法與 retest 節奏。入口照 gap-scan 規則:先測再教,答得到機制層就跳過。與 #19 (TLS) 同一條線:#21 是它的密碼學地基,#22-25 是它上面的身分層,#26-28 是 at-rest 加密與 secrets (全部踩在 #26 envelope encryption 上)。面試模擬素材見 `references/interview-simulations.md`。
+
+### 21. 公開金鑰密碼學:RSA 憑證到底是什麼
+
+- **(1) 指令層**:一對 keypair:public key 加密只有 private key 解得開;反過來 private key 簽章、任何人拿 public key 驗。憑證 = public key + 持有者身分 (hostname) + CA 的簽章,三樣釘在一起。
+- **(2) 機制層**:非對稱運算貴,所以 TLS 只在握手用它 (驗簽章、換 key),之後全走對稱加密 (AES) 傳資料。現代 TLS 裡 RSA 幾乎只剩簽章用途,key exchange 走 ECDHE 換 forward secrecy (session key 不由憑證的 key 推導,私鑰日後外洩也解不開舊流量)。「為什麼要 CA?」因為 public key 本身不含身分,誰都能生一對;CA 簽章解決的是 binding 問題:這把 public key 確實屬於這個 hostname。接 #19 的憑證鏈驗證。
+- **(3) 動手驗證**:`openssl x509 -in cert.pem -noout -text` 看 `Signature Algorithm` (CA 用什麼簽) 與 `Public-Key` (key 本體是 RSA 還是 EC);`openssl s_client -connect <host>:443 </dev/null 2>/dev/null | openssl x509 -noout -text | grep -A1 'Public Key Algorithm'`。
+
+### 22. OAuth 2.0 在解什麼問題
+
+- **(1) 指令層**:delegated authorization:第三方 app 要動用你在別家服務的資源,你不給密碼,授權伺服器發一張限定 scope 的 access token 給它。四個角色:resource owner (你)、client (第三方 app)、authorization server (發 token 的)、resource server (存資源的 API)。
+- **(2) 機制層**:主流程 authorization code flow:browser redirect 到 authorization server 登入+同意 → 拿到一次性的 code → client 後端用 code + client_secret 換 token。設計重點:code 走瀏覽器 (前信道),token 只走 server-to-server (後信道),瀏覽器歷史/log 裡撈不到 token。public client (SPA、mobile) 藏不住 secret,補 PKCE (先送 code_challenge,換 token 時出示 code_verifier) 擋 code 攔截。access token 是 bearer:誰拿到誰能用,所以必須 TLS、短效、scope 最小。machine-to-machine 用 client credentials flow,沒有使用者這個角色。
+- **(3) 動手驗證**:任挑一個「Sign in with Google/GitHub」的網站,看 redirect URL 裡的 `response_type=code&scope=...&state=...`;或 `curl -H "Authorization: Bearer <token>" https://api.github.com/user` 感受 bearer 的意思。
+
+### 23. OIDC 在 OAuth 2.0 上面加了什麼
+
+- **(1) 指令層**:OAuth 2.0 只回答「這個 client 能不能存取」(authorization),沒有標準方式回答「使用者是誰」(authentication)。OIDC 在同一套 code flow 上加一張 **id_token**,把「你是誰」標準化。
+- **(2) 機制層**:id_token 是 JWT (header.payload.signature):client 拿 IdP 公開的 JWKS (公鑰集) 驗簽章,再檢查 `iss` (誰發的)、`aud` (發給誰的)、`exp` (過期沒)。驗證全在本地做,不用回 IdP 查詢,這是 stateless 的關鍵,也是 #21 簽章機制的直接應用。分工:id_token 給 client 確認身分,access token 給 API 授權;拿 id_token 去打 API 是經典誤用。
+- **(3) 動手驗證**:`curl -s https://accounts.google.com/.well-known/openid-configuration | jq .` 看一個真實 IdP 的 discovery document (jwks_uri、supported scopes);把任一 JWT 丟 `base64 -d` 解 payload 看 claims。
+
+### 24. SAML vs OIDC 什麼時候選誰
+
+- **(1) 指令層**:都是 federation 協定 (身分在 IdP、服務在 SP/RP,中間傳簽過章的斷言)。SAML 2.0:XML + browser POST,企業 SSO 的老將;OIDC:JSON + REST,原生適合 API、mobile、CLI。
+- **(2) 機制層**:選擇通常不是技術優劣,是「對接方講什麼」決定的:客戶既有 IdP (AD FS、舊版 IdP) 只講 SAML 就走 SAML;新 app、machine workload、需要 token 給 API 用的走 OIDC。migration 場景的標準組合:on-prem AD → IAM Identity Center 同時吃兩條,SAML 管登入斷言,SCIM 管帳號/群組同步 (SAML 只在登入當下傳身分,不會幫你提前開好帳號,所以需要 SCIM 補 provisioning 這塊)。
+- **(3) 動手驗證**:登入一個走 SAML 的服務,開 devtools 看那個帶 `SAMLResponse` 的 form POST (base64 解開是 XML assertion);對照 #23 的 OIDC discovery,體感兩代協定的差異。
+
+### 25. AWS 身分對應表:Identity Center / Cognito / IRSA
+
+- **(1) 指令層**:三個最常被混掉的東西各管一族人:IAM Identity Center = workforce (員工) SSO 進多個 AWS 帳號;Cognito = customer (你的 app 的使用者) 註冊登入;IRSA / Pod Identity = EKS 裡的 pod 拿 AWS 權限。
+- **(2) 機制層**:三者底層是同一招:federation → STS 換短效憑證,全程沒有 long-lived access key。IRSA 是 OIDC 的漂亮應用:pod 的 service account token 就是一張 OIDC JWT,cluster 的 OIDC provider 註冊進 IAM 當信任的 IdP,pod 拿 token 呼叫 `AssumeRoleWithWebIdentity` 換 role 憑證;GitHub Actions 的 OIDC federation 同一個模式。migration 對話的標準鏈:客戶問「上雲後員工怎麼登入」→ AD ↔ (AD Connector 或 Entra ID) ↔ IAM Identity Center ↔ permission sets 映射到各帳號的 role。
+- **(3) 動手驗證**:`kubectl describe sa <name>` 看 `eks.amazonaws.com/role-arn` annotation;pod 裡 `aws sts get-caller-identity` 看到的是 assumed-role 而不是 user;`aws iam list-open-id-connect-providers` 看 cluster 的 OIDC provider。
+
+### 26. KMS envelope encryption
+
+- **(1) 指令層**:KMS 管 master key (KMS key),但資料不直接用它加密:`GenerateDataKey` 拿一把 data key,本地用 data key 加密資料,然後把「密文 + 被 KMS key 包起來的 data key」存在一起。解密反過來:把加密的 data key 送回 KMS 解開,再本地解資料。
+- **(2) 機制層**:KMS key 永遠不離開 KMS 的 HSM,直接加密的 API 上限只有 4KB,所以大資料一定走 envelope。這個設計同時拿到三件事:大量資料走本地對稱加密的效能、key 的使用集中管控且每次呼叫都留 CloudTrail、廢掉 KMS key 等於廢掉所有它包過的 data key (crypto-shredding)。存取要同時過兩道 gate:key policy 和 IAM policy,跨帳號共享 key 就是靠 key policy 開的。
+- **(3) 動手驗證**:`aws kms generate-data-key --key-id alias/xxx --key-spec AES_256` 看回傳的 `Plaintext` (本地用完即丟) 和 `CiphertextBlob` (存起來的那份)。
+
+### 27. At-rest 加密在各服務怎麼落地
+
+- **(1) 指令層**:EBS、S3、RDS 都是「勾選加密 + 指定 KMS key」;帳號層可設 EBS encryption by default;S3 分 SSE-S3 (AWS 全管) / SSE-KMS (你的 key、有 audit) / SSE-C (你自帶 key)。
+- **(2) 機制層**:全部都是 #26 envelope encryption 的應用,對 OS 和 app 透明。各服務的坑:RDS 加密只能建庫時決定,事後要 snapshot → copy 時加密 → restore,這是 migration cutover 常踩的雷;S3 SSE-KMS 每個 object 都打 KMS API,高流量會撞 KMS throttling,開 bucket key 把呼叫聚合;加密的 snapshot 跨帳號分享,收方要有 key 的使用授權。FSI 對話的標準句:用 SCP + Config rule 把 encryption by default 變成不可關的地板,而不是逐資源檢查。
+- **(3) 動手驗證**:`aws ec2 get-ebs-encryption-by-default`;`aws s3api get-bucket-encryption --bucket xxx`。
+
+### 28. Secrets 管理:密碼從設定檔搬去哪
+
+- **(1) 指令層**:兩個選項:Secrets Manager (內建 rotation、跨帳號、較貴) 和 SSM Parameter Store 的 SecureString (便宜、無內建 rotation)。app 用 IAM 身分在 runtime 取值,不寫進環境變數檔或程式碼。
+- **(2) 機制層**:兩者底層都是 KMS 加密 (又是 #26)。取用權限走 IAM + resource policy,每次讀取留 CloudTrail,這是「密碼在設定檔裡」做不到的兩件事:可稽核、可輪換。rotation 由 Secrets Manager 掛 Lambda 定期換,DB 密碼換掉也不用改 app。migration 對話的位置:discovery 時在設定檔裡挖到硬編碼的 DB 密碼幾乎是必然,搬遷目標態就是 Secrets Manager + ECS/EKS 原生注入,這是 Mobilize 階段 landing zone 的一部分。
+- **(3) 動手驗證**:`aws secretsmanager get-secret-value --secret-id xxx --query SecretString`;`aws ssm get-parameter --name xxx --with-decryption`。
+
 ---
 
 ## Appendix: Support-loop 逐字稿原題 (降權)

@@ -21,3 +21,4 @@ At session start, read the shared engine (run `cat ${CLAUDE_SKILL_DIR}/../../eng
 | gap-scan (P1 subject) | `${CLAUDE_SKILL_DIR}/references/gap-scan-aws-networking.md` |
 | case-bank (P2/P3 subject) | `${CLAUDE_SKILL_DIR}/references/case-bank.md` |
 | linux-interview-bank (sidecar) | `${CLAUDE_SKILL_DIR}/references/linux-interview-bank.md` |
+| interview-simulations (drill 素材) | `${CLAUDE_SKILL_DIR}/references/interview-simulations.md` |
