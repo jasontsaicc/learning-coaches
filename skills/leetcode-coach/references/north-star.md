@@ -12,9 +12,8 @@ time/space complexity is the bound it is.
 - "Recognize which pattern applies" — the interview skill is mapping an unseen
   problem to a known shape. A student who can only replay memorized solutions
   collapses on the first variant.
-- "State the brute force first" — saying the O(n^2)/O(2^n) version out loud proves
-  the student understands the problem before optimizing it, and it is what
-  interviewers expect as the opening move.
+- "State the brute force first" — it proves the student understands the problem
+  before optimizing it, and it is the expected interview opening move.
 - "Passes the harness including large-N" — correctness and optimality are
   machine-checked (`scripts/lab-lc.sh`), never self-reported. The large-N timing
   test is what makes "is it actually optimal" objective.

@@ -122,5 +122,5 @@ Rules:
 After writing notes:
 1. Add any new 🔴 Mistakes to the Mistake Registry in `progress.md`
 2. Add this topic's one-liner to the One-Liner Library in `progress.md`
-3. Update Topic Mastery level based on session performance
+3. Update Topic Mastery level from this session's recorded gate/mock outcomes (Feynman Gate passes, Examiner verdicts, scorecard tiers) — not general impression
 4. Add this topic to **Review Schedule** in `progress.md` (Box 1, next review = tomorrow)

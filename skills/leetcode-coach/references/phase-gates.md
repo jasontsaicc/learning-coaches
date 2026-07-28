@@ -105,6 +105,7 @@ lens.
 
 Specifically, the student must:
 1. Verbalize the bridge and the chosen pattern before coding, per problem.
-2. Land both problems inside the time budget.
+2. Land both problems inside the time budget, evidenced by start and end timestamps
+   recorded in the problem folder's `notes.md` at mock start and end.
 3. Produce green harness runs for both (`lab-lc.sh` exit 0).
 4. Close each with the optimality argument for the final bound.

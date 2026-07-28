@@ -40,12 +40,15 @@ finished code can still score (an articulable approach IS the deliverable).
 **Tier 3 (P4-P5) adds:**
 - **Edge-case handling.** Empty input, single element, duplicates, extreme values are
   raised by the student unprompted, before the harness catches them.
-- **Communication.** Thinks aloud while coding, interview style; silence longer than
-  30 seconds while typing fails this dimension.
+- **Communication.** Thinks aloud while coding, interview style. Fail: the student
+  stalls and cannot say what they would type next, or asks for the answer instead of
+  articulating a next step.
 
 **Tier 4 (P6-P7) adds:**
 - **Optimality justification.** Why is this the best achievable bound? The large-N
   harness result is the objective floor; this dimension tests whether the student can
   argue it ("any solution must read every element at least once, so O(n) is optimal").
 - **Time management.** Allocates interview time across understand / plan / code /
-  verify and lands the mock inside the limit.
+  verify and lands the mock inside the limit. Evidence source: the mock's start and
+  end timestamps, recorded in the problem folder's `notes.md` at mock start and end;
+  the verdict cites them.

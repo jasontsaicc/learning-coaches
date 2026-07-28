@@ -105,6 +105,5 @@ The scorecard history is the data source for:
 - Tracking trend across sessions (improving, plateauing, regressing).
 - Weekly Review scoring (uses the same dimensions, applied to blind recall).
 
-A coach must not omit the scorecard step to save time. The history is the longitudinal
-signal; a single session's result is nearly meaningless; the trend over 5-10 sessions
-is the real picture.
+The history is the longitudinal signal; a single session's result is nearly meaningless;
+the trend over 5-10 sessions is the real picture.

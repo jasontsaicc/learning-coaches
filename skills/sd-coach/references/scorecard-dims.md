@@ -64,3 +64,5 @@ Weekly Review 的 blind recall 用縮編維度計分:
 💡 Top improvement: [一個具體可行的建議]
 🌟 Best moment: [一個做得好的點]
 ```
+
+兩行都必須引用本次 session 真實發生的具體 exchange,不得虛構(對齊 engine/references/anti-sycophancy.md)。

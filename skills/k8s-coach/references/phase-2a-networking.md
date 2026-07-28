@@ -1,10 +1,7 @@
 # P2a 網路深水區: 封包的完整旅程
 
 > **如何使用此檔:** 這是 P2a 階段的教學素材庫,供 coach 在 C 段(核心原理)讀取並改編。
-> 不要逐字唸稿,依學員反應選擇要深挖哪個切面。這是彈藥庫,不是逐字稿。
 > 學員目前就在本 phase:C-1 已全畢業(只做複習錨點),C-2 概念已教完(session 11),下一步是 C-2 的 D 段 lab。
-> 每個 chunk 對應一個 Simon Method 原子單位,通過 Feynman Gate(Recall + Transfer,keystone 必含誘答)再往下走。
-> 安全鐵律:每個 lab 開頭必跑 `kubectl config current-context`,確認不是公司 PROD EKS context。
 
 ---
 
@@ -26,7 +23,7 @@
 | C-4 | CNI + 封包全鏈路(keystone, gate 核心) | 封包物理上怎麼從 A 走到 B? | 未教 |
 | C-5 | EKS VPC CNI 對照(選配) | 雲上跟 kind 差在哪? | 選配 |
 
-**環境**: 本機 kind 3 節點,`bash scripts/lab-cluster.sh up p0`,context 是 `kind-k8s-coach-p0`。C-3/C-4 的 Calico lab 要另開 p2a 叢集(見 C-3 lab 前置)。
+**環境**: 本機 kind 3 節點,`bash scripts/lab-cluster.sh up p0`,context 是 `kind-k8s-coach-p0`。lab 開場安全檢查見 `lab-manager.md`。C-3/C-4 的 Calico lab 要另開 p2a 叢集(見 C-3 lab 前置)。
 
 ---
 

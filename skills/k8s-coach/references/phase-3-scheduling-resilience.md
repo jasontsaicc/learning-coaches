@@ -1,7 +1,6 @@
 # P3 調度與韌性: 扛住流量尖峰的部署設計 ⭐
 
 > **如何使用此檔:** 這是 P3 階段(加重 phase)的教學素材庫,供 coach 在 C 段讀取並改編。
-> 不要逐字唸稿,依學員反應選擇要深挖哪個切面。每個 chunk 通過 Feynman Gate 後再往下走。
 > P3 起英文檔位升級:First-Principles Dive 段落直接用英文寫,教學時保持中文骨幹,
 > 英文段落可以讓學員先讀再用中文複述(這本身就是 Say-it-in-English 的反向練習)。
 > 學員歷史注意:P0 盲講曾漏 scheduler(session 10 Weekly Review 記錄在案),
@@ -30,8 +29,7 @@
 | C-6 | PDB + drain + graceful shutdown | 計畫性變動怎麼一個請求都不掉? | keystone |
 | C-7 | Capacity planning 總合設計 | 把 C-1 到 C-6 組成一份白板答案 | gate 總合 |
 
-**環境前置**: `bash scripts/lab-cluster.sh up p0` 起 3 節點 kind cluster,context 是 `kind-k8s-coach-p0`。
-**安全鐵律**: 每個 lab 動手前先 `kubectl config current-context`,確認輸出是 `kind-k8s-coach-p0` 才准 apply(機器上有公司 PROD EKS kubeconfig)。
+**環境前置**: `bash scripts/lab-cluster.sh up p0` 起 3 節點 kind cluster,context 是 `kind-k8s-coach-p0`。lab 開場安全檢查見 `lab-manager.md`。
 **metrics-server 目前沒裝**(2026-06-28 叢集重建後消失,progress.md 有記),C-3 lab 的第一步就是重裝,步驟在 C-3。
 
 ---

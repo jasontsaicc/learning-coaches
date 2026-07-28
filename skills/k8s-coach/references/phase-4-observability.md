@@ -1,8 +1,6 @@
 # P4 可觀測性工程: Metrics, SLOs, and Tracing
 
 > **如何使用此檔:** 這是 P4 階段的教學素材庫,供 coach 在 C 段(核心原理)讀取並改編。
-> 不要逐字唸稿,依學員反應選擇要深挖哪個切面。
-> 每個 chunk 對應一個 Simon Method 的原子單位,通過 Feynman Gate 後再往下走。
 > 英文檔位:半英半中。核心原理段落以英文為主,中文做點破與過渡。學員用英文覆述時給 English Polish。
 > 客製基準:學員已在 session 6 被預告過「治本要靠 Prometheus 看水位」;P1 的 OOM/probe lab 和 P2a 的 conntrack 都是本 phase 的現成素材,能回扣就回扣。
 > `[RUNTIME: ...]` 標記處依 mistake-registry 與學員當下狀態現場客製。
@@ -32,7 +30,7 @@
 | C-5 | OpenTelemetry 與 tracing | 一個 request 跨 5 個服務,因果鏈怎麼串起來? | |
 | C-6 | 告警工程 | 為什麼告警越多反而越危險? | |
 
-**環境前置**: `bash scripts/lab-cluster.sh up p0` 起 3 節點 kind。每個 lab 開頭先跑 `kubectl config current-context`,確認是 `kind-k8s-coach-p0` 才准 apply(機器上有公司 PROD EKS kubeconfig,鐵律不變)。
+**環境前置**: `bash scripts/lab-cluster.sh up p0` 起 3 節點 kind。lab 開場安全檢查見 `lab-manager.md`。
 
 ---
 

@@ -25,7 +25,7 @@
 | **P5 平台工程 / GitOps** | Helm、ArgoCD/GitOps、EKS prod terraform、progressive delivery、CRD/operator、admission webhook、cluster upgrade、etcd 運維(backup/restore/DR,含 Raft 深入) | P4 gate | `references/phase-5-platform-gitops.md` |
 | **P6 面試衝刺** | SRE 故障 mock、k8s × system design 交集、behavioral story bank 提煉(STAR、英文版)、CKA/CKAD 限時(副線) | P5 gate | `references/phase-6-interview-sprint.md` |
 
-⭐ = Linux/網路底層集中重練區。教材是彈藥庫不是逐字稿,runtime 以 progress.md 即時狀態決定怎麼用,檔內 `[RUNTIME: ...]` 標記處需現場客製。
+⭐ = Linux/網路底層集中重練區。runtime 以 progress.md 即時狀態決定怎麼用,檔內 `[RUNTIME: ...]` 標記處需現場客製。
 
 ## Cross-Phase References
 

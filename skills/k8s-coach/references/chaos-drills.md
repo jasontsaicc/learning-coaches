@@ -178,7 +178,7 @@ kubectl delete deployment test-cordon
 
 ## P1 Drills
 
-> 共用安全鐵律:每個破壞腳本第一條指令都是 `kubectl config current-context`,輸出必須是 `kind-k8s-coach-p0` 才准往下。機器上有公司 PROD EKS kubeconfig,不確認就 apply 是本 repo 的第一大忌。
+> lab 開場安全檢查見 `lab-manager.md`。
 
 ### P1-1: Liveness Probe 打錯 Port,殺掉健康的 App
 

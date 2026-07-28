@@ -5,6 +5,8 @@ structure and all gate mechanics; this file supplies the k8s-specific content po
 each step. Per-topic material lives in the phase reference files (see `curriculum.md`);
 this file defines the reusable templates and k8s-specific step content.
 
+**Phase 檔使用鐵律**:phase 檔是彈藥庫,不是逐字稿。不要逐字唸稿,依學員反應選擇要深挖哪個切面。
+
 ## Step B (Scenario Intro)
 
 用真實生產情境開場(why this matters today)。完整場景庫在 `references/real-world-scenarios.md`(23 scenes,P0-P5),每景走四段式範本:

@@ -1,8 +1,6 @@
 # P0 心智模型: Kubernetes Control Plane 內部機制
 
 > **如何使用此檔:** 這是 P0 階段的教學素材庫,供 coach 在 C 段(核心原理)讀取並改編。
-> 不要逐字唸稿,而是依學員反應選擇要深挖哪個切面。
-> 每個 chunk 對應一個 Simon Method 的原子單位,通過 Feynman Gate 後再往下走。
 
 ---
 

@@ -2,7 +2,7 @@
 
 <!-- FRAMEWORK: Reusable — narrative gamification pattern -->
 
-> Read at session start (alongside `story.md`). This file defines the RPG mechanics: titles, achievements, dashboard, streak, and migration rules.
+> Read at session start (alongside `story.md`). This file defines the RPG mechanics: titles, achievements, dashboard, and streak.
 > `story.md` defines characters and arcs. This file defines the game system.
 
 ---
@@ -74,14 +74,3 @@ Streak counts by WEEK, not by day. The student's real cadence is short sessions 
 - A full calendar week with zero sessions in between → reset streak to 1 (this week).
 - Update `longest_streak` (in weeks) if current exceeds it.
 - Streak achievements (S1, S3) checked at Step H.
-
----
-
-## Old Format Migration
-
-Completed 2026-07-10: RPG state (Profile, Achievements, last story summary) now lives in
-`workspaces/sd/rpg-state.md`, separate from the engine-owned `progress.md`. The day-to-weekly
-streak conversion and the retroactive achievement unlock both ran during the standalone era
-and are done; `longest_streak` keeps its historical value annotated "(days, pre-weekly)".
-No further backfill logic is needed — if a state field is missing from rpg-state.md, add it
-with defaults and continue, without interrupting the learning flow.

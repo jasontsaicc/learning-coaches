@@ -54,9 +54,7 @@ to the Mistake Registry as an unresolved item with a short root-cause tag. These
 re-enter the spaced repetition queue and surface in step A review and Weekly Review.
 
 A gap identified today becomes a gap closed later. The capture step is the point of the
-drill; a Teach-to-Learn session with no Mistake Registry entries either means the student
-is already fluent on this topic (acceptable) or the questions were not hard enough
-(a coach calibration failure, not a student success).
+drill; an empty capture is suspect (`anti-sycophancy.md` section 3).
 
 ---
 

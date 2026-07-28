@@ -24,14 +24,13 @@ even know the pattern, and still cannot produce a first line. This machinery run
 before any attempt exists; the engine's escalation ladder is reactive and takes over
 only after a failed attempt.
 
-- **The articulation bridge (4 plain-language questions).** Before any code: (1) What
-  am I computing? (2) What must I try — what is the brute force? (3) How do I shrink
-  the work / move? (4) When do I stop? Answers are plain sentences; the first line of
-  code is a transcription of them (`seen = {}`, `l, r = 0, len(a)-1`). Full version
-  with a worked example: `references/problem-solving-framework.md` (Step 2.5).
+- **The articulation bridge (4 plain-language questions).** Runs before any code; the
+  answers are plain sentences and the first line of code is a transcription of them.
+  The four questions, full version, and a worked example:
+  `references/problem-solving-framework.md` (Step 2.5).
 - **Gradual release (I do → we do → you do).** Pattern's first problem, or any
-  stuck-at-zero moment: the coach narrates ONE full think-aloud through the 4 questions
-  (I do). Never ask a frozen student to generate; generation is the jammed function.
+  stuck-at-zero moment: the coach demonstrates ONE full pass through the 4 questions
+  out loud on this problem (I do). Never ask a frozen student to generate; generation is the jammed function.
   Default step-D path early in a pattern: skeleton with 2-3 blanks, each blank paired
   with a "why" question (we do). Fade to blind typing, then cold-next-day (you do).
 - **Skeleton-first.** The unit of practice is the pattern skeleton (~8-10 skeletons
@@ -78,8 +77,8 @@ memorizes the template cannot.
 
 Per-pattern chunk order (each chunk gets its own Feynman Gate):
 
-1. **Naive baseline:** state the brute force and its complexity. Always aloud, always
-   first; it anchors the optimization and scores interview points by itself.
+1. **Naive baseline:** state the brute force and its complexity aloud before anything
+   else; it anchors the optimization and scores interview points by itself.
 2. **Key insight:** the invariant or maintained state that collapses the complexity
    ("the hash map remembers complements, so the second scan disappears"; "each element
    enters and leaves the stack once, so the total is O(n) amortized").
@@ -122,7 +121,9 @@ writes from the bridge alone. Late in a pattern, step D is a cold write.
 **Answer-debt rule.** If the student views solution code they did not produce cold
 (tired, deadline, "just show me"), allow it, log it immediately as a cold re-do debt
 due in 3 days, and the pattern cannot be marked fluent until that cold re-do passes
-with zero bugs. Evidence from the standalone era: a Hard problem was viewed under
+with zero bugs. Whenever solution code is shown or co-written, the coach records the
+provenance in the problem's `notes.md` at that moment (one line: shown / co-written /
+cold); cold re-do debts are opened from that record, not from memory. Evidence from the standalone era: a Hard problem was viewed under
 study-group pressure, never cold-redone, and fluency stalled with no trace.
 
 **Compressed-sitting rule.** A short study-group sitting may compress the session, but
@@ -146,7 +147,8 @@ Mistake Registry; a drill that logs nothing was too easy.
   problem, always).
 - **Skeleton Fluency.** Type a known pattern's template cold into a blank file, zero
   bugs. One blind success is not fluency; the acceptance test is cold-next-day with
-  zero bugs, which maps to the engine's review rhythm.
+  zero bugs, meaning the first `lab-lc.sh` run exits 0 with no edits between writing
+  and running. This maps to the engine's review rhythm.
 
 Drill selection guardrail: transfer questions ("would this survive negative numbers?",
 "what breaks if the array is not sorted?") test the mechanism, never trivia about a

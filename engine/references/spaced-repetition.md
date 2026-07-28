@@ -15,9 +15,8 @@ item. The entry format is defined once in `PROGRESS-SCHEMA.md` (section 7); this
 reference points there rather than restating the fields, so the format cannot drift.
 
 The Mistake Registry is the most important artifact produced by a session. It converts
-errors into scheduled practice. A registry with no entries is suspect: the coach should
-challenge whether the session was hard enough, not congratulate the student on
-perfection.
+errors into scheduled practice. A registry with no entries is suspect
+(`anti-sycophancy.md` section 3).
 
 ### Domain Registries (optional, coach-defined)
 
@@ -116,12 +115,13 @@ in step A; the new item is added at the end of step H. They do not collide. The 
 enters the queue for its first review 3 days later.
 
 **Gap longer than the next-review date:** if the student returns after a gap that puts
-multiple items past their scheduled date, surface the oldest-interval items first (items
-at interval 1 before items at interval 2, etc.). Do not attempt to surface all overdue
+multiple items past their scheduled date, surface the lowest-interval items first (items
+at interval 3 before items at interval 7, etc.). Do not attempt to surface all overdue
 items at once; apply the 2-item-per-session cap and let the queue drain across sessions.
 
 **Feynman Gate pass scheduling:** when a chunk passes its Feynman Gate for the first
-time, it is added to the spaced repetition queue at interval 1 if not already present.
+time, it is added to the spaced repetition queue at the first interval (3 days) if not
+already present.
 This applies to all coaches uniformly. The coach's hook may define additional criteria
 for when a chunk is added (for example, only keystone chunks), but the default is all
 passed chunks.

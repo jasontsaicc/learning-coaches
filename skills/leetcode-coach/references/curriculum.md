@@ -17,8 +17,8 @@ patterns are covered once for recognition and not drilled to fluency.
 ## Warm-Up Diagnostic (new students only)
 
 Give an unseen easy problem (e.g., Valid Anagram) described aloud. Listen for whether
-the student can run the 4-question articulation bridge (what am I computing / what is
-the brute force / how do I shrink the work / when do I stop) or freezes at zero.
+the student can run the 4-question articulation bridge
+(`references/problem-solving-framework.md` Step 2.5) or freezes at zero.
 
 Classify: strong (runs the bridge unprompted) / mid (answers when prompted question
 by question) / freezes-at-zero (cannot start without a worked example). Record the

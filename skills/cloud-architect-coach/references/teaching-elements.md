@@ -8,6 +8,8 @@ whiteboard inside the Step E drills.
 
 Case IDs (`CASE-1`..`CASE-6`) refer to `references/case-bank.md`; cite them by ID.
 
+任何 drill 沒過的點,當場入 Mistake Registry(engine 規則,適用以下全部 drills);各 drill 底下只列該 drill 自己的沒過判準,不重複這條。
+
 ---
 
 ## Topic: Migration 三階段 (Assess / Mobilize / Migrate & Modernize)
@@ -39,7 +41,7 @@ Case IDs (`CASE-1`..`CASE-6`) refer to `references/case-bank.md`; cite them by I
 
 ### Step E (Drill)
 
-給學員一張打散順序的 10 項活動清單(混雜例:跑 Discovery agent、簽 landing zone SCP baseline、切第一個 pilot wave、算 TCO、決定哪幾台 retire、設 Control Tower、跟財務過 business case、做 ERP cutover runbook、盤點相依、退機房租約)。要求:歸到 Assess / Mobilize / Migrate & Modernize 三格,並挑其中兩項替它的位置辯護(為什麼是這階段、放錯階段會怎樣)。答錯或說不出「為什麼不能更早/更晚」的,當場入 Mistake Registry。
+給學員一張打散順序的 10 項活動清單(混雜例:跑 Discovery agent、簽 landing zone SCP baseline、切第一個 pilot wave、算 TCO、決定哪幾台 retire、設 Control Tower、跟財務過 business case、做 ERP cutover runbook、盤點相依、退機房租約)。要求:歸到 Assess / Mobilize / Migrate & Modernize 三格,並挑其中兩項替它的位置辯護(為什麼是這階段、放錯階段會怎樣)。答錯或說不出「為什麼不能更早/更晚」的算沒過。
 
 ---
 
@@ -71,7 +73,7 @@ Case IDs (`CASE-1`..`CASE-6`) refer to `references/case-bank.md`; cite them by I
 
 ### Step E (Drill)
 
-給 6 條一行 workload(例:跑在有授權專用機的 Oracle、沒人用的舊報表站、跟五個系統互叫的 ERP、自建的 wiki、明年要下線的活動網站、標準的內部 HR 系統),限面試時間內每條指一個 R + 一句話理由。評分看理由是否咬住 license / coupling / roadmap / compliance 其中之一,而不是憑感覺。理由講不出限制的入 Registry。
+給 6 條一行 workload(例:跑在有授權專用機的 Oracle、沒人用的舊報表站、跟五個系統互叫的 ERP、自建的 wiki、明年要下線的活動網站、標準的內部 HR 系統),限面試時間內每條指一個 R + 一句話理由。評分看理由是否咬住 license / coupling / roadmap / compliance 其中之一,而不是憑感覺。理由講不出限制的算沒過。
 
 ---
 
@@ -101,7 +103,7 @@ Case IDs (`CASE-1`..`CASE-6`) refer to `references/case-bank.md`; cite them by I
 
 ### Step E (Drill)
 
-給定三組(資料量、專線頻寬、可容忍停機窗口),例如「80 TB / 1 Gbps / 一週窗口」「2 TB Oracle / 200 Mbps / 2 小時窗口」「500 GB 檔案 / 100 Mbps / 一晚」。要學員替每組選傳輸路徑(MGN / DMS+CDC / DataSync / Snowball)並把算術寫出來證明選擇。只講結論不算給看的,入 Registry。
+給定三組(資料量、專線頻寬、可容忍停機窗口),例如「80 TB / 1 Gbps / 一週窗口」「2 TB Oracle / 200 Mbps / 2 小時窗口」「500 GB 檔案 / 100 Mbps / 一晚」。要學員替每組選傳輸路徑(MGN / DMS+CDC / DataSync / Snowball)並把算術寫出來證明選擇。只講結論、沒把算術給看的算沒過。
 
 ---
 
@@ -130,7 +132,7 @@ Case IDs (`CASE-1`..`CASE-6`) refer to `references/case-bank.md`; cite them by I
 
 ### Step E (Drill)
 
-要學員在白板畫出一家銀行的 OU 樹,至少涵蓋 prod / nonprod / sandbox 三類,並說明帳號怎麼分(workload / security / network / log-archive)。接著挑兩條 SCP 並替它辯護:這條 SCP 擋住什麼、對應 CASE-2 哪條紅線、為什麼一定要在 SCP 層而不是 IAM 層。說不出「為什麼是 SCP 不是 IAM」的入 Registry。
+要學員在白板畫出一家銀行的 OU 樹,至少涵蓋 prod / nonprod / sandbox 三類,並說明帳號怎麼分(workload / security / network / log-archive)。接著挑兩條 SCP 並替它辯護:這條 SCP 擋住什麼、對應 CASE-2 哪條紅線、為什麼一定要在 SCP 層而不是 IAM 層。說不出「為什麼是 SCP 不是 IAM」的算沒過。
 
 ---
 
@@ -156,7 +158,7 @@ Case IDs (`CASE-1`..`CASE-6`) refer to `references/case-bank.md`; cite them by I
 
 ### Step E (Drill)
 
-要學員在白板畫出完整封包路徑:on-prem app → (DNS 解析:誰回答、走哪個 endpoint)→ DX/TGW → VPC → DB,把解析路徑也畫進去。畫完後,讓學員自己挑一個點把它弄壞(DX 斷掉 failover 到 VPN、Resolver rule 設錯、MTU mismatch),然後現場 troubleshoot:症狀會是什麼、先看哪裡、怎麼確認。挑不出斷點或排障方向錯的入 Registry。
+要學員在白板畫出完整封包路徑:on-prem app → (DNS 解析:誰回答、走哪個 endpoint)→ DX/TGW → VPC → DB,把解析路徑也畫進去。畫完後,讓學員自己挑一個點把它弄壞(DX 斷掉 failover 到 VPN、Resolver rule 設錯、MTU mismatch),然後現場 troubleshoot:症狀會是什麼、先看哪裡、怎麼確認。挑不出斷點或排障方向錯的算沒過。
 
 底層 TCP/DNS 機制不在此重教(見文末 cross-reference);這裡只教 hybrid 設計取捨。
 
@@ -183,7 +185,7 @@ Well-Architected 不是一套架構,是一份 review checklist。它的用途是
 
 ### Step E (Drill)
 
-要學員拿自己剛才任一題 CASE 的答案,套五大支柱各問一遍,找出至少兩個 gap(通常會落在 cost 或 ops),並說明補法。找不到 gap 或只會空喊「要更安全」講不出具體缺口的,入 Registry。
+要學員拿自己剛才任一題 CASE 的答案,套五大支柱各問一遍,找出至少兩個 gap(通常會落在 cost 或 ops),並說明補法。找不到 gap 或只會空喊「要更安全」講不出具體缺口的算沒過。
 
 ---
 
@@ -215,7 +217,7 @@ Well-Architected 不是一套架構,是一份 review checklist。它的用途是
 
 ### Step E (Drill)
 
-要學員用英文做一段 2 分鐘的 pushback 交付,對象是 CASE-5 的老闆執念。評分看的是四步結構完不完整(有沒有先 acknowledge、有沒有拿數字 quantify、有沒有給對著 RTO/RPO 挑的替代方案、有沒有把決定權還回去),不評口音。跳過任一步或變成硬吵/照單全收的入 Registry。
+要學員用英文做一段 2 分鐘的 pushback 交付,對象是 CASE-5 的老闆執念。評分看的是四步結構完不完整(有沒有先 acknowledge、有沒有拿數字 quantify、有沒有給對著 RTO/RPO 挑的替代方案、有沒有把決定權還回去),不評口音。跳過任一步或變成硬吵/照單全收的算沒過。
 
 ---
 
