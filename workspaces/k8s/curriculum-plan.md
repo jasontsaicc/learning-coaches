@@ -175,7 +175,17 @@ Senior 面試常考「你會怎麼把一個現有服務搬進 k8s」,而且導�
 | **格式改制** | 全部抽考包成客戶顧問情境;每題附 L6 範例答法。見 §3 對治機制與 session-log 教法備忘 |
 | **新增** | AWS 廣度散裝卡進 A 段抽考池(VPC、SG vs NACL、TGW、DX/VPN、landing zone),30 秒層級,走既有 term 卡機制,不開新 chunk |
 
-**待定**:§5 時間軸需依實際面試日期倒推重算。學員尚未提供日期(s22 開場先問)。在日期確認前,主線維持 scope-based 節奏,不預先壓縮。
+**時間軸確認(2026-07-28,s22)**:已投遞 resume,學員自估 **1.5 個月**(面試落點 ~2026-09 中旬)。§5 的「2027 農曆新年」窗口作廢,倒推如下(週次從 07-28 起算):
+
+| 週 | 目標 |
+|---|---|
+| W1(~08-03) | P2a 收掉:七站盲測 #3 → phase gate(Examiner 首用)。積壓 registry 債趁 WR8(s25 前後)清一輪 |
+| W2-W3(~08-17) | P2b:RBAC/SA → **IRSA(加重)** → Secrets;PV/PVC 概念層即可。P2b gate |
+| W4(~08-24) | P3+P4 合併修剪版:scheduler/HPA/PDB 面試題深度 + 可觀測性三本柱/SLO 概念對照,不做手作 lab 深潛 |
+| W5(~08-31) | P5 骨幹:EKS terraform + GitOps/ArgoCD 概念 + cluster upgrade 考題;migration 模組壓縮成一堂設計練習 |
+| W6+(09 起) | P6 面試衝刺:SRE mock(英文)、LP story bank 提煉 STAR、k8s×SD 交集題 |
+
+風險註記:此表假設每週 3+ 堂;LP/story-bank 已連兩堂未挖,W1 起每堂強制執行,否則觸發 §9.1 的落後訊號條款。CKA sprint 在此時間軸內**放棄**(投遞後有需要再說)。
 
 **新增的重規劃觸發器**:LP / behavioral 的準備度若在 P4 前仍無 3 則可用 STAR,視為落後訊號 → 挪一堂做專項 mining,不等 P6。
 
