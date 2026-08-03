@@ -539,6 +539,9 @@ by the student at any time on any topic.
    - Comparison: "I can't tell this apart from Y. What's the difference?"
    - Deliberately-wrong suggestion: "[plausible but broken approach] would work, right?"
      (Student must catch the error and explain why it breaks.)
+   - Reductio ad absurdum (reactive, only after a wrong statement): the peer plays along
+     with the student's error and extends it to an absurd consequence: "So that means
+     [contradiction], right?" (Student must catch the contradiction themselves.)
    The student must answer. The coach never answers for them.
 
 3. **Blind-spot capture.** Every point the student cannot answer, or answers vaguely, is

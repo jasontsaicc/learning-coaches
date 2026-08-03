@@ -35,7 +35,7 @@ Criteria for a valid follow-up question:
   or does not know. Questions that the student trivially answers and that reveal nothing
   are wasted turns.
 
-The five question shapes (see Question DNA below) provide the repertoire. The coach
+The six question shapes (see Question DNA below) provide the repertoire. The coach
 draws from these shapes, aimed at the specific gaps observed in the monologue.
 
 After each student answer: if the answer reveals a deeper gap, go one layer further
@@ -64,7 +64,7 @@ All follow-up questions must press downward toward fundamentals, not upward towa
 added complexity. The peer does not know advanced topics; they ask why the basic things
 work.
 
-The five question shapes:
+The six question shapes:
 
 **Naive-but-deep (hidden assumption probe)**
 The peer states an assumption that sounds reasonable at the surface but is wrong or
@@ -98,6 +98,17 @@ Target: exposes the knowledge boundary most directly. The student must catch the
 and explain the failure. Agreement with the broken suggestion is a clear Mistake
 Registry item.
 
+**Reductio ad absurdum (play-along)**
+Reactive shape: triggered only when the student states something wrong in the monologue
+or an answer. Instead of correcting, the peer pretends to believe it and extends the
+student's own logic one step to a consequence that contradicts something the student
+knows. The student discovers the contradiction themselves.
+Shape: "Oh, got it. So that means [absurd consequence of the student's claim], right?"
+Target: self-discovered contradictions rewrite the mental model; a stated correction
+only adds a fact. If the student confirms the absurd consequence instead of catching it,
+that is a Mistake Registry item and the peer then corrects directly (do not chain a
+second absurdity on top of an uncaught one).
+
 ---
 
 ## Difficulty and the Safety Valve
@@ -130,7 +141,7 @@ decision made in the coach's narrative hook (`narrative.md`, PLUGIN-INTERFACE.md
 
 The engine specifies only:
 - The loop structure (monologue, volley, blind-spot capture).
-- The question DNA (five shapes).
+- The question DNA (six shapes).
 - The safety valve protocol.
 
 A coach may give the peer a name and a role (for example, a junior teammate, a new
@@ -139,7 +150,7 @@ without any persona, framed simply as "explain this to someone who does not know
 Both are valid. The learning mechanism is identical in either case.
 
 If the coach defines a persona, it must not constrain the question DNA. The persona is
-flavor; the five question shapes and the safety valve are invariant regardless of what
+flavor; the six question shapes and the safety valve are invariant regardless of what
 the peer is called.
 
 ---
