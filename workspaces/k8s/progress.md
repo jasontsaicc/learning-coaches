@@ -29,13 +29,15 @@
 - 環境:**學員實際在 bastion**(斷點原以為家機)。worker2 NotReady(s16/s21 同款老毛病)+ 10 天 Terminating 殘骸,lab 不受影響,未處理。三層 Pod 全在 worker(backend .84/db .85/frontend .83)。新 Pod:net-tool(netshoot,`run=net-tool`)。`labs/allow-dns.yaml` 已重建並 apply(寫法 A,AND 語義學員選對)。
 - 順手教學:http-echo 極簡 image 無 curl(distroless 概念)、`--` 分界線與 `-sS`(Unix 通用約定)、**DNAT 先於 filter → NetworkPolicy 名單要寫 targetPort 5678 不是 Service port 80**(接一棟樓的部門順序,已教未驗)。
 
-next(s24),順序:
+**⚠️ 2026-08-03 課後學員決定(明確二次要求,教練已陳明 engine 條款後定案):跳過 P2a phase gate,s24 直接開 P2b。** P2a 記為 not-certified 帶 flag 前進;gate 沒有取消,只是延後 — **P6 面試衝刺前必須補考**(面試官必考封包旅程,躲不掉的是面試不是教練)。盲測 #N 制度廢止;七站材料改由 spaced-rep 卡與 WR9 自然到期,不再當開場關卡。
 
-1. **開場:七站盲測 #4**(不讓步,gate 答案卷)。盯:站 2/站 6(veth 兩次出場)、「誰做的」七行全配、四動詞口訣開頭。
-2. 08-06 到期批(超過 2 題上限,挑 2:**iptables 三表分工一句版**、**兩張名單檢查程序**優先;default-deny-分層若盲測 #4 站 4 過關可折算)。老債:kube-proxy-啟動路徑(07-26)、YAML 藏寶圖(06-30)。
-3. **lab Step 5 完成**:兩條 YAML 學員自寫(`frontend-egress`、`backend-ingress`,規格已給:app 標籤、TCP 5678)→ Step 6 驗收矩陣(`kubectl run frontend-client --image=nicolaka/netshoot --labels app=frontend` 當合法客戶端 ✅、net-tool 當陌生人 ❌)→ 3-3 gate → phase gate 準備。
-4. **F/G 連三堂債**(s23 學員跳過 F):s24 F 段題材用 Step 5/6 剛完工的東西,趁熱。story-bank 連三堂未挖,s24 保底一則。
-5. pacing:s23 慢下訊號整堂(裸結論、「協助我寫」「說明一下」「跳過吧」),但 hands-on 段有產出(親手 apply、兩死法實驗)。s24 維持「少抽考、多動手」配比;WR9 於 s25 觸發(25-18=7),過期債佇列在 WR9 清算。
+next(s24)= **P2b 開課(儲存 + 權限:PV/PVC/CSI、StorageClass、RBAC/SA、IRSA、Secrets、PSS)**,順序:
+
+1. **P2b chunk 1 開課**(讀 `references/phase-2b-storage-rbac.md` 排 chunk map)。新 phase 新氣象,開場不抽考、直接進場景。capstone 銜接:api 掛 PVC(訂單資料)+ 最小權限 RBAC + EKS 首登 IRSA(對 Delivery Consultant 目標是高權重段)。
+2. A 段輕量(2 題上限,誠實執行不加碼):08-06 到期批挑 2(iptables 三表分工一句版、兩張名單口頭版優先)。P2a 舊卡照 3/7/14 節奏走,WR9(s25 觸發,25-18=7)清算過期佇列。
+3. **P2a 未收殘局(flag,擇機補)**:lab Step 5 兩條 YAML + Step 6 驗收矩陣(規格已留檔:app 標籤、TCP 5678、frontend-client 合法/net-tool 陌生人);3-3 gate;**P2a phase gate(P6 前必補)**。
+4. F/G 連三堂債:s24 F 段用 P2b 新內容跑(新材料應比舊材料好啟動);story-bank 連三堂未挖,s24 保底一則。
+5. pacing:延續「少抽考多動手」;P2b 是概念+動手 phase,錯峰規則生效(新難主題堂英文降回術語卡)。
 
 <details>
 <summary>s22 斷點(已消化,留參考)</summary>
@@ -148,13 +150,16 @@ next(s17):
 - P0 心智模型: gate-passed(2026-06-22;legacy,pre-Examiner,coach 認證)
 - P1 核心物件 + 容器底層: gate-passed(2026-06-25;legacy,pre-Examiner,coach 認證)
 - P2a 網路深水區: in-progress(chunk 1 Service/kube-proxy/CoreDNS ✅、chunk 2 Ingress ✅;chunk 3 NetworkPolicy in-progress〔3-1/3-2 教完;lab Step 4 於 s23 bastion 側重建完成(allow-dns + 兩死法實證),Step 5 兩道門模型已教、兩條 policy 未寫,剩 Step 5+6+gate+F/G〕;chunk 4 in-progress〔**4-1 CNI 合約 ✅ s19、4-2 veth ✅ s20、4-3 路由 ✅ s20、4-4 MASQUERADE ✅ s20**;**4-5 七站骨架盲講 ❌ s21 冷測 0/4 未過**〕。四塊零件備妥但串不起來,4-5 重測過了才進 phase gate)
-- P2b 儲存 + 權限: not-started
+- P2b 儲存 + 權限: **starts s24(學員決定跳過 P2a gate 直進,2026-08-03)**
 - P3 調度 + 高並發 + 排障: not-started
 - P4 可觀測性工程: not-started
 - P5 平台工程 / GitOps: not-started
 - P6 面試衝刺: not-started
 
-Weak-topic flags: 無(至今沒有帶 flag 過 gate 的紀錄)。
+Weak-topic flags(**2026-08-03 首次啟用**,P2a 帶 flag 前進、gate 未考,學員決定):
+- **七站封包全旅程**(4-5):盲測最佳 5/7,站 2/6 蒸發、「誰做的」缺席。P6 前 phase gate 必補;spaced-rep 卡照常到期。
+- **chunk 3 NetworkPolicy 收尾**:lab Step 5 兩條 policy + Step 6 驗收矩陣未做(規格已留檔);兩張名單口頭版未過。
+- **判準句 pattern**(只給結論):跨七堂未愈,ProServe 加權重罪,每堂續盯。
 
 ## Mastery
 
