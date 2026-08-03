@@ -19,6 +19,7 @@
 | Date | Problem | Pattern | Rung | Next review | Status |
 |------|---------|---------|------|-------------|--------|
 | 2026-07-14 | #153 Find Minimum in Rotated Sorted Array | Binary Search (index) — 邊界變體 `l<r` + `r=mid` | +2 **未過**(S19 只做了換皮題 #33 31/31 green,**白紙重寫 #153 未做**,且 #33 的 `while` fix 是 coach 給的 → answer-debt)| 2026-07-26(重試同 rung:白紙重寫 #153 + 白紙重寫 #33) | active |
+| 2026-08-03 | #206 Reverse Linked List | Linked List — 指向改寫(存改挪挪) | 今天(首刷 harness 8/8 green;**推導含 answer-debt**:五問腳本與三輪模擬由 coach 給出,code 為看後謄寫) | 2026-08-05(+2:白紙重寫 #206 + 首刷換皮題 #21) | active |
 
 <!-- Migration backlog:standalone 時期的 pattern(Hash Map / Two Pointers / Sliding
      Window / Stack)沒進留存階梯。不回填假日期;各 pattern 收尾或 Weekly Review

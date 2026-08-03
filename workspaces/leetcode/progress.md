@@ -12,12 +12,22 @@
 
 ## Meta
 
-- session_count: 19
-- last_weekly_review: 0 — 🔴 從未跑過;19-0 ≥ 7,**第 4 次順延**(S19 開場先補 S18 懸著的 Transfer gate,學生體力耗盡於該 gate,Weekly Review 未進場)。S20 前置:完整 Weekly Review(3 題 blind recall + Mistake Registry 全測 + P0 gate)
-- last_session_date: 2026-07-23
+- session_count: 20
+- last_weekly_review: 0 — 🔴 從未跑過;20-0 ≥ 7,**第 5 次順延**(S20 學員主動選擇直上 Linked List;coach 已開場排入但被否決)。**S21 開場必須先跑,不再接受順延**:3 題 blind recall(binary-search / stack / two-pointers)+ Mistake Registry 全測 + P0 gate
+- last_session_date: 2026-08-03
 - warm_up_classification: (standalone 時期未記錄;既有證據:blank-page 傾向為主要弱點,S16 顯示 bridge 已能自主運行 — 建議 S17 順帶補跑分類,不當新生重測)
 
 ## Current Session breakpoint
+
+**S20 (2026-08-03) 正常收尾** | phase P3 | topic: Linked List 首日,#206 首刷完成 | 11 天 gap,Comeback 精簡跑
+
+- Chunk 1(資料結構本體:記憶體模型、array vs linked list 的交易)✅ Recall + Transfer 皆一次過,乾淨俐落。
+- Chunk 2(#206 推導)Recall **FAIL ×2 → answer-debt**:五問腳本自跑失敗(核心動作「改指向」消失)、模擬第二輪 nxt 帶入上一輪舊值;學生喊「直接說明」→ coach 給出完整三輪模擬。
+- Step D:solution.py 學生手打,harness **8/8 green 一次過**(空鏈/in-place/大 N 10 萬)。手打零 bug(variable-name-precision 家族未發作)。屬看後謄寫,fluency 以白紙重寫為準。
+- Chunk 3 Transfer(環)第 2 次嘗試過:首答「無限迴圈」,提示後自行 trace 出「繞回已反轉區踩到第一輪埋的 None 而停」。
+- next: **S21 開場 = Weekly Review #1(第 5 次順延後,強制)**;然後 2026-08-05 到期的 #206 白紙重寫 + 換皮題 #21 Merge Two Sorted Lists 首刷。#153/#33 白紙重寫債(07-26 逾期)同場清。
+
+--- 以下為 S19 收尾紀錄與未清債務(留存待清)---
 
 **S19 (2026-07-23) 正常收尾** | phase P3 | topic: #153 Chunk 2 Transfer(補 S18 懸債)+ #33 step E 驗收 | 9 天 gap,走 Comeback
 
@@ -47,7 +57,7 @@
 - P0 Problem-Solving Mental Model: in-progress(articulation bridge 已日常運行、Big-O 概念多次驗證;但 gate 從未正式跑,列為舊債 — 不回填 retroactive pass,無 Examiner 證據)
 - P1 Arrays / Hashing / Two Pointers: in-progress(Arrays & Hashing 5/11、Two Pointers 2.5/5;讀書會 jump-to 順序,缺口見 mastery)
 - P2 Sliding Window / Stack: in-progress(Stack 6/6 完成、Sliding Window 1/5;#84 未冷寫)
-- P3 Binary Search / Linked List: in-progress(Binary Search 1/6,S16 開場;Linked List 0/9)
+- P3 Binary Search / Linked List: in-progress(Binary Search 1/6,S16 開場;Linked List 1/9,S20 #206 首刷)
 - P4 Trees: not-started
 - P5 Heap / Backtracking: not-started
 - P6 Graphs + 1-D DP: not-started
@@ -62,6 +72,7 @@ in-progress。Gate 順序照 curriculum 補齊:P0 gate 先行,P1/P2 缺口補完
 - two-pointers: med (s7;#42 Hard 三層全綠,但 Feynman Q2/Q3 看答案 — 升 high 條件:transfer Q 自答)
 - sliding-window: med (s8;#239 Hard 親手寫完,基礎 5 題未做;Feynman Q2/Q3 + Mock 待補)
 - stack: high (s15;NeetCode Stack 全清,#84 code 未冷寫 — 冷寫過才算穩)
+- linked-list: low (s20;#206 首刷 green。概念層(記憶體模型/交易/O(1) 隱藏前提)一次過;操作層(五問腳本/手動模擬)answer-debt,code 為謄寫。升 med 條件:#206 白紙零 bug + #21 自力首刷)
 - binary-search: med (s19;#704 Learn 模式 skeleton 冷寫首次 100%;#74 手打 2 bug;#153 手打**零 bug** 19/19 green。S19:配對規則的**機制**已能自力手算(mid 丟不丟 / 死迴圈),但**組裝成規則**仍失敗,且 `while` 條件答成結束狀態。升 high 條件:① #704 閉區間版 cold re-do 零 bug ② 白紙默出配對表、`l<r` vs `l<=r` 直覺產出而非現場推導)
 
 ## Scorecard history
@@ -103,10 +114,15 @@ Open 項(15 列)自 standalone 遷入;原始狀態原文引註。Resolved 54 列
 - (2026-07-23, s19) | binary-search #33 | `while left < right` 寫成開區間,但兩邊都丟 mid → 最後一格永遠沒被檢查 | interval-openness-pairing(**實戰重演**:同一堂剛推完的規則,寫 code 時仍寫錯)| unresolved(**answer-debt**,coach 指出行號。價值:證明「推導過」≠「寫得出來」,要靠白紙重寫才會固化)| 3 | 2026-07-26 | 0
 - (2026-07-23, s19) | binary-search #33 | 14 fail/17 pass 且「找得到的全掛、找不到的全綠」,學生未從 **fail/pass 分布**診斷,直接要答案 | failure-distribution-diagnosis(🔴 **同型第 2 次**,S17 #74 期望 True 全掛/期望 False 全綠)| unresolved(要養成的反射:**harness 掛了先看 fail/pass 分布,不要先看 code**。抽問:給一組 fail 分布,問這是哪一類邏輯錯)| 3 | 2026-07-26 | 0
 
+- (2026-08-03, s20) | linked-list #206 | 五問腳本 Recall 跑不出來:Q1/Q2 都答成「存 next」,核心動作「改指向 curr.next=prev」整個消失;三動作(存/改/挪挪)黏成一團 | action-sequence-recall | unresolved(**answer-debt**:coach 給出完整模擬。3 天內白紙重跑:五問腳本 + 1→2→3 三輪手動模擬)| 3 | 2026-08-06 | 0
+- (2026-08-03, s20) | linked-list #206 | 手動模擬第二輪 nxt 答成 2(上一輪的值);curr 已站在 2,curr.next 應為 3。不理解迴圈變數每輪重新求值 | loop-variable-liveness(同 while-condition-vs-exit-state 家族:對「這行在什麼時機被求值」沒有心智模型,第 2 次跨題出現)| unresolved(抽問:`nxt = curr.next` 這行在第 k 輪執行時,nxt 是誰?答案依賴什麼?)| 3 | 2026-08-06 | 0
+- (2026-08-03, s20) | linked-list #206 | Transfer 首答「有環會無限迴圈」(直覺猜測);提示後自行 trace 推翻:繞回已反轉區踩到第一輪埋的 None 而停 | intuition-vs-trace | unresolved(半自力修正,值得固化的反射:**不確定就 trace,不用猜的**。抽問:反轉一條有環的鏈,為什麼會停?停的時候 return 的是誰?)| 3 | 2026-08-06 | 0
+
 ## Spaced-repetition queue
 
 Mistake 項引用上表(不重複)。Chunk 型債務:
 
+- chunk:p3/#206 白紙重寫(answer-debt + retention +2 rung 合併:空檔案重寫 #206,harness 綠,並自跑五問腳本)| chunk | 3 | 2026-08-05 | active
 - chunk:p3/#153 Chunk 2 Transfer 重考(① 白紙默出邊界配對表 ② #33 的 check 比 #153 多做什麼)| chunk | 3 | 2026-07-26 | active
 - chunk:p3/binary-search #704 cold re-do(fluency 驗收)| chunk | 3 | 2026-07-11 | active
 - chunk:p2/largest-rectangle #84 cold re-do(answer-debt:S15 code 是看的)| chunk | 3 | 2026-07-05 (approx, 逾期) | active
