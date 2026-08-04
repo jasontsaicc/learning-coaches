@@ -28,6 +28,8 @@
 - 叢集現況:`kind-k8s-coach-p2a` 三節點,**worker2 NotReady 17 天**(老毛病)+ 三個 11 天 Terminating 殘骸(backend/db/frontend on worker2),lab 不受影響未處理。活的 Pod 全在 worker:backend .91 / net-tool .92 / db .93 / frontend .94。net-tool RESTARTS 12(`sleep` 到期自然重啟,約 2h 一次)。
 - ROI 篩判定:`--` 分界線 s23 教過今天又問 → Q1「面試官會考 `--` 嗎」= no,**tool trivia 不進格子**,當場結案(已第二次口頭解釋,連同 pipe 在哪執行一起講清)。
 
+- **收工後即時回想(同堂 20 分鐘後,高價值資料)**:問「今天學到什麼」三題。① 可寫層:答「container 由很多 layer 組成,寫的檔案在最上層」= **講得出結構,講不出「那層綁 container」**,半過。② `kill 1` vs `delete pod` 差別:答「kill 1 是模擬 crash」= 那是定義不是差別,半過。③ 分層判準叫什麼:**「不知道耶,我大概知道怎麼分但不知道判斷標準」= 未過**。⚠️ 同一堂內用該判準答對三題(含無提示的「因為直接修改 kernel」),二十分鐘後說不出判準本身 —— **W1 隱性會的最乾淨一次實證,而且證實「當堂過不算過」**。s25 開場第一題就是它。
+
 **球已出未答(s25 開場直接接)**:PV/PVC 解耦已教完(需求單 vs 房源、binding、與 Pod/scheduler 同構),PV 完整 YAML 已給(`pv-demo`,1Gi,hostPath `/tmp/pv-demo`,storageClassName manual),**PVC 規格已給、學員未寫**(`pvc-demo`、500Mi、RWO、manual)。未答的預測題:**1Gi 的 PV 配 500Mi 的 PVC 綁不綁得起來?剩下 500Mi 會怎樣?**
 
 next(s25),順序:
