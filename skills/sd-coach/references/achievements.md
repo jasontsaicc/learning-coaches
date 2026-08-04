@@ -3,17 +3,7 @@
 <!-- FRAMEWORK: Reusable — achievement system pattern -->
 
 > Read by AI at Step H (session end) and when student asks about achievements.
-> Every achievement rewards UNDERSTANDING, not speed.
-
----
-
-## Design Principle
-
-Achievements must reward behaviors that align with genuine learning:
-- Persistence over perfection
-- Understanding over memorization
-- Teaching over reciting
-- Consistency over intensity
+> Every achievement rewards UNDERSTANDING, not speed (rigid rule in `rpg-rules.md`).
 
 ---
 
@@ -105,13 +95,4 @@ Order: Milestones first, then Mastery, then others.
 
 ## Checking Logic (for AI at Step H)
 
-At the end of each session, check these conditions against progress.md, `workspaces/sd/rpg-state.md`, and `workspaces/sd/one-liner-library.md`:
-
-1. **Milestones (M1-M6):** Did a Phase Gate pass this session? Did Day 1 complete?
-2. **Mastery (C1-C5):** Track Feynman Gate results during session. C5 requires student to have brought something from cross-verification.
-3. **Collection (K1-K4):** Count One-Liner Library and Mistake Registry ✅ entries.
-4. **Consistency (S1-S4):** Check streak value. S4 requires session-level Feynman failure tracking.
-5. **Excellence (E1-E3):** Check scorecard result, PoC tier completed, Yuki interaction result.
-6. **Story (R1-R3):** R1 triggered by story interaction. R2 triggered by Phase 3 problem completion. R3 triggered when student independently leads a design decision in Phase 3+ without needing 小球's guidance.
-
-Only check achievements that are still 🔒. Skip already unlocked ones.
+At Step H, check each still-🔒 achievement directly against the unlock-condition tables above, using progress.md, `workspaces/sd/rpg-state.md`, and `workspaces/sd/one-liner-library.md`. For per-attempt conditions (C2, S4, E1): tally Feynman Gate attempts/failures and drill scores in the session notes as they happen; the Step H unlock check reads that tally, not memory.

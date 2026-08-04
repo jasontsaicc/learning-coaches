@@ -88,6 +88,20 @@ Gradual release 對齊留存排程:首刷 = coach 演出 (I do);換皮題 1 = �
 
 ---
 
+**每題的 chunk 順序 (每 chunk 各過一次 Feynman Gate)**:暴力 baseline + 複雜度 →
+關鍵不變量 (「hash map 記住 complement,第二輪掃描就消失」「每個元素進出棧各一次,
+所以攤還 O(n)」) → template (由腳本答案 transcribe 出來,不是貼 code) → 複雜度論證
+(從不變量推,不是背)。
+
+各 phase 的 first-principles 錨:hashing 用 O(n) 空間換 O(1) 查表,O(n^2) 掃描壓成
+一趟 (P1);單調棧每個 index 進出至多一次,看似巢狀實為攤還 O(n) (P2);二分搜尋要求
+單調性,因為只有順序保證「目標不可能在被丟掉的那半」時丟一半才安全 (P3);樹遞迴安全
+是因為子樹是同一問題的小實例 (P4);heap 只維護偏序不做全排,所以 top-k 是 O(log n)
+(P5);BFS 在無權圖找最短路是因為它按距離分層展開 (P6);DP = 遞迴 + 記憶,把指數樹
+壓成線性表 (P6)。
+
+---
+
 ## Step D: Hands-On
 
 The lab is a per-problem folder (layout in `portfolio.md`) verified by
@@ -100,9 +114,14 @@ test green (see `lab-manager.md`).
 
 **Answer-debt rule.** 看了非自己寫出的解 (累了、趕時間、「直接給我看」都允許) →
 立刻登記白紙重寫 debt,3 天內到期;該 pattern 在白紙零 bug 通過前不得標 fluent。
+凡是 coach 給出或共同寫出的 code,當下就在該題 `notes.md` 記一行 provenance
+(shown / co-written / cold);debt 從這行開,不從記憶開。
+
+鷹架逐題退場:填空變少 → 填空消失 → 只靠腳本白紙寫。Pattern 後段的 step D 就是 cold write。
 
 **Compressed-sitting rule.** 短 sitting 可壓縮流程,但到期 re-test 最少留一題;被
-跳過的項目記成 dated debt,下次完整 session 先清 debt 再上新內容。
+跳過的項目 (transfer 問題、teach-back、weekly review) 記成 dated debt,下次完整
+session 先清 debt 再上新內容。
 
 ---
 
@@ -116,6 +135,10 @@ test green (see `lab-manager.md`).
   一次 blind 成功不算)。
 - Transfer 問題問機制 (「負數會不會壞?」「沒排序會怎樣?」),不考題號/標題 trivia。
 - 驗收沒 log 到任何 Mistake Registry item = 太簡單,下一輪升級。
+
+- **Cold Solve (講得出解法即可)**:已學 pattern 的沒看過的題。交付物是可討論的計畫:
+  點名 pattern 並說理由、口頭跑完腳本、講出暴力法與複雜度。評分看對映 + 表達,不看
+  code 跑不跑得起來 (面試永遠是沒看過的題)。
 
 ---
 

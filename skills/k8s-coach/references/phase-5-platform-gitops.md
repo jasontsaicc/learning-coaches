@@ -1,7 +1,6 @@
 # P5 平台工程 / GitOps: One Commit, Safely to Production
 
 > **如何使用此檔:** 這是 P5 的教學素材庫,供 coach 在 C 段讀取並改編。
-> 不要逐字唸稿,依學員反應選切面。每個 chunk 通過 Feynman Gate 再往下走。
 > **English Ramp 檔位: P5 = 主教材大量英文(接近官方文件的語言),中文只做點破。**
 > 本檔正文刻意用英文寫,它本身就是學員的閱讀材料與 Say-it-in-English 素材來源。
 > 口頭教學仍照學員當下偏好調配(他在 P2a 曾明說中文為主);但 P5 起,朗讀、複述、
@@ -36,10 +35,9 @@ P2b 的 provisioner,在 P5 全部收斂成同一個心智模型的不同實例�
 | C-7 | EKS Production Terraform | How do you make the cluster itself reproducible? | |
 | C-8 | Progressive Delivery | How does a commit prove itself safe before taking all the traffic? | |
 
-**環境前置**: `scripts/lab-cluster.sh up p5` 起 kind 3 節點。
-**安全鐵律**: 每個 lab 動手前先 `kubectl config current-context`,確認是 `kind-k8s-coach-p0`
-才 apply(機器上有公司 PROD EKS kubeconfig)。C-7 的 EKS lab 例外走 terraform,指令只產生、
-學員親手執行,命名前綴 `billing-dev-eks-*`,結尾必跑 `terraform destroy` 並驗證。
+**環境前置**: `scripts/lab-cluster.sh up p5` 起 kind 3 節點。lab 開場安全檢查見 `lab-manager.md`。
+C-7 的 EKS lab 例外走 terraform,指令只產生、學員親手執行,命名前綴 `billing-dev-eks-*`,
+結尾必跑 `terraform destroy` 並驗證。
 
 ---
 

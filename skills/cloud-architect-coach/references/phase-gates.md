@@ -11,6 +11,8 @@ thread-pull 練習彙整而成),而且學員不看筆記就能講清楚 loop 的
 loop 的差別、full loop 約一半分數壓在 LP 上、每個面試官都打 LP。講不出這個形狀,代表還沒
 搞清楚在測什麼,不能進 P1。
 
+Examiner inputs:progress file 裡的 personalized thread-pull list 原文(fenced),加上學員對 gate task 問題的逐字回答(loop 形狀:phone screen vs full loop、LP 權重)。
+
 Suggested gate task(engine 可跨 attempt 換問法):「phone screen 跟 full loop 差在哪?這個
 loop 最容易被技術強的人低估的一條線是什麼?」聽學員有沒有自己點出 LP 的權重。
 
@@ -19,6 +21,8 @@ loop 最容易被技術強的人低估的一條線是什麼?」聽學員有沒�
 Pass condition:gap-scan 十六題跑完,每一題標了 `pass` / `shaky` / `hole`;而且每一個
 `shaky` 或 `hole` 的題目,要嘛在後面的 session 補完機制、重測過(retest 拿到 `pass`),
 要嘛明確 park 起來並在 progress file 寫下 park 的理由。補完機制但沒重測不算過。
+
+Examiner inputs:progress file 裡 16 題的 `pass` / `shaky` / `hole` 標籤與 retest / park 紀錄(fenced)、學員對重問題目的逐字回答,加上該題在 `gap-scan-aws-networking.md` 的 "listen for" 行(判準)。
 
 Suggested gate task:從當初標成 `shaky` / `hole` 的題目裡挑,換個情境重問,聽學員這次自己
 講不講得到 "listen for" 那行的機制。
@@ -31,6 +35,8 @@ workload 的限制(licensing、耦合度、時程、成本),達到 tier-2 scorec
 migration judgment 維要過:選 R 有 workload-specific 的理由,而且不用追問就自己點出風險
 (downtime、資料一致性、rollback)。
 
+Examiner inputs:coach 出的 mini-case brief 原文、學員三階段 plan 與逐 workload R + 理由的逐字回答(含 follow-up 問答,fenced),加上 `scorecard-dims.md` 的 tier-2 維(quality lens)。
+
 Suggested gate task:給一個兩三個 workload 的短 brief(例:一台吃授權的舊 DB 加兩台無狀態
 web),要學員切 wave、逐 workload 說 R 與 why,再丟一個 cutover 的 follow-up 逼他守住。
 
@@ -42,6 +48,8 @@ tier-3:除了前面的維,consultant delivery 要過:答案有結構、英文撐
 走 acknowledge → quantify → offer → land on customer choice 四步、交卷前自己跑一遍
 Well-Architected self-review。
 
+Examiner inputs:兩場 full mock 的英文逐字 transcript(含 follow-up 問答,fenced)、該兩個 case 在 `case-bank.md` 的 Hire bar 清單(與換過的數字),加上 `scorecard-dims.md` 的 tier-3 維(quality lens)。
+
 Suggested gate task:抽一個 CASE(migration 類)加一個 CASE(hybrid-networking 類),把數字
 換掉當 mock 題,逐條對 Hire bar 打勾,再用該 case 的 Follow-up 收尾。
 
@@ -50,6 +58,8 @@ Suggested gate task:抽一個 CASE(migration 類)加一個 CASE(hybrid-networkin
 Pass condition:Priority 0 兩題與 Core 20 全部答得到 mechanism layer(講得出底下怎麼動,不是
 背名詞);其中兩題 Priority 0(IRQ/softirq、static vs shared library)要間隔重測兩次,兩次都
 達 mechanism layer 才算收。
+
+Examiner inputs:抽問的題目與學員的逐字回答(fenced)、每題在 `linux-interview-bank.md` 的機制層 (2) 內容(判準),加上 progress file 裡 Priority 0 兩次間隔重測的日期與結果紀錄。
 
 Suggested gate task:Priority 0 兩題間隔重問(不是連兩次),Core 20 隨機抽問,聽學員這次是不是
 自己講出機制、而不是想起上次被講過的答案。

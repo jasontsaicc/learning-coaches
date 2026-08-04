@@ -7,14 +7,14 @@ into each step. Per-day material (chunk lists, misconceptions, story beats) live
 
 ## Step B (Scenario Intro)
 
-- 讀當日的 story beat(curriculum-detail.md 該 Day 條目)+ narrative 角色開場,劇情最多 2-3 行(規則見 `narrative.md`)。
+- 讀當日的 story beat(curriculum-detail.md 該 Day 條目)+ narrative 角色開場(劇情 rigid rules 見 `rpg-rules.md`)。
 - 用生活化類比建立直覺,先不出術語。範例:「Load Balancer 就像餐廳帶位,決定哪個服務生接下一組客人,才不會有人被操爆。」
 
 ## Step C (Core Teaching: first principles + chunks)
 
 **Step 0(每個 building block 首日,3-5 分鐘上限):**首日先跑第一性推導,讀 `references/first-principles-chains.md` 對應的 chain。模式依 progress.md 的 warm-up classification 與 phase 選:
 
-- **Guided**(預設:Blank/Medium、P0、前 2-3 個 block):教練用 chain 的物理限制與推導方向帶著走,不逐字唸,依學員反應調整。
+- **Guided**(預設:Blank/Medium、P0、前 2-3 個 block):教練用 chain 的物理限制與推導方向帶著走,依學員反應調整。
 - **Exploration**(Strong 或 P2+):只給物理限制和起手問題,讓學員自己推,推完跟參考 chain 對照。學員走出不同但有效的路 → 肯定它。卡超過一輪 → 給一個提示(chain 的下一個概念),還卡 → 轉 guided。
 - 收尾必做 chain 的 **Micro-exercise(Build)**。CLI 環境學員畫不了圖:需要空間思考時,教練畫骨架留 `???` 讓學員填或挑錯;純推理題就用文字題。
 - 難度分層:從基礎層起,進階層要學員基礎穩或 P2+,且過得了 Depth Ceiling 的 Three Questions(engine 擁有)。

@@ -13,7 +13,7 @@
 
 - session_count: 45
 - last_weekly_review: 33 — ⚠️ WR5 於 S41 開跑未完成(Topic 2/3 已收,Topic 3 未答),trigger 持續成立,S46 收 Topic 3 + sweep + audit;完成時才把本欄更新為當時 session_count
-- last_session_date: 2026-07-20
+- last_session_date: 2026-08-04
 - warm_up_classification: (standalone 時期未記錄;學員已 P3,Step 0 模式預設 Exploration)
 
 ## Current Session breakpoint
@@ -34,6 +34,10 @@
 三指標本場:argument ❌(第一句棄權,零嘗試)/ capacity ❌(拒給+縮到單步除法才過,非 unprompted)/ ops 未測(沒走到收尾,模範答案是 coach 給)。連續計數全部維持 0。
 **同場後半(語言規則+難度回檔+核心 chunk 過關):** (1) 學生點名「中文敘述+技術名詞留英文」,已入 memory(keep-technical-terms-in-english)+ coaching-brief 語言策略;之後所有 coach 適用。(2) 全中文對話版完整 mock 逐字稿+速記卡給畢。(3) 學生喊「太難了/會考嗎/圖看不懂」→ safety valve 回檔:校準「逐字稿=天花板非及格線,及格線只有三件事(clarify 三類時效/50min 推 queue 隔離/3AM page)」;11 框圖棄用,改三層漸進圖(第 0 層現狀→第 1 層加 queue→第 2 層一變三)。(4) **核心 chunk 過關**:「三 queue 共用一組 worker 解決了嗎?」→ 學生「還是沒有解決」(裸)→ 要機制 →「會卡在在跑大量的 marketing」= 最小單位過;鏈已拼完整(隔離要隔 queue+worker 兩層)。🌟 本場最佳:學生主動問「worker 可以用 Lambda 嗎」= 主動 AWS 映射(sprint overlay 目標),且 reserved concurrency per-function 正好同構 per-pool 隔離。
 下一步(S47):開場白板默畫**三層簡化圖**(0→1→2 層,非 11 框大圖)+ 自己講「為什麼 queue 和 worker 都要分」→ 過了才進 Step 3 deep dive(provider failover / dedupe 位置)→ 收尾自己跑 3AM page test。
+
+**S47 中斷存檔(2026-08-04,間隔 9 天,Comeback 開場)。** 開場學生提議「先學新的」→ 舉證(6 天留存掉)後接受 deal:默畫一球+進 Step 3。默畫:第 2 層終點形狀留住(queue 一變三+worker 跟著分);第 0/1 層演進反了(第 0 層畫了 queue、API server 當成後加)→ 修正後緩衝痛點自答,coupling 痛點 coach 補。**capacity 冷測過:200 萬÷1000=2000s 零提示自算(s46 registry 複測 pass,interval 3→7,2000s→33min 換算未主動)。** worker-isolation chunk 複測:形狀在、機制鏈斷 — 「排第一還是卡」連問三輪都往「隊伍/前面卡住」找原因(queue-position 框架黏住),銀行櫃員比喻+縮到二選一(B:等空櫃員)才轉向;最終四格句 (1)共用 (2)在忙 自填,(3)順序/(4)人力 靠配對題才落位。chunk 以最小單位過(max scaffold),ordering vs capacity 兩層隔離的標籤-概念綁定待換場景複測(s46 priority 條目不撤,加註)。bulkhead 命名+Lambda reserved concurrency 映射已給(學生 S46 自提的 AWS 鉤子)。**Step 3 球 1 已出未答:Max 餿主意「單 queue+priority 標籤+共用 pool,省三倍維運」vs separate pools — 學生要講兩邊代價(priority 何時夠用/何時死,用空櫃員+200 萬+P99 60s 講)。**
+
+下一場 resume:Step 3 球 1(priority vs pools,題在上行)→ provider failover → dedupe 位置 → 收尾學生自己跑 3AM page test。
 
 **2026-07-19 S45 開場學生拍板:清帳場 2/2 押後(「不要再清場了,快沒耐心」),WR5 Topic 2/3 + 過期卡 sweep 移到 Tier 1 mock 跑完後收;S45 直接進 mock #1 Day 33 Notification System。**
 
@@ -118,9 +122,11 @@ Weak-topic flags: 無(至今沒有帶 flag 過 gate 的紀錄)。
 
 ### Live(unresolved,36 筆)
 
-- (s46) | Capacity estimation | `300 萬 ÷ 1000/s` 喊「不會算」;同一個除法 07-19 同一題已在他面前算過且他當場自答「要 Queue」,6 天後掉 | capacity-freeze 家族 + 「當場🟢≠留得住」;縮到單步除法即答對(3000)= 算術沒問題,是壓力下棄權;複測用同題不同數字冷起手 | unresolved | 3 | 2026-07-29 | 0
+- (s46) | Capacity estimation | `300 萬 ÷ 1000/s` 喊「不會算」;同一個除法 07-19 同一題已在他面前算過且他當場自答「要 Queue」,6 天後掉 | capacity-freeze 家族 + 「當場🟢≠留得住」;縮到單步除法即答對(3000)= 算術沒問題,是壓力下棄權;複測用同題不同數字冷起手 | unresolved | 7 | 2026-08-11 | 0
+  - S47 複測 pass(2026-08-04):200 萬÷1000=2000s 冷起手零提示自算,interval 3→7;缺口剩「換算人類單位+對撞 SLO」未主動(2000s→33min→超標 33 倍由 coach 補)
 - (s46) | Interview habit(棄權) | 一場內三連棄權:「不確定怎麼回答」→「不會算,L6 會怎麼答」→「面試不會問吧,直接說明」;拒給+縮小步+舉證後才動 | 逃避家族第 5 筆(S36/S42/S44/S46);proxy 問法(「Senior 會怎麼答」)S45 後第 2 次;質疑題目正當性 S42 後第 2 次 | unresolved | 3 | 每場 drill 即測 | 0
-- (s46) | Notification System(priority) | 「一條 queue 塞滿時高優先通知的延遲」無法自行量化,因此 priority queue 只剩名詞沒有論證 | 危險感沒機制家族;論證=他自己算的 50 分鐘,已示範綁進 one-liner,留存待 S47 白板默畫複測 | unresolved | 3 | 2026-07-29 | 0
+- (s46) | Notification System(priority) | 「一條 queue 塞滿時高優先通知的延遲」無法自行量化,因此 priority queue 只剩名詞沒有論證 | 危險感沒機制家族;論證=他自己算的 50 分鐘,已示範綁進 one-liner,留存待 S47 白板默畫複測 | unresolved | 3 | 2026-08-07 | 0
+  - S47 複測部分過:量化除法自己出手(pass,見上條);但 worker-isolation 機制鏈斷 —「排第一還是卡」三輪都往 queue-position 找原因,櫃員比喻+二選一+配對題才收;ordering vs capacity 標籤綁定換場景複測(priority vs pools trade-off 球已出未答,下場即測)
 
 - (s45) | Security & Auth (OAuth) | 術語層撈不出:access token 講成「憑證」、scope 講成「權限」、四角色(Resource Owner/Client/Auth Server/Resource Server)喊忘、OIDC 先搶標籤(挑戰後改選 OAuth 2.0 但沒給理由);機制全通(帳密只進銀行頁面、唯讀授權、改密碼=核彈誤傷全部 App) | 術語-概念未綁定家族;AWS 同構對照表已給(token=STS creds、scope=IAM policy),留存待複測;另計 Deny List 語音滑動 ×2(Dynamic/Denial List,5a 家族) | unresolved | 3 | 2026-07-23 | 0
 - (s45) | Security & Auth (deny list) | 「deny list 為何不膨脹」卡兩輪(「不會了」「不確定」),通行證印期限比喻後自組出 TTL aging(過期 entry 可移除,表≈近 15 min 掛失量) | 機制組裝啟動能量問題(S44 同款);短 TTL 綁 deny list 大小這條鏈換場景複測 | unresolved | 3 | 2026-07-23 | 0

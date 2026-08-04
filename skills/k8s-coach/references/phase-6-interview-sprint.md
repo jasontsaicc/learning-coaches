@@ -3,7 +3,7 @@
 > **如何使用此檔:** 本檔性質和 P0-P5 不同:它不是概念教材,是「衝刺期的編排手冊」。
 > P6 不教新知識(全 phase 零新術語卡)。所有 k8s 知識已凍結在 P0-P5 各 phase 檔,
 > 這裡教的是怎麼把它們組裝成 45 分鐘的面試表現。
-> 不要逐字唸稿:run sheet 是骨架,情境參數、追問深度、給不給臺階,依學員當場表現調。
+> run sheet 是骨架:情境參數、追問深度、給不給臺階,依學員當場表現調。
 > 題庫本體在 `references/interview-bank.md`,本檔只用題目 ID 對接,不重複收錄題目。
 > 依 SKILL.md English Ramp 檔位:mock 劇本與 behavioral 全英文,編排說明用中文。
 
@@ -305,7 +305,7 @@ raw 一行 → 門檻篩選 → STAR 英文化 → Action 回注原理 → mock 
 
 ### 手速 drill 清單
 
-環境鐵律不變:kind 叢集練,開打前 `kubectl config current-context` 確認是 `kind-k8s-coach-p0`(機器上有公司 PROD EKS kubeconfig)。
+kind 叢集練(lab 開場安全檢查見 `lab-manager.md`)。
 
 **Session 開頭 30 秒必做的環境設置:**
 

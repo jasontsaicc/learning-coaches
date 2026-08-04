@@ -9,13 +9,13 @@
 | Field | Value |
 |-------|-------|
 | **Title** | 🏗️ Staff Architect |
-| **Current streak** | 6 週 🔥 (連續活躍週:S31 / S32-S36 / S37-S38 / S39-S42 / S43-S44 / 本週 S45) |
+| **Current streak** | 1 週 (07-27 週斷檔 reset;前段 6 週:S31 → S45/S46) |
 | **Longest streak** | 6 週 |
-| **Last session date** | 2026-07-20 (S45, WR5 Topic 2 收 1/6,Topic 3 默畫未答即停) |
+| **Last session date** | 2026-08-04 (S47, worker-isolation chunk 複測過,Step 3 球 1 已出未答即停) |
 
 ## Last story summary
 
-Session 45。WR5 Topic 2 Security & Auth 盲測收 1/6。FSI 銀行題:開局又是裸的「JWT token」被打回,但 scaffold 一給就組出完整 trade-off,Max 的「session 表全塞 memory」餿主意被量級一刀砍回去;OAuth 機制全通、術語全掉(access token 喊「憑證」、四角色喊忘),小球用 STS/IAM 對照表把標籤釘回 AWS 肌肉上。Topic 3 電商 Snowflake 默畫題剛擺上白板,學生喊停收工。下場:默畫起手。
+Session 47。九天後回歸,開場想直奔新內容,小球把三層圖擋在門口。默畫:終點形狀還在,演進順序反了;200 萬÷1000 這次冷起手直接出手(上次喊不會算的那個除法!),但「排第一還是卡」在隊伍裡繞了三圈,銀行櫃員畫面才把他拉到「等的是空櫃員」。bulkhead 得名,他自己的 Lambda reserved concurrency 鉤子接上了。Max 剛拋出「單 queue 加 priority 省三倍維運」的餿主意,學生喊停收工。下場:接 Max 這球。
 
 ## Achievements
 

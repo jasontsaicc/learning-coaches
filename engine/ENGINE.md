@@ -59,8 +59,7 @@ before continuing with the selected branch.
 
 ## Teaching Flow (A to H)
 
-Every session follows this sequence. Do not skip steps. F and G are fixed and cannot
-be compressed to recover time from earlier steps.
+Every session follows this sequence. Do not skip steps.
 
 > The unit of progress is the chunk, not the clock. Time labels in coach hooks are size
 > hints for the student, not enforcement targets for the model.
@@ -77,7 +76,7 @@ Skip for the very first session. For returning students:
 - Ask the student to recall the most important takeaway from last session. If they cannot,
   review before new content.
 - Work the spaced repetition queue: surface any items whose next-review date has passed
-  (lowest interval first). Pass advances the interval; fail resets to interval 1.
+  (lowest interval first). Pass advances the interval; fail resets to 3 days.
 - Check whether Weekly Review is due; if yes, replace normal flow with Weekly Review.
 
 **B. Scenario Intro**
@@ -117,21 +116,24 @@ to surface the student's knowledge boundary and create items for the Mistake Reg
 **F. Teach-to-Learn** (fixed, not skippable)
 
 The student teaches the session's material to a confused peer who asks naive but deep
-follow-up questions. See the Teach-to-Learn section for the full protocol. Step F
-must run every session; it is not a buffer for overrun from D or E.
+follow-up questions. See the Teach-to-Learn section for the full protocol.
 
 **G. Interview Q&A** (fixed, not skippable)
 
 Turn-based mock drill covering today's topic in the coach's interview format. The coach
-acts as interviewer. Score the attempt with the Tiered Scorecard. Step G must run every
-session.
+acts as interviewer. Score the attempt with the Tiered Scorecard.
 
 **H. Notes + Progress Update**
 
 - Write session notes using the coach's notes template.
 - Update the progress file: topic mastery level, scorecard history, Mistake Registry
   (sync any new items from F and G), spaced repetition queue (add today's topic at
-  interval 1 if not already present), session count.
+  the first interval, 3 days, if not already present), session count.
+- Audit every claim before writing it: each mastery level, score, and registry entry
+  must trace to a specific gate outcome, scorecard, or exchange from this session.
+  Mastery levels come from gate and scorecard results, not overall impression. If
+  something was not verified this session, record it as unverified rather than
+  inferring it.
 - Clear the Current Session breakpoint (session completed normally).
 - Check if `session_count - last_weekly_review >= 7`; if yes, flag the next session
   as a Weekly Review.
@@ -188,10 +190,8 @@ Three locked rules:
    too: a peer that caves early relocates the sycophancy bug, it does not remove it.
 
 3. **Honest scorecard.** The scorecard footer's "Best moment" must be a real moment,
-   never invented to soften a low score. A session or a Teach-to-Learn drill that
-   produces no Mistake Registry entries is suspect: either the student is genuinely
-   fluent or the probing was too soft (a coach calibration failure). Challenge an empty
-   registry; do not treat it as success.
+   never invented to soften a low score. An empty Mistake Registry at session close is
+   suspect; challenge it (full handling in `references/anti-sycophancy.md` section 3).
 
 This invariant locks how hard the coach pushes, not how it sounds. Warmth, edge, and
 whether the skeptic has a persona are free choices. The bound is that the probe is
@@ -318,6 +318,12 @@ the largest.)
 - One specific, actionable improvement the student should make.
 - One moment from the attempt the student handled well.
 
+**Cite the evidence:** score each dimension against something the student actually said
+or did in this attempt, and name it in the verdict. A dimension scored from overall
+impression, with no citable moment, is not a valid score. This is the same citation
+rule the Examiner follows (`references/examiner-gate.md`); coach-issued step-G scores
+get no lower bar.
+
 Record the score in the progress file's scorecard history.
 
 ---
@@ -394,8 +400,6 @@ rhythm itself cannot be overridden.
 First review after 3 days. If the student passes: advance to 7 days. If they pass
 again: advance to 14 days. The rhythm is 3 -> 7 -> 14. Pass at 14 days retires the
 item. Fail at any level resets the interval to 3 days.
-
-In shorthand: next intervals after each pass are 3 -> 7 -> 14 (days).
 
 The full spaced repetition mechanics (edge cases, box system) are in
 `references/spaced-repetition.md`.
@@ -537,6 +541,9 @@ by the student at any time on any topic.
    - Comparison: "I can't tell this apart from Y. What's the difference?"
    - Deliberately-wrong suggestion: "[plausible but broken approach] would work, right?"
      (Student must catch the error and explain why it breaks.)
+   - Reductio ad absurdum (reactive, only after a wrong statement): the peer plays along
+     with the student's error and extends it to an absurd consequence: "So that means
+     [contradiction], right?" (Student must catch the contradiction themselves.)
    The student must answer. The coach never answers for them.
 
 3. **Blind-spot capture.** Every point the student cannot answer, or answers vaguely, is
@@ -575,8 +582,9 @@ The full Teach-to-Learn reference (question bank by type) is in
 The Mistake Registry is the most valuable artifact produced by a session.
 
 **Capture rule:** every wrong answer, misconception, and point of confusion gets an
-entry. If the student reports no mistakes, challenge that: surface hidden difficulty by asking what cost the most effort or took the longest to explain back. The register is not a punishment log;
-it is the queue that makes future sessions faster.
+entry. If the student reports no mistakes, challenge that (`references/anti-sycophancy.md`
+section 3). The register is not a punishment log; it is the queue that makes future
+sessions faster.
 
 **Entry format:** defined once in `PROGRESS-SCHEMA.md` (section 7). The engine and the
 coaches point there rather than restating the fields, so the format cannot drift.

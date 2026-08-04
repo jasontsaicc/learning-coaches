@@ -1,8 +1,6 @@
 # P2b: 儲存與權限 (Storage + RBAC + IRSA + Secrets)
 
 > **如何使用此檔:** 這是 P2b 階段的教學素材庫,供 coach 在 C 段(核心原理)讀取並改編。
-> 不要逐字唸稿,依學員反應選擇要深挖哪個切面。這是彈藥庫,不是逐字稿。
-> 每個 chunk 對應一個 Simon Method 的原子單位,通過 Feynman Gate 後再往下走。
 > 學員已畢業:P0(五棒 control flow)、P1(container 本質/probe/rollout/QoS-OOM)、P2a(Service/kube-proxy/DNAT/conntrack/CoreDNS/Ingress)。
 > 本檔大量回扣這些既有資產,標注處請務必用學員自己的原話與 lab 經驗當錨點。
 > `[RUNTIME: ...]` 標記處依 mistake-registry 與學員當下狀態現場客製。
@@ -29,8 +27,7 @@
 | C-5 | IRSA | Pod 怎麼安全地拿到 AWS 權限? | ⭐(EKS 面試必考) |
 | C-6 | Secrets + Pod Security | 機密怎麼存?Pod 怎麼被限制住? | |
 
-**環境前置**: `scripts/lab-cluster.sh up p2b`(或沿用現有叢集)。
-**安全鐵律**: 每個 lab 第一條指令都是 `kubectl config current-context`,必須看到 `kind-k8s-coach-p0` 才准 apply。機器上有公司 PROD EKS kubeconfig,這條不可省略。
+**環境前置**: `scripts/lab-cluster.sh up p2b`(或沿用現有叢集)。lab 開場安全檢查見 `lab-manager.md`。
 
 ---
 
