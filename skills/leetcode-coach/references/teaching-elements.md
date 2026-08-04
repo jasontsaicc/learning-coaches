@@ -1,157 +1,180 @@
 # Teaching Elements
 
-Domain content that fills Teaching Flow steps B, C, D, and E. The engine governs the
-structure (scenario before terminology, principle before mechanism, one Feynman Gate
-per chunk); this file supplies the leetcode content the engine pours into each step.
+Domain content that fills Teaching Flow steps B, C, D, and E. The engine keeps the
+mechanics (gates, registries, breakpoints); this coach teaches every NEW problem
+through the seven-step flow below (第 0 步 ~ 第 6 步, student-specified 2026-07-14).
+The flow serves four outcomes and nothing else: 從頭寫出 code、看到題 10 秒 pattern
+match、兩個月後仍寫得出來、永遠用最簡單好懂的解法。
 
-A topic is a pattern (Approach A). The chunks inside a topic are the escalating ideas
-of the brute-to-optimal path. Hybrid rule: the first problem of a pattern is taught
-fully brute-to-optimal (steps B/C); later problems in the same pattern run as lab/drill.
-This keeps teaching concrete without sliding into per-problem memorization.
+| 七步 | Engine step |
+|------|-------------|
+| 第 0-1 步 模式定位、換一個問法 | B |
+| 第 2-4 步 視覺化、推導腳本、手動模擬 | C |
+| 從腳本長出 code + 跑 harness | D |
+| 換皮題驗收 | E |
+| 第 5 步 面試敘事腳本 | G 的材料 (pattern 收尾時) |
+| 第 6 步 留存排程 | H 排程 + A 回收 |
 
-Cadence note: the daily one-problem study group sitting runs B → C → D for one problem,
-passes the Feynman Gate, saves a breakpoint, and stops clean (engine Micro-mode). Steps
-F and G run once per pattern wrap-up, over the pattern's accumulated problems, not per
-problem. The study group is a natural Teach-to-Learn target: close a problem with
-"when you explain this to your colleague tomorrow, be ready to be asked X."
+A topic is a pattern. 只有 pattern 的首刷題走完整七步;換皮題由學生自己跑推導腳本
+(coach 只在卡住時出手),白紙重寫走留存排程。**Gate economy:** 一道新題恰好兩個
+chunk — 「推導」(第 0-3 步; Recall = 學生自己把腳本問答跑一遍) 和「驗證」(第 4 步;
+Transfer = 「換皮題的 check 和這題差在哪一行?」)。不要把每行程式碼切成 chunk;
+gate 數量正比於學生的痛苦。
 
----
-
-## Blank-Page Handling (cross-cutting, the coach's center of gravity)
-
-The student's biggest failure mode is the blank page: they understand the problem, may
-even know the pattern, and still cannot produce a first line. This machinery runs
-before any attempt exists; the engine's escalation ladder is reactive and takes over
-only after a failed attempt.
-
-- **The articulation bridge (4 plain-language questions).** Before any code: (1) What
-  am I computing? (2) What must I try — what is the brute force? (3) How do I shrink
-  the work / move? (4) When do I stop? Answers are plain sentences; the first line of
-  code is a transcription of them (`seen = {}`, `l, r = 0, len(a)-1`). Full version
-  with a worked example: `references/problem-solving-framework.md` (Step 2.5).
-- **Gradual release (I do → we do → you do).** Pattern's first problem, or any
-  stuck-at-zero moment: the coach narrates ONE full think-aloud through the 4 questions
-  (I do). Never ask a frozen student to generate; generation is the jammed function.
-  Default step-D path early in a pattern: skeleton with 2-3 blanks, each blank paired
-  with a "why" question (we do). Fade to blind typing, then cold-next-day (you do).
-- **Skeleton-first.** The unit of practice is the pattern skeleton (~8-10 skeletons
-  cover most of NeetCode 150), not the whole problem. Each problem is a skeleton plus
-  two problem-specific lines. Skeletons live in `references/pattern-cheatsheet.md`.
-- **Draw to teach.** Teach a pattern by drawing a text diagram with the problem's
-  actual numbers, showing 2-3 steps of motion. The waste the optimization removes must
-  be visible before the optimized code appears.
+Cadence: 每日讀書會 sitting 跑第 0-4 步 + 存檔即停 (engine Micro-mode)。Engine 的
+F 與 G 在 pattern 收尾時跑一次 (對整個 pattern 的累積題目),不逐題跑;第 5 步的
+敘事腳本就是 G 的材料。讀書會是天然的 Teach-to-Learn 對象:收題時說「明天跟同事
+講這題時,準備好被問 X」。
 
 ---
 
-## Step B: Scenario Intro
+## Step B: 模式定位 + 換一個問法 (第 0-1 步)
 
-One-line hooks that make a pattern matter before any jargon. DevOps analogies are the
-default register (the student is a DevOps engineer; the migrated analogy bank has one
-per pattern).
+**第 0 步:模式定位,10 秒內講完。** 固定開場句式:「這題不是 [題名] 題,它是
+[pattern] 的實例。」接著列同模式換皮題 (題號 + 一句話差異),再給 2-3 個秒認信號。
+全部取自下方模式定位表,不即興發明。
 
-| Pattern | Scenario hook |
-|---------|--------------|
-| Hash Map | DNS lookup: domain → IP in O(1). A config store is a hash map you query all day. |
-| Two Pointers | Comparing two sorted server logs: one cursor at each end, walking inward to find the discrepancy. |
-| Sliding Window | A CloudWatch dashboard always shows the last 5 minutes: old points drop off, new ones enter, the aggregate updates without rescanning history. |
-| Stack | Rollback order: the last change applied is the first to undo. Config parsers and call stacks work the same way. |
-| Binary Search | `git bisect`: find the breaking commit in log2(n) checkouts instead of n. |
-| Linked List | A middleware pipeline: each handler holds a pointer to the next. |
-| Trees | A directory tree: `ls -R` is DFS; `find -maxdepth 2` is BFS. |
-| Heap | The incident queue: P1 pages always pop before P2, regardless of arrival order. |
-| Backtracking | Trying every combination of config flags, undoing each failed branch. |
-| Graphs | `terraform graph`: service dependencies form a DAG; Course Schedule is CI/CD job ordering with a cycle check. |
-| 1-D DP | Redis memoization: cache the answer to each subproblem so it is never recomputed. |
-| Intervals | Merging overlapping maintenance windows; finding gaps in the on-call rotation. |
-| Greedy | Autoscaling: pick the locally cheapest instance that meets the current requirement. |
+**第 1 步:換一個問法 (降維)。** 把原題翻譯成 pattern 的標準形式 (「求最小 k」→
+「在答案空間找第一個 True」),再用表中的 DevOps 類比錨定。
 
----
+### 模式定位表 (秒認信號 + 換皮題鏈 + DevOps 錨)
 
-## Step C: Core Teaching (first principles + chunks)
+| Pattern | 秒認信號 | 換皮題鏈 (題號 → 換皮差異) | DevOps 錨 |
+|---------|---------|---------------------------|-----------|
+| Hash Map | 「配對 / 次數 / 分組」+ 無序資料 | 1 → 217 (找重複) → 242 (次數比對) → 49 (key 換成排序後字串) | DNS / config store 的 O(1) 查表 |
+| Two Pointers | 已排序 + 找一對;回文 | 125 → 167 (排序版 Two Sum) → 15 (外層固定一個 + 內層對撞) → 11 (對撞 + 保留高牆) | 兩份排序 log 各一游標對走 |
+| Sliding Window | 「連續」子陣列/子字串 + 最長/最短/大小 k | 121 (窗口退化成追蹤最低點) → 3 (變動窗,遇重複縮左) → 424 (變動窗,可容忍 k 次) → 567 (固定窗 + 字頻比對) | CloudWatch 永遠只看最近 5 分鐘 |
+| Stack | 「最近的一個」「配對消除」LIFO | 20 → 155 (疊加最小值) → 739 (單調棧:下一個更大) | rollback:最後改的最先退 |
+| Binary Search (index) | 已排序 + 找目標/邊界 | 704 → 74 (2D 攤平成 1D) → 153 (旋轉陣列找有序半邊) → 33 (旋轉 + 找目標) | git bisect |
+| Binary Search (answer space) | 「最小化最大值 / 最少需要多少」+ check 單調 | 875 → 1011 (吃香蕉換裝貨) → 1482* (天數換花束) | 容量門檻:FFFTTT 找第一個 True |
+| Linked List | 找中點/判環 → fast-slow;反轉/合併 | 206 → 21 (合併兩鏈) → 141 (快慢判環) → 143 (中點+反轉+合併三合一) | middleware chain,handler 指向下一棒 |
+| Tree DFS | 整棵樹的性質 / 路徑 | 226 → 104 (深度) → 543 (直徑 = 左右深度和) → 110 (深度 + 早退) | `ls -R` |
+| Tree/Graph BFS | 層序 / 最短步數 | 102 → 199 (每層取最右) → 994 (多源 BFS 網格) | `find -maxdepth 2` |
+| Heap | 「第 k 大 / 前 k 個」不用全排 | 1046 → 703 (串流第 k 大) → 215 → 973 (距離當 key) | incident queue:P1 永遠先 pop |
+| Backtracking (認得就好) | 「所有組合 / 排列」 | 78 → 39 (可重複選) → 46 (排列) | 試遍 config 旗標組合,失敗就 undo |
+| Graph | 網格連通塊;依賴順序 | 200 → 695 (count 換 max) → 130 (從邊界反向想);207 → 210 (判環換輸出順序) | terraform graph / CI 依賴解析 |
+| 1-D DP | 「幾種方法 / 最小成本」只依賴前幾步 | 70 → 746 (count 換 min cost) → 198 (相鄰限制) → 213 (環狀) | Redis memoize:算過的不再算 |
+| Intervals | 區間重疊 / 合併 | 56 → 57 (已排序插入) → 435 (反面:留最多 = 貪心) | 維護窗合併 |
+| Greedy | 每步局部最優可證安全 | 53 → 55 (可達性) → 45 (層推進) | autoscaling 選當下最省的機型 |
 
-**Core chain (applies to every pattern):** an optimal solution exists because some
-piece of work the brute force repeats can be remembered or ruled out. The pattern is
-the data structure or invariant that holds that memory. Teach the waste first (show
-the brute force redoing work on real numbers), then the insight that removes it, then
-the template. A student who sees the waste can re-derive the template; a student who
-memorizes the template cannot.
-
-Per-pattern chunk order (each chunk gets its own Feynman Gate):
-
-1. **Naive baseline:** state the brute force and its complexity. Always aloud, always
-   first; it anchors the optimization and scores interview points by itself.
-2. **Key insight:** the invariant or maintained state that collapses the complexity
-   ("the hash map remembers complements, so the second scan disappears"; "each element
-   enters and leaves the stack once, so the total is O(n) amortized").
-3. **Optimal template:** the reusable skeleton (see `pattern-cheatsheet.md`), taught
-   by transcribing the bridge answers, not by pasting code.
-4. **Complexity analysis:** why the optimal bound holds, argued from the insight (an
-   amortized argument, a halving argument), not recited.
-
-First-principles examples by phase: hashing trades O(n) space for O(1) lookup so the
-O(n^2) complement scan becomes one pass (P1); a monotonic stack works because each
-index enters and leaves at most once, so nested-looking work is O(n) amortized (P2);
-binary search requires the sorted/monotonic property because discarding half is only
-safe when order guarantees the target cannot be in the discarded half (P3); tree
-recursion is safe because subtrees are smaller instances of the same problem (P4);
-a heap keeps the top-k reachable in O(log n) because it maintains only a partial
-order, not a full sort (P5); BFS finds shortest paths in unweighted graphs because it
-explores in distance layers (P6); DP is recursion plus a memory that collapses an
-exponential tree into a linear table (P6).
+*1482 不在 NeetCode 150,純換皮練 check。Skeleton code 本體在
+`references/pattern-cheatsheet.md`。
 
 ---
 
-## Step D: Hands-On (guided by default)
+## Step C: 視覺化 → 推導腳本 → 手動模擬 (第 2-4 步)
+
+**第 2 步:視覺化結構 (若有助理解)。** 一張圖,不堆疊。用題目實際數字畫出核心
+結構 (答案空間的 FFFTTT 單調邊界、窗口的進出、棧的推疊)。暴力法重複做的 waste
+必須先看得見,優化後的 code 才准出現。
+
+**第 3 步:推導腳本。** 解法拆成 3-6 個依序回答的問題,每問的答案直接長出幾行
+code。首刷題由 coach 現場**演出**一次「從空白長出程式碼」:逐問展示、每問配對應
+code 片段、最後拼裝。這是演出腳本,不是描述腳本。通用 fallback 是 4 問 bridge
+(`references/problem-solving-framework.md` Step 2.5);pattern 有自己的腳本時用
+pattern 版。二分搜尋五問 (canonical 範例):
+
+1. 我在找什麼?(一句話,產生待辦清單)
+2. check 怎麼寫?(先寫驗證,再寫搜尋)
+3. 範圍是什麼?(建立不變量:答案必在 [lo, hi])
+4. 試了 mid,結果指向哪半邊?(從「mid 可不可能是答案」推出 hi=mid vs lo=mid+1 的不對稱)
+5. 何時結束、答案在哪?(不變量收斂到單點)
+
+**第 4 步:手動模擬。** 用題目給的小例子排表格逐步跑 (逐小時/逐天/逐輪),讓抽象
+公式對上具體過程。收斂過程 (二分的 lo/hi/mid 表) 也要跑。
+
+Gradual release 對齊留存排程:首刷 = coach 演出 (I do);換皮題 1 = 學生自己跑
+腳本,coach 只答卡點 (we do);+2 天白紙重寫 = you do。
+
+---
+
+## Step D: Hands-On
 
 The lab is a per-problem folder (layout in `portfolio.md`) verified by
 `scripts/lab-lc.sh <problem-dir>`: all functional tests green AND the large-N timing
 test green (see `lab-manager.md`).
 
-The we-do loop, early in a pattern:
+1. 學生從自己的腳本答案長出 code:transcribe 已說出口的句子,不是憑空發明。
+2. Code 註解標問句編號 (`# Q2: check`),讓「碼」和「why」對齊。
+3. 跑 harness。失敗先由學生從 error message debug,coach 才解釋。
 
-1. Student runs the articulation bridge aloud for this problem.
-2. Coach presents the skeleton with 2-3 blanks; each blank is paired with a "why"
-   question ("what goes here, and why a set instead of a list?").
-3. Student fills the blanks, then types the whole solution blind.
-4. Run the harness. Read failures aloud; the student debugs from the error message
-   before the coach explains anything.
+**Answer-debt rule.** 看了非自己寫出的解 (累了、趕時間、「直接給我看」都允許) →
+立刻登記白紙重寫 debt,3 天內到期;該 pattern 在白紙零 bug 通過前不得標 fluent。
 
-Scaffolding fades problem by problem: blanks shrink, then disappear, then the student
-writes from the bridge alone. Late in a pattern, step D is a cold write.
-
-**Answer-debt rule.** If the student views solution code they did not produce cold
-(tired, deadline, "just show me"), allow it, log it immediately as a cold re-do debt
-due in 3 days, and the pattern cannot be marked fluent until that cold re-do passes
-with zero bugs. Evidence from the standalone era: a Hard problem was viewed under
-study-group pressure, never cold-redone, and fluency stalled with no trace.
-
-**Compressed-sitting rule.** A short study-group sitting may compress the session, but
-never drops due re-tests to zero (minimum one). Anything a compressed sitting skips
-(transfer questions, teach-back, the weekly review) gets a dated debt entry in the
-registry, and the next full session clears debts before any new content. Evidence:
-every compressed sprint in 2026-06/07 skipped the warm-up entirely and five due
-re-tests sat unresolved for weeks.
+**Compressed-sitting rule.** 短 sitting 可壓縮流程,但到期 re-test 最少留一題;被
+跳過的項目記成 dated debt,下次完整 session 先清 debt 再上新內容。
 
 ---
 
-## Step E: Drill
+## Step E: 換皮題驗收 (驗收即遷移訓練)
 
-Two distinct drills, chosen by the student's fluency on the pattern. Both feed the
-Mistake Registry; a drill that logs nothing was too easy.
+- 驗收 = 同 pattern 的換皮題,不是重述剛學的題 (875 教完用 1011 驗收)。難度剛好
+  跨到下一題,驗收本身就是遷移訓練。
+- 固定收尾問句:「這題的 check 和上一題差在哪一行?為什麼?」— 變的只有 check,
+  骨架不變。
+- Skeleton fluency 的標準:白紙 cold 寫 template 零 bug (cold-next-day 才算數,
+  一次 blind 成功不算)。
+- Transfer 問題問機制 (「負數會不會壞?」「沒排序會怎樣?」),不考題號/標題 trivia。
+- 驗收沒 log 到任何 Mistake Registry item = 太簡單,下一輪升級。
 
-- **Cold Solve (approach articulation).** An unseen problem in a learned pattern. The
-  deliverable is a discussable plan: pattern named and justified, bridge run aloud,
-  brute force stated with complexity. Scored on mapping + articulation, not on whether
-  code ran. This trains the north-star skill directly (the interview is an unseen
-  problem, always).
-- **Skeleton Fluency.** Type a known pattern's template cold into a blank file, zero
-  bugs. One blind success is not fluency; the acceptance test is cold-next-day with
-  zero bugs, which maps to the engine's review rhythm.
+---
 
-Drill selection guardrail: transfer questions ("would this survive negative numbers?",
-"what breaks if the array is not sorted?") test the mechanism, never trivia about a
-specific problem's number or title. The student explicitly rejected title-keyed recall
-questions; honor that.
+## 第 5 步: 面試敘事腳本 (engine step G 的材料)
+
+邊寫邊講的標準台詞順序:暴力 baseline → 講出關鍵性質 (「單調性」等得分關鍵字要
+點名) → bound 的理由 → 邊寫邊解釋非對稱處 → 主動報複雜度。每題附 2-3 個追問預測
+與應答。Pattern 收尾的 G 用這個腳本跑 mock,Tiered Scorecard 照常。
+
+---
+
+## 第 6 步: 留存排程 (retention ladder, 對抗遺忘曲線)
+
+主動回憶,不是重讀。每個 pattern 的首刷題進 `retention.md` (domain registry,
+宣告在 `portfolio.md`;ladder 為本 coach 宣告,PROGRESS-SCHEMA section 10 允許):
+
+| Rung | 內容 |
+|------|------|
+| 今天 | 首刷完成 (harness 綠) |
+| +2 天 | 白紙重寫首刷題 + 首刷換皮題 1 |
+| +7 天 | 換皮題 2 |
+| +21 天 | 換皮題 3 + 口頭跑一遍推導腳本 |
+| +60 天 | 從該 pattern 已解題隨機抽一題白紙寫 |
+
+- 白紙 = 空檔案、不看舊 code 或筆記;harness 綠才算過。每寫完照 Step E 問 check
+  差異問句。
+- Fail:當場用卡住協定修卡點,rung 不前進,3 天後重試同 rung。
+- +60 過 → pattern retired (仍留在 P7 sprint 的隨機抽測池)。
+- 排程歸 step A 檢查:due rung 是當天 sitting 的主內容 (直接當 step D/E),不佔
+  step A 的 2-item 快問額度;多個 overdue 時最低 rung 先。
+
+---
+
+## 卡住協定 (學生說「看不懂」時)
+
+1. **定位卡點:** 問或推斷卡在推導腳本第幾問、或哪一行 code。只針對卡點放大,
+   不重講全部。
+2. **鏡頭拉近,層層拆解:** 一行緊湊 code = 多個概念疊加,拆成獨立層單獨講透再
+   組裝。例:`sum((p+k-1)//k for p in piles)` = ①笨迴圈版本 ②整數向上取整技巧
+   ③生成器壓縮。
+3. **手動模擬優先於解釋:** 與其解釋公式,不如排逐步表格讓學生看到公式是表格的
+   壓縮。先誠實模擬,再壓縮成公式;壓縮是優化不是必要。
+4. **微驗收:** 每次拆解後給一個 30 秒手算完、常識可交叉驗證的小例子 (7 根香蕉
+   每小時吃 3 根,`(7+3-1)//3` 對上「常識上要 3 小時」)。
+5. **技巧存成一句話口訣:** 「整數向上取整 = 加 (除數-1) 再整除」「ceil = 天花板,
+   floor = 地板」。標注跨語言/跨題通用才值得記;方言寫法不值得為它卡住。口訣寫進
+   `one-liner-library.md`。
+6. **重串因果鏈:** 確認理解後,把「規則 → 數學性質 → 程式碼寫法」的完整因果鏈
+   重新串一遍,每一環學生自己走過。
+
+---
+
+## 反模式 (禁止)
+
+- 直接貼最優解 + 逐行解釋。複述型學習,兩個月必忘。
+- 一次教多個 pattern 或炫技多種解法。收斂原則:最簡單好懂、面試過得了的解法
+  優先;更優雅的變體進 curiosity branch,學生好奇時再拉回來。
+- 逐行切 chunk、逐行開 gate。一題兩個 chunk 就夠 (推導 / 驗證)。
+- 卡住時重講全部。只修卡點。
 
 ---
 

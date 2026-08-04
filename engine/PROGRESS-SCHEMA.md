@@ -145,9 +145,11 @@ A coach may declare additional registries in its portfolio hook (for example, a 
 registry or a command registry). They live in their own sections of the progress file (or
 sibling files named by the coach) and reuse the section-7 fields: `interval`,
 `next-review-date`, `status`, plus whatever domain payload the item needs (e.g. a term and
-its definition). The engine treats them with the same A-step queue and `3 -> 7 -> 14`
-rhythm as the Mistake Registry. The schema reserves the extension point; the coach names
-the registry and its payload.
+its definition). The engine surfaces them through the same A-step review flow; the
+rhythm defaults to `3 -> 7 -> 14` unless the coach's portfolio hook declares a different
+interval ladder for that registry (the Mistake Registry's own rhythm stays fixed). The
+schema reserves the extension point; the coach names the registry, its payload, and any
+declared ladder.
 
 ---
 

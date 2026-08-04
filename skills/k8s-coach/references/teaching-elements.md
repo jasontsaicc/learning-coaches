@@ -50,6 +50,10 @@ EN term | 發音 | one-line English definition | 中文點破
 
 親手 apply / 觀察 / 改。叢集開關與驗證見 `lab-manager.md`;每個 phase 的具體 lab 在對應 phase reference 檔。
 
+**鍵盤鐵律(2026-07-17 加,s16 實證)**:**指令一律由學員敲,coach 只給規格與判讀。** YAML 可給範本照打(s13 慣例「給我看照打」),但 `kubectl` / `kind` / 任何執行動作不代跑。s16 教練整堂搶鍵盤自己跑,學員當場糾正「要我自己裝才對」,並回頭要求「請說明前面做了什麼,前面是你做的,所以我不太瞭解」= **搶鍵盤直接造成理解斷層,還得花一大段補交代**。學員明說「幫我檢查 / 幫我改」時才代勞,且改完講清楚改了什麼。
+
+**正解先給(2026-07-17 加,學員明確選定)**:學員選「先看答案才學得進去」(worked-example effect)。正解不擠牙膏、**不在未教前考**(s16 教練拿 chunk 4 的 kubelet Ready 條件當 chunk 3 gate 題,學員答「不確定」是正確反應)。**但正解後面必須立刻接學員動手**:s16 資料顯示「直給 + 口頭抽考」三次全蒸發(conntrack 3 天、L4/L7 3 分鐘、db 裸奔 40 分鐘),「直給 + 學員自己打自己 debug」一次就進(default-deny.yaml,九行對八行 + 自己 dry-run 抓到 bug)。**口頭抽考大砍**,A 段複習改成「跑一發指令驗證」。**隔堂冷測不可砍**(唯一不談判)——留存只在時間過去後才測得出來。見 memory `answer-first-then-hands-on.md`。
+
 **Why-first 規則(每個實驗)**:按 Enter 前先講兩句 — 預測結果 + 一口氣講機制 why。結果只拿來驗證預講;預講不出來 = 當場入 Mistake Registry,不等 step F 才發現。這把「隱性會」(結果預測準但 why 講不出)在最便宜的時點逼成顯性。
 
 ## Step E (Drill)
@@ -66,6 +70,8 @@ k8s-coach 的 step E 是 **Chaos Drill:故意弄壞 → 限回合 debug**,訓練
 **三分類牌(30 秒 drill,可掛 step A 複習或 step E 收尾)**:丟一個名詞問「規則(宣告)/ 狀態(runtime 記憶)/ 資料(被查的名單)?」題池:iptables 規則=規則、conntrack=狀態、Endpoints=資料、Ingress 物件=規則、nginx.conf=規則(render 產物)、etcd 內容=資料(desired)。同家族的坑在 Mistake Registry 合併成一張 pattern 卡追蹤,家族三連過才算封印。
 
 **一句話精準版**:複習抽考過關不只看「對」,要收一句精準收尾(例:kube-proxy 只寫規則、kernel 搬封包)。說不出精準版 = 半過,拉回近期重抽。
+
+**ROI 篩(進 +2 天重抽格前必跑,2026-07-16 加)**:半過的東西要拉回重抽前,先過 Depth Ceiling 的 Q1「面試官真的會問這個點嗎?」。答不出 yes 的**不進格子**:機制已答對、只差用詞或工具細節(curl 怎麼填 header、lab 夾具的行為)= 教練的題目壞掉,不是學員沒懂,當場結案。沒這道篩子,+2 格會把 tool trivia 無限回收成口試債(s16 實證:兩張 07-11 卡磨到學員喊停,判下來兩張都該 park)。keystone 機制(conntrack table full、L4/L7 判準、三分類家族卡)不受此篩影響,照常重抽。
 
 ## Step F Material (naive-but-deep question DNA)
 

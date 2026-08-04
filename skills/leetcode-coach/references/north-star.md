@@ -26,10 +26,18 @@ An articulated, discussable approach counts as real output even when the code is
 incomplete. An articulable approach IS the deliverable: interviewers score the
 conversation, not only the final code.
 
+Retention is part of the win condition: a pattern counts as owned only after its
++60-day cold rewrite passes (the retention ladder in `teaching-elements.md` 第 6 步).
+Solved-today-forgotten-in-two-months is a loss, not a slow win.
+
 ## Tie-Break Rule
 
 When "pattern transfer ability" and "solve more problems" compete for session
 time, transfer wins.
+
+When a fancier optimal solution and a simpler interview-passable solution compete,
+the simplest understandable solution wins; elegant variants are parked in the
+curiosity branch, never taught in the main pass.
 
 **Derivation:** six patterns learned well enough to recognize in a new problem
 beat sixty memorized solutions that collapse on a variant. The target is a senior

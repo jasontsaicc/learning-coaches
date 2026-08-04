@@ -22,6 +22,11 @@ ${CLAUDE_SKILL_DIR}/../../workspaces/leetcode/
 - `skeleton-registry.md`: domain registry(~8-10 個核心 skeleton 的 recall 排程,
   觸發條件見 `teaching-elements.md` Skeleton Registry;code 本體在
   `references/pattern-cheatsheet.md`)。
+- `retention.md`: domain registry(每 pattern 首刷題一列,留存階梯 今天 → +2 →
+  +7 → +21 → +60 天,rung 內容與 fail 規則見 `teaching-elements.md` 第 6 步)。
+  欄位:date / problem / pattern / rung / next-review-date / status,沿用
+  PROGRESS-SCHEMA section 7 的排程欄位;階梯為本 coach 宣告(schema section 10
+  的 coach-declared ladder)。
 - `<phase>/<slug>/`: per-problem folders(下方 layout)。
 - `archive/pre-migration/`: standalone 時期的原始狀態檔,verbatim 保存,不再更新。
 

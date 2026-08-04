@@ -22,9 +22,11 @@ perfection.
 ### Domain Registries (optional, coach-defined)
 
 Coaches may define additional registries in their hooks (for example, a term registry,
-a command registry, or a concept-card registry). These follow the same interval logic
-and the same A-step review queue. The registry schema is the coach's responsibility;
-this engine reference specifies only the mechanics that apply to any registry.
+a command registry, or a concept-card registry). These plug into the same A-step review
+flow; a registry uses the 3 -> 7 -> 14 rhythm unless the coach's portfolio hook declares
+its own interval ladder for that registry (the Mistake Registry rhythm cannot be
+overridden). The registry schema is the coach's responsibility; this engine reference
+specifies only the mechanics that apply to any registry.
 
 ---
 
@@ -41,9 +43,10 @@ The fixed interval sequence is 3 -> 7 -> 14 (days).
 - Fail at any interval: reset to 3 days. The next review is 3 days from the failure
   date.
 
-The 3 -> 7 -> 14 rhythm is fixed and cannot be changed by coach hooks. The rationale
-is that the intervals are calibrated to the forgetting curve for the study cadence this
-engine assumes. Diverging from the rhythm breaks the compounding effect.
+The 3 -> 7 -> 14 rhythm is fixed for the Mistake Registry and for any domain registry
+that does not declare its own ladder. The rationale is that the intervals are calibrated
+to the forgetting curve for the study cadence this engine assumes. A coach that declares
+a different ladder for a domain registry owns that calibration.
 
 ### Provisional +2-Day Slot (verbal-only resolutions)
 

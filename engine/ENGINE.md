@@ -385,7 +385,9 @@ in step A on their scheduled review date.
 ### Domain Registries
 
 Coaches may define additional registries (such as a term registry or command registry)
-in their hooks. These follow the same interval logic.
+in their hooks. A domain registry uses the Mistake Registry's interval logic unless the
+coach's portfolio hook declares its own ladder for that registry; the Mistake Registry
+rhythm itself cannot be overridden.
 
 ### Interval Rhythm
 
