@@ -45,6 +45,29 @@ rm -rf <舊的 k8s-mastery-lab-skill clone>
 kubectl config current-context   # 確認仍是 kind(bastion 本地叢集不受影響)
 ```
 
+## bastion kubeconfig 坑(2026-08-04 排掉)
+
+`kubectl get nodes` 噴 `invalid character '<' looking for beginning of value` 時,**不是叢集壞了**:
+
+```
+context kind → cluster kind-k8s-coach-p0(s21 已刪,條目不存在)
+  → kubectl 退回內建預設 http://localhost:8080
+  → 打到 gitlab-ci-dashboard(bastion 上長期 Up)
+  → 收到 HTML → JSON parser 爆在 '<'
+```
+
+修法:`kubectl config use-context kind-k8s-coach-p2a`。孤兒 context 清除指令 `kubectl config delete-context kind`(2026-08-04 已給學員,**未確認是否執行**)。
+排障順序記住:**先確認你在跟誰講話(context / server URL),再懷疑叢集。**
+
+診斷指令注意:`docker ps --filter name=kind` **抓不到 p2a**(容器叫 `k8s-coach-p2a-*`,名字裡沒有 kind)。要用 `kind get clusters` 或不帶 filter 的 `docker ps -a`。
+
+## bastion 叢集現況(2026-08-04)
+
+- `kind-k8s-coach-p2a` 三節點,Calico。control-plane 172.21.0.4 / worker 172.21.0.2 / **worker2 172.21.0.3 NotReady 已 17 天**(老毛病,lab 不受影響,未處理)。
+- worker2 上三個 Terminating 殘骸(backend/db/frontend,11 天)未清。
+- 活的 Pod 全在 worker:backend .91 / net-tool .92 / db .93 / frontend .94。net-tool = netshoot,`sleep` 到期自然重啟,約 2h 一次。
+- bastion 上**沒有** p0 叢集(s21 已刪),context `kind` 是孤兒。
+
 ## 其他慣例
 
 - EKS lab(P2b 起):terraform 指令由學員親手跑,命名 `billing-dev-eks-*`,每個 lab 必附 destroy + 驗證。
