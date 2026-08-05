@@ -320,6 +320,12 @@ Weak-topic flags(**2026-08-03 首次啟用**,P2a 帶 flag 前進、gate 未考,�
   - 時機:**只在建立 container 的那一刻寫**,container 活著的期間數字就定死。所以「改了 limit 還是 OOMKilled」的完整診斷:① 改的是宣告 ② `kubectl get deploy -o yaml` 讀回來的還是宣告(等於查自己剛寫的字,證明不了現況)③ 舊 Pod 的 container 沒重建 → kubelet 沒有第二次寫的機會 ④ rollout 卡住的原因很多(quota / PDB / image / paused),但根因形狀只有一個:**宣告改了、執行體沒重生**。排障順序:`kubectl get pod <實際那顆> -o yaml` → 直接讀 node 上的 cgroup。
   - L6 顧問版:"Editing the spec only changes the desired state. The limit doesn't reach the kernel until kubelet recreates the container, so I'd check the running pod, not the deployment."
   - 延伸(s25 已答對,未單獨建卡):`/sys/fs/cgroup/memory.max` 讀出來是 `67108864` 不是 `64Mi` —— **cgroup 是 kernel 介面,介面只講 bytes**。**實際數字 s25 未讀到(Pod Pending),s26 補驗。**
+- 2026-08-05 | LVM 三層 + 擴容四步(學員課後自己要求復習,foundational pull) | Q1/Q2 結論皆對但**兩題都只給結論**(Q1「需要 resize」、Q2「還是成立」),追一刀後 Q2 機制自產 | 判準句慣性省略(pattern 卡);LVM 的 PV 與 k8s 的 PV 同名不同物 | unresolved | 3 | 2026-08-08 | 0
+  - 三層:**PV**(實體卷=一顆磁碟/分割區,被 LVM 徵收)→ **VG**(卷組=多個 PV 合成的池)→ **LV**(邏輯卷=從池切出來、檔案系統蓋在上面的假磁碟)。⚠️ **LVM 的 PV ≠ k8s 的 PV,同名不同物**。存在理由=實體磁碟大小固定、位置固定(分割區起訖寫死),**加一層間接層**,與 PVC↔PV 同手法。
+  - **擴容四步,一步都不能跳**:`pvcreate` → `vgextend` → `lvextend` → **`resize2fs`/`xfs_growfs`**。第 4 步最多人漏,因為**容量寫在檔案系統自己的 superblock 裡,下面那層變大它不知道**(症狀:`lvs` 變了、`df -h` 沒變)。`lvextend -r` 可一次做完 3+4,但要講得出是兩層。
+  - **雲上版**:EBS 自己能線上擴容 → LVM「湊出更大空間」的價值被吃掉,EKS 上多半直接 `mkfs` 在 `/dev/nvmeXn1` 上,沒有 LVM 那層。**但第 4 步永遠躲不掉**(EBS 100G→200G 後仍要 `xfs_growfs`,否則 `df -h` 不動)= EKS node 磁碟滿掉最常見的假故障。LVM 在雲上僅存兩用途:多顆 EBS 條帶化衝 IOPS、snapshot 一致性備份。
+  - **Q2(疊層題,學員答對且自帶機制)**:「k8s PV 底下是 LV,1:1 還成不成立?」→ 成立。學員自產「storage 的寫入沒辦法完美切開,寫到別人的會資料損毀」+ **未經提示自己接到「EKS 上不會靜態宣告 PV,CSI driver 收到 PVC 就生對應的 PV」**。精準版(教練補):**LVM 可以切,但切出來是兩個獨立 LV = 兩個獨立塊裝置 = 兩張 PV,切割發生在 k8s 看不到的下面一層。**
+  - Q1 順帶收:「EBS 改大重開機就生效?」→ 錯,**要擴的不是磁碟層是檔案系統層**。教練點名這是**「兩個分身」判準第三次換皮出現**(EBS 實際大小 vs 檔案系統以為的大小)。
 - 2026-08-05 | PV ↔ PVC 是 1:1 獨佔 | 學員自曝「我以為是 PV 1:多」 | 「一份儲存給多人用」的直覺貼錯層(該直覺屬於 PVC→Pod,不屬於 PV↔PVC) | unresolved | 3 | 2026-08-08 | 0
   - 三層關係:**`StorageClass ─1:多→ PV ─1:1→ PVC ─1:多→ Pod`**。PV 被綁走即整張鎖死,`CLAIM` 欄只寫得下一個名字,多出來的容量誰也拿不走(s25 實證:PVC 要 500Mi,`get pvc` 的 CAPACITY 欄顯示 **1Gi**)。
   - **為什麼是 1:1(第一性)**:PV 背後通常是**塊裝置**,檔案系統假設自己獨佔整個裝置(自管 inode/free block/journal),兩個互不知情的 fs 寫同一顆裝置 = 資料毀掉;k8s 這層沒有切割裝置的機制(那是 LVM/分割區的事)。**1:1 不是 k8s 訂的規矩,是塊裝置特性浮到 API 上。** 反之 NFS/EFS 是目錄樹不是塊裝置 → 天生能共用 → 才有 RWX。**能不能 RWX 取決於底層是塊還是檔案系統**(面試點)。
@@ -344,6 +350,7 @@ Weak-topic flags(**2026-08-03 首次啟用**,P2a 帶 flag 前進、gate 未考,�
 - mistake:跨-node-走路由表 | mistake | 3 | 2026-08-07(**s24 四抽未過**,答「查 svc」= 與 s22 完全相同的錯法。WR9 最高優先,改兩段問法)| active
 - mistake:分層判準-關掉APIServer還在不在 | mistake | 3 | 2026-08-08(**s25 冷測 4/5**:判準句無提示自產 ✅、cgroup limit 誤放右欄 ❌。已升級成**兩步版**〔先問宣告還是執行體〕,08-08 抽兩步版)| active
 - mistake:誰把limit寫進cgroup(kubelet不是scheduler)| mistake | 3 | 2026-08-08(s25 新卡,答「scheduler 嗎」;判準句「不在 node 上的元件碰不到 kernel」+ 只在建 container 那刻寫)| active
+- mistake:LVM三層+擴容四步 | mistake | 3 | 2026-08-08(s25 課後學員自己要求復習;兩題結論對但都只給結論,Q2 追一刀後機制自產並自接 EKS CSI。抽:三層各是什麼 + 擴容四步 + 為什麼第 4 步躲不掉)| active
 - mistake:PV↔PVC是1:1獨佔 | mistake | 3 | 2026-08-08(s25 新卡,學員自曝以為 1:多;三層關係 + 塊裝置第一性 + RWO 限的是 node。Transfer 當堂過,冷測定升降)| active
 - mistake:可寫層在硬碟不在memory(overlayfs)| mistake | 3 | 2026-08-07(s24 新卡,親手驗過 kill 1)| active
 - mistake:emptyDir-綁Pod不綁container | mistake | 3 | 2026-08-07(s24 口頭未過且未動手,**s25 必須動手驗**)| active
