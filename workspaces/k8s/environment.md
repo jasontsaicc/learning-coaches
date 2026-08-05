@@ -61,7 +61,22 @@ context kind → cluster kind-k8s-coach-p0(s21 已刪,條目不存在)
 
 診斷指令注意:`docker ps --filter name=kind` **抓不到 p2a**(容器叫 `k8s-coach-p2a-*`,名字裡沒有 kind)。要用 `kind get clusters` 或不帶 filter 的 `docker ps -a`。
 
-## bastion 叢集現況(2026-08-04)
+## ⚠️ bastion 叢集現況(2026-08-05,**叢集目前無法排任何 Pod**)
+
+- **worker 也倒了**。`kubectl describe pod` Events:`0/3 nodes are available: 1 node(s) had untolerated taint {node-role.kubernetes.io/control-plane}, 2 node(s) had untolerated taint {node.kubernetes.io/not-ready}` → **可排的 node = 0**,新 Pod 一律 Pending。
+- 修復三發(s25 已給學員,**未執行未回報**):
+
+```
+kubectl get nodes
+free -h; uptime; docker ps --format '{{.Names}}\t{{.Status}}'
+docker restart k8s-coach-p2a-worker k8s-coach-p2a-worker2
+```
+
+- restart 無效就走 s21 診斷鏈:node Conditions → 宿主機資源 → `systemctl status containerd`(進程活著不代表沒塞住)→ kubelet log 找 `Status from runtime service failed: rpc DeadlineExceeded`。根因大機率仍是 4 核心資源競爭把 CRI gRPC 拖過 timeout。
+- **PV/PVC 綁定不受影響**(s25 實證):node 全 NotReady,`pvc-demo` 照樣 `Bound` —— 媒合是 control plane 的帳本作業。只有「Pod 真的掛上去」才需要活的 node。
+- s25 新增物件:`pv-demo`(1Gi / RWO / manual / hostPath `/tmp/pv-demo` / Retain)、`pvc-demo`(500Mi,Bound 到 pv-demo)、`cg-demo`(limit 64Mi,**Pending**)。lab 檔在 `workspaces/k8s/labs/`(gitignored)。
+
+## bastion 叢集現況(2026-08-04,已被上面取代)
 
 - `kind-k8s-coach-p2a` 三節點,Calico。control-plane 172.21.0.4 / worker 172.21.0.2 / **worker2 172.21.0.3 NotReady 已 17 天**(老毛病,lab 不受影響,未處理)。
 - worker2 上三個 Terminating 殘骸(backend/db/frontend,11 天)未清。

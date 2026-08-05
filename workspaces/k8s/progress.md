@@ -7,13 +7,42 @@
 
 ## Meta
 
-- session_count: 24
-- last_weekly_review: 18
-- last_session_date: 2026-08-04
+- session_count: 25
+- last_weekly_review: 18(**WR9 於 s25 開跑但未完成,仍未推進**,見斷點)
+- last_session_date: 2026-08-05
 - warm_up_classification: mid(有地圖形狀,缺演員名字;P0 剛好,不加速)
 - **target_role: AWS Delivery Consultant(ProServe),2026-07-23 學員確認**。全部抽考包成客戶顧問情境、每題附 L6 範例答法(memory `aws-delivery-consultant-target` / `aws-mock-and-l6-answer-format`);戰略重排見 curriculum-plan §9。
 
 ## Current Session breakpoint
+
+**s25 已收(2026-08-05,公司 bastion)。WR9 開跑第 1 題就收到大魚(分層判準判準句自產=昨天的洞補上),但 WR9 只跑完 1/3 主題即中斷,`last_weekly_review` 不推進。C-1 PV/PVC 收尾:PV+PVC 親手 apply、Bound 實證、Transfer 過(今天最好的一次回答)。⚠️ 叢集三台 node 全排不出 Pod,修復指令已給、學員未執行。F/G 連五堂未跑;story-bank 連五堂未挖。**
+
+本堂事實:
+
+- **WR9 未完成,只跑了主題 1**。已跑:分層判準卡盲測 + Transfer + 一次 MTTR 排障。**未跑**:主題 2(跨-node-走路由表,四連錯最高優先)、主題 3(kube-proxy-不在-Pod-啟動路徑)、Mistake Registry sweep、quick drill、**artifact audit**。依 `weekly-review.md`「WR 中斷則下堂從未完成的步驟續跑」,s26 從主題 2 接。
+- **分層判準卡:判準句自產 ✅,分欄 4/5,Transfer ❌**。① 判準句「如果沒有 API Server 能不能使用」**無提示自己講出來** —— 昨天收工回想時答「不知道耶」,今天補上,**這是本堂最重要的正樣本**。② 但首答用了兩套詞(1、3 寫「kernel」,2、4、5 寫「可以」),兩種讀法答案完全相反,教練當場點名這是 pattern 卡「只給結論不給判準」穿新衣服;釐清為讀法 B 後 4/5。③ 唯一錯的是 **cgroup memory limit**,學員自述「我在想的是 cgroup,那應該是 yaml 的 limit 沒錯」= 把兩個分身當成一個。
+- **卡升級成兩步版(重要,取代原單步版)**:**每個 k8s 資源都有兩個分身** —— 宣告(etcd)vs 執行體(kernel)。Service 物件 / kube-proxy 的 DNAT 規則、PVC 物件 / node 上的 mount、`resources.limits` / cgroup `memory.max`、NetworkPolicy 物件 / filter 表規則。判準第一步變成「**你問的是宣告還是執行體**」,第二步才是「宣告在 etcd、執行體在 kernel」。定調句:**API Server 掛掉 = 沒有新的翻譯了,不是已經翻好的東西消失了。**
+- **Transfer 未過,新病灶**:「誰把新的 limit 寫進 cgroup、什麼時候寫」→ 答 **「scheduler 嗎」**。正解 kubelet(→CRI→runc)。判準句:**不在 node 上的元件碰不到 kernel**(scheduler 只填 `spec.nodeName`,連 node 的門都沒進過)。時機:**只在建立 container 那一刻寫**,所以改 limit 不重建 Pod = kernel 數字不變。已回扣 P0 五棒,新卡入帳。
+- **cgroup 動手驗未完成**:`cg-demo`(limit 64Mi)apply 後 **Pending**。三選一預測題經一層梯子後答對 B(`67108864`),封印句「cgroup 是 kernel 介面,介面只講 bytes」已給,但**實際數字沒讀到**,s26 補。
+- ⚠️ **叢集大故障(比昨天嚴重)**:`describe pod` Events = `0/3 nodes are available: 1 node(s) had untolerated taint node-role.kubernetes.io/control-plane, 2 node(s) had untolerated taint node.kubernetes.io/not-ready`。**worker 也倒了**(昨天只有 worker2),等於能排的 node 掛零。修復三發(`kubectl get nodes` / `free -h; uptime; docker ps` / `docker restart k8s-coach-p2a-worker k8s-coach-p2a-worker2`)**已給,學員未執行未回報**。s26 開場第一件事,不修就沒有任何 lab。
+- **MTTR 連三堂未過**:Pending 的第一個排查指令問「你會下什麼」→ 答「不知道 直接開始今天的課程吧 拖太久了」。正解 `kubectl describe pod` 看 Events 已直給(理由:scheduler 排不進去一定把原因寫在 Events)。注意學員**願意跑教練指定的指令,但不願意自己選指令** —— 排障訓練的缺口精確落在「選指令」這一步。
+- **YAML 藏寶圖 rep 首次自己讀圖過關**(06-18 卡,unresolved 至今):`strict decoding error: unknown field "spec.sccessModes"` → 教練只說「訊息把座標給你了」,學員**自己回檔案找到打錯的字並改對** apply 成功。這是這張卡自建卡以來第一次不用代打。但同一段稍早學員說「**直接給我 yaml**」跳過自寫 PVC,rep 打了折。
+- **PV/PVC 收尾(C-1 第三階)**:PVC `Pending` → `get pv` = No resources found → 認出**靜態供給的痛點**(沒人擺貨需求單就永遠掛著)→ apply `pv-demo` → 立刻 `Bound`。三個實證收下:① PVC 的 CAPACITY 欄顯示 **1Gi 不是 500Mi**(capacity 是下限、綁定不切割)② **三台 node 全 NotReady 照樣 Bound** = 媒合是 control plane 帳本作業,不需要 node ③ `RECLAIM POLICY: Retain` 已埋未教。
+- **學員自曝誤解「PV 1:多」** → 三層關係表釐清:`StorageClass ─1:多→ PV ─1:1→ PVC ─1:多→ Pod`。順帶收 RWO 常見誤解(**RWO 限制的是 node 不是 Pod 數**,同 node 多顆都掛得到)。
+- **學員主動要求「重新幫我整理,使用第一性原理開始」= 高價值訊號**。重整版從一個物理事實長出來(overlayfs upperdir 綁 container)→ 三階梯壽命表(路徑裡就寫著它綁誰)→ 為什麼拆兩個物件(知識不對稱/解耦,同構 Pod↔scheduler)→ 媒合三條件。**重整後學員立刻 Transfer 過**,證明「亂了就重砌地基」比繼續往前推有效。
+- **Transfer 過(本堂最佳)**:「pvc-demo-2 會怎樣」→ 「pending 因為沒有 PV 了,因為 PV to PVC 是一對一的,所以就算 PV 有 1G、目前一個 PVC 使用 500,剩下的 500 也不能拿出來使用」+ **自己追問「為什麼要這樣設計」與「一般都宣告一樣的空間嗎」**。判準句自帶「因為」= pattern 卡第三次無提示正樣本(前兩次 s22 站 7、s24 kernel 題)。已回答:1:1 是**塊裝置**的物理特性上浮(檔案系統假設獨佔裝置);RWX 只有目錄樹型(NFS/EFS)做得到;實務上動態供給讓這個浪費結構上不存在。
+- pacing:學員兩次喊停(「拖太久了」「直接給我 yaml」)。低電量 + 想要進度感。**有效做法記錄**:三選一縮小(cgroup 數字題,一層梯子就答對)、第一性原理重砌(重整後立刻過)。**無效做法**:要他自己選排查指令(直接喊跳過)。
+
+next(s26),順序:
+
+1. **開場先修叢集**(不修就沒 lab):三發修復指令重跑,`kubectl get nodes` 三台 Ready 才往下。若 restart 無效,走 s21 那條診斷鏈(node Conditions → 宿主機資源 → containerd active? → kubelet log 找 `rpc DeadlineExceeded`),根因大機率仍是 4 核心資源競爭。
+2. **WR9 續跑(從主題 2 接)**:跨-node-走路由表(**改兩段問法**:①這條路徑有哪些元件參與 ②第一個指令)、kube-proxy-不在-Pod-啟動路徑。接 registry sweep(11 張過期)+ **artifact audit**(P2a 只有 notes,manifests 未落地)。跑完才把 `last_weekly_review` 設成 26。
+3. **C-1 最後兩塊動手債**:① `cg-demo` 讀 `/sys/fs/cgroup/memory.max` 拿到 `67108864`(node 修好即可跑)② **emptyDir 第二階必須動手驗**(口頭已錯一次,直給後沒接動手 = 依 s16 實證會蒸發):同一顆 Pod 掛 emptyDir 寫檔 → `kill 1` → 檔案還在 → `delete pod` → 檔案沒了。③ Pod 掛 `pvc-demo` 寫檔 → 刪 Pod 重建 → 檔案還在 → 進 node `findmnt` 看 bind mount 本體。
+4. **F/G 連五堂債**:F 段材料現成且燙(菜鳥題:「為什麼 container 死了檔案就沒了?硬碟又沒壞」/「PV 為什麼不能兩個人分著用?」);G 段正式版自 s21 起未跑。story-bank 保底一則。
+5. pacing:延續「三選一縮小」與「亂了就重砌第一性原理」;**排障訓練改法** —— 不再問開放式「你會下什麼指令」,改成給 3 個候選指令二選一/三選一,先建立選指令的肌肉再放開。
+
+<details>
+<summary>s24 斷點(已消化,留參考)</summary>
 
 **s24 已收(2026-08-04,公司 bastion,context `kind-k8s-coach-p2a`)。P2b 開跑,C-1 第一階親手拆完(overlayfs 可寫層);A 段兩張過期卡雙雙未過;中段被叢集環境故障吃掉一大段。F/G 連四堂未跑(本堂學員下班收工,非跳過);story-bank 連四堂未挖。**
 
@@ -38,6 +67,8 @@ next(s25),順序:
 2. WR 後接 **C-1 收尾**:PVC 自寫 → server dry-run → `get pv,pvc` 看 Bound → Pod 掛 PVC 寫檔 → 刪 Pod 重建 → 檔案還在(第三階實證)→ 進 node `findmnt` 看 bind mount 本體。emptyDir 第二階順道用同一顆 Pod 驗(`kill 1` 檔案還在)。
 3. **F/G 連四堂債**:s25 F 段用 C-1 材料跑(菜鳥題材:「為什麼 container 死了檔案就沒了?硬碟又沒壞」);G 段正式版仍欠。story-bank 保底一則。
 4. pacing:本堂學員答覆極簡短、連跳預測題 = 低電量訊號。s25 開場先做一件事就好,不要 WR + 新內容全塞。**why-first 預測改成硬規格**:不給預測就不給下一發指令(本堂已實測有效,縮小成二選一學員就答得出來)。
+
+</details>
 
 <details>
 <summary>s23 斷點(已消化,留參考)</summary>
@@ -179,7 +210,7 @@ next(s17):
 - P0 心智模型: gate-passed(2026-06-22;legacy,pre-Examiner,coach 認證)
 - P1 核心物件 + 容器底層: gate-passed(2026-06-25;legacy,pre-Examiner,coach 認證)
 - P2a 網路深水區: in-progress(chunk 1 Service/kube-proxy/CoreDNS ✅、chunk 2 Ingress ✅;chunk 3 NetworkPolicy in-progress〔3-1/3-2 教完;lab Step 4 於 s23 bastion 側重建完成(allow-dns + 兩死法實證),Step 5 兩道門模型已教、兩條 policy 未寫,剩 Step 5+6+gate+F/G〕;chunk 4 in-progress〔**4-1 CNI 合約 ✅ s19、4-2 veth ✅ s20、4-3 路由 ✅ s20、4-4 MASQUERADE ✅ s20**;**4-5 七站骨架盲講 ❌ s21 冷測 0/4 未過**〕。四塊零件備妥但串不起來,4-5 重測過了才進 phase gate)
-- P2b 儲存 + 權限: **in-progress(s24 開跑)**。C-1 Volume/PV/PVC in-progress:第一階「可寫層綁 container」✅ 親手實證(overlay 三層 + kill 1);第二階 emptyDir ❌ 口頭未過、未動手;第三階 PV/PVC 概念已教、**PVC YAML 球已出未答**。C-2 起未開。
+- P2b 儲存 + 權限: **in-progress(s24 開跑)**。C-1 Volume/PV/PVC in-progress:第一階「可寫層綁 container」✅ 親手實證(overlay 三層 + kill 1);第二階 emptyDir ❌ 口頭未過、**仍未動手(s26 必補)**;第三階 PV/PVC **✅ s25**(PV+PVC 親手 apply、Bound、CAPACITY 1Gi 三實證、Transfer 過含「因為」)。第三階剩「Pod 掛 PVC 寫檔 → 刪 Pod → 檔案還在 → node 上 `findmnt`」未做。C-2(StorageClass 動態供給 / CSI)已預告未開。
 - P3 調度 + 高並發 + 排障: not-started
 - P4 可觀測性工程: not-started
 - P5 平台工程 / GitOps: not-started
@@ -205,8 +236,9 @@ Weak-topic flags(**2026-08-03 首次啟用**,P2a 帶 flag 前進、gate 未考,�
 - DNS 排障第一刀(先用 FQDN 二分): med (s13;需鷹架)
 - P2a CNI 封包全鏈 data plane(veth/路由表/MASQUERADE/conntrack): **low-med** (**s21 降級**:無鷹架七站冷測 0/4,只吐出 3 個碎片〔CoreDNS 的 ClusterIP / kube-proxy iptables / 回程 conntrack〕,漏 veth 出 Pod、過濾層、跨 node 路由、抵達對面 node。追問跨 node 第一個指令 → 答 iptables → 縮小重問 → 答 resolv.conf〔跨層〕。**s20 自己推出的排障尺「跨 node 不通查對面網段那行」三天後完全蒸發**。診斷:零件記憶 ≠ 旅程記憶,四塊各自驗過但從未串講。事後給正解 + L6 範例後親手 `ip route` 挑對 `192.168.20.192/26 via 172.21.0.2 dev tunl0`。s20 原始紀錄:一堂三 chunk 全親手驗:veth ifindex 兩頭互指、路由表三岔路〔via/dev 尺〕、MASQUERADE 換臉規則自讀出「Pod 打 Pod 不換」。排障尺〔跨 node 不通查對面網段那行〕經三段逼問鎖精準;conntrack 治標/治本仍需扶〔調 max=治標歸錯邊,s5/s6 老條〕。**未經無鷹架冷測**,4-5 七站盲講過了才升 high。**s22 重建**:鷹架版七站全走完;無鷹架盲測 #2 5/7 未過(幻影站 4 DNAT 重複+站 6 進門蒸發,兩錯輕提示下自我診斷)但 vs s21 的 3 碎片是實質進步;四動詞口訣「問名→改寫→放行→送達」取代四層名詞;s23 開場冷測 #3 定升降。**s23 盲測 #3:3.5/7 未過**(6 天留存:站 2/站 6 蒸發=veth 的兩次出場、七行紀律垮、「誰做的」只剩站 1;幻影站 4 未復發、kube-proxy 不碰封包的存疑自發。當日重建:veth 卡冷測過、站 6 當場重組成功。盲測 #4 s24 開場)
 
-- **分層判準「關掉 API Server 還在不在」**(對治層級混淆家族): med (s24 新造工具,當堂 3/3 過且兩題無提示自答〔「沒有,因為 CNI 不支援」「可以,因為直接修改 kernel」〕。左欄=kernel 真東西〔iptables/conntrack/路由表/veth/cgroup/mount/namespace〕,右欄=etcd 資料〔Service/Deployment/PVC/NetworkPolicy/RBAC/Secret〕;RBAC 是特例〔純 API Server 層,kernel 一無所知〕已埋未教。**當堂教當堂過不算保留**,08-07 冷測定升降)
-- **P2b C-1 可寫層 / overlayfs**: med (s24 親手實證:讀 `/proc/mounts` 認出 lowerdir 15 層共用 vs upperdir 1 層獨有、全在 `/var/lib/containerd`;`kill 1` 三個預測全中。起手誤答「存在 memory」= 結論對機制錯。**emptyDir 綁 Pod uid 那一階口頭未過且未動手**,PV/PVC 第三階未做。判準句:路徑裡就寫著它綁誰)
+- **分層判準「關掉 API Server 還在不在」**(對治層級混淆家族): med (s24 新造工具,當堂 3/3 過且兩題無提示自答〔「沒有,因為 CNI 不支援」「可以,因為直接修改 kernel」〕。左欄=kernel 真東西〔iptables/conntrack/路由表/veth/cgroup/mount/namespace〕,右欄=etcd 資料〔Service/Deployment/PVC/NetworkPolicy/RBAC/Secret〕;RBAC 是特例〔純 API Server 層,kernel 一無所知〕已埋未教。**s25 隔堂冷測:判準句無提示自產 ✅**(補上 s24 收工回想時的「不知道耶」),分欄 4/5;唯一錯 cgroup memory limit〔自述「我在想的是 yaml 的 limit」〕。**卡升級成兩步版**:每個 k8s 資源都有兩個分身,先問「宣告還是執行體」再判層。維持 med,08-08 抽兩步版)
+- **P2b C-1 可寫層 / overlayfs**: med (s24 親手實證:讀 `/proc/mounts` 認出 lowerdir 15 層共用 vs upperdir 1 層獨有、全在 `/var/lib/containerd`;`kill 1` 三個預測全中。起手誤答「存在 memory」= 結論對機制錯。**emptyDir 綁 Pod uid 那一階口頭未過且 s25 仍未動手**。判準句:路徑裡就寫著它綁誰)
+- **P2b C-1 PV/PVC 解耦**: med (s25 親手:PVC `Pending` → `get pv` 空 → 認出靜態供給痛點 → apply PV → 立刻 `Bound`。三實證:CAPACITY 顯示 1Gi 不是 500Mi〔capacity 是下限、綁定不切割〕、**node 全 NotReady 照樣 Bound**〔媒合是 control plane 帳本作業〕、Retain 已埋。Transfer 過且自帶「因為」+ 自己追問設計理由。誤解「PV 1:多」已當場更正為三層關係 `SC 1:多 PV 1:1 PVC 1:多 Pod`;RWO 限制的是 node 不是 Pod 數已教。**當堂過不算保留**,08-08 冷測。實體掛載那一階〔Pod 掛 PVC → 刪 Pod → 檔案還在 → `findmnt`〕未做)
 
 ## Scorecard history
 
@@ -223,6 +255,7 @@ Weak-topic flags(**2026-08-03 首次啟用**,P2a 帶 flag 前進、gate 未考,�
 - 2026-07-19 | weekly review (s18, tier 2) | 3/4 | 判準句慣性省略、只給結論(第五堂同條);L4-L7 兩步框架仍靠教練給才套用 | conntrack「去程改 Destination/回程改 Source+都查 conntrack」自產;redis 題「要拆開的是 redis 的指令」自己的話 | coach(原理✅ 機制✅ 自己的話✅ MTTR 未演練=0;冷測專場,s17 低信度 1/4 之後的乾淨重測)
 - 2026-08-03 | 盲測 #3 + lab (s23, tier 2) | 1/4 | 「誰做的」與判準句整堂缺席,兩道門檢查程序三層提示未自產;盲測格式紀律(口訣+七行)要當成硬規格 | 換皮誘答咬住「NetworkPolicy 實際改 iptables filter table」+ tunl0 不是 veth 咬住;兩死法 Resolving→Connection 親手集齊 | coach(原理🟡 機制✅ 自己的話❌ MTTR🟡〔讀 no matches for kind 有方向但誤修大寫 V、跳過讀圖〕。G 未跑,盲測+lab 折算;F 學員跳過)
 - 2026-08-04 | A 段冷測 + C-1 lab 折算 (s24, tier 2) | 1/4 | **why-first 預測連跳三次**(context 要三次才給、kill 1 三題只答 2、emptyDir 題只回問不預測):預測是最便宜的抓漏點,跳過等於把錯誤延後到冷測才發現。s25 起改硬規格,不給預測不給下一發指令 | 「Calico 上 apply 完的 NetworkPolicy,關掉 API Server 還擋不擋得住?」答**「可以,因為直接修改 kernel」,無提示自答**,是本堂最硬的一題,也是靜默無效卡的鏡像正樣本 | coach(原理🟡〔「存在 memory」機制錯、emptyDir 綁誰答錯,但 overlay 圖看懂後能自推 upperdir 綁 container〕 機制✅〔分層判準兩題無提示自答〕 自己的話❌〔全堂極簡短答,判準句缺席〕 MTTR❌〔HTML error 排障全程教練驅動,學員未提任何診斷方向〕。**G 未跑、F 未跑**,以 A 段冷測 + lab 折算)
+- 2026-08-05 | WR9 主題1 + C-1 lab 折算 (s25, tier 2) | 2/4 | **排障的「選指令」那一步**:Pending 問「你的第一個排查指令是什麼」→ 「不知道 直接開始今天的課程吧 拖太久了」,連三堂沒給出任何方向。注意學員**願意跑教練指定的指令、不願意自己選指令** → s26 起改用三選一候選指令建立肌肉,不再問開放式 | 「pvc-demo-2 會是什麼狀態?」→ **「pending 因為沒有 PV 了,因為 PV to PVC 是一對一的,所以就算 PV 有 1G、目前一個 PVC 使用 500,剩下的 500 也不能拿出來使用」**,判準句自帶「因為」且**主動追問「為什麼要這樣設計」**,是 pattern 卡第三次無提示正樣本 | coach(原理✅〔分層判準句無提示自產,補上 s24 收工說不出來的洞〕 機制🟡〔「誰把 limit 寫進 cgroup」答 scheduler = 控制面元件碰不到 kernel 的大破口;但 PV/PVC 媒合機制與靜態供給痛點自己認出〕 自己的話✅ MTTR❌。**G 未跑、F 未跑(連五堂)**,以 WR9 主題1 + PV/PVC lab 折算)
 - 2026-07-28 | step G 折算 (s22, tier 2, 盲測 #2 + F 段) | 1/4 | 「誰做的」欄要長在骨架裡,每站一個負責人;iptables=一棟樓(nat 改寫/filter 過濾)當日教過仍吞誘答 | F 段自組靜默無效鏈「不會報錯,但預期 DB 有保護、實際沒有」+ 站 7 無提示判準句「改 src 因為 Pod A 不認識 PodB-IP」 | coach(原理🟡 機制🟡 自己的話✅ MTTR❌。盲測純冷信度高;F 段帶問題鷹架)
 - 2026-07-23 | step G (s21, tier 2, **AWS Delivery Consultant 面試模擬首場**) | 0/4 | 判準句缺席:三次只給結論(kube-proxy yes/no、選路由那行、CIDR「不用特別算」),第六堂同條 | 回程 conntrack 主動講出來,無提示,而且那是 gate 歷史漏點清單上的站 | coach(原理❌ 機制❌ 自己的話❌ MTTR❌。七站只給 3 碎片;MTTR 兩次選錯指令且第二次跨層到 DNS。**信度高**:純冷測、教練全程未給鷹架)
 - 2026-07-17 | A 段+chunk3 gate (s16, tier 2) | 1/4 | 判準/機制講不出:L4-L7 兩度結論對理由錯;分工句未收 | conntrack 去程/回程兩欄位**自產**(給框架不給答案,s15 直給後蒸發,今日一次推出) | coach(原理❌ 機制🟡 自己的話❌ MTTR 未演練。**本場信度低**:教練犯三錯〔過度抽考/考未教內容/搶鍵盤〕,低分含教練污染,不宜單獨採信,s17 WR 重測)
@@ -234,7 +267,7 @@ Weak-topic flags(**2026-08-03 首次啟用**,P2a 帶 flag 前進、gate 未考,�
      unresolved-session-count 於遷移時依複測紀錄初始化(近似值)。 -->
 
 - 2026-06-18 | YAML validation | `matchLabels` 打成 `metaLabels`,不會讀 strict decoding error | 不知道 unknown-field 路徑=藏寶圖、驗證發生在 API Server | unresolved | 7 | 2026-06-30 | 2
-  - 正解:讀 `unknown field "A.B.C"` 完整路徑回檔案定位;selector 認親欄位是 `matchLabels` 且必須等於 template.metadata.labels。06-23 抽考需引導才答對「檢查在 API Server、與 etcd 無關」,推 +7。**s23 實戰現形**:allow-dns 重寫把 selector 塞進 ports 清單,dry-run 前自行「猜修」把 apiVersion 改成大寫 V1(`no matches for kind ... in version` 第二次親手撞,s16 同款),拿到錯誤後學員選擇跳過讀圖、教練代打。讀圖 rep 仍欠,WR9 用帶錯 YAML 現場讀圖。
+  - 正解:讀 `unknown field "A.B.C"` 完整路徑回檔案定位;selector 認親欄位是 `matchLabels` 且必須等於 template.metadata.labels。06-23 抽考需引導才答對「檢查在 API Server、與 etcd 無關」,推 +7。**s23 實戰現形**:allow-dns 重寫把 selector 塞進 ports 清單,dry-run 前自行「猜修」把 apiVersion 改成大寫 V1(`no matches for kind ... in version` 第二次親手撞,s16 同款),拿到錯誤後學員選擇跳過讀圖、教練代打。讀圖 rep 仍欠,WR9 用帶錯 YAML 現場讀圖。**s25 rep 首次自己讀圖過關**:`strict decoding error: unknown field "spec.sccessModes"`,教練只說「訊息把座標給你了」,學員**自己回檔案找到打錯的字並改對**,apply 成功 —— 建卡以來第一次不用代打。但同一段稍早學員說「直接給我 yaml」跳過自寫 PVC,rep 打折,故留 3 不推 7;08-08 換一個不同型別的錯(`cannot unmarshal` 或 enum 大小寫)再測一次,過了才 resolved。
 - 2026-06-22 | probe 職責 | 把 readiness 的「準備好接流量」塞給 liveness,延伸成 liveness 查 DB | 沒抓住兩種 probe 失敗後動作不同(重啟 vs 切流量) | unresolved | 7 | 2026-07-10 | 1
   - 正解:判斷句「Would a restart fix this?」;liveness 查 DB → DB 一慢全 Pod 集體重啟雪崩 + reconnection 風暴。06-25、07-03 兩次抽考 PASS(07-03 自己講出正回饋迴圈+羊群效應,唯英文詞 thundering herd 忘了),推 +7。
 - 2026-06-23 | ImagePullBackOff | image 打成 `ngimx:1.25`,apply 成功卻卡 ImagePullBackOff,不解 | 驗證有邊界:API Server 只驗語法,repo 存不存在要 kubelet 第 5 棒拉了才知 | unresolved | 7 | 2026-07-03 | 1
@@ -278,8 +311,20 @@ Weak-topic flags(**2026-08-03 首次啟用**,P2a 帶 flag 前進、gate 未考,�
 - 2026-07-09 | no-Host→404 的 why | 結果預測對,但講不出「curl 自動拿 URL 主機名當 Host」那個字 | 會用/會預測 ≠ 會講 why(W1 隱性會) | resolved(2026-07-16 ROI 篩:Q1=no,curl 填 header 是 tool trivia,面試不考;學員答「沒帶 domain → Ingress 對應不上」= 機制正確,教練題目壞掉不是學員沒懂。結案) | - | - | 1
   - 正解三步:① curl 無 -H → Host 自動填 URL 主機名 ② 那串長 DNS ≠ `shop.com` ③ 字串比不上→無規則接→404。對照 `/apiv2`:Host 對但 Prefix 以斜線切段,`/apiv2`≠`/api` 段 → 掉 `/` catch-all → web。口頭型+需鷹架,+2 天格。
 
-- 2026-08-04 | 分層判準:關掉 API Server 還在不在(工具卡,層級混淆家族的解藥) | (新卡,當堂 3/3 過,尚未冷測) | 對治「用 k8s 物件回答 kernel 問題」的通病 | unresolved | 3 | 2026-08-07 | 0
-  - 判準:想像 etcd + API Server 被砍掉,node 上的 Pod 繼續跑,**誰還在?** 還在=kernel 的東西(iptables 規則、conntrack 表、路由表、veth/tunl0、cgroup、mount、namespace);消失=etcd 裡的資料(Service、Endpoints、Deployment、Pod 物件、NetworkPolicy 物件、PVC/PV、RBAC、Secret、ConfigMap)。**特例:RBAC 全程活在 API Server 的請求路徑上,kernel 一無所知**(C-4 再打開)。排障 payoff:症狀在 kernel 那欄就別再 `kubectl`,去 node 上用 `ip route` / `iptables-save` / `conntrack -L` / `findmnt`。08-07 冷測:給 5 個名詞分兩欄 + 講判準。
+- 2026-08-04 | 分層判準:關掉 API Server 還在不在(工具卡,層級混淆家族的解藥) | s25 冷測 4/5:cgroup memory limit 誤放右欄,自述「我在想的是 yaml 的 limit」 | 同一個名詞的兩個分身(宣告 vs 執行體)沒有分開 | unresolved | 3 | 2026-08-08 | 1
+  - 判準:想像 etcd + API Server 被砍掉,node 上的 Pod 繼續跑,**誰還在?** 還在=kernel 的東西(iptables 規則、conntrack 表、路由表、veth/tunl0、cgroup、mount、namespace);消失=etcd 裡的資料(Service、Endpoints、Deployment、Pod 物件、NetworkPolicy 物件、PVC/PV、RBAC、Secret、ConfigMap)。**特例:RBAC 全程活在 API Server 的請求路徑上,kernel 一無所知**(C-4 再打開)。排障 payoff:症狀在 kernel 那欄就別再 `kubectl`,去 node 上用 `ip route` / `iptables-save` / `conntrack -L` / `findmnt`。
+  - **s25 升級成兩步版(取代單步版)**:**每個 k8s 資源都有兩個分身** —— Service 物件 / DNAT 規則、PVC 物件 / node 上的 mount、`resources.limits` / cgroup `memory.max`、NetworkPolicy 物件 / filter 表規則。**① 先問你講的是宣告還是執行體 ② 宣告在 etcd、執行體在 kernel。** 中間把宣告翻成執行體的是各種 controller/agent(kube-proxy、felix、kubelet)。定調句:**API Server 掛掉 = 沒有新的翻譯了,不是已經翻好的東西消失了。**
+  - s25 正面:**判準句本身無提示自產**(s24 收工回想答「不知道耶」的洞補上)。負面:首答用兩套詞(1、3 寫 kernel,2、4、5 寫「可以」)導致答案有兩種相反讀法 = pattern 卡「只給結論不給判準」的新形狀。08-08 抽兩步版:給一個名詞先問「宣告還是執行體」,再問住哪層。
+- 2026-08-05 | 誰把 limit 寫進 cgroup、什麼時候寫 | 「客戶改了 limit 但 Pod 還在 OOMKilled,誰負責把新數字寫進 cgroup?」→ 答 **「scheduler 嗎」** | 控制面元件與 node 上元件的職責混淆(層級混淆家族);不知道 cgroup 只在建 container 那一刻寫 | unresolved | 3 | 2026-08-08 | 0
+  - 正解:**kubelet**(→ CRI/containerd → runc 實際寫)。判準句:**不在 node 上的元件碰不到 kernel** —— scheduler 只做一件事,從一堆 node 挑一台把 `spec.nodeName` 填進 Pod 物件,**它只改 etcd 的一個欄位,連 node 的門都沒進過**;API Server、controller-manager 同理。回扣 P0 五棒:第 3 棒之後才有人碰得到 kernel,而那個人只有 kubelet 那一路。
+  - 時機:**只在建立 container 的那一刻寫**,container 活著的期間數字就定死。所以「改了 limit 還是 OOMKilled」的完整診斷:① 改的是宣告 ② `kubectl get deploy -o yaml` 讀回來的還是宣告(等於查自己剛寫的字,證明不了現況)③ 舊 Pod 的 container 沒重建 → kubelet 沒有第二次寫的機會 ④ rollout 卡住的原因很多(quota / PDB / image / paused),但根因形狀只有一個:**宣告改了、執行體沒重生**。排障順序:`kubectl get pod <實際那顆> -o yaml` → 直接讀 node 上的 cgroup。
+  - L6 顧問版:"Editing the spec only changes the desired state. The limit doesn't reach the kernel until kubelet recreates the container, so I'd check the running pod, not the deployment."
+  - 延伸(s25 已答對,未單獨建卡):`/sys/fs/cgroup/memory.max` 讀出來是 `67108864` 不是 `64Mi` —— **cgroup 是 kernel 介面,介面只講 bytes**。**實際數字 s25 未讀到(Pod Pending),s26 補驗。**
+- 2026-08-05 | PV ↔ PVC 是 1:1 獨佔 | 學員自曝「我以為是 PV 1:多」 | 「一份儲存給多人用」的直覺貼錯層(該直覺屬於 PVC→Pod,不屬於 PV↔PVC) | unresolved | 3 | 2026-08-08 | 0
+  - 三層關係:**`StorageClass ─1:多→ PV ─1:1→ PVC ─1:多→ Pod`**。PV 被綁走即整張鎖死,`CLAIM` 欄只寫得下一個名字,多出來的容量誰也拿不走(s25 實證:PVC 要 500Mi,`get pvc` 的 CAPACITY 欄顯示 **1Gi**)。
+  - **為什麼是 1:1(第一性)**:PV 背後通常是**塊裝置**,檔案系統假設自己獨佔整個裝置(自管 inode/free block/journal),兩個互不知情的 fs 寫同一顆裝置 = 資料毀掉;k8s 這層沒有切割裝置的機制(那是 LVM/分割區的事)。**1:1 不是 k8s 訂的規矩,是塊裝置特性浮到 API 上。** 反之 NFS/EFS 是目錄樹不是塊裝置 → 天生能共用 → 才有 RWX。**能不能 RWX 取決於底層是塊還是檔案系統**(面試點)。
+  - **RWO 常見誤解**:RWO 限制的是 **node** 不是 Pod 數,同一台 node 上排十顆都掛得到。
+  - 實務註記:靜態供給才會有「1Gi 配 500Mi 浪費」的問題;動態供給(EKS + EBS CSI)PVC 要多少就開多少,結構上不存在。s25 Transfer 已過(含「因為」),**當堂過不算保留**,08-08 冷測。
 - 2026-08-04 | container 可寫層在硬碟不在 memory(overlayfs 三層) | 「process 死掉檔案去哪」答「存在 memory 就消失了」= 結論對機制錯 | 把 ephemeral 誤等於 in-memory;沒有「可寫層是硬碟上一個目錄」的實體概念 | unresolved | 3 | 2026-08-07 | 0
   - 正解:container 的 `/` 是 kernel 用 overlayfs **疊**出來的,不是一顆真磁碟。`lowerdir`=image 的 N 層,唯讀,**所有用同 image 的 container 共用**;`upperdir`=可寫層,**每個 container 自己一層**;全部實體位置在 node 的 `/var/lib/containerd/...`(硬碟)。消失的原因不是 memory,是 **upperdir 綁在 container 上,container 一刪那層陪葬,image 層留著給下一個用**。s24 親手驗:寫檔 → `kill 1`(送 SIGTERM 給 PID 1 = 模擬 crash,Pod 不動)→ 名字 IP 不變、RESTARTS+1、`cat: can't open`。三個延伸面試點(100 個 Pod 不佔 100 份 image / 啟動快 / Dockerfile 裡 rm 不會讓 image 變小)當堂教,未抽。
 - 2026-08-04 | emptyDir 綁 Pod 不綁 container | 「emptyDir 撐不撐得過 kill 1」答「不在了」;同時不知道 `kill 1` 是什麼 | 三層階梯的中間一階沒有實體錨點,只有教練口頭列表 | unresolved | 3 | 2026-08-07 | 0
@@ -289,7 +334,7 @@ Weak-topic flags(**2026-08-03 首次啟用**,P2a 帶 flag 前進、gate 未考,�
 
 <!-- 檢視序:過期優先、interval 小者優先;step A 每堂 ~2 題上限。term 卡到期日在 term-registry.md。 -->
 
-- mistake:YAML-validation | mistake | 7 | 2026-06-30(過期)| active
+- mistake:YAML-validation | mistake | 3 | 2026-08-08(**s25 讀圖 rep 首次自己過**:`unknown field "spec.sccessModes"` 自行定位改對;但同段跳過自寫 PVC,rep 打折不推 7。08-08 換 `cannot unmarshal` / enum 大小寫型再測)| active
 - mistake:ImagePullBackOff | mistake | 7 | 2026-07-03(過期;07-09 已重抽 2/3,補「node 出網 i/o timeout」那類即可)| active
 - mistake:dry-run-兩層 | mistake | 3 | 2026-07-20(s16 未口頭抽,但**真場景實用一次**:自寫 default-deny 用 `--dry-run=server` 抓到自己的 apiVersion 錯並讀懂 `no matches for kind ... in version` → 工具已進肌肉,精準版仍未收)| active
 - mistake:三分類-家族卡 | mistake | 3 | 2026-07-22(**s18 counter 1/3**:零流量思想實驗全對、conntrack 站對「狀態」;第 2 輪換家族成員)| active
@@ -297,7 +342,9 @@ Weak-topic flags(**2026-08-03 首次啟用**,P2a 帶 flag 前進、gate 未考,�
 - mistake:NetworkPolicy-出廠全通 | mistake | 3 | 2026-07-23(s20 重抽半過:結論靠提示、「podSelector 只在自家 ns 選人」why 沒站住;與 CNI 卡同天再抽)| active
 - mistake:default-deny-分層(DNS vs 連線)| mistake | 3 | 2026-08-06(**s23 口頭再未過**但 lab 兩死法親手集齊;抽「兩步先後+兩種 timeout 關鍵字」)| active
 - mistake:跨-node-走路由表 | mistake | 3 | 2026-08-07(**s24 四抽未過**,答「查 svc」= 與 s22 完全相同的錯法。WR9 最高優先,改兩段問法)| active
-- mistake:分層判準-關掉APIServer還在不在 | mistake | 3 | 2026-08-07(s24 新工具卡,當堂 3/3 過;當堂過不算保留,冷測定升降)| active
+- mistake:分層判準-關掉APIServer還在不在 | mistake | 3 | 2026-08-08(**s25 冷測 4/5**:判準句無提示自產 ✅、cgroup limit 誤放右欄 ❌。已升級成**兩步版**〔先問宣告還是執行體〕,08-08 抽兩步版)| active
+- mistake:誰把limit寫進cgroup(kubelet不是scheduler)| mistake | 3 | 2026-08-08(s25 新卡,答「scheduler 嗎」;判準句「不在 node 上的元件碰不到 kernel」+ 只在建 container 那刻寫)| active
+- mistake:PV↔PVC是1:1獨佔 | mistake | 3 | 2026-08-08(s25 新卡,學員自曝以為 1:多;三層關係 + 塊裝置第一性 + RWO 限的是 node。Transfer 當堂過,冷測定升降)| active
 - mistake:可寫層在硬碟不在memory(overlayfs)| mistake | 3 | 2026-08-07(s24 新卡,親手驗過 kill 1)| active
 - mistake:emptyDir-綁Pod不綁container | mistake | 3 | 2026-08-07(s24 口頭未過且未動手,**s25 必須動手驗**)| active
 - mistake:veth-誤記跨node連線 | mistake | 7 | 2026-08-10(**s23 冷測過**:數字全對+tunl0 誘答咬住,推 7;但同日盲測站 2/6 仍蒸發,08-10 抽「旅程內出場」版)| active
