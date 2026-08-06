@@ -61,7 +61,41 @@ context kind → cluster kind-k8s-coach-p0(s21 已刪,條目不存在)
 
 診斷指令注意:`docker ps --filter name=kind` **抓不到 p2a**(容器叫 `k8s-coach-p2a-*`,名字裡沒有 kind)。要用 `kind get clusters` 或不帶 filter 的 `docker ps -a`。
 
-## ⚠️ bastion 叢集現況(2026-08-05,**叢集目前無法排任何 Pod**)
+## bastion 叢集現況(2026-08-06,s26 開場,**三台全 Ready**)
+
+- `kubectl get nodes` 三台 `Ready`(control-plane / worker / worker2,19d,v1.32.2)。
+- **恢復原因 = 宿主機今早重開機**(`up 1:49`,所有容器 `Up 2 hours`),不是誰修好的。
+- 當下資源健康:load average `0.56 / 1.07 / 1.15`(4 核心)、`available 12Gi` / 15Gi、swap 未用。
+- ⚠️ **s25 那次 node 全倒的真兇未採證即被重開機洗掉,永遠查不到**。教學結論已給學員:restart/reboot 同時清掉症狀與證據,採證(node Conditions / kubelet log)必須排在 restart 前面。
+- `gitlab-ci-dashboard` 仍在跑(Up 2 hours),就是 s24 那個吃掉 `localhost:8080` 的東西。孤兒 context `kind` 已清除(`kubectl config get-contexts` 只剩 `kind-k8s-coach-p2a`)。
+- s26 新增物件:`vol-demo` Pod(釘 `nodeName: k8s-coach-p2a-worker`,同掛 emptyDir `/scratch` + `pvc-demo` `/data`,image busybox `sleep 86400`)。`pv-demo` / `pvc-demo` 仍 Bound;`cg-demo` 未再檢查(node 已 Ready,Pending 應已解除,s27 確認)。
+
+### ⚠️ 兩份 repo clone(2026-08-06 發現)
+
+bastion 上同時存在:
+
+| 路徑 | 內容 |
+|------|------|
+| `~/jason/learning-coaches/` | s26 的 `labs/vol-demo.yaml` 寫在這裡;教練本次 session 的工作目錄 |
+| `~/go_senior_devops/learning-coaches/` | s25 的 `labs/pv-demo.yaml` / `pvc-demo.yaml` / `cg-demo.yaml` 在這裡(environment.md 遷移步驟指定的路徑) |
+
+`labs/` 是 gitignored 所以不影響跨機同步,但**兩邊都是 git clone,commit/push 前先確認在哪一份**。已告知學員。
+
+### kind 特有陷阱:`/tmp` 是 tmpfs(2026-08-06)
+
+kind 的 node image 把 `/tmp` 掛成 tmpfs。任何 hostPath 指到 `/tmp/...` 的 PV,**實體是記憶體,node 重開就沒**。s26 實證:`kubectl exec vol-demo -- cat /proc/mounts` 顯示 `/data`(hostPath `/tmp/pv-demo`)是 `tmpfs`,而 `/scratch`(emptyDir,在 `/var/lib/kubelet/...`)才是 `/dev/nvme0n1p1` xfs。
+
+排障通則:**持久性看 `/proc/mounts` 實際掛什麼,不看物件叫什麼名字。**
+
+### 從外面殺 container(PID 1 保護的繞法)
+
+`kubectl exec <pod> -- kill 1` 殺不死 container(kernel 對 PID 1 的 signal 保護,同 namespace 內連 SIGKILL 都擋)。要模擬 container crash 必須從祖先 namespace 動手:
+
+```
+docker exec k8s-coach-p2a-worker sh -c 'crictl stop $(crictl ps -q --label io.kubernetes.pod.name=<pod-name>)'
+```
+
+## ⚠️ bastion 叢集舊現況(2026-08-05,已被上面取代)
 
 - **worker 也倒了**。`kubectl describe pod` Events:`0/3 nodes are available: 1 node(s) had untolerated taint {node-role.kubernetes.io/control-plane}, 2 node(s) had untolerated taint {node.kubernetes.io/not-ready}` → **可排的 node = 0**,新 Pod 一律 Pending。
 - 修復三發(s25 已給學員,**未執行未回報**):
