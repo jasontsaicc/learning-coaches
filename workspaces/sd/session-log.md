@@ -22,7 +22,10 @@
 - 🎯 **誠實轉折(本場教學核心)**:這一段其實**不能證明 Max 錯** — separate pool 在同情境下更慢(30÷36 = 0.83/s),因為瓶頸在 Provider A 不在 pool topology,兩案一起死。真正救命的是 **circuit breaker**。Max 真死因五條全與 latency 無關:failure isolation(poison message 吃光 shared pool)/ independent scaling(200 萬則淹掉 queue-depth 訊號)/ pause + 24h TTL 語意(單 queue 只能 pull 出來丟掉,照樣燒 worker)/ provider quota 帳號級共享(fraud 收 429,你的 priority 管不到下游)/ **工程現實:SQS 與 Kafka 皆無 priority,此選項在他的 AWS 技術棧根本不存在**。separate pools 的自付代價(三套 alarm/scaling policy、idle 資源)也要求他講得出來。
 - **收尾 gate**:「priority 解決什麼、沒解決什麼」→ 自產「priority 分類 vs worker 佔用」(最小單位過)。bulkhead 精度誤解當場修正:separate pool **一樣被佔住**,差別是 fraud 那 30 台沒事 → **bulkhead = 損害範圍限縮(誰陪葬)/ circuit breaker = 損害時間限縮(卡多久)**,兩軸拆開入庫。
 - **三指標**:argument 🟡(裸答被打回後一口氣補完整,無需追問誘導)/ capacity 🟡(36s unprompted pass;130÷36 棄權且需給模型)/ ops 未測。連續計數維持 0。
-- 新 registry 4 筆(capacity-modeling / P99 判讀 / bulkhead 精度 / 棄權第 6 筆)。下場:Step 3 球 2 provider failover(CB 擺 per-worker 還是 per-pool;跳到 B 之後 B 扛不扛得住 300/s)。
+- 新 registry 4 筆(capacity-modeling / P99 判讀 / bulkhead 精度 / 棄權第 6 筆)。
+- **後半學生喊「整題有點亂了」要求重整**,四個具體問題(AWS 怎麼出題 / L6 怎麼 clarify / deep dive 多深 / 圖怎麼畫)→ 產出整題重整版筆記 + mindmap。clarify 給了判準句(**一個問題如果不管答案架構都一樣就不要問**)與可直接背的四行表;deep dive 給 6 個挖點各一組論證骨架並明示天花板(機制+數字+反面代價);畫圖給三層漸進法與四種常見死法。補 **Little's Law `N = λ × W`**(修正 S46 的 30 worker → 60,並要求假設講在前)+ AWS 服務映射全表(每格附坑)。
+- ⚠️ **Day 33 只跑完一半**:挖點 2-6 與 Step 4 3AM page test 全是 coach 給的模範答案,學生零實作,筆記現況是「讀過」非「會」。已告知學生,他拍板收束不回頭補,S49 開場改用兩球冷測驗留存(默畫第 2 層圖 + 自算 worker 數)。
+- 學生拍板進 **Chat System(Day 35-37)**。清帳債(WR5 Topic 3 + 8 張過期卡)提案壓成每場 mock 開頭 10 分鐘 quick-fire、四場清完,學生未表態,S49 確認。
 
 ## S44(2026-07-18,清帳場 1/2:Sprint re-plan 拍板 + 兩球複測 + migration 詞彙插課)
 

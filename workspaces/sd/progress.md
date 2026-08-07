@@ -43,7 +43,18 @@
 模範答案已給畢:缺口 83 倍(3.6/s vs 300/s)、P99 vs best case 的判讀陷阱、**誠實轉折**(separate pool 在此情境更慢 0.83/s,瓶頸在 provider 不在 pool topology,兩案一起死 → 真正救命的是 circuit breaker)、Max 真死因五條(failure isolation / independent scaling / pause+TTL 語意 / provider quota 共享 / **SQS 與 Kafka 皆無 priority,此選項在 AWS 技術棧不存在**)、separate pools 的自付代價、英文 one-liner。收尾 gate:「priority 解決什麼、沒解決什麼」→ 自產「priority 分類 vs worker 佔用」(最小單位過);bulkhead 精度誤解(separate pool「不用一直等」)當場修正為「損害範圍限縮 vs circuit breaker 損害時間限縮」。
 三指標本場:argument 🟡(裸答字母被打回後一口氣補完整,無需追問誘導)/ capacity 🟡(36s unprompted pass;130÷36 棄權且需給模型)/ ops 未測。連續計數維持 0。
 
-下一場(S49)resume:Step 3 球 2 = **provider failover**(circuit breaker 擺在每個 worker 各自一個 vs 整池共用一個;跳開後 Provider B 扛不扛得住 300/s)→ dedupe 位置 → 收尾學生自己跑 3AM page test。
+**S48 後半(學生要求整題重整,mock #1 提前收束)。** 學生點名「學到現在有點亂了」,要求四件事:AWS 面試怎麼出這題 / L6 怎麼 clarify / deep dive 挖多深 / 架構圖怎麼畫。產出 `portfolio/sd/notes/day33-notification-system.md`(整題重整版,收 S46-S48 四次 sitting)+ `-mindmap.md`。⚠️ **誠實記錄:Day 33 只有 Step 1 clarify、Step 2 三層圖、Step 3 挖點 1(bulkhead)是學生跑的;挖點 2-6(CB/dedupe/rate limit/TTL-pause/capacity)與 Step 4 3AM page test 全部是 coach 給的模範答案,學生零實作。** 該筆記現況是「讀過」不是「會」。
+本場新增給畢:Little's Law `N = λ × W`(修正 S46 的 ≈30 worker 為 300/s × 0.2s = 60,並要求講假設在前)、AWS 服務映射全表(按設計格排,每格附坑;含 SQS 無 priority、SQS FIFO dedupe 窗口只有 5 分鐘、Lambda reserved concurrency = bulkhead 但帳號 concurrency 共享、Pinpoint 已公告 EOL 改 AWS End User Messaging)。學生問「🌍 段要不要併進筆記」未答,pending。
+**學生拍板:Day 33 收束,不回頭補跑,進 Chat System(Day 35-37)。** 路線圖已給:Chat → Distributed Cache(38-39)→ News Feed(40-42)→ Payment(43-45);Tier 2 七題維持不逐題教。
+
+**清帳債排程(coach 提案,S49 開場確認):** 學生 07-19 押後的 WR5 Topic 3(Unique ID)+ 8 張過期卡,到期條件(Tier 1 mock #1 跑完)已達成。提案不單開清帳場(S45 已證明學生不耐),壓縮成**每場 mock 開頭 10 分鐘 quick-fire,一場 2-3 張,四場清完**,與 Chat System 並行。學生本場未表態(直接收工),S49 開場問一次。
+
+下一場(S49)resume:
+1. **Day 33 冷測兩球(不准看筆記)**:白板默畫第 2 層圖 + 用 Little's Law 自算 worker 數。這是驗「模範答案給完之後留下什麼」,S46 那次 6 天掉光的前科在
+2. Quick-fire 2 張過期卡(先確認上方排程提案)
+3. **開 Chat System(Day 35)**:產業情境開場 → 4-step → AWS 映射收尾;新東西是長連線(WebSocket vs SSE vs long polling)、presence、離線投遞
+
+~~原 resume:Step 3 球 2 provider failover~~(模範答案已於本場給畢,不再排;留存驗證併入上方第 1 點與日後 mock 追問)。
 
 **2026-07-19 S45 開場學生拍板:清帳場 2/2 押後(「不要再清場了,快沒耐心」),WR5 Topic 2/3 + 過期卡 sweep 移到 Tier 1 mock 跑完後收;S45 直接進 mock #1 Day 33 Notification System。**
 
