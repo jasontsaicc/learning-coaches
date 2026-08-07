@@ -11,9 +11,9 @@
 
 ## Meta
 
-- session_count: 45
-- last_weekly_review: 33 — ⚠️ WR5 於 S41 開跑未完成(Topic 2/3 已收,Topic 3 未答),trigger 持續成立,S46 收 Topic 3 + sweep + audit;完成時才把本欄更新為當時 session_count
-- last_session_date: 2026-08-04
+- session_count: 48
+- last_weekly_review: 33 — ⚠️ WR5 於 S41 開跑未完成(Topic 2/3 已收,Topic 3 未答),trigger 持續成立;學生拍板押後至 Tier 1 mock #1 收工後才收 Topic 3 + sweep + audit;完成時才把本欄更新為當時 session_count
+- last_session_date: 2026-08-07
 - warm_up_classification: (standalone 時期未記錄;學員已 P3,Step 0 模式預設 Exploration)
 
 ## Current Session breakpoint
@@ -38,6 +38,12 @@
 **S47 中斷存檔(2026-08-04,間隔 9 天,Comeback 開場)。** 開場學生提議「先學新的」→ 舉證(6 天留存掉)後接受 deal:默畫一球+進 Step 3。默畫:第 2 層終點形狀留住(queue 一變三+worker 跟著分);第 0/1 層演進反了(第 0 層畫了 queue、API server 當成後加)→ 修正後緩衝痛點自答,coupling 痛點 coach 補。**capacity 冷測過:200 萬÷1000=2000s 零提示自算(s46 registry 複測 pass,interval 3→7,2000s→33min 換算未主動)。** worker-isolation chunk 複測:形狀在、機制鏈斷 — 「排第一還是卡」連問三輪都往「隊伍/前面卡住」找原因(queue-position 框架黏住),銀行櫃員比喻+縮到二選一(B:等空櫃員)才轉向;最終四格句 (1)共用 (2)在忙 自填,(3)順序/(4)人力 靠配對題才落位。chunk 以最小單位過(max scaffold),ordering vs capacity 兩層隔離的標籤-概念綁定待換場景複測(s46 priority 條目不撤,加註)。bulkhead 命名+Lambda reserved concurrency 映射已給(學生 S46 自提的 AWS 鉤子)。**Step 3 球 1 已出未答:Max 餿主意「單 queue+priority 標籤+共用 pool,省三倍維運」vs separate pools — 學生要講兩邊代價(priority 何時夠用/何時死,用空櫃員+200 萬+P99 60s 講)。**
 
 下一場 resume:Step 3 球 1(priority vs pools,題在上行)→ provider failover → dedupe 位置 → 收尾學生自己跑 3AM page test。
+
+**S48 中斷存檔(2026-08-07,間隔 3 天)= Step 3 球 1(priority vs separate pools)收畢。** 開場即卡(「很卡 不知道怎麼說」,非棄權)→ 縮到單球+銀行櫃員畫面 → **「等有櫃員空出來」自產**(S47 卡三輪的 ordering vs capacity 這次一個畫面就轉向,新場景複測 pass)。三選一 B(等手上那筆做多久)裸答字母 → 依硬規則打回要求重講 → 三題一口氣答完,`(10+2)×3=36s` **unprompted 把 connect timeout 自己加進去**;第 3 題 commit「沒破」(反直覺方向敢表態,best case 前提下 Max 確實對)。接著 `130÷36`(pool 每秒空出幾台)→ **「你直接說明 不要卡太久」棄權家族第 6 筆** → 拒給+舉證(S46 200萬÷1000 同款)+縮到單一除法 → 仍問「要怎麼算啊」→ 給 rate 模型骨架(一台 36 秒放手一次 = 1/36)後即答 3.6。⚠️ **新根因分化**:前五筆是啟動能量,這筆是**場景翻算式的 modeling 缺口**(算術會、建模不會),分開治。
+模範答案已給畢:缺口 83 倍(3.6/s vs 300/s)、P99 vs best case 的判讀陷阱、**誠實轉折**(separate pool 在此情境更慢 0.83/s,瓶頸在 provider 不在 pool topology,兩案一起死 → 真正救命的是 circuit breaker)、Max 真死因五條(failure isolation / independent scaling / pause+TTL 語意 / provider quota 共享 / **SQS 與 Kafka 皆無 priority,此選項在 AWS 技術棧不存在**)、separate pools 的自付代價、英文 one-liner。收尾 gate:「priority 解決什麼、沒解決什麼」→ 自產「priority 分類 vs worker 佔用」(最小單位過);bulkhead 精度誤解(separate pool「不用一直等」)當場修正為「損害範圍限縮 vs circuit breaker 損害時間限縮」。
+三指標本場:argument 🟡(裸答字母被打回後一口氣補完整,無需追問誘導)/ capacity 🟡(36s unprompted pass;130÷36 棄權且需給模型)/ ops 未測。連續計數維持 0。
+
+下一場(S49)resume:Step 3 球 2 = **provider failover**(circuit breaker 擺在每個 worker 各自一個 vs 整池共用一個;跳開後 Provider B 扛不扛得住 300/s)→ dedupe 位置 → 收尾學生自己跑 3AM page test。
 
 **2026-07-19 S45 開場學生拍板:清帳場 2/2 押後(「不要再清場了,快沒耐心」),WR5 Topic 2/3 + 過期卡 sweep 移到 Tier 1 mock 跑完後收;S45 直接進 mock #1 Day 33 Notification System。**
 
@@ -120,13 +126,19 @@ Weak-topic flags: 無(至今沒有帶 flag 過 gate 的紀錄)。
      無卡的設 3 天(2026-07-13)。unresolved-session-count = 40 - 建立 session(近似;≥5 依 engine
      Priority Override 置頂,step A 每堂上限內逐步清)。 -->
 
-### Live(unresolved,36 筆)
+### Live(unresolved,40 筆)
+
+- (s48) | Capacity(modeling) | `130 台 worker × 每台佔 36s → 每秒空出幾台` 講不出算式:縮到單一除法後仍問「要怎麼算啊」,給 rate 模型骨架(一台 36s 放手一次 = 1/36 台/秒)後即答 3.6 | ⚠️ **與棄權家族分家的新根因**:算術沒問題(同場 `(10+2)×3=36` unprompted 算對),缺的是**把場景翻成算式**的 modeling 步驟;治法=每場塞一題「先寫出單位式(X per second 是什麼除什麼)」再算數字 | unresolved | 3 | 2026-08-10(每場 drill 即測) | 0
+- (s48) | Capacity(判讀) | 拿 best case 交 P99 的卷:只算「排第一那則等 36s」就答「SLO 沒破」,沒看第 300 則(等 84s)與 backlog 累積(296/s) | P99 = 最慢的 1%,不是最順的那則;happy-path-only 交卷是 capacity 通用死法;複測形式:任何 SLO 題追問「你算的是第幾則」 | unresolved | 3 | 2026-08-10(每場 drill 即測) | 0
+- (s48) | 分散式術語(bulkhead) | separate pool 講成「不用一直等」= 以為隔離讓損害消失(實際上 marketing 那池照樣卡滿 retry,只是 fraud 那 30 台沒事) | 術語-概念未綁定;**bulkhead=損害範圍限縮(誰陪葬)vs circuit breaker=損害時間限縮(卡多久)** 兩軸當場拆開,換場景複測 | unresolved | 3 | 2026-08-10 | 0
+- (s48) | Interview habit(棄權) | 「你直接說明 不要卡太久」出現在 `130÷36` 這一步(家族第 6 筆:S36→S42→S44→S46→S48) | 逃避家族;本次拒給+舉證(S46 200萬÷1000 同款前科)+縮到單步後仍卡 → 判定**部分成因是 modeling 缺口而非純逃避**(見上方 s48 capacity-modeling 條);後續要分辨「不敢算」與「不會建模」,前者加壓、後者給模型 | unresolved | 3 | 每場 drill 即測 | 0
 
 - (s46) | Capacity estimation | `300 萬 ÷ 1000/s` 喊「不會算」;同一個除法 07-19 同一題已在他面前算過且他當場自答「要 Queue」,6 天後掉 | capacity-freeze 家族 + 「當場🟢≠留得住」;縮到單步除法即答對(3000)= 算術沒問題,是壓力下棄權;複測用同題不同數字冷起手 | unresolved | 7 | 2026-08-11 | 0
   - S47 複測 pass(2026-08-04):200 萬÷1000=2000s 冷起手零提示自算,interval 3→7;缺口剩「換算人類單位+對撞 SLO」未主動(2000s→33min→超標 33 倍由 coach 補)
 - (s46) | Interview habit(棄權) | 一場內三連棄權:「不確定怎麼回答」→「不會算,L6 會怎麼答」→「面試不會問吧,直接說明」;拒給+縮小步+舉證後才動 | 逃避家族第 5 筆(S36/S42/S44/S46);proxy 問法(「Senior 會怎麼答」)S45 後第 2 次;質疑題目正當性 S42 後第 2 次 | unresolved | 3 | 每場 drill 即測 | 0
 - (s46) | Notification System(priority) | 「一條 queue 塞滿時高優先通知的延遲」無法自行量化,因此 priority queue 只剩名詞沒有論證 | 危險感沒機制家族;論證=他自己算的 50 分鐘,已示範綁進 one-liner,留存待 S47 白板默畫複測 | unresolved | 3 | 2026-08-07 | 0
   - S47 複測部分過:量化除法自己出手(pass,見上條);但 worker-isolation 機制鏈斷 —「排第一還是卡」三輪都往 queue-position 找原因,櫃員比喻+二選一+配對題才收;ordering vs capacity 標籤綁定換場景複測(priority vs pools trade-off 球已出未答,下場即測)
+  - **S48 複測 pass**(2026-08-07):新場景(Max 的 single queue + priority tag)一個櫃員畫面即自產「等有櫃員空出來」,S47 卡三輪的位置這次一輪過;收尾自產「priority 分類 vs worker 佔用」= ordering vs capacity 標籤綁定成立。interval 3→7,next 2026-08-14。缺口剩 isolation 這一層(見下方 s48 bulkhead 條目)
 
 - (s45) | Security & Auth (OAuth) | 術語層撈不出:access token 講成「憑證」、scope 講成「權限」、四角色(Resource Owner/Client/Auth Server/Resource Server)喊忘、OIDC 先搶標籤(挑戰後改選 OAuth 2.0 但沒給理由);機制全通(帳密只進銀行頁面、唯讀授權、改密碼=核彈誤傷全部 App) | 術語-概念未綁定家族;AWS 同構對照表已給(token=STS creds、scope=IAM policy),留存待複測;另計 Deny List 語音滑動 ×2(Dynamic/Denial List,5a 家族) | unresolved | 3 | 2026-07-23 | 0
 - (s45) | Security & Auth (deny list) | 「deny list 為何不膨脹」卡兩輪(「不會了」「不確定」),通行證印期限比喻後自組出 TTL aging(過期 entry 可移除,表≈近 15 min 掛失量) | 機制組裝啟動能量問題(S44 同款);短 TTL 綁 deny list 大小這條鏈換場景複測 | unresolved | 3 | 2026-07-23 | 0

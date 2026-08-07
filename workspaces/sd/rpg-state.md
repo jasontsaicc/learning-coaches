@@ -11,11 +11,11 @@
 | **Title** | 🏗️ Staff Architect |
 | **Current streak** | 1 週 (07-27 週斷檔 reset;前段 6 週:S31 → S45/S46) |
 | **Longest streak** | 6 週 |
-| **Last session date** | 2026-08-04 (S47, worker-isolation chunk 複測過,Step 3 球 1 已出未答即停) |
+| **Last session date** | 2026-08-07 (S48, Step 3 球 1 收畢:priority vs separate pools) |
 
 ## Last story summary
 
-Session 47。九天後回歸,開場想直奔新內容,小球把三層圖擋在門口。默畫:終點形狀還在,演進順序反了;200 萬÷1000 這次冷起手直接出手(上次喊不會算的那個除法!),但「排第一還是卡」在隊伍裡繞了三圈,銀行櫃員畫面才把他拉到「等的是空櫃員」。bulkhead 得名,他自己的 Lambda reserved concurrency 鉤子接上了。Max 剛拋出「單 queue 加 priority 省三倍維運」的餿主意,學生喊停收工。下場:接 Max 這球。
+Session 48。Max 那盤菜終於吃完。開局「很卡」,櫃員畫面一擺,上次繞三圈的地方這次一輪就轉向。他算出 36 秒的時候還自己把 connect timeout 加進去,然後在「Max 害 fraud 遲到了嗎」這題,他敢說 no,而且他是對的。栽在 130÷36 這一步喊「直接說明」,拒給之後才發現真相不是他不敢,是他不知道怎麼把「一台 36 秒放手一次」寫成算式。83 倍的缺口攤開之後,小球給了他一個誠實的轉折:這一段其實不能證明 Max 錯,瓶頸在 provider 不在 pool。Max 真正的死因五條在別的地方,包括最現實的那條 — SQS 根本沒有 priority。下場:circuit breaker 擺哪一層。
 
 ## Achievements
 

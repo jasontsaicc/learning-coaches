@@ -13,6 +13,17 @@
      - docs/curriculum-roadmap.md、docs/planning-review.md → workspaces/sd/archive/pre-migration/
      - sd-coach skill 本體         → skills/sd-coach/(curriculum 詳文=references/curriculum-detail.md) -->
 
+## S48(2026-08-07,mock #1 Day 33 Notification System — Step 3 球 1:priority vs separate pools)
+
+- **開場冷回憶 + 球 1 同題續打**(S47 已出未答):Max 提案「一條 queue + priority tag + shared pool,省三倍維運」vs 三條 queue 三組 pool。學生開局「很卡 不知道怎麼說」(卡住,非棄權)→ 縮到單球(fraud 排第一要等多久)+ **銀行櫃員畫面** → 自產「等有櫃員空出來」。**S47 同一條鏈繞三圈才轉向,S48 一輪過 = ordering vs capacity 新場景複測 pass。**
+- **三選一裸答字母 → 依 execution-heavy 硬規則打回**(不接「為什麼?」,直接要求重講)→ 一口氣答完三題:`(10+2)×3 = 36s` 且 **unprompted 把 connect timeout 自己加進去**;第 3 題 commit「沒破」= 沒有因為「Max 是反派」反射性反對,在 200ms 前提下 Max 確實對。
+- ⚠️ **棄權家族第 6 筆**(S36→S42→S44→S46→S48):`130÷36` 這一步喊「你直接說明 不要卡太久」。拒給 + 舉證(S46 200萬÷1000 同款前科)+ 縮到單一除法 → 仍問「要怎麼算啊」→ 給 rate 模型骨架(一台 36s 放手一次 = 1/36 台/秒)後即答 3.6。**新根因分化:算術會、建模不會。** 前五筆是啟動能量,這筆是「場景翻算式」的 modeling 缺口,今起分開治(不敢算=加壓;不會建模=給單位式)。
+- ⚠️ **P99 判讀陷阱**:拿 best case(排第一那則 36s)交 P99 的卷。攤開:pool 每秒空出 3.6 台 vs fraud 尖峰 300/s = **缺口 83 倍**,第 300 則等 84 秒,backlog 每秒累積 296 則。
+- 🎯 **誠實轉折(本場教學核心)**:這一段其實**不能證明 Max 錯** — separate pool 在同情境下更慢(30÷36 = 0.83/s),因為瓶頸在 Provider A 不在 pool topology,兩案一起死。真正救命的是 **circuit breaker**。Max 真死因五條全與 latency 無關:failure isolation(poison message 吃光 shared pool)/ independent scaling(200 萬則淹掉 queue-depth 訊號)/ pause + 24h TTL 語意(單 queue 只能 pull 出來丟掉,照樣燒 worker)/ provider quota 帳號級共享(fraud 收 429,你的 priority 管不到下游)/ **工程現實:SQS 與 Kafka 皆無 priority,此選項在他的 AWS 技術棧根本不存在**。separate pools 的自付代價(三套 alarm/scaling policy、idle 資源)也要求他講得出來。
+- **收尾 gate**:「priority 解決什麼、沒解決什麼」→ 自產「priority 分類 vs worker 佔用」(最小單位過)。bulkhead 精度誤解當場修正:separate pool **一樣被佔住**,差別是 fraud 那 30 台沒事 → **bulkhead = 損害範圍限縮(誰陪葬)/ circuit breaker = 損害時間限縮(卡多久)**,兩軸拆開入庫。
+- **三指標**:argument 🟡(裸答被打回後一口氣補完整,無需追問誘導)/ capacity 🟡(36s unprompted pass;130÷36 棄權且需給模型)/ ops 未測。連續計數維持 0。
+- 新 registry 4 筆(capacity-modeling / P99 判讀 / bulkhead 精度 / 棄權第 6 筆)。下場:Step 3 球 2 provider failover(CB 擺 per-worker 還是 per-pool;跳到 B 之後 B 扛不扛得住 300/s)。
+
 ## S44(2026-07-18,清帳場 1/2:Sprint re-plan 拍板 + 兩球複測 + migration 詞彙插課)
 
 - **場前拍板 Sprint re-plan**(詳 curriculum-plan.md):目標 AWS 職缺面試(尚未投遞,修正原「已投遞」誤記);廢 Gauntlet 3 連退出條件(S40-S43 零進展=進度緩慢根源),Tier 1 剩 5 題 mock 化,Tier 2 只走 pattern-map,parked PoC 全砍。學生當日累:推理准中文,英文只收最小單位。
