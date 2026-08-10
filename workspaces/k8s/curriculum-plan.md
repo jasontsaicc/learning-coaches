@@ -214,8 +214,11 @@ Senior 面試常考「你會怎麼把一個現有服務搬進 k8s」,而且導�
 1. **P2b 核心**:C-4 RBAC → C-5 IRSA → C-6 Secrets/PSS。C-2 CSI 概念層、C-3 StatefulSet 簡講即可。P2a 殘項(NetworkPolicy Step 5-6)併入 RBAC 場當熱身,不獨立排課。
 2. **P4 提前到 P3 之前**:SLI/SLO/error budget/alerting philosophy 是 SRE 面試的身分證科目,不能再排最後。
 3. **P3 修剪版**:scheduler/HPA/PDB/capacity 以面試題深度走;排障 drill 在此吸收七站能力(見 10.2)。
-4. **P5 砍半**:Helm + ArgoCD 最小閉環 + EKS terraform,其餘(etcd 運維深入、admission webhook、progressive delivery)降口頭教材。
-5. P6 照舊,mock 全英文。
+4. **Terraform senior 模組插入 P3 與 P5 之間**(6 場,借用 k8s 檔期,不開新週配額;
+   內容見 terraform-coach curriculum 的 Senior Fast Path)。理由:P5 的 EKS prod terraform
+   直接當模組的 capstone 續集,兩邊共用產出。
+5. **P5 砍半**:Helm + ArgoCD 最小閉環 + EKS terraform,其餘(etcd 運維深入、admission webhook、progressive delivery)降口頭教材。
+6. P6 照舊,mock 全英文。
 
 ### 10.2 七站封包改制(學員 2026-08-11 拍板,教練同意並記理由)
 
