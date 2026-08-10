@@ -61,7 +61,40 @@ context kind → cluster kind-k8s-coach-p0(s21 已刪,條目不存在)
 
 診斷指令注意:`docker ps --filter name=kind` **抓不到 p2a**(容器叫 `k8s-coach-p2a-*`,名字裡沒有 kind)。要用 `kind get clusters` 或不帶 filter 的 `docker ps -a`。
 
-## bastion 叢集現況(2026-08-10,s27,**第五次故障;下課時仍未修好**)
+## bastion 叢集現況(2026-08-10 晚,**p2a 已重建 + 三台 Ready**)
+
+- 舊叢集已 `kind delete`,用 `clusters/kind-p2a.yaml` 重建(control-plane + worker ×2,disableDefaultCNI,podSubnet `192.168.0.0/16`),Calico `v3.28.2` 已裝。三台 `Ready`,kube-system 全 `Running`。
+- ⚠️ **重建後 11 分鐘 worker2 立刻復發同一個病** —— 所以**根因不是叢集老舊**,是這台 bastion(4 核心)在 Calico 啟動尖峰(load 一度 5.05)把 worker2 的 containerd 拖過 kubelet 的健康檢查 timeout,而且**負載退下去之後 containerd 不會自己恢復**。
+
+### 兩個可重用的東西(2026-08-10 新,價值最高)
+
+**1. 一行分辨「containerd 是慢還是死」** —— 好壞 node 對照跑,秒判:
+
+```
+for n in worker worker2; do printf "%s: " $n; docker exec k8s-coach-p2a-$n sh -c 'timeout 2 crictl info >/dev/null 2>&1 && echo FAST || echo SLOW'; done
+```
+
+實測:`worker: FAST` / `worker2: SLOW` —— 同一台宿主機、同一個 image、同樣 11 分鐘壽命。`systemctl is-active` 兩台都是 `active`,分不出來;**這一行分得出來**。2 秒是照 kubelet 健康檢查的量級取的。
+
+**2. 精準修法:重啟 containerd 就好,不用重啟整個 node 容器**
+
+```
+docker exec k8s-coach-p2a-worker2 systemctl restart containerd
+```
+
+25 秒後 CRI 回 `FAST`、node 回 `Ready`,**Pod 不用重排、其他 node 不受影響**。比 `docker restart <node>` 影響面小得多。
+
+**對應的 kubelet log 訊號**(worker2 復發時):
+
+```
+kubelet.go:2993 "Container runtime sanity check failed" err="rpc error: code = DeadlineExceeded"
+kubelet.go:2412 "Skipping pod synchronization" err="container runtime is down"
+containerd: level=warning msg="container event discarded"     ← 事件消費者跟不上,contention 的徵兆
+```
+
+**降低復發**:開課前先 `docker stop gitlab-ci-dashboard`(4 核心經不起多跑東西);Calico 剛裝完那 5 分鐘是尖峰,不要同時做別的事。
+
+## bastion 叢集舊現況(2026-08-10 下午,s27 課中,**已被上面取代**)
 
 - `kubectl get nodes`:**control-plane / worker `NotReady`,worker2 `Ready`**(24d,v1.32.2)。
 - **根因已完整採證(s27,五次以來第一次證據齊全)**:
