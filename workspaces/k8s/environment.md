@@ -92,7 +92,9 @@ kubelet.go:2412 "Skipping pod synchronization" err="container runtime is down"
 containerd: level=warning msg="container event discarded"     ← 事件消費者跟不上,contention 的徵兆
 ```
 
-**降低復發**:開課前先 `docker stop gitlab-ci-dashboard`(4 核心經不起多跑東西);Calico 剛裝完那 5 分鐘是尖峰,不要同時做別的事。
+**降低復發**:Calico 剛裝完那 5 分鐘是尖峰,不要同時做別的事。
+
+**`gitlab-ci-dashboard` 已退場(2026-08-10,學員確認不再使用)**:`docker stop` + `docker update --restart=no`。它原本是 `restart=always`,這就是每次宿主機重開它都自己回來、長期跟叢集搶 4 核心的原因(也是 s24 吃掉 `localhost:8080` 的那個)。容器保留未 `docker rm`。**現在這台 bastion 上只有三個 kind node 在跑。**
 
 ## bastion 叢集舊現況(2026-08-10 下午,s27 課中,**已被上面取代**)
 
