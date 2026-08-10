@@ -7,13 +7,40 @@
 
 ## Meta
 
-- session_count: 26
-- last_weekly_review: 18(**WR9 於 s25 開跑、s26 學員要求改上 storage,仍未完成**,見斷點)
-- last_session_date: 2026-08-06
+- session_count: 27
+- last_weekly_review: 18(**WR9 於 s25 開跑、s26/s27 均未跑,仍未完成**,見斷點)
+- last_session_date: 2026-08-10
 - warm_up_classification: mid(有地圖形狀,缺演員名字;P0 剛好,不加速)
 - **target_role: AWS Delivery Consultant(ProServe),2026-07-23 學員確認**。全部抽考包成客戶顧問情境、每題附 L6 範例答法(memory `aws-delivery-consultant-target` / `aws-mock-and-l6-answer-format`);戰略重排見 curriculum-plan §9。
 
 ## Current Session breakpoint
+
+**s27 已收(2026-08-10,公司 bastion,context `kind-k8s-coach-p2a`)。學員宣告「1 小時」,實際約 40 分鐘後疲勞收工。本堂學員自行啟用 `/i-have-adhd` skill(輸出格式規則,持續到說 stop adhd mode)。開場即遇真實故障(第五次),整堂被排障吃掉;`ip route` 動手債還清;cgroup 段學員要求跳過;F/G 未跑。**
+
+本堂事實:
+
+- ✅ **五次故障以來第一次「採證完成才 restart」**。s21/s24/s25/s26 四次全是 restart 先下去、證據一起洗掉;本堂完整證據鏈當場成立。08-09 到期的 `restart排在採證前面` 卡等於在真現場抽考。
+- **根因鏈(全部有輸出佐證)**:`Ready=False / KubeletNotReady / container runtime is down`(kubelet 自己回報,MemoryPressure/DiskPressure/PIDPressure 皆 False)→ 宿主機健康(`available 11Gi`、load 0.54/4 核心、三個 node 容器皆 `Up 8 hours`)→ **同宿主機上 worker2 Ready 而另兩台 NotReady = 對照組排掉整個宿主機層** → `systemctl is-active containerd kubelet` **兩個都 active** → kubelet log `StopPodSandbox from runtime service failed: rpc error: code = DeadlineExceeded` + `Skipping pod synchronization err="container runtime is down"` **每 5 秒一次連噴 8 小時**。containerd 最後一行 log 停在 09:10,查看時 17:10 = **八小時全靜音**。開場看到的 `cg-demo` / `vol-demo` / 三個 Terminating 殘骸 **就是同一個病的症狀**(StopPodSandbox 逾時 → 刪不掉)。
+- ⚠️ **答題品質與上面的成果落差極大 —— 指令全部由教練指定,學員一個都沒自選**。① 開場「你要看的是哪一個東西」→ 答 **`scheduler`**,**scheduler 當萬用嫌犯第 2 次**(s25「誰把 limit 寫進 cgroup」同款)。② 三選一(誰把 NotReady 寫上去)→ 答 **A(controller-manager)**,正解 **B(kubelet)**;已教兩種產生者的分辨法:`Ready=False` = kubelet 活著自己回報(message 寫死因)、`Ready=Unknown` = kubelet 失聯 40 秒由 node-lifecycle-controller 代筆,**看 `reason` 欄就知道是誰寫的**。
+- ⚠️ **why-first 預測連跳 3 次**(`free -h` 那題、`ip route` A/B/C 題,皆未答即按 Enter)。s24 訂的硬規格「不給預測就不給下一發指令」**本堂教練沒執行**,是教練的執行失誤。
+- ✅ **`ip route` 動手驗完成,s26 的債還清**(但預測未答,rep 打折)。親手讀到 `192.168.20.192/26 via 172.21.0.4 dev tunl0 proto bird onlink`、`192.168.138.128/26 via 172.21.0.2 dev tunl0`。三欄意義已教:`via <node IP>` = 下一站是另一台機器的 IP(**CoreDNS/Service/kube-proxy 各出場 0 次**)、`dev tunl0` = IPIP 外殼、`proto bird` = Calico BGP daemon 自動佈的不是人寫的。
+- 🎁 **意外彩蛋(價值高,學員未經抽考)**:`blackhole 192.168.46.64/26 proto bird` = worker 自己的 Pod 網段,**本機 /32 `dev caliXXXX` 路由一條都沒有** —— 因為 runtime 死了沒 Pod 起得來。**這張路由表本身就是故障的第二份獨立證據**。blackhole 的作用 = 打到本機網段但無對應 Pod 的封包當場丟掉,否則會走 default gateway 繞回來成迴圈。
+- **新教材四條(全部教練直給、本堂未經抽考,s28 起冷測)**:① **產生者 vs 消費者**:每個狀態欄位都有一個產生者和一批消費者,排障找產生者、不問消費者(scheduler 是 node 狀態的消費者)。② **對照組判準(通用,跨領域)**:同一層裡有的好有的壞 → 那一層以下全部無罪,不用再查。③ **`active` ≠ 還在幹活**:健康檢查三層(進程存在 / 有在聽 / 真的回得了話),**塞住的服務跟死掉的服務 `systemctl` 分不出來** → 直接接到「liveness probe 只看 PID 永遠救不了 hang 住的服務」(P3 伏筆,已埋)。④ **`DeadlineExceeded` = 對方還在但不理你**,與 connection refused(對方不在)是相反的兩種病、查法相反。
+- ⚠️ **本堂最重要的過程訊號:學員連續兩次問「現在在幹嘛 沒有前後文 不清不楚的」「這到底在幹嘛 在課程裏面嗎」,最後對 A/B 二選一答「不知道啦」。** 教練在 ADHD mode 已開的狀態下仍然:同一則訊息裡塞教學段落 + 動手指令 + 五行進度表 + 多個判準句,**多線程同框把 working memory 吃爆**。教練第一次口頭簡化(三句話 + 一個動作)後學員立刻恢復執行,證實是**版面問題不是內容難度問題**。
+- **收工方式**:學員答「不知道啦」= 決策癱瘓訊號,教練**不再追問、直接代為決定收工**並存檔(正確處置,勿在此情境下再丟選擇題)。
+- 環境:`docker restart k8s-coach-p2a-worker k8s-coach-p2a-control-plane` 下完後 **兩台仍 NotReady**(下課時),worker2 Ready。叢集已 24 天、containerd 第五次卡死。
+- 未跑:F 段(開場即斷)、G 段、cgroup 讀 `memory.max`(學員主動跳過,理由「這是這臺的環境 不要浪費時間」)、story-bank(連七堂)、WR9(第三度未跑)。
+
+next(s28),順序:
+
+1. ⚠️ **開場先講「今天做哪 3 件事」再開始,一次只推一件事,不要排故障或抽考當開場。** ADHD mode 生效中:**教學段落與動手指令不同框、進度表最多 3 行、一則訊息只放一個動作**。s27 末段已實證這是唯一有效的形狀。
+2. **叢集:建議直接重建不要再修**。`docker restart` 已無效,叢集 24 天、containerd 第五次卡死。`kind delete cluster --name k8s-coach-p2a` + 用 `workspaces/k8s/clusters/kind-p2a.yaml` 重建(Calico 需重裝)。重建成本比每堂開場修 20 分鐘低。
+3. **隔堂冷測(不可砍,s27 四條新教材全部只有直給沒抽考)**:① `NotReady` 兩種產生者怎麼分(`Ready=False` vs `Unknown`)② 對照組判準一句版 ③ `active` 為什麼不等於服務活著 + 接到 liveness probe ④ `ip route` 那行三個欄位各是什麼意思。
+4. **F/G 連兩堂債**,材料現成且燙(F 菜鳥題:「containerd 明明是 active 的,為什麼 k8s 說它死了?」;G 顧問情境:客戶 EKS node 週期性 NotReady)。
+5. pacing:**why-first 硬規格 s28 起真的執行** —— 不給預測就不給下一發指令(s24 訂、s27 教練沒執行)。MTTR 下一階仍是「方向 → 指令」那一步,但**先解決版面問題再加壓**,學員疲勞時不加壓。
+
+<details>
+<summary>s26 斷點(已消化,留參考)</summary>
 
 **s26 已收(2026-08-06,公司 bastion,context `kind-k8s-coach-p2a`)。C-1 三階梯壽命表全部親手實證收工,scorecard 3/4 = 自 s18 以來首次通過。WR9 第二度中斷(學員兩次要求「直接開始今天的課程」「我的意思是繼續昨天的 storage」),`last_weekly_review` 仍是 18。F 段連五堂債本堂還掉;G 段跑了一題正式版。story-bank 連六堂未挖。**
 
@@ -51,6 +78,8 @@ next(s27),順序:
 4. **WR9 第三度嘗試**:已中斷兩次。建議**不要再排成開場關卡**(兩次都被跳過),改成拆散寄生 —— 每堂 A 段動手驗一張過期卡,artifact audit 單獨找一堂做。若學員自己要求 WR 再整堂跑。
 5. **story-bank 連六堂未挖**,s27 保底一則(LP 佔 loop 近半)。
 6. pacing:延續三選一 + 意外結果轉教材。**MTTR 下一階**:學員已能講方向,缺的是「方向 → 指令」那一步。s27 起問法改成「你要看的是哪一個東西?」(答:Events / node 生命週期)再問「那個東西用什麼指令看?」,兩段式把指令逼出來。
+
+</details>
 
 <details>
 <summary>s25 斷點(已消化,留參考)</summary>
@@ -301,6 +330,7 @@ Weak-topic flags(**2026-08-03 首次啟用**,P2a 帶 flag 前進、gate 未考,�
 - 2026-08-03 | 盲測 #3 + lab (s23, tier 2) | 1/4 | 「誰做的」與判準句整堂缺席,兩道門檢查程序三層提示未自產;盲測格式紀律(口訣+七行)要當成硬規格 | 換皮誘答咬住「NetworkPolicy 實際改 iptables filter table」+ tunl0 不是 veth 咬住;兩死法 Resolving→Connection 親手集齊 | coach(原理🟡 機制✅ 自己的話❌ MTTR🟡〔讀 no matches for kind 有方向但誤修大寫 V、跳過讀圖〕。G 未跑,盲測+lab 折算;F 學員跳過)
 - 2026-08-04 | A 段冷測 + C-1 lab 折算 (s24, tier 2) | 1/4 | **why-first 預測連跳三次**(context 要三次才給、kill 1 三題只答 2、emptyDir 題只回問不預測):預測是最便宜的抓漏點,跳過等於把錯誤延後到冷測才發現。s25 起改硬規格,不給預測不給下一發指令 | 「Calico 上 apply 完的 NetworkPolicy,關掉 API Server 還擋不擋得住?」答**「可以,因為直接修改 kernel」,無提示自答**,是本堂最硬的一題,也是靜默無效卡的鏡像正樣本 | coach(原理🟡〔「存在 memory」機制錯、emptyDir 綁誰答錯,但 overlay 圖看懂後能自推 upperdir 綁 container〕 機制✅〔分層判準兩題無提示自答〕 自己的話❌〔全堂極簡短答,判準句缺席〕 MTTR❌〔HTML error 排障全程教練驅動,學員未提任何診斷方向〕。**G 未跑、F 未跑**,以 A 段冷測 + lab 折算)
 - 2026-08-05 | WR9 主題1 + C-1 lab 折算 (s25, tier 2) | 2/4 | **排障的「選指令」那一步**:Pending 問「你的第一個排查指令是什麼」→ 「不知道 直接開始今天的課程吧 拖太久了」,連三堂沒給出任何方向。注意學員**願意跑教練指定的指令、不願意自己選指令** → s26 起改用三選一候選指令建立肌肉,不再問開放式 | 「pvc-demo-2 會是什麼狀態?」→ **「pending 因為沒有 PV 了,因為 PV to PVC 是一對一的,所以就算 PV 有 1G、目前一個 PVC 使用 500,剩下的 500 也不能拿出來使用」**,判準句自帶「因為」且**主動追問「為什麼要這樣設計」**,是 pattern 卡第三次無提示正樣本 | coach(原理✅〔分層判準句無提示自產,補上 s24 收工說不出來的洞〕 機制🟡〔「誰把 limit 寫進 cgroup」答 scheduler = 控制面元件碰不到 kernel 的大破口;但 PV/PVC 媒合機制與靜態供給痛點自己認出〕 自己的話✅ MTTR❌。**G 未跑、F 未跑(連五堂)**,以 WR9 主題1 + PV/PVC lab 折算)
+- 2026-08-10 | **s27 無 scorecard(F/G 未跑,學員疲勞收工)** | 不計分 | — | — | coach(僅記可引用事實,不折算分數:**MTTR 有真實正樣本但摻教練驅動** —— 五次故障以來第一次採證先於 restart、完整證據鏈成立,**但每一發指令都是教練指定,學員零自選**;答題面兩次錯〔scheduler 當萬用嫌犯第 2 次、NotReady 產生者選 A〕;why-first 連跳 3 次。**信度低,不宜當 tier 2 分數採用**:整堂是教練帶著走的排障示範,不是學員獨立表現)
 - 2026-08-06 | step G (s26, tier 2, **正式版一題**,自 s21 以來首次) | **3/4 — 通過(自 s18 以來首次)** | **F 段獨白**:對「完全沒碰過容器」的新同事開口就是 container/emptydir/pv 三個名詞 + 三句結論,零機制;機制被追問就出得來 = 差的是「先講機制再講名詞」。顧問工作一半是對非專家講話,這條在 ProServe 直接可見 | **誘答那一題**:菜鳥說「不刪 pod 就永遠安全吧」,沒點頭,而且拿三分鐘前才意外發現的 tmpfs 當武器反駁 = 當堂新知識立刻遷移成防禦 | coach(原理✅〔「pod 沒有換 container 換掉只有 upperdir 換掉」無鷹架自產〕 機制✅〔WaitForFirstConsumer 順序完整鏈〕 自己的話✅〔三句無鷹架機制句〕 MTTR🟡〔G 段方向對「查 Pod 生命週期不查 code」= 連四堂 ❌ 後首次回升,但漏掉「凌晨兩三點」決定性線索,且**整堂沒主動說出過任何一個指令**,開場還選「先 restart 試試」〕。F 段已跑、G 段正式版已跑,無折算)
 - 2026-07-28 | step G 折算 (s22, tier 2, 盲測 #2 + F 段) | 1/4 | 「誰做的」欄要長在骨架裡,每站一個負責人;iptables=一棟樓(nat 改寫/filter 過濾)當日教過仍吞誘答 | F 段自組靜默無效鏈「不會報錯,但預期 DB 有保護、實際沒有」+ 站 7 無提示判準句「改 src 因為 Pod A 不認識 PodB-IP」 | coach(原理🟡 機制🟡 自己的話✅ MTTR❌。盲測純冷信度高;F 段帶問題鷹架)
 - 2026-07-23 | step G (s21, tier 2, **AWS Delivery Consultant 面試模擬首場**) | 0/4 | 判準句缺席:三次只給結論(kube-proxy yes/no、選路由那行、CIDR「不用特別算」),第六堂同條 | 回程 conntrack 主動講出來,無提示,而且那是 gate 歷史漏點清單上的站 | coach(原理❌ 機制❌ 自己的話❌ MTTR❌。七站只給 3 碎片;MTTR 兩次選錯指令且第二次跨層到 DNS。**信度高**:純冷測、教練全程未給鷹架)
@@ -435,14 +465,21 @@ Weak-topic flags(**2026-08-03 首次啟用**,P2a 帶 flag 前進、gate 未考,�
 - mistake:L4-vs-L7 | mistake | 3 | 2026-07-22(**s18 新情境過但框架教練給**:postgres/redis 兩題連過、標籤貼反未重現;07-22 無框架第四情境〔禁 postgres/redis〕過了才推 7)| active
 - mistake:NetworkPolicy-出廠全通 | mistake | 3 | 2026-07-23(s20 重抽半過:結論靠提示、「podSelector 只在自家 ns 選人」why 沒站住;與 CNI 卡同天再抽)| active
 - mistake:default-deny-分層(DNS vs 連線)| mistake | 3 | 2026-08-06(**s23 口頭再未過**但 lab 兩死法親手集齊;抽「兩步先後+兩種 timeout 關鍵字」)| active
-- mistake:跨-node-走路由表 | mistake | 3 | 2026-08-09(**s26 直給正解、學員未動手**:已給「路徑上 CoreDNS/Service/kube-proxy 各零次」+ 七段 kernel 路徑 + `ip route` + 判準句,三選一預測題未作答即改議程。⚠️ 依學員自身資料「直給+無動手」必蒸發 → **s27 開場先動手 `docker exec k8s-coach-p2a-worker ip route` 讀那一行**,跑完才算有 rep)| active
+- mistake:跨-node-走路由表 | mistake | 3 | 2026-08-13(**s27 動手驗完成,s26 的債還清**:親手 `docker exec k8s-coach-p2a-worker ip route` 讀到 `192.168.20.192/26 via 172.21.0.4 dev tunl0 proto bird onlink`,三欄意義已教。**但 A/B/C 預測未答即按 Enter,rep 打折不推 7**。08-13 抽:那一行三個欄位各是什麼意思 + 為什麼要包 tunl0〔底層網路不認 Pod 網段〕+ EKS VPC CNI 為什麼不需要 overlay)| active
+- mistake:blackhole路由與本機/32 | mistake | 3 | 2026-08-13(s27 意外彩蛋,**教練直給未抽考**:`blackhole <本機 Pod 網段>` + 本機 /32 `dev cali` 全缺 = 沒有 Pod 在跑的獨立證據。抽:blackhole 存在的理由〔無對應 Pod 的封包當場丟掉,否則走 default gw 繞回成迴圈〕)| active
+- mistake:跨-node-走路由表-舊記錄 | mistake | - | 2026-08-09(**s26 直給正解、學員未動手**:已給「路徑上 CoreDNS/Service/kube-proxy 各零次」+ 七段 kernel 路徑 + `ip route` + 判準句,三選一預測題未作答即改議程。⚠️ 依學員自身資料「直給+無動手」必蒸發 → **s27 開場先動手 `docker exec k8s-coach-p2a-worker ip route` 讀那一行**,跑完才算有 rep)| retired(s27 已執行,由上面的新列接手)
 - mistake:分層判準-關掉APIServer還在不在 | mistake | 3 | 2026-08-08(**s25 冷測 4/5**:判準句無提示自產 ✅、cgroup limit 誤放右欄 ❌。已升級成**兩步版**〔先問宣告還是執行體〕,08-08 抽兩步版)| active
 - mistake:誰把limit寫進cgroup(kubelet不是scheduler)| mistake | 3 | 2026-08-08(s25 新卡,答「scheduler 嗎」;判準句「不在 node 上的元件碰不到 kernel」+ 只在建 container 那刻寫)| active
 - mistake:LVM三層+擴容四步 | mistake | 3 | 2026-08-08(s25 課後學員自己要求復習;兩題結論對但都只給結論,Q2 追一刀後機制自產並自接 EKS CSI。抽:三層各是什麼 + 擴容四步 + 為什麼第 4 步躲不掉)| active
 - mistake:PV↔PVC是1:1獨佔 | mistake | 3 | 2026-08-08(s25 新卡,學員自曝以為 1:多;三層關係 + 塊裝置第一性 + RWO 限的是 node。Transfer 當堂過,冷測定升降)| active
 - mistake:可寫層在硬碟不在memory(overlayfs)| mistake | 7 | 2026-08-13(**s26 二度實證 + 機制無鷹架自產**「只有 upperdir 換掉」,推 7)| active
 - mistake:emptyDir-綁Pod不綁container | mistake | 7 | 2026-08-13(**s26 動手驗過翻正**:crictl stop 檔案在、delete pod 檔案沒,推 7。連同三階梯一起抽)| active
-- mistake:restart排在採證前面(MTTR)| mistake | 3 | 2026-08-09(s26 新卡,三選一選 C「先重啟試試」;治標/治本第三次同形狀。抽:node NotReady 的動作順序 + 為什麼 restart 不能第一個)| active
+- mistake:restart排在採證前面(MTTR)| mistake | 3 | 2026-08-13(**s27 真現場大幅正向但只算半過**:五次故障以來第一次採證完成才 restart,完整證據鏈成立〔conditions → 宿主機 → 對照組 → systemctl → kubelet log〕。**但每一發指令都是教練指定的,學員零自選** —— 順序學會了,選指令那一步沒動。不推 7。08-13 抽:給一個新的 node NotReady,要學員自己說出頭三發指令)| active
+- mistake:scheduler當萬用嫌犯 | mistake | 3 | 2026-08-13(**s27 第 2 次**〔s25「誰把 limit 寫進 cgroup」→ 答 scheduler;s27「node NotReady 你要看哪個東西」→ 答 scheduler〕。判準句合併:**scheduler 只填 `spec.nodeName`,它是狀態的消費者不是產生者,而且從沒進過 node 的門**。抽:換第三個情境〔e.g. Pod 卡 ContainerCreating〕看還會不會答 scheduler)| active
+- mistake:產生者vs消費者(排障找誰) | mistake | 3 | 2026-08-13(s27 新卡,**教練直給未抽考**。`NotReady` 兩種產生者:`Ready=False`=kubelet 活著自己回報〔message 寫死因〕、`Ready=Unknown`=kubelet 失聯 40 秒 controller-manager 代筆,**看 `reason` 欄分辨**。抽:兩種怎麼分 + 為什麼不該問消費者)| active
+- mistake:對照組判準(同層有好有壞) | mistake | 3 | 2026-08-13(s27 新卡,**教練直給未抽考**。同一宿主機三台 node、worker2 Ready 另兩台 NotReady → 整個宿主機層一次排除。通用句:**同一層裡有的好有的壞,那一層以下全部無罪**。抽:換一個非 k8s 情境〔e.g. 三個 ECS task 一個正常〕看會不會用)| active
+- mistake:active≠還在幹活(健康檢查三層) | mistake | 3 | 2026-08-13(s27 新卡,**教練直給未抽考**。`systemctl is-active containerd kubelet` 兩個都 active,node 仍說 `container runtime is down`;kubelet log `StopPodSandbox ... DeadlineExceeded`,containerd 八小時零 log。三層:進程存在 / 有在聽 / **真的回得了話**。封印句:**塞住的服務跟死掉的服務,`systemctl` 分不出來**。抽:接到「liveness probe 只檢查 PID 會漏掉什麼」)| active
+- mistake:DeadlineExceeded語義 | mistake | 3 | 2026-08-13(s27 新卡,**教練直給未抽考**。`DeadlineExceeded` = 對方還在但不理你;connection refused = 對方不在。**兩種病相反、查法相反**,回扣 CA session 已有的 refused-vs-timeout 卡〔跨 coach 同形狀,見 workspaces/ca〕。抽:兩個症狀各該先查哪一邊)| active
 - mistake:PID1-signal保護 | mistake | 3 | 2026-08-09(s26 意外實證,`kill 1` 殺不死 container。**全程教練驅動未經抽考**。抽:Pod 刪除為什麼等 30 秒 + 同 namespace 內 `kill -9 1` 殺不殺得掉)| active
 - mistake:Pod不會重啟只會被丟掉重建 | mistake | 3 | 2026-08-09(s26 F 段盲點,答「pod 會重啟 or 調節 編排」。抽:數出至少三種不需人動手 Pod 就消失的情境)| active
 - mistake:持久性看掛在哪不看名字(tmpfs)| mistake | 3 | 2026-08-09(s26 `/proc/mounts` 意外:emptyDir 在 xfs、PVC 在 tmpfs。兩個分身判準第四次換皮)| active
@@ -450,7 +487,7 @@ Weak-topic flags(**2026-08-03 首次啟用**,P2a 帶 flag 前進、gate 未考,�
 - mistake:veth-誤記跨node連線 | mistake | 7 | 2026-08-10(**s23 冷測過**:數字全對+tunl0 誘答咬住,推 7;但同日盲測站 2/6 仍蒸發,08-10 抽「旅程內出場」版)| active
 - mistake:iptables-一棟樓 | mistake | 3 | 2026-08-06(**s23 半過**:換皮誘答咬住=吞餌史終結;但「nat 管路由」新錯法,重教後收。抽三表分工一句版+targetPort 5678 應用)| active
 - mistake:kube-proxy-不在-Pod-啟動路徑 | mistake | 3 | 2026-08-07(**s24 首次重抽未過**,答「CoreDNS 嗎」= 寫進 resolv.conf ≠ 打過它)| active
-- mistake:只給結論不給判準(pattern)| mistake | 3 | 2026-08-09(**s26 明顯正向**:預測題全部作答、三句無鷹架機制句;但新形狀「同義反覆」與 F 段獨白純結論。08-09 續盯,新盯點=有沒有同義反覆)| active
+- mistake:只給結論不給判準(pattern)| mistake | 3 | 2026-08-13(⚠️ **s27 倒退**:why-first 預測**連跳 3 次**〔`free -h`、`ip route` A/B/C〕,全部未答即按 Enter,s26 的正向沒延續。註:s27 教練也沒執行 s24 訂的硬規格〔不給預測就不給下一發指令〕,是雙方各一半。08-13 續盯)| active
 - mistake:NetworkPolicy-靜默無效 | mistake | 3 | 2026-07-31(過期,s23 未抽;**s22 F 段質變**:追問下自組完整鏈含「安全假象」自己的話;一段話冷測版過才 resolved,s24/WR9 抽)| active
 - mistake:CNI-合約三件事 | mistake | 3 | 2026-07-23(s19 新卡:網卡/IP/路由 + 各自缺席的死法;hostNetwork 判準已自推不用重考)| active
 - mistake:兩張獨立名單 | mistake | 3 | 2026-08-06(**s23 重抽未過**,三層提示未自產、直教兩道門模型;s24 動手版〔Step 5 自寫兩條 policy + 矩陣〕+ 08-06 口頭版)| active

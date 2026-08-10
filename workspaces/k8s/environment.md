@@ -61,7 +61,32 @@ context kind → cluster kind-k8s-coach-p0(s21 已刪,條目不存在)
 
 診斷指令注意:`docker ps --filter name=kind` **抓不到 p2a**(容器叫 `k8s-coach-p2a-*`,名字裡沒有 kind)。要用 `kind get clusters` 或不帶 filter 的 `docker ps -a`。
 
-## bastion 叢集現況(2026-08-06,s26 開場,**三台全 Ready**)
+## bastion 叢集現況(2026-08-10,s27,**第五次故障;下課時仍未修好**)
+
+- `kubectl get nodes`:**control-plane / worker `NotReady`,worker2 `Ready`**(24d,v1.32.2)。
+- **根因已完整採證(s27,五次以來第一次證據齊全)**:
+
+```
+Ready  False  KubeletNotReady  container runtime is down     ← kubelet 活著、自己回報
+MemoryPressure / DiskPressure / PIDPressure  全 False        ← kubelet 已排除三個嫌犯
+NetworkUnavailable  False  CalicoIsUp                        ← CNI 沒事
+
+宿主機:available 11Gi / 15Gi,load 0.54(4 核心),三個 node 容器全 Up 8 hours  ← 宿主機無罪
+worker2 Ready 而另兩台 NotReady(同一台宿主機)                                 ← 對照組再確認一次
+
+docker exec <node> systemctl is-active containerd kubelet   → 兩個都 active   ← 進程沒死
+docker exec <node> journalctl -u kubelet | grep DeadlineExceeded
+  → "StopPodSandbox from runtime service failed: rpc error: code = DeadlineExceeded"
+  → "Skipping pod synchronization err=container runtime is down"  每 5 秒一次、連噴 8 小時
+containerd 最後一行 log 停在 09:10(查看時 17:10)= 八小時全靜音
+```
+
+- **真兇 = containerd 的 CRI gRPC 卡住不回話(不是死掉)**,與 s21 同款。`Terminating` 卡住的 Pod(`cg-demo` / `vol-demo` / 三個舊殘骸)是同一個病的症狀,不是另一個問題。
+- **`docker restart k8s-coach-p2a-worker k8s-coach-p2a-control-plane` 下完後仍 NotReady**(下課時)。
+- ⚠️ **s28 建議直接重建,不要再修**:叢集已 24 天、containerd 第五次卡死(s21/s24/s25/s26/s27)。`kind delete cluster --name k8s-coach-p2a` → 用 `clusters/kind-p2a.yaml` 重建 → 重裝 Calico。每堂開場修 20 分鐘的成本已超過重建。
+- 診斷順序(可直接重用):**node conditions → 宿主機資源 → 對照組〔壞幾台好幾台〕→ `systemctl is-active` → kubelet log 抓 `DeadlineExceeded`**。
+
+## bastion 叢集現況(2026-08-06,s26 開場,**三台全 Ready**,已被上面取代)
 
 - `kubectl get nodes` 三台 `Ready`(control-plane / worker / worker2,19d,v1.32.2)。
 - **恢復原因 = 宿主機今早重開機**(`up 1:49`,所有容器 `Up 2 hours`),不是誰修好的。
