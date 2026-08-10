@@ -160,7 +160,7 @@ Senior 面試常考「你會怎麼把一個現有服務搬進 k8s」,而且導�
 - CKA:2026-07-09 已升級為正式里程碑,見 §4.8(不再是 P6 副線)。CKAD 不考,不排。
 - 三分類牌(M2)首發:建議下堂(s15)A 段就上,拿 conntrack 07-09 到期重抽當開刀題。
 
-## §9.1 目標確認與重排(2026-07-23,s21;取代下方 §9 的待命狀態)
+## §9.1 目標確認與重排(2026-07-23,s21;**2026-08-11 已作廢,見 §10**)
 
 學員 2026-07-23 確認:準備的是 **AWS Delivery Consultant (ProServe)**,並要求加速課程。§9 的 conditional overlay 全部生效,另加以下決策。
 
@@ -204,3 +204,26 @@ Senior 面試常考「你會怎麼把一個現有服務搬進 k8s」,而且導�
 - **M4 story mining 頻率加倍**:consultant loop 的 behavioral 佔比 ~50%,Weekly Review 的
   10 分鐘挖礦改為每場都跑;raw 一行入帳即可,STAR 提煉不在本 repo 做。
 - LC 維持一天一題;session 佔比調度由學員自行控制,本檔不管跨 coach 排程。
+
+## §10 主線回歸與重排(2026-08-11,學員拍板;取代 §9/§9.1)
+
+背景:AWS ProServe 拒信(2026-08-11),§9/§9.1 的目標與時間軸全部作廢。目標回到**泛用大廠 senior DevOps/SRE**(Google/AWS 型 loop),無面試日期,投遞窗口依 career plan(~2027)。學習模式改 **coverage-first**:快速走完一輪,第二輪才加深;複習成本固定為每堂開場 10 分鐘 quick-fire(2-3 張卡),不清場、不凍結。
+
+### 10.1 Phase 順序重排(取代 §4.2 與 §9.1 週表)
+
+1. **P2b 核心**:C-4 RBAC → C-5 IRSA → C-6 Secrets/PSS。C-2 CSI 概念層、C-3 StatefulSet 簡講即可。P2a 殘項(NetworkPolicy Step 5-6)併入 RBAC 場當熱身,不獨立排課。
+2. **P4 提前到 P3 之前**:SLI/SLO/error budget/alerting philosophy 是 SRE 面試的身分證科目,不能再排最後。
+3. **P3 修剪版**:scheduler/HPA/PDB/capacity 以面試題深度走;排障 drill 在此吸收七站能力(見 10.2)。
+4. **P5 砍半**:Helm + ArgoCD 最小閉環 + EKS terraform,其餘(etcd 運維深入、admission webhook、progressive delivery)降口頭教材。
+5. P6 照舊,mock 全英文。
+
+### 10.2 七站封包改制(學員 2026-08-11 拍板,教練同意並記理由)
+
+背誦式盲講/默數/答案卷**全面退役**,不再出現在 step A、gate、WR。理由:面試考的是「流量進不到 Pod,查給我看」的 debugging 情境,不是默背站名;背誦卡是 session 開場反感的主因,痛感是課程形式造成的,不是能力問題。能力本體保留,驗收形式一律改**情境排障題**(P3 排障 drill 與 P6 mock)。P2a gate 的答案卷同步改為情境題形式。
+
+### 10.3 其他
+
+- **s27 開場一次性倒帳**:過期 spaced-rep 卡(現 30 張)砍到 ≤10,只留 weak-topic 相關,其餘封存;之後每堂只付 10 分鐘 quick-fire。
+- **story mining(M4)停止**:story bank 由學員在 Obsidian 自管(`01-Work/面試/AWS ProServe`),本 repo 不再排程、不再每堂提醒。
+- **Linux/networking 補位**:cloud-architect-coach 的 30 題題庫(Linux + networking + crypto/KMS)納入 step A 抽考池素材,覆蓋 Google 型 Linux round;ca coach 本身停用。
+- CKA:維持放棄,2027 投遞前重估。
