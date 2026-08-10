@@ -238,3 +238,12 @@ Senior 面試常考「你會怎麼把一個現有服務搬進 k8s」,而且導�
   封包層深度已付清,不再加深。
 - **cost 收尾問**:每個 chunk 的 G 段固定加一問:「這東西在 AWS 上一個月多少錢、帳單要砍
   30% 你動哪裡、怎麼證明沒砍到可靠性」。學員付過真帳單(billing 平台),這是主場優勢,每堂練。
+
+### 10.5 卡片級補強(2026-08-11 三輪拍板;全部卡片/情境題級,不開新課)
+
+- **Incident management**:P3 與 P6 各掛一場「你是 incident commander」情境題
+  (severity 判級、指揮與溝通、何時 escalate、事後檢討怎麼開);公司真 incident 機會式吸收。
+- **Security posture**:supply chain(image signing、SBOM、admission policy)與 org 級
+  IAM 設計進 step A 抽考池(卡片級),P6 前一場情境題總驗。
+- **Data layer 運維**:RDS 備援/backup-restore/資料搬遷,卡片級;深水區不開,設計面歸 sd 的
+  migration 題。
