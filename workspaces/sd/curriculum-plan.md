@@ -9,7 +9,8 @@
 ## North Star 對齊
 
 ~~無明確面試日期 → 深度優先,全課表照走,預估 2026 年 12 月初完課~~
-**(2026-07-18 改向:目標鎖定 AWS 職缺面試,深度優先讓位給面試就緒。見 Sprint re-plan。)**
+~~(2026-07-18 改向:目標鎖定 AWS 職缺面試,深度優先讓位給面試就緒。見 Sprint re-plan。)~~
+**(2026-08-11 再改向:ProServe 拒信,目標回泛用大廠 senior DevOps/SRE,SD 面試型態按 SRE/infra loop〔NALSD 導向〕調整。見 Re-plan 2026-08-11。)**
 Readiness 領先 curriculum position 的原則不變(見 scorecard-dims 的 Readiness Report 規則)。
 
 ## Learning Mode(S23 拍板,仍生效)
@@ -84,6 +85,33 @@ mock),學生決策完全拿掉,照辦。庫檔保留作自修素材。拿到具�
 
 **Repo 外提醒:** 尚未投遞 → 照 career plan,履歷+內推投遞先於學習衝刺;behavioral/LP
 故事庫與口說(fsi-devops-english)是這個 loop 的另一半,不在本 repo 排程。
+
+## Re-plan 2026-08-11(主線回歸,學員拍板,生效中)
+
+背景:AWS ProServe 拒信(2026-08-11),Sprint re-plan(07-18)的目標背景失效;無面試日期,
+投遞窗口依 career plan(~2027)。目標回泛用大廠 senior DevOps/SRE。學習模式 coverage-first:
+快速走完一輪,第二輪才加深。SRE/infra loop 的 SD 是 NALSD 型(capacity math 貫穿、failure
+domain、成長推演),不是 SWE feature design,以下依此換血。
+
+**隊列換血:**
+- Chat(35-37)→ Distributed Cache(38-39)→ News Feed(40-42)照走。
+- **Payment(43-45)降級**為 pattern-map 驗證(ledger/exactly-once pattern 能拆講即可,不排課)。
+  理由:八題裡最 SWE 味的一題,對 SRE loop 邊際回報最低。
+- **Metrics/Logging(Day 46-47)升回主隊列**,排在 News Feed 後。理由:全課表最貼 SRE 的題,
+  07-18 隨 Tier 2 整批被砍是按標籤不按職位相關性的誤砍。
+- 新增一場「**deploy system / 發布系統設計**」mock(pattern 組裝,不新增教學 Day):
+  rollout 策略、健康判定、自動 rollback、fleet 規模的 capacity。
+
+**Capacity math 升為主軸:** 每題 mock 必含 capacity 段,rate-model skeleton(需求率 → 單元
+容量 → 台數 → 安全係數)練到 unprompted。capacity 弱項正是 NALSD 的核心考點,不再當配菜。
+
+**Mock 規則:** 單場限時打完,結束必評分;打不完記 fail(fail 也是資料)。Day 33 式的
+四場一題不再發生。
+
+**複習制:** 每場開場 10 分鐘 quick-fire(s48 提案正式生效,2-3 張卡);S49 開場一次性倒帳:
+14 張過期卡砍到 ≤10(只留弱項相關,其餘封存),WR5 Topic 3 當場收掉或記棄權,WR 計數歸位。
+
+**保留/降級:** AWS 服務映射保留(便宜,對任何 AWS 系 loop 通用);產業情境外皮降為 optional。
 
 ## Re-plan triggers
 
