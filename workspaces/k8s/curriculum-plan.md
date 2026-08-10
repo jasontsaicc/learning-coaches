@@ -227,3 +227,11 @@ Senior 面試常考「你會怎麼把一個現有服務搬進 k8s」,而且導�
 - **story mining(M4)停止**:story bank 由學員在 Obsidian 自管(`01-Work/面試/AWS ProServe`),本 repo 不再排程、不再每堂提醒。
 - **Linux/networking 補位**:cloud-architect-coach 的 30 題題庫(Linux + networking + crypto/KMS)納入 step A 抽考池素材,覆蓋 Google 型 Linux round;ca coach 本身停用。
 - CKA:維持放棄,2027 投遞前重估。
+
+### 10.4 L6 補強(2026-08-11 二輪拍板)
+
+- **選修池翻轉(§4.7 作廢)**:multi-tenancy、multi-cluster/DR、cost/FinOps、upgrade-at-scale
+  升主線,P6 前各排一場情境題(口頭,不做 lab)。這四題是 L6 loop 的差異化科目,不是選配。
+  封包層深度已付清,不再加深。
+- **cost 收尾問**:每個 chunk 的 G 段固定加一問:「這東西在 AWS 上一個月多少錢、帳單要砍
+  30% 你動哪裡、怎麼證明沒砍到可靠性」。學員付過真帳單(billing 平台),這是主場優勢,每堂練。

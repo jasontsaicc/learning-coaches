@@ -113,6 +113,15 @@ domain、成長推演),不是 SWE feature design,以下依此換血。
 
 **保留/降級:** AWS 服務映射保留(便宜,對任何 AWS 系 loop 通用);產業情境外皮降為 optional。
 
+**L6 補強(2026-08-11 二輪拍板):**
+- **Design-critique 模式**:每三場 mock 改一場「拆設計」— 教練給一份埋雷的設計
+  (單點故障、假的 exactly-once、無 backpressure、cost 黑洞之類),學員限時找雷 + 提便宜修法。
+  L6 的日常是 review 別人的設計,不是白板從零畫;部分 L6 loop 直接考這個。
+- **Brownfield migration(Day 62-63)提前**,排在 Metrics/Logging 之後、P4 mock 之前。
+  真實 senior 工作九成是 brownfield,不留到壓軸。
+- **cost 收尾問**:每題 mock 收尾固定一問:「這架構一個月燒多少錢、砍 30% 動哪裡、
+  怎麼證明沒砍到可靠性」。與 3AM page test 並列為固定收尾雙問。
+
 ## Re-plan triggers
 
 - 拿到具體面試日期 → 再壓縮:清帳收斂成 1 場,主衝刺只挑 2-3 題最可能考的,直接 mock 連發。
