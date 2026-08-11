@@ -23,6 +23,10 @@
 - ⚠️ **新行為 pattern:沉默跳題**。「決定這則進哪條 queue 的動作在哪個框」連問三次全部略過,最後由 coach 給(router/dispatcher)。這比棄權難抓,因為沒有拒絕訊號。已入 registry,治法=下場第一顆重投並當場點名。
 - 「alert **嗎**?」問句丟球再現(s38 家族,interval 重置)。
 - **Chat System(Day 35)開場**:FSI 銀行網銀一對一即時客服(現況 2 秒 polling,資安長要求全對話留存可稽核)。學生問「應該先教學還是直接開始」= 正當流程提問,一次講清 problem-anchored(clarify 不需新知識先跑,撞到 polling 撐不住那格再 JIT 教 WebSocket/SSE/long polling)。接著「要問啥」→ 給四抽屜 thinking scaffold(邊界/規模/快與穩/綁手綁腳)→ **學生喊「頭腦有點痛」,coach 直接代為收工存檔,不丟選擇題**(比照 k8s s27 疲勞處置)。Step 1 clarify 零產出。
+- **加時:學生說「今天好像根本沒教什麼」,coach 認一半責任**(反面代價那球壓三輪最後還是自己給答案,該兩輪就收)→ 補教 Chat System chunk 1 並過 gate:HTTP 物理限制、2 秒 polling 的帳(5 萬 req/s、99.9% 空包彈)、三條路(long polling/SSE 是 HTTP 用法,WebSocket 是換協定)、DevOps 五坑(ALB idle timeout / **autoscaling 改用 ActiveConnectionCount** / 部署踢連線 / 單機 fd 上限 / API Gateway 按連線分鐘計價)。Recall unprompted 過;Transfer(銀行 A 聊天 vs B 交易通知)選型第一次就對但理由**循環論證**,縮到「幾向」才轉出,最小單位過。判準句焊入:**方向決定 protocol**。
+- ⚠️ 兩筆新 registry:**循環論證**(給假的 why,比裸結論更難察覺)、**SSE 講成推播**(術語滑動)。
+- 🌟 本場最佳過程訊號:chunk 1 教完後學生主動連問四個結構性問題(這三個是什麼層級 / HTTP 只有這三個嗎 / 是在 ALB 還 API Gateway 設 / 這算 API 拉取嗎),全部問在點上。**problem-anchored + 先教學後 drill 的組合對他有效,S50 續用。**
+- 學生本場中途拍板:新 Day 一律先教學後 drill(已回寫 curriculum-plan),clarify 移到收尾。
 - **卡堆倒帳第三次順延**(S45 → S48 → S49「趕快開始課程 前面花太多時間」)。S50 改由 coach 單方執行,只有 WR5 Topic 3 收/棄需要學生一句話。
 
 ## S48(2026-08-07,mock #1 Day 33 Notification System — Step 3 球 1:priority vs separate pools)

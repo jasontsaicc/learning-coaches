@@ -61,12 +61,17 @@
   - ❌ **反面代價(separate pools 自付成本):三輪全程 max scaffold 仍不合格。** 首答「維運的費用 + 需要良好的分流」(前者是 s40 cost 格老毛病、後者是前提不是代價),二答「3 倍的維運能量」= 同句換皮,縮到「單一 pool 上面掛哪三個名詞」的填空才產出 alert/scaling policy/dashboard。**idle 成本那條軸三輪完全沒碰到**,由 coach 給。形狀已焊:bulkhead 自付代價 = 管理面 ×N + idle 資源。
 - **三指標本場:** argument 🟡(120 台裸結論被打回後自補完整論證,無需追問誘導)/ **capacity ✅ 本場兩球皆 unprompted,no-freeze-capacity 首次乾淨達標,連續計數 1**(argument/ops 維持 0;ops 未測)。
 - 行為:「alert **嗎**?」問句丟球再現(s38 家族);「要問啥」= 要提示家族在 clarify 開場再現(給 thinking scaffold 四抽屜後仍未產出即中斷)。學生中途問「教學模式應該先教學還是直接開始」= 正當流程提問非逃避,已一次講清 problem-anchored 並回丟球。
+- **S49 加時(學生喊頭痛後自己續攤,coach 未再加壓):Chat System Day 35 chunk 1 教完並過 gate。** 內容:HTTP 的物理限制(server 不能主動開口)、2 秒 polling 的帳(10 萬人在線 = 5 萬 req/s、99.9% 空包彈、延遲仍 2 秒)、三條路對照(long polling / SSE 是 HTTP 用法,WebSocket 是換協定)、DevOps 五坑(ALB idle timeout 60s / **autoscaling 指標要換成 ActiveConnectionCount** / 部署踢連線要 dereg delay + client backoff jitter / 單機 fd 上限 / API Gateway WebSocket 按連線分鐘計價)。
+  - **Recall ✅ unprompted**:學生自己回述「聊天要雙方收到對方訊息,但 server 不能發訊息」,coach 只把「不能發」修精準成「不能主動開口」。
+  - **Transfer 🟡 最小單位過**:銀行 App 兩需求(A 客服聊天 / B 交易通知),選型 A=WebSocket / B=SSE **第一次就選對**,但 ①第一句裸結論無 why ②打回後理由循環論證(「WebSocket 適合即時傳輸」=因為它適合)③縮到「幾向?」二選一才轉出「A 雙向 B 單向」。判準句已焊:**方向決定 protocol**。RD 反駁三條(連線不存在 / 連線池成本 / 耦合)由 coach 給。
+  - ⚠️ **術語滑動新一筆**:SSE 講成「推播」。已當場拆開(SSE/WebSocket = App 開著時的 in-app 通道;推播 = APNs/FCM,App 關著也收,走廠商通道)。
+  - 學生本段主動問出四個高品質問題(這三個算什麼層級 / HTTP 只有這三個嗎 / 是在 ALB 還 API Gateway 設定 / 這算 API 拉取嗎),**驗證 problem-anchored 有效**:帶著問題聽的產出遠高於單向講授。
 - **卡堆倒帳第三次順延**(S45 押後 → S48 提案 → S49 學生喊「趕快開始課程 前面花太多時間」)。14 張過期卡與 WR5 Topic 3 全數未動,`last_weekly_review` 仍 33。**S50 開場先做,不再徵詢**(倒帳是 coach 行政作業,砍卡不需要學生投票;只有 WR5 Topic 3 收/棄要他一句話)。
 
 下一場(S50)resume:
 1. **開場 5 分鐘 coach 單方倒帳**:14 張過期卡砍到 ≤10(只留弱項相關,其餘封存),WR5 Topic 3 當場收掉或記棄權,`last_weekly_review` 歸位。不問學生要不要做,只報結果。
 2. **Chat System(Day 35)= 先教學後 drill**(2026-08-11 S49 收工後學生拍板,推翻本場的 mock-first 開法;coach 同意:Day 35 是真新內容,08-11 Re-plan 的 coverage-first 前提下先教再打順序正確)。落地:
-   - 走 engine 正規 step B→C→E,chunk map 先列。核心 chunk:long-lived connection 三選一(WebSocket vs SSE vs long polling)、1v1 message flow(send → store → deliver)、message ordering、offline delivery、Observability mini chunk。
+   - 走 engine 正規 step B→C→E,chunk map 先列。**chunk 1(transport 三選一)S49 已教完並過 gate,不重教**,S50 從 chunk 2 起:**連線有狀態黏在某一台**(咬到 LB / 重連落點 / presence)、1v1 message flow(send → store → deliver)、message ordering、offline delivery、Observability mini chunk。
    - **clarify 不取消,移到收尾 drill**:教完學生要自己把 FSI 題從 Step 1 走一遍(題目已出:銀行網銀 App 一對一即時客服,現況前端每 2 秒 polling,資安長要求全對話留存可稽核;四抽屜 scaffold 已給=邊界/規模/快與穩/綁手綁腳,S50 不再重給)。
    - 收尾雙問照跑(3AM page test + cost 一問)+ AWS 映射(API Gateway WebSocket / ALB sticky / ElastiCache presence / DynamoDB 訊息表,每格附坑)。
 3. 冷測債:**separate anything 的反面代價**(管理面 ×N + idle)換場景複測;**router/dispatcher 那個框**在 Chat System 的對應位置直接抽考(S49 跳過三次)。
@@ -165,6 +170,8 @@ Weak-topic flags: 無(至今沒有帶 flag 過 gate 的紀錄)。
 
 - (s49) | Interview habit(trade-off 反面) | 「separate pools 的自付代價」三輪答不出可用答案:①「維運的費用」(s40 cost 格老毛病:抽象名詞不是代價)②「需要良好的分流」(那是前提)③「3 倍的維運能量」(同句換皮);縮到「單一 pool 上面掛哪三個名詞」填空才產出 alert/scaling policy/dashboard。**idle 成本整條軸三輪零觸及** | 頭號主線的反面代價格;**焊入的形狀:任何 separate/isolate 決策的自付代價一律兩條 = 管理面 ×N + idle 資源**。複測形式:換場景(shard/cell/region 隔離)問代價,要求兩條各一句,不給 scaffold | unresolved | 3 | 2026-08-14 | 0
 - (s49) | Capacity(安全係數機制) | 「為什麼不敢開 60 台跑 100%」第一句只給數字(120)不給 why;打回後自產 `2.5×0.2=50% utilization`(強),但機制要 coach 給方向才補出 jitter/burst/retry,最後一塊由 coach 給 | 缺的不是數字是**排隊機制**:100% 使用率下 burst 留下的 backlog 追平速度為 0 → 單調上升回不來;50% 的意義是「burst 過後有一倍產能吃 backlog」。複測:任何 capacity 題追問「你算出來的台數敢不敢直接上線」 | unresolved | 3 | 2026-08-14 | 0
+- (s49) | Interview habit(循環論證) | 「A 用 WebSocket 因為 WebSocket 適合即時傳輸訊息」= 用結論當理由,等於「因為它適合」。第一句先裸結論、打回後給循環論證,縮到「幾向?」二選一才產出真理由 | 頭號主線的新變體:**不是不給 why,是給了一個假的 why**,比裸結論更難自我察覺。判準:理由裡如果出現待證명詞本身(「因為 X 適合 X 的場景」)就是循環。複測:任何選型題追問「你這個理由換成另一個工具還成不成立?成立就不是理由」 | unresolved | 3 | 2026-08-14 | 0
+- (s49) | 分散式術語(SSE vs 推播) | SSE 講成「推播」 | 術語-概念未綁定家族(5a 語音/標籤滑動):**SSE/WebSocket = App 開著的 in-app 通道;push notification = APNs/FCM,App 關著也收,走廠商通道**,兩者常併用(開著走 SSE、關了發推播)。換場景複測 | unresolved | 3 | 2026-08-14 | 0
 - (s49) | Interview habit(跳題) | 「決定這則進哪條 queue 的動作在哪個框」連問三次全部略過不答,最後由 coach 給(router/dispatcher) | 新面具:不是棄權也不是質疑題目,是**沉默跳過**,比棄權更難抓(沒有拒絕訊號);治法=跳過的球下場開頭第一顆重投,並當場點名「你剛剛跳過這題」 | unresolved | 3 | 2026-08-14 | 0
 - (s48) | Interview habit(棄權) | 「你直接說明 不要卡太久」出現在 `130÷36` 這一步(家族第 6 筆:S36→S42→S44→S46→S48) | 逃避家族;本次拒給+舉證(S46 200萬÷1000 同款前科)+縮到單步後仍卡 → 判定**部分成因是 modeling 缺口而非純逃避**(見上方 s48 capacity-modeling 條);後續要分辨「不敢算」與「不會建模」,前者加壓、後者給模型 | unresolved | 3 | 每場 drill 即測 | 0
 
