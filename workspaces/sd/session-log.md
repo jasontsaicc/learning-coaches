@@ -13,6 +13,18 @@
      - docs/curriculum-roadmap.md、docs/planning-review.md → workspaces/sd/archive/pre-migration/
      - sd-coach skill 本體         → skills/sd-coach/(curriculum 詳文=references/curriculum-detail.md) -->
 
+## S49(2026-08-11,Day 33 留存冷測兩球 + Chat System 開場即中斷)
+
+- **場前**:curriculum-plan 當日寫入 [Re-plan 2026-08-11](ProServe 拒信 → 目標回泛用大廠 senior DevOps/SRE,NALSD 導向,capacity math 升主軸,mock 單場限時制,每場開場 quick-fire)。本場照它跑。間隔 4 天,無 Comeback Protocol。
+- **冷測球 1(第 2 層圖 + 兩層隔離機制)✅ 零輪過**:冷起手 unprompted 自產「queue 不分會被 marketing 塞爆 → fraud 達不到 SLA;worker 不分,就算設 priority 還是要等人下來」。S46 卡三輪 → S47 卡三輪 → S48 一輪 → **S49 零輪**,ordering vs capacity 這條鏈確認焊死。圖學生自稱畫完未貼出,未驗證。
+- **capacity 冷測 ✅✅ 本場最大收穫**:`300萬÷1000=3000s` 自算,**並自己接完 S47 缺的兩步**(換算人類單位 + 對撞 P99 60s = 50 倍);Little's Law `300×0.2=60` unprompted 且自補「這是最少」。coach 當場把它與 S48 卡死的 `130÷36` 對焊成同一條式子(**一台每 W 秒放手一次 = 1/W 台/秒**),modeling 缺口正面打過。no-freeze-capacity 首次乾淨達標。
+- 🟡 **headroom**:「我會開 120 台」第一句裸結論 → 打回 → 自產 `2.5×0.2=0.5=50% utilization`(把 headroom 翻成可驗證數字,senior 級);但「為什麼 50% 優於 100%」要 coach 給方向才補出 jitter/burst/retry,**最後一塊(100% 使用率下 backlog 追平速度為 0、單調上升)由 coach 給**。英文 one-liner 給畢。
+- ❌ **反面代價三輪不合格**:「維運的費用」→「需要良好的分流」(前提非代價)→「3 倍的維運能量」(換皮),縮到填空才產出 alert/scaling policy/dashboard,**idle 那條軸零觸及**。焊入形狀:**任何 separate/isolate 的自付代價 = 管理面 ×N + idle 資源**。
+- ⚠️ **新行為 pattern:沉默跳題**。「決定這則進哪條 queue 的動作在哪個框」連問三次全部略過,最後由 coach 給(router/dispatcher)。這比棄權難抓,因為沒有拒絕訊號。已入 registry,治法=下場第一顆重投並當場點名。
+- 「alert **嗎**?」問句丟球再現(s38 家族,interval 重置)。
+- **Chat System(Day 35)開場**:FSI 銀行網銀一對一即時客服(現況 2 秒 polling,資安長要求全對話留存可稽核)。學生問「應該先教學還是直接開始」= 正當流程提問,一次講清 problem-anchored(clarify 不需新知識先跑,撞到 polling 撐不住那格再 JIT 教 WebSocket/SSE/long polling)。接著「要問啥」→ 給四抽屜 thinking scaffold(邊界/規模/快與穩/綁手綁腳)→ **學生喊「頭腦有點痛」,coach 直接代為收工存檔,不丟選擇題**(比照 k8s s27 疲勞處置)。Step 1 clarify 零產出。
+- **卡堆倒帳第三次順延**(S45 → S48 → S49「趕快開始課程 前面花太多時間」)。S50 改由 coach 單方執行,只有 WR5 Topic 3 收/棄需要學生一句話。
+
 ## S48(2026-08-07,mock #1 Day 33 Notification System — Step 3 球 1:priority vs separate pools)
 
 - **開場冷回憶 + 球 1 同題續打**(S47 已出未答):Max 提案「一條 queue + priority tag + shared pool,省三倍維運」vs 三條 queue 三組 pool。學生開局「很卡 不知道怎麼說」(卡住,非棄權)→ 縮到單球(fraud 排第一要等多久)+ **銀行櫃員畫面** → 自產「等有櫃員空出來」。**S47 同一條鏈繞三圈才轉向,S48 一輪過 = ordering vs capacity 新場景複測 pass。**

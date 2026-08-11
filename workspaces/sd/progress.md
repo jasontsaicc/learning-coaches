@@ -11,9 +11,9 @@
 
 ## Meta
 
-- session_count: 48
+- session_count: 49
 - last_weekly_review: 33 — ⚠️ WR5 於 S41 開跑未完成(Topic 2/3 已收,Topic 3 未答),trigger 持續成立;學生拍板押後至 Tier 1 mock #1 收工後才收 Topic 3 + sweep + audit;完成時才把本欄更新為當時 session_count
-- last_session_date: 2026-08-07
+- last_session_date: 2026-08-11
 - warm_up_classification: (standalone 時期未記錄;學員已 P3,Step 0 模式預設 Exploration)
 
 ## Current Session breakpoint
@@ -49,10 +49,24 @@
 
 **清帳債排程(coach 提案,S49 開場確認):** 學生 07-19 押後的 WR5 Topic 3(Unique ID)+ 8 張過期卡,到期條件(Tier 1 mock #1 跑完)已達成。提案不單開清帳場(S45 已證明學生不耐),壓縮成**每場 mock 開頭 10 分鐘 quick-fire,一場 2-3 張,四場清完**,與 Chat System 並行。學生本場未表態(直接收工),S49 開場問一次。
 
-下一場(S49)resume:
-1. **Day 33 冷測兩球(不准看筆記)**:白板默畫第 2 層圖 + 用 Little's Law 自算 worker 數。這是驗「模範答案給完之後留下什麼」,S46 那次 6 天掉光的前科在
-2. Quick-fire 2 張過期卡(先確認上方排程提案)
-3. **開 Chat System(Day 35)**:產業情境開場 → 4-step → AWS 映射收尾;新東西是長連線(WebSocket vs SSE vs long polling)、presence、離線投遞
+~~下一場(S49)resume~~(已於 S49 執行,見下)。
+
+**S49 中斷存檔(2026-08-11,間隔 4 天;學生喊「頭腦有點痛」= 疲勞訊號,coach 直接代為收工,不丟選擇題,比照 k8s s27 處置)。Day 33 冷測兩球跑完並結算;Chat System(Day 35)開場即中斷,Step 1 clarify 未產出。**
+
+- **冷測結果(Day 33 留存,模範答案給完 4 天後):骨架與數字留住,trade-off 反面沒留住。**
+  - ✅ 球 1 第 2 層圖 + 兩層機制:冷起手 unprompted 自產「queue 不分會被 marketing 塞爆 → fraud 達不到 SLA;worker 不分,就算設 priority 還是要等人下來」。S46/S47 卡三輪的 ordering vs capacity,S48 一輪過,S49 零輪過 = **真的焊住了**。(圖學生自稱畫完但未貼出,未驗證;coach 改以「router/dispatcher 那個框」問句側驗,學生**連續三次跳過不答**,答案由 coach 給。)
+  - ✅ capacity 冷測 1:`300 萬 ÷ 1000 = 3000s`,並**自己完成 S47 缺的兩步**(換算人類單位 + 對撞 P99 60s = 50 倍)。
+  - ✅ capacity 冷測 2(Little's Law):`300 × 0.2 = 60` unprompted,且自補「這是最少」。coach 當場把它跟 S48 卡死的 `130÷36` 焊成同一條式子(一台每 W 秒放手一次 = 1/W 的 rate),**modeling 缺口本場正面打過**。
+  - 🟡 headroom 論證:第一句只給數字「我會開 120 台」= 裸結論,被打回;第二次一口氣給出 `2.5×0.2=0.5=50% utilization`(把 headroom 翻成可驗證數字,senior 級講法),但「為什麼 50% 優於 100%」的機制要 coach 給方向才補出 jitter/burst/retry;最後一塊(**100% 使用率下 backlog 單調上升、追平速度為 0**)由 coach 給畢。英文 one-liner 已給(Little's Law gives me the floor, not the answer…)。
+  - ❌ **反面代價(separate pools 自付成本):三輪全程 max scaffold 仍不合格。** 首答「維運的費用 + 需要良好的分流」(前者是 s40 cost 格老毛病、後者是前提不是代價),二答「3 倍的維運能量」= 同句換皮,縮到「單一 pool 上面掛哪三個名詞」的填空才產出 alert/scaling policy/dashboard。**idle 成本那條軸三輪完全沒碰到**,由 coach 給。形狀已焊:bulkhead 自付代價 = 管理面 ×N + idle 資源。
+- **三指標本場:** argument 🟡(120 台裸結論被打回後自補完整論證,無需追問誘導)/ **capacity ✅ 本場兩球皆 unprompted,no-freeze-capacity 首次乾淨達標,連續計數 1**(argument/ops 維持 0;ops 未測)。
+- 行為:「alert **嗎**?」問句丟球再現(s38 家族);「要問啥」= 要提示家族在 clarify 開場再現(給 thinking scaffold 四抽屜後仍未產出即中斷)。學生中途問「教學模式應該先教學還是直接開始」= 正當流程提問非逃避,已一次講清 problem-anchored 並回丟球。
+- **卡堆倒帳第三次順延**(S45 押後 → S48 提案 → S49 學生喊「趕快開始課程 前面花太多時間」)。14 張過期卡與 WR5 Topic 3 全數未動,`last_weekly_review` 仍 33。**S50 開場先做,不再徵詢**(倒帳是 coach 行政作業,砍卡不需要學生投票;只有 WR5 Topic 3 收/棄要他一句話)。
+
+下一場(S50)resume:
+1. **開場 5 分鐘 coach 單方倒帳**:14 張過期卡砍到 ≤10(只留弱項相關,其餘封存),WR5 Topic 3 當場收掉或記棄權,`last_weekly_review` 歸位。不問學生要不要做,只報結果。
+2. **Chat System(Day 35)從 Step 1 clarify 重開**:題目已出(FSI 銀行網銀 App 一對一即時客服,現況前端每 2 秒 polling,資安長要求全對話留存可稽核),四抽屜 scaffold 已給(邊界/規模/快與穩/綁手綁腳)。要求一口氣三到四個問題。撞到「polling 撐不住」那格 → JIT 教 WebSocket vs SSE vs long polling。
+3. 冷測債:**separate anything 的反面代價**(管理面 ×N + idle)換場景複測;**router/dispatcher 那個框**在 Chat System 的對應位置直接抽考(S49 跳過三次)。
 
 ~~原 resume:Step 3 球 2 provider failover~~(模範答案已於本場給畢,不再排;留存驗證併入上方第 1 點與日後 mock 追問)。
 
@@ -127,6 +141,7 @@ Weak-topic flags: 無(至今沒有帶 flag 過 gate 的紀錄)。
 - (未記日期) | step G (s36, Unique ID Generator, bar-raiser) | 3/7(原記 ~4/7;✅=1 正規化,原符號:TWY🟡 FM🟡 Ops❌ Cap❌) | 結論要附論證;收尾固定提監控(第 4 次);capacity 別被 2^n 嚇退 | enumeration 洩漏營業額觀點零提示(architect 級) | coach
 - 2026-07-08 | step G (s40, Distributed Rate Limiter, Gauntlet #1, L3) | 3/9(原記 ~3/9;原符號:Scope❌ TWY❌ Ops❌ FM🟡 Cap🟡✅ Hint🟡 TB❌) | 三指標:unprompted-argument ❌ / unprompted-ops ❌(第 5 次) / no-freeze-capacity 🟡✅ | 「謝謝你拒絕我,逃避心態又來了」頂回去自推 5000/min=反脆弱本身 | coach
 - 2026-07-11 | weekly review (s42, WR5 Topic 1: Multi-Region Session Store, S41-S42 跨場) | 1/6(✅=1 正規化:security/殭屍免疫✅;trade-off🟡 capacity🟡 failure-timeline🟡 one-liner🟡未抽;ops❌;scale trigger 未測) | 3AM page test 句型組裝獨立跑不動;SLI 標籤掉 | 「上一筆成功時間」零提示 = dead man's switch 直覺,素材在缺組裝 | coach
+- 2026-08-11 | cold retest (s49, Day 33 Notification System 留存冷測,非完整 step G) | 3/5 測到的維度(機制鏈✅ capacity×2✅ / headroom 論證🟡 / trade-off 反面❌;Think Aloud、scope、ops、failure modes 本場未測,不計分母) | 第一句就給論證:「我會開 120 台」不附 why = 裸結論被打回;separate 決策的自付代價要能一口氣講「管理面 ×N + idle」 | `300萬÷1000=3000s` 之後自己接著換算並對撞 P99 60s 得出 50 倍,S47 停住的那兩步這次零提示做完 | coach
 
 ## Mistake Registry
 
@@ -139,13 +154,20 @@ Weak-topic flags: 無(至今沒有帶 flag 過 gate 的紀錄)。
 
 ### Live(unresolved,40 筆)
 
-- (s48) | Capacity(modeling) | `130 台 worker × 每台佔 36s → 每秒空出幾台` 講不出算式:縮到單一除法後仍問「要怎麼算啊」,給 rate 模型骨架(一台 36s 放手一次 = 1/36 台/秒)後即答 3.6 | ⚠️ **與棄權家族分家的新根因**:算術沒問題(同場 `(10+2)×3=36` unprompted 算對),缺的是**把場景翻成算式**的 modeling 步驟;治法=每場塞一題「先寫出單位式(X per second 是什麼除什麼)」再算數字 | unresolved | 3 | 2026-08-10(每場 drill 即測) | 0
+- (s48) | Capacity(modeling) | `130 台 worker × 每台佔 36s → 每秒空出幾台` 講不出算式:縮到單一除法後仍問「要怎麼算啊」,給 rate 模型骨架(一台 36s 放手一次 = 1/36 台/秒)後即答 3.6 | ⚠️ **與棄權家族分家的新根因**:算術沒問題(同場 `(10+2)×3=36` unprompted 算對),缺的是**把場景翻成算式**的 modeling 步驟;治法=每場塞一題「先寫出單位式(X per second 是什麼除什麼)」再算數字 | unresolved | 7 | 2026-08-18 | 0
+  - **S49 複測 pass**(2026-08-11):Little's Law 冷測 `300/s × 200ms = 60 台` unprompted,並自補「這是最少」。coach 當場把它與卡死的 `130÷36` 對焊(**一台每 W 秒放手一次 = 1/W 台/秒**,乘除只是同式兩面)。interval 3→7。缺口剩:安全係數的**機制**(見下方 s49 headroom 條),數字面已通
 - (s48) | Capacity(判讀) | 拿 best case 交 P99 的卷:只算「排第一那則等 36s」就答「SLO 沒破」,沒看第 300 則(等 84s)與 backlog 累積(296/s) | P99 = 最慢的 1%,不是最順的那則;happy-path-only 交卷是 capacity 通用死法;複測形式:任何 SLO 題追問「你算的是第幾則」 | unresolved | 3 | 2026-08-10(每場 drill 即測) | 0
-- (s48) | 分散式術語(bulkhead) | separate pool 講成「不用一直等」= 以為隔離讓損害消失(實際上 marketing 那池照樣卡滿 retry,只是 fraud 那 30 台沒事) | 術語-概念未綁定;**bulkhead=損害範圍限縮(誰陪葬)vs circuit breaker=損害時間限縮(卡多久)** 兩軸當場拆開,換場景複測 | unresolved | 3 | 2026-08-10 | 0
+- (s48) | 分散式術語(bulkhead) | separate pool 講成「不用一直等」= 以為隔離讓損害消失(實際上 marketing 那池照樣卡滿 retry,只是 fraud 那 30 台沒事) | 術語-概念未綁定;**bulkhead=損害範圍限縮(誰陪葬)vs circuit breaker=損害時間限縮(卡多久)** 兩軸當場拆開,換場景複測 | unresolved | 3 | 2026-08-18 | 1
+  - S49 側面複測(2026-08-11):精度那一軸未直接測;但問「separate pools 你自己付什麼代價」三輪不合格(見下方 s49 條目),顯示 bulkhead 只學到「好處那一半」
+
+- (s49) | Interview habit(trade-off 反面) | 「separate pools 的自付代價」三輪答不出可用答案:①「維運的費用」(s40 cost 格老毛病:抽象名詞不是代價)②「需要良好的分流」(那是前提)③「3 倍的維運能量」(同句換皮);縮到「單一 pool 上面掛哪三個名詞」填空才產出 alert/scaling policy/dashboard。**idle 成本整條軸三輪零觸及** | 頭號主線的反面代價格;**焊入的形狀:任何 separate/isolate 決策的自付代價一律兩條 = 管理面 ×N + idle 資源**。複測形式:換場景(shard/cell/region 隔離)問代價,要求兩條各一句,不給 scaffold | unresolved | 3 | 2026-08-14 | 0
+- (s49) | Capacity(安全係數機制) | 「為什麼不敢開 60 台跑 100%」第一句只給數字(120)不給 why;打回後自產 `2.5×0.2=50% utilization`(強),但機制要 coach 給方向才補出 jitter/burst/retry,最後一塊由 coach 給 | 缺的不是數字是**排隊機制**:100% 使用率下 burst 留下的 backlog 追平速度為 0 → 單調上升回不來;50% 的意義是「burst 過後有一倍產能吃 backlog」。複測:任何 capacity 題追問「你算出來的台數敢不敢直接上線」 | unresolved | 3 | 2026-08-14 | 0
+- (s49) | Interview habit(跳題) | 「決定這則進哪條 queue 的動作在哪個框」連問三次全部略過不答,最後由 coach 給(router/dispatcher) | 新面具:不是棄權也不是質疑題目,是**沉默跳過**,比棄權更難抓(沒有拒絕訊號);治法=跳過的球下場開頭第一顆重投,並當場點名「你剛剛跳過這題」 | unresolved | 3 | 2026-08-14 | 0
 - (s48) | Interview habit(棄權) | 「你直接說明 不要卡太久」出現在 `130÷36` 這一步(家族第 6 筆:S36→S42→S44→S46→S48) | 逃避家族;本次拒給+舉證(S46 200萬÷1000 同款前科)+縮到單步後仍卡 → 判定**部分成因是 modeling 缺口而非純逃避**(見上方 s48 capacity-modeling 條);後續要分辨「不敢算」與「不會建模」,前者加壓、後者給模型 | unresolved | 3 | 每場 drill 即測 | 0
 
-- (s46) | Capacity estimation | `300 萬 ÷ 1000/s` 喊「不會算」;同一個除法 07-19 同一題已在他面前算過且他當場自答「要 Queue」,6 天後掉 | capacity-freeze 家族 + 「當場🟢≠留得住」;縮到單步除法即答對(3000)= 算術沒問題,是壓力下棄權;複測用同題不同數字冷起手 | unresolved | 7 | 2026-08-11 | 0
+- (s46) | Capacity estimation | `300 萬 ÷ 1000/s` 喊「不會算」;同一個除法 07-19 同一題已在他面前算過且他當場自答「要 Queue」,6 天後掉 | capacity-freeze 家族 + 「當場🟢≠留得住」;縮到單步除法即答對(3000)= 算術沒問題,是壓力下棄權;複測用同題不同數字冷起手 | unresolved | 14 | 2026-08-25 | 0
   - S47 複測 pass(2026-08-04):200 萬÷1000=2000s 冷起手零提示自算,interval 3→7;缺口剩「換算人類單位+對撞 SLO」未主動(2000s→33min→超標 33 倍由 coach 補)
+  - **S49 複測 pass 且缺口補齊**(2026-08-11):`300 萬÷1000=3000s` 冷起手自算,**S47 缺的兩步這次自己做完**(換算 + 對撞 P99 60s = 50 倍)。interval 7→14。滿 14 天複測再過即 resolve
 - (s46) | Interview habit(棄權) | 一場內三連棄權:「不確定怎麼回答」→「不會算,L6 會怎麼答」→「面試不會問吧,直接說明」;拒給+縮小步+舉證後才動 | 逃避家族第 5 筆(S36/S42/S44/S46);proxy 問法(「Senior 會怎麼答」)S45 後第 2 次;質疑題目正當性 S42 後第 2 次 | unresolved | 3 | 每場 drill 即測 | 0
 - (s46) | Notification System(priority) | 「一條 queue 塞滿時高優先通知的延遲」無法自行量化,因此 priority queue 只剩名詞沒有論證 | 危險感沒機制家族;論證=他自己算的 50 分鐘,已示範綁進 one-liner,留存待 S47 白板默畫複測 | unresolved | 3 | 2026-08-07 | 0
   - S47 複測部分過:量化除法自己出手(pass,見上條);但 worker-isolation 機制鏈斷 —「排第一還是卡」三輪都往 queue-position 找原因,櫃員比喻+二選一+配對題才收;ordering vs capacity 標籤綁定換場景複測(priority vs pools trade-off 球已出未答,下場即測)
@@ -175,7 +197,7 @@ Weak-topic flags: 無(至今沒有帶 flag 過 gate 的紀錄)。
 - (s36) | Interview habit (trade-off) | 給結論不給論證(「Snowflake 最適合」一句帶過) | 頭號主線 | unresolved(原 🟡 Improving:被追問後補得出,首句仍裸) | 3 | 2026-07-11(每場 drill 即測) | 4
 - (s36) | Interview habit (operational) | drill 沒主動提監控(第 4 次) | 監控收尾未成反射 | unresolved | 3 | 2026-07-11(每場 drill 即測) | 4
 - (s36) | Capacity estimation | 算 2^12/秒「直接放棄」 | 被 2^n 寫法嚇退,非真不會(拆 1024×2^(n-10)) | unresolved(原 🟡 Improving:S36 拆次方後跟上;S40 半扶沒凍結) | 3 | 2026-07-11(每場 drill 即測) | 4
-- (s38) | Interview habit (commit) | 「用統一的限流器**嗎**?」問句丟球不敢 commit | 頭號主線(commit 缺席) | unresolved(原 🟡 Improving:S38 收尾 One-Liner 主動綁結論+論證=當場突破) | 3 | 2026-07-11(每場 drill 即測) | 2
+- (s38) | Interview habit (commit) | 「用統一的限流器**嗎**?」問句丟球不敢 commit | 頭號主線(commit 缺席) | unresolved(原 🟡 Improving:S38 收尾 One-Liner 主動綁結論+論證=當場突破;**S49 再現**:知道答案卻用「alert 嗎?」問號確認,當場點名「面試官聽到的是他自己也不確定」,interval 重置) | 3 | 2026-08-14(每場 drill 即測) | 3
 - (s39) | Interview habit (argument) | 連 3 次「問兩件事只答一件」 | 頭號主線在複習題再現 | unresolved(原 🟡 Improving:逼問後每次補得出) | 3 | 2026-07-11(每場 drill 即測) | 1
 - (s40) | Load Balancer | 該用 Least Connections 選了 latency + 英文名想不起(33 天又掉) | 語音近似+當場🟢≠留得住;命名軸摺疊 | unresolved(原 🟡 Improving:S40 對照表重錨) | 3 | 2026-07-11 | 0
 - (s40) | Interview habit (Step 1) | 跳過 clarify 直接報解法 + LB 亂套進 rate limiter(recency bias) | Step 1 未成硬關卡 | unresolved — 下次 drill 開場自己跑完 clarify 才准進 Step 2 | 3 | 2026-07-11(每場 drill 即測) | 0
@@ -206,7 +228,11 @@ Weak-topic flags: 無(至今沒有帶 flag 過 gate 的紀錄)。
 
 <!-- 遷移自 standalone Review Schedule(14 張主題卡,Leitner Box 1-4)。
      Box→interval 對映:Box1→3、Box2→3、Box3→7、Box4→14(Box1 的「隔天」檔位 engine 無,
-     取最近的 3;到期日照原檔 verbatim,過期就是過期,S41 WR5 收)。type=chunk(主題級 recall)。 -->
+     取最近的 3;到期日照原檔 verbatim,過期就是過期,S41 WR5 收)。type=chunk(主題級 recall)。
+
+     ⚠️ 2026-08-11(S49):14 張全部過期,倒帳第三次順延(S45 押後 → S48 提案 → S49 學生喊
+     「趕快開始課程」)。依 curriculum-plan [Re-plan 2026-08-11] 複習制,S50 開場由 coach
+     單方執行:砍到 ≤10(只留弱項相關,其餘封存),不再徵詢學生同意。 -->
 
 - chunk:Multi-Region-Session-Store(design) | chunk | 3 | 2026-07-13(S41 WR5 重打:盲測不過、導引後全鏈通;interval 重置 3) | active
 - chunk:Consistency-Models | chunk | 3 | 2026-06-21(過期;原 Box 2) | active
