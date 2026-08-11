@@ -65,7 +65,10 @@
 
 下一場(S50)resume:
 1. **開場 5 分鐘 coach 單方倒帳**:14 張過期卡砍到 ≤10(只留弱項相關,其餘封存),WR5 Topic 3 當場收掉或記棄權,`last_weekly_review` 歸位。不問學生要不要做,只報結果。
-2. **Chat System(Day 35)從 Step 1 clarify 重開**:題目已出(FSI 銀行網銀 App 一對一即時客服,現況前端每 2 秒 polling,資安長要求全對話留存可稽核),四抽屜 scaffold 已給(邊界/規模/快與穩/綁手綁腳)。要求一口氣三到四個問題。撞到「polling 撐不住」那格 → JIT 教 WebSocket vs SSE vs long polling。
+2. **Chat System(Day 35)= 先教學後 drill**(2026-08-11 S49 收工後學生拍板,推翻本場的 mock-first 開法;coach 同意:Day 35 是真新內容,08-11 Re-plan 的 coverage-first 前提下先教再打順序正確)。落地:
+   - 走 engine 正規 step B→C→E,chunk map 先列。核心 chunk:long-lived connection 三選一(WebSocket vs SSE vs long polling)、1v1 message flow(send → store → deliver)、message ordering、offline delivery、Observability mini chunk。
+   - **clarify 不取消,移到收尾 drill**:教完學生要自己把 FSI 題從 Step 1 走一遍(題目已出:銀行網銀 App 一對一即時客服,現況前端每 2 秒 polling,資安長要求全對話留存可稽核;四抽屜 scaffold 已給=邊界/規模/快與穩/綁手綁腳,S50 不再重給)。
+   - 收尾雙問照跑(3AM page test + cost 一問)+ AWS 映射(API Gateway WebSocket / ALB sticky / ElastiCache presence / DynamoDB 訊息表,每格附坑)。
 3. 冷測債:**separate anything 的反面代價**(管理面 ×N + idle)換場景複測;**router/dispatcher 那個框**在 Chat System 的對應位置直接抽考(S49 跳過三次)。
 
 ~~原 resume:Step 3 球 2 provider failover~~(模範答案已於本場給畢,不再排;留存驗證併入上方第 1 點與日後 mock 追問)。

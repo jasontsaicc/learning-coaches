@@ -108,6 +108,11 @@ domain、成長推演),不是 SWE feature design,以下依此換血。
 **Mock 規則:** 單場限時打完,結束必評分;打不完記 fail(fail 也是資料)。Day 33 式的
 四場一題不再發生。
 
+**教學 vs mock 的分工(2026-08-11 S49 收工後學生拍板,修正上行):** mock-first 只適用**已學過**
+的題(Day 33 這種)。**沒教過的新 Day 一律先教學後 drill**:走 engine step B→C→E,收尾
+drill 才進 4-step。理由:clarify 不需新知識但後面三步需要,拿新內容直接開 mock 只是製造
+無效失敗。clarify 練習不因此消失,移到收尾 drill 由學生自己從 Step 1 走一遍。
+
 **複習制:** 每場開場 10 分鐘 quick-fire(s48 提案正式生效,2-3 張卡);S49 開場一次性倒帳:
 14 張過期卡砍到 ≤10(只留弱項相關,其餘封存),WR5 Topic 3 當場收掉或記棄權,WR 計數歸位。
 
