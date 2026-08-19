@@ -13,7 +13,13 @@ ${CLAUDE_SKILL_DIR}/../../workspaces/k8s/
 - `progress.md`:engine 的進度檔。Schema engine-owned,定義在 `engine/PROGRESS-SCHEMA.md`,本 coach 不重定義。
 - `term-registry.md`:domain registry(英文術語卡:EN term / 發音 / 英文定義 / 中文點破),沿用 PROGRESS-SCHEMA section 7 的 registry 欄位(interval、next-review-date、status)。抽考雙向,見 `language.md`。
 - `story-bank.md`:domain registry(behavioral 素材,非間隔複習型)。學員提到真實工作經歷(prod incident、on-call、架構決策)→ 當場一行 raw 入帳,不打斷教學流;每次 Weekly Review 固定挖 10 分鐘一則保底。P6 才提煉 STAR:篩準是「衝突或壓力 / 學員自己的判斷 / 可量化結果」三佔其二;提煉時用課程學到的底層原理回注 Action 段。
-- `session-log.md`:歷史 session 敘事紀錄(sessions 1-14 自 standalone 時期遷入,之後的 session 摘要續寫於此,progress.md 只留 schema 欄位)。
+- `session-log.md`:**熱檔,只留最近幾堂 + 學員背景/教法備忘/教練執行紀律/chunk maps**。session 1-19 封存在 `archive/session-log-s01-s19.md`。
+- `archive/`:冷檔,開課時不讀;Weekly Review trend tracking、Phase Gate 三振診斷、或要查某堂歷史時才讀。
+  - `breakpoint-history.md`:2026-08-19 以前 progress.md 的 Current Session breakpoint 疊層原文(s16-s26,該區段當時已長成 263 行日誌,違反 schema §3)。
+  - `session-log-s01-s19.md`:早期 session 敘事。
+  - `pre-migration/`:standalone 時期的原始狀態檔,verbatim 保存,不再更新。
+
+**寫入紀律**:`progress.md` 的 Current Session breakpoint 只留最新一堂(當前狀態 + 下一堂 resume,PROGRESS-SCHEMA §3),敘事寫 `session-log.md`,長效教練紀律寫 `session-log.md`「教練執行紀律」,不要在 breakpoint 疊舊堂。
 - `environment.md`:機器層事實(kubeconfig contexts 與安全清單、port 慣例、工具狀態、bastion 同步步驟)。
 - `curriculum-plan.md`:戰略層規劃(advisory,見 `curriculum.md`)。
 - `clusters/`:per-phase kind 設定檔;`notes/`:工作草稿;`labs/`:lab 暫存(gitignored)。
