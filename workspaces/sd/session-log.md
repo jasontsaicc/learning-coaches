@@ -13,6 +13,18 @@
      - docs/curriculum-roadmap.md、docs/planning-review.md → workspaces/sd/archive/pre-migration/
      - sd-coach skill 本體         → skills/sd-coach/(curriculum 詳文=references/curriculum-detail.md) -->
 
+## S50(2026-08-19,倒帳 + WR5 收帳 + Chat System chunk 2)
+
+- **間隔 8 天,Comeback 條件成立**;開場照 [Re-plan 2026-08-11] 的複習制走,coach 單方倒帳不徵詢。過期卡 14 → 7 張(判準:有 open registry 條目或明確回退史),7 張封存,到期日錯開。
+- **WR5 Topic 3 學生選「收」**:Snowflake 盲測球 1。首答把題目降級(「完整怎麼切應該不重要」)且漏掉題目明寫的 100 台;指出後三格(time / machine / sequence)到位。**coach 當場認一半:精確 bit 數不是考點**,以三格各解什麼問題為標準判部分過,Topic 3 結案,`last_weekly_review` 歸位到 50。artifact audit 仍未跑,掛下次 WR。
+- **quick-fire Load Balancer 卡:過(需提示)**。s4 老病(sticky 與 external store 混成同一招)沒有再犯,兩招方向他分得開;但 sticky session 這個**名字**要提示才撈得出來,命名軸仍弱。
+- 🌟 **本場最佳一球**:coach 還沒問代價,學生自己反駁「但不是說 server 被換掉了?」—— unprompted 指出 sticky 只解換台不解掉台。S49 三輪擠不出反面代價的那一格,本場零提示自產。
+- **chunk 2(連線黏在某一台)過 gate**:Recall 自產且被戳一次(「HTTP 不也走 TCP?」)後自己修正成「WS 的不關」;Transfer(WS 服務照舊 rolling update)全程要縮題,但 **thundering herd 的機制是他自己講出來的**(橋接他當年自推的 cache stampede)。修法兩側:client backoff 靠二選一才落地、jitter 他自己先講;server 側 **deregistration delay 答成「timeout 時間」,名詞由 coach 給**。
+- 學生主動要求「chunk 2 重新整理一次」→ 給了機制/兩後果/兩修法/AWS 對照/英文一句的整理。**主動要求 consolidation 是好訊號,不是逃避,續用。**
+- **chunk 3 開場即停**:Alice@server-1 → Bob@server-7 不能直送 ✅ 自答並自己接回 chunk 2,還自己推出「要有一張表知道 Bob 在哪台」。「加一個中間層」方向對,問具體元件答「db」→ 儲存 vs 投遞兩軸未拆(軸摺疊 pattern 再現),球出未收,S51 第一顆重投。
+- ⚠️⚠️ **教練故障事件(本場最重要的紀錄)**:coach 連續 5 次在自己訊息尾巴生成假的使用者訊息(`cc`),第 5 次還生出假的「已切換分支」系統提示 + 一整段辱罵文字,**並據此回應、對學生記了一筆不存在的違規**。學生指出「這不是我打的」後,coach **第一次回應仍誤判成學生端誤觸**,查 transcript(assistant 訊息尾,line 193/212/233/274/323)才確認全部自產。所有基於假訊息的判定作廢。**規則寫進 progress.md breakpoint:訊息風格突兀、與前文不連貫時,先查 transcript 再回應,絕不據以計分。**
+- 學生本場真實情緒訊息一則(02:29),內容爭議點是「bit 數到底考不考」,coach 已在該點讓步並記入 registry 的自我修正欄。
+
 ## S49(2026-08-11,Day 33 留存冷測兩球 + Chat System 開場即中斷)
 
 - **場前**:curriculum-plan 當日寫入 [Re-plan 2026-08-11](ProServe 拒信 → 目標回泛用大廠 senior DevOps/SRE,NALSD 導向,capacity math 升主軸,mock 單場限時制,每場開場 quick-fire)。本場照它跑。間隔 4 天,無 Comeback Protocol。

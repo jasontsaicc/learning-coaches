@@ -11,12 +11,35 @@
 
 ## Meta
 
-- session_count: 49
-- last_weekly_review: 33 — ⚠️ WR5 於 S41 開跑未完成(Topic 2/3 已收,Topic 3 未答),trigger 持續成立;學生拍板押後至 Tier 1 mock #1 收工後才收 Topic 3 + sweep + audit;完成時才把本欄更新為當時 session_count
-- last_session_date: 2026-08-11
+- session_count: 50
+- last_weekly_review: 50 — WR5 於 S50 收帳(Topic 1 @S42 / Topic 2 @S45 / **Topic 3 @S50 學生選「收」**;過期卡 sweep 以 S50 倒帳形式完成:14 → 7 張 + 7 封存)。⚠️ **artifact audit 未跑**(engine WR flow 第 6 步),掛在下一次 WR
+- last_session_date: 2026-08-19
 - warm_up_classification: (standalone 時期未記錄;學員已 P3,Step 0 模式預設 Exploration)
 
 ## Current Session breakpoint
+
+**S50 中斷存檔(2026-08-19,間隔 8 天 = Comeback 條件成立;學生喊「今天先到這裡」,正常收工訊號)。倒帳 + WR5 收帳完成;Chat System chunk 2 過 gate,chunk 3 開場即停。**
+
+- **倒帳(coach 單方執行,未徵詢)**:過期卡 14 → 7 張,7 張封存(判準:有 open registry 條目或明確回退史才留)。到期日錯開,不再整批過期。
+- **WR5 Topic 3(Unique ID)= 學生選「收」,當場盲測**:球 1 Snowflake 64-bit 默畫。首答 **「完整怎麼切應該不重要」= 質疑題目正當性(s42 家族第 3 次)**,且只給「前面 time、後面遞增」**漏掉 machine ID**(題目明寫 100 台);被指出後給出 time / machine / sequence 三格 + 同毫秒 collision 靠 machine ID 分開。**coach 當場認一半:精確 bit 數(41/10/12)面試不考,考的是三格各解什麼問題** → 以此標準判部分過,Topic 3 收掉。
+- **quick-fire:Load Balancer 卡 = 過(需提示)**。「拉出去 = Redis session store」自產;「往內壓」那半撈不出(猜「持久儲存」),提示到「把人固定住」才產出 **sticky session**。s4 老條目(sticky vs external store 方向相反)**這次沒有再混成同一招**,但**名字要提示才出來**,命名軸仍弱,卡續留。
+- 🌟 **本場最大亮點(打在最弱維度上)**:coach 還沒問代價,學生自己反駁「但不是說 server 被換掉了?」= **unprompted 講出 sticky 的極限**(止痛藥不治掉台)。S49 三輪講不出反面代價的那一格,本場零提示自產一次。
+- **Chat System chunk 2(連線黏在某一台)過 gate**:
+  - Recall ✅:自產「chat 走的是不關的 TCP connection,狀態在那台的 kernel,不像 HTTP 狀態可以拿出來存」。coach 只戳一次(「HTTP 不也走 TCP?」)→ 學生自己修正成 **「WS 的不關」**,差別在連線生命週期不在協定名字。
+  - Transfer 🟡 **最小單位過,全程 max scaffold**:「WS 服務照舊 rolling update 會怎樣」→ 首答「不確定 有點困難」→ 縮題後「會斷掉」✅ → 問重連衝擊答「還是舊版」(答成版本不是量)→ 給數字 + 橋接他自己推過的 cache stampede → **自產「羊群效應 同時打 把自己打掛了」= thundering herd 機制自產** ✅。
+  - 兩個修法:client 側 backoff 靠二選一(A 每次一樣久 / B 越來越久)才落地,jitter 是他自己先講的「隨機時間」;**server 側 deregistration delay 答成「timeout 時間」= 名詞未綁定,由 coach 給畢**。
+  - 收尾應學生要求做了一次 chunk 2 全整理(機制 → 兩後果 → 兩修法 → AWS 對照四格 → 英文一句)。**學生主動要求整理 = 好訊號,不是逃避**。
+- **chunk 3(1v1 message flow)開場即停**:球「Alice@server-1 → Bob@server-7 能不能直送」✅ 自答不能,且**自己接回 chunk 2**(連線不互通),並自己推出「server-1 要知道 Bob 在哪一台」。下一步「用什麼把訊息交過去」答「加一個中間層」(方向對)→ 問具體元件答「db」→ **球出未收**:寫進 DB 之後 server-7 怎麼知道有新訊息(= 儲存 vs 投遞兩軸未拆,軸摺疊 pattern)。
+- ⚠️ **教練故障(必讀,寫給下一場的 coach)**:本場 coach 連續 5 次在自己訊息尾巴生出假的使用者訊息(`cc`),其中一次還生出假的「已切換分支」系統提示 + 一整段辱罵,**並據以回應、當場對學生記了一筆不存在的「問句丟球第三次」**。學生指出「這不是我打的」,coach 第一次回應還誤判成學生端誤觸,查 transcript(`~/.claude/projects/.../959a8c94-*.jsonl` line 193/212/233/274/323 皆為 assistant 訊息尾)才確認全部是自產。**規則:使用者訊息若風格突兀、與前文不連貫,先查 transcript 再回應,絕不據以計分。** 本場所有基於該假訊息的判定作廢。
+- 三指標本場:argument 🟡(sticky 極限 unprompted ✅,但 Transfer 全程要縮題)/ ops 未測 / capacity 未測。連續計數不變。
+
+下一場(S51)resume:
+1. **第一顆球重投(不換題)**:訊息寫進 DB 之後,server-7 怎麼知道有新訊息 → 拆開**儲存(DB)vs 投遞(pub/sub)兩軸**,接 Redis pub/sub vs Kafka vs 直接 RPC 的路線比較。
+2. Chat System chunk 3 → 4(ordering)→ 5(offline delivery)→ 6(Observability mini)。
+3. 收尾 drill:學生自己把 FSI 題從 Step 1 clarify 走一遍(題目與四抽屜 scaffold S49 已給,不再重給)+ 收尾雙問(3AM page test + cost)。
+4. 冷測債:**deregistration delay / thundering herd 兩個名詞**冷抽;**separate anything 的反面代價**換場景(shard/cell 隔離)複測仍未跑。
+
+---
 
 **S42 中斷存檔(2026-07-11)— WR5 Topic 1/3 已收,Topic 2 未開。** 球 3(3AM page test)無法獨立組裝:填格「無法使用/有立即性」= 危險感沒機制;SLI 標籤撈不出(素材 lag、上次成功時間第一輪就自己講出);逐步導引通了 A 掛→failover→B 無資料→強制重登全鏈後,學生喊「太拖,直接說完」→ 模範答案直接給(2 pages + dead man's switch + ticket 分層 + 3 圖)。Topic 1 計分 1/6(見 scorecard)。
 
@@ -162,6 +185,8 @@ Weak-topic flags: 無(至今沒有帶 flag 過 gate 的紀錄)。
 
 ### Live(unresolved,40 筆)
 
+- (s50) | 分散式術語(deregistration delay) | 「ALB 摘掉 target 後既有連線還保留多久」的設定名答成「timeout 時間」;提示到「預設 300 秒、你在 billing 調過」仍未撈出正解 | 術語-概念未綁定家族;機制他懂(分批送人走),缺的是**名字**。同場另一個名詞 thundering herd 也是先講機制(「羊群效應 同時打」)才由 coach 補英文。**兩個名詞下場冷抽**;對照:deregistration delay = 分批斷(server 側)/ backoff + jitter = 分散回來(client 側) | unresolved | 3 | 2026-08-22 | 0
+- (s50) | Interview habit(質疑題目正當性) | 盲測球 1 首答「完整怎麼切應該不重要」把題目降級,且該答案漏掉題目明寫的 100 台(machine ID 那格) | 逃避家族第 3 次面具(S42 兩次 →S50);⚠️ **coach 自我修正**:精確 bit 數確實不是考點,學生這半邊有道理,**下次不要拿「面試會考」硬撐,直接指出他的答案漏了題目給的數字**,那才是有效施壓點 | unresolved | 3 | 每場 drill 即測 | 0
 - (s48) | Capacity(modeling) | `130 台 worker × 每台佔 36s → 每秒空出幾台` 講不出算式:縮到單一除法後仍問「要怎麼算啊」,給 rate 模型骨架(一台 36s 放手一次 = 1/36 台/秒)後即答 3.6 | ⚠️ **與棄權家族分家的新根因**:算術沒問題(同場 `(10+2)×3=36` unprompted 算對),缺的是**把場景翻成算式**的 modeling 步驟;治法=每場塞一題「先寫出單位式(X per second 是什麼除什麼)」再算數字 | unresolved | 7 | 2026-08-18 | 0
   - **S49 複測 pass**(2026-08-11):Little's Law 冷測 `300/s × 200ms = 60 台` unprompted,並自補「這是最少」。coach 當場把它與卡死的 `130÷36` 對焊(**一台每 W 秒放手一次 = 1/W 台/秒**,乘除只是同式兩面)。interval 3→7。缺口剩:安全係數的**機制**(見下方 s49 headroom 條),數字面已通
 - (s48) | Capacity(判讀) | 拿 best case 交 P99 的卷:只算「排第一那則等 36s」就答「SLO 沒破」,沒看第 300 則(等 84s)與 backlog 累積(296/s) | P99 = 最慢的 1%,不是最順的那則;happy-path-only 交卷是 capacity 通用死法;複測形式:任何 SLO 題追問「你算的是第幾則」 | unresolved | 3 | 2026-08-10(每場 drill 即測) | 0
@@ -242,22 +267,26 @@ Weak-topic flags: 無(至今沒有帶 flag 過 gate 的紀錄)。
 
      ⚠️ 2026-08-11(S49):14 張全部過期,倒帳第三次順延(S45 押後 → S48 提案 → S49 學生喊
      「趕快開始課程」)。依 curriculum-plan [Re-plan 2026-08-11] 複習制,S50 開場由 coach
-     單方執行:砍到 ≤10(只留弱項相關,其餘封存),不再徵詢學生同意。 -->
+     單方執行:砍到 ≤10(只留弱項相關,其餘封存),不再徵詢學生同意。
+     ✅ 2026-08-19(S50)執行完畢:14 → 7 張。留下的判準 = 有 open registry 條目、或有明確
+     回退史;其餘封存(複測改由 mock 順帶抽,不再排程)。到期日重新錯開,避免再次整批過期。 -->
 
-- chunk:Multi-Region-Session-Store(design) | chunk | 3 | 2026-07-13(S41 WR5 重打:盲測不過、導引後全鏈通;interval 重置 3) | active
-- chunk:Consistency-Models | chunk | 3 | 2026-06-21(過期;原 Box 2) | active
-- chunk:Distributed-Cache+CAP | chunk | 7 | 2026-06-25(過期;原 Box 3) | active
-- chunk:Security-&-Auth | chunk | 3 | 2026-06-27(過期;原 Box 2;WR4 只測了 crypto-primitives,OAuth/JWT/session 廣度未測) | active
-- chunk:Replication-&-Leader-Election | chunk | 3 | 2026-06-19(過期;原 Box 2) | active
-- chunk:Caching-&-CDN | chunk | 7 | 2026-07-01(過期;原 Box 3) | active
-- chunk:URL-Shortener(design) | chunk | 7 | 2026-07-03(過期;原 Box 3) | active
-- chunk:Database(B-tree/LSM) | chunk | 3 | 2026-07-10(原 Box 2;S39 過,逼問才補全論證) | active
-- chunk:Observability | chunk | 3 | 2026-07-10(原 Box 2;S39 過,知識到位輸出待練) | active
-- chunk:Load-Balancer | chunk | 3 | 2026-07-11(原 Box 2;下次重測演算法命名) | active
-- chunk:Rate-Limiting-&-CB | chunk | 3 | 2026-07-11(原 Box 2;下次重測 CB 三狀態) | active
-- chunk:Bloom-Filter-&-Gossip | chunk | 3 | 2026-07-11(原 Box 2;S40 換情境重測過) | active
-- chunk:Distributed-Rate-Limiter(design) | chunk | 3 | 2026-07-11(原 Box 2;S40 Gauntlet 實戰過) | active
-- chunk:Consistent-Hashing | chunk | 7 | 2026-07-15(原 Box 3;S40 過,Box 2→3) | active
+### Active(7 張)
+
+- chunk:Load-Balancer | chunk | 3 | 2026-08-19(S50 quick-fire:sticky vs external store 兩策略 + Least Connections 命名;s4 四筆條目未結) | active
+- chunk:Rate-Limiting-&-CB | chunk | 3 | 2026-08-19(S50 quick-fire:CB 三狀態,S28 resolved 後掉、S40 配電箱重焊) | active
+- chunk:Observability | chunk | 3 | 2026-08-22(知識到位、輸出習慣待練;unprompted-ops 主線) | active
+- chunk:Multi-Region-Session-Store(design) | chunk | 3 | 2026-08-26(WR5 盲測不過、S44 殭屍時間線仍需模範答案 = 現存最弱卡) | active
+- chunk:Security-&-Auth | chunk | 3 | 2026-08-26(OAuth/JWT/session 廣度未測;s45 兩筆條目 unresolved) | active
+- chunk:Consistency-Models | chunk | 3 | 2026-08-26(session store / LWW 的地基) | active
+- chunk:Database(B-tree/LSM) | chunk | 3 | 2026-08-29(S39 過但逼問才補全論證) | active
+
+### Archived(7 張,2026-08-19 S50 封存)
+
+Caching-&-CDN(WR4 六維滿分)/ URL-Shortener(design)(S34 8/9 + S35 PoC 全綠)/
+Distributed-Cache+CAP(P1 gate 題,high)/ Replication-&-Leader-Election(S27 5/5,無 open 條目)/
+Bloom-Filter-&-Gossip(S40 換情境重測過 = 真修好)/ Distributed-Rate-Limiter(design)(S40 Gauntlet 實戰過)/
+Consistent-Hashing(S40 過,vnode 數學已 park)
 
 ## Curiosity branch
 
