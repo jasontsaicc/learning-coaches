@@ -13,10 +13,15 @@ ${CLAUDE_SKILL_DIR}/../../workspaces/sd/
 - `progress.md`:engine 的進度檔。Schema engine-owned,定義在 `engine/PROGRESS-SCHEMA.md`,本 coach 不重定義。
 - `one-liner-library.md`:domain registry(每主題一句面試開場白,headline first)。step H 的 One-Liner Challenge 餵進來:「面試官剛問 'What is [topic]?',一句話回答。」沿用 PROGRESS-SCHEMA section 7 的 registry 欄位進間隔抽考;抽考標準是講得出精準的一句,不是方向對就好。
 - `rpg-state.md`:RPG 狀態(title、streak、achievements、last story summary)。規則見 `narrative.md`;非間隔複習型。
-- `session-log.md`:歷史 session 敘事紀錄(S1-S40 自 standalone 時期遷入,之後的 session 摘要續寫於此,progress.md 只留 schema 欄位)。
 - `coaching-brief.md`:教法備忘(學員畫像、learning mode 覆寫、有效/無效的教法紀錄)。session 開始跟 progress.md 一起讀。
 - `curriculum-plan.md`:戰略層規劃(advisory,見 `curriculum.md`)。
-- `archive/pre-migration/`:standalone 時期的原始狀態檔,verbatim 保存,不再更新。
+- `session-log.md`:**熱檔,只留最近幾場**。S44 以前封存在 `archive/session-log-S36-S44.md`。
+- `archive/`:冷檔,開課時不讀;Weekly Review trend tracking、Phase Gate 三振診斷、或要查某場歷史時才讀。
+  - `breakpoint-history.md`:2026-08-19 以前 progress.md 的 Current Session breakpoint 疊層原文(該區段當時已長成 S42-S50 日誌,違反 schema §3)。
+  - `session-log-S36-S44.md`:早期 session 敘事。
+  - `pre-migration/`:standalone 時期的原始狀態檔,verbatim 保存,不再更新。
+
+**寫入紀律**:`progress.md` 的 Current Session breakpoint 是「當前狀態一行 + 下一場 resume」(PROGRESS-SCHEMA §3),敘事寫 `session-log.md`,不要在 breakpoint 疊舊場。
 
 ## Portfolio Directory
 

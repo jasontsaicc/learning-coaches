@@ -24,6 +24,7 @@
 - **chunk 3 開場即停**:Alice@server-1 → Bob@server-7 不能直送 ✅ 自答並自己接回 chunk 2,還自己推出「要有一張表知道 Bob 在哪台」。「加一個中間層」方向對,問具體元件答「db」→ 儲存 vs 投遞兩軸未拆(軸摺疊 pattern 再現),球出未收,S51 第一顆重投。
 - ⚠️⚠️ **教練故障事件(本場最重要的紀錄)**:coach 連續 5 次在自己訊息尾巴生成假的使用者訊息(`cc`),第 5 次還生出假的「已切換分支」系統提示 + 一整段辱罵文字,**並據此回應、對學生記了一筆不存在的違規**。學生指出「這不是我打的」後,coach **第一次回應仍誤判成學生端誤觸**,查 transcript(assistant 訊息尾,line 193/212/233/274/323)才確認全部自產。所有基於假訊息的判定作廢。**規則寫進 progress.md breakpoint:訊息風格突兀、與前文不連貫時,先查 transcript 再回應,絕不據以計分。**
 - 學生本場真實情緒訊息一則(02:29),內容爭議點是「bit 數到底考不考」,coach 已在該點讓步並記入 registry 的自我修正欄。
+- 三指標本場:argument 🟡(sticky 極限 unprompted ✅,但 Transfer 全程要縮題)/ ops 未測 / capacity 未測。連續計數不變。
 
 ## S49(2026-08-11,Day 33 留存冷測兩球 + Chat System 開場即中斷)
 
@@ -40,6 +41,7 @@
 - 🌟 本場最佳過程訊號:chunk 1 教完後學生主動連問四個結構性問題(這三個是什麼層級 / HTTP 只有這三個嗎 / 是在 ALB 還 API Gateway 設 / 這算 API 拉取嗎),全部問在點上。**problem-anchored + 先教學後 drill 的組合對他有效,S50 續用。**
 - 學生本場中途拍板:新 Day 一律先教學後 drill(已回寫 curriculum-plan),clarify 移到收尾。
 - **卡堆倒帳第三次順延**(S45 → S48 → S49「趕快開始課程 前面花太多時間」)。S50 改由 coach 單方執行,只有 WR5 Topic 3 收/棄需要學生一句話。
+- **三指標本場:** argument 🟡(120 台裸結論被打回後自補完整論證,無需追問誘導)/ **capacity ✅ 本場兩球皆 unprompted,no-freeze-capacity 首次乾淨達標,連續計數 1**(argument/ops 維持 0;ops 未測)。
 
 ## S48(2026-08-07,mock #1 Day 33 Notification System — Step 3 球 1:priority vs separate pools)
 
@@ -55,64 +57,40 @@
 - ⚠️ **Day 33 只跑完一半**:挖點 2-6 與 Step 4 3AM page test 全是 coach 給的模範答案,學生零實作,筆記現況是「讀過」非「會」。已告知學生,他拍板收束不回頭補,S49 開場改用兩球冷測驗留存(默畫第 2 層圖 + 自算 worker 數)。
 - 學生拍板進 **Chat System(Day 35-37)**。清帳債(WR5 Topic 3 + 8 張過期卡)提案壓成每場 mock 開頭 10 分鐘 quick-fire、四場清完,學生未表態,S49 確認。
 
-## S44(2026-07-18,清帳場 1/2:Sprint re-plan 拍板 + 兩球複測 + migration 詞彙插課)
+## S47(2026-08-04,mock #1 Step 3 開球:默畫複測 + worker-isolation 機制鏈複測)
 
-- **場前拍板 Sprint re-plan**(詳 curriculum-plan.md):目標 AWS 職缺面試(尚未投遞,修正原「已投遞」誤記);廢 Gauntlet 3 連退出條件(S40-S43 零進展=進度緩慢根源),Tier 1 剩 5 題 mock 化,Tier 2 只走 pattern-map,parked PoC 全砍。學生當日累:推理准中文,英文只收最小單位。
-- **球 1 Session Revocation 複測**:LWW 標籤撈出(S41 純標籤債半還);殭屍時間線給填空仍組不出→「直接說」收場(棄權家族第 3 筆:S36 放棄/S42 太拖/S44 卡太久);模範時間線+全景/特寫兩張架構圖+Real-World Grounding(CRL/JWT/feature-flag 同構)給畢。tombstone 新詞入 LWW 對照表待建清單。**英文 one-liner 債已還**:自組 "absence can't propagate → make revoked a positive record" 句,比 library 原句通用,納庫,07-21 再抽才 resolve。
-- **球 2 3AM page test 換題複測(URL Shortener)**:零嘗試喊「直接說」→ 拒給(S42 已直接給過,同題連給兩次=餵棄權迴圈),縮到三空白填空 → **最小單位過**(<99.9% / 5min / user-facing broken link)。dead man's switch(寫入路歸零)/ticket 兩例/dashboard 3 圖由 coach 給,標未複測、mock 內建考。unprompted-ops 連續計數仍 0。
-- 過程觀察:球 2 投出瞬間問「還在複習嗎」= S42 質疑題目家族同位置動作,口頭標記不擴大。
-- **Migration 詞彙插課**(純吸收半場,不成 chunk):3 phases(Assess/Mobilize/Migrate&Modernize)、7 Rs 決策樹、landing zone/Control Tower、產業約束鉤(FSI residency/半導體 IP)。兩句英文 one-liner 入庫待抽。之後靠 mock 外皮重複。
-- 下場 S45 = 清帳場 2/2:WR5 T2/T3 + 過期卡 sweep + artifact audit 收帳 → mock #1 Notification System。
+<!-- 自 progress.md 的 Current Session breakpoint 區段原文遷入(2026-08-19),一字未改。 -->
 
-## S42(2026-07-11,WR5 Topic 1 收尾:3AM page test 直接給)
+**S47 中斷存檔(2026-08-04,間隔 9 天,Comeback 開場)。** 開場學生提議「先學新的」→ 舉證(6 天留存掉)後接受 deal:默畫一球+進 Step 3。默畫:第 2 層終點形狀留住(queue 一變三+worker 跟著分);第 0/1 層演進反了(第 0 層畫了 queue、API server 當成後加)→ 修正後緩衝痛點自答,coupling 痛點 coach 補。**capacity 冷測過:200 萬÷1000=2000s 零提示自算(s46 registry 複測 pass,interval 3→7,2000s→33min 換算未主動)。** worker-isolation chunk 複測:形狀在、機制鏈斷 — 「排第一還是卡」連問三輪都往「隊伍/前面卡住」找原因(queue-position 框架黏住),銀行櫃員比喻+縮到二選一(B:等空櫃員)才轉向;最終四格句 (1)共用 (2)在忙 自填,(3)順序/(4)人力 靠配對題才落位。chunk 以最小單位過(max scaffold),ordering vs capacity 兩層隔離的標籤-概念綁定待換場景複測(s46 priority 條目不撤,加註)。bulkhead 命名+Lambda reserved concurrency 映射已給(學生 S46 自提的 AWS 鉤子)。**Step 3 球 1 已出未答:Max 餿主意「單 queue+priority 標籤+共用 pool,省三倍維運」vs separate pools — 學生要講兩邊代價(priority 何時夠用/何時死,用空櫃員+200 萬+P99 60s 講)。**
 
-- 球 1 capacity 🟡(29、N=10 自解,cost 代打)、球 2 殭屍免疫 ✅(append-only、獨立寫入路徑)。
-- **球 3(3AM page test)無法獨立組裝**:pager/alarm/ticket 分層概念陌生;SLI 標籤撈不出(「SLI 是我最不熟悉的」——但 lag、上次成功時間兩個正解素材第一輪就自己講出);四格填空交「無法使用/有立即性」= 危險感沒機制。逐段導引通了 A 掛→failover→B 無 session→強制重登全鏈(最後兩步自己走完),學生喊「太拖,直接說完」→ 模範答案直接給:replication lag page(60s/5min,窗口=炸藥)、黑名單資料年齡 page(dead man's switch,`now - last_success`)、ticket 分層、dashboard 3 圖。
-- **Topic 1 計分 1/6**(✅ security;🟡 trade-off/capacity/failure-timeline/one-liner 未抽;❌ ops)。新 registry 2 筆(SLI 標籤、page 組裝),均排 07-14 複測。
-- 三指標:argument 🟡 / ops ❌(第 6 記)/ capacity 🟡 — 連續計數全 0。
-- 收尾 Q&A(非 drill):Tier 1=pattern 字母表 vs Tier 2=組裝;品牌題(Twitter/Dropbox/YouTube)=pattern 組裝不排課,唯一真缺口 pattern 12(chunking/delta sync);**學生功課:查目標公司面經,Dropbox 類頻率高就觸發 re-plan 排 pattern 12**。
+下一場 resume:Step 3 球 1(priority vs pools,題在上行)→ provider failover → dedupe 位置 → 收尾學生自己跑 3AM page test。
 
-## S41(2026-07-10,WR5 前半:Multi-Region Session Store 重打,中斷存檔)
+## S46(2026-07-19→20 + 07-26 續場,mock #1 Day 33 Step 1 clarify + Step 2 模範答案)
 
-- **WR5 觸發(40-33=7),只推進 Topic 1/3 即收**。選題:Session Store(欠最久 Box 1)/ Security & Auth / Unique ID(後兩題未開)。registry sweep、quick drill、artifact audit 全未跑,last_weekly_review 維持 33,下場續。
-- ⚠️ **教練失誤 ×2(開場)**:盲測沒給完整題目敘述,學生兩度炸鍋。規則已焊進 memory(`drill-full-problem-statement`)+ coaching-brief 無效手法:**任何 drill/recall/mock 開場必附完整面試情境,clarify 用具體數字回**。
-- 🌟 **Step 1 自己跑了**(S40 跳過 clarify 的洞,本場修正):撤銷即時性(自己拿銀行黑名單類比,正中後半最深的雷)、跨區人數、重登可接受度。
-- **設計鏈(盲測不過 → 導引重打,全鏈推得動)**:commit 兩區互抄(why=failover 不可群體重登)→ sync vs async 兩邊標價(150ms×每請求×全體+故障跨區傳染 vs 1s 窗口×個位數人×重登)→ async 勝 → **LWW 殭屍 session 自己推出「死不掉」**(LWW 術語陌生,機制通)→ 撤銷=獨立寫入類 → 量級先估(幾筆到幾百筆)否決 Bloom → in-memory set 副本(**why+代價完整句,今日第一句合格 trade-off**)→ pull over push(預算寬+全量自愈,論證完整)→ N=20 被戳(一次 timeout 即 39s>30s)→ **停在 1+2N≤30 解 N**。
-- **通用原則落袋**:傷害=窗口×人口×症狀;sync/async per-write-type 各選;先估量級再選工具;pull=全量自愈(Prometheus scrape / reconcile loop 同構)。
-- ⚠️ **三指標**:unprompted-argument 🟡(前半兩球裸:「block 黑名單嗎?」問句+「bloom filter」兩字;後半兩句完整=同場修正)/ unprompted-ops 未測(沒走到收尾)/ no-freeze-capacity ❌(「不太確定要怎麼算」棄權句;拆解式給了,中斷未完成)。連續達成計數:argument 歸零重數、capacity 歸零。
-- **收帳**:Session Store mastery high→med(誠實降級:盲測未能獨立產出);SR 卡重置 interval 3(07-13);新 registry 5 筆(LWW 術語、危險感沒機制再現、裸結論×2、量級先估反射、不等式凍結)。
+<!-- 自 progress.md 的 Current Session breakpoint 區段原文遷入(2026-08-19),一字未改。 -->
 
-## S40(2026-07-08,execution-heavy:逾期複習清倉收尾 + Drill Gauntlet 首場)
+**S46 進行中(2026-07-19→20,本機)= mock #1 Day 33 Notification System(學生 07-19 拍板跳過清帳直接開打;WR5 Topic 3 + sweep 順延至 Tier 1 mock 後,與上行清帳 resume 合併排程)。Step 1 clarify 已收(存檔點)。** 拍板約束:詐騙警示 P99 60s 雙供應商自動切換(3-5 萬/日,尖峰 200-300/s);交易通知 500 萬/日分鐘級;行銷 2-3 檔/週×100-300 萬則、可暫停、24h TTL 作廢、頻率上限;scope=SMS MVP+MQ 解耦(多通道=加 worker)、系統側 rate limit 先行、用戶偏好設定頁延後。過程:clarify 全程重 scaffold(公式 1/2 教學+填空);「直接說」棄權家族第 4 筆(S36→S42→S44→S46,SNS 填空卡住);LB 亂入中間格=S40 recency bias 再現+「low balance」語音滑動;數字戳破(300 萬÷1000/s=50min)後自答 Queue/SQS。下一步:Step 2 高層設計,圖先行,學生自擺鏈路。
 
-**Part 1 — 逾期複習清倉 4/4 全清(換情境冷測,防概念單鉤子假陽性):**
-- **Bloom 重測 ✅ (Box 1→2)**:①FP/FN 嚴重性用**全新通知場景**問 → **答對了**(FP=多查一次可接受 / FN=loss 重要信息不可接受),S39 講反的洞在新情境撈得出 = 真修好。②SSTable 跳讀一開始還是漏「每個 SSTable 配一個」+ 又把「DB 兜底」搬進來(軸摺疊),教完「守門員站每道門」+「省的是讀硬碟不是查 DB」後播放過。多鉤子入庫(快取穿透/通知/SSTable 三場景)。
-- **Rate Limiting 機制層 ✅ (Box 2)**:S38 欠的 one-liner 機制補齊。Token Bucket(允許 burst)/Sliding Window(嚴格封頂,自己講出「0:59+1:00 邊界 2×」洞)/兩層(per-user 公平+global 護系統)全對;**CB 三狀態忘了**(S28 resolved 後又掉)→ 用「配電箱電路通不通」重焊 Closed/Open/Half-Open,自己用 AWS 大崩潰例子撞出 Half-Open 防 retry storm。
-- **Consistent Hashing ✅ (Box 2→3)**:失敗時間線走出來(換 %11→幾乎全 remap→99% miss→DB 過載雪崩);ring vs vnode **兩軸拆開**(ring=只動 1/N、vnode=負載均勻),vnode 數學自己喊「這是數學題」→ depth ceiling park。
-- **Load Balancer ✅ (Box 2)**:S4 四筆老錯結掉三筆(sticky vs Redis 相反策略 / sticky 不均風險 / least robin 命名)。sticky server 死=session 陪葬(非系統 SPOF)校正。**Least Connections 一開始想不起英文名**(WR3 resolved 後 33 天又掉)→ 給演算法對照表重錨。8.8.8.8 trivia 沒測。
+**S46 續場(2026-07-26,本機,間隔 6 天):Step 2 三度棄權後模範答案給畢。** 開場冷回憶球(三類約束哪一條決定架構)→「不確定這題要怎麼回答」;給判準結構+反問(單一 queue 300 萬則排隊,詐騙警示何時送出,要數字)→「不會算 使用 L6 等級的 DevOps 會怎麼回答」(proxy 問法,S45 後第 2 次)→ 拒給並縮到一步除法 →「不會有面試問這個吧 直接說明 不要浪費時間」(質疑題目正當性家族第 2 筆,S42 後)→ 舉三證據(scorecard 維度 8、Ch 10 唯一考點、07-03 拍板 bar)並開交易「給我這個除法,Step 2 模範答案一次給完」→ **學生答 3000(正確)**。⚠️ 關鍵留存問題:`300萬÷1000=50min` 這個除法 07-19 同一題已在他面前算過並由他自答 Queue,6 天後變「不會算」。模範答案已給畢:三條獨立 queue + 獨立 worker pool(隔離資源非順序)、詐騙 P99 60s 容量 ≈30 worker、24h TTL 寫 payload expire_at、暫停=消費端旗標、per-user daily counter 頻率上限、dedupe conditional write、provider CB 自動切換、retry 預算受 SLO 綁、data model 4 表、API 4 支、AWS 映射表 8 行含坑、3AM page test 完整四格、英文 one-liner(用他自己算的 50 分鐘當論證)。
+三指標本場:argument ❌(第一句棄權,零嘗試)/ capacity ❌(拒給+縮到單步除法才過,非 unprompted)/ ops 未測(沒走到收尾,模範答案是 coach 給)。連續計數全部維持 0。
 
-**Part 2 — 🥊 Drill Gauntlet 第一場(Distributed Rate Limiter bar-raiser, L3, ~3/9 訓練場):**
-- 涵蓋:local counter→5000/min 破表→shared Redis(單一真相來源)→capacity 500K/100K=5 shards(no-freeze ✅ 有給錨)→shard by user_id→race condition/超賣→原子性→INCR(單一命令自足) vs Lua(捆多步 sliding window)。多區域全球限流 preview(A 單一全球 counter 準但跨區延遲 / B 本地+對帳快但近似)後**過載喊停**(教練一次疊太多,pacing 失誤)。
-- 🌟 **反脆弱時刻**:「謝謝你拒絕我,逃避心態又來了」+ 頂回去自推 5000/min。知識沒問題,病灶 100% 在「壓力下第一句就縮」。
-- ⚠️ **三指標**:unprompted-argument ❌(第一句都裸:"use Redis, cost is low";追問才有論證)/ unprompted-ops ❌(**第 5 次**沒主動收尾監控)/ no-freeze-capacity 🟡✅(沒凍結但半扶)。
-- ⚠️ **Step 1 跳過 clarify 直接報解法** + 把剛複習的 LB 演算法亂套(recency bias)。"cost is low" = 初階 tell,已焊「cost 格禁用低/高,一律換具體會咬你的東西」。
+**同場後半(語言規則+難度回檔+核心 chunk 過關):** (1) 學生點名「中文敘述+技術名詞留英文」,已入 memory(keep-technical-terms-in-english)+ coaching-brief 語言策略;之後所有 coach 適用。(2) 全中文對話版完整 mock 逐字稿+速記卡給畢。(3) 學生喊「太難了/會考嗎/圖看不懂」→ safety valve 回檔:校準「逐字稿=天花板非及格線,及格線只有三件事(clarify 三類時效/50min 推 queue 隔離/3AM page)」;11 框圖棄用,改三層漸進圖(第 0 層現狀→第 1 層加 queue→第 2 層一變三)。(4) **核心 chunk 過關**:「三 queue 共用一組 worker 解決了嗎?」→ 學生「還是沒有解決」(裸)→ 要機制 →「會卡在在跑大量的 marketing」= 最小單位過;鏈已拼完整(隔離要隔 queue+worker 兩層)。🌟 本場最佳:學生主動問「worker 可以用 Lambda 嗎」= 主動 AWS 映射(sprint overlay 目標),且 reserved concurrency per-function 正好同構 per-pool 隔離。
+下一步(S47):開場白板默畫**三層簡化圖**(0→1→2 層,非 11 框大圖)+ 自己講「為什麼 queue 和 worker 都要分」→ 過了才進 Step 3 deep dive(provider failover / dedupe 位置)→ 收尾自己跑 3AM page test。
 
-## S38(跨機器接續,兩段)
+## S45(2026-07-19→20,清帳場 2/2:WR5 Topic 2 盲測 + Topic 3 開題;開場拍板押後清帳)
 
-- **(工作 PC) execution-heavy Part 1 逾期複習 1/5:** ✅ **Rate Limiting failure-timeline PASS** — 本地計數陷阱「10 台 ×1000 = 10000/min」冷推出來(S28 的 N×limit 28 天後仍在),補「無聲失敗」點(每台全綠但合計 10 倍 = 監控盲點反例)。→ **Box 1→2**。但 one-liner 機制層(Token Bucket/Sliding Window/兩層/CB)掉了,下次再測(S40 已補)。
-- **(家機) Day 31 Distributed Rate Limiter 完整設計 — 全鏈自推:** 從 Rate Limiting 暖身(同上,順接)→ 100 台各跑各的 = 孤島 → N×limit=10,000 → 共享 Redis counter(選對「共享計數器」非「一台限流機器」=SPOF)→ 搶票超賣比喻教 race condition → 學生**自己跳到** Redis 單執行緒 DECR 原子性 → TTL 過期(Fixed Window)取代排程手動補 → 抓到邊界 2 倍破綻 → sliding window「往回看 60s」補洞 → 多步 race 重演 → Lua 捆多步成原子收口。主軸就一個字 atomicity。筆記 `portfolio/sd/notes/day31-distributed-rate-limiter.md`+mindmap。
-  - 🌟 **頭號弱點突破**:收尾 One-Liner 主動把「選 sliding window **因為**往回算 request」結論+論證綁一起,沒等追問(execution-heavy 首攻目標本場有一次達標)。
-  - 🌟 自抽「**主動 vs 被動**」遷移心法(TTL 過期 > 排程主動清),連到 DevOps 半夜 job 掛。
-  - ⚠️ **教練自我教訓**:本場 3 次「有點亂/什麼意思」= 一次塞太多 + 抽象 meta 問句;退小步+具象比喻(搶票、計數紙自燒)後全通。非概念不懂,是 pacing。
+<!-- 自 progress.md 的 Current Session breakpoint 區段原文遷入(2026-08-19),一字未改。 -->
 
-## S36(Day 29 Unique ID Generator 設計+理論,Snowflake)
+**2026-07-19 S45 開場學生拍板:清帳場 2/2 押後(「不要再清場了,快沒耐心」),WR5 Topic 2/3 + 過期卡 sweep 移到 Tier 1 mock 跑完後收;S45 直接進 mock #1 Day 33 Notification System。**
 
-筆記 `portfolio/sd/notes/day29-unique-id-generator.md`。
-- **問題錨定教法奏效**:從 KGS(上場)橋接 —「不准中央配號,100 台各自發唯一 ID」→ 學生**自己推出** Snowflake 三段骨架(machineID 不撞跨機器 → 加 counter 同台不撞 → 重啟撞號 → 加 timestamp)。timestamp 放最高位用「日期格式 `2026-06-28` vs `28-06-2026`」比喻打通(「排序由最高位主宰」)。
-- **Clock skew(最大雷)**:學生卡在「只覺得很危險」講不出機制 → 用具體數字走「倒退→重入舊毫秒→seq 歸零→重發已發號=撞號」釘死。解法拒發>等>借位,連回 Day27「丟得起 vs 丟不起」。
-- **兩條 coaching 設定本場建立(已存 memory)**:[[coaching-no-mechanical-gate-labels]](學生點名「Recall/Transfer」標籤太機械 → 收回,自然問) + [[coaching-aggressive-interviewer-drills]](學生主動要求 Drill 當 bar-raiser 用力追問,他真面試常被追問考倒)。
-- **Interview Drill ~4/7(未達 Phase3 線,練習非 Gate)**:✅ think aloud/scope(主動想到 enumeration 洩漏營業額=architect 級,加分)/用 Snowflake;🟡 trade-off WHY(給結論不給論證,被追問才展開=老毛病)/failure modes(SPOF 有 clock skew 沒主動帶);❌ operational(第4次監控掛蛋)+ capacity(「直接放棄」,拆 1024×4 才跟上)。
+**S45 中斷存檔(2026-07-20,清帳場 2/2,WR5 Topic 2/3 已收)。** Topic 2 Security & Auth 盲測 1/6(security✅;trade-off🟡 開局裸「JWT token」scaffold 後完整組裝+Max session-表-進-memory 挑戰用量級頂回;failure-timeline🟡 deny list-TTL aging 卡兩輪、通行證期限比喻後自組;capacity/ops/one-liner 未測)。新 registry 2 筆已落檔(s45,見 Live)。問句丟球(「是這樣子嗎?」)+要提示(「Senior 會怎麼答」)各再現一次,計入既有每場即測條目。**Topic 3 Unique ID Generator 題目已出(電商 100 台/50K per s/ID≈時間排序),球 1 Snowflake 64-bit 白板默畫未作答。**
 
-**當時的 pending(多數已由 S37-S40 消化):** 逾期複習 5 筆(S38-S40 清完)、Security 廣度(OAuth/JWT/session full recall 仍欠,Box 2)、Snowflake Light PoC(park 中)、Circuit Breaker/Replication-lag 獨立 PoC(2026-07-02 triage 放掉,概念已 5/5)。
+下一場(S46)resume:Topic 3 球 1 默畫起 → 8 張過期卡 sweep → artifact audit → 收帳(last_weekly_review 更新)→ mock #1 Day 33 Notification System(計畫細節見上方 S44 段)。
 
-<!-- S1-S35 無集中敘事;軌跡見 scorecard history(progress.md)、逐日筆記(portfolio/sd/notes/)、
-     以及 coaching-brief.md 的 S1-S36 蒸餾。 -->
+原 S45 計畫(押後,Tier 1 mock 後執行;one-liner 抽考已停用,2026-07-18 學生拍板,見 curriculum-plan.md):
+1. 續 WR5:Topic 2 Security & Auth(OAuth/JWT/session 廣度盲測,完整題目敘述開場)→ Topic 3 Unique ID Generator → 8 張過期卡 sweep → artifact audit → 收帳(last_weekly_review 更新)。
+2. 收完 → **mock #1:Day 33 Notification System**(產業情境開場 + 4-step + AWS 映射 + 三指標計分;3AM page test 四格內建考:dead man's switch/ticket/dashboard 模範答案 S44 給過,這裡驗留存;session store 架構圖白板默畫可插入)。
+
+---
+
+ S44 以前的敘事(S36–S44)封存於 `archive/session-log-S36-S44.md`,一字未刪;需要查史時讀該檔。
