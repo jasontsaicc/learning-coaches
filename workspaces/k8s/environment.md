@@ -61,6 +61,18 @@ context kind → cluster kind-k8s-coach-p0(s21 已刪,條目不存在)
 
 診斷指令注意:`docker ps --filter name=kind` **抓不到 p2a**(容器叫 `k8s-coach-p2a-*`,名字裡沒有 kind)。要用 `kind get clusters` 或不帶 filter 的 `docker ps -a`。
 
+## bastion 叢集現況(2026-08-20,s28 開場,**containerd 第六次卡死 → 已修復三台 Ready**)
+
+- 開場:三台全 `NotReady`(9d),一行對照跑出來**三台都 `SLOW`**(不是只有 worker2)。
+- 修法照 08-10 精準版,三台各一發,25 秒全回 `Ready`,Pod 未重排:
+
+```
+for n in control-plane worker worker2; do docker exec k8s-coach-p2a-$n systemctl restart containerd; done
+```
+
+- **當下宿主機 load 5.97 / 4 核心**,`ps -eo pcpu,pmem,etime,comm --sort=-pcpu | head` 抓到 **terraform 69% + terragrunt 20%**(別的工作在跑)。→ **根因不變:這台 4 核心 bastion 只要有人跑重活,containerd 的 CRI 就會被拖過 kubelet 的健康檢查 timeout,而且負載退了它不會自己恢復。**
+- 結論:`gitlab-ci-dashboard` 退場沒有根治,因為競爭者換人就會再犯。**s29 評估:改用單節點 kind 叢集(少兩個 node 的 containerd/kubelet)或上課前避開跑 terraform。**
+
 ## bastion 叢集現況(2026-08-10 晚,**p2a 已重建 + 三台 Ready**)
 
 - 舊叢集已 `kind delete`,用 `clusters/kind-p2a.yaml` 重建(control-plane + worker ×2,disableDefaultCNI,podSubnet `192.168.0.0/16`),Calico `v3.28.2` 已裝。三台 `Ready`,kube-system 全 `Running`。
