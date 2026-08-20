@@ -15,11 +15,31 @@
 
 ## Current Session breakpoint
 
-**s28 進行中(2026-08-20,公司 bastion,context `kind-k8s-coach-p2a`)。距 s27 隔 10 天,走 Comeback Protocol。**
+**s28 已收(2026-08-20,公司 bastion,context `kind-k8s-coach-p2a`)。距 s27 隔 10 天,走 Comeback Protocol。學員趕下班,G 段要求直接給正解後收工。**
 
-- 開場叢集:三台 NotReady、`crictl` 三台全 SLOW(containerd 第六次卡死)。**學員明說「你直接檢查環境」→ 鍵盤鐵律例外條款觸發,教練代跑**;用 08-10 精準修法 `docker exec <node> systemctl restart containerd` ×3,25 秒三台 Ready。當下宿主機 load 5.97/4 核心,兇手是別人在跑 terraform/terragrunt(同 s21 terraboard 形狀)。
-- **冷測三題結果**:Q1 對照組(ALB 三台兩壞)**半過** —— 認出證據句「第三台完全正常」✅,但判準句答不出、喊「直接説明」,直給;隨後的應用題**立刻選 A(查 ALB access log)= 剛砍掉的那層**。Q2 `active`≠活著 **未過** —— 首答跑去講 DB、二答「不是網絡嗎」,機制直給;接的 liveness 二選一**又選 A(pgrep)**,梯子縮到最小(pgrep 對 hang 住的 process 找不找得到)才走通,中途 liveness/readiness 動作**對調**(答「繼續導入流量」),且答案兩種讀法要教練追問才定案(s25 同形狀)。Q3 排障順序 **過** —— `reboot` 排最後 ✅(**restart 排採證前面這張卡 s21 以來第一次真的做對**),B/C 順序初答倒置,給成本對比後自己改對並給出判準「比較簡單」。
-- ⚠️ **本堂主訊號(比知識點重要)**:**判準句給完 30 秒內,下一題就套用不上** —— Q1、Q2 兩次同形狀(剛證明某層無罪 → 立刻去查那層;剛講完 systemctl 只驗第 1 層 → 立刻選第 1 層的 probe)。不是記不住,是**沒有把剛拿到的判準當成工具去用**。
+本堂事實:
+
+- **開場環境**:三台 NotReady、`crictl` 三台全 SLOW(containerd **第六次**卡死)。學員明說「你直接檢查環境」→ 鍵盤鐵律例外條款觸發,教練代跑。08-10 精準修法 `systemctl restart containerd` ×3,25 秒三台 Ready、Pod 未重排。宿主機 load 5.97/4 核心,兇手是**別人在跑 terraform/terragrunt**(同 s21 terraboard 形狀)。
+- **冷測三題**:Q1 對照組(ALB 三台兩壞)**半過** —— 認出證據句「第三台完全正常」✅,判準句答不出、喊「直接説明」,直給;隨後應用題**立刻選 A(查 ALB access log)= 剛砍掉的那層**。Q2 `active`≠活著 **未過** —— 首答跑去講 DB(講別人壞不是講它自己壞)、二答「不是網絡嗎」,機制直給;接的 liveness 二選一**又選 `pgrep`**,梯子縮到最小才走通。中途 **liveness/readiness 動作對調**(答「繼續導入流量」),且答案兩種讀法要教練追問才定案(s25 同形狀第二次)。Q3 排障順序 **過**。
+- ✅ **本堂最大正樣本:`restart` 排在採證前面這張卡,s21 以來第一次真的做對**。四動作排序把 `reboot` 排最後;B/C 初答倒置,給成本對比後自己改對並自帶判準「**比較簡單**」= pattern 卡無提示正樣本第 5 次(前四次:s22 站 7、s24 kernel 題、s25 PV/PVC、s26 upperdir)。
+- ⚠️ **本堂主訊號(教學法層級,比知識點重要):判準句給完 30 秒內,下一題就套用不上,同堂兩次同形狀。** 不是記不住(兩次都能複述),是**沒把剛拿到的判準當工具用**。診斷:直給之後少了「當場用一次」那一步。已建 pattern 卡。
+- **F 段跑了但散掉**:獨白首句「active 代表 process **順利執行**」= 把「存在」講成「順利執行」,正是整堂的病;第二輪出現與主題無關的碎片(「repo 的 parameter-store JSON」)→ 判定負荷/分心訊號,依安全閥縮成二選一「不在家 vs 在家但不接電話」→ **答對**,`DeadlineExceeded` vs `connection refused` 當場收。
+- **G 段未作答**(學員趕時間),正解與 L6 版已給,**原題留 s29 重用**。
+- **Scorecard tier2 1/4**(原理🟡 機制❌ 自己的話❌ MTTR✅)。
+- 未跑:WR9(第四度)、story-bank(連八堂)、C-2 StorageClass。
+
+next(s29),順序 —— ⚠️ **2026-08-20 學員拍板改制:新內容排最前面,複習/冷測壓到課堂尾巴**。理由:P2b 自 s26(08-06)起 14 天沒推進,每堂開場被「修叢集 + 複習」吃掉,新內容排最後就在疲勞時被砍;面試窗口約 09 中旬,舊節奏推不完。**冷測不砍**(隔堂測留存是唯一有效方法),只改排序,吃掉的是複習時間不是課程時間。學員選項 A(冷測留課堂尾巴)勝出,B(非同步冷測)未採用。
+
+1. **開場先講今天做哪 3 件事,一次只推一件**(s28 照做有效,續用)。叢集若掛,直接下 `for n in control-plane worker worker2; do docker exec k8s-coach-p2a-$n systemctl restart containerd; done`,**不當教材、不排障**。
+2. **主秀先跑:C-2 StorageClass / 動態供給 / CSI**(P2b;s26 已把 EBS CSI 概念鋪好)。
+3. **G 段**:s28 未答的原題直接重用(12 個 Pod、3 個延遲 30 秒、`RESTARTS` 全 0、`exec: pgrep` probe;同時考對照組 + active≠活著 + 選指令)。
+4. **尾巴才做冷測,3 題上限**:① 對照組判準一句版(換第三種皮)② `active` 為什麼不等於服務活著 ③ **liveness vs readiness 各自的動作(s28 退步卡,必抽)**。
+5. ⚠️ **對治 s28 主訊號的硬規格:每給一個判準句,立刻接一題只有換皮的應用題,答對才算給完。** 不要等隔堂才發現沒套用。
+6. **叢集**:9 天大、containerd 第六次(這次三台全 SLOW)。修法成熟但每堂都要修 → 評估改單節點 kind 降負載,或上課前避開跑 terraform。
+
+<!-- schema: PROGRESS-SCHEMA.md §3 = 當前狀態 + 下一堂 resume,只留最新一堂。
+     s26 及更早的斷點原文封存於 archive/breakpoint-history.md(冷檔,一字未刪);
+     長效教練紀律在 session-log.md「教練執行紀律」。 -->
 
 ## Phase status
 
