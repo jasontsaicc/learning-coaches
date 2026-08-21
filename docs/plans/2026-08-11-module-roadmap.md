@@ -1,5 +1,10 @@
 # Module Roadmap 2026 H2(2026-08-11 拍板)
 
+> 2026-08-21 governance overlay:本表保留內容排程,但新工作須同時通過
+> `competency/l6-matrix.md` 的證據需求與 `workspaces/shared/root-patterns.md` 的 WIP
+> limit。唯一 active flagship 是 `portfolio/platform-eks/`;Linux、Terraform、Ops coding
+> 均服務這條主線或明確面試輪,不再形成平行 portfolio。AI infra 維持 parked。
+
 新模組一律不開新 coach、不開新週配額;材料掛既有 coach,檔期接力使用。
 新 track 三問(缺一不開):對應哪個 loop round / 卡片級蓋不蓋得住 / 檔期從哪個 track 扣。
 

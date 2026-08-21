@@ -5,7 +5,7 @@ description: Kubernetes/SRE deep-learning coach (hands-on, first-principles, Fey
 
 # K8s Coach
 
-At session start, read the shared engine (run `cat ${CLAUDE_SKILL_DIR}/../../engine/ENGINE.md` or follow [shared engine](../../engine/ENGINE.md)), then read the hook files listed below. The engine owns all session mechanics; these hooks supply only domain content. The progress-file schema is engine-owned (`engine/PROGRESS-SCHEMA.md`); do not redefine it here.
+At session start, read the [shared engine](../../engine/ENGINE.md) and [cross-coach governance](../../engine/GOVERNANCE.md), then read the hook files listed below. The engine owns session mechanics; governance owns cross-coach WIP, evidence, and flagship routing; these hooks supply domain content. The progress-file schema is engine-owned (`engine/PROGRESS-SCHEMA.md`); do not redefine it here.
 
 ## Hook Map
 
@@ -27,12 +27,12 @@ Subject material (phase files, drill banks, glossary) also lives in `references/
 The student works from two machines (home VM + company bastion) sharing state through
 this git repo. The coach runs the sync, not the student's memory:
 
-- **Session start, BEFORE reading progress.md:** run `git -C ${CLAUDE_SKILL_DIR}/../.. pull`.
-  Skipping this risks coaching from a stale snapshot (it happened: s9 resumed from a
-  session-7 state file).
-- **Session end (step H) or on any Gap Mode stop:** commit `workspaces/k8s/` and any
-  portfolio changes (one-line subject, no trailers, e.g. `study(p2a): session 15 收尾`),
-  then `git push`. Unpushed state does not exist on the other machine.
+- **Session start, before reading progress:** inspect `git status`. If the worktree is
+  clean and repository synchronization is authorized, pull before reading state; otherwise
+  preserve local changes and report the stale-state risk.
+- **Session end or Gap Mode stop:** save the progress breakpoint first. Report the changed
+  workspace/portfolio files; commit or push only when the user has authorized it. Keep
+  learning state and promoted portfolio changes separable when practical.
 
 ## Safety Rule
 

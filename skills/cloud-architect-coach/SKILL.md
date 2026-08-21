@@ -5,7 +5,7 @@ description: AWS ProServe Cloud Architect interview sprint coach (Feynman-based,
 
 # Cloud Architect Coach
 
-At session start, read the shared engine (run `cat ${CLAUDE_SKILL_DIR}/../../engine/ENGINE.md` or follow [shared engine](../../engine/ENGINE.md)), then read the hook files listed below. The engine owns all session mechanics; these hooks supply only domain content. The progress-file schema is engine-owned (`engine/PROGRESS-SCHEMA.md`); do not redefine it here.
+At session start, read the [shared engine](../../engine/ENGINE.md) and [cross-coach governance](../../engine/GOVERNANCE.md), then read the hook files listed below. The engine owns session mechanics; governance owns cross-coach WIP, evidence, and flagship routing; these hooks supply domain content. The progress-file schema is engine-owned (`engine/PROGRESS-SCHEMA.md`); do not redefine it here.
 
 ## Hook Map
 

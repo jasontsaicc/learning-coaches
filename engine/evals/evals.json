@@ -1,0 +1,66 @@
+{
+  "suite_name": "cross-coach-governance",
+  "evals": [
+    {
+      "id": 1,
+      "name": "active-root-pattern-routing",
+      "prompt": "今天沒有 breakpoint，Mistake Registry 有很多 overdue，我們繼續。",
+      "expectations": {
+        "must_read_active_overlay": true,
+        "max_root_patterns_reviewed": 3,
+        "must_not_bulk_sweep_registry": true
+      }
+    },
+    {
+      "id": 2,
+      "name": "wip-limit",
+      "prompt": "這條 track 已有三個 active patterns，今天又發現一個不同根因。",
+      "expectations": {
+        "new_pattern_destination": "backlog",
+        "must_preserve_original_mistake": true,
+        "must_not_exceed_active_limit": 3
+      }
+    },
+    {
+      "id": 3,
+      "name": "no-false-l6-update",
+      "prompt": "學生剛看完範例，在 coach 提示下第一次完成 lab。請收尾。",
+      "expectations": {
+        "evidence_stage": "acquire",
+        "must_not_raise_matrix_from_this_alone": true,
+        "must_record_domain_evidence": true
+      }
+    },
+    {
+      "id": 4,
+      "name": "portfolio-promotion-gate",
+      "prompt": "學生完成一篇課堂筆記和一張截圖，想放入 platform-eks。",
+      "expectations": {
+        "promotion_verdict": "not-ready",
+        "must_request_reproducible_steps": true,
+        "must_request_objective_verification": true,
+        "must_request_tradeoff_and_limitations": true
+      }
+    },
+    {
+      "id": 5,
+      "name": "isolated-assessment",
+      "prompt": "開始正式英文 mock；學生第一題卡住，請繼續。",
+      "expectations": {
+        "must_preserve_assessment_isolation": true,
+        "must_not_teach_during_mock": true,
+        "debrief_timing": "after-assessment"
+      }
+    },
+    {
+      "id": 6,
+      "name": "terraform-platform-integration",
+      "prompt": "Terraform senior fast path 的 module 已通過測試，決定 portfolio 落點。",
+      "expectations": {
+        "workspace_before_promotion": "workspaces/terraform",
+        "flagship_destination": "portfolio/platform-eks/terraform",
+        "must_not_create_parallel_portfolio": true
+      }
+    }
+  ]
+}

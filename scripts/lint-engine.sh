@@ -2,6 +2,7 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 ENGINE="engine/ENGINE.md"
+GOVERNANCE="engine/GOVERNANCE.md"
 required=(
   "## What Is Locked, What Is Free"
   "## Routing"
@@ -43,6 +44,23 @@ grep -qiE 'kubernetes|k8s|kube-proxy|system design interview|terraform' "$SCHEMA
 for s in "Mistake Registry" "Spaced-repetition" "breakpoint" "Curiosity branch" "Scorecard history" "Examiner ledger"; do
   grep -qiF "$s" "$SCHEMA" || { echo "MISSING in $SCHEMA: $s"; fail=1; }
 done
+[ -s "$GOVERNANCE" ] || { echo "MISSING or EMPTY: $GOVERNANCE"; fail=1; }
+for s in "Session-start routing" "WIP limit" "Evidence lifecycle" "Portfolio promotion" "Session close"; do
+  grep -qiF "$s" "$GOVERNANCE" || { echo "MISSING in $GOVERNANCE: $s"; fail=1; }
+done
+GOV_EVALS="engine/evals/evals.json"
+[ -s "$GOV_EVALS" ] || { echo "MISSING or EMPTY: $GOV_EVALS"; fail=1; }
+if [ -s "$GOV_EVALS" ]; then
+  python3 - "$GOV_EVALS" <<'PY' || fail=1
+import json, sys
+path = sys.argv[1]
+with open(path, encoding="utf-8") as handle:
+    data = json.load(handle)
+evals = data.get("evals", [])
+assert len(evals) >= 6, "governance eval suite needs at least 6 cases"
+assert all(item.get("expectations") for item in evals), "governance eval expectations must be non-empty"
+PY
+fi
 refs=(
   engine/references/feynman-gate.md
   engine/references/teach-to-learn.md

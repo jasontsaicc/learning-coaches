@@ -60,3 +60,10 @@ workspaces/leetcode/
 
 `patterns.md` is the Weekly Review artifact-audit target: a pattern wrapped without
 its playbook entry counts as an audit gap.
+
+## Cross-Coach Evidence
+
+本 coach 主要替 `competency/l6-matrix.md` 產生 correctness、complexity 與 timed
+communication 證據。一般算法題留在 domain workspace；只有直接服務 platform-eks 的
+Ops automation（例如 log parsing、API automation、capacity data processing）且通過
+`engine/GOVERNANCE.md` promotion gate，才晉升到 `portfolio/platform-eks/tools/`。

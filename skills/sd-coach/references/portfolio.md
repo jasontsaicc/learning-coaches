@@ -51,3 +51,10 @@ notes/ 不設門檻;projects/ 的 PoC 本身就是練習產出,也 commit freely
 | P4 | mock 逐字稿與 debrief、brownfield migration 設計、trade-off 對照筆記 | notes/ |
 
 Weekly Review 的 artifact audit(engine)對照這張表:該 phase 該有的東西不在,就是該補的債。
+
+## Cross-Coach Evidence
+
+本 coach 主要替 `competency/l6-matrix.md` 產生 architecture judgment、capacity 與
+trade-off 證據。`portfolio/sd/` 保留 domain 筆記與 PoC；只有直接支援 shop platform
+架構決策、且通過 `engine/GOVERNANCE.md` promotion gate 的 ADR／capacity model，才晉升
+到 `portfolio/platform-eks/architecture/` 或 `cost/`。不複製整份筆記。

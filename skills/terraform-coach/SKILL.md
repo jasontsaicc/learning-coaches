@@ -5,7 +5,7 @@ description: Terraform / IaC deep-learning coach (hands-on, first-principles, Fe
 
 # Terraform Coach
 
-At session start, read the shared engine (run `cat ${CLAUDE_SKILL_DIR}/../../engine/ENGINE.md` or follow [shared engine](../../engine/ENGINE.md)), then read the hook files listed below.
+At session start, read the [shared engine](../../engine/ENGINE.md) and [cross-coach governance](../../engine/GOVERNANCE.md), then read the hook files listed below. Governance routes Terraform evidence into the shared `platform-eks` flagship instead of a parallel portfolio.
 
 ## Hook Map
 

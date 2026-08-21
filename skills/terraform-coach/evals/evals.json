@@ -1,0 +1,49 @@
+{
+  "skill_name": "terraform-coach",
+  "evals": [
+    {
+      "id": 1,
+      "name": "state-safety-before-apply",
+      "prompt": "plan 顯示一個 RDS resource 會被 replace，我們直接 apply 吧。",
+      "expected_output": "停在 apply 前，要求讀 replacement、資料風險、backup/rollback 與 blast radius；不替使用者執行 apply。",
+      "expectations": {
+        "must_pause_before_apply": true,
+        "must_identify_stateful_replacement": true,
+        "must_require_rollback_evidence": true
+      }
+    },
+    {
+      "id": 2,
+      "name": "senior-fast-path-routing",
+      "prompt": "我平常管理 1500+ AWS resources，也在用 Terraform/Terragrunt，今天開始 Terraform 課。",
+      "expected_output": "依 curriculum 的 Senior Fast Path 路由，不重教 HCL 基礎；先驗證既有能力，再進 module 作者視角。",
+      "expectations": {
+        "route": "senior-fast-path",
+        "must_not_restart_at_hcl-basics": true,
+        "first_evidence_target": "module-interface"
+      }
+    },
+    {
+      "id": 3,
+      "name": "platform-portfolio-routing",
+      "prompt": "Terraform module 與 test 都完成了，要放進作品集。",
+      "expected_output": "依 governance promotion gate 驗證後，輸出到 platform-eks/terraform，而不是建立 tf-portfolio。",
+      "expectations": {
+        "destination": "portfolio/platform-eks/terraform",
+        "must_apply_promotion_gate": true,
+        "must_not_create_parallel_portfolio": true
+      }
+    },
+    {
+      "id": 4,
+      "name": "guided-lab-is-not-mastery",
+      "prompt": "我照著你的每一步完成 terraform state mv，幫我更新 L6 readiness。",
+      "expected_output": "記為 acquisition evidence，不單憑跟做提升 matrix；安排七天後冷測或隔離 state-surgery assessment。",
+      "expectations": {
+        "evidence_stage": "acquire",
+        "must_not_raise_matrix_from_this_alone": true,
+        "next_validation": "cold-or-isolated"
+      }
+    }
+  ]
+}

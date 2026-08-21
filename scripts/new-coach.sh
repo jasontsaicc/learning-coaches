@@ -38,8 +38,10 @@ stamp() {
 }
 
 mkdir -p "$DEST/references"
+mkdir -p "$DEST/evals"
 
 stamp "$TMPL/SKILL.md.tmpl" "$DEST/SKILL.md"
+stamp "$TMPL/evals/evals.json.tmpl" "$DEST/evals/evals.json"
 
 # required hooks (always stamped)
 for hook in north-star curriculum teaching-elements scorecard-dims phase-gates portfolio; do

@@ -11,9 +11,11 @@ learning-coaches/
 ├── .gitignore
 ├── README.md
 ├── docs/                                    # design specs + implementation plans
+├── competency/                              # cross-coach Senior/L6 evidence matrix
 ├── legacy/                                  # frozen pre-merge repo snapshots (k8s, sd, leetcode)
 ├── engine/
 │   ├── ENGINE.md                            # Shared teaching engine
+│   ├── GOVERNANCE.md                        # Cross-coach WIP, evidence, portfolio routing
 │   ├── PLUGIN-INTERFACE.md                  # Coach hook contract
 │   ├── PROGRESS-SCHEMA.md                   # Engine-owned progress-file schema (shared by all coaches)
 │   └── references/                          # Engine reference materials
@@ -82,6 +84,15 @@ learning-coaches/
     └── sd/                                  # notes/ (day01+ topic notes + mindmaps)
                                              #   + projects/ (Go PoCs, one dir per topic)
 ```
+
+## Current Governance Focus
+
+- `competency/l6-matrix.md` is the cross-coach readiness projection; only observable
+  evidence can raise a score.
+- `workspaces/shared/root-patterns.md` groups unresolved mistakes into seven transferable
+  patterns and limits each track to three active patterns.
+- `portfolio/platform-eks/` is the only active flagship. Existing K8s and system-design
+  portfolio files remain source material and are promoted only after objective validation.
 
 ## Tracked Workspaces
 

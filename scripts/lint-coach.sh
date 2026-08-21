@@ -18,6 +18,7 @@ for f in "${required[@]}"; do
 done
 # the thin SKILL.md must read the engine, not re-implement it
 grep -qF "engine/ENGINE.md" "$base/SKILL.md" || { echo "SKILL.md does not read the engine"; fail=1; }
+grep -qF "engine/GOVERNANCE.md" "$base/SKILL.md" || { echo "SKILL.md does not read governance"; fail=1; }
 # guard against engine mechanics being copied into the coach
 if grep -qiE 'failure escalation|two stages|3 -> 7 -> 14' "$base/SKILL.md"; then
   echo "ENGINE LEAK: $base/SKILL.md re-implements engine mechanics"; fail=1
@@ -51,6 +52,21 @@ check_markers references/scorecard-dims.md 'primary' 'tier 1'
 check_markers references/phase-gates.md 'gate'
 min_subsections references/phase-gates.md 1
 check_markers references/portfolio.md 'workspace' 'artifact'
+# Evals are required for every live coach; assertions must carry structured expectations.
+evals="$base/evals/evals.json"
+[ -s "$evals" ] || { echo "MISSING or EMPTY: $evals"; fail=1; }
+if [ -s "$evals" ]; then
+  python3 - "$evals" <<'PY' || fail=1
+import json, sys
+path = sys.argv[1]
+with open(path, encoding="utf-8") as handle:
+    data = json.load(handle)
+assert data.get("evals"), "eval suite must contain at least one case"
+for item in data["evals"]:
+    assert item.get("id") is not None, "eval case missing id"
+    assert item.get("prompt"), "eval case missing prompt"
+PY
+fi
 # lab-manager is conditional; check structure only if present
 [ -s "$base/references/lab-manager.md" ] && check_markers references/lab-manager.md 'verif|teardown'
 exit $fail

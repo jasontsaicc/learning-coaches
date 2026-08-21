@@ -273,8 +273,9 @@ the progress file's schema. That schema is engine-owned and lives in
 The thin `SKILL.md` entry point must:
 
 1. Read the engine at session start: `${CLAUDE_SKILL_DIR}/../../engine/ENGINE.md`
-2. Read each hook in `${CLAUDE_SKILL_DIR}/references/` to load domain content.
-3. Not re-implement any engine mechanic. The engine text itself is authoritative for
+2. Read cross-coach governance: `${CLAUDE_SKILL_DIR}/../../engine/GOVERNANCE.md`
+3. Read each hook in `${CLAUDE_SKILL_DIR}/references/` to load domain content.
+4. Not re-implement any engine mechanic or governance rule. Those source files are authoritative for
    mechanics. If a mechanic is duplicated in `SKILL.md`, the lint script will flag it.
 
 The recommended structure for `SKILL.md`:
@@ -283,6 +284,7 @@ The recommended structure for `SKILL.md`:
 # <Domain> Coach
 
 Read engine: ${CLAUDE_SKILL_DIR}/../../engine/ENGINE.md
+Read governance: ${CLAUDE_SKILL_DIR}/../../engine/GOVERNANCE.md
 Read hooks:
   - ${CLAUDE_SKILL_DIR}/references/north-star.md
   - ${CLAUDE_SKILL_DIR}/references/curriculum.md
@@ -307,6 +309,7 @@ Read hooks:
    required structure and `<!-- TODO: -->` markers.
 2. Fill every TODO marker with domain content. The engine owns all mechanics and the
    progress-file schema (`PROGRESS-SCHEMA.md`); the hooks supply only domain content.
+   Replace the eval template with at least one realistic case and structured expectations.
 3. Run `./scripts/lint-coach.sh <coach-name>`. It fails while any TODO remains and checks
    that each hook has its required structure, so a scaffolded-but-unfilled coach cannot
    pass. Fix any reported issues before committing.

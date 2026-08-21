@@ -23,3 +23,11 @@ ${CLAUDE_SKILL_DIR}/../../workspaces/ca/
 - final pre-interview one-page crib:面試前最後一張紙,把 thread-pull list、parked holes(盤點時沒補完、決定先擱著的洞)、weak-point retest log(補完機制重測拿到 `pass` 的紀錄)收斂成一頁。
 
 Weekly Review 的 artifact audit(engine)對照這兩項:該有的不在,就是該補的債。
+
+## Cross-Coach Evidence
+
+本 coach 主要替 `competency/l6-matrix.md` 產生 customer ambiguity、migration、leadership
+與 English delivery 證據。若 case 直接使用 shop platform，通過
+`engine/GOVERNANCE.md` promotion gate 的 migration decision、customer-facing ADR 或英文
+executive summary 可晉升到 `portfolio/platform-eks/architecture/`；一般 mock 答案仍留在
+本 workspace，不另開 portfolio 主線。

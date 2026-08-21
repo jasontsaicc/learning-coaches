@@ -5,10 +5,10 @@
 Progress files, registries, and in-progress work live in:
 
 ```
-~/terraform-coach-workspace/
+${CLAUDE_SKILL_DIR}/../../workspaces/terraform/
 ```
 
-This directory is not a public repo. It holds:
+This git-tracked directory holds:
 - `progress.md`: the engine's progress file. Its schema is engine-owned and defined in
   `engine/PROGRESS-SCHEMA.md`; this coach does not redefine it.
 - `term-registry.md`: this coach's domain registry, built incrementally from the term
@@ -28,11 +28,19 @@ each session.
 Artifacts that clear the quality bar ship to:
 
 ```
-~/tf-portfolio/
+${CLAUDE_SKILL_DIR}/../../portfolio/platform-eks/terraform/
 ```
 
-This is a public (or shareable) repo. Only promote an artifact when it would impress
-a senior reviewer who has not seen the backstory.
+Terraform extends the shared `platform-eks` flagship; it does not create a parallel
+portfolio. Phase exercises remain in the workspace until they meet the promotion gate in
+`engine/GOVERNANCE.md`. Only promote an artifact when it would impress a senior reviewer
+who has not seen the backstory.
+
+### Evidence ownership
+
+This coach primarily certifies state safety, delivery, policy, and blast-radius evidence
+for `competency/l6-matrix.md`. A successful guided apply is acquisition evidence; matrix
+updates require a cold test, reproducible artifact, or isolated assessment.
 
 ### Quality Bar
 
@@ -58,8 +66,7 @@ but produces no public artifact.
 an EC2 instance in the public subnet, and a security group allowing SSH.
 
 **Ships with:**
-- `main.tf`, `variables.tf`, `outputs.tf` in a `p1-vpc-ec2/` directory under
-  `tf-portfolio/`.
+- `main.tf`, `variables.tf`, `outputs.tf` in a `p1-vpc-ec2/` workspace directory.
 - A `destroy.log` file: the output of `terraform destroy -auto-approve`, confirming
   the resources were cleaned up after the lab (no orphaned resources, no runaway cost).
 - A short `README.md` (3-5 sentences) explaining what the config does and what the
@@ -113,7 +120,8 @@ at least one OPA policy enforcing a team naming convention or tag requirement.
 
 ### P6 - Complete Portfolio + Mock Result
 
-**Artifact:** A clean `tf-portfolio/` with all phase artifacts present, plus:
+**Artifact:** A clean `portfolio/platform-eks/terraform/` contribution with all promoted
+phase artifacts present, plus:
 - A written mock result: the design produced during the P6 gate (three-tier web app
   layout), with module structure, state config, and CI/CD approach documented.
 - The P6 gate scorecard printed from the session.

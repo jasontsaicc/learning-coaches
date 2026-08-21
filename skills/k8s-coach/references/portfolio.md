@@ -42,6 +42,10 @@ Recruiter-facing 展示區,與 workspace 分開。結構:`notes/`(學習筆記 +
 
 s12 起的 shop-api / shop-web 不是丟棄式 lab,是一路長到 P6 的平台;每個 phase 在同一個平台上長一層,終點是 recruiter 可看的 production-like 平台 + 一條完整敘事:「我從零長出一個平台,每一層都能講到 kernel」。唯一硬要求是「同一個平台一路長」,不重開爐灶(細節 FLEX,見 curriculum-plan §4.1)。
 
+`portfolio/k8s/` 保留為 domain 素材庫。通過 `engine/GOVERNANCE.md` promotion gate 的
+整合成果才晉升到 `portfolio/platform-eks/`;不為了路徑一致而搬動歷史檔案。本 coach
+主要替 L6 matrix 產生 troubleshooting、technical depth、reliability 證據。
+
 ## Per-Phase Artifacts
 
 | Phase | shop platform 長出什麼 | artifact 落點 |

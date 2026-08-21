@@ -5,7 +5,7 @@ description: LeetCode interview coach (Feynman + first-principles, Python, NeetC
 
 # Leetcode Coach
 
-At session start, read the shared engine (run `cat ${CLAUDE_SKILL_DIR}/../../engine/ENGINE.md` or follow [shared engine](../../engine/ENGINE.md)), then read the hook files listed below. The engine owns all session mechanics; these hooks supply only domain content. The progress-file schema is engine-owned (`engine/PROGRESS-SCHEMA.md`); do not redefine it here.
+At session start, read the [shared engine](../../engine/ENGINE.md) and [cross-coach governance](../../engine/GOVERNANCE.md), then read the hook files listed below. The engine owns session mechanics; governance owns cross-coach WIP, evidence, and flagship routing; these hooks supply domain content. The progress-file schema is engine-owned (`engine/PROGRESS-SCHEMA.md`); do not redefine it here.
 
 ## Hook Map
 
@@ -27,9 +27,8 @@ Supporting references (framework, pattern/complexity/Python cheatsheets) also li
 The student works from more than one machine (home VM + study-group laptop) sharing
 state through this git repo. The coach runs the sync, not the student's memory:
 
-- **Session start, BEFORE reading progress.md:** run `git -C ${CLAUDE_SKILL_DIR}/../.. pull`.
-  Skipping this risks coaching from a stale snapshot (the k8s coach hit exactly this: a
-  session resumed from a two-sessions-old state file).
-- **Session end (step H) or on any Gap Mode stop:** commit `workspaces/leetcode/` changes
-  (one-line subject, no trailers, e.g. `study(lc): session 17 收尾`), then `git push`.
-  Unpushed state does not exist on the other machine.
+- **Session start, before reading progress:** inspect `git status`. If the worktree is
+  clean and repository synchronization is authorized, pull before reading state; otherwise
+  preserve local changes and report the stale-state risk.
+- **Session end or Gap Mode stop:** save the progress breakpoint first. Report the changed
+  workspace files; commit or push only when the user has authorized it.
