@@ -7,13 +7,15 @@
 
 ## Meta
 
-- session_count: 28
-- last_weekly_review: 18(**WR9 於 s25 開跑,s26/s27/s28 均未跑,第四度未完成**;s28 的冷測三題只算壓縮版複習,不推進 last_weekly_review)
-- last_session_date: 2026-08-20
+- session_count: 29
+- last_weekly_review: 18(**WR9 於 s25 開跑,s26/s27/s28/s29 均未跑,第五度未完成**;s28 的冷測三題只算壓縮版複習,不推進 last_weekly_review)
+- last_session_date: 2026-08-21
 - warm_up_classification: mid(有地圖形狀,缺演員名字;P0 剛好,不加速)
 - **target_role: AWS Delivery Consultant(ProServe),2026-07-23 學員確認**。全部抽考包成客戶顧問情境、每題附 L6 範例答法(memory `aws-delivery-consultant-target` / `aws-mock-and-l6-answer-format`);戰略重排見 curriculum-plan §9。
 
 ## Current Session breakpoint
+
+**s29 已收(2026-08-21,context `kind-k8s-coach-p2a`)。C-2 三個概念 chunk Recall + Transfer 已過，hands-on 主鏈完成，停在 reclaimPolicy teardown 尚未執行。** ① StorageClass 動態供應：能用「只有 rule 沒有 engine」解釋無 CSI provisioner 時 PVC Pending；EKS CSI controller Running + PVC Pending 情境先查 IAM，守住 `Running` 不等於功能正常。② WaitForFirstConsumer：能推出「EBS 不能跨 AZ attach → scheduler 先確定 Pod/node AZ → provisioner 同 AZ 建 EBS」；一度把既有 EBS 重新調度誤答成 WFFC，重教建立前定序 vs 建立後 PV nodeAffinity 後換皮通過。③ CSI 分工：能指出 attach 後仍需 node 端 kernel mount；Transfer 首答錯選 `get pvc` 查 mount，重教「PVC Bound 是控制面帳本、Pod Events 是 node 執行證據」後改選 `describe pod` 通過。④ Hands-on：安全 context 已驗；`standard`=`rancher.io/local-path`/`WaitForFirstConsumer`/`Delete`；自寫 PVC 時 `PersistenVolumeClaim` typo 由 server dry-run 抓出並修正；PVC 單獨 Pending 且 Events 明示 waiting for first consumer；自寫 Pod 的 `image:` 空格修正後，why-first 正確排出 scheduler→provisioner→Bound→mount；實測 Pod Running、PVC/PV Bound、`/data/message.txt`=`hello-from-storage`；provisioner log 明示在 worker 的 `/var/local-path-provisioner/...` 建卷與 `ProvisioningSucceeded`。⑤ `Immediate` AGE 判讀首答反了，重教後換皮通過。⑥ reclaimPolicy 一度誤以為 EBS 應保留，重教後正確以 PV 的 `persistentVolumeReclaimPolicy: Delete` 判定 PV 與後端資料皆刪。**next(s30)：不要重教；先讓學員執行已預測完成的 teardown：`kubectl delete pod sc-demo` → `kubectl delete pvc sc-demo` → `kubectl get pv`，再看 provisioner deletion log，完成 C-2 hands-on checkpoint；之後才跑 s28 遺留 G 題，冷測置尾。**
 
 **s28 已收(2026-08-20,公司 bastion,context `kind-k8s-coach-p2a`)。距 s27 隔 10 天,走 Comeback Protocol。學員趕下班,G 段要求直接給正解後收工。**
 
@@ -46,7 +48,7 @@ next(s29),順序 —— ⚠️ **2026-08-20 學員拍板改制:新內容排最�
 - P0 心智模型: gate-passed(2026-06-22;legacy,pre-Examiner,coach 認證)
 - P1 核心物件 + 容器底層: gate-passed(2026-06-25;legacy,pre-Examiner,coach 認證)
 - P2a 網路深水區: in-progress(chunk 1 Service/kube-proxy/CoreDNS ✅、chunk 2 Ingress ✅;chunk 3 NetworkPolicy in-progress〔3-1/3-2 教完;lab Step 4 於 s23 bastion 側重建完成(allow-dns + 兩死法實證),Step 5 兩道門模型已教、兩條 policy 未寫,剩 Step 5+6+gate+F/G〕;chunk 4 in-progress〔**4-1 CNI 合約 ✅ s19、4-2 veth ✅ s20、4-3 路由 ✅ s20、4-4 MASQUERADE ✅ s20**;**4-5 七站骨架盲講 ❌ s21 冷測 0/4 未過**〕。四塊零件備妥但串不起來;**4-5 背誦式重測已於 2026-08-11 退役,P2a gate 答案卷改情境排障題形式(curriculum-plan §10.2)**)
-- P2b 儲存 + 權限: **in-progress**。**C-1 Volume/PV/PVC ✅ 完成(s26)**:三階梯壽命表一顆 `vol-demo` Pod 全部親手實證(L1 可寫層 / L2 emptyDir / L3 PVC,換 container 與 delete pod 兩種情境四格全驗),預測全中、機制自產(「pod 沒有換 container 換掉只有 upperdir 換掉」);執行體肉身摸到(`/proc/mounts` + node 上 `ls /tmp/pv-demo/`)。附帶收:PID 1 signal 保護、hostPath PV 落在 tmpfs 的意外、EBS AZ-scoped + `nodeAffinity` + `volumeBindingMode`。**C-1 唯一殘留**:`cg-demo` 的 `/sys/fs/cgroup/memory.max` 實際數字未讀到(s25 Pending,node 已修好,s27 補)。C-2(StorageClass 動態供給 / CSI)已預告未開,s26 已把 EBS CSI 概念鋪好。
+- P2b 儲存 + 權限: **in-progress**。**C-1 Volume/PV/PVC ✅ 完成(s26)**:三階梯壽命表一顆 `vol-demo` Pod 全部親手實證(L1 可寫層 / L2 emptyDir / L3 PVC,換 container 與 delete pod 兩種情境四格全驗),預測全中、機制自產(「pod 沒有換 container 換掉只有 upperdir 換掉」);執行體肉身摸到(`/proc/mounts` + node 上 `ls /tmp/pv-demo/`)。附帶收:PID 1 signal 保護、hostPath PV 落在 tmpfs 的意外、EBS AZ-scoped + `nodeAffinity` + `volumeBindingMode`。**C-1 唯一殘留**:`cg-demo` 的 `/sys/fs/cgroup/memory.max` 實際數字未讀到(s25 Pending,node 已修好,s27 補)。**C-2 StorageClass / dynamic provisioning / CSI 概念三 chunk ✅(s29)，hands-on 主鏈 ✅；只剩 `reclaimPolicy: Delete` teardown 實證。**
 - P3 調度 + 高並發 + 排障: not-started
 - P4 可觀測性工程: not-started
 - P5 平台工程 / GitOps: not-started
