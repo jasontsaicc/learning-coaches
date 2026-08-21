@@ -257,6 +257,7 @@ Senior 面試常考「你會怎麼把一個現有服務搬進 k8s」,而且導�
 1. **Production track**:設計/部署 → 正常基線 → 故障注入 → 以 Events/logs/metrics 採證 → 止血 → 根治 → rollback/cleanup；不能只成功 apply。
 2. **Senior interview track**:用第一性原理說 why，主動講 trade-off、failure mode、成本、安全、升級與可觀測性；回答必含「我看 X，因為 [判準]」。
 3. 同一能力必須有 hands-on evidence 與 scenario answer，兩者不能互相代替。
+4. **Command Intent Gate**:每一條學員要執行的查詢/修改指令前，coach 必須先給 `Context → Hypothesis → Why this command → Decision after output`；學員用一句「我要查 X，因為 Y」確認意圖後才執行。若學員只是在複製貼上，該步不算 hands-on evidence。
 
 ### 11.2 每個主題固定做三欄差異
 
