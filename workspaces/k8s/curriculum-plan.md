@@ -247,3 +247,35 @@ Senior 面試常考「你會怎麼把一個現有服務搬進 k8s」,而且導�
   IAM 設計進 step A 抽考池(卡片級),P6 前一場情境題總驗。
 - **Data layer 運維**:RDS 備援/backup-restore/資料搬遷,卡片級;深水區不開,設計面歸 sd 的
   migration 題。
+
+## §11 Production-Senior 雙軌(2026-08-21,學員拍板;取代 §10 的 coverage-first 修剪幅度)
+
+背景:目前沒有緊急面試時限。目標改為同時達到 **實際業務可交付** 與 **senior DevOps/SRE 面試可清楚辯證**，不為趕時間把 production hands-on 降成只會名詞。Phase 順序沿用 §10.1，但 P2b-P5 恢復足以形成操作證據的深度。
+
+### 11.1 每個核心 chunk 的固定雙軌驗收
+
+1. **Production track**:設計/部署 → 正常基線 → 故障注入 → 以 Events/logs/metrics 採證 → 止血 → 根治 → rollback/cleanup；不能只成功 apply。
+2. **Senior interview track**:用第一性原理說 why，主動講 trade-off、failure mode、成本、安全、升級與可觀測性；回答必含「我看 X，因為 [判準]」。
+3. 同一能力必須有 hands-on evidence 與 scenario answer，兩者不能互相代替。
+
+### 11.2 每個主題固定做三欄差異
+
+| 面向 | 地端 Kubernetes | 傳統 EKS(Managed Node Groups/Karpenter) | 高度託管 EKS(Auto Mode 等) |
+|---|---|---|---|
+| 誰負責 | control plane、node、LB/storage integration 多由團隊維護 | AWS 管 control plane；團隊管 data plane、add-ons 與 workload | AWS 再多管 compute/network/storage controllers；團隊仍管 workload/SLO/security intent |
+| 實作 | MetalLB/Ingress、Calico/Cilium、NFS/Ceph/CSI、kubeadm 升級 | VPC CNI、AWS Load Balancer Controller、EBS/EFS CSI、managed add-ons | Auto Mode NodePool/NodeClass 與內建 networking/storage/LB 能力 |
+| 排障 | node/kernel/CNI/driver/control-plane 全鏈 | Kubernetes evidence + IAM/VPC/subnet/quota/AWS API | Kubernetes evidence + managed boundary/CloudTrail/服務限制，知道哪些層無法直接登入 |
+
+每個 chunk 至少回答四題:①地端誰做?②EKS 哪個 AWS controller/service 取代?③責任邊界移到哪?④故障時證據在哪一層?
+
+### 11.3 EKS production 主線(加入 P2b-P5)
+
+- **Identity/access**:RBAC、EKS Access Entries、IRSA、EKS Pod Identity、node role 隔離、跨帳號取權。
+- **Networking/traffic**:VPC CNI 的 ENI/IP 容量與 prefix delegation、subnet 規劃、Security Groups for Pods、AWS Load Balancer Controller、ALB/NLB/Gateway API 選型、private endpoint/DNS。
+- **Storage/data**:EBS/EFS CSI、AZ topology、snapshot/restore、expansion、backup/DR、stateful workload failure modes。
+- **Compute/scaling**:Managed Node Groups、Karpenter、Auto Mode、Fargate 的選型；On-Demand/Spot 混用、taint/affinity/topology spread、PDB/disruption。
+- **Day-2 operations**:managed add-ons、version skew/deprecation/upgrade insights、control-plane→add-on→node→workload 升級順序、rollback 與不可逆邊界。
+- **Observability/reliability**:CloudWatch/Prometheus/OTel、SLI/SLO/error budget、multi-AZ、incident/DR drill。
+- **Delivery/security/cost**:Terraform、Helm/ArgoCD、policy/supply chain、Secrets Manager、cost allocation/right-sizing/FinOps。
+
+EKS lab 仍遵守安全規則:公司 `eks` context 不當教材；需雲端實證時使用隔離 dev cluster、`billing-dev-eks-*` 命名、IaC 建立、當堂 destroy + 查空。地端 kind lab 先證明 Kubernetes/OS 原理，再用 EKS lab 證明 AWS integration delta。

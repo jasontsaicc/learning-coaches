@@ -11,7 +11,7 @@
 - last_weekly_review: 18(**WR9 於 s25 開跑,s26/s27/s28/s29 均未跑,第五度未完成**;s28 的冷測三題只算壓縮版複習,不推進 last_weekly_review)
 - last_session_date: 2026-08-21
 - warm_up_classification: mid(有地圖形狀,缺演員名字;P0 剛好,不加速)
-- **target_role: AWS Delivery Consultant(ProServe),2026-07-23 學員確認**。全部抽考包成客戶顧問情境、每題附 L6 範例答法(memory `aws-delivery-consultant-target` / `aws-mock-and-l6-answer-format`);戰略重排見 curriculum-plan §9。
+- **target_role: 泛用大廠 senior DevOps/SRE；2026-08-21 確認目前無緊急面試，採 production depth + senior interview 雙軌**。每個核心主題固定比較地端 Kubernetes、傳統 EKS 與高度託管 EKS，並同時要求 hands-on evidence 與 scenario answer；見 curriculum-plan §11。
 
 ## Current Session breakpoint
 
