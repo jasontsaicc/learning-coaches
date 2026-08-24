@@ -15,7 +15,7 @@
 
 ## Current Session breakpoint
 
-**s30 已收(2026-08-24,家用 VM,context `kind-k8s-coach-p2a`)。** C-2 的 `sc-demo` 只存在公司 bastion，`reclaimPolicy: Delete` teardown 實證延後到回 bastion，不為一次刪除在家用 VM 重建 lab。s28 遺留 G 題完成：首刀選 `kubectl describe pod` 未直接驗證 30 秒 timeout，經重教後能以「繞過嫌疑層，直接對照正常/異常 target」縮小 fault domain；Tier 2 3/4（原理/機制/自己的話過，MTTR 未過）。probe 冷測：readiness 不重啟、退出 Service 流量已答對；liveness 一度誤答重啟整個 Pod，拆小後已能分清只重啟失敗 container、Pod UID 與 sidecar 不變、`restartCount` 為 container 級。`active` 仍首答成「程序正常」，已完整重教 systemd unit state → socket → CRI gRPC response 三層，尚未經無提示換皮驗收。**C-3 StatefulSet chunk 1（Deployment 的儲存/身分/秩序三面牆）Recall + Transfer 已過：能守住 RWO=單 node 而非單 Pod、Running≠共寫安全、StatefulSet 只保證固定序號與建立秩序，不自動設定 PostgreSQL primary/replication。chunk 2 `volumeClaimTemplates` 已教：理解預設刪 Pod/scale down 保留 PVC，並以公司 GitLab PostgreSQL + Karpenter 單 AZ 經驗連到 EBS AZ topology；Transfer 題尚未回答。next(s31)：直接重問「`db-0` 刪除、Karpenter 在同 AZ 補 node 後，哪些身分/資料不變、哪些 runtime 會變」，通過後進 headless Service；C-2 teardown 保留 bastion 待辦。**
+**s31 收工斷點(2026-08-24,公司 bastion,context `kind-k8s-coach-p2a`)**：C-3 StatefulSet 三個核心 chunk、hands-on、step E failure drill、step F Teach-to-Learn 已完成。能說清固定 ordinal、per-replica PVC、固定 DNS 尋址，以及 Pod UID/IP/node 是可替換 runtime state；曾誤以為 StatefulSet 固定 Pod IP並以模糊 `internal id` 解釋尋址，經反駁後已修正。Lab 客觀證據：`web-0`/`web-1` ordered creation、兩顆 PVC 各綁不同 PV；刪除 `web-0` 後 UID/IP 改變、同名同 PVC 資料仍可讀。EndpointSlice 已驗證兩個 backend IP；per-Pod DNS lookup 未直接驗證。詳細筆記：`notes/s31-statefulset.md`。**next：直接回答 step G 原題：「把 PostgreSQL 從 Deployment 改成 StatefulSet，是否已 production-ready HA？StatefulSet 解決與未解決什麼？」完成 Tier 2 scorecard 後再決定進 C-4 RBAC 或補 WR9；C-2 `sc-demo` reclaimPolicy Delete teardown 仍待做。**
 
 **s28 已收(2026-08-20,公司 bastion,context `kind-k8s-coach-p2a`)。距 s27 隔 10 天,走 Comeback Protocol。學員趕下班,G 段要求直接給正解後收工。**
 
