@@ -16,6 +16,7 @@ tag 選項:incident / design-decision / cross-team / migration / cost / postmort
 
 | 日期 | 一句話事件 | tag | status |
 |------|-----------|-----|--------|
+| 2026-08-23 | 公司 GitLab 採內建 PostgreSQL 而非 RDS，為配合有狀態儲存，以 Karpenter 將 workload/node capacity 約束在同一 AZ | design-decision | raw |
 
 ## STAR 提煉區(P6)
 

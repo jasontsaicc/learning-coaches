@@ -7,15 +7,15 @@
 
 ## Meta
 
-- session_count: 29
-- last_weekly_review: 18(**WR9 於 s25 開跑,s26/s27/s28/s29 均未跑,第五度未完成**;s28 的冷測三題只算壓縮版複習,不推進 last_weekly_review)
-- last_session_date: 2026-08-21
+- session_count: 30
+- last_weekly_review: 18(**WR9 於 s25 開跑,s26/s27/s28/s29/s30 均未跑,第六度未完成**;s28/s30 的壓縮冷測不推進 last_weekly_review)
+- last_session_date: 2026-08-24
 - warm_up_classification: mid(有地圖形狀,缺演員名字;P0 剛好,不加速)
 - **target_role: 泛用大廠 senior DevOps/SRE；2026-08-21 確認目前無緊急面試，採 production depth + senior interview 雙軌**。每個核心主題固定比較地端 Kubernetes、傳統 EKS 與高度託管 EKS，並同時要求 hands-on evidence 與 scenario answer；見 curriculum-plan §11。
 
 ## Current Session breakpoint
 
-**s29 已收(2026-08-21,context `kind-k8s-coach-p2a`)。C-2 三個概念 chunk Recall + Transfer 已過，hands-on 主鏈完成，停在 reclaimPolicy teardown 尚未執行。** ① StorageClass 動態供應：能用「只有 rule 沒有 engine」解釋無 CSI provisioner 時 PVC Pending；EKS CSI controller Running + PVC Pending 情境先查 IAM，守住 `Running` 不等於功能正常。② WaitForFirstConsumer：能推出「EBS 不能跨 AZ attach → scheduler 先確定 Pod/node AZ → provisioner 同 AZ 建 EBS」；一度把既有 EBS 重新調度誤答成 WFFC，重教建立前定序 vs 建立後 PV nodeAffinity 後換皮通過。③ CSI 分工：能指出 attach 後仍需 node 端 kernel mount；Transfer 首答錯選 `get pvc` 查 mount，重教「PVC Bound 是控制面帳本、Pod Events 是 node 執行證據」後改選 `describe pod` 通過。④ Hands-on：安全 context 已驗；`standard`=`rancher.io/local-path`/`WaitForFirstConsumer`/`Delete`；自寫 PVC 時 `PersistenVolumeClaim` typo 由 server dry-run 抓出並修正；PVC 單獨 Pending 且 Events 明示 waiting for first consumer；自寫 Pod 的 `image:` 空格修正後，why-first 正確排出 scheduler→provisioner→Bound→mount；實測 Pod Running、PVC/PV Bound、`/data/message.txt`=`hello-from-storage`；provisioner log 明示在 worker 的 `/var/local-path-provisioner/...` 建卷與 `ProvisioningSucceeded`。⑤ `Immediate` AGE 判讀首答反了，重教後換皮通過。⑥ reclaimPolicy 一度誤以為 EBS 應保留，重教後正確以 PV 的 `persistentVolumeReclaimPolicy: Delete` 判定 PV 與後端資料皆刪。**next(s30)：不要重教；先讓學員執行已預測完成的 teardown：`kubectl delete pod sc-demo` → `kubectl delete pvc sc-demo` → `kubectl get pv`，再看 provisioner deletion log，完成 C-2 hands-on checkpoint；之後才跑 s28 遺留 G 題，冷測置尾。**
+**s30 已收(2026-08-24,家用 VM,context `kind-k8s-coach-p2a`)。** C-2 的 `sc-demo` 只存在公司 bastion，`reclaimPolicy: Delete` teardown 實證延後到回 bastion，不為一次刪除在家用 VM 重建 lab。s28 遺留 G 題完成：首刀選 `kubectl describe pod` 未直接驗證 30 秒 timeout，經重教後能以「繞過嫌疑層，直接對照正常/異常 target」縮小 fault domain；Tier 2 3/4（原理/機制/自己的話過，MTTR 未過）。probe 冷測：readiness 不重啟、退出 Service 流量已答對；liveness 一度誤答重啟整個 Pod，拆小後已能分清只重啟失敗 container、Pod UID 與 sidecar 不變、`restartCount` 為 container 級。`active` 仍首答成「程序正常」，已完整重教 systemd unit state → socket → CRI gRPC response 三層，尚未經無提示換皮驗收。**C-3 StatefulSet chunk 1（Deployment 的儲存/身分/秩序三面牆）Recall + Transfer 已過：能守住 RWO=單 node 而非單 Pod、Running≠共寫安全、StatefulSet 只保證固定序號與建立秩序，不自動設定 PostgreSQL primary/replication。chunk 2 `volumeClaimTemplates` 已教：理解預設刪 Pod/scale down 保留 PVC，並以公司 GitLab PostgreSQL + Karpenter 單 AZ 經驗連到 EBS AZ topology；Transfer 題尚未回答。next(s31)：直接重問「`db-0` 刪除、Karpenter 在同 AZ 補 node 後，哪些身分/資料不變、哪些 runtime 會變」，通過後進 headless Service；C-2 teardown 保留 bastion 待辦。**
 
 **s28 已收(2026-08-20,公司 bastion,context `kind-k8s-coach-p2a`)。距 s27 隔 10 天,走 Comeback Protocol。學員趕下班,G 段要求直接給正解後收工。**
 
@@ -48,7 +48,7 @@ next(s29),順序 —— ⚠️ **2026-08-20 學員拍板改制:新內容排最�
 - P0 心智模型: gate-passed(2026-06-22;legacy,pre-Examiner,coach 認證)
 - P1 核心物件 + 容器底層: gate-passed(2026-06-25;legacy,pre-Examiner,coach 認證)
 - P2a 網路深水區: in-progress(chunk 1 Service/kube-proxy/CoreDNS ✅、chunk 2 Ingress ✅;chunk 3 NetworkPolicy in-progress〔3-1/3-2 教完;lab Step 4 於 s23 bastion 側重建完成(allow-dns + 兩死法實證),Step 5 兩道門模型已教、兩條 policy 未寫,剩 Step 5+6+gate+F/G〕;chunk 4 in-progress〔**4-1 CNI 合約 ✅ s19、4-2 veth ✅ s20、4-3 路由 ✅ s20、4-4 MASQUERADE ✅ s20**;**4-5 七站骨架盲講 ❌ s21 冷測 0/4 未過**〕。四塊零件備妥但串不起來;**4-5 背誦式重測已於 2026-08-11 退役,P2a gate 答案卷改情境排障題形式(curriculum-plan §10.2)**)
-- P2b 儲存 + 權限: **in-progress**。**C-1 Volume/PV/PVC ✅ 完成(s26)**:三階梯壽命表一顆 `vol-demo` Pod 全部親手實證(L1 可寫層 / L2 emptyDir / L3 PVC,換 container 與 delete pod 兩種情境四格全驗),預測全中、機制自產(「pod 沒有換 container 換掉只有 upperdir 換掉」);執行體肉身摸到(`/proc/mounts` + node 上 `ls /tmp/pv-demo/`)。附帶收:PID 1 signal 保護、hostPath PV 落在 tmpfs 的意外、EBS AZ-scoped + `nodeAffinity` + `volumeBindingMode`。**C-1 唯一殘留**:`cg-demo` 的 `/sys/fs/cgroup/memory.max` 實際數字未讀到(s25 Pending,node 已修好,s27 補)。**C-2 StorageClass / dynamic provisioning / CSI 概念三 chunk ✅(s29)，hands-on 主鏈 ✅；只剩 `reclaimPolicy: Delete` teardown 實證。**
+- P2b 儲存 + 權限: **in-progress**。**C-1 Volume/PV/PVC ✅ 完成(s26)**:三階梯壽命表一顆 `vol-demo` Pod 全部親手實證(L1 可寫層 / L2 emptyDir / L3 PVC,換 container 與 delete pod 兩種情境四格全驗),預測全中、機制自產(「pod 沒有換 container 換掉只有 upperdir 換掉」);執行體肉身摸到(`/proc/mounts` + node 上 `ls /tmp/pv-demo/`)。附帶收:PID 1 signal 保護、hostPath PV 落在 tmpfs 的意外、EBS AZ-scoped + `nodeAffinity` + `volumeBindingMode`。**C-1 唯一殘留**:`cg-demo` 的 `/sys/fs/cgroup/memory.max` 實際數字未讀到(s25 Pending,node 已修好,s27 補)。**C-2 StorageClass / dynamic provisioning / CSI 概念三 chunk ✅(s29)，hands-on 主鏈 ✅；只剩 `reclaimPolicy: Delete` teardown 實證。C-3 StatefulSet in-progress：chunk 1 三面牆 ✅；chunk 2 `volumeClaimTemplates` 已教、Transfer 待答。**
 - P3 調度 + 高並發 + 排障: not-started
 - P4 可觀測性工程: not-started
 - P5 平台工程 / GitOps: not-started
@@ -85,6 +85,7 @@ Weak-topic flags(**2026-08-03 首次啟用**,P2a 帶 flag 前進、gate 未考,�
 
 <!-- 轉換規則:原 ✅=1、🟡/❌=0,原符號保留在註記。legacy = pre-Examiner 時期由教學 coach 認證。 -->
 
+- 2026-08-24 | step G (s30, tier 2) | 3/4 | 第一刀選 `kubectl describe pod`，沒有直接驗證 30 秒 request timeout；下次先用 direct-to-target 對照 bypass 嫌疑層 | 能用自己的話修正成「繞過後正常只鎖定被繞過的整段路徑，不能直接定罪 Proxy」 | coach(原理✅ 機制✅ 自己的話✅ MTTR❌)
 - 2026-08-20 | 冷測三題 + F 段折算 (s28, tier 2) | 1/4 | **判準句給完 30 秒內套用不上**(Q1 剛砍掉 ALB 層→立刻選查 ALB log;Q2 剛講完 systemctl 只驗第 1 層→立刻選 pgrep probe)。對策:每給一個判準,當場接一題換皮應用題,答對才算給完 | **排障順序題把 `reboot` 排最後**,restart-vs-採證這張卡 s21 以來第一次真的做對,而且 B/C 順序自己改對還自帶判準「比較簡單」 | coach(原理🟡〔Q3 成本判準自產,Q1/Q2 判準全部直給〕 機制❌〔active≠活著未過、liveness/readiness 動作對調〕 自己的話❌〔F 段獨白首句就把「存在」講成「順利執行」,第二段散掉〕 MTTR✅〔Q3 過〕。**G 未作答**(學員趕時間),不折算)
 - 2026-06-17 | step G (s1, tier 1) | 3/3 | 用詞精準度 | 底層原理/機制/自己的話全過 | coach
 - 2026-06-18 | step G (s2, tier 1) | 3/3 | 用詞精準度 | 自創恆溫器比喻講 declarative | coach
@@ -250,7 +251,7 @@ Weak-topic flags(**2026-08-03 首次啟用**,P2a 帶 flag 前進、gate 未考,�
 - mistake:scheduler當萬用嫌犯 | mistake | 3 | 2026-08-13(**s27 第 2 次**〔s25「誰把 limit 寫進 cgroup」→ 答 scheduler;s27「node NotReady 你要看哪個東西」→ 答 scheduler〕。判準句合併:**scheduler 只填 `spec.nodeName`,它是狀態的消費者不是產生者,而且從沒進過 node 的門**。抽:換第三個情境〔e.g. Pod 卡 ContainerCreating〕看還會不會答 scheduler)| active
 - mistake:產生者vs消費者(排障找誰) | mistake | 3 | 2026-08-13(s27 新卡,**教練直給未抽考**。`NotReady` 兩種產生者:`Ready=False`=kubelet 活著自己回報〔message 寫死因〕、`Ready=Unknown`=kubelet 失聯 40 秒 controller-manager 代筆,**看 `reason` 欄分辨**。抽:兩種怎麼分 + 為什麼不該問消費者)| active
 - mistake:對照組判準(同層有好有壞) | mistake | 3 | 2026-08-23(**s28 首抽半過**:ALB 三台兩壞情境,認出證據句「第三台完全正常」✅,判準句答不出喊「直接説明」;直給後的應用題**立刻選查 ALB access log = 剛砍掉的那層**。留 3,換第三種皮再抽。歷史:s27 新卡,**教練直給未抽考**。同一宿主機三台 node、worker2 Ready 另兩台 NotReady → 整個宿主機層一次排除。通用句:**同一層裡有的好有的壞,那一層以下全部無罪**。抽:換一個非 k8s 情境〔e.g. 三個 ECS task 一個正常〕看會不會用)| active
-- mistake:active≠還在幹活(健康檢查三層) | mistake | 3 | 2026-08-23(**s28 首抽未過**:首答跑去講 DB(講別人壞不是講它自己)、二答「不是網絡嗎」,機制直給;接的 liveness 二選一又選 `pgrep`。梯子縮到最小(pgrep 對 hang 住的 process 找不找得到)才走通。留 3。歷史:s27 新卡,**教練直給未抽考**。`systemctl is-active containerd kubelet` 兩個都 active,node 仍說 `container runtime is down`;kubelet log `StopPodSandbox ... DeadlineExceeded`,containerd 八小時零 log。三層:進程存在 / 有在聽 / **真的回得了話**。封印句:**塞住的服務跟死掉的服務,`systemctl` 分不出來**。抽:接到「liveness probe 只檢查 PID 會漏掉什麼」)| active
+- mistake:active≠還在幹活(健康檢查三層) | mistake | 3 | 2026-08-27(**s30 再未過**:`active` 首答成「程序正常」；已拆成 systemd unit active / socket listener / CRI 真回話三層並完整重教，尚未經無提示換皮驗收。s28 首抽亦未過。抽:`active` + socket exists + `crictl info` timeout，各層通過/失敗為何)| active
 - mistake:DeadlineExceeded語義 | mistake | 7 | 2026-08-27(**s28 過**:二選一「不在家 vs 在家不接電話」答對「在家但是不接電話」,推 7。歷史:s27 新卡,**教練直給未抽考**。`DeadlineExceeded` = 對方還在但不理你;connection refused = 對方不在。**兩種病相反、查法相反**,回扣 CA session 已有的 refused-vs-timeout 卡〔跨 coach 同形狀,見 workspaces/ca〕。抽:兩個症狀各該先查哪一邊)| active
 - mistake:PID1-signal保護 | mistake | 3 | 2026-08-09(s26 意外實證,`kill 1` 殺不死 container。**全程教練驅動未經抽考**。抽:Pod 刪除為什麼等 30 秒 + 同 namespace 內 `kill -9 1` 殺不殺得掉)| active
 - mistake:Pod不會重啟只會被丟掉重建 | mistake | 3 | 2026-08-09(s26 F 段盲點,答「pod 會重啟 or 調節 編排」。抽:數出至少三種不需人動手 Pod 就消失的情境)| active
@@ -260,12 +261,12 @@ Weak-topic flags(**2026-08-03 首次啟用**,P2a 帶 flag 前進、gate 未考,�
 - mistake:iptables-一棟樓 | mistake | 3 | 2026-08-06(**s23 半過**:換皮誘答咬住=吞餌史終結;但「nat 管路由」新錯法,重教後收。抽三表分工一句版+targetPort 5678 應用)| active
 - mistake:kube-proxy-不在-Pod-啟動路徑 | mistake | 3 | 2026-08-07(**s24 首次重抽未過**,答「CoreDNS 嗎」= 寫進 resolv.conf ≠ 打過它)| active
 - mistake:判準給完當場套用不上(pattern)| mistake | 3 | 2026-08-23(s28 新卡,同堂兩次。對治:給完判準當場接換皮應用題)| active
-- mistake:只給結論不給判準(pattern)| mistake | 3 | 2026-08-23(**s28 混合**:正面=Q3 自帶判準「比較簡單」〔無提示正樣本第 5 次〕;負面=Q1 判準句喊「直接説明」。歷史:⚠️ **s27 倒退**:why-first 預測**連跳 3 次**〔`free -h`、`ip route` A/B/C〕,全部未答即按 Enter,s26 的正向沒延續。註:s27 教練也沒執行 s24 訂的硬規格〔不給預測就不給下一發指令〕,是雙方各一半。08-13 續盯)| active
+- mistake:只給結論不給判準(pattern)| mistake | 3 | 2026-08-27(**s30 再現**:Proxy 換皮只答 `B`、RWO 題兩次只答「不能」，都需句型鷹架才補出判準；正樣本是後段能完整說出 bypass 對照只能鎖定整段路徑。留 3，下一次答案固定要求「判斷+因為+證據」)| active
 - mistake:NetworkPolicy-靜默無效 | mistake | 3 | 2026-07-31(過期,s23 未抽;**s22 F 段質變**:追問下自組完整鏈含「安全假象」自己的話;一段話冷測版過才 resolved,s24/WR9 抽)| active
 - mistake:CNI-合約三件事 | mistake | 3 | 2026-07-23(s19 新卡:網卡/IP/路由 + 各自缺席的死法;hostNetwork 判準已自推不用重考)| active
 - mistake:兩張獨立名單 | mistake | 3 | 2026-08-06(**s23 重抽未過**,三層提示未自產、直教兩道門模型;s24 動手版〔Step 5 自寫兩條 policy + 矩陣〕+ 08-06 口頭版)| active
 - term:conntrack | term | 7 | 2026-07-26(**s18 分工句收**:骨架〔規則管第一次、conntrack 管之後〕自產,應用一次追問補全〔去程改 Destination/回程改 Source、都查 conntrack〕;07-26 抽完整版〔兩個詞+分工句+查誰〕過即封印。歷史:s16 兩個詞給框架後自產;s15 直給後 3 天蒸發=「給框架 vs 給答案」對照組證據)| active
-- mistake:probe-職責 | mistake | 3 | 2026-08-23(⚠️ **s28 退步,interval 從 7 重置**:「liveness 拿到 exit 0 之後 kubelet 做什麼」→ 答「**繼續導入流量**」= readiness 的動作。P1 已封印的東西在疲勞下對調。抽:兩種 probe 失敗/通過後各自的動作,一句一個)| active
+- mistake:probe-職責 | mistake | 3 | 2026-08-27(**s30 半過**:readiness 失敗不 restart、退出 Service 流量答對；liveness 先答重啟整個 Pod，拆小後能說清只重啟失敗 container、Pod UID/sidecar 不變、`restartCount` 為 container 級。當堂重教不推 interval；換皮冷測「container vs Pod」)| active
 - mistake:DNS-排障第一刀 | mistake | 3 | 2026-07-10 | active
 - mistake:Ingress-YAML-schema | mistake | 3 | 2026-07-10 | active
 - term:(07-10 到期各卡) | term | - | 2026-07-10 | active(見 term-registry.md)
