@@ -15,7 +15,7 @@
 
 ## Current Session breakpoint
 
-**s31 收工斷點(2026-08-24,公司 bastion,context `kind-k8s-coach-p2a`)**：C-3 StatefulSet 三個核心 chunk、hands-on、step E failure drill、step F Teach-to-Learn 已完成。能說清固定 ordinal、per-replica PVC、固定 DNS 尋址，以及 Pod UID/IP/node 是可替換 runtime state；曾誤以為 StatefulSet 固定 Pod IP並以模糊 `internal id` 解釋尋址，經反駁後已修正。Lab 客觀證據：`web-0`/`web-1` ordered creation、兩顆 PVC 各綁不同 PV；刪除 `web-0` 後 UID/IP 改變、同名同 PVC 資料仍可讀。EndpointSlice 已驗證兩個 backend IP；per-Pod DNS lookup 未直接驗證。詳細筆記：`notes/s31-statefulset.md`。**next：直接回答 step G 原題：「把 PostgreSQL 從 Deployment 改成 StatefulSet，是否已 production-ready HA？StatefulSet 解決與未解決什麼？」完成 Tier 2 scorecard 後再決定進 C-4 RBAC 或補 WR9；C-2 `sc-demo` reclaimPolicy Delete teardown 仍待做。**
+**s31 收工斷點(2026-08-24,公司 bastion,context `kind-k8s-coach-p2a`)**：C-3 StatefulSet 三個核心 chunk、hands-on、step E failure drill、step F Teach-to-Learn 已完成。能說清固定 ordinal、per-replica PVC、固定 DNS 尋址，以及 Pod UID/IP/node 是可替換 runtime state；曾誤以為 StatefulSet 固定 Pod IP並以模糊 `internal id` 解釋尋址，經反駁後已修正。Lab 客觀證據：`web-0`/`web-1` ordered creation、兩顆 PVC 各綁不同 PV；刪除 `web-0` 後 UID/IP 改變、同名同 PVC 資料仍可讀。EndpointSlice 已驗證兩個 backend IP；per-Pod DNS lookup 未直接驗證。課後補充現實使用：簡單 stateful workload 可直接用 StatefulSet，PostgreSQL/Kafka/Elasticsearch 等複雜系統多由成熟 Operator 管理，AWS 上優先評估 RDS/Aurora/MSK 等託管服務；StatefulSet 是 identity/storage/order primitive，不等於 replication/failover/backup/DR。L6 標準答法已示範但非學員獨立作答，**step G 尚未認證、不可計分**。詳細筆記：`notes/s31-statefulset.md`。**next：用不同情境重考「StatefulSet 是否等於 production-ready HA」，要求分清 Kubernetes primitive、application domain logic、reliability evidence 與 build-vs-buy；完成 Tier 2 scorecard 後再決定進 C-4 RBAC 或補 WR9。C-2 `sc-demo` reclaimPolicy Delete teardown 仍待做。**
 
 **s28 已收(2026-08-20,公司 bastion,context `kind-k8s-coach-p2a`)。距 s27 隔 10 天,走 Comeback Protocol。學員趕下班,G 段要求直接給正解後收工。**
 
