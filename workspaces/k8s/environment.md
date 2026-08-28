@@ -61,6 +61,18 @@ context kind → cluster kind-k8s-coach-p0(s21 已刪,條目不存在)
 
 診斷指令注意:`docker ps --filter name=kind` **抓不到 p2a**(容器叫 `k8s-coach-p2a-*`,名字裡沒有 kind)。要用 `kind get clusters` 或不帶 filter 的 `docker ps -a`。
 
+## 家用 VM 叢集現況(2026-08-28,s32 開場,**containerd 第七次卡死 → 已修復三台 Ready**)
+
+- context `kind-k8s-coach-p2a`,三台 `NotReady`(16d,v1.32.2)。修法照 08-10 精準版三台各一發,約 20 秒全回 `Ready`:
+
+```
+for n in control-plane worker worker2; do docker exec k8s-coach-p2a-$n systemctl restart containerd; done
+```
+
+- **這個病看過七次,已無教學價值**:開場直接修、明講「這不是教材,只是恢復 lab」,不排障不當教材(s28 訂的紀律,s32 續用有效)。
+- 殘留物件(未清,下堂可直接沿用或一併清掉):`web` StatefulSet(0/2)+ `www-web-0` / `www-web-1` PVC(各自 Bound 不同 PV)、headless `web-hl`(CLUSTER-IP `None`)、`sc-demo` Pod + PVC(**C-2 `reclaimPolicy: Delete` teardown 仍待做**)、`dnstest`(s31 殘留,卡 ContainerCreating)、`pvc-dyn`(**Pending 15 天**,無 consumer 的 WaitForFirstConsumer 正常現象)。
+- ⚠️ **單節點 kind 的評估仍未做**(s29 起掛著)。三節點在這台機器上每隔幾天就要修一次 containerd。
+
 ## bastion 叢集現況(2026-08-20,s28 開場,**containerd 第六次卡死 → 已修復三台 Ready**)
 
 - 開場:三台全 `NotReady`(9d),一行對照跑出來**三台都 `SLOW`**(不是只有 worker2)。
