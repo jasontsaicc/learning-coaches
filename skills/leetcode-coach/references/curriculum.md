@@ -1,151 +1,54 @@
+<!-- ponytail: 此課程針對 Easy+Medium、DevOps coding 輪。
+     觸發升級的條件(三選一發生就回來改):
+       1. 目標公司換成算法題比重高的
+       2. recruiter 明講 round 會有 Hard
+       3. Medium 已經穩到無聊
+     升級要動的只有兩處,不是重寫:
+       1. 龜模式比例拉高(目前只有 pattern 首刷題走龜)
+       2. 加 Hard 題池
+-->
+
 # Curriculum
 
-Each phase has a one-line focus, prerequisites, and the reference filename that holds
-its detailed teaching material (to be filled in future tasks). Phases are sequential;
-the engine enforces prerequisite checks via Routing branch 5. Problem order follows
-NeetCode 150 (Easy + Medium only; DP capped at 1-D plus basic 2-D).
+順序跟著讀書會走 NeetCode,不自己另排一套。難度是 Easy 加 Medium;NeetCode 順序內
+出現的 Hard 不跳過,但走 Hard 規格(見 `teaching-loop.md`)。
 
-**DevOps priority annotation:** the student's daily study group walks NeetCode 150 in
-order, and the interview target is a senior DevOps coding round. Each phase lists its
-DevOps-priority patterns (from the migrated relevance ratings: Hash Map, Sliding
-Window, Binary Search, Graphs at the top; Backtracking and 2-D DP at the bottom).
-Priority patterns get the extra drill reps and the phase-gate problems; low-priority
-patterns are covered once for recognition and not drilled to fluency.
+## Layer 0:Python 執行模型
 
----
+**跑一次,不寫題。** 內容在 `layer0-execution-model.md`,7 個概念,全部從重建前那 32 筆
+錯誤倒推出來。
 
-## Warm-Up Diagnostic (new students only)
+跑完之後不再單獨複習。之後任何一場 session 只要學員卡在執行模型(哪一行會跑、
+跑幾次、什麼型別),就回頭翻對應那一節,不重跑整個 Layer 0。
 
-Give an unseen easy problem (e.g., Valid Anagram) described aloud. Listen for whether
-the student can run the 4-question articulation bridge
-(`references/problem-solving-framework.md` Step 2.5) or freezes at zero.
+遞迴不在 Layer 0,走到 Tree 再教。
 
-Classify: strong (runs the bridge unprompted) / mid (answers when prompted question
-by question) / freezes-at-zero (cannot start without a worked example). Record the
-classification in the progress file; it decides how much I-do scaffolding P0 starts
-with.
+## Linked List(起點)
 
----
+讀書會 2026-08 的進度在這裡,所以從這裡開始。
 
-## P0 - Problem-Solving Mental Model
+**開始前先跟讀書會核對一次實際順序。** 下表是 NeetCode 的順序,但以讀書會排的為準。
 
-**Focus:** The 4-question articulation bridge as the anti-freeze tool, Big-O analysis,
-the time/space trade-off, the brute-to-optimal method, and reading a problem to
-extract constraints. No new data structure.
+| 題號 | 題目 | 模式 | 備註 |
+|---|---|---|---|
+| 206 | Reverse Linked List | 龜 | 2026-08-03 做過一次,重跑。既有資料夾 `p3-binsearch-linkedlist/reverse-linked-list/` |
+| 21 | Merge Two Sorted Lists | 兔 | |
+| 141 | Linked List Cycle | 小龜 | fast-slow 是新招,不是 206 的換皮 |
+| 143 | Reorder List | 兔 | 等於中點加反轉加合併 |
+| 19 | Remove Nth Node From End | 兔 | |
+| 138 | Copy List with Random Pointer | 兔 | |
+| 2 | Add Two Numbers | 兔 | |
+| 287 | Find the Duplicate Number | 兔 | fast-slow 換皮到陣列上 |
+| 146 | LRU Cache | 龜 | 新結構:hash 加雙向鏈 |
+| 23 | Merge K Sorted Lists | Hard 規格 | 等於 heap 加 #21 |
+| 25 | Reverse Nodes in k-Group | Hard 規格 | 等於 #206 加分組 |
 
-**Prerequisites:** none (entry phase). Python basics assumed.
+**龜兔判準看「這題有沒有沒見過的動作」,不看題號順序。** 同一個 pattern 底下也可能藏新招,
+141 的 fast-slow 就是例子。
 
-**DevOps priority:** the bridge and Big-O apply to every pattern; nothing is skippable
-here.
+## Linked List 之後
 
-**Reference file:** `references/p0-mental-model.md` (to be created in a future task)
+依讀書會進度決定,不預先排。要排的時候照同一個格式:題號、題目、龜兔、一句話備註,
+備註寫「這題等於哪幾個學過的東西」。
 
----
-
-## P1 - Arrays / Hashing / Two Pointers
-
-**Focus:** Hash map O(1) lookup as the first space-for-time trade, frequency counting,
-converging two pointers. Two Sum, Valid Anagram, Group Anagrams, 3Sum, Container With
-Most Water.
-
-**Prerequisites:** P0 gate passed — student runs the bridge without freezing and can
-analyze a snippet's complexity.
-
-**DevOps priority:** Hash Map is top priority (config stores, log parsing, frequency
-counting are daily DevOps work). Two Pointers is mid priority: one solid template is
-enough.
-
-**Reference file:** `references/p1-arrays-hashing.md` (to be created in a future task)
-
----
-
-## P2 - Sliding Window / Stack
-
-**Focus:** Fixed and variable windows, monotonic stack, FILO matching. Best Time to
-Buy and Sell Stock, Longest Substring Without Repeating Characters, Valid Parentheses,
-Min Stack, Daily Temperatures.
-
-**Prerequisites:** P1 gate passed — student solves an unseen hashing/two-pointer
-Medium with a green harness.
-
-**DevOps priority:** Sliding Window is top priority (rolling metrics, monitoring
-windows, rate limiting). Stack is high (config parsing, undo semantics, call stacks).
-
-**Reference file:** `references/p2-window-stack.md` (to be created in a future task)
-
----
-
-## P3 - Binary Search / Linked List
-
-**Focus:** Binary search on an index range and on an answer space, fast/slow pointers,
-in-place reversal. Binary Search, Search a 2D Matrix, Koko Eating Bananas, Reverse
-Linked List, Linked List Cycle.
-
-**Prerequisites:** P2 gate passed.
-
-**DevOps priority:** Binary Search is top priority (git bisect, threshold finding,
-log search). Linked List is low: cover the Easy set for recognition, do not over-drill.
-
-**Reference file:** `references/p3-binsearch-linkedlist.md` (to be created in a future task)
-
----
-
-## P4 - Trees (BFS/DFS)
-
-**Focus:** Tree recursion, level-order traversal, the DFS/BFS choice. Invert Binary
-Tree, Maximum Depth, Lowest Common Ancestor, Level Order Traversal, Validate BST.
-
-**Prerequisites:** P3 gate passed.
-
-**DevOps priority:** mid (directory trees, DNS hierarchy). Trees matter mainly as the
-prerequisite for Graphs, which is a top DevOps pattern; teach with that arrow in view.
-
-**Reference file:** `references/p4-trees.md` (to be created in a future task)
-
----
-
-## P5 - Heap / Backtracking
-
-**Focus:** Priority queue for top-k problems, the backtracking template. Kth Largest
-Element, K Closest Points, Last Stone Weight, Subsets, Combination Sum.
-
-**Prerequisites:** P4 gate passed.
-
-**DevOps priority:** Heap is mid (job scheduling, incident priority queues); do the
-Easy set plus one Medium. Backtracking is the lowest-priority pattern in the whole
-curriculum: one template pass for recognition, no fluency drilling.
-
-**Reference file:** `references/p5-heap-backtracking.md` (to be created in a future task)
-
----
-
-## P6 - Graphs + 1-D DP (intro)
-
-**Focus:** Grid and adjacency BFS/DFS, topological sort, one-dimensional DP. Number of
-Islands, Clone Graph, Rotting Oranges, Course Schedule I & II, Connected Components,
-Climbing Stairs, House Robber, Coin Change.
-
-**Prerequisites:** P5 gate passed.
-
-**DevOps priority:** Graphs is THE DevOps pattern (service dependency DAGs, network
-topology, Terraform resource ordering, incident blast radius); give it the most reps
-of any phase. Course Schedule maps directly to CI/CD dependency resolution. 1-D DP is
-low priority: basics only, per the difficulty ceiling.
-
-**Reference file:** `references/p6-graphs-dp.md` (to be created in a future task)
-
----
-
-## P7 - Interview Sprint
-
-**Focus:** Timed mocks on mixed unseen problems, verbalize before coding, pattern
-recognition under time. Long-tail patterns (Intervals, Greedy, Trie, Bit Manipulation)
-are covered inside this sprint rather than as separate phases.
-
-**Prerequisites:** P6 gate passed.
-
-**DevOps priority:** Intervals and Greedy get one drill each (maintenance windows and
-autoscaling analogies make them fast to absorb); Trie and Bit Manipulation are
-recognition-only.
-
-**Reference file:** `references/p7-interview-sprint.md` (to be created in a future task)
+模板與秒認信號在 `pattern-cheatsheet.md`。
