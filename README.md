@@ -53,11 +53,12 @@ learning-coaches/
 │   │   │                                    #   material (curriculum-detail, first-principles-chains,
 │   │   │                                    #    follow-up-bank, answer-comparisons, story, rpg-rules)
 │   │   └── evals/                           # behavioral evals + fixtures
-│   ├── leetcode-coach/
+│   ├── leetcode-coach/                      # standalone: does NOT run on engine/
 │   │   ├── SKILL.md
-│   │   ├── references/                      # 8 hook files (incl. language) + cheatsheets
-│   │   │                                    #   (problem-solving-framework, pattern,
-│   │   │                                    #    complexity, python-dsa)
+│   │   ├── references/                      # teaching-loop, curriculum, layer0-execution-model,
+│   │   │                                    #   my-common-bugs, lab-manager + cheatsheets
+│   │   │                                    #   (pattern, complexity, python-dsa)
+│   │   └── evals/                           # behavioral evals + fixtures
 │   │   ├── scripts/                         # lab-lc.sh (pytest + large-N tripwire) + test
 │   │   └── evals/                           # behavioral evals + fixtures
 │   └── cloud-architect-coach/
@@ -73,9 +74,9 @@ learning-coaches/
 │   ├── sd/                                  # progress.md (engine schema), one-liner-library,
 │   │                                        #   rpg-state, session-log, coaching-brief,
 │   │                                        #   curriculum-plan, pattern-map
-│   ├── leetcode/                            # progress.md (engine schema), one-liner-library,
-│   │                                        #   skeleton-registry, patterns.md,
-│   │                                        #   <phase>/<slug>/ problem folders
+│   ├── leetcode/                            # progress.md (standalone schema), one-liner-library,
+│   │                                        #   <pattern>/<slug>/ problem folders,
+│   │                                        #   archive/pre-rebuild/ (engine-era state)
 │   └── ca/                                  # progress.md (engine schema), gap-scan records,
 │                                            #   thread-pull list, mock scorecards
 └── portfolio/                               # recruiter-facing artifacts
