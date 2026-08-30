@@ -4,6 +4,13 @@ cd "$(dirname "$0")/.."
 COACH="${1:?usage: lint-coach.sh <coach-dir-name>}"
 base="skills/$COACH"
 [ -f "$base/SKILL.md" ] || { echo "MISSING: $base/SKILL.md"; exit 1; }
+# standalone coach: carries its own teaching loop, does not hang off engine/.
+# Check SKILL.md and evals only; skip the engine-coupling checks and the six
+# engine hook files below.
+if grep -qF 'engine: standalone' "$base/SKILL.md"; then
+  [ -s "$base/evals/evals.json" ] || { echo "MISSING or EMPTY: $base/evals/evals.json"; exit 1; }
+  exit 0
+fi
 required=(
   references/north-star.md
   references/curriculum.md
