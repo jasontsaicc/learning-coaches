@@ -1,14 +1,17 @@
 # learning-coaches
 
-A Claude Code plugin providing a family of first-principles learning coaches built on a shared teaching engine. Each coach uses Feynman and Simon methods (incremental layering, asking you to articulate understanding, teaching by breaking down complex topics into foundational pieces) to guide deep learning in DevOps domains. Live coaches: Terraform/Infrastructure-as-Code, Kubernetes/SRE, System Design interview prep, LeetCode coding-interview prep, and AWS ProServe Cloud Architect interview prep.
+A Claude Code and Codex skill collection providing a family of first-principles learning coaches built on a shared teaching engine. Each coach uses Feynman and Simon methods (incremental layering, asking you to articulate understanding, teaching by breaking down complex topics into foundational pieces) to guide deep learning in DevOps domains. Live coaches: Terraform/Infrastructure-as-Code, Kubernetes/SRE, System Design interview prep, LeetCode coding-interview prep, and AWS ProServe Cloud Architect interview prep.
 
 ## Repository Structure
 
 ```
 learning-coaches/
+├── .agents/
+│   └── skills/                              # Codex discovery symlinks
 ├── .claude-plugin/
 │   └── plugin.json                          # Plugin manifest
 ├── .gitignore
+├── AGENTS.md                                # Codex repository instructions
 ├── README.md
 ├── docs/                                    # design specs + implementation plans
 ├── competency/                              # cross-coach Senior/L6 evidence matrix
@@ -115,10 +118,15 @@ archives as read-only.
 
 ## Deployment and Lint
 
-Live coaches run as user-level skills: each is symlinked into `~/.claude/skills/`, e.g.
-`ln -s <repo>/skills/sd-coach ~/.claude/skills/sd-coach`. Currently deployed: k8s-coach,
-sd-coach, leetcode-coach (terraform-coach is not symlinked). Local plugin testing:
-`claude --plugin-dir <repo>`, reload with `/reload-plugins`.
+Claude Code uses user-level symlinks in `~/.claude/skills/`, e.g.
+`ln -s <repo>/skills/sd-coach ~/.claude/skills/sd-coach`. Local plugin testing uses
+`claude --plugin-dir <repo>` and `/reload-plugins`.
+
+Codex discovers every live coach through the checked-in symlinks under `.agents/skills/`.
+Launch Codex anywhere inside this repository, then use `/skills` to verify discovery or
+invoke a coach explicitly, for example `$sd-coach`. Codex normally detects skill changes
+automatically; restart it if the list remains stale. See the
+[official Codex skill documentation](https://developers.openai.com/codex/skills).
 
 Before commit: `./scripts/lint-all.sh` must pass (validates plugin manifest, engine, and
 every coach; runs lab script tests). Scaffold a new coach with `./scripts/new-coach.sh
@@ -127,8 +135,7 @@ marker is filled.
 
 ## Engine Read Mechanism
 
-A coach reads the shared engine via `${CLAUDE_SKILL_DIR}/../../engine/ENGINE.md` (bash
-injection), with markdown link `../../engine/ENGINE.md` as a human-readable backup.
-`${CLAUDE_SKILL_DIR}` is the skill's own directory and resolves regardless of the session
-working directory (per official Claude Code skills docs). `${CLAUDE_PLUGIN_ROOT}` does not
-exist for skills.
+All agent-facing paths are relative to the real directory containing each `SKILL.md`, after
+following symlinks. For example, an engine-backed coach reads
+`../../engine/ENGINE.md`. This convention works in both Claude Code and Codex and does not
+depend on a host-specific environment variable.

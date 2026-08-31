@@ -4,9 +4,7 @@
 
 Progress file, registries, and in-progress work live in:
 
-```
-${CLAUDE_SKILL_DIR}/../../workspaces/sd/
-```
+`../../workspaces/sd/`（相對於 coach 的 `SKILL.md`）
 
 這個目錄是 git-tracked 學習狀態(跨機器同步:每堂課後 commit + push,開課前 pull,協定見 SKILL.md Session Sync)。內容:
 
@@ -27,9 +25,7 @@ ${CLAUDE_SKILL_DIR}/../../workspaces/sd/
 
 Artifacts that clear the quality bar ship to:
 
-```
-${CLAUDE_SKILL_DIR}/../../portfolio/sd/
-```
+`../../portfolio/sd/`（相對於 coach 的 `SKILL.md`）
 
 Recruiter-facing 展示區,與 workspace 分開:
 

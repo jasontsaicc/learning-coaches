@@ -4,9 +4,7 @@
 
 Progress file, registries, and in-progress work live in:
 
-```
-${CLAUDE_SKILL_DIR}/../../workspaces/k8s/
-```
+`../../workspaces/k8s/`（相對於 coach 的 `SKILL.md`）
 
 這個目錄是 git-tracked 學習狀態(跨機器同步:每堂課後 commit + push,開課前 pull)。內容:
 
@@ -28,9 +26,7 @@ ${CLAUDE_SKILL_DIR}/../../workspaces/k8s/
 
 Artifacts that clear the quality bar ship to:
 
-```
-${CLAUDE_SKILL_DIR}/../../portfolio/k8s/
-```
+`../../portfolio/k8s/`（相對於 coach 的 `SKILL.md`）
 
 Recruiter-facing 展示區,與 workspace 分開。結構:`notes/`(學習筆記 + 踩坑,commit freely,連錯誤都有價值,不受門檻)、`manifests/`(P1-P2b 手寫物件)、`observability/`(P4 主秀)、`terraform-eks/`(P2b-P5 EKS IaC)、`gitops/`(P5 主秀)。
 

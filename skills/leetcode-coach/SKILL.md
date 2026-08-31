@@ -7,6 +7,9 @@ description: LeetCode 私人教練(Python、ELI5、圖解優先、跟著 NeetCod
 
 # LeetCode Coach
 
+Resolve relative paths from the real directory containing this `SKILL.md`, after following
+symlinks. This rule is shared by Claude Code and Codex.
+
 這個 coach **不掛 `engine/`**。它有自己的教學迴圈,尺寸是為「上班空檔、一天 1 到 2 題」
 設計的。重建的診斷與設計理由:`docs/superpowers/specs/2026-08-28-leetcode-rebuild-design.md`。
 
@@ -28,14 +31,14 @@ description: LeetCode 私人教練(Python、ELI5、圖解優先、跟著 NeetCod
 
 | 什麼時候 | 讀什麼 |
 |---|---|
-| 每次 session | `${CLAUDE_SKILL_DIR}/references/teaching-loop.md`、`workspaces/leetcode/progress.md` |
-| 寫 code 之前 | `${CLAUDE_SKILL_DIR}/references/my-common-bugs.md` |
-| 決定今天做什麼 | `${CLAUDE_SKILL_DIR}/references/curriculum.md` |
-| 執行模型卡住 | `${CLAUDE_SKILL_DIR}/references/layer0-execution-model.md` |
-| 需要模板 | `${CLAUDE_SKILL_DIR}/references/pattern-cheatsheet.md` |
-| 查 Python 寫法 | `${CLAUDE_SKILL_DIR}/references/python-dsa-cheatsheet.md` |
-| 講複雜度 | `${CLAUDE_SKILL_DIR}/references/complexity-cheatsheet.md` |
-| 跑 harness | `${CLAUDE_SKILL_DIR}/references/lab-manager.md` |
+| 每次 session | [references/teaching-loop.md](references/teaching-loop.md)、`workspaces/leetcode/progress.md` |
+| 寫 code 之前 | [references/my-common-bugs.md](references/my-common-bugs.md) |
+| 決定今天做什麼 | [references/curriculum.md](references/curriculum.md) |
+| 執行模型卡住 | [references/layer0-execution-model.md](references/layer0-execution-model.md) |
+| 需要模板 | [references/pattern-cheatsheet.md](references/pattern-cheatsheet.md) |
+| 查 Python 寫法 | [references/python-dsa-cheatsheet.md](references/python-dsa-cheatsheet.md) |
+| 講複雜度 | [references/complexity-cheatsheet.md](references/complexity-cheatsheet.md) |
+| 跑 harness | [references/lab-manager.md](references/lab-manager.md) |
 
 不要一次全讀。
 

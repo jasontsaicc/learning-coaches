@@ -272,9 +272,12 @@ the progress file's schema. That schema is engine-owned and lives in
 
 The thin `SKILL.md` entry point must:
 
-1. Read the engine at session start: `${CLAUDE_SKILL_DIR}/../../engine/ENGINE.md`
-2. Read cross-coach governance: `${CLAUDE_SKILL_DIR}/../../engine/GOVERNANCE.md`
-3. Read each hook in `${CLAUDE_SKILL_DIR}/references/` to load domain content.
+All paths below are relative to the real directory containing `SKILL.md`, after following
+symlinks. This keeps the same coach loadable by Claude Code and Codex.
+
+1. Read the engine at session start: `../../engine/ENGINE.md`
+2. Read cross-coach governance: `../../engine/GOVERNANCE.md`
+3. Read each hook in `references/` to load domain content.
 4. Not re-implement any engine mechanic or governance rule. Those source files are authoritative for
    mechanics. If a mechanic is duplicated in `SKILL.md`, the lint script will flag it.
 
@@ -283,18 +286,18 @@ The recommended structure for `SKILL.md`:
 ```
 # <Domain> Coach
 
-Read engine: ${CLAUDE_SKILL_DIR}/../../engine/ENGINE.md
-Read governance: ${CLAUDE_SKILL_DIR}/../../engine/GOVERNANCE.md
+Read engine: ../../engine/ENGINE.md
+Read governance: ../../engine/GOVERNANCE.md
 Read hooks:
-  - ${CLAUDE_SKILL_DIR}/references/north-star.md
-  - ${CLAUDE_SKILL_DIR}/references/curriculum.md
-  - ${CLAUDE_SKILL_DIR}/references/teaching-elements.md
-  - ${CLAUDE_SKILL_DIR}/references/lab-manager.md      # omit if not a hands-on domain
-  - ${CLAUDE_SKILL_DIR}/references/scorecard-dims.md
-  - ${CLAUDE_SKILL_DIR}/references/phase-gates.md
-  - ${CLAUDE_SKILL_DIR}/references/language.md         # optional
-  - ${CLAUDE_SKILL_DIR}/references/narrative.md        # optional
-  - ${CLAUDE_SKILL_DIR}/references/portfolio.md
+  - references/north-star.md
+  - references/curriculum.md
+  - references/teaching-elements.md
+  - references/lab-manager.md      # omit if not a hands-on domain
+  - references/scorecard-dims.md
+  - references/phase-gates.md
+  - references/language.md         # optional
+  - references/narrative.md        # optional
+  - references/portfolio.md
 
 [domain-specific routing overrides or context, if any — keep minimal]
 ```

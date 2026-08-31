@@ -4,9 +4,7 @@
 
 Progress files, registries, and in-progress work live in:
 
-```
-${CLAUDE_SKILL_DIR}/../../workspaces/terraform/
-```
+`../../workspaces/terraform/` (relative to the coach's `SKILL.md`)
 
 This git-tracked directory holds:
 - `progress.md`: the engine's progress file. Its schema is engine-owned and defined in
@@ -27,9 +25,7 @@ each session.
 
 Artifacts that clear the quality bar ship to:
 
-```
-${CLAUDE_SKILL_DIR}/../../portfolio/platform-eks/terraform/
-```
+`../../portfolio/platform-eks/terraform/` (relative to the coach's `SKILL.md`)
 
 Terraform extends the shared `platform-eks` flagship; it does not create a parallel
 portfolio. Phase exercises remain in the workspace until they meet the promotion gate in

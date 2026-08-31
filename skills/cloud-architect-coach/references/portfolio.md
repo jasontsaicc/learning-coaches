@@ -4,9 +4,7 @@
 
 進度檔、盤點紀錄與 in-progress 練習都放在:
 
-```
-${CLAUDE_SKILL_DIR}/../../workspaces/ca/
-```
+`../../workspaces/ca/`（相對於 coach 的 `SKILL.md`）
 
 這個目錄是 git-tracked 學習狀態,跨機器同步:每堂課後 commit + push,開課前 pull。內容:
 

@@ -600,8 +600,8 @@ session, including the root cause. A partial answer does not resolve the item.
 
 ## How A Coach Uses This Engine
 
-At session start, the coach reads this file (`${CLAUDE_SKILL_DIR}/../../engine/ENGINE.md`)
-to load the shared invariants. It then reads its own hooks listed in `PLUGIN-INTERFACE.md`
+At session start, the coach reads this file at `../../engine/ENGINE.md`, resolved from the
+real directory containing the coach's `SKILL.md`. It then reads its own hooks listed in `PLUGIN-INTERFACE.md`
 to load the domain-specific content: curriculum, phase-gate pass conditions, scorecard
 dimensions, teaching elements (scenarios, first-principles chains, lab scripts), and
 any domain registries. The engine invariants govern the session structure and gates;

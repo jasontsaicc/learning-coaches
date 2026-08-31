@@ -3,6 +3,8 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 echo "== plugin manifest =="
 python3 -c "import json,sys; json.load(open('.claude-plugin/plugin.json')); print('plugin.json OK')"
+echo "== codex discovery =="
+./scripts/lint-codex.sh && echo "codex discovery OK"
 echo "== engine =="
 ./scripts/lint-engine.sh && echo "engine OK"
 echo "== coaches =="
