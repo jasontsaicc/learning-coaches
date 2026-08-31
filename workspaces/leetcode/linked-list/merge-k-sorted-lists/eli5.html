@@ -1,0 +1,471 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>合併 K 條有序火車</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&amp;family=JetBrains+Mono:wght@400;700&amp;family=Noto+Sans+TC:wght@400;500;700&amp;display=swap">
+<style>
+:root{
+  --paper:#EFF2EF; --surface:#FFFFFF; --ink:#131C18; --body:#28332D;
+  --muted:#68766E; --line:#C6D0C9;
+  --c1:#2C6B8C; --c1-soft:#DCE9F0;
+  --c2:#AE5233; --c2-soft:#F3E1DA;
+  --c3:#567A4D; --c3-soft:#E1EBDD;
+  --signal:#B4881F; --signal-soft:#F5EBD3;
+  --code-bg:#132018; --code-fg:#DCE6DE;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#101815; --surface:#18211D; --ink:#E8EEE9; --body:#C3CEC7;
+    --muted:#8C9A92; --line:#2C3A33;
+    --c1:#7CB8D6; --c1-soft:#1B2E38;
+    --c2:#E29070; --c2-soft:#331F17;
+    --c3:#9BC28E; --c3-soft:#1E3020;
+    --signal:#E0B855; --signal-soft:#332A14;
+    --code-bg:#0A100D; --code-fg:#D6E2D9;
+  }
+}
+*{box-sizing:border-box}
+body{
+  margin:0; padding:0 1.25rem 5rem; background:var(--paper); color:var(--body);
+  font-family:"Noto Sans TC","Microsoft JhengHei",sans-serif; font-size:16px; line-height:1.85;
+}
+.wrap{max-width:48rem;margin:0 auto}
+header{padding:3.5rem 0 1.5rem}
+.kicker{font-family:"JetBrains Mono",monospace;font-size:.72rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--signal)}
+h1{font-family:"Archivo","Noto Sans TC",sans-serif;font-size:clamp(2rem,6vw,3rem);line-height:1.1;letter-spacing:-.02em;color:var(--ink);margin:.5rem 0 .6rem;text-wrap:balance}
+.sub{color:var(--muted);margin:0}
+.rail{height:9px;margin:2.75rem 0 2.25rem;border-top:2px solid var(--line);border-bottom:2px solid var(--line);background:repeating-linear-gradient(90deg,var(--line) 0 3px,transparent 3px 13px)}
+h2{font-family:"Archivo","Noto Sans TC",sans-serif;font-size:1.4rem;color:var(--ink);margin:0 0 .25rem;text-wrap:balance}
+h2 .num{font-family:"JetBrains Mono",monospace;font-size:.85rem;color:var(--signal);margin-right:.6rem;vertical-align:.15em}
+h3{font-family:"Archivo","Noto Sans TC",sans-serif;font-size:1rem;color:var(--ink);margin:1.7rem 0 .4rem}
+h4{color:var(--ink)}
+section{margin-bottom:2.5rem}
+p{margin:.7rem 0} strong{color:var(--ink)}
+code{font-family:"JetBrains Mono",monospace;font-size:.87em;background:var(--signal-soft);color:var(--ink);padding:.1em .35em;border-radius:2px}
+.lede{font-size:1.1rem;color:var(--ink);border-left:3px solid var(--signal);padding-left:1rem;margin:1rem 0 1.25rem}
+.formula{font-family:"JetBrains Mono",monospace;font-size:clamp(.92rem,3vw,1.1rem);font-weight:700;color:var(--ink);background:var(--signal-soft);padding:1rem 1.1rem;border-radius:4px;text-align:center;margin:1.2rem 0}
+.track{display:flex;align-items:center;gap:.3rem;overflow-x:auto;padding:.65rem 0;font-family:"JetBrains Mono",monospace}
+.track .lbl{color:var(--muted);font-size:.78rem;min-width:3.6rem;flex-shrink:0}
+.node{display:inline-flex;align-items:center;justify-content:center;min-width:2.2rem;padding:.3rem .5rem;flex-shrink:0;border:2px solid var(--line);border-radius:3px;background:var(--surface);font-weight:700;color:var(--ink)}
+.node.a{border-color:var(--c1);background:var(--c1-soft);color:var(--c1)}
+.node.b{border-color:var(--c2);background:var(--c2-soft);color:var(--c2)}
+.node.c{border-color:var(--c3);background:var(--c3-soft);color:var(--c3)}
+.node.d{border-style:dashed;border-color:var(--signal);background:var(--signal-soft);color:var(--signal);font-size:.75rem}
+.node.dim{opacity:.32}.arrow,.nil{color:var(--muted);flex-shrink:0;font-size:.85rem}
+.heap{display:flex;flex-wrap:wrap;gap:.55rem;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:5px;padding:1rem;margin:.9rem 0}
+.heap-label{font-family:"JetBrains Mono",monospace;font-size:.72rem;font-weight:700;color:var(--muted);width:100%}
+.ticket{font-family:"JetBrains Mono",monospace;border:2px solid var(--signal);background:var(--signal-soft);color:var(--ink);padding:.4rem .65rem;border-radius:3px;font-weight:700}
+.ticket.root::after{content:" ← root / 最小";font-family:"Noto Sans TC",sans-serif;font-weight:500;color:var(--signal);font-size:.75rem}
+.callout{background:var(--surface);border:1px solid var(--line);border-radius:4px;padding:1.1rem 1.25rem;margin:1.25rem 0}
+.callout.warn{border-left:4px solid var(--c2)}.callout.key{border-left:4px solid var(--signal)}.callout.pause{border:2px solid var(--signal);background:var(--signal-soft)}
+.callout h3{margin-top:0}
+ul,ol{padding-left:1.35rem;margin:.7rem 0}li{margin:.35rem 0}
+.signals{list-style:none;padding:0;display:grid;gap:.5rem}
+.signals li{display:flex;gap:.75rem;align-items:baseline;background:var(--surface);border:1px solid var(--line);border-radius:4px;padding:.7rem .95rem;margin:0}
+.signals .n{font-family:"JetBrains Mono",monospace;font-weight:700;color:var(--signal);flex-shrink:0}
+.tablewrap{overflow-x:auto;margin:1.25rem 0;border:1px solid var(--line);border-radius:4px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:.86rem;font-variant-numeric:tabular-nums}
+th,td{text-align:left;vertical-align:top;padding:.55rem .8rem;border-bottom:1px solid var(--line)}
+th{font-family:"Archivo","Noto Sans TC",sans-serif;font-weight:600;color:var(--ink);font-size:.78rem;letter-spacing:.03em}tr:last-child td{border-bottom:none}.mono{font-family:"JetBrains Mono",monospace;white-space:nowrap}
+pre{background:var(--code-bg);color:var(--code-fg);border-radius:5px;padding:1.1rem 1.25rem;overflow-x:auto;margin:1rem 0;font-family:"JetBrains Mono",monospace;font-size:.82rem;line-height:1.7}
+pre code{background:none;color:inherit;padding:0;font-size:1em}.cm{color:#7E9B8A}.kw{color:#E0B855}.fn{color:#7CB8D6}
+details{border:1px solid var(--line);border-radius:5px;background:var(--surface);margin:.85rem 0;overflow:hidden}
+summary{cursor:pointer;padding:.95rem 1.2rem;list-style:none;font-family:"Archivo","Noto Sans TC",sans-serif;font-weight:600;color:var(--ink);display:flex;align-items:center;gap:.7rem}
+summary::-webkit-details-marker{display:none}summary::before{content:"▸";color:var(--signal);font-size:.85rem;transition:transform .15s}details[open] summary::before{transform:rotate(90deg)}
+.dbody{padding:0 1.2rem 1.3rem;border-top:1px solid var(--line)}.dbody>*:first-child{margin-top:1rem}.lockhint{font-weight:400;font-size:.8rem;color:var(--muted);margin-left:auto}
+.mantra{font-family:"Archivo","Noto Sans TC",sans-serif;font-size:1.05rem;font-weight:600;color:var(--ink);background:var(--signal-soft);border-radius:4px;padding:1rem 1.2rem;margin:1rem 0}
+.move{border-top:1px solid var(--line);padding-top:1.15rem;margin-top:1.4rem}.move:first-of-type{border-top:none;padding-top:0}
+.move h4{font-family:"Archivo","Noto Sans TC",sans-serif;font-size:1rem;margin:0 0 .5rem;display:flex;gap:.6rem;align-items:baseline}.mv{font-family:"JetBrains Mono",monospace;font-size:.7rem;letter-spacing:.1em;color:var(--signal);border:1px solid var(--signal);border-radius:2px;padding:.1rem .35rem;flex-shrink:0}
+.say{background:var(--c1-soft);border-left:3px solid var(--c1);padding:.75rem 1rem;margin:.6rem 0;font-size:.93rem;color:var(--ink)}
+.say b,.think b,.write b{display:block;font-family:"JetBrains Mono",monospace;font-size:.66rem;letter-spacing:.12em;text-transform:uppercase;margin-bottom:.25rem}
+.say b{color:var(--c1)}.think{font-size:.93rem;margin:.6rem 0;padding-left:.9rem;border-left:2px dotted var(--line)}.think b{color:var(--muted)}.write{font-size:.93rem;margin:.6rem 0}.write b{color:var(--signal)}
+.fix{display:grid;gap:.2rem;margin:1.1rem 0;padding-left:.9rem;border-left:3px solid var(--line)}.fix .x{color:var(--c2)}.fix .o{color:var(--c1)}.fix .w{color:var(--muted);font-size:.92rem}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<main class="wrap">
+<header>
+  <div class="kicker">LeetCode 23 · Heap / Priority Queue · Hard</div>
+  <h1>合併 K 條有序火車</h1>
+  <p class="sub">Merge K Sorted Lists — 不是全新的 Hard；是 #21 加上一個會挑最小值的櫃台</p>
+</header>
+
+<div class="rail"></div>
+
+<section>
+  <h2><span class="num">01</span>這題在幹嘛</h2>
+  <p class="lede">現在不是兩列火車，而是 <strong>k 列</strong>。每列車廂都已由小到大排好；要把所有車廂重新掛成一列，結果仍然由小到大。</p>
+  <p>我們全程用同一組例子：</p>
+  <div class="track"><span class="lbl">list 0</span><span class="node a">1</span><span class="arrow">→</span><span class="node a">4</span><span class="arrow">→</span><span class="node a">5</span><span class="arrow">→</span><span class="nil">∅</span></div>
+  <div class="track"><span class="lbl">list 1</span><span class="node b">1</span><span class="arrow">→</span><span class="node b">3</span><span class="arrow">→</span><span class="node b">4</span><span class="arrow">→</span><span class="nil">∅</span></div>
+  <div class="track"><span class="lbl">list 2</span><span class="node c">2</span><span class="arrow">→</span><span class="node c">6</span><span class="arrow">→</span><span class="nil">∅</span></div>
+  <div class="track"><span class="lbl">答案</span><span class="node a">1</span><span class="arrow">→</span><span class="node b">1</span><span class="arrow">→</span><span class="node c">2</span><span class="arrow">→</span><span class="node b">3</span><span class="arrow">→</span><span class="node a">4</span><span class="arrow">→</span><span class="node b">4</span><span class="arrow">→</span><span class="node a">5</span><span class="arrow">→</span><span class="node c">6</span><span class="arrow">→</span><span class="nil">∅</span></div>
+  <p>跟 #21 一樣，我們重用原本的 node，只改 <code>.next</code>。真正的新問題只有一個：<strong>兩個 head 可以直接比；k 個 head 要怎麼快速選最小？</strong></p>
+</section>
+
+<div class="rail"></div>
+
+<section>
+  <h2><span class="num">02</span>這是什麼題型</h2>
+  <ul class="signals">
+    <li><span class="n">S1</span><span>有 <strong>k 個已排序來源</strong>，要合成一個已排序結果。</span></li>
+    <li><span class="n">S2</span><span>每一輪都在問「目前候選人裡，<strong>誰最小</strong>？」</span></li>
+    <li><span class="n">S3</span><span>拿走一個候選人後，只會從<strong>同一個來源</strong>補進下一個。</span></li>
+  </ul>
+  <div class="formula">#23 = #21 的 dummy + tail　＋　min-heap 選最小 head</div>
+  <div class="callout key">
+    <h3>秒認句</h3>
+    <p style="margin-bottom:0">「多個已排序 stream，反覆拿全域最小」→ 想 <strong>min-heap</strong>。heap 是選秀櫃台；#21 的 <code>dummy + tail</code> 是後方的組裝線。</p>
+  </div>
+  <div class="callout pause">
+    <h3>先停一下，不要往下滑</h3>
+    <p style="margin-bottom:0">回到對話回答：<strong>如果還不知道 heap，你會怎麼做？暴力的也算。</strong></p>
+  </div>
+</section>
+
+<div class="rail"></div>
+
+<section>
+  <h2><span class="num">03</span>兩個直覺做法，慢在哪裡</h2>
+  <h3>A. 全部倒出來再排序</h3>
+  <div class="track"><span class="lbl">倒出來</span><span class="node a">1</span><span class="node a">4</span><span class="node a">5</span><span class="node b">1</span><span class="node b">3</span><span class="node b">4</span><span class="node c">2</span><span class="node c">6</span></div>
+  <p>把 N 個值放進 array、排序、重建 linked list。時間 <strong>O(N log N)</strong>，額外空間 <strong>O(N)</strong>。它浪費了「每條 list 已排序」這份免費情報。</p>
+
+  <h3>B. 把 #21 從左到右一直做</h3>
+  <p>先 merge list 0 和 list 1，再把長大的結果跟 list 2 merge，繼續直到第 k 條。答案前半段會被重複掃過；最壞可到 <strong>O(Nk)</strong>。</p>
+  <div class="callout warn">
+    <h3>問題不是 #21 慢，而是合併順序失衡</h3>
+    <p style="margin-bottom:0">一條越長越大的結果，每來一條新 list 就重新走一次。後面的 follow-up 會把 lists 兩兩配對，平衡地使用 #21，讓它也能做到 O(N log k)。</p>
+  </div>
+</section>
+
+<div class="rail"></div>
+
+<section>
+  <h2><span class="num">04</span>min-heap 做法：一步一步，沒有 code</h2>
+  <h3>先只放每條 list 的 head</h3>
+  <p>初始候選人是 <code>1(list 0)</code>、<code>1(list 1)</code>、<code>2(list 2)</code>。heap 最多只有 k 張票，不需要把所有 N 個 node 都塞進去。</p>
+  <div class="heap"><div class="heap-label">概念上的候選集合（只是為了看懂；heap 內部不保證整排排序）</div><span class="ticket root">1 · L0</span><span class="ticket">1 · L1</span><span class="ticket">2 · L2</span></div>
+  <div class="callout key">
+    <h3>整題最重要的 invariant</h3>
+    <p><strong>heap 恰好保存每條尚未合併 list 的當前 head。</strong></p>
+    <p style="margin-bottom:0">每條 list 自己已排序，所以該 list 剩餘最小值一定是它的 head；所有 list 的 head 再取最小，就是所有剩餘 node 的全域最小值。</p>
+  </div>
+
+  <h3>每一輪固定做四件事</h3>
+  <ol>
+    <li>從 heap <strong>pop 最小 head</strong>。</li>
+    <li>把這個 node 接到 <code>tail</code> 後面。</li>
+    <li><code>tail</code> 往前走到新隊尾。</li>
+    <li>如果這個 node 原本還有下一個，就把<strong>同一條 list 的下一個 node</strong> push 進 heap。</li>
+  </ol>
+
+  <div class="tablewrap"><table>
+    <tr><th>輪</th><th>pop</th><th>同來源補進</th><th>heap 候選值</th><th>答案</th></tr>
+    <tr><td class="mono">0</td><td>—</td><td>三條 head</td><td class="mono">1₀, 1₁, 2₂</td><td class="mono">∅</td></tr>
+    <tr><td class="mono">1</td><td class="mono">1₀</td><td class="mono">4₀</td><td class="mono">1₁, 2₂, 4₀</td><td class="mono">1</td></tr>
+    <tr><td class="mono">2</td><td class="mono">1₁</td><td class="mono">3₁</td><td class="mono">2₂, 3₁, 4₀</td><td class="mono">1→1</td></tr>
+    <tr><td class="mono">3</td><td class="mono">2₂</td><td class="mono">6₂</td><td class="mono">3₁, 4₀, 6₂</td><td class="mono">1→1→2</td></tr>
+    <tr><td class="mono">4</td><td class="mono">3₁</td><td class="mono">4₁</td><td class="mono">4₀, 4₁, 6₂</td><td class="mono">1→1→2→3</td></tr>
+    <tr><td class="mono">5</td><td class="mono">4₀</td><td class="mono">5₀</td><td class="mono">4₁, 5₀, 6₂</td><td class="mono">…→4</td></tr>
+    <tr><td class="mono">6</td><td class="mono">4₁</td><td>無</td><td class="mono">5₀, 6₂</td><td class="mono">…→4</td></tr>
+    <tr><td class="mono">7</td><td class="mono">5₀</td><td>無</td><td class="mono">6₂</td><td class="mono">…→5</td></tr>
+    <tr><td class="mono">8</td><td class="mono">6₂</td><td>無</td><td class="mono">∅</td><td class="mono">…→6</td></tr>
+  </table></div>
+  <p><strong>注意：</strong>表格為了人眼把候選值排好了；真正的 heap 只保證 <code>heap[0]</code> 最小，不保證其他元素從小到大。</p>
+
+  <h3>為什麼 tuple 要放 list_id？</h3>
+  <p>例子一開始有兩個值都是 1。Python 比 tuple 時會從左往右比：</p>
+  <div class="formula">(node.val, list_id, node)</div>
+  <p>值相同就比較唯一的 <code>list_id</code>，勝負已分，不會走到第三格去比較 <code>ListNode</code>。如果只放 <code>(node.val, node)</code>，遇到同值時 Python 會嘗試比較兩個 <code>ListNode</code>，產生 <code>TypeError</code>。</p>
+
+  <h3>複雜度</h3>
+  <div class="tablewrap"><table>
+    <tr><th>項目</th><th>值</th><th>理由</th></tr>
+    <tr><td>時間</td><td class="mono">O(k + N log k)</td><td>先掃 k 條 list；N 個 node 各 pop 一次、最多 push 一次，heap 大小不超過 k</td></tr>
+    <tr><td>常見簡寫</td><td class="mono">O(N log k)</td><td>面試時常省略初始化掃描；若 empty lists 很多，精確式更完整</td></tr>
+    <tr><td>額外空間</td><td class="mono">O(k)</td><td>heap 最多保存每條 list 的一個 head；答案沿用原 node</td></tr>
+  </table></div>
+</section>
+
+<div class="rail"></div>
+
+<section>
+  <h2>下面由你決定何時展開</h2>
+  <p class="sub" style="margin-bottom:1.25rem">上面的圖能自己講順，再打開 code。讀書會最值錢的是 invariant，不是背 <code>heapq</code> 拼字。</p>
+
+  <details>
+    <summary>完整 code 加逐行解釋<span class="lockhint">預設對照打</span></summary>
+    <div class="dbody">
+<pre><code><span class="kw">import</span> heapq
+
+<span class="kw">class</span> Solution:
+    <span class="kw">def</span> <span class="fn">mergeKLists</span>(self, lists):
+        min_heap = []
+
+        <span class="kw">for</span> list_id, node <span class="kw">in</span> enumerate(lists):
+            <span class="kw">if</span> node:
+                heapq.heappush(min_heap, (node.val, list_id, node))
+
+        dummy = ListNode()
+        tail = dummy
+
+        <span class="kw">while</span> min_heap:
+            _, list_id, node = heapq.heappop(min_heap)
+
+            tail.next = node
+            tail = tail.next
+
+            <span class="kw">if</span> node.next:
+                heapq.heappush(
+                    min_heap,
+                    (node.next.val, list_id, node.next),
+                )
+
+        <span class="kw">return</span> dummy.next</code></pre>
+      <div class="tablewrap"><table>
+        <tr><th>變數</th><th>工作</th><th>何時改變</th></tr>
+        <tr><td class="mono">min_heap</td><td>各 list 當前 head 的候選櫃台</td><td>每輪 pop 一張，可能 push 同來源下一張</td></tr>
+        <tr><td class="mono">list_id</td><td>同值時的 tie-breaker，也標記 node 來自哪條 list</td><td>跟著該來源一路傳下去</td></tr>
+        <tr><td class="mono">node</td><td>這一輪選出的全域最小 node</td><td>每次 pop 重新賦值</td></tr>
+        <tr><td class="mono">dummy</td><td>答案固定錨點</td><td>不動</td></tr>
+        <tr><td class="mono">tail</td><td>答案目前隊尾</td><td>每輪前進一次</td></tr>
+      </table></div>
+      <div class="callout warn">
+        <h3>你最容易犯的兩個錯</h3>
+        <ul style="margin-bottom:0">
+          <li><code>return dummy.next</code> 必須在 <code>while</code> 外面；放裡面只會回傳第一個 node。</li>
+          <li><code>node</code> 每輪由 <code>heappop</code> 重新求值。問「第 4 輪的 node 是誰？」要回到當輪 heap，不是沿用第 1 輪的 node。</li>
+        </ul>
+      </div>
+    </div>
+  </details>
+
+  <details>
+    <summary>逐輪執行模擬表<span class="lockhint">對照 code 行為</span></summary>
+    <div class="dbody">
+      <p>跟步驟 04 是<strong>同一個例子</strong>。上面是手動動作，這裡只是把每個動作對回變數。</p>
+      <div class="tablewrap"><table>
+        <tr><th>輪</th><th class="mono">heappop → node</th><th class="mono">tail.next</th><th class="mono">heappush</th><th class="mono">min_heap 內候選值</th></tr>
+        <tr><td class="mono">1</td><td class="mono">1 (L0)</td><td class="mono">dummy→1</td><td class="mono">(4,0,node)</td><td class="mono">1₁,2₂,4₀</td></tr>
+        <tr><td class="mono">2</td><td class="mono">1 (L1)</td><td class="mono">1→1</td><td class="mono">(3,1,node)</td><td class="mono">2₂,3₁,4₀</td></tr>
+        <tr><td class="mono">3</td><td class="mono">2 (L2)</td><td class="mono">1→2</td><td class="mono">(6,2,node)</td><td class="mono">3₁,4₀,6₂</td></tr>
+        <tr><td class="mono">4</td><td class="mono">3 (L1)</td><td class="mono">2→3</td><td class="mono">(4,1,node)</td><td class="mono">4₀,4₁,6₂</td></tr>
+        <tr><td class="mono">5</td><td class="mono">4 (L0)</td><td class="mono">3→4</td><td class="mono">(5,0,node)</td><td class="mono">4₁,5₀,6₂</td></tr>
+        <tr><td class="mono">6</td><td class="mono">4 (L1)</td><td class="mono">4→4</td><td>不 push</td><td class="mono">5₀,6₂</td></tr>
+        <tr><td class="mono">7</td><td class="mono">5 (L0)</td><td class="mono">4→5</td><td>不 push</td><td class="mono">6₂</td></tr>
+        <tr><td class="mono">8</td><td class="mono">6 (L2)</td><td class="mono">5→6</td><td>不 push</td><td class="mono">∅</td></tr>
+      </table></div>
+      <p>手走和 code 做的是同一件事：<strong>拿一張最小票、接一節車廂、只從那列補下一張票。</strong></p>
+    </div>
+  </details>
+
+  <details>
+    <summary>口訣、模板與 follow-up<span class="lockhint">讀書會收尾用</span></summary>
+    <div class="dbody">
+      <div class="mantra">每條先派 head 進 heap；pop 誰就接誰，並只補它的 next。heap 永遠一條一票，所以 root 永遠是全域最小。</div>
+<pre><code>heap = 每個非空來源的第一個候選
+dummy, tail = 假頭, 假頭
+
+<span class="kw">while</span> heap:
+    item = pop 最小候選
+    tail 後面接 item
+    tail 前進
+    <span class="kw">if</span> item 的同來源還有下一個:
+        push 下一個候選
+
+<span class="kw">return</span> dummy.next</code></pre>
+      <h3>Follow-up：不用 heap 可以嗎？</h3>
+      <p>可以。把 k 條 lists 兩兩配對，用 #21 merge；下一輪再把結果兩兩配對。每一層所有 N 個 node 只走一次，共 <code>log k</code> 層，所以也是 <strong>O(N log k)</strong>。</p>
+      <div class="tablewrap"><table>
+        <tr><th>做法</th><th>時間</th><th>你怎麼選</th></tr>
+        <tr><td>Min-heap</td><td class="mono">O(k + N log k)</td><td>最直接表達「k 個 sorted streams 反覆取最小」；也是本題主講</td></tr>
+        <tr><td>Divide and conquer + #21</td><td class="mono">O(N log k)</td><td>最大化重用已會的 #21；適合面試官追問 alternative</td></tr>
+        <tr><td>從左到右 sequential merge</td><td class="mono">O(Nk) worst</td><td>容易想到，但成長中的結果會被反覆掃</td></tr>
+      </table></div>
+    </div>
+  </details>
+
+  <details>
+    <summary>L6 面試／讀書會逐字稿<span class="lockhint">英文 shadowing</span></summary>
+    <div class="dbody">
+      <div class="move"><h4><span class="mv">MOVE 0</span>先問 constraints</h4>
+        <div class="say"><b>說</b>“Before I start: may I reuse and relink the input nodes? Can some lists be empty? Can values repeat? And should I assume the input array itself may be empty?”</div>
+        <div class="think"><b>想</b>確認可重用 node 才能說結果空間不算 O(N)；重複值會直接引出 Python tuple 的 tie-breaker。</div>
+        <div class="write"><b>寫</b><pre><code><span class="cm"># lists can be [], lists may contain None</span>
+<span class="cm"># duplicate values are allowed; reuse nodes</span></code></pre></div>
+      </div>
+
+      <div class="move"><h4><span class="mv">MOVE 1</span>重述並自帶例子</h4>
+        <div class="say"><b>說</b>“I need to merge k individually sorted linked lists into one sorted list. I’ll trace [1,4,5], [1,3,4], and [2,6], whose result should be [1,1,2,3,4,4,5,6].”</div>
+        <div class="think"><b>想</b>先寫例子，Move 7 可以直接指回來，不浪費時間重建測資。</div>
+        <div class="write"><b>寫</b><pre><code>L0: 1 → 4 → 5
+L1: 1 → 3 → 4
+L2: 2 → 6
+out: 1 → 1 → 2 → 3 → 4 → 4 → 5 → 6</code></pre></div>
+      </div>
+
+      <div class="move"><h4><span class="mv">MOVE 2</span>暴力解與浪費的免費情報</h4>
+        <div class="say"><b>說</b>“A brute-force solution collects all N values, sorts them, and rebuilds the list. That costs O(N log N) time and O(N) extra space, but it throws away the fact that every input list is already sorted.”</div>
+        <div class="think"><b>想</b>20 秒帶過，重點不是嫌棄 sort，而是點出它沒用題目送的免費情報。</div>
+        <div class="write"><b>寫</b><pre><code>all_values.sort()  <span class="cm"># O(N log N), ignores per-list order</span></code></pre></div>
+      </div>
+
+      <div class="move"><h4><span class="mv">MOVE 3</span>講 invariant</h4>
+        <div class="say"><b>說</b>“Here is the invariant: the heap contains exactly the current head of every non-empty remaining list. Since each list is sorted, its head is its smallest remaining node. Therefore, the minimum among those heads is the global minimum remaining node.”</div>
+        <div class="think"><b>想</b>這段是全題的證明。不要只說「heap 可以拿最小」；要說為什麼只放 head 就沒有漏掉更小的 node。</div>
+        <div class="write"><b>寫</b><pre><code><span class="kw">for</span> list_id, node <span class="kw">in</span> enumerate(lists):
+    <span class="kw">if</span> node:
+        heappush(heap, (node.val, list_id, node))</code></pre></div>
+      </div>
+
+      <div class="move"><h4><span class="mv">MOVE 4</span>講成本交換</h4>
+        <div class="say"><b>說</b>“Instead of scanning up to k heads for every output node, I’ll pay O(k) space for a min-heap and reduce each selection from O(k) to O(log k). I’ll reuse the dummy-and-tail assembly line from Merge Two Sorted Lists.”</div>
+        <div class="think"><b>想</b>heap 不是魔法，是用 O(k) 空間買更快的選最小；dummy/tail 則直接重用 #21。</div>
+        <div class="write"><b>寫</b><pre><code>dummy = ListNode()
+tail = dummy
+<span class="cm"># scan k heads → heap pop in log k</span></code></pre></div>
+      </div>
+
+      <div class="move"><h4><span class="mv">MOVE 5</span>先講複雜度</h4>
+        <div class="say"><b>說</b>“Let N be the total number of nodes and k the number of lists. Initialization scans k lists. Every node is pushed and popped at most once, and the heap holds at most k entries, so time is O(k + N log k), commonly written O(N log k). Extra space is O(k). Sound reasonable?”</div>
+        <div class="think"><b>想</b>精確式保留 O(k)，可以正確處理「k 很大但全是 empty list」的情況。</div>
+        <div class="write"><b>寫</b><pre><code>time  = O(k + N log k)
+space = O(k)</code></pre></div>
+      </div>
+
+      <div class="move"><h4><span class="mv">MOVE 6</span>code 分三段寫</h4>
+        <div class="say"><b>說</b>“First, I seed the heap with one node per non-empty list. The list ID breaks ties, so Python never has to compare ListNode objects.”</div>
+        <div class="write"><b>寫</b><pre><code>min_heap = []
+<span class="kw">for</span> list_id, node <span class="kw">in</span> enumerate(lists):
+    <span class="kw">if</span> node:
+        heapq.heappush(min_heap, (node.val, list_id, node))</code></pre></div>
+
+        <div class="say"><b>說</b>“Next, I pop the smallest node, append it with the same dummy-and-tail pattern as problem 21, and only advance the source list that produced that node.”</div>
+        <div class="write"><b>寫</b><pre><code>dummy = ListNode()
+tail = dummy
+
+<span class="kw">while</span> min_heap:
+    _, list_id, node = heapq.heappop(min_heap)
+    tail.next = node
+    tail = tail.next</code></pre></div>
+
+        <div class="say"><b>說</b>“If that source has another node, I push exactly that successor. This restores the invariant: one candidate for every non-empty remaining list.”</div>
+        <div class="write"><b>寫</b><pre><code>    <span class="kw">if</span> node.next:
+        heapq.heappush(
+            min_heap,
+            (node.next.val, list_id, node.next),
+        )
+
+<span class="kw">return</span> dummy.next</code></pre></div>
+        <div class="think"><b>想</b>第三段要明講「restore the invariant」。push next 不是語法細節，而是維持正確性的動作。</div>
+      </div>
+
+      <div class="move"><h4><span class="mv">MOVE 7</span>主動 dry run</h4>
+        <div class="say"><b>說</b>“Let me trace the example from the top. I seed [1 from L0, 1 from L1, 2 from L2]. I pop 1 from L0 and push 4 from L0; then pop 1 from L1 and push 3; then pop 2 and push 6. Repeating this produces 1,1,2,3,4,4,5,6.”</div>
+        <div class="think"><b>想</b>必須說出「pop 哪條，就補哪條」，這才證明你真的理解資料流。</div>
+        <div class="write"><b>寫</b><pre><code>heap: [1₀,1₁,2₂] → [1₁,2₂,4₀] → [2₂,3₁,4₀]
+out:  ∅          → 1             → 1→1</code></pre></div>
+      </div>
+
+      <div class="move"><h4><span class="mv">MOVE 8</span>主動掃 edge cases</h4>
+        <div class="say"><b>說</b>“For an empty array or all-empty lists, the heap stays empty and dummy.next is None. A single non-empty list still works, with a heap of size one. Duplicate values are safe because list_id breaks ties before tuple comparison reaches the node.”</div>
+        <div class="think"><b>想</b>每個 edge case 都指回一個具體設計：empty 靠 dummy；duplicate 靠 list_id。</div>
+        <div class="write"><b>寫</b><pre><code>[]              → <span class="kw">return</span> dummy.next  <span class="cm"># None</span>
+[None, None]    → <span class="kw">return</span> dummy.next  <span class="cm"># None</span>
+(1, 0, node_a), (1, 1, node_b)  <span class="cm"># tie is safe</span></code></pre></div>
+      </div>
+
+      <div class="move"><h4><span class="mv">MOVE 9</span>主動講 alternative</h4>
+        <div class="say"><b>說</b>“An alternative is divide and conquer: pair the lists, merge each pair with problem 21, and repeat. Every level touches all N nodes and there are log k levels, so it also runs in O(N log k). The heap version expresses k-way streaming more directly.”</div>
+        <div class="think"><b>想</b>把 Hard 拆回已學過的元件：heap + #21；或 log k 層的 #21。這比背第二份 code 更重要。</div>
+        <div class="write"><b>寫</b><pre><code>k lists → k/2 merged lists → k/4 → ... → 1
+each level: O(N), levels: O(log k)</code></pre></div>
+      </div>
+
+      <h3>完整 code</h3>
+<pre><code><span class="kw">import</span> heapq
+
+<span class="kw">class</span> Solution:
+    <span class="kw">def</span> <span class="fn">mergeKLists</span>(self, lists):
+        min_heap = []
+
+        <span class="kw">for</span> list_id, node <span class="kw">in</span> enumerate(lists):
+            <span class="kw">if</span> node:
+                heapq.heappush(min_heap, (node.val, list_id, node))
+
+        dummy = ListNode()
+        tail = dummy
+
+        <span class="kw">while</span> min_heap:
+            _, list_id, node = heapq.heappop(min_heap)
+            tail.next = node
+            tail = tail.next
+
+            <span class="kw">if</span> node.next:
+                heapq.heappush(
+                    min_heap,
+                    (node.next.val, list_id, node.next),
+                )
+
+        <span class="kw">return</span> dummy.next</code></pre>
+
+      <h3>哪一句話對應哪幾行</h3>
+      <div class="tablewrap"><table>
+        <tr><th>Move</th><th>嘴巴講的核心</th><th>code</th></tr>
+        <tr><td class="mono">3</td><td>heap has exactly one current head per non-empty list</td><td class="mono">for ... heappush(... node)</td></tr>
+        <tr><td class="mono">4</td><td>reuse the dummy-and-tail assembly line</td><td class="mono">dummy = ListNode()<br>tail = dummy</td></tr>
+        <tr><td class="mono">6a</td><td>list ID breaks ties</td><td class="mono">(node.val, list_id, node)</td></tr>
+        <tr><td class="mono">6b</td><td>pop the global minimum and append it</td><td class="mono">heappop<br>tail.next = node<br>tail = tail.next</td></tr>
+        <tr><td class="mono">6c</td><td>push exactly that successor; restore invariant</td><td class="mono">if node.next:<br>heappush(... node.next)</td></tr>
+        <tr><td class="mono">8</td><td>empty input returns None automatically</td><td class="mono">return dummy.next</td></tr>
+      </table></div>
+
+      <h3>L4 vs L6：code 一模一樣</h3>
+      <div class="tablewrap"><table>
+        <tr><th>Move</th><th>L4</th><th>L6</th></tr>
+        <tr><td class="mono">0</td><td>直接解</td><td>先確認可否重用 node、empty、duplicate</td></tr>
+        <tr><td class="mono">1</td><td>重述題目</td><td>自帶例子，後面反覆指同一組</td></tr>
+        <tr><td class="mono">2</td><td>說 sort 很慢</td><td>指出 sort 浪費「每條已排序」</td></tr>
+        <tr><td class="mono">3</td><td>heap 會拿最小</td><td>證明只放各 head 就能拿到全域最小</td></tr>
+        <tr><td class="mono">4</td><td>套 heap 技巧</td><td>說清楚 O(k) 空間換 O(log k) 選擇</td></tr>
+        <tr><td class="mono">5</td><td>寫完才算 Big-O</td><td>寫前先講 O(k + N log k)，並對齊面試官</td></tr>
+        <tr><td class="mono">6</td><td>默默寫 code</td><td>每段 code 都說它維持哪個 invariant</td></tr>
+        <tr><td class="mono">7</td><td>等人要求 dry run</td><td>主動說 pop 哪條、補哪條</td></tr>
+        <tr><td class="mono">8</td><td>說有處理 edge case</td><td>把每個 edge case 對回 dummy 或 list_id</td></tr>
+        <tr><td class="mono">9</td><td>結束</td><td>主動提出 divide-and-conquer alternative</td></tr>
+      </table></div>
+      <div class="callout key"><p style="margin-bottom:0"><strong>兩人的 code 完全一樣。</strong>L6 多拿的分數，全部來自 constraint、invariant、成本交換、驗證與 follow-up。</p></div>
+
+      <h3>Native English：先背這四句</h3>
+      <ol>
+        <li>“Here is the invariant: the heap contains exactly one current head per non-empty list.”</li>
+        <li>“Therefore, the minimum among those heads is the global minimum remaining node.”</li>
+        <li>“I’m trading O(k) space to reduce each selection from O(k) to O(log k).”</li>
+        <li>“This restores the invariant: one candidate for every non-empty remaining list.”</li>
+      </ol>
+    </div>
+  </details>
+
+  <details>
+    <summary>這次的釐清<span class="lockhint">2026-08-31</span></summary>
+    <div class="dbody">
+      <div class="fix">
+        <div class="x">✗ 我以為:有寫 <code>tail = tail.next</code>,就完成了把新 node 接到答案後方。</div>
+        <div class="o">✓ 其實是:要先用 <code>tail.next = node</code> 改掛鉤,再用 <code>tail = tail.next</code> 讓 tail 走到新的隊尾。兩行缺一不可。</div>
+        <div class="w">→ 為什麼會搞混:把「修改 node 的 <code>.next</code>」和「移動 tail 這張標籤」看成同一個動作。前者改結構,後者只換站的位置。</div>
+      </div>
+      <div class="callout key">
+        <p style="margin-bottom:0"><strong>口訣:</strong>先接再走。<code>tail.next = node</code> 是接車廂;<code>tail = tail.next</code> 是人走到新車尾。</p>
+      </div>
+    </div>
+  </details>
+</section>
+</main>
+</body>
+</html>

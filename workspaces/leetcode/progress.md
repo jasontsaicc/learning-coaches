@@ -4,14 +4,16 @@
 
 # leetcode
 
-- 今天做到:2026-08-30 第一場。Layer 0 跑過一輪,#21 進到圖解頁與 L6 逐字稿,solution.py 還沒寫
-- 模式:龜(#21 是 linked list 首刷)
+- 今天做到:2026-08-31 第二場。學員回報早上完成 #21;開場默寫記得 dummy、tail、tail 前進與回傳,
+  當場補上漏掉的 `tail.next = node`。#23 圖解頁與 L6 逐字稿已備妥,課程停在拷問 ① 前
+- 模式:Hard(#23 = min-heap + #21,目標是拆得開、講得出來)
 
 ## Pattern 狀態
 
 | Pattern | 圖解看過 | 對照打過 | 自己寫出來 | 口訣 |
 |---|---|---|---|---|
-| Linked List 合併(dummy + tail) | ✓ | | | ✓ |
+| Linked List 合併(dummy + tail) | ✓ | ✓ | | ✓ |
+| Heap k-way merge(每條一個 head) | | | | |
 
 ## 做過
 
@@ -20,11 +22,14 @@
   linked list 用不到,卡到再翻。
 - **#21 Merge Two Sorted Lists** — `linked-list/merge-two-sorted-lists/`
   圖解頁:https://claude.ai/code/artifact/0a337a0c-2d4f-47f1-b00a-712a79221119
-  已完成:圖解頁、L6 面試逐字稿(含 code 對照表)、pytest harness。
+  已完成:圖解頁、L6 面試逐字稿(含 code 對照表)、pytest harness;2026-08-31 學員回報早上完成。
+- **#23 Merge K Sorted Lists** — `linked-list/merge-k-sorted-lists/`
+  圖解頁:`linked-list/merge-k-sorted-lists/eli5.html`
+  本場產出:圖解頁、min-heap 主解、divide-and-conquer follow-up、L6 面試逐字稿(含 code 對照表)。
 
 ## 接下來
 
-1. #21 拷問 ②:`tail = tail.next` 搬進 `else` 會怎樣
-2. 寫 `solution.py`,跑 `./scripts/lab-lc.sh workspaces/leetcode/linked-list/merge-two-sorted-lists/`
-3. `heapq` 是什麼、為什麼 #23 需要它
-4. #23 Merge K Sorted Lists(Hard 規格 = heap + #21)。讀書會 2026-09-01 由學員報這題
+1. #23 拷問 ①:不知道 heap 時會怎麼做,暴力的也算
+2. 讀圖解頁 01–04,用自己的話講出「為什麼只放每條 list 的 head 就夠」
+3. 用 `[[1,4,5],[1,3,4],[2,6]]` 預測 pop 一個 node 後該 push 誰
+4. 對照 code 後完成 L6 讀書會口說演練
