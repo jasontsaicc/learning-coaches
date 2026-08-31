@@ -1,0 +1,505 @@
+<title>合併兩條有序火車</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=JetBrains+Mono:wght@400;700&family=Noto+Sans+TC:wght@400;500;700&display=swap">
+<style>
+:root{
+  --paper:#EFF2EF; --surface:#FFFFFF; --ink:#131C18; --body:#28332D;
+  --muted:#68766E; --line:#C6D0C9;
+  --c1:#2C6B8C; --c1-soft:#DCE9F0;
+  --c2:#AE5233; --c2-soft:#F3E1DA;
+  --signal:#B4881F; --signal-soft:#F5EBD3;
+  --code-bg:#132018; --code-fg:#DCE6DE;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#101815; --surface:#18211D; --ink:#E8EEE9; --body:#C3CEC7;
+    --muted:#8C9A92; --line:#2C3A33;
+    --c1:#7CB8D6; --c1-soft:#1B2E38;
+    --c2:#E29070; --c2-soft:#331F17;
+    --signal:#E0B855; --signal-soft:#332A14;
+    --code-bg:#0A100D; --code-fg:#D6E2D9;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#101815; --surface:#18211D; --ink:#E8EEE9; --body:#C3CEC7;
+  --muted:#8C9A92; --line:#2C3A33;
+  --c1:#7CB8D6; --c1-soft:#1B2E38;
+  --c2:#E29070; --c2-soft:#331F17;
+  --signal:#E0B855; --signal-soft:#332A14;
+  --code-bg:#0A100D; --code-fg:#D6E2D9;
+}
+
+*{box-sizing:border-box}
+body{
+  background:var(--paper); color:var(--body);
+  font-family:"Noto Sans TC","Hiragino Sans","Microsoft JhengHei",sans-serif;
+  font-size:16px; line-height:1.85;
+  padding:0 1.25rem 5rem;
+}
+.wrap{max-width:44rem; margin:0 auto}
+
+header{padding:3.5rem 0 1.5rem}
+.kicker{
+  font-family:"JetBrains Mono",monospace; font-size:.72rem; font-weight:700;
+  letter-spacing:.16em; text-transform:uppercase; color:var(--signal);
+}
+h1{
+  font-family:"Archivo","Noto Sans TC",sans-serif; font-weight:700;
+  font-size:clamp(2rem,6vw,2.9rem); line-height:1.12; letter-spacing:-.02em;
+  color:var(--ink); margin:.5rem 0 .6rem; text-wrap:balance;
+}
+.sub{color:var(--muted); font-size:1rem; margin:0}
+
+.rail{
+  height:9px; margin:2.75rem 0 2.25rem;
+  border-top:2px solid var(--line); border-bottom:2px solid var(--line);
+  background:repeating-linear-gradient(90deg,var(--line) 0 3px,transparent 3px 13px);
+}
+
+h2{
+  font-family:"Archivo","Noto Sans TC",sans-serif; font-weight:700;
+  font-size:1.4rem; color:var(--ink); letter-spacing:-.01em;
+  margin:0 0 .25rem; text-wrap:balance;
+}
+h2 .num{
+  font-family:"JetBrains Mono",monospace; font-size:.85rem; color:var(--signal);
+  margin-right:.6rem; vertical-align:.15em;
+}
+h3{font-family:"Archivo","Noto Sans TC",sans-serif;font-weight:600;font-size:1rem;color:var(--ink);margin:1.75rem 0 .4rem}
+section{margin-bottom:2.5rem}
+p{margin:.7rem 0}
+strong{color:var(--ink); font-weight:700}
+code{font-family:"JetBrains Mono",monospace; font-size:.87em; background:var(--signal-soft); color:var(--ink); padding:.1em .35em; border-radius:2px}
+
+.lede{font-size:1.1rem; color:var(--ink); border-left:3px solid var(--signal); padding-left:1rem; margin:1rem 0 1.25rem}
+
+/* train cars */
+.track{display:flex; align-items:center; gap:.3rem; overflow-x:auto; padding:.9rem 0; font-family:"JetBrains Mono",monospace}
+.track .lbl{color:var(--muted); font-size:.8rem; min-width:3.4rem; flex-shrink:0}
+.node{
+  display:inline-flex; align-items:center; justify-content:center;
+  min-width:2.2rem; padding:.3rem .5rem; flex-shrink:0;
+  border:2px solid var(--line); border-radius:3px; background:var(--surface);
+  font-weight:700; color:var(--ink);
+}
+.node.a{border-color:var(--c1); background:var(--c1-soft); color:var(--c1)}
+.node.b{border-color:var(--c2); background:var(--c2-soft); color:var(--c2)}
+.node.d{border-style:dashed; border-color:var(--signal); background:var(--signal-soft); color:var(--signal); font-size:.75rem}
+.node.dim{opacity:.35}
+.arrow{color:var(--muted); flex-shrink:0; font-size:.9rem}
+.nil{color:var(--muted); font-size:.85rem; flex-shrink:0}
+
+.callout{background:var(--surface); border:1px solid var(--line); border-radius:4px; padding:1.1rem 1.25rem; margin:1.25rem 0}
+.callout.warn{border-left:4px solid var(--c2)}
+.callout.key{border-left:4px solid var(--signal)}
+.callout h3{margin-top:0}
+
+ul,ol{padding-left:1.35rem; margin:.7rem 0}
+li{margin:.35rem 0}
+
+.signals{list-style:none; padding:0; display:grid; gap:.5rem}
+.signals li{
+  display:flex; gap:.75rem; align-items:baseline;
+  background:var(--surface); border:1px solid var(--line); border-radius:4px; padding:.7rem .95rem; margin:0;
+}
+.signals .n{font-family:"JetBrains Mono",monospace; font-weight:700; color:var(--signal); flex-shrink:0}
+
+.tablewrap{overflow-x:auto; margin:1.25rem 0; border:1px solid var(--line); border-radius:4px; background:var(--surface)}
+table{border-collapse:collapse; width:100%; font-size:.86rem; font-variant-numeric:tabular-nums}
+th,td{text-align:left; padding:.55rem .8rem; border-bottom:1px solid var(--line); white-space:nowrap}
+th{font-family:"Archivo",sans-serif; font-weight:600; color:var(--ink); font-size:.78rem; letter-spacing:.03em; text-transform:uppercase}
+tr:last-child td{border-bottom:none}
+td.mono,th.mono{font-family:"JetBrains Mono",monospace}
+.t1{color:var(--c1); font-weight:700}
+.t2{color:var(--c2); font-weight:700}
+
+pre{
+  background:var(--code-bg); color:var(--code-fg); border-radius:5px;
+  padding:1.1rem 1.25rem; overflow-x:auto; margin:1rem 0;
+  font-family:"JetBrains Mono",monospace; font-size:.84rem; line-height:1.75;
+}
+pre code{background:none; color:inherit; padding:0; font-size:1em}
+.cm{color:#7E9B8A}
+.kw{color:#E0B855}
+.fn{color:#7CB8D6}
+
+details{border:1px solid var(--line); border-radius:5px; background:var(--surface); margin:.85rem 0; overflow:hidden}
+summary{
+  cursor:pointer; padding:.95rem 1.2rem; list-style:none;
+  font-family:"Archivo","Noto Sans TC",sans-serif; font-weight:600; color:var(--ink);
+  display:flex; align-items:center; gap:.7rem;
+}
+summary::-webkit-details-marker{display:none}
+summary::before{content:"▸"; color:var(--signal); font-size:.85rem; transition:transform .15s}
+details[open] summary::before{transform:rotate(90deg)}
+summary:focus-visible{outline:2px solid var(--signal); outline-offset:-2px}
+.dbody{padding:0 1.2rem 1.3rem; border-top:1px solid var(--line)}
+.dbody > *:first-child{margin-top:1rem}
+.lockhint{font-family:"Noto Sans TC",sans-serif;font-weight:400;font-size:.8rem;color:var(--muted);margin-left:auto}
+
+.mantra{font-family:"Archivo","Noto Sans TC",sans-serif;font-size:1.05rem;font-weight:600;color:var(--ink);background:var(--signal-soft);border-radius:4px;padding:1rem 1.2rem;margin:1rem 0}
+
+.fix{display:grid;gap:.2rem;margin:1.1rem 0;padding-left:.9rem;border-left:3px solid var(--line)}
+.fix .x{color:var(--c2)} .fix .o{color:var(--c1)} .fix .w{color:var(--muted);font-size:.92rem}
+
+
+.move{border-top:1px solid var(--line); padding-top:1.15rem; margin-top:1.4rem}
+.move:first-of-type{border-top:none;padding-top:0;margin-top:.6rem}
+.move h4{font-family:"Archivo","Noto Sans TC",sans-serif;font-weight:700;font-size:1rem;color:var(--ink);margin:0 0 .5rem;display:flex;gap:.6rem;align-items:baseline}
+.move h4 .mv{font-family:"JetBrains Mono",monospace;font-size:.7rem;font-weight:700;letter-spacing:.1em;color:var(--signal);border:1px solid var(--signal);border-radius:2px;padding:.1rem .35rem;flex-shrink:0}
+.say{background:var(--c1-soft);border-left:3px solid var(--c1);border-radius:0 3px 3px 0;padding:.75rem 1rem;margin:.6rem 0;font-size:.93rem;color:var(--ink)}
+.say strong{color:var(--ink)}
+.say b{display:block;font-family:"JetBrains Mono",monospace;font-size:.66rem;letter-spacing:.12em;text-transform:uppercase;color:var(--c1);margin-bottom:.3rem}
+.think{font-size:.93rem;margin:.6rem 0;padding-left:.9rem;border-left:2px dotted var(--line)}
+.think b{font-family:"JetBrains Mono",monospace;font-size:.66rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:.2rem}
+
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+<div class="wrap">
+
+<header>
+  <div class="kicker">LeetCode 21 · Linked List · 龜模式</div>
+  <h1>合併兩條有序火車</h1>
+  <p class="sub">Merge Two Sorted Lists — 也是 #23 Merge K Sorted Lists 的地基</p>
+</header>
+
+<div class="rail"></div>
+
+<section>
+  <h2><span class="num">01</span>這題在幹嘛</h2>
+  <p class="lede">兩列車廂編號都已經由小到大排好了。把它們合成一列,合完還是由小到大。</p>
+  <p>關鍵字是 <strong>「已經排好」</strong>。你不是在排序,你是在<strong>拉拉鍊</strong>:兩邊各站一個人,每次看誰的車廂編號小,就把那一節先掛上去。</p>
+
+  <div class="track"><span class="lbl">list1</span><span class="node a">1</span><span class="arrow">→</span><span class="node a">2</span><span class="arrow">→</span><span class="node a">4</span><span class="arrow">→</span><span class="nil">∅</span></div>
+  <div class="track"><span class="lbl">list2</span><span class="node b">1</span><span class="arrow">→</span><span class="node b">3</span><span class="arrow">→</span><span class="node b">4</span><span class="arrow">→</span><span class="nil">∅</span></div>
+  <div class="track"><span class="lbl">答案</span><span class="node a">1</span><span class="arrow">→</span><span class="node b">1</span><span class="arrow">→</span><span class="node a">2</span><span class="arrow">→</span><span class="node b">3</span><span class="arrow">→</span><span class="node a">4</span><span class="arrow">→</span><span class="node b">4</span><span class="arrow">→</span><span class="nil">∅</span></div>
+
+  <p>顏色是為了讓你看出哪一節來自哪一列。<strong>沒有新造任何車廂</strong>,只是把原本的車廂重新掛鉤。這件事等一下會變成複雜度的重點。</p>
+</section>
+
+<div class="rail"></div>
+
+<section>
+  <h2><span class="num">02</span>這是什麼題型</h2>
+  <p>Two Pointers 走在 linked list 上的「合併」型。三個秒認信號:</p>
+  <ul class="signals">
+    <li><span class="n">S1</span><span>輸入<strong>已經排序</strong>。題目送你一份免費情報,你的解法必須用到它,否則就是浪費。</span></li>
+    <li><span class="n">S2</span><span>輸出也要求<strong>排序</strong>,而且要求的是同一種順序。</span></li>
+    <li><span class="n">S3</span><span>題目動詞是 <strong>merge / 合併 / 交錯</strong>,不是 search、不是 count。</span></li>
+  </ul>
+  <div class="callout key">
+    <h3>三個一起出現 = 雙指針各站一邊,每輪挑小的接走</h3>
+    <p style="margin-bottom:0">這時候你<strong>不需要任何排序演算法</strong>。看到 S1 就想「我可以只掃一遍」。這個直覺之後在 merge sort、merge K lists、合併區間都會重複用到。</p>
+  </div>
+</section>
+
+<div class="rail"></div>
+
+<section>
+  <h2><span class="num">03</span>暴力法長怎樣,為什麼慢</h2>
+  <p>最直覺的做法:兩條全部倒進一個 array,呼叫 <code>sort()</code>,再重建一條 linked list。</p>
+
+  <div class="track"><span class="lbl">倒出來</span><span class="node a">1</span><span class="node a">2</span><span class="node a">4</span><span class="node b">1</span><span class="node b">3</span><span class="node b">4</span></div>
+  <div class="track"><span class="lbl">sort</span><span class="node a">1</span><span class="node b">1</span><span class="node a">2</span><span class="node b">3</span><span class="node a">4</span><span class="node b">4</span></div>
+  <div class="track"><span class="lbl">重建</span><span class="node dim">新</span><span class="arrow">→</span><span class="node dim">新</span><span class="arrow">→</span><span class="node dim">新</span><span class="arrow">→</span><span class="nil">… 六節全新的車廂</span></div>
+
+  <div class="callout warn">
+    <h3>它會過,但兩邊都輸</h3>
+    <ul style="margin-bottom:0">
+      <li><strong>時間 O((n+m) log(n+m))</strong> — <code>sort</code> 的錢。而題目已經幫你排好了,你等於付錢買一份免費的東西。</li>
+      <li><strong>空間 O(n+m)</strong> — array 加上全新的 node。</li>
+    </ul>
+  </div>
+  <p>面試官問「已經排序這個條件你用在哪裡?」的時候,暴力法答不出來。這就是它被扣分的地方,不是它跑得慢。</p>
+</section>
+
+<div class="rail"></div>
+
+<section>
+  <h2><span class="num">04</span>做法,一步一步(沒有 code)</h2>
+  <p>用上面同一組資料手動走一遍:<code>list1 = 1→2→4</code>,<code>list2 = 1→3→4</code>。</p>
+
+  <h3>先講一個小道具:dummy 假車頭</h3>
+  <p>我們造<strong>一節空車頭</strong>掛在最前面,它不存資料,只是給人站。再派一個叫 <code>tail</code> 的人,永遠站在「目前已經接好那串的最後一節」。</p>
+  <div class="track"><span class="lbl">起手</span><span class="node d">dummy</span><span class="arrow">→</span><span class="nil">∅　　← tail 站在 dummy</span></div>
+
+  <div class="callout key">
+    <h3>為什麼要 dummy?</h3>
+    <p style="margin-bottom:0">沒有它的話,「掛第一節」要寫特例判斷(答案的頭還不存在),「掛第二節之後」才是正常流程。有了 dummy,<strong>掛第一節和掛第 n 節變成完全一樣的動作</strong>。這是 linked list 的通用招:<strong>dummy head 消除頭部特例</strong>,不只這題用。</p>
+  </div>
+
+  <h3>然後每一輪做同一件事</h3>
+  <ol>
+    <li>看兩邊的<strong>當前車廂</strong>,誰的編號小。</li>
+    <li>把小的那一節<strong>掛到 tail 後面</strong>。</li>
+    <li>被拿走的那一列往前走一節。</li>
+    <li><code>tail</code> 也往前走一節,重新站到隊尾。</li>
+  </ol>
+
+  <div class="track"><span class="lbl">輪 1</span><span class="node d">d</span><span class="arrow">→</span><span class="node a">1</span><span class="nil">　1 vs 1,平手取 list1 ｜ tail 移到這節</span></div>
+  <div class="track"><span class="lbl">輪 2</span><span class="node d">d</span><span class="arrow">→</span><span class="node a">1</span><span class="arrow">→</span><span class="node b">1</span><span class="nil">　2 vs 1,取 list2</span></div>
+  <div class="track"><span class="lbl">輪 3</span><span class="node d">d</span><span class="arrow">→</span><span class="node a">1</span><span class="arrow">→</span><span class="node b">1</span><span class="arrow">→</span><span class="node a">2</span><span class="nil">　2 vs 3,取 list1</span></div>
+  <div class="track"><span class="lbl">輪 4</span><span class="node d">d</span><span class="arrow">→</span><span class="node a">1</span><span class="arrow">→</span><span class="node b">1</span><span class="arrow">→</span><span class="node a">2</span><span class="arrow">→</span><span class="node b">3</span><span class="nil">　4 vs 3,取 list2</span></div>
+  <div class="track"><span class="lbl">輪 5</span><span class="node d">d</span><span class="arrow">→</span><span class="node a">1</span><span class="arrow">→</span><span class="node b">1</span><span class="arrow">→</span><span class="node a">2</span><span class="arrow">→</span><span class="node b">3</span><span class="arrow">→</span><span class="node a">4</span><span class="nil">　4 vs 4,平手取 list1</span></div>
+
+  <h3>收尾:有一列空了</h3>
+  <p>輪 5 之後 <code>list1</code> 走完了,<code>list2</code> 還剩 <code>4</code>。<strong>不用一節一節接。</strong></p>
+  <div class="track"><span class="lbl">收尾</span><span class="node d">d</span><span class="arrow">→</span><span class="node a">1</span><span class="arrow">→</span><span class="node b">1</span><span class="arrow">→</span><span class="node a">2</span><span class="arrow">→</span><span class="node b">3</span><span class="arrow">→</span><span class="node a">4</span><span class="arrow">→</span><span class="node b">4</span><span class="arrow">→</span><span class="nil">∅</span></div>
+  <p>因為 <code>list2</code> 自己是排好序的,而且它剩下的每一節都<strong>不小於</strong>剛剛接走的那節。所以整段直接掛上去就對了。<strong>一個動作,不是一個迴圈。</strong></p>
+
+  <div class="callout warn">
+    <h3>最後回傳誰?</h3>
+    <p style="margin-bottom:0">回傳 <code>dummy.next</code>,<strong>不是</strong> <code>dummy</code>。dummy 是鷹架,拆掉才交屋。</p>
+  </div>
+
+  <h3>複雜度</h3>
+  <div class="tablewrap"><table>
+    <tr><th>項目</th><th class="mono">值</th><th>為什麼</th></tr>
+    <tr><td>時間</td><td class="mono">O(n + m)</td><td>每節車廂只被看一次、掛一次</td></tr>
+    <tr><td>空間</td><td class="mono">O(1)</td><td>沒造新 node,只改掛鉤。dummy 是唯一那一節,常數</td></tr>
+  </table></div>
+</section>
+
+<div class="rail"></div>
+
+<section>
+  <h2>接下來的區塊,你自己決定何時打開</h2>
+  <p class="sub" style="margin-bottom:1.25rem">先把上面走通,再展開下面。倒過來的話你會記住 code 的長相,而不是它為什麼長這樣。</p>
+
+  <details>
+    <summary>完整 code 加逐行解釋<span class="lockhint">先自己講一遍再開</span></summary>
+    <div class="dbody">
+<pre><code><span class="kw">def</span> <span class="fn">mergeTwoLists</span>(self, list1, list2):
+    dummy = ListNode()          <span class="cm"># 假車頭,val 是什麼都不重要</span>
+    tail  = dummy               <span class="cm"># tail 永遠站在「已接好那串」的最後一節</span>
+
+    <span class="kw">while</span> list1 <span class="kw">and</span> list2:      <span class="cm"># 兩邊都還有貨,才需要比較</span>
+        <span class="kw">if</span> list1.val &lt;= list2.val:
+            tail.next = list1   <span class="cm"># 改掛鉤:把 list1 這節掛到隊尾</span>
+            list1 = list1.next  <span class="cm"># 移動標籤:list1 往前走一節</span>
+        <span class="kw">else</span>:
+            tail.next = list2
+            list2 = list2.next
+        tail = tail.next        <span class="cm"># tail 跟上,重新站到隊尾</span>
+
+    tail.next = list1 <span class="kw">or</span> list2  <span class="cm"># 剩下的整段掛上。一定有一邊是 None</span>
+    <span class="kw">return</span> dummy.next          <span class="cm"># 拆鷹架。注意這行在 while 外面</span></code></pre>
+
+      <h3>四個變數各自在做什麼</h3>
+      <div class="tablewrap"><table>
+        <tr><th class="mono">變數</th><th>它是誰</th><th>什麼時候變</th></tr>
+        <tr><td class="mono">dummy</td><td>假車頭,答案的錨點</td><td><strong>從頭到尾不動</strong>,所以最後找得回答案的頭</td></tr>
+        <tr><td class="mono">tail</td><td>目前隊尾那一節</td><td>每圈往後一節</td></tr>
+        <tr><td class="mono">list1</td><td>第一列還沒被拿走的頭</td><td>只有它被選中那圈才動</td></tr>
+        <tr><td class="mono">list2</td><td>第二列還沒被拿走的頭</td><td>只有它被選中那圈才動</td></tr>
+      </table></div>
+
+      <h3>三個容易滑過去的地方</h3>
+      <ul>
+        <li><code>tail.next = list1</code> 和 <code>list1 = list1.next</code> 長得像,做的事相反。<strong>左邊有 <code>.next</code> 是改掛鉤,右邊有 <code>.next</code> 是我往前走。</strong></li>
+        <li><code>list1 <span>or</span> list2</code> 是 Python 的短路:回傳第一個不是 <code>None</code> 的那個。跳出 while 時<strong>至少有一邊是 None</strong>,所以這行等於「把還活著的那段掛上」。兩邊都 None 也對,掛上 None 就是結尾。</li>
+        <li><code>&lt;=</code> 而不是 <code>&lt;</code>:平手時取 list1。功能上兩者都會過,但 <code>&lt;=</code> 保住 stable 的順序,而且 merge sort 靠這個性質。</li>
+      </ul>
+    </div>
+  </details>
+
+  <details>
+    <summary>逐輪執行模擬表<span class="lockhint">跟你手算的對照</span></summary>
+    <div class="dbody">
+      <p><code>list1 = 1→2→4</code>,<code>list2 = 1→3→4</code>。「當前」欄是該圈進入時,那個變數指著的車廂。</p>
+      <div class="tablewrap"><table>
+        <tr><th>圈</th><th class="mono">list1</th><th class="mono">list2</th><th>比較</th><th>接走</th><th class="mono">tail 落在</th><th>目前的鏈</th></tr>
+        <tr><td>進迴圈前</td><td class="mono t1">1</td><td class="mono t2">1</td><td>—</td><td>—</td><td class="mono">dummy</td><td class="mono">d</td></tr>
+        <tr><td>1</td><td class="mono t1">1</td><td class="mono t2">1</td><td class="mono">1 &lt;= 1 ✓</td><td class="t1">list1 的 1</td><td class="mono t1">1</td><td class="mono">d→1</td></tr>
+        <tr><td>2</td><td class="mono t1">2</td><td class="mono t2">1</td><td class="mono">2 &lt;= 1 ✗</td><td class="t2">list2 的 1</td><td class="mono t2">1</td><td class="mono">d→1→1</td></tr>
+        <tr><td>3</td><td class="mono t1">2</td><td class="mono t2">3</td><td class="mono">2 &lt;= 3 ✓</td><td class="t1">2</td><td class="mono t1">2</td><td class="mono">d→1→1→2</td></tr>
+        <tr><td>4</td><td class="mono t1">4</td><td class="mono t2">3</td><td class="mono">4 &lt;= 3 ✗</td><td class="t2">3</td><td class="mono t2">3</td><td class="mono">d→1→1→2→3</td></tr>
+        <tr><td>5</td><td class="mono t1">4</td><td class="mono t2">4</td><td class="mono">4 &lt;= 4 ✓</td><td class="t1">list1 的 4</td><td class="mono t1">4</td><td class="mono">…→3→4</td></tr>
+        <tr><td>6 檢查</td><td class="mono">None</td><td class="mono t2">4</td><td>list1 是空 → <strong>跳出</strong></td><td>—</td><td class="mono t1">4</td><td class="mono">—</td></tr>
+        <tr><td>收尾</td><td class="mono">None</td><td class="mono t2">4</td><td class="mono">None or list2</td><td class="t2">整段 4</td><td>—</td><td class="mono">d→1→1→2→3→4→4</td></tr>
+        <tr><td>return</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td class="mono">dummy.next = 1→1→2→3→4→4</td></tr>
+      </table></div>
+      <p><strong>對照一下:</strong>這張表的第 1 到 5 圈,跟你在區塊 04 手動走的輪 1 到輪 5 是同一件事。上面用手走,這裡用 code 走。<strong>如果兩邊對不起來,是理解有洞,不是 code 有 bug。</strong></p>
+    </div>
+  </details>
+
+  <details>
+    <summary>口訣加可重複使用的模板<span class="lockhint">#23 會直接用到</span></summary>
+    <div class="dbody">
+      <div class="mantra">兩條已排序合併 = dummy 假車頭 + tail 跟著跑,每圈挑小的接走,一條空了就把另一條整段掛上 — O(n+m) 時間,O(1) 空間。</div>
+
+      <h3>模板(記這個骨架,不是記這題)</h3>
+<pre><code>dummy = ListNode()
+tail  = dummy
+
+<span class="kw">while</span> &lt;兩邊都還有東西&gt;:
+    &lt;挑出該接走的那一個&gt;
+    tail.next = &lt;它&gt;
+    &lt;它所屬的那條往前走&gt;
+    tail = tail.next
+
+tail.next = &lt;剩下的整段&gt;
+<span class="kw">return</span> dummy.next</code></pre>
+
+      <h3>這個骨架的重用範圍</h3>
+      <div class="tablewrap"><table>
+        <tr><th>題</th><th>改哪裡</th></tr>
+        <tr><td><strong>#23 Merge K Sorted</strong></td><td>「挑出該接走的那一個」從「比兩個」換成「從 min-heap 拿最小的」。骨架其他行原封不動</td></tr>
+        <tr><td><strong>#2 Add Two Numbers</strong></td><td>不是挑小的,是相加加進位,然後<strong>造</strong>新 node 掛上</td></tr>
+        <tr><td><strong>#148 Sort List</strong></td><td>merge sort 的 merge 那一半,就是這題本人</td></tr>
+      </table></div>
+      <div class="callout key">
+        <p style="margin-bottom:0"><strong>看穿疊加</strong>是 Hard 題的正確打開方式。#23 不是新東西,是「這個骨架」加「一個 heap」。你今天練的是那個骨架。</p>
+      </div>
+    </div>
+  </details>
+
+  <details>
+    <summary>你最可能犯的錯<span class="lockhint">從你自己的紀錄撈的</span></summary>
+    <div class="dbody">
+      <div class="tablewrap"><table>
+        <tr><th>雷</th><th>症狀</th><th>你犯過</th></tr>
+        <tr><td><code>return dummy.next</code> 縮排卡在 while 裡</td><td>只接一節就回傳。<strong>不報錯</strong>,只是答案很短</td><td class="mono">3 次</td></tr>
+        <tr><td>忘了 <code>tail = tail.next</code></td><td>tail 一直站在 dummy,每圈覆蓋上一圈,最後只剩 1 節</td><td>新</td></tr>
+        <tr><td><code>return dummy</code> 而不是 <code>dummy.next</code></td><td>答案開頭多一個 0</td><td>新</td></tr>
+        <tr><td>while 條件寫成 <code>or</code></td><td>某一邊變 None 之後還去讀 <code>.val</code> → <code>AttributeError</code></td><td class="mono">觀念 1</td></tr>
+        <tr><td>寫成 <code>tail.next = list1.next</code></td><td>掛鉤接到下下節,直接掉一節車廂</td><td>新</td></tr>
+      </table></div>
+      <div class="callout warn">
+        <p style="margin-bottom:0">第一列是你最貴的錯,犯過 <strong>3 次</strong>。它的可怕之處是<strong>不報錯</strong>。寫完之後回頭看一眼 <code>return</code> 的縮排,只要 2 秒。</p>
+      </div>
+    </div>
+  </details>
+
+
+  <details>
+    <summary>L6 面試逐字稿<span class="lockhint">練嘴巴,不是練手</span></summary>
+    <div class="dbody">
+      <p>同一份 code,L4 和 L6 寫出來<strong>一模一樣</strong>。分數差別全在講出來的東西。下面是一個 L6 從頭到尾的逐字稿:<strong>說</strong>(英文可直接背)、<strong>想</strong>(這句話換到什麼)、<strong>寫</strong>(白板長出什麼)。</p>
+<div class="move"><h4><span class="mv">MOVE 0</span>手不碰白板,先問 constraint</h4>
+<div class="say"><b>說</b>&ldquo;Before I start, let me make sure I understand the constraints. Both lists are sorted <strong>ascending</strong>, correct? Can there be duplicates across the two? Am I allowed to <strong>reuse the existing nodes</strong>, or do you want a brand-new list? And what&rsquo;s the size bound?&rdquo;</div>
+<div class="think"><b>想</b>第三問最值錢:<strong>它決定你的 space 是 O(1) 還是 O(n)</strong>。面試官聽到你問這句,就知道你在想空間,不只是想能不能跑。</div><div class="think"><b>寫</b>什麼都不寫。手放下來。</div></div>
+<div class="move"><h4><span class="mv">MOVE 1</span>重述題目,自己舉例</h4>
+<div class="say"><b>說</b>&ldquo;So: two sorted linked lists, splice them into one sorted list, reusing the nodes. Let me work through a small example.&rdquo;</div>
+<div class="think"><b>想</b>舉<strong>自己的</strong>例子,不要用面試官的。因為 Move 7 的 dry run 要指著同一個例子走,現在寫下去等於先付款。</div><div class="think"><b>寫</b><code>list1: 1→2→4</code> / <code>list2: 1→3→4</code> / <code>out: 1→1→2→3→4→4</code></div></div>
+<div class="move"><h4><span class="mv">MOVE 2</span>暴力解 20 秒帶過</h4>
+<div class="say"><b>說</b>&ldquo;The naive approach is to dump both into an array, sort, and rebuild. That&rsquo;s O((n+m) log(n+m)) time and O(n+m) space, and more importantly it <strong>throws away the fact that the inputs are already sorted</strong>. That&rsquo;s free information, so I&rsquo;d rather use it.&rdquo;</div>
+<div class="think"><b>想</b>講暴力解證明你有比較過。但<strong>只講 20 秒</strong>,L4 常在這裡耗 3 分鐘。轉場的通關密語是「題目給我的免費情報,我要用到」。</div></div>
+<div class="move"><h4><span class="mv">MOVE 3</span>講出 invariant(最大的分水嶺)</h4>
+<div class="say"><b>說</b>&ldquo;Key observation: since both lists are sorted, <strong>the smallest remaining element is always one of the two heads.</strong> I never look deeper than the front of each list. So: two pointers, compare the heads, take the smaller, advance that list. Single pass.&rdquo;</div>
+<div class="think"><b>想</b>L4 說「我比大小然後接走」(描述動作),L6 說「因為都排序,最小的一定在兩個頭裡」(<strong>給證明</strong>)。面試官在聽的就是這個。</div><div class="think"><b>寫</b><code>兩個 pointer 各站一列的頭 → 每輪比頭 → 小的接走 → 那列前進一節</code></div></div>
+<div class="move"><h4><span class="mv">MOVE 4</span>講關鍵手法,以及它換掉了什麼</h4>
+<div class="say"><b>說</b>&ldquo;One detail before I code: I&rsquo;ll use a <strong>dummy head</strong>. Without it, appending the first node is a special case, because the result&rsquo;s head doesn&rsquo;t exist yet. With it, appending the first and the hundredth node are the exact same two lines. It costs one node of constant space and removes an entire branch.&rdquo;</div>
+<div class="think"><b>寫</b><code>dummy → ∅</code>,<code>tail</code> 站在 dummy<pre><code>dummy = ListNode()          <span class="cm"># 假車頭</span>
+tail  = dummy               <span class="cm"># 隊尾的人</span></code></pre></div>
+<div class="move"><h4><span class="mv">MOVE 5</span>複雜度講在寫 code 之前</h4>
+<div class="say"><b>說</b>&ldquo;Before I write it: time is O(n + m), every node visited once. Space is O(1) extra, since I&rsquo;m re-linking existing nodes, not allocating. The dummy is one constant node. <strong>Sound reasonable?</strong>&rdquo;</div>
+<div class="think"><b>想</b>順序本身就是訊號:<strong>先設計再實作</strong>,不是寫完才回頭算。最後那句 <code>Sound reasonable?</code> 是跟面試官對齊 —— 如果他要別的解,他會在你寫 20 行之前喊停,替你省 5 分鐘。</div></div>
+<div class="move"><h4><span class="mv">MOVE 6</span>code 分三段寫,每段講一句</h4>
+<div class="say"><b>說</b>&ldquo;Set up the dummy and the tail pointer.&rdquo;</div>
+<pre><code>dummy = ListNode()
+tail  = dummy</code></pre>
+
+<div class="say"><b>說</b>&ldquo;Loop while <strong>both</strong> lists have nodes. It has to be <code>and</code>, not <code>or</code> &mdash; the moment one runs out I can&rsquo;t dereference <code>.val</code> on it.&rdquo;<br><br>&ldquo;I use <code>&lt;=</code> not <code>&lt;</code> so ties break toward list1. Keeps the merge <strong>stable</strong>, which matters if this gets reused inside a merge sort.&rdquo;<br><br>&ldquo;Note <code>tail = tail.next</code> sits <strong>outside</strong> the if/else &mdash; it happens every iteration regardless of branch. Only the source-list advance is branch-specific.&rdquo;</div>
+<pre><code><span class="kw">while</span> list1 <span class="kw">and</span> list2:          <span class="cm"># and 不是 or</span>
+    <span class="kw">if</span> list1.val &lt;= list2.val:   <span class="cm"># &lt;= 不是 &lt;,保住 stable</span>
+        tail.next = list1           <span class="cm"># 改掛鉤</span>
+        list1 = list1.next          <span class="cm"># 移動標籤</span>
+    <span class="kw">else</span>:
+        tail.next = list2
+        list2 = list2.next
+    tail = tail.next                <span class="cm"># ← 在 if/else 外面,每圈都跑</span></code></pre>
+
+<div class="say"><b>說</b>&ldquo;When the loop exits, at least one list is exhausted. The other one is already sorted and entirely &ge; everything I&rsquo;ve appended, so I attach the whole remainder in one shot. No loop needed. And I return <code>dummy.next</code>, not <code>dummy</code> &mdash; the dummy is scaffolding, I take it down before handing over the result.&rdquo;</div>
+<pre><code>tail.next = list1 <span class="kw">or</span> list2      <span class="cm"># 剩下的整段掛上</span>
+<span class="kw">return</span> dummy.next              <span class="cm"># 注意:在 while 外面</span></code></pre>
+
+<div class="think"><b>想</b>第三句是在<strong>防你自己最貴的雷</strong>。把 <code>tail = tail.next</code> 為什麼在 if/else 外面講出來,你寫的時候縮排就不會放錯。講出來 = 防呆。</div></div>
+<div class="move"><h4><span class="mv">MOVE 7</span>主動 dry run,不等人叫</h4>
+<div class="say"><b>說</b>&ldquo;Let me trace it against the example I wrote up top.&rdquo;</div>
+<div class="think"><b>想</b>被面試官問「你確定嗎,跑一遍」才跑,跟自己跑完說「這是結果」,在他筆記本上是兩個不同的勾。<strong>主動 dry run 是免費的分數。</strong></div><div class="think"><b>寫</b>指著 Move 1 那組資料走,不要重新舉例</div></div>
+<div class="move"><h4><span class="mv">MOVE 8</span>主動掃 edge case</h4>
+<div class="say"><b>說</b>&ldquo;Edges: <strong>both empty</strong> &mdash; loop never runs, <code>None or None</code> is None, return <code>dummy.next</code> which is None. Correct. <strong>One empty</strong> &mdash; the other attaches wholesale. <strong>No overlap</strong> like [1,2,3] and [4,5,6] &mdash; list1 drains, then list2 attaches in one move.&rdquo;</div>
+<div class="think"><b>想</b><code>both empty</code> 一定要講,因為它是<strong>靠 dummy 的存在才自動答對</strong>的。點名這件事,等於再證明一次 dummy 是你選的、不是抄的。</div></div>
+<div class="move"><h4><span class="mv">MOVE 9</span>主動接下一題</h4>
+<div class="say"><b>說</b>&ldquo;Worth flagging: this generalizes. With <strong>k</strong> sorted lists instead of two, the only piece that changes is how I pick the smallest head &mdash; swap the two-way comparison for a min-heap and the rest of this structure is untouched. That&rsquo;d be O(N log k).&rdquo;</div>
+<div class="think"><b>想</b>這句直接鋪到 <strong>#23 Merge K Sorted Lists</strong>。主動講 follow-up 傳達的是「我知道這題在整個題型裡的位置」。<strong>L4 解一題,L6 解一類。</strong></div></div>
+      <h3>完整 code，以及每句話對應哪幾行</h3>
+<pre><code><span class="kw">class</span> Solution:
+    <span class="kw">def</span> <span class="fn">mergeTwoLists</span>(self, list1, list2):
+        dummy = ListNode()                  <span class="cm"># Move 4</span>
+        tail  = dummy                       <span class="cm"># Move 4</span>
+
+        <span class="kw">while</span> list1 <span class="kw">and</span> list2:              <span class="cm"># Move 3 的 invariant 在這裡兌現</span>
+            <span class="kw">if</span> list1.val &lt;= list2.val:
+                tail.next = list1
+                list1 = list1.next
+            <span class="kw">else</span>:
+                tail.next = list2
+                list2 = list2.next
+            tail = tail.next                <span class="cm"># Move 6 第三句在講這行</span>
+
+        tail.next = list1 <span class="kw">or</span> list2          <span class="cm"># Move 4 的 dummy 讓這行不用特判</span>
+        <span class="kw">return</span> dummy.next                  <span class="cm"># Move 8 的 both-empty 靠這行自動答對</span></code></pre>
+
+      <div class="tablewrap"><table>
+        <tr><th>Move</th><th>他說的那句</th><th>對應的 code</th></tr>
+        <tr><td class="mono">3</td><td>the smallest remaining is always one of the two heads</td><td class="mono">while list1 and list2:<br>if list1.val &lt;= list2.val:</td></tr>
+        <tr><td class="mono">4</td><td>it costs one node and removes an entire branch</td><td class="mono">dummy = ListNode()<br>return dummy.next</td></tr>
+        <tr><td class="mono">6a</td><td>it has to be <code>and</code>, not <code>or</code></td><td class="mono">while list1 and list2:</td></tr>
+        <tr><td class="mono">6b</td><td><code>&lt;=</code> keeps the merge stable</td><td class="mono">if list1.val &lt;= list2.val:</td></tr>
+        <tr><td class="mono">6c</td><td>it happens every iteration regardless of branch</td><td class="mono">tail = tail.next<br>(在 if/else 外面)</td></tr>
+        <tr><td class="mono">6d</td><td>attach the whole remainder in one shot</td><td class="mono">tail.next = list1 or list2</td></tr>
+        <tr><td class="mono">9</td><td>swap the two-way comparison for a min-heap</td><td class="mono">只換 if/else 那一塊<br>其餘 8 行原封不動</td></tr>
+      </table></div>
+
+      <h3>並排看</h3>
+      <div class="tablewrap"><table>
+        <tr><th></th><th>L4</th><th>L6</th></tr>
+        <tr><td>開場</td><td>直接寫</td><td>先問 3 個 constraint,尤其「能不能重用節點」</td></tr>
+        <tr><td>暴力解</td><td>跳過,或畫太久</td><td>20 秒帶過,指出它浪費了「已排序」</td></tr>
+        <tr><td>講解法</td><td>「比大小,小的接走」</td><td>「因為都排序,<strong>最小的一定在兩個頭裡</strong>」</td></tr>
+        <tr><td>dummy</td><td>「這是個技巧」</td><td>「一節常數空間,<strong>換掉一整個 special case</strong>」</td></tr>
+        <tr><td>複雜度</td><td>寫完才算</td><td><strong>寫之前</strong>就講,並徵求同意</td></tr>
+        <tr><td>驗證</td><td>等人問</td><td>主動 dry run,用開頭自己舉的例子</td></tr>
+        <tr><td>收尾</td><td>停</td><td>主動講 k 條的推廣</td></tr>
+      </table></div>
+      <div class="callout key">
+        <p style="margin-bottom:0">這張表<strong>沒有一格是「code 寫得比較好」</strong>。兩個人的 code 一模一樣。差別全在講出來的東西 &mdash; 對你是好消息:code 你看得懂,要練的是嘴巴。</p>
+      </div>
+    </div>
+  </details>
+
+  <details>
+    <summary>這次的釐清<span class="lockhint">session 結束時補寫</span></summary>
+    <div class="dbody">
+      <p class="sub">2026-08-30 第一場。這三個都來自 Layer 0,不是這題本身,但它們是這題會踩雷的根。</p>
+
+      <div class="fix">
+        <div class="x">✗ 我以為:<code>print(n)</code> 和 <code>return n</code> 差不多,都是「把 n 交出來」</div>
+        <div class="o">✓ 其實是:<code>print</code> 印到螢幕,函式<strong>繼續跑</strong>,想印幾次就幾次。<code>return</code> 把值交回呼叫者,而且函式<strong>當場結束</strong>,只能發生一次。</div>
+        <div class="w">→ 為什麼會搞混:兩個都「輸出一個東西」,看起來同類。但一個是<strong>副作用</strong>,一個是<strong>控制流</strong>。用 shell 對照最快:<code>echo</code> 之於 <code>exit</code>。</div>
+      </div>
+
+      <div class="fix">
+        <div class="x">✗ 我以為:<code>for n in [7,8,9]: print(n); return n</code> 會回傳 7、8、9 三個</div>
+        <div class="o">✓ 其實是:只回傳 <code>7</code>。<code>return</code> 在迴圈<strong>裡面</strong>,第 1 圈就結束整個函式,<code>8</code> 和 <code>9</code> 從沒被碰過,連 <code>print</code> 都只印一次。</div>
+        <div class="w">→ 為什麼會搞混:縮排看成排版,不是看成<strong>「這行歸誰管」</strong>。判準:問自己「這個動作該做幾次?」每圈一次就在迴圈內,跑完做一次就在迴圈外。<strong>這是你犯過 4 次的最貴錯誤</strong>,而且它不報錯。</div>
+      </div>
+
+      <div class="fix">
+        <div class="x">✗ 我以為:迴圈跑完之後 <code>n</code> 就不存在了,沒東西可以回傳</div>
+        <div class="o">✓ 其實是:Python 裡 <code>n</code> <strong>還活著</strong>,值停在最後一圈的 <code>9</code>。只有 <code>def</code> / <code>class</code> / <code>lambda</code> / comprehension 會建立新 scope,<code>for</code> / <code>while</code> / <code>if</code> / <code>try</code> 都不會。</div>
+        <div class="w">→ 為什麼會搞混:腦裡裝的是 C 家族的規則(<code>for (int n : nums)</code> 出了大括號就死)。<strong>陷阱:</strong>如果 list 是空的,迴圈一圈都沒跑,<code>n</code> 從沒被賦值 → <code>NameError</code>,不是回傳 None,是直接炸掉。</div>
+      </div>
+
+      <div class="callout key">
+        <p style="margin-bottom:0"><strong>這三個怎麼咬到 #21:</strong>第 2 條就是 <code>return dummy.next</code> 必須在 <code>while</code> 外面的理由,也是 <code>tail = tail.next</code> 必須在 <code>if/else</code> 外面的理由。同一個心智模型,兩個不同的行。</p>
+      </div>
+    </div>
+  </details>
+</section>
+
+</div>
