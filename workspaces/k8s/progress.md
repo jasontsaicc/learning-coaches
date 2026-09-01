@@ -7,60 +7,35 @@
 
 ## Meta
 
-- session_count: 32(⚠️ s31 有斷點但當時未遞增計數，本堂一次補正）
-- last_weekly_review: 18(**WR9 第七度未完成**;s25 開跑後 s26-s32 均未跑。32-18=14，已嚴重逾期，s33 開場硬性排入或明確作廢)
-- last_session_date: 2026-08-28
+- session_count: 33
+- last_weekly_review: 18(**WR9 第八度未完成**;33-18=15。s33 已拍板「壓縮跑一版」，但學員提前收工沒跑到，s34 開場第一件事，不可再延)
+- last_session_date: 2026-09-01
 - warm_up_classification: mid(有地圖形狀,缺演員名字;P0 剛好,不加速)
 - **target_role: 泛用大廠 senior DevOps/SRE；2026-08-21 確認目前無緊急面試，採 production depth + senior interview 雙軌**。每個核心主題固定比較地端 Kubernetes、傳統 EKS 與高度託管 EKS，並同時要求 hands-on evidence 與 scenario answer；見 curriculum-plan §11。
 
 ## Current Session breakpoint
 
-**s32 收工斷點(2026-08-28,家用 VM,context `kind-k8s-coach-p2a`)**：step G StatefulSet≠HA 換情境補考完成，**Tier 2 2/4 未通過**（原理🟡 機制✅ 自己的話✅ MTTR❌）。C-3 StatefulSet **內容段結案**（三個核心 chunk + hands-on + E + F 已於 s31 完成，本堂補完 G）。
+**s33 中途收工(2026-09-01,公司 bastion,context `kind-k8s-coach-p2a`)**：C-4 RBAC 開講。chunk 1(四象限)、chunk 2(純 allow / SA 是 Pod 身分)Recall+Transfer 皆過(含 ELI5 鷹架)。chunk 3(403 排障 + `--as` impersonation)剛建好 `rbac-lab` namespace 與 `ci-reader` ServiceAccount，**Role/RoleBinding YAML 尚未寫**。學員主動喊停，收工存檔。今天叢集健康(三台 Ready，21d，無 containerd 問題)。
 
-本堂事實：
+**next(s34)，順序：**
 
-- **開場環境**：三台 NotReady（16d），`containerd` **第七次**卡死。依 s28 紀律直接修不當教材：`for n in control-plane worker worker2; do docker exec k8s-coach-p2a-$n systemctl restart containerd; done`，約 20 秒三台 Ready。殘留物件：`web-0`/`web-1` StatefulSet、`www-web-0/1` PVC、`sc-demo`、`dnstest`、`pvc-dyn`(Pending 15d) 未清。
-- ✅ **StatefulSet identity 冷測過（3 天留存）**：`delete redis-0` 後「保證一樣 = storage + pod 名稱 / 會變 = UID + IP」無提示答對。
-- ✅ **PDB 誘答咬住**：客戶說「加 PDB minAvailable:2 + replicas 5 就是 HA」→ 答「**這只是 pod 層級的 scale，不是 redis 服務層級的 HA**」，自帶分層判準，無提示。
-- ✅ **fan-out 機制自產**：普通 ClusterIP + 5 顆獨立 Redis → 「set 到 server 1 但 get 指向 server 2 所以找不到」，立即、無鷹架。
-- ❌ **「5 顆 = 幾份資料」未過**：答「still is 3 data」，誤以為原本 3 顆共用一份。正解已給：`volumeClaimTemplates` 給每個 ordinal 一顆**空 PVC** → 每顆 Redis 掛空目錄自己開一份 → **從第一天起就是 3 個互不相識的 Redis**。判準句：**StatefulSet 給的是「每人一份儲存」，不是「大家共用一份資料」；複製是 application 的事，k8s 一無所知。**
-- ❌ **MTTR 兩次選錯第一發指令**：① Redis 題三選一選 C(`redis-cli info replication`，單顆內部) 而非 B(`endpointslice`，fault domain)；被壓「C 回答得了流量打到幾個東西嗎」時誠實認輸並要求 L6 正解。② **換皮 Postgres 題再選「檢查 replica 的 log」= 又跳內部**，梯子（「這是第幾步」）+ 三選一才到 B。判準句已給：**先鎖「流量打到幾個東西」，再查「那個東西內部怎麼了」。**
-- ⚠️ **主訊號：判準給完當場套用不上，同形狀第三次**（s28 兩次、本堂一次）。學員能完整複述順序，但下一題仍先跳內部。
-- 🌟 **正樣本**：MTTR 第一題自帶完整判準句型「寫入成功 + 全 Running + RESTARTS 0，**所以**我看資料層」= pattern 卡無提示正樣本第 6 次，且推理方向正確（砍掉 process 層是對的第一刀），錯的是選指令不是想法。
-- 學員誠實說「Redis HA 我不熟」而非硬掰 —— 顧問情境正確反應，已當場肯定。
+1. ⚠️ **WR9 開場第一件事，必須執行**：這次不是又忘了，是「s33 已拍板要壓縮跑但提前收工沒跑到」，性質不同，優先度更高。壓縮版 3 主題 blind recall：本堂兩張新卡(StatefulSet 幾份資料、先鎖 fault domain 再查內部)算近期兩題，補一題較舊的弱點題(建議從 RP1/RP3 active pattern 挑)。
+2. **接續 C-4 chunk 3**：spec 已給待動手 —— Role(`pod-reader`，ns `rbac-lab`，`get`/`list` pods)+ RoleBinding(綁 `ci-reader`)。先問 why-first(範圍要不要對得起來)再讓學員自己寫 YAML，接 `kubectl auth can-i` 系列驗證 + `--as` impersonation 排障三段鏈。
+3. **C-4 chunk 4**：最小權限設計方法論(爆炸半徑思維)，keystone 收尾，之後可視進度排 P2b gate。
+4. **尾巴冷測 2 題**(若時間夠)：① fault-domain 換皮(08-31 已過期，優先)② StatefulSet 換皮。
+5. C-4 的 F/G 今天沒推進到，仍待。
+6. 叢集今天健康，單節點 kind 評估可再拖；story-bank 連十二堂未挖。
 
-**next(s33)，順序：**
+本堂新增筆記(已併入下方 Mastery / Mistake Registry，此處摘要)：
 
-1. **主秀先跑：C-4 RBAC**（P2b keystone，本堂已預告未開始）。四象限 / 只有 allow 沒有 deny / SA 是 Pod 的身分 / 403 三段鏈 + `--as` impersonation lab。
-2. **WR9 第七度逾期**：32-18=14。s33 必須二選一 —— 硬排進課堂，或明確宣告作廢改用其他複習機制。不要再默默跳過。
-3. **尾巴冷測 2 題上限**：① StatefulSet「5 顆幾份資料」（本堂未過，換皮）② 排障兩步「先鎖 fault domain 再查內部」（本堂未過，換第三種皮）。
-4. ⚠️ **對治主訊號的硬規格續用且加碼**：排障題強迫學員先答「我這一發回答的是第 1 步還是第 2 步」再給指令。
-5. **叢集**：16 天大、containerd 第七次。單節點 kind 的評估仍未做，s33 決定。C-2 `sc-demo` reclaimPolicy Delete teardown 仍待做。
-
-**s28 已收(2026-08-20,公司 bastion,context `kind-k8s-coach-p2a`)。距 s27 隔 10 天,走 Comeback Protocol。學員趕下班,G 段要求直接給正解後收工。**
-
-本堂事實:
-
-- **開場環境**:三台 NotReady、`crictl` 三台全 SLOW(containerd **第六次**卡死)。學員明說「你直接檢查環境」→ 鍵盤鐵律例外條款觸發,教練代跑。08-10 精準修法 `systemctl restart containerd` ×3,25 秒三台 Ready、Pod 未重排。宿主機 load 5.97/4 核心,兇手是**別人在跑 terraform/terragrunt**(同 s21 terraboard 形狀)。
-- **冷測三題**:Q1 對照組(ALB 三台兩壞)**半過** —— 認出證據句「第三台完全正常」✅,判準句答不出、喊「直接説明」,直給;隨後應用題**立刻選 A(查 ALB access log)= 剛砍掉的那層**。Q2 `active`≠活著 **未過** —— 首答跑去講 DB(講別人壞不是講它自己壞)、二答「不是網絡嗎」,機制直給;接的 liveness 二選一**又選 `pgrep`**,梯子縮到最小才走通。中途 **liveness/readiness 動作對調**(答「繼續導入流量」),且答案兩種讀法要教練追問才定案(s25 同形狀第二次)。Q3 排障順序 **過**。
-- ✅ **本堂最大正樣本:`restart` 排在採證前面這張卡,s21 以來第一次真的做對**。四動作排序把 `reboot` 排最後;B/C 初答倒置,給成本對比後自己改對並自帶判準「**比較簡單**」= pattern 卡無提示正樣本第 5 次(前四次:s22 站 7、s24 kernel 題、s25 PV/PVC、s26 upperdir)。
-- ⚠️ **本堂主訊號(教學法層級,比知識點重要):判準句給完 30 秒內,下一題就套用不上,同堂兩次同形狀。** 不是記不住(兩次都能複述),是**沒把剛拿到的判準當工具用**。診斷:直給之後少了「當場用一次」那一步。已建 pattern 卡。
-- **F 段跑了但散掉**:獨白首句「active 代表 process **順利執行**」= 把「存在」講成「順利執行」,正是整堂的病;第二輪出現與主題無關的碎片(「repo 的 parameter-store JSON」)→ 判定負荷/分心訊號,依安全閥縮成二選一「不在家 vs 在家但不接電話」→ **答對**,`DeadlineExceeded` vs `connection refused` 當場收。
-- **G 段未作答**(學員趕時間),正解與 L6 版已給,**原題留 s29 重用**。
-- **Scorecard tier2 1/4**(原理🟡 機制❌ 自己的話❌ MTTR✅)。
-- 未跑:WR9(第四度)、story-bank(連八堂)、C-2 StorageClass。
-
-next(s29),順序 —— ⚠️ **2026-08-20 學員拍板改制:新內容排最前面,複習/冷測壓到課堂尾巴**。理由:P2b 自 s26(08-06)起 14 天沒推進,每堂開場被「修叢集 + 複習」吃掉,新內容排最後就在疲勞時被砍;面試窗口約 09 中旬,舊節奏推不完。**冷測不砍**(隔堂測留存是唯一有效方法),只改排序,吃掉的是複習時間不是課程時間。學員選項 A(冷測留課堂尾巴)勝出,B(非同步冷測)未採用。
-
-1. **開場先講今天做哪 3 件事,一次只推一件**(s28 照做有效,續用)。叢集若掛,直接下 `for n in control-plane worker worker2; do docker exec k8s-coach-p2a-$n systemctl restart containerd; done`,**不當教材、不排障**。
-2. **主秀先跑:C-2 StorageClass / 動態供給 / CSI**(P2b;s26 已把 EBS CSI 概念鋪好)。
-3. **G 段**:s28 未答的原題直接重用(12 個 Pod、3 個延遲 30 秒、`RESTARTS` 全 0、`exec: pgrep` probe;同時考對照組 + active≠活著 + 選指令)。
-4. **尾巴才做冷測,3 題上限**:① 對照組判準一句版(換第三種皮)② `active` 為什麼不等於服務活著 ③ **liveness vs readiness 各自的動作(s28 退步卡,必抽)**。
-5. ⚠️ **對治 s28 主訊號的硬規格:每給一個判準句,立刻接一題只有換皮的應用題,答對才算給完。** 不要等隔堂才發現沒套用。
-6. **叢集**:9 天大、containerd 第六次(這次三台全 SLOW)。修法成熟但每堂都要修 → 評估改單節點 kind 降負載,或上課前避開跑 terraform。
+- Chunk 1 撞出新混淆並用 ELI5 圖解拆掉：**namespace 對「API 物件存在範圍」是硬邊界，跟「namespace 不做網路隔離」是兩個獨立軸**，不能混用。Role(ns 級)結構上無法被 ClusterRoleBinding(cluster 級)引用；反向(ClusterRole 被 RoleBinding 限縮到單一 ns)則可以，學員最終自己講出機制(「每個大樓都一張，所以可以限定一棟大樓」)。
+- 「只給結論不給判準」在 chunk 1 同一題型連中兩次(四象限第三/四格問答，先答「不行的」「可以的」都要追問才補理由)。
+- Chunk 2 誘答(RBAC 403 會不會讓 Pod 變 CrashLoopBackOff)最終答對且抓住「兩條路不相通」機制，並用 ELI5 artifact 鞏固。
+- Chunk 2 換皮應用題撞出新混淆：**把「controller 建 Pod 用自己的系統身分」跟「Pod 裡程式呼叫 API 用宣告的 SA」搞混**(答「CronJob 不會被建立成 Pod，因為根本沒有到建立 pod」)，已教正並入 Mistake Registry。
+- 一度把「Pod 打 k8s API 用什麼身分」答成「node instance role」(那是 C-5 IRSA 的概念)，一個提示即自我修正，未建獨立卡，留 C-5 正式收。
 
 <!-- schema: PROGRESS-SCHEMA.md §3 = 當前狀態 + 下一堂 resume,只留最新一堂。
-     s26 及更早的斷點原文封存於 archive/breakpoint-history.md(冷檔,一字未刪);
+     s32 及更早的斷點原文已收錄於 session-log.md「Session 紀錄」對應堂;
      長效教練紀律在 session-log.md「教練執行紀律」。 -->
 
 ## Phase status
@@ -68,7 +43,7 @@ next(s29),順序 —— ⚠️ **2026-08-20 學員拍板改制:新內容排最�
 - P0 心智模型: gate-passed(2026-06-22;legacy,pre-Examiner,coach 認證)
 - P1 核心物件 + 容器底層: gate-passed(2026-06-25;legacy,pre-Examiner,coach 認證)
 - P2a 網路深水區: in-progress(chunk 1 Service/kube-proxy/CoreDNS ✅、chunk 2 Ingress ✅;chunk 3 NetworkPolicy in-progress〔3-1/3-2 教完;lab Step 4 於 s23 bastion 側重建完成(allow-dns + 兩死法實證),Step 5 兩道門模型已教、兩條 policy 未寫,剩 Step 5+6+gate+F/G〕;chunk 4 in-progress〔**4-1 CNI 合約 ✅ s19、4-2 veth ✅ s20、4-3 路由 ✅ s20、4-4 MASQUERADE ✅ s20**;**4-5 七站骨架盲講 ❌ s21 冷測 0/4 未過**〕。四塊零件備妥但串不起來;**4-5 背誦式重測已於 2026-08-11 退役,P2a gate 答案卷改情境排障題形式(curriculum-plan §10.2)**)
-- P2b 儲存 + 權限: **in-progress**。**C-1 Volume/PV/PVC ✅ 完成(s26)**:三階梯壽命表一顆 `vol-demo` Pod 全部親手實證(L1 可寫層 / L2 emptyDir / L3 PVC,換 container 與 delete pod 兩種情境四格全驗),預測全中、機制自產(「pod 沒有換 container 換掉只有 upperdir 換掉」);執行體肉身摸到(`/proc/mounts` + node 上 `ls /tmp/pv-demo/`)。附帶收:PID 1 signal 保護、hostPath PV 落在 tmpfs 的意外、EBS AZ-scoped + `nodeAffinity` + `volumeBindingMode`。**C-1 唯一殘留**:`cg-demo` 的 `/sys/fs/cgroup/memory.max` 實際數字未讀到(s25 Pending,node 已修好,s27 補)。**C-2 StorageClass / dynamic provisioning / CSI 概念三 chunk ✅(s29)，hands-on 主鏈 ✅；只剩 `reclaimPolicy: Delete` teardown 實證。** **C-3 StatefulSet 內容段結案（s31 三 chunk + hands-on + E + F，s32 補完 G）**：identity/storage/DNS 三面牆與 `volumeClaimTemplates`、headless Service、EndpointSlice 全部教完並有 lab 證據；step G Tier 2 **2/4 未通過**（MTTR 失分），內容不重教、MTTR 留 registry 續盯。**下一站 C-4 RBAC。**
+- P2b 儲存 + 權限: **in-progress**。**C-1 Volume/PV/PVC ✅ 完成(s26)**:三階梯壽命表一顆 `vol-demo` Pod 全部親手實證(L1 可寫層 / L2 emptyDir / L3 PVC,換 container 與 delete pod 兩種情境四格全驗),預測全中、機制自產(「pod 沒有換 container 換掉只有 upperdir 換掉」);執行體肉身摸到(`/proc/mounts` + node 上 `ls /tmp/pv-demo/`)。附帶收:PID 1 signal 保護、hostPath PV 落在 tmpfs 的意外、EBS AZ-scoped + `nodeAffinity` + `volumeBindingMode`。**C-1 唯一殘留**:`cg-demo` 的 `/sys/fs/cgroup/memory.max` 實際數字未讀到(s25 Pending,node 已修好,s27 補)。**C-2 StorageClass / dynamic provisioning / CSI 概念三 chunk ✅(s29)，hands-on 主鏈 ✅；只剩 `reclaimPolicy: Delete` teardown 實證。** **C-3 StatefulSet 內容段結案（s31 三 chunk + hands-on + E + F，s32 補完 G）**：identity/storage/DNS 三面牆與 `volumeClaimTemplates`、headless Service、EndpointSlice 全部教完並有 lab 證據；step G Tier 2 **2/4 未通過**（MTTR 失分），內容不重教、MTTR 留 registry 續盯。**C-4 RBAC 開講（s33）**：chunk 1(四象限)、chunk 2(純 allow / SA 是 Pod 身分)Recall+Transfer 皆過(含 ELI5 鷹架，過程撞出兩個新混淆已教正)；chunk 3(403 排障 + impersonation)動手才開始(ns/SA 建好，YAML 未寫)；chunk 4(最小權限設計方法論)未開始。
 - P3 調度 + 高並發 + 排障: not-started
 - P4 可觀測性工程: not-started
 - P5 平台工程 / GitOps: not-started
@@ -102,6 +77,11 @@ Weak-topic flags(**2026-08-03 首次啟用**,P2a 帶 flag 前進、gate 未考,�
 - **P2b C-1 PV/PVC 解耦**: med (s25 親手:PVC `Pending` → `get pv` 空 → 認出靜態供給痛點 → apply PV → 立刻 `Bound`。三實證:CAPACITY 顯示 1Gi 不是 500Mi〔capacity 是下限、綁定不切割〕、**node 全 NotReady 照樣 Bound**〔媒合是 control plane 帳本作業〕、Retain 已埋。Transfer 過且自帶「因為」+ 自己追問設計理由。誤解「PV 1:多」已當場更正為三層關係 `SC 1:多 PV 1:1 PVC 1:多 Pod`;RWO 限制的是 node 不是 Pod 數已教。**當堂過不算保留**,08-08 冷測。實體掛載那一階〔Pod 掛 PVC → 刪 Pod → 檔案還在 → `findmnt`〕未做)
 
 - **P2b C-3 StatefulSet identity(ordinal / per-replica PVC / per-Pod DNS)**: med-high (s31 lab 全實證 + **s32 三天冷測無提示過**:`delete redis-0` 的「保證一樣=storage+名稱 / 會變=UID+IP」兩欄全對;PDB 誘答「pod 層級 scale ≠ 服務層級 HA」自帶分層判準咬住;ClusterIP fan-out 機制「set 到 server 1、get 指向 server 2」無鷹架自產。**未升 high 的理由**:「5 個 replica = 幾份資料」答 3,誤以為原本 3 顆共用一份 —— per-replica 空 PVC 這個第一性沒站住。09-04 換皮抽「N 個 replica 幾份資料 + 誰負責 sync」)
+
+- **kubectl debug / ephemeral container(P1 應用,ad hoc 非正式堂)**: low (2026-09-01,實際工作觸發:ecr-uat pod 測 DB 連線,非 s33 主線、未排入 curriculum、未經 gate。Recall 過〔exec 受限於 image 裝了什麼工具,minimal image 沒 curl/nc〕;Transfer 過但需鷹架〔先答「像 sidecar」方向對但機制沒點出,誤答 cgroup 後才收斂到 network namespace〕。機制句:同 pod 內所有 container(不論原生宣告或後補的 ephemeral container)共用同一個 network namespace,這就是 debug container 能看到跟 app 一樣的 IP/route 的原因;ephemeral container API 2022(1.25)才 GA,GA 前只能靠 sidecar 在 pod 建立時就寫進去。**acquire tier,尚未冷測**,下次自然遇到再測是否保留。)
+
+- **P2b C-4 RBAC 四象限(Role/ClusterRole × RoleBinding/ClusterRoleBinding,三種合法組合)**: low(scaffolded)(s33 新教。Recall 需 ELI5 鷹架(大樓公佈欄比喻)才收斂,自產終版判準「Role 只印一份沒辦法擴大生效範圍,ClusterRole 印每份可以縮小生效範圍」;Transfer(反向,ClusterRole+RoleBinding 為什麼合法)無鷹架自答「每個大樓都一張,所以可以限定一棟大樓」✅。核心混淆已教正:namespace 對「物件存在範圍」是硬邊界(etcd key 結構),跟「namespace 不做網路隔離」是兩個獨立軸。**未冷測**,09-04 起換情境驗。)
+- **P2b C-4 RBAC 兩地基性質(純 allow 無 deny / SA 是 Pod 身分)**: low(scaffolded)(s33 新教。性質一 Recall 帶因果過(「反正預設是 deny」);性質二誘答(403 會不會讓 Pod CrashLoopBackOff)最終答對且抓住「兩條路不相通」機制,用 ELI5 artifact 鞏固。**換皮應用題撞出新混淆**:把「controller 建 Pod 用自己系統身分」跟「Pod 裡程式呼叫 API 用宣告的 SA」搞混,已教正(見 Mistake Registry)。**未冷測**,09-04 起換情境驗。)
 
 ## Scorecard history
 
@@ -268,6 +248,11 @@ Weak-topic flags(**2026-08-03 首次啟用**,P2a 帶 flag 前進、gate 未考,�
   - **s32 第三次同形狀(2026-08-28)**:剛給完「先鎖 fault domain 再查內部」的兩步判準,**下一題換皮 Postgres 立刻又答「檢查 replicas 的 log」= 第 2 步**。梯子問「這是第幾步」後能正確複述順序,再給三選一才挑到 B。**證實診斷:不是記不住,是不會把剛拿到的判準當工具用。**
   - **加碼規格(s33 起)**:排障題不直接問「第一發是什麼」,先強迫學員答「**我這一發回答的是第 1 步還是第 2 步**」,答完才給指令選項。把「用一次」變成強制動作,不是期待他自己想到。
 
+- 2026-09-01 | 建 Pod 的權限 vs Pod 裡程式呼叫 API 的權限(誰用誰的身分) | C-4 換皮應用題(CronJob 的 SA 沒有 `list configmaps` 權限,問 Pod 會不會變 CrashLoopBackOff)→ 答「不會,因為根本沒有到建立 pod」 | 把「controller 建 Pod」跟「Pod 裡程式自己呼叫 API」當成同一件事、用同一個身分;層級混淆家族(RP1)新成員 | unresolved | 3 | 2026-09-04 | 0
+  - 正解:Pod 會正常建立、`Running`。建 Pod 是 kube-controller-manager 裡的控制器用**它自己的系統級身分**做的,跟 CronJob 宣告的那個 SA 完全無關;那個 SA 只在 **Pod 裡的程式自己呼叫 API** 時才用得到。比喻:建 Pod 像 HR 幫新人辦入職,不需要新人自己的識別證;403 發生在員工已經到職、自己拿識別證開某個門的那一刻。
+  - 判準句:**「誰建立」跟「誰呼叫」是兩個不同的身分,不要因為兩件事都跟同一個物件(Pod/SA)有關就假設是同一個人做的。**
+  - 09-04 抽:換皮(e.g. Deployment 的 SA 權限不夠,新副本會不會建立失敗)看是否自產「controller 用自己身分建物件,app 用宣告的 SA 呼叫 API」這條分工句。
+
 ## Spaced-repetition queue
 
 <!-- 檢視序:過期優先、interval 小者優先;step A 每堂 ~2 題上限。term 卡到期日在 term-registry.md。 -->
@@ -304,7 +289,8 @@ Weak-topic flags(**2026-08-03 首次啟用**,P2a 帶 flag 前進、gate 未考,�
 - mistake:判準給完當場套用不上(pattern)| mistake | 3 | 2026-08-31(**s32 第三次同形狀**:剛收到兩步判準,換皮題立刻又跳內部;梯子後能複述順序。加碼規格:排障題先問「我這一發是第 1 步還是第 2 步」再給指令選項。歷史:s28 新卡,同堂兩次)| active
 - mistake:StatefulSet每個replica一份獨立資料 | mistake | 3 | 2026-09-04(s32 新卡,答「still is 3 data」。`volumeClaimTemplates` 給的是**空** PVC;複製是 application 的事。抽:換 Kafka/ES 皮問 N 個 replica 幾份資料 + 誰負責 sync)| active
 - mistake:先鎖fault-domain再查內部(MTTR) | mistake | 3 | 2026-08-31(s32 新卡,同堂兩次先跳內部。指令 `kubectl get endpointslice -l kubernetes.io/service-name=<svc> -o wide`。抽:換第三種皮,先問「第 1 步還是第 2 步」再給指令)| active
-- mistake:只給結論不給判準(pattern)| mistake | 3 | 2026-08-31(**s32 正樣本第 6 次**:MTTR 第一題無提示自帶完整句型「寫入成功 + 全 Running + RESTARTS 0,**所以**我看資料層」,推理方向正確,錯的是選指令不是想法;同堂另有「pod 層級 scale 不是服務層級 HA」分層判準。歷史:**s30 再現**:Proxy 換皮只答 `B`、RWO 題兩次只答「不能」，都需句型鷹架才補出判準；正樣本是後段能完整說出 bypass 對照只能鎖定整段路徑。留 3，下一次答案固定要求「判斷+因為+證據」)| active
+- mistake:只給結論不給判準(pattern)| mistake | 3 | 2026-09-04(**s33 同一堂連中兩次**:C-4 四象限第三/四格問答,先答「不行的」「可以的」都要教練追問才補理由,最終補出的判準是對的(範圍/存在的機制),但預設反應仍是先吐結論。**s32 正樣本第 6 次**:MTTR 第一題無提示自帶完整句型「寫入成功 + 全 Running + RESTARTS 0,**所以**我看資料層」,推理方向正確,錯的是選指令不是想法;同堂另有「pod 層級 scale 不是服務層級 HA」分層判準。歷史:**s30 再現**:Proxy 換皮只答 `B`、RWO 題兩次只答「不能」，都需句型鷹架才補出判準；正樣本是後段能完整說出 bypass 對照只能鎖定整段路徑。留 3，下一次答案固定要求「判斷+因為+證據」)| active
+- mistake:建Pod的權限vs呼叫API的權限(誰用誰的身分)| mistake | 3 | 2026-09-04(s33 新卡,答「不會,因為根本沒有到建立 pod」。判準句:建立是 controller 自己的身分、呼叫是 Pod 裡程式的 SA。抽:換皮 Deployment 版)| active
 - mistake:NetworkPolicy-靜默無效 | mistake | 3 | 2026-07-31(過期,s23 未抽;**s22 F 段質變**:追問下自組完整鏈含「安全假象」自己的話;一段話冷測版過才 resolved,s24/WR9 抽)| active
 - mistake:CNI-合約三件事 | mistake | 3 | 2026-07-23(s19 新卡:網卡/IP/路由 + 各自缺席的死法;hostNetwork 判準已自推不用重考)| active
 - mistake:兩張獨立名單 | mistake | 3 | 2026-08-06(**s23 重抽未過**,三層提示未自產、直教兩道門模型;s24 動手版〔Step 5 自寫兩條 policy + 矩陣〕+ 08-06 口頭版)| active
