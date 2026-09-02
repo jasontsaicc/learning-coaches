@@ -453,7 +453,7 @@ each level: O(N), levels: O(log k)</code></pre></div>
   </details>
 
   <details>
-    <summary>這次的釐清<span class="lockhint">2026-08-31</span></summary>
+    <summary>這次的釐清<span class="lockhint">2026-08-31, 2026-09-02</span></summary>
     <div class="dbody">
       <div class="fix">
         <div class="x">✗ 我以為:有寫 <code>tail = tail.next</code>,就完成了把新 node 接到答案後方。</div>
@@ -462,6 +462,11 @@ each level: O(N), levels: O(log k)</code></pre></div>
       </div>
       <div class="callout key">
         <p style="margin-bottom:0"><strong>口訣:</strong>先接再走。<code>tail.next = node</code> 是接車廂;<code>tail = tail.next</code> 是人走到新車尾。</p>
+      </div>
+      <div class="fix">
+        <div class="x">✗ 我以為:演算法邏輯(tuple 放 val/i/node、tie-breaker)寫對,code 就能跑。</div>
+        <div class="o">✓ 其實是:檔案最上面漏了 <code>import heapq</code>,跑起來是 <code>NameError: name 'heapq' is not defined</code>。邏輯對不代表語法完整。</div>
+        <div class="w">→ 為什麼會搞混:注意力全放在演算法設計(怎麼排、怎麼比),漏了「這個模組要先 import 才能用」這層語法檢查。</div>
       </div>
     </div>
   </details>

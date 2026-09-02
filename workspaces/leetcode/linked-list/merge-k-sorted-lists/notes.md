@@ -1,6 +1,6 @@
 # 23. Merge K Sorted Lists
 
-- 圖解頁:[eli5.html](eli5.html)
+- 圖解頁:https://claude.ai/code/artifact/65a51c4d-d03a-4161-8140-0f8b9669254f
 - 模式:Hard(講得出來；預設對照打)
 - 拆解:#23 = #21 的 `dummy + tail` 串接 + min-heap 選最小 head
 - invariant:heap 恰好保存每條尚未合併 list 的當前 head；因此 heap root 是所有剩餘 node 的全域最小值
