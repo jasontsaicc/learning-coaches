@@ -1,0 +1,621 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>寄物間快取</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&amp;family=JetBrains+Mono:wght@400;700&amp;family=Noto+Sans+TC:wght@400;500;700&amp;display=swap">
+<style>
+:root{
+  --paper:#E7EAEA; --surface:#F7F8F6; --ink:#171F23; --body:#3B454A;
+  --muted:#737C80; --line:#C9D1D2;
+  --mru:#B5652D; --mru-soft:#F1DFC9;
+  --lru:#2B5F6B; --lru-soft:#D8E5E8;
+  --ticket:#7A3B45; --ticket-soft:#EEDCDD;
+  --danger:#8C3B2E; --danger-soft:#F1DCD6;
+  --code-bg:#171F23; --code-fg:#DDE4E3;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#12171A; --surface:#1A2124; --ink:#E9EEEE; --body:#BFC8C9;
+    --muted:#8A9396; --line:#2D373A;
+    --mru:#E0A050; --mru-soft:#33270F;
+    --lru:#7FAFC0; --lru-soft:#17282D;
+    --ticket:#D98A94; --ticket-soft:#2E1A1D;
+    --danger:#E0897A; --danger-soft:#33201C;
+    --code-bg:#0D1214; --code-fg:#DCE4E3;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#12171A; --surface:#1A2124; --ink:#E9EEEE; --body:#BFC8C9;
+  --muted:#8A9396; --line:#2D373A;
+  --mru:#E0A050; --mru-soft:#33270F;
+  --lru:#7FAFC0; --lru-soft:#17282D;
+  --ticket:#D98A94; --ticket-soft:#2E1A1D;
+  --danger:#E0897A; --danger-soft:#33201C;
+  --code-bg:#0D1214; --code-fg:#DCE4E3;
+}
+*{box-sizing:border-box}
+body{margin:0;padding:0 1.25rem 6rem;background:var(--paper);color:var(--body);font-family:"Noto Sans TC","Microsoft JhengHei",sans-serif;font-size:16px;line-height:1.85}
+.wrap{max-width:46rem;margin:0 auto}
+header{padding:3.25rem 0 1.5rem}
+.kicker{font-family:"JetBrains Mono",monospace;font-size:.72rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--ticket)}
+h1{font-family:"Oswald","Noto Sans TC",sans-serif;font-weight:700;font-size:clamp(2rem,6vw,2.9rem);line-height:1.1;letter-spacing:.01em;color:var(--ink);margin:.55rem 0 .6rem;text-wrap:balance}
+.sub{color:var(--muted);margin:0;max-width:38rem}
+.rule{height:9px;margin:2.5rem 0 2.1rem;border-top:2px solid var(--line);border-bottom:2px solid var(--line);background:repeating-linear-gradient(90deg,var(--line) 0 3px,transparent 3px 13px)}
+h2{font-family:"Oswald","Noto Sans TC",sans-serif;font-weight:600;font-size:1.35rem;color:var(--ink);margin:0 0 .3rem;text-wrap:balance}
+h2 .num{font-family:"JetBrains Mono",monospace;font-size:.82rem;color:var(--ticket);margin-right:.55rem;vertical-align:.1em}
+h3{font-family:"Oswald","Noto Sans TC",sans-serif;font-weight:600;font-size:1rem;color:var(--ink);margin:1.6rem 0 .5rem}
+section{margin-bottom:2.4rem}
+p{margin:.7rem 0}
+strong{color:var(--ink)}
+code{font-family:"JetBrains Mono",monospace;font-size:.87em;background:var(--ticket-soft);color:var(--ink);padding:.1em .35em;border-radius:2px}
+.lede{font-size:1.08rem;color:var(--ink);border-left:3px solid var(--ticket);padding-left:1rem;margin:1rem 0 1.25rem}
+ul,ol{padding-left:1.35rem;margin:.7rem 0}
+li{margin:.35rem 0}
+.callout{background:var(--surface);border:1px solid var(--line);border-radius:5px;padding:1.1rem 1.25rem;margin:1.25rem 0}
+.callout.map{border-left:4px solid var(--ticket)}
+.callout.warn{border-left:4px solid var(--danger)}
+.callout.key{border-left:4px solid var(--mru)}
+.callout h3{margin-top:0}
+.mapping{display:grid;grid-template-columns:auto 1fr;gap:.35rem 1rem;margin:.6rem 0 0;font-size:.92rem}
+.mapping dt{font-family:"JetBrains Mono",monospace;color:var(--ticket);white-space:nowrap}
+.mapping dd{margin:0;color:var(--body)}
+.signals{list-style:none;padding:0;display:grid;gap:.5rem}
+.signals li{display:flex;gap:.75rem;align-items:baseline;background:var(--surface);border:1px solid var(--line);border-radius:4px;padding:.7rem .95rem;margin:0}
+.signals .n{font-family:"JetBrains Mono",monospace;font-weight:700;color:var(--ticket);flex-shrink:0}
+.diagram{overflow-x:auto;padding:1.1rem 1rem;margin:1.1rem 0;background:var(--surface);border:1px solid var(--line);border-radius:6px}
+.diagram .cap{font-family:"JetBrains Mono",monospace;font-size:.72rem;color:var(--muted);letter-spacing:.04em;margin-bottom:.75rem;text-transform:uppercase}
+.rail{display:flex;align-items:center;gap:0;min-width:max-content}
+.sentinel{display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:3.4rem;height:3.6rem;border:2px dashed var(--muted);border-radius:4px;color:var(--muted);font-family:"JetBrains Mono",monospace;font-size:.68rem;flex-shrink:0;padding:.2rem}
+.hook{display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:4.4rem;height:3.6rem;border:2px solid var(--line);border-radius:4px;background:var(--surface);flex-shrink:0;padding:.2rem}
+.hook .k{font-family:"JetBrains Mono",monospace;font-weight:700;font-size:1.05rem}
+.hook .v{font-family:"JetBrains Mono",monospace;font-size:.66rem;color:var(--muted)}
+.hook.mru{border-color:var(--mru);background:var(--mru-soft)}
+.hook.mru .k{color:var(--mru)}
+.hook.lru{border-color:var(--lru);background:var(--lru-soft)}
+.hook.lru .k{color:var(--lru)}
+.hook.mid{border-color:var(--line);color:var(--muted)}
+.hook.evict{border-color:var(--danger);background:var(--danger-soft);opacity:.55}
+.hook.evict .k{color:var(--danger)}
+.link{color:var(--muted);font-size:1.1rem;flex-shrink:0;width:1.6rem;text-align:center}
+.legend{display:flex;flex-wrap:wrap;gap:.4rem 1.1rem;font-size:.78rem;color:var(--muted);margin-top:.7rem;font-family:"JetBrains Mono",monospace}
+.legend span{display:inline-flex;align-items:center;gap:.35rem}
+.swatch{width:.7rem;height:.7rem;border-radius:2px;display:inline-block}
+.ticketrow{display:flex;gap:.5rem;margin-bottom:.9rem;flex-wrap:wrap}
+.ticket{font-family:"JetBrains Mono",monospace;font-size:.78rem;border:2px solid var(--line);border-radius:3px;padding:.3rem .6rem;color:var(--muted);background:var(--surface)}
+.ticket.mru{border-color:var(--mru);color:var(--mru);background:var(--mru-soft)}
+.ticket.lru{border-color:var(--lru);color:var(--lru);background:var(--lru-soft)}
+.frame{margin:1.6rem 0}
+.frame .step{font-family:"JetBrains Mono",monospace;font-weight:700;font-size:.85rem;color:var(--ink);margin-bottom:.5rem}
+.frame .note{font-size:.88rem;color:var(--muted);margin-top:.65rem}
+.scanrow{display:flex;align-items:center;gap:.4rem;min-width:max-content}
+.scanbox{display:flex;align-items:center;justify-content:center;min-width:3rem;height:2.6rem;border:2px solid var(--line);border-radius:4px;font-family:"JetBrains Mono",monospace;font-weight:700;color:var(--muted);background:var(--surface);flex-shrink:0}
+.scanbox.passed{opacity:.4;border-style:dashed}
+.scanbox.found{border-color:var(--danger);background:var(--danger-soft);color:var(--danger)}
+.tablewrap{overflow-x:auto;margin:1.25rem 0;border:1px solid var(--line);border-radius:5px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:.85rem;font-variant-numeric:tabular-nums}
+th,td{text-align:left;vertical-align:top;padding:.55rem .8rem;border-bottom:1px solid var(--line)}
+th{font-family:"Oswald","Noto Sans TC",sans-serif;font-weight:600;color:var(--ink);font-size:.76rem;letter-spacing:.03em}
+tr:last-child td{border-bottom:none}
+.mono{font-family:"JetBrains Mono",monospace;white-space:nowrap}
+pre{background:var(--code-bg);color:var(--code-fg);border-radius:5px;padding:1.1rem 1.25rem;overflow-x:auto;margin:1rem 0;font-family:"JetBrains Mono",monospace;font-size:.82rem;line-height:1.7}
+pre code{background:none;color:inherit;padding:0;font-size:1em}
+details{border:1px solid var(--line);border-radius:5px;background:var(--surface);margin:.85rem 0;overflow:hidden}
+summary{cursor:pointer;padding:.95rem 1.2rem;list-style:none;font-family:"Oswald","Noto Sans TC",sans-serif;font-weight:600;color:var(--ink);display:flex;align-items:center;gap:.7rem}
+summary:focus-visible{outline:2px solid var(--ticket);outline-offset:2px}
+summary::-webkit-details-marker{display:none}
+summary::before{content:"▸";color:var(--ticket);font-size:.85rem;transition:transform .15s}
+details[open] summary::before{transform:rotate(90deg)}
+.dbody{padding:0 1.2rem 1.3rem;border-top:1px solid var(--line)}
+.dbody>*:first-child{margin-top:1rem}
+.mantra{font-family:"Oswald","Noto Sans TC",sans-serif;font-size:1.02rem;font-weight:600;color:var(--ink);background:var(--ticket-soft);border-radius:4px;padding:1rem 1.2rem;margin:1rem 0}
+.move{border-top:1px solid var(--line);padding-top:1.15rem;margin-top:1.4rem}
+.move:first-of-type{border-top:none;padding-top:0}
+.move h4{font-family:"Oswald","Noto Sans TC",sans-serif;font-size:1rem;margin:0 0 .5rem;display:flex;gap:.6rem;align-items:baseline}
+.mv{font-family:"JetBrains Mono",monospace;font-size:.68rem;letter-spacing:.1em;color:var(--ticket);border:1px solid var(--ticket);border-radius:2px;padding:.1rem .35rem;flex-shrink:0}
+.say{background:var(--mru-soft);border-left:3px solid var(--mru);padding:.75rem 1rem;margin:.6rem 0;font-size:.93rem;color:var(--ink)}
+.think{font-size:.93rem;margin:.6rem 0;padding-left:.9rem;border-left:2px dotted var(--line);color:var(--body)}
+.write{font-size:.93rem;margin:.6rem 0}
+.say b,.think b,.write b{display:block;font-family:"JetBrains Mono",monospace;font-size:.66rem;letter-spacing:.12em;text-transform:uppercase;margin-bottom:.25rem}
+.say b{color:var(--mru)}
+.think b{color:var(--muted)}
+.write b{color:var(--ticket)}
+.native{background:var(--surface);border:1px solid var(--line);border-radius:5px;padding:1rem 1.2rem;margin:1.3rem 0}
+.native h4{margin:0 0 .6rem}
+.native ol{margin:0}
+.native li{margin:.5rem 0;font-family:"JetBrains Mono",monospace;font-size:.85rem;color:var(--ink)}
+.clarify{color:var(--muted);font-size:.92rem}
+.clarify .x{color:var(--danger)}
+.clarify .o{color:var(--lru)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+<div class="kicker">LeetCode 146 · Hashmap + Doubly Linked List</div>
+<h1>寄物間快取</h1>
+<p class="sub">一個寄物間只有 N 個掛勾。滿了要丟東西，丟的是「最久沒人碰的」，不是「放最早的」。你要讓「拿」「放」都在 O(1) 時間完成。</p>
+</header>
+
+<div class="rule"></div>
+
+<section>
+<h2><span class="num">①</span>白話：這題在幹嘛</h2>
+<p class="lede">你要做一個有大小限制的置物櫃。放滿了，新東西進來就要丟一個舊的——丟的規則是「最久沒被碰過」，不是「放進去最久」。每次你去拿或放一個東西，那個東西就變成「剛剛用過」，暫時安全。</p>
+
+<div class="callout map">
+<h3>這題的詞我全部換成寄物間的說法</h3>
+<dl class="mapping">
+<dt>capacity</dt><dd>掛桿上只有這麼多個掛勾</dd>
+<dt>key</dt><dd>號碼牌</dd>
+<dt>value</dt><dd>外套（寄放的東西）</dd>
+<dt>get(key)</dt><dd>憑號碼牌把外套拿出來看一眼，看完照樣掛回去——但位置會變</dd>
+<dt>put(key, val)</dt><dd>拿新外套來寄，或用同一張號碼牌換一件新外套</dd>
+<dt>MRU 端</dt><dd>掛桿靠門口那端：剛被碰過的外套掛這裡</dd>
+<dt>LRU 端</dt><dd>掛桿最裡面那端：最久沒人理，滿了先丟這裡</dd>
+<dt>hashmap</dt><dd>服務台的號碼本：號碼牌一查，直接告訴你外套掛在「哪一個掛勾」，不用把整根桿子摸一遍</dd>
+<dt>doubly linked list</dt><dd>掛桿本身：外套一件接一件掛著，每件都知道左右鄰居是誰</dd>
+</dl>
+</div>
+</section>
+
+<section>
+<h2><span class="num">②</span>這是什麼型，秒認信號</h2>
+<ul class="signals">
+<li><span class="n">01</span><span>題目要你「design a data structure」，不是寫一個 function</span></li>
+<li><span class="n">02</span><span>同時出現 <code>capacity</code> 限制 + get/put 都要求 O(1)</span></li>
+<li><span class="n">03</span><span>需要同時記兩件事：「這個 key 現在的值」和「哪個 key 最久沒被碰」</span></li>
+</ul>
+<p>單獨一個 hashmap 只能秒查值，不記順序。單獨一個 array／list 好記順序，但插入或刪除中間那個要搬東西，O(n)。這兩題各自都有解，但「兩個都要」，才是這個型的訊號：hashmap 負責給位置的直接指標，doubly linked list 拿著那個指標做 O(1) 插拔。</p>
+</section>
+
+<section>
+<h2><span class="num">③</span>暴力解，為什麼慢</h2>
+<p>最直覺的做法：一個 dict 存值，外加一個 list 存「使用順序」，最久沒碰的排最前面。get/put 命中時，把該 key 從 list 裡挖出來，塞到 list 尾端（代表「剛剛用過」）。</p>
+
+<div class="diagram">
+<div class="cap">order = [1, 3, 2] — 要把 key=2 挪到尾端，得先找到它</div>
+<div class="scanrow">
+<div class="scanbox passed">1</div>
+<span class="link">→</span>
+<div class="scanbox passed">3</div>
+<span class="link">→</span>
+<div class="scanbox found">2</div>
+</div>
+<div class="note">list.remove(2) 要從頭一個一個比對，掃了 2 步才找到位置。</div>
+</div>
+
+<p>問題就在「找出來刪掉」這一步：<code>list.remove(key)</code> 得從頭掃過去才能找到那個 key 的位置，這是 O(n)。dict 明明已經用 O(1) 查到了值，但「它在 list 的哪個位置」這個情報，dict 完全不知道——list 只好重新從頭找一次。这就是浪費的免費情報：早就查到手的位置，沒有存下來，白白丟掉重找。每次 get/put 都要付一次 O(n)，呼叫次數上看 2×10⁵，總成本 O(n²)，會超時。</p>
+</section>
+
+<section>
+<h2><span class="num">④</span>做法一步一步</h2>
+<p>優化版：把 dict 改成存「指標」，不是存「值」。指標直接指到掛桿上的那個掛勾，不用再找。掛桿本身是 doubly linked list——每個掛勾知道左右鄰居是誰，所以「把某個掛勾抽出來」只要跟它自己的左右鄰居打招呼就好，跟其他掛勾無關，O(1)。掛桿兩端各釘一根固定柱子（sentinel），本身不掛外套，只是邊界，讓「這是第一個/最後一個掛勾」不用另外判斷。</p>
+
+<div class="diagram">
+<div class="cap">通用形狀（掛勾數量比範例多，方便看出漸層）</div>
+<div class="ticketrow">
+<div class="ticket mru">1號 →</div>
+<div class="ticket">…</div>
+<div class="ticket lru">7號 →</div>
+</div>
+<div class="rail">
+<div class="sentinel">head<br>柱子</div>
+<span class="link">↔</span>
+<div class="hook mru"><span class="k">1</span><span class="v">剛碰過</span></div>
+<span class="link">↔</span>
+<div class="hook mid"><span class="k">4</span><span class="v">…</span></div>
+<span class="link">↔</span>
+<div class="hook mid"><span class="k">9</span><span class="v">…</span></div>
+<span class="link">↔</span>
+<div class="hook lru"><span class="k">7</span><span class="v">快被丟</span></div>
+<span class="link">↔</span>
+<div class="sentinel">tail<br>柱子</div>
+</div>
+<div class="legend">
+<span><span class="swatch" style="background:var(--mru)"></span>MRU 端（門口，剛用過）</span>
+<span><span class="swatch" style="background:var(--lru)"></span>LRU 端（裡面，下一個被丟）</span>
+</div>
+<div class="note">號碼本上的號碼牌顏色跟掛勾顏色對得起來，代表號碼本直接指到那個掛勾——不用摸整根桿子。</div>
+</div>
+
+<p>兩個原子動作，之後所有操作都只是這兩個動作的組合：</p>
+<ul>
+<li><strong>拔（remove）</strong>：把某個掛勾從目前位置抽走，讓它左右的鄰居直接牽手</li>
+<li><strong>插到最前面（insert_front）</strong>：把某個掛勾插到最靠門口（MRU）那端</li>
+</ul>
+<p><code>get</code> 命中 = 拔 + 插到最前面（順便回傳值）。<code>put</code> 命中舊 key = 改值 + 拔 + 插到最前面。<code>put</code> 新 key = 新掛勾插到最前面；如果超過 capacity，把最裡面（LRU 端）那個掛勾拔掉，順手把它的號碼牌從號碼本撕掉。</p>
+
+<h3>用範例走一遍（capacity = 2）</h3>
+
+<div class="frame">
+<div class="step">put(1, 1)</div>
+<div class="diagram">
+<div class="rail">
+<div class="sentinel">head</div><span class="link">↔</span>
+<div class="hook mru"><span class="k">1</span><span class="v">val 1</span></div>
+<span class="link">↔</span><div class="sentinel">tail</div>
+</div>
+</div>
+</div>
+
+<div class="frame">
+<div class="step">put(2, 2)</div>
+<div class="diagram">
+<div class="rail">
+<div class="sentinel">head</div><span class="link">↔</span>
+<div class="hook mru"><span class="k">2</span><span class="v">val 2</span></div>
+<span class="link">↔</span>
+<div class="hook lru"><span class="k">1</span><span class="v">val 1</span></div>
+<span class="link">↔</span><div class="sentinel">tail</div>
+</div>
+<div class="note">新掛勾永遠插最前面。1 被 2 擠向 LRU 端，但還沒被丟。</div>
+</div>
+</div>
+
+<div class="frame">
+<div class="step">get(1) → 回傳 1</div>
+<div class="diagram">
+<div class="rail">
+<div class="sentinel">head</div><span class="link">↔</span>
+<div class="hook mru"><span class="k">1</span><span class="v">val 1</span></div>
+<span class="link">↔</span>
+<div class="hook lru"><span class="k">2</span><span class="v">val 2</span></div>
+<span class="link">↔</span><div class="sentinel">tail</div>
+</div>
+<div class="note">命中 → 拔下來、插回最前面。1 和 2 交換了位置，順序反過來了。</div>
+</div>
+</div>
+
+<div class="frame">
+<div class="step">put(3, 3) → 超過 capacity，evict</div>
+<div class="diagram">
+<div class="rail">
+<div class="sentinel">head</div><span class="link">↔</span>
+<div class="hook mru"><span class="k">3</span><span class="v">val 3</span></div>
+<span class="link">↔</span>
+<div class="hook lru"><span class="k">1</span><span class="v">val 1</span></div>
+<span class="link">↔</span>
+<div class="hook evict"><span class="k">2</span><span class="v">丟掉</span></div>
+<span class="link">↔</span><div class="sentinel">tail</div>
+</div>
+<div class="note">3 插到最前面，3 個掛勾超過 capacity=2。丟掛桿最裡面那個：2。號碼本裡的「2」也一起刪掉。</div>
+</div>
+</div>
+
+<div class="frame">
+<div class="step">put(4, 4) → 再次 evict</div>
+<div class="diagram">
+<div class="rail">
+<div class="sentinel">head</div><span class="link">↔</span>
+<div class="hook mru"><span class="k">4</span><span class="v">val 4</span></div>
+<span class="link">↔</span>
+<div class="hook lru"><span class="k">3</span><span class="v">val 3</span></div>
+<span class="link">↔</span>
+<div class="hook evict"><span class="k">1</span><span class="v">丟掉</span></div>
+<span class="link">↔</span><div class="sentinel">tail</div>
+</div>
+<div class="note">同樣的道理：4 插到最前面，最裡面的 1 被丟。剩下 {3, 4}。</div>
+</div>
+</div>
+
+<p class="clarify">中間插的 <code>get(2)</code>（此時 2 已經被丟，回傳 -1）不會動到掛桿——miss 直接回傳，不碰任何指標。完整 9 步的逐輪表在下面「逐輪執行模擬表」。</p>
+</section>
+
+<details>
+<summary>完整 code + 逐行解釋</summary>
+<div class="dbody">
+
+<pre><code>class Node:
+    def __init__(self, key=0, val=0):
+        self.key, self.val = key, val
+        self.prev = self.next = None
+
+
+class LRUCache:
+    def __init__(self, capacity: int):
+        self.capacity = capacity
+        self.map = {}                  # key -> Node，直接指標，不用找
+        self.head, self.tail = Node(), Node()   # 兩個 sentinel，不裝真資料
+        self.head.next = self.tail
+        self.tail.prev = self.head
+
+    def _remove(self, node):
+        node.prev.next = node.next
+        node.next.prev = node.prev
+
+    def _insert_front(self, node):
+        node.next = self.head.next
+        node.prev = self.head
+        self.head.next.prev = node
+        self.head.next = node
+
+    def get(self, key: int) -> int:
+        if key not in self.map:
+            return -1
+        node = self.map[key]
+        self._remove(node)
+        self._insert_front(node)
+        return node.val
+
+    def put(self, key: int, value: int) -> None:
+        if key in self.map:
+            node = self.map[key]
+            node.val = value
+            self._remove(node)
+            self._insert_front(node)
+            return
+        node = Node(key, value)
+        self.map[key] = node
+        self._insert_front(node)
+        if len(self.map) > self.capacity:
+            lru = self.tail.prev
+            self._remove(lru)
+            del self.map[lru.key]
+</code></pre>
+
+<h3>變數在幹什麼</h3>
+<div class="tablewrap">
+<table>
+<tr><th>變數</th><th>角色</th></tr>
+<tr><td class="mono">self.map</td><td>key → Node 的直接指標，取代暴力解裡「找位置」那一步</td></tr>
+<tr><td class="mono">self.head / self.tail</td><td>兩個永遠存在的 sentinel，卡住鏈的兩端，讓「是不是第一/最後一個」不用另外判斷</td></tr>
+<tr><td class="mono">node.prev / node.next</td><td>doubly linked list 的雙向指標，讓 <code>_remove</code> 不用從頭找鄰居</td></tr>
+</table>
+</div>
+
+<div class="callout warn">
+<h3>指標重接的順序會咬人</h3>
+<p><code>_remove</code> 和 <code>_insert_front</code> 裡，一定要先讀出舊的 <code>prev</code>/<code>next</code>，再覆寫指標。順序顛倒的話，你會先把某個指標蓋掉，後面要用的那個舊鄰居就已經找不到了——鏈斷掉但不會報錯，最貴的那種 bug。這招你在 #21 的 dummy node 已經踩過一次同樣的坑。</p>
+</div>
+
+</div>
+</details>
+
+<details>
+<summary>逐輪執行模擬表</summary>
+<div class="dbody">
+<div class="tablewrap">
+<table>
+<tr><th>#</th><th>呼叫</th><th>map keys</th><th>鏈（MRU → LRU）</th><th>回傳</th></tr>
+<tr><td>1</td><td class="mono">put(1,1)</td><td class="mono">{1}</td><td class="mono">1</td><td>—</td></tr>
+<tr><td>2</td><td class="mono">put(2,2)</td><td class="mono">{1,2}</td><td class="mono">2,1</td><td>—</td></tr>
+<tr><td>3</td><td class="mono">get(1)</td><td class="mono">{1,2}</td><td class="mono">1,2</td><td class="mono">1</td></tr>
+<tr><td>4</td><td class="mono">put(3,3)</td><td class="mono">{1,3}</td><td class="mono">3,1 <span class="clarify">(evict 2)</span></td><td>—</td></tr>
+<tr><td>5</td><td class="mono">get(2)</td><td class="mono">{1,3}</td><td class="mono">3,1</td><td class="mono">-1</td></tr>
+<tr><td>6</td><td class="mono">put(4,4)</td><td class="mono">{3,4}</td><td class="mono">4,3 <span class="clarify">(evict 1)</span></td><td>—</td></tr>
+<tr><td>7</td><td class="mono">get(1)</td><td class="mono">{3,4}</td><td class="mono">4,3</td><td class="mono">-1</td></tr>
+<tr><td>8</td><td class="mono">get(3)</td><td class="mono">{3,4}</td><td class="mono">3,4</td><td class="mono">3</td></tr>
+<tr><td>9</td><td class="mono">get(4)</td><td class="mono">{3,4}</td><td class="mono">4,3</td><td class="mono">4</td></tr>
+</table>
+</div>
+<p class="clarify">跟 LeetCode 官方範例的期望輸出逐項對上：[null,null,null,1,null,-1,null,-1,3,4]。</p>
+</div>
+</details>
+
+<details>
+<summary>口訣 + 模板</summary>
+<div class="dbody">
+<div class="mantra">LRU = 服務台號碼本（hashmap）記位址 + 掛衣桿（doubly linked list）記順序。碰一次就「拔下來、插到最前面」，滿了就「砍掛桿最裡面那個，順手把它的號碼牌從號碼本撕掉」。get/put 都是 O(1) 時間，O(capacity) 空間。</div>
+<p>兩個 sentinel 打掉的邊界 special case，跟 #21 的 dummy node 是同一招：先固定一個不會消失的柱子，鏈永遠有頭有尾可以掛，不用判斷「這是不是第一個」。</p>
+<pre><code>class Node:
+    def __init__(self, key=0, val=0):
+        self.key, self.val, self.prev, self.next = key, val, None, None
+
+class LRUCache:
+    def __init__(self, capacity):
+        self.capacity, self.map = capacity, {}
+        self.head, self.tail = Node(), Node()
+        self.head.next, self.tail.prev = self.tail, self.head
+
+    def _remove(self, n):
+        n.prev.next, n.next.prev = n.next, n.prev
+
+    def _insert_front(self, n):
+        n.next, n.prev = self.head.next, self.head
+        self.head.next.prev, self.head.next = n, n
+
+    def get(self, key):
+        if key not in self.map: return -1
+        n = self.map[key]; self._remove(n); self._insert_front(n)
+        return n.val
+
+    def put(self, key, value):
+        if key in self.map:
+            n = self.map[key]; n.val = value
+            self._remove(n); self._insert_front(n); return
+        n = Node(key, value); self.map[key] = n; self._insert_front(n)
+        if len(self.map) > self.capacity:
+            lru = self.tail.prev; self._remove(lru); del self.map[lru.key]
+</code></pre>
+</div>
+</details>
+
+<details>
+<summary>L6 面試逐字稿</summary>
+<div class="dbody">
+
+<div class="move">
+<h4><span class="mv">MOVE 0</span>先問 constraint，手不碰白板</h4>
+<div class="say"><b>SAY</b>“Before I code, let me confirm a few things. Is the capacity fixed for the cache's lifetime? Are keys and values plain integers, or could they be other hashable types? Roughly how many total get and put calls should I expect — thousands, or up toward a couple hundred thousand? And is this single-threaded, or do I need to worry about concurrent access?”</div>
+<div class="think"><b>THINK</b>面試官筆記本記的是「有先確認範圍才動手」。呼叫量的答案（题目通常給到 2×10⁵）會直接決定後面「為什麼一定要 O(1)，list 不夠」這句站不站得住腳。</div>
+<div class="write"><b>WRITE</b>（白板還空著，先不寫 code）</div>
+</div>
+
+<div class="move">
+<h4><span class="mv">MOVE 1</span>重述題目 + 自己舉例子</h4>
+<div class="say"><b>SAY</b>“So I need a fixed-capacity cache with get and put, both averaging O(1) time. When put pushes it over capacity, I evict the least recently used entry. Let me write a small example to work with: capacity 2, then put(1,1), put(2,2), get(1), put(3,3), get(2), put(4,4), get(1), get(3), get(4).”</div>
+<div class="think"><b>THINK</b>例子先寫死，後面 dry run 直接指它，不用臨時想測資，省時間。</div>
+<div class="write"><b>WRITE</b><code>capacity=2; [put(1,1), put(2,2), get(1), put(3,3), get(2), put(4,4), get(1), get(3), get(4)]</code></div>
+</div>
+
+<div class="move">
+<h4><span class="mv">MOVE 2</span>暴力解 20 秒 + 講出浪費了什麼</h4>
+<div class="say"><b>SAY</b>“The easy way: a dict for O(1) value lookup, plus a plain list tracking usage order, oldest at the front. On every access I remove the key from wherever it sits in that list and append it to the end. But list.remove has to scan to find the key first, so that's O(n). We already get that position information for free from a hashmap lookup — we just don't use it. That's the waste.”</div>
+<div class="think"><b>THINK</b>面試官在看「有沒有比較過別的解法」，不是背答案。指出被浪費的免費情報是分水嶺句。</div>
+<div class="write"><b>WRITE</b><code>order=[1,3,2]</code>，畫箭頭：掃過 1、3 才找到 2 → O(n)</div>
+</div>
+
+<div class="move">
+<h4><span class="mv">MOVE 3</span>講出 invariant</h4>
+<div class="say"><b>SAY</b>“So I want O(1) removal from the middle of an ordered structure, given a direct reference. A doubly linked list gives me that: if I already hold the node, I can unlink it using only its own prev and next pointers, no scanning. The dict's job changes from storing the value to storing a direct pointer to the node. The invariant I keep is: the linked list order always matches recency order exactly, and the dict always points to the live node for every key currently in the cache.”</div>
+<div class="think"><b>THINK</b>這是 L4/L6 分水嶺：講出「為什麼一定對」，不是背「用 hashmap 加 doubly linked list」這個搭配。</div>
+<div class="write"><b>WRITE</b>畫 <code>head ↔ node ↔ node ↔ tail</code>，標 MRU 端在 head 旁、LRU 端在 tail 旁</div>
+</div>
+
+<div class="move">
+<h4><span class="mv">MOVE 4</span>關鍵手法 + 換掉了什麼</h4>
+<div class="say"><b>SAY</b>“Two dummy sentinel nodes, head and tail, that never hold real data. Every access on an existing key does the same two steps: unlink the node, then re-insert it right after head. Eviction, when we're over capacity, removes the node right before tail. I'm trading a constant amount of extra pointer space for never special-casing whether a node is the first or last real one.”</div>
+<div class="think"><b>THINK</b>是選的，不是背的：sentinel 換掉的是邊界 special case，跟 #21 的 dummy node 同一個交易。</div>
+<div class="write"><b>WRITE</b>補畫 <code>_remove(node)</code> 和 <code>_insert_front(node)</code> 兩個箭頭</div>
+</div>
+
+<div class="move">
+<h4><span class="mv">MOVE 5</span>複雜度先講，收尾對齊</h4>
+<div class="say"><b>SAY</b>“get and put are both O(1) time — one hashmap lookup plus a constant number of pointer updates. Space is O(capacity), one node and one hashmap entry per cached key. Sound reasonable?”</div>
+<div class="think"><b>THINK</b>先把成本攤開再動手，同時跟面試官對齊，不等他打斷才想到。</div>
+<div class="write"><b>WRITE</b><code>get/put: O(1) time, O(capacity) space</code></div>
+</div>
+
+<div class="move">
+<h4><span class="mv">MOVE 6</span>code 分 3 段</h4>
+<div class="say"><b>SAY</b>“I'll start with a small Node class holding key, val, prev, next, then wire up the two dummy sentinels pointing at each other so the list starts empty but never null.”</div>
+<div class="write"><b>WRITE</b>
+<pre><code>class Node:
+    def __init__(self, key=0, val=0):
+        self.key, self.val = key, val
+        self.prev = self.next = None
+
+class LRUCache:
+    def __init__(self, capacity: int):
+        self.capacity = capacity
+        self.map = {}
+        self.head, self.tail = Node(), Node()
+        self.head.next = self.tail
+        self.tail.prev = self.head
+</code></pre>
+</div>
+<div class="say"><b>SAY</b>“Two private helpers do all the pointer work: _remove unlinks a node using only its own neighbors, _insert_front always re-attaches right after head. Every other method is built only out of these two.”</div>
+<div class="write"><b>WRITE</b>
+<pre><code>    def _remove(self, node):
+        node.prev.next = node.next
+        node.next.prev = node.prev
+
+    def _insert_front(self, node):
+        node.next = self.head.next
+        node.prev = self.head
+        self.head.next.prev = node
+        self.head.next = node
+</code></pre>
+</div>
+<div class="say"><b>SAY</b>“get does a hashmap lookup; on a hit it moves the node to the front and returns its value. put either updates and moves an existing node, or creates one, and evicts the node right before tail if that pushes size over capacity.”</div>
+<div class="write"><b>WRITE</b>
+<pre><code>    def get(self, key: int) -> int:
+        if key not in self.map:
+            return -1
+        node = self.map[key]
+        self._remove(node)
+        self._insert_front(node)
+        return node.val
+
+    def put(self, key: int, value: int) -> None:
+        if key in self.map:
+            node = self.map[key]
+            node.val = value
+            self._remove(node)
+            self._insert_front(node)
+            return
+        node = Node(key, value)
+        self.map[key] = node
+        self._insert_front(node)
+        if len(self.map) > self.capacity:
+            lru = self.tail.prev
+            self._remove(lru)
+            del self.map[lru.key]
+</code></pre>
+</div>
+</div>
+
+<div class="move">
+<h4><span class="mv">MOVE 7</span>主動 dry run（用 Move 1 的例子）</h4>
+<div class="say"><b>SAY</b>“Let me trace it. put(1,1) and put(2,2) fill the cache: chain is 2, 1 from MRU to LRU. get(1) hits, moves 1 to front: chain becomes 1, 2, returns 1. put(3,3) inserts 3 at front, now 3 over capacity 2, so I evict the node before tail — that's 2. Chain is 3, 1. get(2) misses now, returns -1. put(4,4) inserts 4, evicts 1. Chain is 4, 3. get(1) misses, get(3) and get(4) both hit and just reshuffle the front.”</div>
+<div class="think"><b>THINK</b>主動 trace，不等面試官叫你跑；順便暴露自己有沒有講錯 invariant。</div>
+<div class="write"><b>WRITE</b>指著逐輪模擬表念過去（詳表見上）</div>
+</div>
+
+<div class="move">
+<h4><span class="mv">MOVE 8</span>主動掃 edge case</h4>
+<div class="say"><b>SAY</b>“Capacity 1 just means every put after the first evicts the previous single entry — no special case needed, since eviction only checks size against capacity. Updating an existing key's value must not double-count toward capacity, which is why put checks key in self.map first. A get on a missing key returns -1 without touching the chain at all, because I return before touching any pointer.”</div>
+<div class="think"><b>THINK</b>每個 case 都點名「靠哪個設計自動接住」，不是背 case list。</div>
+<div class="write"><b>WRITE</b>在 code 上圈出 <code>if key not in self.map</code>、<code>if key in self.map</code>、<code>if len(self.map) > self.capacity</code> 三行</div>
+</div>
+
+<div class="move">
+<h4><span class="mv">MOVE 9</span>主動講 follow-up</h4>
+<div class="say"><b>SAY</b>“If this needed thread safety, I'd wrap the pointer mutations in a lock, since two threads touching prev/next at once corrupts the chain. If it needed TTL eviction on top of LRU, I'd store an expiry timestamp per node and check it lazily on get, evicting expired entries before checking capacity.”</div>
+<div class="think"><b>THINK</b>展示這是「一類問題」，不是背一題。</div>
+<div class="write"><b>WRITE</b>（口頭延伸，不寫 code）</div>
+</div>
+
+<h3>L4 vs L6：code 一模一樣，講出來的東西不一樣</h3>
+<div class="tablewrap">
+<table>
+<tr><th>Move</th><th>L4</th><th>L6</th></tr>
+<tr><td>0</td><td>直接開始寫 code</td><td>先問 capacity、呼叫量、資料型別、thread safety</td></tr>
+<tr><td>2</td><td>直接說「用 OrderedDict」</td><td>先講清楚純 list 為什麼是 O(n)，點出浪費了 dict 給的位置資訊</td></tr>
+<tr><td>3</td><td>說「用 doubly linked list」但講不出為什麼一定對</td><td>講出 invariant：鏈的順序永遠等於 recency，map 永遠指向活著的 node</td></tr>
+<tr><td>4</td><td>忘記為什麼要 sentinel，邊界另外寫 if</td><td>明講 sentinel 換掉的是邊界 special case，跟 #21 同一招</td></tr>
+<tr><td>5</td><td>寫完才想複雜度</td><td>動手前先講 O(1)/O(1)，還問一句 “sound reasonable?”</td></tr>
+<tr><td>6</td><td>code 一次性倒出來</td><td>分 3 段講，每段一句話對應一個設計決定</td></tr>
+<tr><td>7</td><td>等面試官要求才 trace</td><td>主動拿 Move 1 的例子跑一遍</td></tr>
+<tr><td>8</td><td>被問才想 edge case</td><td>主動列，並點名哪個設計自動接住</td></tr>
+<tr><td>9</td><td>不主動延伸</td><td>主動講 thread safety 與 TTL 的 follow-up</td></tr>
+</table>
+</div>
+<p><strong>兩人的 code 一模一樣。分數差別全在這十個 move 有沒有講出來。</strong></p>
+
+<h3>哪一句話對應哪幾行</h3>
+<div class="tablewrap">
+<table>
+<tr><th>說的哪一句</th><th>對應哪幾行 / 哪個結構</th></tr>
+<tr><td>Move 0：confirm constraints</td><td>（還沒動手，無 code）</td></tr>
+<tr><td>Move 2：list scan 是 O(n)</td><td>暴力解草圖，不在最終 code 裡</td></tr>
+<tr><td>Move 3：invariant</td><td class="mono">self.map / self.head / self.tail</td></tr>
+<tr><td>Move 4：sentinel、拔+插</td><td class="mono">__init__ 的 head/tail 接法 + _remove / _insert_front</td></tr>
+<tr><td>Move 6 chunk 1：Node + 接 sentinel</td><td class="mono">class Node + LRUCache.__init__</td></tr>
+<tr><td>Move 6 chunk 2：兩個 helper</td><td class="mono">_remove + _insert_front</td></tr>
+<tr><td>Move 6 chunk 3：get/put</td><td class="mono">get + put 兩個 method</td></tr>
+<tr><td>Move 7：dry run</td><td>對照逐輪執行模擬表，逐行念 get/put 的 body</td></tr>
+<tr><td>Move 8：edge case</td><td class="mono">if key not in self.map / if key in self.map / if len(self.map) &gt; self.capacity</td></tr>
+<tr><td>Move 9：follow-up</td><td>（口頭延伸，不在這份 code 裡）</td></tr>
+</table>
+</div>
+
+<div class="native">
+<h4>Native English block — 挑 4 句最可遷移的</h4>
+<ol>
+<li>“Before I code, let me confirm a few things.”</li>
+<li>“We already get that information for free — we just don't use it.”</li>
+<li>“The invariant I keep is…”</li>
+<li>“Sound reasonable?”</li>
+</ol>
+</div>
+
+</div>
+</details>
+
+<details>
+<summary>這次的釐清</summary>
+<div class="dbody">
+<p class="clarify">（session 結束時補寫。格式：<span class="x">✗ 我以為</span> / <span class="o">✓ 其實是</span> / → 為什麼會搞混）</p>
+</div>
+</details>
+
+</div>
+</body>
+</html>
