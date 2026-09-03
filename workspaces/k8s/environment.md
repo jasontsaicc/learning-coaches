@@ -61,17 +61,31 @@ context kind → cluster kind-k8s-coach-p0(s21 已刪,條目不存在)
 
 診斷指令注意:`docker ps --filter name=kind` **抓不到 p2a**(容器叫 `k8s-coach-p2a-*`,名字裡沒有 kind)。要用 `kind get clusters` 或不帶 filter 的 `docker ps -a`。
 
-## 家用 VM 叢集現況(2026-08-28,s32 開場,**containerd 第七次卡死 → 已修復三台 Ready**)
+## 家用 VM 叢集現況(2026-09-02,s34 開場實測,**兩台 Ready**)
 
-- context `kind-k8s-coach-p2a`,三台 `NotReady`(16d,v1.32.2)。修法照 08-10 精準版三台各一發,約 20 秒全回 `Ready`:
+主機 `jasonarmvm2`,context `kind-k8s-coach-p2a`,`kind get clusters` 只有這一座。
+
+| 項目 | 實測值 |
+|---|---|
+| node | `k8s-coach-p2a-control-plane` + `k8s-coach-p2a-worker`,**兩台 Ready** |
+| 版本 / 年齡 | **v1.30.0**,45d |
+| CNI | Calico(`calico-node` ×2 + `calico-kube-controllers`) |
+| podCIDR | control-plane `192.168.0.0/24`、worker `192.168.1.0/24` |
+| s32 殘留物件 | **全部不存在**(`web` / `sc-demo` / `dnstest` / `pvc-dyn` 都查無) |
+
+⚠️ **與 2026-08-28 的 s32 紀錄對不上**:那筆記的是「三台、v1.32.2、16d」外加一批殘留物件,
+這台今天量到的是兩台 v1.32 以下的 45d 叢集且殘留物全無。可能是 s32 那筆其實記的是 bastion,
+或這座叢集後來被重建過。**未追查,以本節實測值為準。**
+
+- 影響:**C-2 的 `reclaimPolicy: Delete` teardown 實證失去現場**(`sc-demo` PVC 沒了),要重做得重建物件。
+- 這台只有兩台 node,跨 node 封包題仍做得起來(worker ↔ control-plane),但少一個對照組。
+- 修 containerd 卡死沿用 08-10 精準版,節點名照這台只有兩個:
 
 ```
-for n in control-plane worker worker2; do docker exec k8s-coach-p2a-$n systemctl restart containerd; done
+for n in control-plane worker; do docker exec k8s-coach-p2a-$n systemctl restart containerd; done
 ```
 
-- **這個病看過七次,已無教學價值**:開場直接修、明講「這不是教材,只是恢復 lab」,不排障不當教材(s28 訂的紀律,s32 續用有效)。
-- 殘留物件(未清,下堂可直接沿用或一併清掉):`web` StatefulSet(0/2)+ `www-web-0` / `www-web-1` PVC(各自 Bound 不同 PV)、headless `web-hl`(CLUSTER-IP `None`)、`sc-demo` Pod + PVC(**C-2 `reclaimPolicy: Delete` teardown 仍待做**)、`dnstest`(s31 殘留,卡 ContainerCreating)、`pvc-dyn`(**Pending 15 天**,無 consumer 的 WaitForFirstConsumer 正常現象)。
-- ⚠️ **單節點 kind 的評估仍未做**(s29 起掛著)。三節點在這台機器上每隔幾天就要修一次 containerd。
+- ⚠️ **單節點 kind 的評估仍未做**(s29 起掛著)。
 
 ## bastion 叢集現況(2026-08-20,s28 開場,**containerd 第六次卡死 → 已修復三台 Ready**)
 
@@ -90,7 +104,7 @@ for n in control-plane worker worker2; do docker exec k8s-coach-p2a-$n systemctl
 - 舊叢集已 `kind delete`,用 `clusters/kind-p2a.yaml` 重建(control-plane + worker ×2,disableDefaultCNI,podSubnet `192.168.0.0/16`),Calico `v3.28.2` 已裝。三台 `Ready`,kube-system 全 `Running`。
 - ⚠️ **重建後 11 分鐘 worker2 立刻復發同一個病** —— 所以**根因不是叢集老舊**,是這台 bastion(4 核心)在 Calico 啟動尖峰(load 一度 5.05)把 worker2 的 containerd 拖過 kubelet 的健康檢查 timeout,而且**負載退下去之後 containerd 不會自己恢復**。
 
-### 兩個可重用的東西(2026-08-10 新,價值最高)
+### 三個可重用的東西(2026-08-10 新 + s27 診斷順序,價值最高)
 
 **1. 一行分辨「containerd 是慢還是死」** —— 好壞 node 對照跑,秒判:
 
@@ -120,41 +134,13 @@ containerd: level=warning msg="container event discarded"     ← 事件消費�
 
 **`gitlab-ci-dashboard` 已退場(2026-08-10,學員確認不再使用)**:`docker stop` + `docker update --restart=no`。它原本是 `restart=always`,這就是每次宿主機重開它都自己回來、長期跟叢集搶 4 核心的原因(也是 s24 吃掉 `localhost:8080` 的那個)。容器保留未 `docker rm`。**現在這台 bastion 上只有三個 kind node 在跑。**
 
-## bastion 叢集舊現況(2026-08-10 下午,s27 課中,**已被上面取代**)
 
-- `kubectl get nodes`:**control-plane / worker `NotReady`,worker2 `Ready`**(24d,v1.32.2)。
-- **根因已完整採證(s27,五次以來第一次證據齊全)**:
+**3. 診斷順序(s27 採證實績,可直接重用)**
 
-```
-Ready  False  KubeletNotReady  container runtime is down     ← kubelet 活著、自己回報
-MemoryPressure / DiskPressure / PIDPressure  全 False        ← kubelet 已排除三個嫌犯
-NetworkUnavailable  False  CalicoIsUp                        ← CNI 沒事
+`node conditions` → 宿主機資源 → 對照組〔壞幾台好幾台〕→ `systemctl is-active` → kubelet log 抓 `DeadlineExceeded`。
+真兇多半是 **containerd 的 CRI gRPC 卡住不回話,不是死掉** —— `systemctl is-active` 兩台都回 `active`,分不出來,要靠上面第 1 條的對照跑法。
 
-宿主機:available 11Gi / 15Gi,load 0.54(4 核心),三個 node 容器全 Up 8 hours  ← 宿主機無罪
-worker2 Ready 而另兩台 NotReady(同一台宿主機)                                 ← 對照組再確認一次
-
-docker exec <node> systemctl is-active containerd kubelet   → 兩個都 active   ← 進程沒死
-docker exec <node> journalctl -u kubelet | grep DeadlineExceeded
-  → "StopPodSandbox from runtime service failed: rpc error: code = DeadlineExceeded"
-  → "Skipping pod synchronization err=container runtime is down"  每 5 秒一次、連噴 8 小時
-containerd 最後一行 log 停在 09:10(查看時 17:10)= 八小時全靜音
-```
-
-- **真兇 = containerd 的 CRI gRPC 卡住不回話(不是死掉)**,與 s21 同款。`Terminating` 卡住的 Pod(`cg-demo` / `vol-demo` / 三個舊殘骸)是同一個病的症狀,不是另一個問題。
-- **`docker restart k8s-coach-p2a-worker k8s-coach-p2a-control-plane` 下完後仍 NotReady**(下課時)。
-- ⚠️ **s28 建議直接重建,不要再修**:叢集已 24 天、containerd 第五次卡死(s21/s24/s25/s26/s27)。`kind delete cluster --name k8s-coach-p2a` → 用 `clusters/kind-p2a.yaml` 重建 → 重裝 Calico。每堂開場修 20 分鐘的成本已超過重建。
-- 診斷順序(可直接重用):**node conditions → 宿主機資源 → 對照組〔壞幾台好幾台〕→ `systemctl is-active` → kubelet log 抓 `DeadlineExceeded`**。
-
-## bastion 叢集現況(2026-08-06,s26 開場,**三台全 Ready**,已被上面取代)
-
-- `kubectl get nodes` 三台 `Ready`(control-plane / worker / worker2,19d,v1.32.2)。
-- **恢復原因 = 宿主機今早重開機**(`up 1:49`,所有容器 `Up 2 hours`),不是誰修好的。
-- 當下資源健康:load average `0.56 / 1.07 / 1.15`(4 核心)、`available 12Gi` / 15Gi、swap 未用。
-- ⚠️ **s25 那次 node 全倒的真兇未採證即被重開機洗掉,永遠查不到**。教學結論已給學員:restart/reboot 同時清掉症狀與證據,採證(node Conditions / kubelet log)必須排在 restart 前面。
-- `gitlab-ci-dashboard` 仍在跑(Up 2 hours),就是 s24 那個吃掉 `localhost:8080` 的東西。孤兒 context `kind` 已清除(`kubectl config get-contexts` 只剩 `kind-k8s-coach-p2a`)。
-- s26 新增物件:`vol-demo` Pod(釘 `nodeName: k8s-coach-p2a-worker`,同掛 emptyDir `/scratch` + `pvc-demo` `/data`,image busybox `sleep 86400`)。`pv-demo` / `pvc-demo` 仍 Bound;`cg-demo` 未再檢查(node 已 Ready,Pending 應已解除,s27 確認)。
-
-### ⚠️ 兩份 repo clone(2026-08-06 發現)
+## ⚠️ 兩份 repo clone(2026-08-06 發現)
 
 bastion 上同時存在:
 
@@ -165,41 +151,19 @@ bastion 上同時存在:
 
 `labs/` 是 gitignored 所以不影響跨機同步,但**兩邊都是 git clone,commit/push 前先確認在哪一份**。已告知學員。
 
-### kind 特有陷阱:`/tmp` 是 tmpfs(2026-08-06)
+## kind 特有陷阱:`/tmp` 是 tmpfs(2026-08-06)
 
 kind 的 node image 把 `/tmp` 掛成 tmpfs。任何 hostPath 指到 `/tmp/...` 的 PV,**實體是記憶體,node 重開就沒**。s26 實證:`kubectl exec vol-demo -- cat /proc/mounts` 顯示 `/data`(hostPath `/tmp/pv-demo`)是 `tmpfs`,而 `/scratch`(emptyDir,在 `/var/lib/kubelet/...`)才是 `/dev/nvme0n1p1` xfs。
 
 排障通則:**持久性看 `/proc/mounts` 實際掛什麼,不看物件叫什麼名字。**
 
-### 從外面殺 container(PID 1 保護的繞法)
+## 從外面殺 container(PID 1 保護的繞法)
 
 `kubectl exec <pod> -- kill 1` 殺不死 container(kernel 對 PID 1 的 signal 保護,同 namespace 內連 SIGKILL 都擋)。要模擬 container crash 必須從祖先 namespace 動手:
 
 ```
 docker exec k8s-coach-p2a-worker sh -c 'crictl stop $(crictl ps -q --label io.kubernetes.pod.name=<pod-name>)'
 ```
-
-## ⚠️ bastion 叢集舊現況(2026-08-05,已被上面取代)
-
-- **worker 也倒了**。`kubectl describe pod` Events:`0/3 nodes are available: 1 node(s) had untolerated taint {node-role.kubernetes.io/control-plane}, 2 node(s) had untolerated taint {node.kubernetes.io/not-ready}` → **可排的 node = 0**,新 Pod 一律 Pending。
-- 修復三發(s25 已給學員,**未執行未回報**):
-
-```
-kubectl get nodes
-free -h; uptime; docker ps --format '{{.Names}}\t{{.Status}}'
-docker restart k8s-coach-p2a-worker k8s-coach-p2a-worker2
-```
-
-- restart 無效就走 s21 診斷鏈:node Conditions → 宿主機資源 → `systemctl status containerd`(進程活著不代表沒塞住)→ kubelet log 找 `Status from runtime service failed: rpc DeadlineExceeded`。根因大機率仍是 4 核心資源競爭把 CRI gRPC 拖過 timeout。
-- **PV/PVC 綁定不受影響**(s25 實證):node 全 NotReady,`pvc-demo` 照樣 `Bound` —— 媒合是 control plane 的帳本作業。只有「Pod 真的掛上去」才需要活的 node。
-- s25 新增物件:`pv-demo`(1Gi / RWO / manual / hostPath `/tmp/pv-demo` / Retain)、`pvc-demo`(500Mi,Bound 到 pv-demo)、`cg-demo`(limit 64Mi,**Pending**)。lab 檔在 `workspaces/k8s/labs/`(gitignored)。
-
-## bastion 叢集現況(2026-08-04,已被上面取代)
-
-- `kind-k8s-coach-p2a` 三節點,Calico。control-plane 172.21.0.4 / worker 172.21.0.2 / **worker2 172.21.0.3 NotReady 已 17 天**(老毛病,lab 不受影響,未處理)。
-- worker2 上三個 Terminating 殘骸(backend/db/frontend,11 天)未清。
-- 活的 Pod 全在 worker:backend .91 / net-tool .92 / db .93 / frontend .94。net-tool = netshoot,`sleep` 到期自然重啟,約 2h 一次。
-- bastion 上**沒有** p0 叢集(s21 已刪),context `kind` 是孤兒。
 
 ## 其他慣例
 

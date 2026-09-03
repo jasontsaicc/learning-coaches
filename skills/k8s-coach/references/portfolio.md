@@ -9,6 +9,7 @@ Progress file, registries, and in-progress work live in:
 這個目錄是 git-tracked 學習狀態(跨機器同步:每堂課後 commit + push,開課前 pull)。內容:
 
 - `progress.md`:engine 的進度檔。Schema engine-owned,定義在 `engine/PROGRESS-SCHEMA.md`,本 coach 不重定義。
+- `mistake-notes.md`:**熱檔但開場不讀**。Mistake Registry 每張卡的正解、判準句、L6 顧問版、歷史重測紀錄、下次抽考題,節標題 = registry 行的 `date | topic`。step A 抽考到哪張卡,才讀哪一節。
 - `term-registry.md`:domain registry(英文術語卡:EN term / 發音 / 英文定義 / 中文點破),沿用 PROGRESS-SCHEMA section 7 的 registry 欄位(interval、next-review-date、status)。抽考雙向,見 `language.md`。
 - `story-bank.md`:domain registry(behavioral 素材,非間隔複習型)。學員提到真實工作經歷(prod incident、on-call、架構決策)→ 當場一行 raw 入帳,不打斷教學流;每次 Weekly Review 固定挖 10 分鐘一則保底。P6 才提煉 STAR:篩準是「衝突或壓力 / 學員自己的判斷 / 可量化結果」三佔其二;提煉時用課程學到的底層原理回注 Action 段。
 - `session-log.md`:**熱檔,只留最近幾堂 + 學員背景/教法備忘/教練執行紀律/chunk maps**。session 1-19 封存在 `archive/session-log-s01-s19.md`。
@@ -18,6 +19,8 @@ Progress file, registries, and in-progress work live in:
   - `pre-migration/`:standalone 時期的原始狀態檔,verbatim 保存,不再更新。
 
 **寫入紀律**:`progress.md` 的 Current Session breakpoint 只留最新一堂(當前狀態 + 下一堂 resume,PROGRESS-SCHEMA §3),敘事寫 `session-log.md`,長效教練紀律寫 `session-log.md`「教練執行紀律」,不要在 breakpoint 疊舊堂。
+
+**寫入紀律(Mistake Registry,2026-09-02 加)**:registry 一張卡就是**一行八欄**(PROGRESS-SCHEMA §7),queue 一行五欄(§8)。正解、判準句、L6 版、重測歷史、下次抽考題一律寫 `mistake-notes.md` 對應節,**不要在 registry 行底下疊子項、不要在 queue 行尾疊括號**。這條的由來:progress.md 曾長到 84 KB / 40.8k tokens(36 條 registry 疊出 92 條子項),開場一次全讀但一堂只抽 2 到 3 張卡。同一個病 2026-08-19 已在 breakpoint 區發生過一次。
 - `environment.md`:機器層事實(kubeconfig contexts 與安全清單、port 慣例、工具狀態、bastion 同步步驟)。
 - `curriculum-plan.md`:戰略層規劃(advisory,見 `curriculum.md`)。
 - `clusters/`:per-phase kind 設定檔;`notes/`:工作草稿;`labs/`:lab 暫存(gitignored)。
