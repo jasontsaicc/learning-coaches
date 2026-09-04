@@ -37,3 +37,26 @@ Linked List 指向改寫。秒認信號:反轉/合併/中點/環。換皮鏈:206
 ## 結果
 
 harness 8/8 green(空鏈/單節點/in-place/大 N 10 萬),手打零 bug(謄寫)。O(n) time / O(1) space。白紙重寫 2026-08-05 到期。
+
+## 2026-09-04 速刷
+
+冷寫(不看任何東西)失敗。
+
+```
+✗ 我以為:起手 prev = head
+✓ 其實是:prev = None。原 head 反轉後是尾巴,第一次 curr.next = prev 要把它接到 None;
+         寫 head 會讓前兩個 node 互指成環,harness 大 N case timeout
+→ 為什麼會搞混:知道「要有個 prev」但沒想清楚它第一圈的值代表「新鏈尾巴的下一站」
+```
+
+```
+✗ 我以為:組不出 4 步 loop,先寫 head = head.next 往前走
+✓ 其實是:存、改、挪、挪。還沒「改」就先「挪」,留在後面的 node 永遠不會掉頭
+→ 零件(prev=None、存在改之前)分開問都答得出,從空白頁組不起來
+```
+
+手滑:清空重打時 `curr = nxt` 打成 `curr = next`(shadow builtin)→
+`AttributeError: 'builtin_function_or_method' object has no attribute 'next'`,階 1 提示後自抓。
+
+對照打 + 變形題(刪 `nxt = curr.next` → `curr.next` 被蓋掉找不回,鏈斷)過。
+清空重打 8/8 綠 = 短期記憶過;留存看下堂開場默寫。

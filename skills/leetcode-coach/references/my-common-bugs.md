@@ -12,12 +12,12 @@
 | # | 檢查 | 犯過 | 症狀 |
 |---|---|---|---|
 | 1 | `return` 是不是縮排卡在迴圈裡? | 4 | 找得到的全掛、找不到的全綠。不報錯,所以最貴 |
-| 2 | 算 index 有沒有用 `//`?`/` 回 float,float 不能當 index | 2 | `TypeError: list indices must be integers` |
-| 3 | 變數名有沒有手滑?(pairs→paris→pairss、answes) | 2 | `NameError` |
+| 2 | 變數名有沒有手滑?(pairs→paris、answes、`nxt`→`next`) | 3 | `NameError`;或 `nxt`→`next` 打成 builtin,`AttributeError: 'builtin_function_or_method' object has no attribute ...` |
+| 3 | 算 index 有沒有用 `//`?`/` 回 float,float 不能當 index | 2 | `TypeError: list indices must be integers` |
 | 4 | 字元有沒有打錯?(`stack, append(i)` 的逗點、`len(matrix)[0]` 的括號位置) | 2 | 當場報錯,成本低 |
 | 5 | 閉區間 `[l, r]` 配 `while l <= r` 時,`r` 初始值是 `len(nums) - 1` 不是 `len(nums)` | 2 | `IndexError`,或測資不夠 hostile 而整組漏掉 |
-| 6 | Python list 是 `.append`,沒有 `.push` | 1 | `AttributeError` |
-| 7 | `if` / `for` / `while` / `def` 開頭的行,結尾冒號補了嗎? | 1 | `SyntaxError` |
+| 6 | `if` / `elif` / `else` / `for` / `while` / `def` 開頭的行,結尾冒號補了嗎? | 2 | `SyntaxError: invalid syntax`,箭頭指在關鍵字後 |
+| 7 | Python list 是 `.append`,沒有 `.push` | 1 | `AttributeError` |
 | 8 | `if stack` 是「有東西」,`not stack` 是「空的」。`not stack` 要放 `or` 左邊短路保護 `stack[-1]` | 1 | `IndexError` 或邏輯全反 |
 
 ## 你容易搞混的觀念
@@ -28,6 +28,7 @@
 |---|---|---|---|
 | 1 | **「這行什麼時候被求值」** 沒有心智模型。三個症狀同源:`while` 條件答成迴圈結束狀態、迴圈變數以為每圈不變、講不出哪些行該在迴圈內 | 4 次跨題 | 問「這行在第 k 圈執行時,值是誰?依賴什麼?」 |
 | 2 | binary search 的前提是「丟掉的那半保證不含 target」,**不是**「array 要 sorted」。sorted 只是取得這個許可證的手段 | 3 | 問「沒排序但有一個保證答對的 oracle,能不能 binary search?Koko 沒有 sorted array 為什麼是 binary search?」 |
-| 3 | 抽象原則講得出來,套不到具體元素上(給原則加具體矩陣,講不出「這兩個 row 的每個元素都小於 target」) | 2 | 給原則加一個具體例子,要求指名是哪幾個元素 |
-| 4 | harness 掛了先看 code,沒先看 fail/pass 分布 | 2 | 給一組 fail 分布,問這是哪一類邏輯錯 |
-| 5 | **`print` 與 `return` 混為一談**。`print` 每圈都可以跑,`return` 一碰到就結束整個 function | 1 | 問「螢幕印什麼」和「回傳什麼」會答成同一個 |
+| 3 | **linked list 指標推進迴圈:零件都懂,組不出骨架**。`prev=None` / `dummy`+`tail` / 「存在改之前」分開問都答得出,但從空白頁組不出 4 步 loop;且會把 trailing 指標(#206 的 `prev`,往回指)和 moving 指標(#21 的 `tail`,往前接)的角色混掉 | 2 次(#206 #21,2026-09-04 同日) | 寫 code 前先要求「寫出 4 步順序 + 每個指標一句話的工作描述」,通過才動手。#206=存改挪挪;#21=比、接、往前 |
+| 4 | 抽象原則講得出來,套不到具體元素上(給原則加具體矩陣,講不出「這兩個 row 的每個元素都小於 target」) | 2 | 給原則加一個具體例子,要求指名是哪幾個元素 |
+| 5 | harness 掛了先看 code,沒先看 fail/pass 分布 | 2 | 給一組 fail 分布,問這是哪一類邏輯錯 |
+| 6 | **`print` 與 `return` 混為一談**。`print` 每圈都可以跑,`return` 一碰到就結束整個 function | 1 | 問「螢幕印什麼」和「回傳什麼」會答成同一個 |
