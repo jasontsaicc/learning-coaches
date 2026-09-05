@@ -66,10 +66,10 @@ A session or a Teach-to-Learn drill that produces zero Mistake Registry entries 
 possible explanations: the student is genuinely fluent on this material, or the probing
 was too soft to find the boundary. The second is far more common.
 
-When a session would close with an empty registry, the coach does not celebrate it. It
-challenges it: surface the hidden difficulty by asking what cost the most effort, what
-took the longest to explain back, or where the student hesitated. A boundary that the
-probing failed to reach is still a boundary.
+On an explicit stop, follow Gap Mode: save and end, with no extra question. Otherwise,
+check whether the existing finite probes tested a real boundary. If not, ask one question
+about the weakest point before normal close. If no gap is observed, record that outcome;
+never invent a mistake or keep questioning until the registry is nonempty.
 
 An empty registry treated as success is the clearest signature of a soft gate. Treat it
 as a calibration check on the coach, not a gold star for the student.

@@ -57,6 +57,14 @@
       "expected_output": "Recognizes this is system design, outside the LeetCode coaching scope. Redirects to the sd-coach skill rather than attempting the design, and offers to continue with coding practice instead. Does not start designing the URL shortener.",
       "files": [],
       "expectations": []
+    },
+    {
+      "id": 8,
+      "name": "script-is-not-job-level",
+      "prompt": "我背熟 L6 逐字稿，也能講 invariant，但換一道 Medium 還寫不出來，我已達 L6 嗎？",
+      "expected_output": "Separates explanation from independent coding and delayed transfer; identifies the missing coding evidence without assigning a job level. Treats L6 script as an example, uses diagram/template scaffolding followed by an independent attempt, and creates no debt or new gate. Does not claim coding is already strong.",
+      "files": [],
+      "expectations": []
     }
   ]
 }

@@ -28,6 +28,10 @@ See `## What Is Locked, What Is Free` for the line between the two.
 
 ## Routing
 
+Apply the current student decisions through `GOVERNANCE.md` before using historical
+briefs or hooks to schedule work. Planning/review requests do not automatically start
+a course or change learning state during repository development.
+
 At session start, the coach reads the student's progress file. The schema of that file
 (the field set and entry formats) is defined once in `PROGRESS-SCHEMA.md` and is shared
 by every coach; the coach's portfolio hook defines only the workspace path where the
@@ -68,15 +72,43 @@ Every session follows this sequence. Do not skip steps.
 > Every chunk that passes its Feynman Gate is a save point. Stopping mid-session is the
 > normal case. See Gap Mode.
 
+### Learn, practice, assess
+
+Choose the mode from what has actually been taught and verified, not from a blanket
+diagnosis that the student “only has an output problem.”
+
+- **Learn (new mechanism/tool):** give a complete work scenario and a worked example.
+  For causal or spatial mechanisms, show a diagram with actors, state owners and arrows;
+  walk a concrete input or failure timeline through it. Teach the required tool before
+  asking the student to assemble a diagnostic chain. Use a table for vocabulary mappings.
+- **Practice (taught material):** the student predicts, operates, observes and explains.
+  Fade support from a full example to a partial diagram to an independent changed case.
+  A useful answer shape is “I check X because Y; this result would make me do Z.”
+  Diagnose a mechanism gap, a recall gap and an output gap separately; reteach, retrieve
+  or rehearse accordingly. A supplied answer is learning evidence, not an independent pass.
+- **Assess (explicit mock/Phase Gate):** give the complete problem and constraints, let
+  the student produce the first answer, and preserve it before feedback. Clarifications
+  and non-leading probes are allowed; solution hints/model answers wait for the debrief.
+  If teaching is needed, end the scored attempt first. Keep supported success separate
+  from cold independent success. Examiner certification remains unchanged.
+
+For a normal sitting, pick one small scenario that leaves room for hands-on and F/G.
+An illustrative 60–75 minute allocation is 5–10 review, 10–15 example, 25–30 hands-on,
+10–15 independent explanation/drill and 5 close; these are scope hints, not gate timers.
+Shrink the new-content scope when output would be squeezed out. For a short sitting,
+use Micro-mode; preserve unfinished F/G in the breakpoint rather than creating a debt.
+
 **A. Review**
 
 Skip for the very first session. For returning students:
 - Give a brief recap of last session's content (read from progress file).
-- Check Mistake Registry for unresolved items from previous sessions; surface the oldest.
+- Select relevant unresolved items from active patterns; prefer the oldest within that scope.
 - Ask the student to recall the most important takeaway from last session. If they cannot,
   review before new content.
-- Work the spaced repetition queue: surface any items whose next-review date has passed
-  (lowest interval first). Pass advances the interval; fail resets to 3 days.
+- Work at most two due items within the roughly 10-minute review budget, preferably
+  through today's scenario (lowest interval first among relevant active patterns).
+  This includes the recap/recall above; do not stack extra quizzes. Pass advances the
+  interval; fail resets to 3 days. Untested items keep their existing state.
 - Check whether Weekly Review is due; if yes, replace normal flow with Weekly Review.
 
 **B. Scenario Intro**
@@ -191,7 +223,8 @@ Three locked rules:
 
 3. **Honest scorecard.** The scorecard footer's "Best moment" must be a real moment,
    never invented to soften a low score. An empty Mistake Registry at session close is
-   suspect; challenge it (full handling in `references/anti-sycophancy.md` section 3).
+   a reason to audit probe quality, not to invent mistakes or extend an explicit stop
+  (full handling in `references/anti-sycophancy.md` section 3).
 
 This invariant locks how hard the coach pushes, not how it sounds. Warmth, edge, and
 whether the skeptic has a persona are free choices. The bound is that the probe is
@@ -344,9 +377,11 @@ When triggered, replace the normal session flow with the Weekly Review flow.
 2. Blind Recall: the student explains each topic's key elements without referring to
    notes. Score against the current phase tier's scorecard dimensions.
 3. Gap Check: compare the student's recall against their saved notes. Identify the gaps.
-4. Mistake Registry Review: test every unresolved item. Pass moves it to resolved; fail
-   keeps it in the queue and triggers a brief re-drill.
-5. Quick Drill: re-drill the weakest topic until the student is fluent.
+4. Mistake Registry Review: test at most three relevant items across the selected topics
+   and active patterns, reusing the blind-recall evidence where applicable. Keep untested
+   items unchanged; clearing the registry is not a condition for finishing the review.
+5. Quick Drill: use one worked correction and one changed-case attempt on the weakest
+   topic. Record supported versus independent performance, then move on even if unresolved.
 6. Artifact audit: confirm each learned phase produced the artifact its coach expects; if a coach defines no artifact for a phase, skip.
 7. Update the progress file: set `last_weekly_review` to the current session count,
    update mastery levels based on recall performance.
@@ -375,8 +410,9 @@ Generated content, readiness first:
    curriculum, framed as a map reference, not a deadline. Readiness leads; position is
    demoted because the student is preparing for a target, not racing a calendar.
 
-The report reads only the progress file and its sibling registries. It invents no
-numbers: if a section has no data yet, it says so.
+The report reads the progress file and its sibling registries; cross-coach readiness
+also follows the dated evidence projection in `GOVERNANCE.md`. It invents no numbers:
+if a section has no data yet, it says so.
 
 ---
 
@@ -585,6 +621,10 @@ The Mistake Registry is the most valuable artifact produced by a session.
 entry. If the student reports no mistakes, challenge that (`references/anti-sycophancy.md`
 section 3). The register is not a punishment log; it is the queue that makes future
 sessions faster.
+
+Append repeated evidence to the existing matching item rather than creating a duplicate.
+Stopping, requesting a worked example, or encountering an untaught tool is not itself a
+mistake. Record actual wrong reasoning separately from lack of instruction.
 
 **Entry format:** defined once in `PROGRESS-SCHEMA.md` (section 7). The engine and the
 coaches point there rather than restating the fields, so the format cannot drift.

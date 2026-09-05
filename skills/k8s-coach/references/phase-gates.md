@@ -29,12 +29,12 @@ Specifically, the student must:
 
 ## P2a Gate - 網路深水區
 
-**Pass condition:** 白板講完封包全鏈路 + 答出「conntrack 滿了怎麼查」。
+**Pass condition:** 在完整網路 incident 情境中先採證、定位 fault domain,再解釋相關封包路徑與 conntrack 處置。背誦站名或固定站數不列為驗收條件。
 
-**Examiner inputs:** the student's verbatim packet-path walkthrough (client → Ingress → Service → Pod, both directions where relevant), the conntrack answer, and any supporting lab output (fenced).
+**Examiner inputs:** the complete incident prompt, the student's verbatim triage decisions and reasoning, relevant packet-path sketch, conntrack answer, and command outputs (fenced). The coach supplies symptoms and constraints, not the diagnosis or solution diagram.
 
 Specifically, the student must:
-1. 講完封包路徑:外部 client → Ingress controller → Service(kube-proxy/iptables/conntrack)→ Pod,含 DNAT 與回程。
+1. 先用症狀與對照測試縮小 fault domain,再畫出該情境實際經過的封包路徑,解釋相關 DNAT／回程與各元件職責;不假設每種 Ingress 都經過 Service VIP。
 2. 分清「規則(iptables)/ 狀態(conntrack)/ 資料(Endpoints)」三者角色,不混淆。
 3. 答出 conntrack table 滿了的症狀、查法(`conntrack -S`、dmesg)與處置方向。
 4. 講出 NetworkPolicy 的 default-deny 語義與 CNI 為什麼要支援才有效。

@@ -9,7 +9,8 @@ mastery.
 
 After reading `ENGINE.md` and before choosing new work:
 
-1. Read the domain `progress.md`; an active breakpoint wins and must be resumed.
+1. Read the domain `progress.md` and the current decisions in its `curriculum-plan.md`
+   when present; resume the active breakpoint within that approved scope.
 2. Read `workspaces/shared/root-patterns.md`; use only this track's active patterns.
 3. If the session is planning, assessment, or portfolio work, read
    `competency/l6-matrix.md` and `portfolio/platform-eks/README.md`.
@@ -19,6 +20,36 @@ After reading `ENGINE.md` and before choosing new work:
 
 Do not preload the matrix or flagship plan for a simple breakpoint continuation where
 neither can affect the next action.
+
+## Current decisions and historical notes
+
+For teaching format, scope, and scheduling, the latest explicit student decision takes
+precedence over older briefs, generic hooks, and stale next-action reminders. Dates alone
+do not make a coach's suggestion an approved decision. Keep the original records intact;
+apply the decision when planning the next session. Safety and honest evidence still apply.
+
+Known retirements to honor:
+- SD: the 2026-07-18 plan removed the three-consecutive-pass exit requirement. The
+  2026-08-11 plan requires teaching new topics before their drill. Old execution-heavy
+  instructions must not freeze new content or presume every gap is only an output issue.
+- K8s: the 2026-08-11 plan retired packet-station recitation and repo-scheduled story
+  mining. Use incident scenarios for networking; behavioral material is managed outside
+  this repo. A stale “sessions without mining” reminder is not debt. Behavioral mocks
+  still use real stories when requested or required by an assessment.
+- LeetCode: the standalone rebuild owns its state and practice loop. Historical
+  answer-debt and engine review schedules do not apply to it.
+
+## Sustainable practice
+
+For a planning session, start with a two-week trial: two platform sittings and one
+design sitting per week, plus three short coding practices if the student's time permits.
+These are adjustable slots, not deadlines or make-up debt. Resume existing breakpoints;
+one sitting need not finish a topic. English practice uses a familiar result and the
+student's existing language workflow; increase language load after the mechanism is stable.
+
+Platform work extends the shop baseline; design work supplies its capacity model,
+failure modes, SLO and cost decisions. Review the trial using fewer hints, independent
+changed-scenario answers, and reproducible artifacts, not pages read or phase count.
 
 ## WIP limit
 
@@ -46,6 +77,12 @@ Update `competency/l6-matrix.md` only when a new scorecard, Examiner verdict, co
 reproducible artifact, or attributable real-work result changes a row. Cite the source in
 the row. When domain mastery and the matrix disagree, retain the lower confidence until
 an isolated assessment resolves it.
+
+Readiness reports name the matrix snapshot date and compare it with newer domain evidence.
+Report stale or missing evidence explicitly; do not silently promote a score or treat
+an old debt count as current. A “L6 answer” is a worked example, not a job-level verdict.
+Report hiring readiness by demonstrated skills; long-term senior scope additionally
+needs attributable work outcomes, collaboration, rollout decisions and sustained impact.
 
 ## Portfolio promotion
 

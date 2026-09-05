@@ -48,8 +48,9 @@ If the student has fewer than 3 topics total: use all of them.
 
 For each of the 3 selected topics:
 
-1. Name the topic. Do not restate any content from prior sessions.
-2. Ask the student to explain the topic's key elements without notes.
+1. Give a complete scenario with the necessary symptoms and constraints, without its
+   solution. Use the topic itself, not a session number, as the recall cue.
+2. Ask the student to draw or explain the mechanism and apply it without notes.
 3. Score the recall against the current phase tier's scorecard dimensions (same
    dimensions as used in Teaching Flow step G, same 60% pass threshold).
 
@@ -81,37 +82,27 @@ re-teaching for the quick drill.
 
 ## Mistake Registry Sweep
 
-Go through every unresolved item in the Mistake Registry. For each one:
+Select at most three unresolved items tied to the three review topics and active root
+patterns. Reuse blind-recall answers that already test an item rather than asking again.
+For each selected item, record the first independent answer before correcting it:
 
-1. Test the student on it (ask them to explain the concept or answer the question from
-   memory, including the root cause).
-2. Pass: mark the item resolved in the registry. Advance the spaced repetition interval.
-3. Fail: keep the item unresolved. Run a brief re-drill (one or two targeted questions
-   to close the gap), then move on. Update the next-review date.
+1. Pass: resolve it only when the later-session answer includes the original root cause.
+2. Fail: keep it unresolved and update its review date; use the Quick Drill for the weakest.
+3. Leave untested items unchanged. Do not add repeats, extend the sitting to clear the
+   backlog, or require all mistakes to be resolved before new learning can resume.
 
-The registry sweep is not a quiz to be finished as fast as possible. Items that have
-been unresolved for many sessions deserve extra attention. If the student fails on the
-same item they have failed on repeatedly, that is a signal for a deeper re-teach, not
-just another question.
-
-After the sweep, note how many items were resolved versus how many remain unresolved.
-This ratio is a health indicator for the registry. A registry that never shrinks despite
-regular sweeps indicates the student has systematic gaps that need targeted re-teaching,
-not just more repetition.
+Report which items were actually tested. A completed review means this bounded flow and
+its artifact audit were done; it does not mean the registry was swept or cleared.
 
 ---
 
 ## Quick Drill
 
-Re-drill the weakest topic identified during the weekly review (the topic with the
-lowest recall score or the most gaps) until the student is fluent.
-
-"Fluent" means the student can explain the concept, name the trade-offs, and answer one
-Transfer-type question correctly. This is a miniature Feynman Gate applied to the
-weakest topic.
-
-The quick drill is not optional. Its purpose is to ensure the student leaves the Weekly
-Review with at least one gap actively closed, not just identified.
+For the weakest topic, show one worked correction (a diagram or concrete timeline when
+appropriate), then ask one changed-case question. Distinguish supported understanding
+from an independent answer. If the student still cannot explain it, record the gap and
+move on; do not repeat until fluent. A failed attempt is usable evidence, not a reason
+to prevent the review from closing.
 
 ---
 
@@ -147,7 +138,6 @@ After the Weekly Review completes:
 3. Sync any new Mistake Registry items found during the review.
 4. Note the artifact check results (any missing artifacts flagged).
 
-The Weekly Review does not set a Current Session breakpoint. It is a complete session
-type, not a resumable pipeline. If the student runs out of time during a Weekly Review,
-resume at the next incomplete step at the next session; the progress file should note
-where the review stopped.
+If the student stops during a Weekly Review, save the next incomplete step as the
+Current Session breakpoint and resume it next time. Do not advance `last_weekly_review`
+until the bounded review and artifact audit are complete. No exit quiz or make-up debt.
