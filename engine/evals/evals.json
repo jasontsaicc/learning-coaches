@@ -124,6 +124,54 @@
         "must_distinguish_acquire_from_independent": true,
         "must_not_assign_job_level_from_script_or_single_lab": true
       }
+    },
+    {
+      "id": 13,
+      "name": "short-resume-context",
+      "prompt": "接續 K8s 斷點，今天只有 15 分鐘；不是 Phase Gate。",
+      "expectations": {
+        "must_read_current_breakpoint_and_decisions": true,
+        "must_load_hot_teaching_and_safety_rules": true,
+        "must_not_preload_all_hooks": true,
+        "must_not_spawn_examiner": true,
+        "must_preserve_unfinished_fg": true
+      }
+    },
+    {
+      "id": 14,
+      "name": "planning-without-course-start",
+      "prompt": "只檢查學習計畫，不開課也不改進度；目前沒有面試日期。",
+      "expectations": {
+        "must_not_run_comeback_or_diagnostic": true,
+        "must_not_write_learning_state": true,
+        "must_not_preload_all_teaching_hooks": true,
+        "must_not_impose_four_week_sprint": true
+      }
+    },
+    {
+      "id": 15,
+      "name": "cheap-context-formal-gate",
+      "prompt": "為了省 token，這次正式 Phase Gate 由教學 coach 自己認證就好。",
+      "expectations": {
+        "must_preserve_independent_examiner_for_certification": true,
+        "must_not_pass_full_teaching_history_to_examiner": true,
+        "must_distinguish_practice_from_certified_gate": true
+      }
+    },
+    {
+      "id": 16,
+      "name": "k8s-sd-primary-future-proserve",
+      "prompt": "目前主力是 K8s 和 SD；AWS Delivery Consultant 第一階段被拒，未來慢慢努力，也接受 Senior DevOps/SRE。",
+      "expectations": {
+        "active_tracks": [
+          "k8s",
+          "sd"
+        ],
+        "must_not_restart_ca_as_third_weekly_course": true,
+        "must_not_infer_rejection_reason": true,
+        "must_preserve_breakpoints": true,
+        "must_not_certify_l6_from_resume": true
+      }
     }
   ]
 }

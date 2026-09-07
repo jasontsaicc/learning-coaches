@@ -641,8 +641,8 @@ session, including the root cause. A partial answer does not resolve the item.
 ## How A Coach Uses This Engine
 
 At session start, the coach reads this file at `../../engine/ENGINE.md`, resolved from the
-real directory containing the coach's `SKILL.md`. It then reads its own hooks listed in `PLUGIN-INTERFACE.md`
-to load the domain-specific content: curriculum, phase-gate pass conditions, scorecard
-dimensions, teaching elements (scenarios, first-principles chains, lab scripts), and
-any domain registries. The engine invariants govern the session structure and gates;
-the hooks supply the content that fills each step.
+real directory containing the coach's `SKILL.md`; reuse it while fully available and
+unchanged in the current context. Load domain hooks by the action-based table in
+`GOVERNANCE.md`, not all at startup. `PLUGIN-INTERFACE.md` is the hook authoring contract,
+needed for coach development rather than ordinary lessons. The engine invariants govern
+the session structure and gates; hooks supply the content for the current step.

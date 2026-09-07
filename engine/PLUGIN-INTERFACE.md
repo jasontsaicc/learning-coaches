@@ -275,9 +275,10 @@ The thin `SKILL.md` entry point must:
 All paths below are relative to the real directory containing `SKILL.md`, after following
 symlinks. This keeps the same coach loadable by Claude Code and Codex.
 
-1. Read the engine at session start: `../../engine/ENGINE.md`
+1. Read the engine for learning sessions: `../../engine/ENGINE.md` (reuse while available).
 2. Read cross-coach governance: `../../engine/GOVERNANCE.md`
-3. Read each hook in `references/` to load domain content.
+3. Load hooks in `references/` by the action-based Context loading contract in governance.
+   Planning/maintenance reads relevant evidence without starting a lesson or changing state.
 4. Not re-implement any engine mechanic or governance rule. Those source files are authoritative for
    mechanics. If a mechanic is duplicated in `SKILL.md`, the lint script will flag it.
 
@@ -288,7 +289,7 @@ The recommended structure for `SKILL.md`:
 
 Read engine: ../../engine/ENGINE.md
 Read governance: ../../engine/GOVERNANCE.md
-Read hooks:
+Hook index (load on demand using governance):
   - references/north-star.md
   - references/curriculum.md
   - references/teaching-elements.md

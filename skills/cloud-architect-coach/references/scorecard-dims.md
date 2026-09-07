@@ -43,5 +43,5 @@ Fail:選了 R 但理由通用、換個 workload 也照抄;或風險要被問才�
 - 英文清楚到能撐一通客戶電話,對事不對人。
 - 反對客戶時走 pushback 的四步,見 `teaching-elements.md` topic 7:acknowledge →
   quantify → offer → land on customer choice,順序不能亂,不硬吵也不照單全收。
-- 交卷前自己跑一遍 Well-Architected self-review,對著五大支柱抓出自己答案最痛的兩個洞,
+- 交卷前自己跑一遍 Well-Architected self-review，對照六大支柱指出最重要的缺口（已充分處理則給證據，不虛構缺口），
   尤其 cost 跟 operational excellence 這兩個白板上最常漏的。

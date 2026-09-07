@@ -174,18 +174,18 @@ Case IDs (`CASE-1`..`CASE-6`) refer to `references/case-bank.md`; cite them by I
 
 **第一性推導鏈:**
 
-Well-Architected 不是一套架構,是一份 review checklist。它的用途是回頭掃「你的答案忘了什麼」,而人最常忘的是成本(cost)和維運(operational excellence),因為白板上先想到的都是功能與可用性。把 WA 當「要照著蓋的藍圖」是誤用;它是照妖鏡,不是模板。
+Well-Architected 是設計與 review 的原則框架，不指定唯一架構。本練習用它檢查已提出的設計，尤其是容易漏掉的 cost 和 operational excellence；設計時也可以用它來釐清需求。
 
-學員若試圖「用五大支柱來設計」就是把工具用反了,壓這一點:先設計,再拿 WA 掃缺口。
+支柱名稱要落到案例的限制、決策與可驗證措施，不能只列名詞。[官方六大支柱](https://docs.aws.amazon.com/wellarchitected/latest/framework/the-pillars-of-the-framework.html)是本段來源。
 
 **Chunks:**
 
-1. 五大支柱各一行:Operational Excellence(跑起來怎麼運維、怎麼觀測)、Security(誰能碰什麼、資料怎麼保護)、Reliability(壞了怎麼恢復,對到 RTO/RPO)、Performance Efficiency(選對資源型別與規模)、Cost Optimization(有沒有在燒冤枉錢)。
+1. 六大支柱各一行:Operational Excellence(怎麼運維、觀測)、Security(誰能碰什麼、資料怎麼保護)、Reliability(壞了怎麼恢復，對到 RTO/RPO)、Performance Efficiency(資源型別與規模)、Cost Optimization(成本是否合理)、Sustainability(減少不必要資源消耗與環境影響)。
 2. 怎麼跑一遍 self-review:對著自己的答案,每個支柱問一句「這裡最弱的一點是什麼」,不求面面俱到,先抓出最痛的兩個洞。重點是養成交卷前自己先掃一遍的習慣。
 
 ### Step E (Drill)
 
-要學員拿自己剛才任一題 CASE 的答案,套五大支柱各問一遍,找出至少兩個 gap(通常會落在 cost 或 ops),並說明補法。找不到 gap 或只會空喊「要更安全」講不出具體缺口的算沒過。
+要學員拿自己剛才任一題 CASE 的答案，按六大支柱檢查，指出具體缺口與補法；若某項已充分處理就說明證據，不為湊兩個 gap 捏造缺陷。只說「要更安全」不足以證明理解。
 
 ---
 

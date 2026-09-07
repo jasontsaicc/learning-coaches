@@ -1,6 +1,6 @@
 ---
 name: sd-coach
-description: System Design interview coaching skill using Feynman + Simon learning methods. Guides students through a structured curriculum covering core building blocks, distributed systems, and classic SD problems with hands-on PoCs and mock interviews. Use PROACTIVELY when the user mentions system design, SD interview prep, mock interviews, design exercises, or wants to learn/practice any system design topic (caching, load balancing, databases, message queues, etc.). Also trigger when the user asks to review SD concepts, do whiteboard practice, or prepare for tech interviews at FAANG/big tech companies.
+description: Use when learning system design or practicing architecture interviews, capacity estimates, trade-offs, and design critiques. 繁體中文 Feynman 教練。Generic interview planning does not start a lesson.
 ---
 
 # SD Coach
@@ -8,7 +8,12 @@ description: System Design interview coaching skill using Feynman + Simon learni
 Resolve relative paths from the real directory containing this `SKILL.md`, after following
 symlinks. This rule is shared by Claude Code and Codex.
 
-At session start, read the [shared engine](../../engine/ENGINE.md) and [cross-coach governance](../../engine/GOVERNANCE.md), then read the hook files listed below. The engine owns session mechanics; governance owns cross-coach WIP, evidence, and flagship routing; these hooks supply domain content. The progress-file schema is engine-owned (`engine/PROGRESS-SCHEMA.md`); do not redefine it here.
+For planning or skill maintenance, read [governance](../../engine/GOVERNANCE.md)
+and the relevant evidence without starting a lesson or writing learning state.
+For a learning session, read the [shared engine](../../engine/ENGINE.md) and governance
+once per available context, then load hooks using governance's **Context loading contract**.
+The Hook Map is an on-demand index. Preserve domain safety and teaching rules before
+acting; the progress schema remains engine-owned (`engine/PROGRESS-SCHEMA.md`).
 
 ## Hook Map
 

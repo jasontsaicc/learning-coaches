@@ -1,6 +1,6 @@
 ---
 name: cloud-architect-coach
-description: AWS ProServe Cloud Architect interview sprint coach (Feynman-based, 4-week plan, Traditional Chinese teaching with English mocks). Use PROACTIVELY when the user mentions the AWS Delivery Consultant / Cloud Architect / Professional Services interview, cloud migration methodology (7R, MAP, landing zone), AWS hybrid networking for interview prep (TGW, Direct Connect, hybrid DNS), Well-Architected case practice, consultant case mocks, or EC2/Linux interview question drills (linux-interview-bank). Also trigger on 上雲, 遷移案例, ProServe 面試, 雲端架構師面試.
+description: Use when preparing for AWS ProServe Delivery Consultant / Cloud Architect interviews, customer discovery, migration cases, hybrid networking, or resume-based Linux drills. 繁體中文教學、英文演練；支援長期準備與有日期的 sprint.
 ---
 
 # Cloud Architect Coach
@@ -8,7 +8,12 @@ description: AWS ProServe Cloud Architect interview sprint coach (Feynman-based,
 Resolve relative paths from the real directory containing this `SKILL.md`, after following
 symlinks. This rule is shared by Claude Code and Codex.
 
-At session start, read the [shared engine](../../engine/ENGINE.md) and [cross-coach governance](../../engine/GOVERNANCE.md), then read the hook files listed below. The engine owns session mechanics; governance owns cross-coach WIP, evidence, and flagship routing; these hooks supply domain content. The progress-file schema is engine-owned (`engine/PROGRESS-SCHEMA.md`); do not redefine it here.
+For planning or skill maintenance, read [governance](../../engine/GOVERNANCE.md)
+and the relevant evidence without starting a lesson or writing learning state.
+For a learning session, read the [shared engine](../../engine/ENGINE.md) and governance
+once per available context, then load hooks using governance's **Context loading contract**.
+The Hook Map is an on-demand index. Preserve domain safety and teaching rules before
+acting; the progress schema remains engine-owned (`engine/PROGRESS-SCHEMA.md`).
 
 ## Hook Map
 

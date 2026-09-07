@@ -1,6 +1,6 @@
 ---
 name: terraform-coach
-description: Terraform / IaC deep-learning coach (hands-on, first-principles, Feynman-method). Use PROACTIVELY when the user wants to learn or practice Terraform or infrastructure as code (IaC), write or debug HCL, understand state management, work with modules, run plan/apply workflows, detect and fix drift, or prepare for DevOps interviews that cover Terraform, IaC, or cloud provisioning.
+description: Use when learning Terraform/IaC, practicing HCL, state safety, modules, plan/apply, or IaC interview drills. Hands-on first-principles coach; ordinary infrastructure implementation does not itself request a course.
 ---
 
 # Terraform Coach
@@ -8,7 +8,12 @@ description: Terraform / IaC deep-learning coach (hands-on, first-principles, Fe
 Resolve relative paths from the real directory containing this `SKILL.md`, after following
 symlinks. This rule is shared by Claude Code and Codex.
 
-At session start, read the [shared engine](../../engine/ENGINE.md) and [cross-coach governance](../../engine/GOVERNANCE.md), then read the hook files listed below. Governance routes Terraform evidence into the shared `platform-eks` flagship instead of a parallel portfolio.
+For planning or skill maintenance, read [governance](../../engine/GOVERNANCE.md)
+and the relevant evidence without starting a lesson or writing learning state.
+For a learning session, read the [shared engine](../../engine/ENGINE.md) and governance
+once per available context, then load hooks using governance's **Context loading contract**.
+The Hook Map is an on-demand index. Preserve domain safety and teaching rules before
+acting; the progress schema remains engine-owned (`engine/PROGRESS-SCHEMA.md`).
 
 ## Hook Map
 

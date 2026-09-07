@@ -7,11 +7,16 @@ mastery.
 
 ## Session-start routing
 
-After reading `ENGINE.md` and before choosing new work:
+First distinguish planning/repository maintenance from an actual learning session.
+Planning reads the relevant evidence and plans; it does not run diagnostics, Comeback,
+Weekly Review, gates, or learning-state writes. For a learning session, read `ENGINE.md`
+once in the current context and then route before choosing new work:
 
-1. Read the domain `progress.md` and the current decisions in its `curriculum-plan.md`
-   when present; resume the active breakpoint within that approved scope.
-2. Read `workspaces/shared/root-patterns.md`; use only this track's active patterns.
+1. Read the domain progress file's Meta and Current Session breakpoint, then its current
+   curriculum-plan decisions when present; resume within that scope. Discover headings
+   first and read complete relevant sections, rather than truncating an arbitrary prefix.
+2. Read the Active WIP and resolution protocol in `workspaces/shared/root-patterns.md`;
+   use only this track's active patterns. Read supporting pattern evidence when needed.
 3. If the session is planning, assessment, or portfolio work, read
    `competency/l6-matrix.md` and `portfolio/platform-eks/README.md`.
 4. Prefer work that both tests an active pattern and produces evidence required by the
@@ -21,7 +26,65 @@ After reading `ENGINE.md` and before choosing new work:
 Do not preload the matrix or flagship plan for a simple breakpoint continuation where
 neither can affect the next action.
 
+## Context loading contract
+
+The coach's Hook Map is an index, not a startup checklist. Resolve workspace paths from
+its portfolio hook. Load each hook when the next action needs it:
+
+| Action | Required context beyond engine/governance and current state |
+|---|---|
+| Start/resume teaching | portfolio workspace/write rules; teaching-elements' shared rules and current step; current topic/chunk material |
+| Choose a topic / check prerequisites | curriculum phase map and relevant prerequisite/mastery entries; north-star when scope is disputed |
+| Run a lab | lab-manager when supplied; current environment/context safety facts and lab instructions |
+| Review / Comeback | Meta, applicable engine protocol, relevant queue and unresolved rows; selected item's notes only |
+| Score G / mock | scorecard-dims and applicable interview format; first answer before feedback |
+| Phase Gate | phase-gates for this phase and Examiner protocol; isolated assessment remains mandatory |
+| Use English / narrative | language or narrative hook for the chosen step, when supplied |
+| Save / close | progress schema sections and existing entries being changed; portfolio write/quality rules |
+| Plan / readiness review | current domain decisions/evidence, matrix snapshot, flagship milestones; [learning project](../docs/devops-learning-project.md) for cross-coach planning |
+
+Before choosing a review item, inspect the relevant queue and unresolved registry rows
+so due/aged items are not lost. Weekly Review reads the evidence window required by its
+protocol; a wider audit may read more. Unknown headings or ambiguous state justify
+expanding the read. A file already fully available and unchanged in the current context
+does not need another tool read; after compaction, reload missing rules/current state.
+
+Student-specific teaching constraints are hot context even when stored inside a large
+historical file: K8s reads `session-log.md`'s teaching-profile and coach-discipline sections;
+SD reads `coaching-brief.md`'s effective/ineffective methods, language and coach self-check
+sections, plus the active weakness's subsection. Current decisions below retire stale
+instructions within those sections. Session narratives, complete score histories, entire
+question banks and model answers are loaded only for an identified question or audit.
+
+An ordinary teaching turn delivers one explanation/diagram or one action/question, then
+waits for the student. Give a complete worked example when needed; keep repeated recaps
+and alternate model answers out of subsequent turns. Explicit requests for a full plan,
+comparison or transcript receive that output. Historical per-question “L6 answer” notes
+are satisfied by one concise comparison at the completed teaching question; subsequent
+follow-ups address the new gap rather than regenerate the full model answer. Retain required F/G and save points; use
+the existing Micro-mode when time is short. Routine teaching and chunk checks stay with
+the coach; only formal Phase Gates require an Examiner, and other delegation needs an
+explicit task-specific reason and authorization. If the student declines an agent, honor
+that choice and offer coach-scored practice without an independent certification claim.
+Saving updates changed facts once in
+their canonical location, with links from projections instead of copied narratives.
+
+This reduces context retrieval, not an enforceable model-token quota. Measure actual
+input/output/cache usage only if the host exposes it; otherwise report UTF-8 bytes and
+loaded file/section counts as proxies, never as measured token savings.
+
 ## Current decisions and historical notes
+
+Current targets (student confirmed 2026-09-07): active study tracks are K8s and System
+Design, building toward Senior DevOps/SRE. AWS Delivery Consultant remains a future
+application goal after a first-stage rejection; the rejection reason is unknown and is
+not technical assessment evidence. There is no scheduled interview. Terraform is pulled
+into platform work when needed; CA/customer cases are optional overlays, not a third
+weekly course. Senior/L6 remains an aspiration, not a certified current level.
+This replaces the old four-week ProServe urgency without discarding the SRE route,
+resetting domain breakpoints or reactivating old debt.
+The personalized route and provisional weekly capacity live in
+`docs/devops-learning-project.md`; read that document for planning, not every lesson.
 
 For teaching format, scope, and scheduling, the latest explicit student decision takes
 precedence over older briefs, generic hooks, and stale next-action reminders. Dates alone
@@ -36,13 +99,19 @@ Known retirements to honor:
   mining. Use incident scenarios for networking; behavioral material is managed outside
   this repo. A stale “sessions without mining” reminder is not debt. Behavioral mocks
   still use real stories when requested or required by an assessment.
+- K8s: the 2026-08-20 coach-discipline decision puts new content first and brief review
+  near the close. The 2026-08-21 curriculum-plan §11 restores production-depth labs,
+  command-intent checks and on-premises/traditional EKS/managed EKS comparisons. Preserve
+  those decisions when reducing context; do not revive the old coverage-only sprint.
 - LeetCode: the standalone rebuild owns its state and practice loop. Historical
   answer-debt and engine review schedules do not apply to it.
 
 ## Sustainable practice
 
-For a planning session, start with a two-week trial: two platform sittings and one
-design sitting per week, plus three short coding practices if the student's time permits.
+For a planning session, start with a two-week trial: two K8s/platform sittings and one
+System Design sitting per week, plus short coding practices if time permits. Preserve
+existing breakpoints; add a customer-facing lens inside an SD review when useful without
+automatically restarting the CA course.
 These are adjustable slots, not deadlines or make-up debt. Resume existing breakpoints;
 one sitting need not finish a topic. English practice uses a familiar result and the
 student's existing language workflow; increase language load after the mechanism is stable.

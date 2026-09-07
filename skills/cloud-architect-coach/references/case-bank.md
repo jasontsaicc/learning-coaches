@@ -5,7 +5,7 @@
 > - **Hire bar**：一個 hire-bar 答案必須涵蓋的骨架。這是評分基準,不是逐字答案;學生要用自己的話展開並帶 trade-off。缺其中一條就是 no-hire 訊號。
 > - **Follow-up**：面試官的標準追問。學生的第一版答案守不住這一擊,分數就上不去。
 >
-> 使用方式:coach 讀 brief、學生口頭設計 10-15 分鐘、coach 用 Hire bar 逐條打勾、最後丟 Follow-up 逼學生守住。Well-Architected 五大支柱只當評分視角,不當上課主題。
+> 使用方式:coach 讀 brief、學生口頭設計 10-15 分鐘、coach 用 Hire bar 逐條打勾、最後丟 Follow-up 逼學生守住。Well-Architected 六大支柱用於設計檢查；需要的新機制先教。本檔 Hire bar 是課程 rubric，不是 AWS 內部錄取標準。
 
 ---
 

@@ -40,7 +40,11 @@ scorecard 或 Examiner ledger。它只引用已存在的證據；沒有隔離評
 4. 每兩週 review 一次；一次只選最低分且最接近目標面試輪的 1–2 項補證據。
 5. Domain mastery 與本表矛盾時，以較低者為準，直到 Examiner 或隔離評量解除差異。
 
-## Current priority
+## Snapshot priority（2026-08-21）
 
 本輪只追三項：Troubleshooting、Technical depth、English communication。其餘保留在
 readiness backlog，透過 `portfolio/platform-eks/` 的後續里程碑逐步產生證據，不另開課。
+
+2026-09-07 排課已改以 K8s＋SD 為主，見 `engine/GOVERNANCE.md` 與
+`docs/devops-learning-project.md`。以上分數仍是原始快照；coding 的 answer-debt 描述屬舊制，
+不再用來排課。本次沒有新增獨立評量，不更新能力分數。

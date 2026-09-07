@@ -91,6 +91,9 @@ learning-coaches/
 
 ## Current Governance Focus
 
+- [Personal learning project](docs/devops-learning-project.md): AWS Delivery Consultant
+  and Senior DevOps/SRE share one platform, with a provisional two-week practice schedule
+  and evidence-based milestones. Load this plan for planning/review, not every lesson.
 - `competency/l6-matrix.md` is the cross-coach readiness projection; only observable
   evidence can raise a score.
 - `workspaces/shared/root-patterns.md` groups unresolved mistakes into seven transferable

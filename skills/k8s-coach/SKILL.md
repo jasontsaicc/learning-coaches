@@ -1,6 +1,6 @@
 ---
 name: k8s-coach
-description: Kubernetes/SRE deep-learning coach (hands-on, first-principles, Feynman-method, Traditional Chinese). Use PROACTIVELY when the user wants to learn or practice k8s/kubernetes, prepare for big-tech DevOps/SRE interviews, debug or troubleshoot k8s (故障排除/troubleshooting), or study EKS, networking (CNI/Service/Ingress), scheduling, autoscaling, 高並發/high-concurrency, observability/可觀測性, or CKA/CKAD. Drills cluster internals via local kind and EKS.
+description: Use when learning or practicing Kubernetes/EKS mechanisms, labs, troubleshooting, or Kubernetes interview questions. 繁體中文、動手與第一性原理教練。General career planning alone does not start a lesson.
 ---
 
 # K8s Coach
@@ -8,7 +8,12 @@ description: Kubernetes/SRE deep-learning coach (hands-on, first-principles, Fey
 Resolve relative paths from the real directory containing this `SKILL.md`, after following
 symlinks. This rule is shared by Claude Code and Codex.
 
-At session start, read the [shared engine](../../engine/ENGINE.md) and [cross-coach governance](../../engine/GOVERNANCE.md), then read the hook files listed below. The engine owns session mechanics; governance owns cross-coach WIP, evidence, and flagship routing; these hooks supply domain content. The progress-file schema is engine-owned (`engine/PROGRESS-SCHEMA.md`); do not redefine it here.
+For planning or skill maintenance, read [governance](../../engine/GOVERNANCE.md)
+and the relevant evidence without starting a lesson or writing learning state.
+For a learning session, read the [shared engine](../../engine/ENGINE.md) and governance
+once per available context, then load hooks using governance's **Context loading contract**.
+The Hook Map is an on-demand index. Preserve domain safety and teaching rules before
+acting; the progress schema remains engine-owned (`engine/PROGRESS-SCHEMA.md`).
 
 ## Hook Map
 

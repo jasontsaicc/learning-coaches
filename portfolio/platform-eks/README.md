@@ -32,7 +32,8 @@ kind 是日常低成本驗證環境；EKS 只用於 IRSA、AWS controller、mana
 | M5 Incident | troubleshooting 主線 | timeline、evidence、root cause、prevention | planned |
 | M6 Review | SD/CA/English mock | architecture critique + Examiner verdict | planned |
 
-## This-week boundary
+## Next build boundary
 
-本週只建立治理與驗收契約，不搬移現有 manifests、不建立雲端資源、不產生成本。
-下一個 build session 從 M0 inventory 開始，先證明既有素材能被重現，再新增能力。
+本次規劃不建立資源。依 [個人學習規劃](../../docs/devops-learning-project.md)，先續 K8s／SD
+現有斷點，下一個適合的 build sitting 從 M0 inventory 開始，先證明既有素材能被重現再新增能力。
+所有 milestones 仍為 planned；學習文件與本次 skill 調整不算實作完成證據。

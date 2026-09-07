@@ -7,14 +7,13 @@ behavior, not a time-on-task target. One section per curriculum phase.
 ## P0 意識定向 Gate
 
 Pass condition:progress file 裡有一份 personalized thread-pull list(由 warm-up 的 resume
-thread-pull 練習彙整而成),而且學員不看筆記就能講清楚 loop 的形狀:phone screen 跟 full
-loop 的差別、full loop 約一半分數壓在 LP 上、每個面試官都打 LP。講不出這個形狀,代表還沒
-搞清楚在測什麼,不能進 P1。
+thread-pull 練習彙整而成)，而且學員能說明 technical delivery 與 LP behavioral 各需要什麼
+證據，分清已由 recruiter 確認的資訊和仍未知的輪次／比重。不要求背誦未證實的 LP 百分比。
 
-Examiner inputs:progress file 裡的 personalized thread-pull list 原文(fenced),加上學員對 gate task 問題的逐字回答(loop 形狀:phone screen vs full loop、LP 權重)。
+Examiner inputs:personalized thread-pull list 原文(fenced)、學員對 gate task 的逐字回答，以及已取得的 recruiter 流程資訊（沒有則明列未知）。
 
 Suggested gate task(engine 可跨 attempt 換問法):「phone screen 跟 full loop 差在哪?這個
-loop 最容易被技術強的人低估的一條線是什麼?」聽學員有沒有自己點出 LP 的權重。
+loop 最容易被技術強的人低估的一條線是什麼?哪些流程資訊仍需向 recruiter 確認?」看學員能否指出 behavioral 證據與資訊界限。
 
 ## P1 Networking Gap-Scan Gate
 

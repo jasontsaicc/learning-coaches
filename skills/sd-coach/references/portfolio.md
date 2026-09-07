@@ -11,7 +11,7 @@ Progress file, registries, and in-progress work live in:
 - `progress.md`:engine 的進度檔。Schema engine-owned,定義在 `engine/PROGRESS-SCHEMA.md`,本 coach 不重定義。
 - `one-liner-library.md`:domain registry(每主題一句面試開場白,headline first)。step H 的 One-Liner Challenge 餵進來:「面試官剛問 'What is [topic]?',一句話回答。」沿用 PROGRESS-SCHEMA section 7 的 registry 欄位進間隔抽考;抽考標準是講得出精準的一句,不是方向對就好。
 - `rpg-state.md`:RPG 狀態(title、streak、achievements、last story summary)。規則見 `narrative.md`;非間隔複習型。
-- `coaching-brief.md`:教法備忘(學員畫像、learning mode 覆寫、有效/無效的教法紀錄)。session 開始跟 progress.md 一起讀。
+- `coaching-brief.md`:教法備忘。開場依 `engine/GOVERNANCE.md` 讀有效/無效教法、語言、自檢與當前弱點的完整段落；歷史診斷按需讀，舊 overlay 不覆蓋最新學員決定。
 - `curriculum-plan.md`:戰略層規劃(advisory,見 `curriculum.md`)。
 - `session-log.md`:**熱檔,只留最近幾場**。S44 以前封存在 `archive/session-log-S36-S44.md`。
 - `archive/`:冷檔,開課時不讀;Weekly Review trend tracking、Phase Gate 三振診斷、或要查某場歷史時才讀。

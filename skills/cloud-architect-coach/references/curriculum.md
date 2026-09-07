@@ -1,10 +1,10 @@
 # Curriculum
 
-4 週衝刺,對準 AWS ProServe Delivery Consultant (Cloud Architect, Taiwan) 的面試 loop,申請約在 2026-07-20 送出。Phase 依序推進,engine 透過 Routing branch 5 檢查前置 gate。每個 phase 給一句話焦點加一個綁在前一關 gate 的前置條件。
+對準 AWS ProServe Delivery Consultant (Cloud Architect, Taiwan)。2026-09-07 學員確認沒有面試日期，預設長期準備：同一個 platform 專案連結 customer discovery、AWS 基礎、migration、實作與英文交付。個人排程見 `docs/devops-learning-project.md`，只在規劃時讀。Phase 依序推進，engine 透過 Routing branch 5 檢查前置 gate。
 
-時間框架是計畫、不是承諾。一旦 phone screen 或 full loop 的日期落地,整個排程繞著那個日期重排,mock 往前提、覆蓋度往後讓。日期是外部硬約束,學習進度會讓路。下面的週數是「沒有外部日期時」的預設節奏。
+下面的週數僅是有日期時可選的四週 sprint 尺度，不是無期限準備的預設進度。日期確定後依 recruiter 確認的輪次和冷測缺口重排；新機制先教與實作，已學過的才用 mock 找缺口。
 
-LP behavioral(領導力原則的行為面試)整段走 `fsi-devops-english`,從 week 1 就平行開跑,不在這個 coach 的範圍內。
+LP behavioral 與一般英文練習沿用學員既有外部流程，不另建故事資料庫；需要顧問 mock 時只請學員提供相關真實故事摘要。`fsi-devops-english` 若在目前環境不可用，不將其當成開課前置依賴。
 
 ## Warm-Up Diagnostic (new students / week 1 intake)
 
@@ -22,7 +22,7 @@ warm-up 的分類(new / mid / strong)寫進 progress.md 的 warm-up classificati
 **焦點**:搞清楚這份工作在做什麼、這個 loop 在測什麼,再開始練技術。前置:無(入門 phase)。
 
 - ProServe Delivery Consultant 的日常:帶 customer workshop、交付 migration、寫 architecture doc。這是 client-facing 顧問職,不是純後端工程師,講不清楚等於做不到。
-- Loop 結構:phone screen(LP 加輕量技術)通常在 full loop 前 1-2 週到;full loop 約一半的分數壓在 LP 上,而且每個面試官都會打 LP。這代表技術強但 LP 弱一樣過不了,所以 LP 那條線 week 1 就得在 `fsi-devops-english` 平行跑。
+- Loop 準備包含 technical delivery 與 LP behavioral；實際輪次、時長、語言與評量比重請以這個職缺的 recruiter 資訊為準，不把 SDE 流程當成 Delivery Consultant 的固定流程。練習時能用真實經驗說明自己的決策、影響與反思。
 - 產出:personalized thread-pull list,由 warm-up 的 resume thread-pull 練習彙整而成,往下餵 linux-interview-bank 的優先序。
 
 ## P1 Networking Gap-Scan (0.5 week)
@@ -50,7 +50,7 @@ warm-up 的分類(new / mid / strong)寫進 progress.md 的 warm-up classificati
 **焦點**:把案例練到被追問也守得住,最後用全英文 mock 驗收。前置:P2 gate 通過。
 
 - 白板案例走 `references/case-bank.md`:migration assessment、hybrid architecture、cost optimization、consultant pushback(面試官反駁你的設計時怎麼接)。
-- Well-Architected 五大支柱只當評分框架用,不當上課主題。
+- Well-Architected 六大支柱作為案例檢查框架；未學過的機制先補教，不要求每題硬背全部支柱。官方來源見 north-star。
 - Week 4:全英文 full mock 連發,加上弱點重測(前面卡過的點回頭再打一次)。
 
 ## Sidecar: Linux Interview Bank
