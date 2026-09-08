@@ -7,15 +7,15 @@
 
 ## Meta
 
-- session_count: 34
+- session_count: 35
 - last_weekly_review: 34(WR9 於 s34 壓縮版跑完,三主題 blind recall 全過;下次 WR 於 s41)
-- last_session_date: 2026-09-03
+- last_session_date: 2026-09-08
 - warm_up_classification: mid
 - target_role: 泛用大廠 senior DevOps/SRE。2026-08-21 確認無緊急面試,採 production depth + senior interview 雙軌;核心主題固定比較地端 K8s / 傳統 EKS / 高度託管 EKS(curriculum-plan §11)
 
 ## Current Session breakpoint
 
-P2b C-4 RBAC, step D, chunk 3, 用一個 verbs 只給 `get` 的壞掉情境驗收 `auth can-i --list` 三種診斷結果,過了才進 chunk 4;s34 完整交班(次要待辦、教練失誤、冷測到期日)見 session-log.md 的 s34 紀錄。
+P2b C-4 RBAC, step D, chunk 3 ✅ 收尾(s35:`get` vs `list` 陷阱親手撞到 + `--list` 三分判準換皮獨立答對),下一步 chunk 4 最小權限設計方法論(爆炸半徑),再補 C-4 的 F/G 與到期冷測;s34/s35 完整交班見 session-log.md。
 
 <!-- schema §3 = 恰好一行。敘事與次要待辦寫 session-log.md,長效教練紀律寫 session-log.md
      「教練執行紀律」,不要在這裡疊舊堂。s32 及更早斷點原文見 session-log.md 對應堂,
@@ -26,7 +26,7 @@ P2b C-4 RBAC, step D, chunk 3, 用一個 verbs 只給 `get` 的壞掉情境驗�
 - P0 心智模型: gate-passed(2026-06-22,legacy pre-Examiner)
 - P1 核心物件 + 容器底層: gate-passed(2026-06-25,legacy pre-Examiner)
 - P2a 網路深水區: in-progress(chunk 1 ✅ / chunk 2 ✅ / chunk 3 NetworkPolicy 剩 lab Step 5+6+gate+F/G / chunk 4 零件 4-1~4-4 ✅,4-5 盲講式已於 2026-08-11 退役改情境排障題)
-- P2b 儲存 + 權限: in-progress(C-1 ✅ s26,欠 `cg-demo` memory.max 讀數 / C-2 ✅ s29,欠 `reclaimPolicy: Delete` teardown 實證 / C-3 ✅ s31-32,step G 2/4 未過 / C-4 chunk 1-2 ✅ s33,chunk 3 in-progress,chunk 4 未開始)
+- P2b 儲存 + 權限: in-progress(C-1 ✅ s26,欠 `cg-demo` memory.max 讀數 / C-2 ✅ s29,欠 `reclaimPolicy: Delete` teardown 實證 / C-3 ✅ s31-32,step G 2/4 未過 / C-4 chunk 1-3 ✅ s33/s35,chunk 4 未開始,C-4 的 F/G 未跑)
 - P3 調度 + 高並發 + 排障: not-started
 - P4 可觀測性工程: not-started
 - P5 平台工程 / GitOps: not-started
@@ -112,7 +112,7 @@ weak-topic flags(2026-08-03 啟用,P2a 帶 flag 前進、gate 未考,學員決�
 - 2026-07-17 | NetworkPolicy 出廠全通 | 預測「陌生 Pod 連不到 db」,實測連得到 | 出廠全通;namespace 不做網路隔離 | unresolved | 3 | 2026-07-23 | 1
 - 2026-07-23 | 跨 node 走路由表不是 iptables(層級混淆家族) | 問跨 node 第一個指令答 iptables,縮小重問答 resolv.conf | 改寫層(NAT)與轉送層(routing)混淆 | unresolved | 7 | 2026-09-10 | 0
 - 2026-07-23 | kube-proxy 不在 Pod 啟動路徑上 | 把 kube-proxy 列為 kubelet 建 Pod 三件事之一 | 控制路徑 vs 資料路徑混淆 | unresolved | 3 | 2026-08-07 | 1
-- 2026-07-23 | 只給結論不給判準(pattern 卡,升級追蹤) | 同堂三次只給結論不 show work | 輸出習慣不是能力;面試官無法區分會與猜對 | unresolved | 3 | 2026-07-26 | 5
+- 2026-07-23 | 只給結論不給判準(pattern 卡,升級追蹤) | 同堂三次只給結論不 show work;2026-09-08 續犯(「因為是 get」=複述觀察非判準) | 輸出習慣不是能力;面試官無法區分會與猜對 | unresolved | 3 | 2026-09-11 | 6
 - 2026-07-17 | default-deny 後的分層(DNS 層 vs 連線層) | 只答「連線不到」,不分辨死在 DNS 層還是連線層 | 層級混淆;兩步都被鎖時不問哪步先發生 | unresolved | 3 | 2026-07-26 | 1
 - 2026-07-28 | veth 誤記「跨 node 連線」 | 答「veth 是跨 node 的網卡連線」 | veth 只管 Pod netns 到 root netns 那段 | unresolved | 7 | 2026-08-10 | 1
 - 2026-07-28 | iptables=一棟樓(nat 表/filter 表) | 幻影站 4 + 誘答「DNAT 做完才進 iptables」 | 把 iptables 當一站,不知 DNAT 就在 nat 表裡 | unresolved | 3 | 2026-07-31 | 0
@@ -139,6 +139,10 @@ weak-topic flags(2026-08-03 啟用,P2a 帶 flag 前進、gate 未考,學員決�
 - 2026-08-28 | StatefulSet 每個 replica 一份獨立資料(不是共用一份) | 3 開到 5 問幾份資料,答「still is 3 data」 | 把「每人一份儲存」誤讀成「大家共用一份」 | unresolved | 3 | 2026-09-04 | 0
 - 2026-08-28 | 排障兩步:先鎖 fault domain 再查內部(MTTR 核心卡) | 同堂兩次先跳單一成員內部狀態 | 沒先問「這條路徑上有幾個東西」 | unresolved | 3 | 2026-08-31 | 0
 - 2026-09-01 | 建 Pod 的權限 vs Pod 裡程式呼叫 API 的權限(誰用誰的身分) | 答「不會,因為根本沒有到建立 pod」 | controller 建 Pod 與 Pod 呼叫 API 誤用同一身分 | unresolved | 3 | 2026-09-04 | 0
+- 2026-09-08 | RBAC 動詞看有無物件名字(get vs list vs watch) | Role 只給 get,預測 `kubectl get pods` 會成功,實測 403 cannot list | 把 kubectl 指令名字當成 RBAC 動詞 | unresolved | 3 | 2026-09-11 | 0
+- 2026-09-08 | 成功訊息不保證做到你以為的事(pattern 卡,ops 判準,同堂三次) | `-n ALL` 查了不存在的 ns、`--as=$SA` 空變數沒假扮、`patched (no change)` | 不先驗證指令是否真的生效就改結論 | unresolved | 3 | 2026-09-11 | 0
+- 2026-09-08 | `auth can-i --list` 不加 `--as` 問的是自己 | chunk 3 驗收給裸指令,無 `--as` 無 `-n`(同堂第二次) | 排障要問壞掉的身分,預設問的是自己 | unresolved | 3 | 2026-09-11 | 0
+- 2026-09-08 | `--list` 三分判準(只剩噪音 / 缺 resource / 缺動詞) | 首答把原本 403 訊息當成 `--list` 輸出,且用「會 403」當判準(兩種都 403) | 兩個不同指令的輸出混為一談 | unresolved | 3 | 2026-09-11 | 0
 
 ## Spaced-repetition queue
 
@@ -191,10 +195,15 @@ weak-topic flags(2026-08-03 啟用,P2a 帶 flag 前進、gate 未考,學員決�
 - mistake:Ingress-YAML-schema | mistake | 3 | 2026-07-10 | active
 - term:(07-10 到期各卡) | term | - | 2026-07-10 | active(見 term-registry.md)
 - mistake:ClusterIP-全鏈(謎題B) | mistake | 14 | 2026-07-13 | active(resolved,考精度)
+- mistake:RBAC動詞-get-vs-list | mistake | 3 | 2026-09-11 | active
+- mistake:成功訊息不保證生效(pattern) | mistake | 3 | 2026-09-11 | active
+- mistake:--list-要加---as | mistake | 3 | 2026-09-11 | active
+- mistake:--list-三分判準 | mistake | 3 | 2026-09-11 | active
 
 ## Curiosity branch
 
 - etcd Raft 深入 | 2026-06 | 面試不直接考實作、P5 etcd 運維會用到 | 想追 Raft 共識怎麼撐起 etcd,park 到 P5(見 curriculum P5 焦點)
+- `kubectl patch` 為何印 `(no change)` 卻實際有改 | 2026-09-08 | 面試不考、不改善排障品質(Three Questions Q1/Q2 皆 no) | s35 現場撞到,已用 describe 驗出實際生效;kubectl client 端訊息機制,想追再追
 
 ## Domain registries
 
