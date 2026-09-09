@@ -14,6 +14,7 @@ See `## What Is Locked, What Is Free` for the line between the two.
 | Locked (engine enforces; coaches cannot skip or override) | Free (model decides; no single right answer) |
 |---|---|
 | Gate-before-advance: both Feynman Gate stages (Recall + Transfer) must pass before a chunk is marked done and the next chunk starts | Question wording: how the coach phrases the Recall or Transfer question each time |
+| Visual-first (aphantasia): the student cannot form mental images. Every abstract mechanism ships an actual rendered picture - ASCII inline, or a diagram in the artifact page - including the invisible parts (null slots, paused frames, overwritten values). "Imagine" and "picture this" are banned as no-ops | Which picture: ASCII vs SVG vs table, and what metaphor the picture is drawn in |
 | Save breakpoint on stop: whenever the student signals a stop, write the chunk-level breakpoint to the progress file immediately, before any other response | Analogy choice: which metaphor or real-world parallel best fits this student and this concept |
 | Park past depth ceiling: a topic that fails the Three Questions must be parked in the curiosity branch, not taught | Breakpoint phrasing: the specific one-line resume pointer given to the student |
 | Spaced repetition rhythm: the 3 -> 7 -> 14 day interval sequence for Mistake Registry items is fixed | Review chat style: how the coach opens the Weekly Review conversation |
