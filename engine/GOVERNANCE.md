@@ -108,7 +108,7 @@ Known retirements to honor:
 
 ## Sustainable practice
 
-For a planning session, start with a two-week trial: two K8s/platform sittings and one
+For a planning session, run the two-week trial set on 2026-09-07: two K8s/platform sittings and one
 System Design sitting per week, plus short coding practices if time permits. Preserve
 existing breakpoints; add a customer-facing lens inside an SD review when useful without
 automatically restarting the CA course.

@@ -1,11 +1,9 @@
 # Model Playbook
 
-Rewritten 2026-07-29: this environment runs Fable-class models again (Claude Fable 5).
-The 2026-07-10 version assumed a downgrade to smaller models; that premise inverted, so
-the weak-model rules (one-session-one-task, restart-on-drift, the Opus/Sonnet/Haiku
-routing table) are deleted. If the environment downgrades again, restore them from this
-file's git history. Re-read after any model change and delete rules that stop earning
-their keep.
+How to work with whatever model this environment runs. Re-read after any model change
+and delete rules that stop earning their keep. If the environment ever drops to a weaker
+model, the rules for that case (one-session-one-task, restart-on-drift, a routing table)
+are recoverable from this file's git history.
 
 ## Standing rules (any model)
 
@@ -38,7 +36,7 @@ model. Signs, and what to say:
 | When | What |
 |---|---|
 | Weekly | `./scripts/lint-all.sh` in this repo; skim progress.md files for breakpoints that never resumed |
-| After correcting the model | Say 寫進 memory (feedback type); confirm a file landed in `~/.claude/projects/-home-ubuntu/memory/` |
+| After correcting the model | Say 寫進 memory (feedback type); confirm a file landed in the memory dir of the project you were in (`~/.claude/projects/<slugified-cwd>/memory/`) |
 | Monthly | Prune memory: delete stale or wrong entries; keep MEMORY.md under ~20 lines |
 | Quarterly, or after a model change | `/revise-claude-md` on the global CLAUDE.md; re-read this playbook and delete rules that stopped earning their keep |
 

@@ -97,7 +97,7 @@ Engine 擁有 Teach-to-Learn 的整個 loop 與 safety valve;persona 與觸發�
 | **L2 Probing** | P2 | 每場至少打斷一次 + 中途改一個需求;每個 trade-off 都問 why;停止牽手 |
 | **L3 Adversarial** | P3+ | 追問到知識邊界(找到邊就停);否決一個設計決策要求 pivot;偶爾埋錯誤提示(「單一 DB 不是更簡單嗎?」)看學員會不會頂回來;中性偏懷疑,像 Bar Raiser |
 
-規則:學員講 ~80%、面試官 ~20%,面試官每 turn 不超過 3 行(結尾 feedback 除外)。壓力測的是壓力下的反應不是 recall,目標是看他怎麼站回來,不是弄倒他。收尾必 debrief:點名一個扛住壓力的時刻、一個垮掉的時刻。
+規則:學員講 ~80%、面試官 ~20%,面試官的 turn 短到不佔走學員的發言時間(結尾 feedback 除外)。壓力測的是壓力下的反應不是 recall,目標是看他怎麼站回來,不是弄倒他。收尾必 debrief:點名一個扛住壓力的時刻、一個垮掉的時刻。
 
 **Follow-Up Preview**(drill feedback 後):
 
