@@ -12,13 +12,14 @@ Progress file, registries, and in-progress work live in:
 - `mistake-notes.md`:**熱檔但開場不讀**。Mistake Registry 每張卡的正解、判準句、L6 顧問版、歷史重測紀錄、下次抽考題,節標題 = registry 行的 `date | topic`。step A 抽考到哪張卡,才讀哪一節。
 - `term-registry.md`:domain registry(英文術語卡:EN term / 發音 / 英文定義 / 中文點破),沿用 PROGRESS-SCHEMA section 7 的 registry 欄位(interval、next-review-date、status)。抽考雙向,見 `language.md`。
 - `story-bank.md`:既有 behavioral 素材；固定挖故事已退役，沿用學員外部流程，不排 Weekly Review 保底或欠帳。學員要求 behavioral mock 時才取相關真實故事，區分團隊成果與個人判斷。
-- `session-log.md`:**熱檔,只留最近幾堂 + 學員背景/教法備忘/教練執行紀律/chunk maps**。session 1-19 封存在 `archive/session-log-s01-s19.md`。
+- `coach-rules.md`:**常駐檔,每場 session 全讀**。學員背景/教法備忘 + 教練執行紀律。
+- `session-log.md`:**熱檔,只留最近幾堂 + chunk maps**。session 1-19 封存在 `archive/session-log-s01-s19.md`。
 - `archive/`:冷檔,開課時不讀;Weekly Review trend tracking、Phase Gate 三振診斷、或要查某堂歷史時才讀。
   - `breakpoint-history.md`:2026-08-19 以前 progress.md 的 Current Session breakpoint 疊層原文(s16-s26,該區段當時已長成 263 行日誌,違反 schema §3)。
   - `session-log-s01-s19.md`:早期 session 敘事。
   - `pre-migration/`:standalone 時期的原始狀態檔,verbatim 保存,不再更新。
 
-**寫入紀律**:`progress.md` 的 Current Session breakpoint 只留最新一堂(當前狀態 + 下一堂 resume,PROGRESS-SCHEMA §3),敘事寫 `session-log.md`,長效教練紀律寫 `session-log.md`「教練執行紀律」,不要在 breakpoint 疊舊堂。
+**寫入紀律**:`progress.md` 的 Current Session breakpoint 只留最新一堂(當前狀態 + 下一堂 resume,PROGRESS-SCHEMA §3),敘事寫 `session-log.md`,長效教練紀律寫 `coach-rules.md`「教練執行紀律」,不要在 breakpoint 疊舊堂。
 
 **寫入紀律(Mistake Registry,2026-09-02 加)**:registry 一張卡就是**一行八欄**(PROGRESS-SCHEMA §7),queue 一行五欄(§8)。正解、判準句、L6 版、重測歷史、下次抽考題一律寫 `mistake-notes.md` 對應節,**不要在 registry 行底下疊子項、不要在 queue 行尾疊括號**。這條的由來:progress.md 曾長到 84 KB / 40.8k tokens(36 條 registry 疊出 92 條子項),開場一次全讀但一堂只抽 2 到 3 張卡。同一個病 2026-08-19 已在 breakpoint 區發生過一次。
 - `environment.md`:機器層事實(kubeconfig contexts 與安全清單、port 慣例、工具狀態、bastion 同步步驟)。

@@ -49,8 +49,7 @@ protocol; a wider audit may read more. Unknown headings or ambiguous state justi
 expanding the read. A file already fully available and unchanged in the current context
 does not need another tool read; after compaction, reload missing rules/current state.
 
-Student-specific teaching constraints are hot context even when stored inside a large
-historical file: K8s reads `session-log.md`'s teaching-profile and coach-discipline sections;
+Student-specific teaching constraints are hot context. K8s reads `coach-rules.md` whole;
 SD reads `coaching-brief.md`'s effective/ineffective methods, language and coach self-check
 sections, plus the active weakness's subsection. Current decisions below retire stale
 instructions within those sections. Session narratives, complete score histories, entire
