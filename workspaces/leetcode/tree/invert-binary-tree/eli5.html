@@ -1,0 +1,712 @@
+<title>委派給下屬的樹</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=JetBrains+Mono:wght@400;700&family=Noto+Sans+TC:wght@400;500;700&display=swap">
+<style>
+:root{
+  --paper:#F2F0F6; --surface:#FFFFFF; --ink:#191527; --body:#302B41;
+  --muted:#6E687E; --line:#CFCADB;
+  --c1:#4A4098; --c1-soft:#E3E0F3;
+  --c2:#AE3557; --c2-soft:#F6E0E7;
+  --signal:#10726B; --signal-soft:#D8ECE9;
+  --code-bg:#131022; --code-fg:#DEDAEA;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#14121C; --surface:#1C1929; --ink:#EAE7F2; --body:#C6C1D4;
+    --muted:#8E88A0; --line:#322E44;
+    --c1:#9E94EC; --c1-soft:#241F42;
+    --c2:#E88BA4; --c2-soft:#3A1D28;
+    --signal:#4FC7B6; --signal-soft:#0F2F2C;
+    --code-bg:#0C0A14; --code-fg:#DAD5E6;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#14121C; --surface:#1C1929; --ink:#EAE7F2; --body:#C6C1D4;
+  --muted:#8E88A0; --line:#322E44;
+  --c1:#9E94EC; --c1-soft:#241F42;
+  --c2:#E88BA4; --c2-soft:#3A1D28;
+  --signal:#4FC7B6; --signal-soft:#0F2F2C;
+  --code-bg:#0C0A14; --code-fg:#DAD5E6;
+}
+
+*{box-sizing:border-box}
+body{
+  background:var(--paper); color:var(--body);
+  font-family:"Noto Sans TC","Hiragino Sans","Microsoft JhengHei",sans-serif;
+  font-size:16px; line-height:1.85;
+  padding:0 1.25rem 5rem;
+}
+.wrap{max-width:44rem; margin:0 auto}
+
+header{padding:3.5rem 0 1.5rem}
+.kicker{
+  font-family:"JetBrains Mono",monospace; font-size:.72rem; font-weight:700;
+  letter-spacing:.16em; text-transform:uppercase; color:var(--signal);
+}
+h1{
+  font-family:"Archivo","Noto Sans TC",sans-serif; font-weight:700;
+  font-size:clamp(2rem,6vw,2.9rem); line-height:1.12; letter-spacing:-.02em;
+  color:var(--ink); margin:.5rem 0 .6rem; text-wrap:balance;
+}
+.sub{color:var(--muted); font-size:1rem; margin:0}
+
+.rail{
+  height:9px; margin:2.75rem 0 2.25rem;
+  border-top:2px solid var(--line); border-bottom:2px solid var(--line);
+  background:repeating-linear-gradient(90deg,var(--line) 0 3px,transparent 3px 13px);
+}
+
+h2{
+  font-family:"Archivo","Noto Sans TC",sans-serif; font-weight:700;
+  font-size:1.4rem; color:var(--ink); letter-spacing:-.01em;
+  margin:0 0 .25rem; text-wrap:balance;
+}
+h2 .num{
+  font-family:"JetBrains Mono",monospace; font-size:.85rem; color:var(--signal);
+  margin-right:.6rem; vertical-align:.15em;
+}
+h3{font-family:"Archivo","Noto Sans TC",sans-serif;font-weight:600;font-size:1rem;color:var(--ink);margin:1.75rem 0 .4rem}
+h4{font-family:"Archivo","Noto Sans TC",sans-serif;font-weight:600;font-size:.95rem;color:var(--ink);margin:1.4rem 0 .3rem}
+section{margin-bottom:2.5rem}
+p{margin:.7rem 0}
+strong{color:var(--ink); font-weight:700}
+code{font-family:"JetBrains Mono",monospace; font-size:.87em; background:var(--signal-soft); color:var(--ink); padding:.1em .35em; border-radius:2px}
+
+.lede{font-size:1.1rem; color:var(--ink); border-left:3px solid var(--signal); padding-left:1rem; margin:1rem 0 1.25rem}
+
+.track{display:flex; align-items:center; gap:.3rem; overflow-x:auto; padding:.9rem 0; font-family:"JetBrains Mono",monospace}
+.track .lbl{color:var(--muted); font-size:.8rem; min-width:3.4rem; flex-shrink:0}
+.node{
+  display:inline-flex; align-items:center; justify-content:center;
+  min-width:2.2rem; padding:.3rem .5rem; flex-shrink:0;
+  border:2px solid var(--line); border-radius:3px; background:var(--surface);
+  font-weight:700; color:var(--ink);
+}
+.node.a{border-color:var(--c1); background:var(--c1-soft); color:var(--c1)}
+.node.b{border-color:var(--c2); background:var(--c2-soft); color:var(--c2)}
+.arrow{color:var(--muted); flex-shrink:0; font-size:.9rem}
+.nil{color:var(--muted); font-size:.85rem; flex-shrink:0}
+
+.callout{background:var(--surface); border:1px solid var(--line); border-radius:4px; padding:1.1rem 1.25rem; margin:1.25rem 0}
+.callout.warn{border-left:4px solid var(--c2)}
+.callout.key{border-left:4px solid var(--signal)}
+.callout h3{margin-top:0}
+
+ul,ol{padding-left:1.35rem; margin:.7rem 0}
+li{margin:.35rem 0}
+
+.signals{list-style:none; padding:0; display:grid; gap:.5rem}
+.signals li{
+  display:flex; gap:.75rem; align-items:baseline;
+  background:var(--surface); border:1px solid var(--line); border-radius:4px; padding:.7rem .95rem; margin:0;
+}
+.signals .n{font-family:"JetBrains Mono",monospace; font-weight:700; color:var(--signal); flex-shrink:0}
+
+.tablewrap{overflow-x:auto; margin:1.25rem 0; border:1px solid var(--line); border-radius:4px; background:var(--surface)}
+table{border-collapse:collapse; width:100%; font-size:.86rem; font-variant-numeric:tabular-nums}
+th,td{text-align:left; padding:.55rem .8rem; border-bottom:1px solid var(--line); white-space:nowrap}
+th{font-family:"Archivo",sans-serif; font-weight:600; color:var(--ink); font-size:.78rem; letter-spacing:.03em; text-transform:uppercase}
+tr:last-child td{border-bottom:none}
+td.mono,th.mono{font-family:"JetBrains Mono",monospace}
+.t1{color:var(--c1); font-weight:700}
+.t2{color:var(--c2); font-weight:700}
+.hit{color:var(--signal); font-weight:700}
+
+pre{
+  background:var(--code-bg); color:var(--code-fg); border-radius:5px;
+  padding:1.1rem 1.25rem; overflow-x:auto; margin:1rem 0;
+  font-family:"JetBrains Mono",monospace; font-size:.84rem; line-height:1.75;
+}
+pre code{background:none; color:inherit; padding:0; font-size:1em}
+.cm{color:#8A83A8}
+.kw{color:#E8A0B4}
+.fn{color:#9E94EC}
+
+details{border:1px solid var(--line); border-radius:5px; background:var(--surface); margin:.85rem 0; overflow:hidden}
+summary{
+  cursor:pointer; padding:.95rem 1.2rem; list-style:none;
+  font-family:"Archivo","Noto Sans TC",sans-serif; font-weight:600; color:var(--ink);
+  display:flex; align-items:center; gap:.7rem;
+}
+summary::-webkit-details-marker{display:none}
+summary::before{content:"\25B8"; color:var(--signal); font-size:.85rem; transition:transform .15s}
+details[open] summary::before{transform:rotate(90deg)}
+summary:focus-visible{outline:2px solid var(--signal); outline-offset:-2px}
+.dbody{padding:0 1.2rem 1.3rem; border-top:1px solid var(--line)}
+.dbody > *:first-child{margin-top:1rem}
+.lockhint{font-family:"Noto Sans TC",sans-serif;font-weight:400;font-size:.8rem;color:var(--muted);margin-left:auto}
+
+.mantra{font-family:"Archivo","Noto Sans TC",sans-serif;font-size:1.05rem;font-weight:600;color:var(--ink);background:var(--signal-soft);border-radius:4px;padding:1rem 1.2rem;margin:1rem 0}
+
+.fix{display:grid;gap:.2rem;margin:1.1rem 0;padding-left:.9rem;border-left:3px solid var(--line)}
+.fix .x{color:var(--c2)} .fix .o{color:var(--c1)} .fix .w{color:var(--muted);font-size:.92rem}
+
+.move{border-top:1px solid var(--line); padding-top:1.15rem; margin-top:1.4rem}
+.move:first-of-type{border-top:none;padding-top:0;margin-top:.6rem}
+.move h4{font-family:"Archivo","Noto Sans TC",sans-serif;font-weight:700;font-size:1rem;color:var(--ink);margin:0 0 .5rem;display:flex;gap:.6rem;align-items:baseline}
+.move h4 .mv{font-family:"JetBrains Mono",monospace;font-size:.7rem;font-weight:700;letter-spacing:.1em;color:var(--signal);border:1px solid var(--signal);border-radius:2px;padding:.1rem .35rem;flex-shrink:0}
+.say{background:var(--c1-soft);border-left:3px solid var(--c1);border-radius:0 3px 3px 0;padding:.75rem 1rem;margin:.6rem 0;font-size:.93rem;color:var(--ink)}
+.say b{display:block;font-family:"JetBrains Mono",monospace;font-size:.66rem;letter-spacing:.12em;text-transform:uppercase;color:var(--c1);margin-bottom:.3rem}
+.think{font-size:.93rem;margin:.6rem 0;padding-left:.9rem;border-left:2px dotted var(--line)}
+.think b{font-family:"JetBrains Mono",monospace;font-size:.66rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:.2rem}
+
+/* circular track diagrams */
+.frames{display:grid;grid-template-columns:repeat(auto-fit,minmax(15rem,1fr));gap:1rem;margin:1.25rem 0}
+.frame{background:var(--surface);border:1px solid var(--line);border-radius:4px;padding:.8rem .9rem}
+.frame .cap{font-family:"JetBrains Mono",monospace;font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:.2rem}
+.frame .note{font-size:.86rem;color:var(--body);margin:.35rem 0 0}
+.dia{width:100%;height:auto;display:block}
+.dia .edge{stroke:var(--line);stroke-width:2;fill:none}
+.dia .ah{fill:var(--line)}
+.dia .ring{fill:var(--surface);stroke:var(--line);stroke-width:2}
+.dia .val{fill:var(--muted);font-family:"JetBrains Mono",monospace;font-size:15px;font-weight:700;text-anchor:middle;dominant-baseline:central}
+.dia .tag{font-family:"JetBrains Mono",monospace;font-size:13px;font-weight:700;text-anchor:middle}
+.dia .s .ring{stroke:var(--c1);fill:var(--c1-soft);stroke-width:3}
+.dia .s .val{fill:var(--c1)}
+.dia .f .ring{stroke:var(--c2);fill:var(--c2-soft);stroke-width:3}
+.dia .f .val{fill:var(--c2)}
+.dia .both .ring{stroke:var(--signal);fill:var(--signal-soft);stroke-width:4}
+.dia .both .val{fill:var(--signal)}
+.dia .tag.ts{fill:var(--c1)} .dia .tag.tf{fill:var(--c2)} .dia .tag.tb{fill:var(--signal)}
+
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+
+/* ── tree 專用:call stack 便條紙 ────────────────────────── */
+.stack{display:grid;gap:0;margin:1.25rem 0}
+.sf{
+  border:1px solid var(--line); background:var(--surface);
+  padding:.55rem .8rem; font-family:"JetBrains Mono",monospace; font-size:.82rem;
+}
+.sf + .sf{border-top:none}
+.sf .who{color:var(--c1);font-weight:700}
+.sf .var{color:var(--muted)}
+.sf.top{border-left:4px solid var(--c2)}
+.sf.done{opacity:.55}
+.indent1{margin-left:1.4rem} .indent2{margin-left:2.8rem} .indent3{margin-left:4.2rem}
+
+/* ── tree 圖 ─────────────────────────────────────────────── */
+.dia .tnode{fill:var(--surface);stroke:var(--line);stroke-width:2}
+.dia .tval{fill:var(--ink);font-family:"JetBrains Mono",monospace;font-size:15px;font-weight:700;text-anchor:middle;dominant-baseline:central}
+.dia .swapped .tnode{stroke:var(--c2);fill:var(--c2-soft);stroke-width:3}
+.dia .swapped .tval{fill:var(--c2)}
+.dia .focus .tnode{stroke:var(--signal);fill:var(--signal-soft);stroke-width:3}
+.dia .focus .tval{fill:var(--signal)}
+.pair{display:grid;grid-template-columns:repeat(auto-fit,minmax(15rem,1fr));gap:1rem;margin:1.25rem 0}
+</style>
+<div class="wrap">
+
+<header>
+  <div class="kicker">Tree 01 · 遞迴第一課 · LeetCode #226</div>
+  <h1>委派給下屬的樹</h1>
+  <p class="sub">Invert Binary Tree。這一題的重點不是翻轉,是<strong>遞迴</strong>。你在 linked list 用的是 while 迴圈,樹上不能這樣走。</p>
+</header>
+
+<div class="rail"></div>
+
+<section>
+  <h2><span class="num">00</span>先學新招:遞迴</h2>
+  <p class="lede">遞迴 = 你只做一層的事,剩下的<strong>委派</strong>給同一個 function 的另一個分身,然後<strong>相信它會做對</strong>。</p>
+
+  <p>你在公司收到一張單子:「把整個 <code>infra/</code> 目錄底下所有 <code>.tf</code> 檔案格式化」。你有兩種做法。</p>
+
+  <p><strong>迴圈的做法:</strong>自己維護一個「待辦清單」,把目錄丟進去,一個一個拿出來,是檔案就處理,是目錄就把裡面的東西再丟回清單。清單是你自己宣告的變數,你要自己管它什麼時候空。</p>
+
+  <p><strong>遞迴的做法:</strong>你看一眼手上這個東西。是檔案 → 處理完收工。是目錄 → 對裡面每一個項目,<strong>發同一張單子給下屬</strong>,然後等他們回報。你不管下屬怎麼做的。</p>
+
+  <div class="callout key">
+    <h3>遞迴永遠只有三個零件</h3>
+    <ul class="signals">
+      <li><span class="n">1</span><span><strong>base case</strong> — 什麼時候不再委派,直接回答。少了它 → <code>RecursionError</code>,程式炸掉。</span></li>
+      <li><span class="n">2</span><span><strong>這一層自己做的事</strong> — 只做一層。不要在腦中往下追。</span></li>
+      <li><span class="n">3</span><span><strong>委派</strong> — 呼叫自己,但參數是「更小的問題」。</span></li>
+    </ul>
+  </div>
+
+  <h3>最重要的一句:相信下屬</h3>
+  <p>新手寫遞迴卡住,幾乎都是因為在腦中往下追第二層、第三層,然後腦袋爆掉。<strong>不要追。</strong>寫 <code>invertTree(root.left)</code> 的時候,直接假設「這行跑完,左子樹已經翻好了」。這叫 recursive leap of faith。</p>
+  <p>你追不完,而且不需要追。真正需要驗證的只有一件事:<strong>如果下屬都做對了,我這一層做的事能不能讓整體正確?</strong>能,就對了。這就是 invariant。</p>
+
+  <h3>每個分身有自己的便條紙</h3>
+  <p>這是你之前踩過的坑的樹上版本(「這行什麼時候被求值」)。每一次呼叫,Python 會給它<strong>一組全新的 local 變數</strong>,疊在一個叫 <strong>call stack</strong> 的東西上。</p>
+  <div class="stack">
+    <div class="sf">          <span class="who">invertTree</span>(root=<span class="var">4</span>) &nbsp;← 主管,暫停在「呼叫左邊」那一行,等回報</div>
+    <div class="sf indent1">   <span class="who">invertTree</span>(root=<span class="var">7</span>) &nbsp;← 下屬,也暫停著</div>
+    <div class="sf indent2 top"><span class="who">invertTree</span>(root=<span class="var">9</span>) &nbsp;← <strong>現在真正在跑的是這一層</strong></div>
+  </div>
+  <p>三個 frame 裡都有一個叫 <code>root</code> 的變數,<strong>它們是三個不同的變數</strong>,互不干擾。最底下那層改自己的 <code>root</code>,不會動到上面的。上面兩層就停在那一行,等下面 return。</p>
+
+  <h3>迴圈 vs 遞迴:同一件事的兩種記帳法</h3>
+  <div class="tablewrap">
+  <table>
+    <tr><th></th><th>while 迴圈(#206 / #141)</th><th>遞迴(tree)</th></tr>
+    <tr><td>誰記住進度</td><td class="mono">你自己宣告的 prev / curr / fast</td><td class="mono">Python 的 call stack</td></tr>
+    <tr><td>什麼時候停</td><td class="mono">while 條件變 False</td><td class="mono">base case 直接 return</td></tr>
+    <tr><td>要走兩條路時</td><td>做不到,只有一個 next</td><td>呼叫兩次就好</td></tr>
+    <tr><td>額外空間</td><td class="mono">O(1)</td><td class="mono">O(h)，h = 樹高</td></tr>
+  </table>
+  </div>
+  <p><strong>樹一定要遞迴的原因就在第三列。</strong>Linked list 每個 node 只有一條路,一個 <code>curr</code> 指標走得完。樹每個 node 有兩條路,走了左邊,右邊要留給誰記住?call stack 幫你記。</p>
+</section>
+
+<div class="rail"></div>
+
+<section>
+  <h2><span class="num">01</span>這題在幹嘛</h2>
+  <p class="lede">把一棵二元樹左右翻過來,像照鏡子。每一個 node 的左右小孩互換,整棵樹都要換。</p>
+  <div class="pair">
+    <div class="frame">
+      <div class="cap">Input</div>
+      <svg class="dia" viewBox="0 0 340 200" role="img" aria-label="原本的樹:根 4,左 2 右 7,葉子 1 3 6 9">
+        <line class="edge" x1="170" y1="30" x2="90" y2="100"/>
+        <line class="edge" x1="170" y1="30" x2="250" y2="100"/>
+        <line class="edge" x1="90" y1="100" x2="50" y2="170"/>
+        <line class="edge" x1="90" y1="100" x2="130" y2="170"/>
+        <line class="edge" x1="250" y1="100" x2="210" y2="170"/>
+        <line class="edge" x1="250" y1="100" x2="290" y2="170"/>
+        <g><circle class="tnode" cx="170" cy="30" r="18"/><text class="tval" x="170" y="30">4</text></g>
+        <g><circle class="tnode" cx="90" cy="100" r="18"/><text class="tval" x="90" y="100">2</text></g>
+        <g><circle class="tnode" cx="250" cy="100" r="18"/><text class="tval" x="250" y="100">7</text></g>
+        <g><circle class="tnode" cx="50" cy="170" r="18"/><text class="tval" x="50" y="170">1</text></g>
+        <g><circle class="tnode" cx="130" cy="170" r="18"/><text class="tval" x="130" y="170">3</text></g>
+        <g><circle class="tnode" cx="210" cy="170" r="18"/><text class="tval" x="210" y="170">6</text></g>
+        <g><circle class="tnode" cx="290" cy="170" r="18"/><text class="tval" x="290" y="170">9</text></g>
+      </svg>
+      <p class="note">[4,2,7,1,3,6,9]</p>
+    </div>
+    <div class="frame">
+      <div class="cap">Output</div>
+      <svg class="dia" viewBox="0 0 340 200" role="img" aria-label="翻轉後的樹:根 4,左 7 右 2,葉子 9 6 3 1">
+        <line class="edge" x1="170" y1="30" x2="90" y2="100"/>
+        <line class="edge" x1="170" y1="30" x2="250" y2="100"/>
+        <line class="edge" x1="90" y1="100" x2="50" y2="170"/>
+        <line class="edge" x1="90" y1="100" x2="130" y2="170"/>
+        <line class="edge" x1="250" y1="100" x2="210" y2="170"/>
+        <line class="edge" x1="250" y1="100" x2="290" y2="170"/>
+        <g class="swapped"><circle class="tnode" cx="170" cy="30" r="18"/><text class="tval" x="170" y="30">4</text></g>
+        <g class="swapped"><circle class="tnode" cx="90" cy="100" r="18"/><text class="tval" x="90" y="100">7</text></g>
+        <g class="swapped"><circle class="tnode" cx="250" cy="100" r="18"/><text class="tval" x="250" y="100">2</text></g>
+        <g><circle class="tnode" cx="50" cy="170" r="18"/><text class="tval" x="50" y="170">9</text></g>
+        <g><circle class="tnode" cx="130" cy="170" r="18"/><text class="tval" x="130" y="170">6</text></g>
+        <g><circle class="tnode" cx="210" cy="170" r="18"/><text class="tval" x="210" y="170">3</text></g>
+        <g><circle class="tnode" cx="290" cy="170" r="18"/><text class="tval" x="290" y="170">1</text></g>
+      </svg>
+      <p class="note">[4,7,2,9,6,3,1]</p>
+    </div>
+  </div>
+  <p>注意葉子 <code>1 3 6 9</code> 變成 <code>9 6 3 1</code>。<strong>不是只換根的兩個小孩</strong>,是每一層都換。</p>
+</section>
+
+<section>
+  <h2><span class="num">02</span>什麼型 + 秒認信號</h2>
+  <p><strong>型:Tree DFS(深度優先),遞迴寫法。</strong>這是所有樹題的預設起手式,先想 DFS,不行再想 BFS。</p>
+  <ul class="signals">
+    <li><span class="n">1</span><span>題目給你 <code>root</code>,而且 node 有 <code>.left</code> / <code>.right</code> → 樹題,九成是 DFS。</span></li>
+    <li><span class="n">2</span><span>「每一個 node 都要做同一件事」→ 遞迴。差別只在做什麼。</span></li>
+    <li><span class="n">3</span><span>做的事<strong>不依賴子樹的回傳值</strong>(換小孩就是換小孩)→ 這題特別簡單,是遞迴的入門款。#104 求深度就會依賴回傳值,難一階。</span></li>
+  </ul>
+</section>
+
+<section>
+  <h2><span class="num">03</span>不用遞迴怎麼做,以及為什麼不划算</h2>
+  <p>可以。你自己維護那張「待辦清單」就好,這就是把 call stack 手動攤開:</p>
+  <p><strong>手動版:</strong>準備一個 stack,先把 root 丟進去。反覆拿一顆出來 → 換它的左右小孩 → 把它的兩個小孩丟進 stack → 直到 stack 空。</p>
+  <p>複雜度<strong>完全一樣</strong>:時間 O(n)、空間 O(h)。差別只在誰記帳:手動版你自己開一個 list,遞迴版 Python 幫你開。</p>
+  <div class="callout warn">
+    <h3>所以「遞迴比較快」是錯的</h3>
+    <p>遞迴買到的是<strong>可讀性</strong>,不是效能。它其實還<strong>更慢一點點</strong>(function call 有開銷)、也<strong>更危險一點</strong>(Python 預設遞迴上限約 1000 層,一棵歪掉的樹深度 10 萬就會 <code>RecursionError</code>)。</p>
+    <p>這跟 #141 那條是同一個教訓:<strong>先講清楚換掉了什麼</strong>。#141 換的是空間不是時間;這裡換的是可讀性換掉一點效能與堆疊安全。</p>
+  </div>
+</section>
+
+<section>
+  <h2><span class="num">04</span>做法一步一步(手動走,沒有 code)</h2>
+  <p>用上面那棵 <code>[4,2,7,1,3,6,9]</code>。規則只有一條:<strong>站在某一顆 node 上,先把自己的左右手交換,再叫兩個小孩做同樣的事。</strong></p>
+
+  <div class="frames">
+    <div class="frame">
+      <div class="cap">step 1 · 站在 4</div>
+      <p class="note">交換 4 的左右手:左邊原本是 <strong>2 那一整包</strong>,右邊是 <strong>7 那一整包</strong>。換完 4 的左邊變成 7 那包。<br><strong>整包一起搬,不是只搬一顆。</strong></p>
+    </div>
+    <div class="frame">
+      <div class="cap">step 2 · 委派給左小孩(現在是 7)</div>
+      <p class="note">對 7 做同一件事:交換它的 6 和 9。7 底下變成左 9 右 6。</p>
+    </div>
+    <div class="frame">
+      <div class="cap">step 3 · 9 和 6 各自也要做</div>
+      <p class="note">它們沒有小孩,交換兩個 <code>None</code>,什麼都沒發生。這就是 base case 附近。</p>
+    </div>
+    <div class="frame">
+      <div class="cap">step 4 · 回到 4,委派給右小孩(現在是 2)</div>
+      <p class="note">交換 2 的 1 和 3 → 左 3 右 1。它們的小孩也各自跑一次,一樣什麼都沒發生。</p>
+    </div>
+  </div>
+
+  <div class="callout key">
+    <h3>step 1 那句「整包一起搬」是這題唯一的關鍵</h3>
+    <p>你交換的是<strong>兩個指標</strong>,不是兩個數字。<code>root.left</code> 存的是「2 那一整棵子樹的地址」。指標一換,底下掛的東西全部跟著走。這跟 #21 的「尾段可以整段掛」是同一個直覺:<strong>動一根指標,搬一整包。</strong></p>
+  </div>
+
+  <h3>先想清楚:為什麼這樣一定對?</h3>
+  <p>用歸納法,一句話:<strong>假設左右子樹都已經被下屬翻好了,那我在這一層把左右指標交換,整棵樹就翻好了。</strong>最小的情況(空樹)本來就翻好了。所以每一層都對。</p>
+  <p>這句話就是你面試時要講出來的 invariant。講得出來,面試官就知道你不是背的。</p>
+</section>
+
+<div class="rail"></div>
+
+<section>
+  <h2><span class="num">05</span>逐格走一次(給腦中沒有畫面的人)</h2>
+  <p class="lede">用一棵只有三顆 node 的樹,把每一次呼叫都攤開。真正的樹一樣,只是格子更多。</p>
+
+  <h3>先補上你看不到的那四顆 None</h3>
+  <div class="pair">
+    <div class="frame">
+      <div class="cap">你以為的樹</div>
+      <svg class="dia" viewBox="0 0 220 110" role="img" aria-label="三顆 node 的樹:根 4,左 2,右 7">
+        <line class="edge" x1="110" y1="28" x2="55" y2="82"/>
+        <line class="edge" x1="110" y1="28" x2="165" y2="82"/>
+        <g><circle class="tnode" cx="110" cy="28" r="17"/><text class="tval" x="110" y="28">4</text></g>
+        <g><circle class="tnode" cx="55" cy="82" r="17"/><text class="tval" x="55" y="82">2</text></g>
+        <g><circle class="tnode" cx="165" cy="82" r="17"/><text class="tval" x="165" y="82">7</text></g>
+      </svg>
+      <p class="note">三顆 node,看起來就這樣。</p>
+    </div>
+    <div class="frame">
+      <div class="cap">實際上的樹</div>
+      <svg class="dia" viewBox="0 0 220 170" role="img" aria-label="同一棵樹,但補上四個 None 子節點">
+        <line class="edge" x1="110" y1="28" x2="55" y2="82"/>
+        <line class="edge" x1="110" y1="28" x2="165" y2="82"/>
+        <line class="edge" x1="55" y1="82" x2="27" y2="136" stroke-dasharray="4 4"/>
+        <line class="edge" x1="55" y1="82" x2="83" y2="136" stroke-dasharray="4 4"/>
+        <line class="edge" x1="165" y1="82" x2="137" y2="136" stroke-dasharray="4 4"/>
+        <line class="edge" x1="165" y1="82" x2="193" y2="136" stroke-dasharray="4 4"/>
+        <g><circle class="tnode" cx="110" cy="28" r="17"/><text class="tval" x="110" y="28">4</text></g>
+        <g><circle class="tnode" cx="55" cy="82" r="17"/><text class="tval" x="55" y="82">2</text></g>
+        <g><circle class="tnode" cx="165" cy="82" r="17"/><text class="tval" x="165" y="82">7</text></g>
+        <g><circle cx="27" cy="136" r="13" fill="none" stroke="#8E88A0" stroke-width="2" stroke-dasharray="3 3"/><text class="tval" x="27" y="136" fill="#8E88A0" font-size="12">&#8709;</text></g>
+        <g><circle cx="83" cy="136" r="13" fill="none" stroke="#8E88A0" stroke-width="2" stroke-dasharray="3 3"/><text class="tval" x="83" y="136" fill="#8E88A0" font-size="12">&#8709;</text></g>
+        <g><circle cx="137" cy="136" r="13" fill="none" stroke="#8E88A0" stroke-width="2" stroke-dasharray="3 3"/><text class="tval" x="137" y="136" fill="#8E88A0" font-size="12">&#8709;</text></g>
+        <g><circle cx="193" cy="136" r="13" fill="none" stroke="#8E88A0" stroke-width="2" stroke-dasharray="3 3"/><text class="tval" x="193" y="136" fill="#8E88A0" font-size="12">&#8709;</text></g>
+      </svg>
+      <p class="note"><code>2.left</code> 不是「沒東西」,它是 <code>None</code>。所以 <code>invertTree(2.left)</code> 是合法呼叫。</p>
+    </div>
+  </div>
+
+  <div class="callout key">
+    <h3><code>if not root: return None</code> 到底在接什麼</h3>
+    <p>它<strong>不是</strong>在檢查「我是不是葉子」。它是在接住<strong>掉出樹外的那一次呼叫</strong> — 有人把 <code>None</code> 當參數傳進來了。</p>
+    <p>三顆 node 的樹,總共會呼叫 <strong>7 次</strong>:3 次踩在真的 node 上,4 次踩空。踩空的那 4 次全部由這一行接住。</p>
+  </div>
+
+  <h3>七格,一格一格走</h3>
+
+  <div class="stack"><div class="sf top"><span class="who">invert(4)</span> &nbsp;<span class="var">root=4,不是 None -> 繼續</span></div></div>
+  <p><strong>格 1.</strong> 進來第一件事就是撞 <code>if not root</code>。4 是真的 node,不成立,往下走。</p>
+
+  <div class="stack"><div class="sf top"><span class="who">invert(4)</span> &nbsp;<span class="var">交換 -> left=7, right=2</span></div></div>
+  <p><strong>格 2.</strong> 交換自己的左右手。<strong>這一層的工作到此結束</strong>,剩下的都是委派。</p>
+
+  <div class="stack">
+    <div class="sf"><span class="who">invert(4)</span> &nbsp;<span class="var">暫停,等回報</span></div>
+    <div class="sf indent1 top"><span class="who">invert(7)</span> &nbsp;<span class="var">不是 None -> 交換兩個 None,沒事發生</span></div>
+  </div>
+  <p><strong>格 3.</strong> 委派給左邊(現在是 7)。<code>invert(4)</code> <strong>停在那一行不動</strong>。7 照樣跑完整套:檢查、交換、再委派。</p>
+
+  <div class="stack">
+    <div class="sf"><span class="who">invert(4)</span> &nbsp;<span class="var">暫停</span></div>
+    <div class="sf indent1"><span class="who">invert(7)</span> &nbsp;<span class="var">暫停</span></div>
+    <div class="sf indent2 top"><span class="who">invert(None)</span> &nbsp;<span class="var">&#8709; 踩空了</span></div>
+  </div>
+  <p><strong>格 4. 這就是 base case 那一格。</strong>7 把單子發給 <code>7.left</code>,而 <code>7.left</code> 是 <code>None</code>。這一層一進來就撞上 <code>if not root</code>,<strong>成立</strong>,立刻 <code>return None</code>,不交換、不再委派。</p>
+
+  <div class="stack">
+    <div class="sf"><span class="who">invert(4)</span> &nbsp;<span class="var">暫停</span></div>
+    <div class="sf indent1 top"><span class="who">invert(7)</span> &nbsp;<span class="var">左邊回來了,換發右邊</span></div>
+    <div class="sf indent2 done"><span class="who">invert(None)</span> &nbsp;<span class="var">已 return</span></div>
+  </div>
+  <p><strong>格 5.</strong> 右邊也是 <code>None</code>,一樣立刻回來。7 的兩張單子都回報了。</p>
+
+  <div class="stack">
+    <div class="sf top"><span class="who">invert(4)</span> &nbsp;<span class="var">左邊回來了,換發右邊 -> invert(2)</span></div>
+    <div class="sf indent1 done"><span class="who">invert(7)</span> &nbsp;<span class="var">return 7</span></div>
+  </div>
+  <p><strong>格 6.</strong> <code>invert(4)</code> <strong>從格 3 停住的那一行的下一行醒過來</strong>。它的 <code>root</code> 還是 4,沒被任何下屬動過。</p>
+
+  <div class="stack"><div class="sf top"><span class="who">invert(4)</span> &nbsp;<span class="var">全部回來了 -> return 4</span></div></div>
+  <p><strong>格 7.</strong> 2 那邊跟 7 完全一樣走一遍。收工。</p>
+
+  <div class="callout warn">
+    <h3>踩空 4 次,不是浪費</h3>
+    <p>那 4 次 <code>invert(None)</code> 就是遞迴的煞車。你不用在每個地方寫 <code>if root.left:</code> 才呼叫 &#8212; <strong>讓它踩空,然後在入口統一接住</strong>,code 少一半,而且不會漏掉某個分支。</p>
+    <p>這是遞迴模板最值錢的一個習慣:<strong>base case 放在函式最上面,不要放在呼叫端。</strong></p>
+  </div>
+
+  <h3>溫度計 &#9313;:交換搬到最後,還會對嗎</h3>
+  <p><strong>會。</strong>理由只有一句:<strong>這一層的交換沒有用到下屬的回傳值。</strong></p>
+  <div class="tablewrap">
+  <table>
+    <tr><th></th><th>先交換再委派(pre-order)</th><th>先委派再交換(post-order)</th></tr>
+    <tr><td>委派給誰</td><td class="mono">換過之後的 left / right</td><td class="mono">還沒換的 left / right</td></tr>
+    <tr><td>下屬做什麼</td><td>把那一整包翻好</td><td>把那一整包翻好</td></tr>
+    <tr><td>結果</td><td class="hit">對</td><td class="hit">對</td></tr>
+  </table>
+  </div>
+  <p>兩包子樹<strong>各自都會被翻好</strong>,先翻後換、先換後翻,最後長得一樣。順序不影響。</p>
+  <div class="callout key">
+    <h3>但這是 #226 的特權,下一題就沒了</h3>
+    <p><code>#104 Max Depth</code> 的這一層要寫 <code>1 + max(left, right)</code> &#8212; 它<strong>吃下屬的回傳值</strong>。那就<strong>非得等下屬回來不可</strong>,順序不能動。</p>
+    <p>判準記這一句:<strong>這一層用不用下屬的回傳值?用,順序就鎖死;不用,愛擺哪擺哪。</strong></p>
+  </div>
+</section>
+
+<div class="rail"></div>
+
+<section>
+  <h2>接下來的區塊,你自己決定何時打開</h2>
+  <p class="sub">先自己試著寫 <code>drill.py</code>,卡住再打開。看答案是合法動作,不記債。</p>
+
+  <details>
+    <summary>完整 code 加逐行解釋<span class="lockhint">先自己寫過再開</span></summary>
+    <div class="dbody">
+<pre><code><span class="kw">class</span> <span class="fn">Solution</span>:
+    <span class="kw">def</span> <span class="fn">invertTree</span>(self, root):
+        <span class="kw">if not</span> root:                                  <span class="cm"># ① base case</span>
+            <span class="kw">return</span> <span class="kw">None</span>
+
+        root.left, root.right = root.right, root.left  <span class="cm"># ② 這一層自己做的事</span>
+
+        self.invertTree(root.left)                     <span class="cm"># ③ 委派</span>
+        self.invertTree(root.right)
+
+        <span class="kw">return</span> root                                    <span class="cm"># ④ 把自己交回去</span>
+</code></pre>
+      <div class="tablewrap">
+      <table>
+        <tr><th>行</th><th>它是三零件的哪一個</th><th>為什麼非有不可</th></tr>
+        <tr><td class="mono">if not root</td><td>base case</td><td>走到葉子底下就是 <code>None</code>。沒有這行,下一行 <code>None.left</code> 直接 <code>AttributeError</code></td></tr>
+        <tr><td class="mono">root.left, root.right = ...</td><td>這一層的事</td><td>交換兩個指標。整包子樹跟著搬</td></tr>
+        <tr><td class="mono">self.invertTree(root.left)</td><td>委派</td><td>此時 <code>root.left</code> <strong>已經是換過的那一包</strong>(第 ② 行先跑完了)</td></tr>
+        <tr><td class="mono">return root</td><td>交件</td><td>題目要回傳 root。內部呼叫其實用不到這個回傳值,但外面那一次要</td></tr>
+      </table>
+      </div>
+
+      <div class="callout warn">
+        <h3>第 ② 行:為什麼不能拆成兩行</h3>
+        <p>你可能會想這樣寫:</p>
+<pre><code><span class="cm"># ✗ 錯</span>
+root.left = root.right
+root.right = root.left   <span class="cm"># root.left 已經被上一行改掉了,這裡抄回同一包</span>
+</code></pre>
+        <p>結果是<strong>左右兩邊都變成原本的右子樹</strong>,原本的左子樹整包不見。</p>
+        <p><strong>這跟你在 #206 踩的雷是同一家的。</strong>那題是 <code>nxt = curr.next</code> 不能刪,因為下一行就要把 <code>curr.next</code> 改掉。同一條規則:<strong>要覆蓋一個東西之前,先把它存起來。</strong></p>
+        <p>Python 的 <code>a, b = b, a</code> 之所以安全,是因為 <strong>右邊整串先算完</strong>(算成一個 tuple),才開始往左邊塞。等於幫你自動存了。</p>
+      </div>
+
+      <h4>複雜度</h4>
+      <ul>
+        <li><strong>時間 O(n)</strong> — 每顆 node 剛好被拜訪一次,每次做 O(1) 的交換。</li>
+        <li><strong>空間 O(h)</strong>,h 是樹高。這是 call stack 的深度,不是你開的變數。平衡樹 h = O(log n);歪成一條線的樹 h = n,那就是 O(n)。</li>
+      </ul>
+      <p>面試講空間複雜度時,<strong>一定要講出「這個空間是 call stack 佔的」</strong>。說 O(1) 是最常見的扣分點。</p>
+    </div>
+  </details>
+
+  <details>
+    <summary>逐輪執行模擬表:call stack 長什麼樣<span class="lockhint">治「這行什麼時候被求值」</span></summary>
+    <div class="dbody">
+      <p>用 <code>[4,2,7,1,3,6,9]</code>。<code>depth</code> 是 call stack 疊了幾層。注意<strong>第 4 步到第 8 步,上面那幾層都停在原地沒動</strong>,它們卡在自己那行 <code>self.invertTree(root.left)</code> 上等回報。</p>
+      <div class="tablewrap">
+      <table>
+        <tr><th>#</th><th>depth</th><th>誰在跑</th><th>做了什麼</th><th>這一層的 root.left / right</th></tr>
+        <tr><td>1</td><td>1</td><td class="mono t1">invert(4)</td><td>不是 None,繼續</td><td class="mono">2 / 7</td></tr>
+        <tr><td>2</td><td>1</td><td class="mono t1">invert(4)</td><td>交換</td><td class="mono t2">7 / 2</td></tr>
+        <tr><td>3</td><td>1</td><td class="mono t1">invert(4)</td><td>委派左邊 → 暫停</td><td class="mono">7 / 2</td></tr>
+        <tr><td>4</td><td>2</td><td class="mono t1">invert(7)</td><td>交換</td><td class="mono t2">9 / 6</td></tr>
+        <tr><td>5</td><td>3</td><td class="mono t1">invert(9)</td><td>交換兩個 None,沒事發生</td><td class="mono">None / None</td></tr>
+        <tr><td>6</td><td>4</td><td class="mono">invert(None)</td><td class="hit">base case,return None</td><td class="mono">—</td></tr>
+        <tr><td>7</td><td>4</td><td class="mono">invert(None)</td><td class="hit">base case,return None</td><td class="mono">—</td></tr>
+        <tr><td>8</td><td>3</td><td class="mono t1">invert(9)</td><td>兩個下屬都回來了 → return 9</td><td class="mono">None / None</td></tr>
+        <tr><td>9</td><td>3</td><td class="mono t1">invert(6)</td><td>同上,return 6</td><td class="mono">None / None</td></tr>
+        <tr><td>10</td><td>2</td><td class="mono t1">invert(7)</td><td>下屬都回來了 → return 7</td><td class="mono">9 / 6</td></tr>
+        <tr><td>11</td><td>1</td><td class="mono t1">invert(4)</td><td class="hit">從第 3 步那行醒過來,換委派右邊</td><td class="mono">7 / 2</td></tr>
+        <tr><td>12</td><td>2</td><td class="mono t1">invert(2)</td><td>交換,然後同樣往下跑一輪</td><td class="mono t2">3 / 1</td></tr>
+        <tr><td>13</td><td>1</td><td class="mono t1">invert(4)</td><td class="hit">全部回來了 → return 4</td><td class="mono">7 / 2</td></tr>
+      </table>
+      </div>
+      <div class="callout key">
+        <h3>第 11 步是整張表最重要的一列</h3>
+        <p><code>invert(4)</code> 在第 3 步就停住了,中間 7 層跟它無關。第 11 步它<strong>從停住的那一行的下一行繼續</strong>,它的 <code>root</code> 還是 4,沒有被任何下屬改掉。</p>
+        <p>這就是「每個分身有自己的便條紙」的具體證據。你之前四次卡在「這行什麼時候被求值」,答案在遞迴裡是:<strong>被求值的時機由 call stack 決定,不是由你從上往下讀 code 的順序決定。</strong></p>
+      </div>
+    </div>
+  </details>
+
+  <details>
+    <summary>口訣加模板<span class="lockhint">所有樹題共用</span></summary>
+    <div class="dbody">
+      <div class="mantra">遞迴三件事:什麼時候停、我這層做什麼、剩下丟給誰。<br>寫完問一句:「下屬都做對的話,我這層夠不夠?」</div>
+      <p>樹題 DFS 通用模板,之後每一題都是填空:</p>
+<pre><code><span class="kw">def</span> <span class="fn">dfs</span>(node):
+    <span class="kw">if not</span> node:
+        <span class="kw">return</span> ____          <span class="cm"># base case 回什麼?(None / 0 / True / ...)</span>
+
+    left  = <span class="fn">dfs</span>(node.left)     <span class="cm"># 委派,拿回下屬的答案</span>
+    right = <span class="fn">dfs</span>(node.right)
+
+    <span class="kw">return</span> ____              <span class="cm"># 用 left / right 加上 node.val 拼出這層的答案</span>
+</code></pre>
+      <div class="tablewrap">
+      <table>
+        <tr><th>題</th><th>base case 回什麼</th><th>這一層做什麼</th></tr>
+        <tr><td class="mono">#226 Invert</td><td class="mono">None</td><td>交換左右指標(不看回傳值)</td></tr>
+        <tr><td class="mono">#104 Max Depth</td><td class="mono">0</td><td class="mono">1 + max(left, right)</td></tr>
+        <tr><td class="mono">#100 Same Tree</td><td class="mono">True</td><td>值相等 <strong>且</strong> 左右都相等</td></tr>
+        <tr><td class="mono">#543 Diameter</td><td class="mono">0</td><td>回高度,順手更新全域最大值</td></tr>
+      </table>
+      </div>
+      <p><strong>#226 是這個模板最鬆的版本</strong>,因為它不用下屬的回傳值。下一題 #104 就要用了,那才是真正吃「相信下屬」的地方。</p>
+    </div>
+  </details>
+
+  <details>
+    <summary>L6 面試逐字稿<span class="lockhint">英文,可直接背</span></summary>
+    <div class="dbody">
+
+      <div class="move">
+        <h4><span class="mv">MOVE 0</span>先問 constraint,手不碰白板</h4>
+        <div class="say"><b>說</b>"Before I start — a few things. How large can this tree get? I'm asking because I'm leaning toward recursion, and depth decides whether that's safe. Can the root be null? And should I invert in place and return the same root, or build a new tree?"</div>
+        <div class="think"><b>想</b>三個問題各換到一個東西:size 換到「他有在想 stack overflow」,null root 換到「他會想 edge case」,in place 換到「他知道這題可以有兩種契約」。</div>
+      </div>
+
+      <div class="move">
+        <h4><span class="mv">MOVE 1</span>重述 + 自己舉例</h4>
+        <div class="say"><b>說</b>"So: mirror the whole tree. Every node swaps its two children, all the way down. Let me draw one I'll use for the rest of this."</div>
+        <div class="think"><b>想</b>自己畫的例子後面 dry run 直接指,省時間。畫<strong>三層</strong>,不要兩層。兩層看不出「每一層都要換」。</div>
+        <div class="think"><b>寫</b><code>4 / (2: 1,3) / (7: 6,9)</code> → 期望 <code>4 / (7: 9,6) / (2: 3,1)</code></div>
+      </div>
+
+      <div class="move">
+        <h4><span class="mv">MOVE 2</span>暴力解 20 秒,指出浪費了什麼</h4>
+        <div class="say"><b>說</b>"The naive version builds a brand-new tree, allocating a mirrored node for every node. That works, but it throws away a free advantage: the problem lets me mutate, so I can just swap pointers and touch no extra memory."</div>
+        <div class="think"><b>想</b>「浪費了哪個免費情報」是 Move 2 的整個重點。有比較過,不是背下來的。</div>
+      </div>
+
+      <div class="move">
+        <h4><span class="mv">MOVE 3</span>講 invariant</h4>
+        <div class="say"><b>說</b>"Here's why recursion is correct. Assume the left and right subtrees are already fully inverted. Then swapping the two pointers at this node makes the whole tree inverted. The base case, an empty tree, is trivially inverted. So by induction every node holds."</div>
+        <div class="think"><b>想</b>這一格是整場最值錢的 30 秒。大部分人直接跳去寫 code。講出歸納法,面試官筆記本上寫的是 "reasons about correctness"。</div>
+      </div>
+
+      <div class="move">
+        <h4><span class="mv">MOVE 4</span>手法,以及換掉了什麼</h4>
+        <div class="say"><b>說</b>"I'll go with recursive DFS. To be clear about the trade: recursion isn't faster here. An explicit stack does the same O(n) work with the same O(h) space. What I'm buying is readability, and what I'm paying is the interpreter's recursion limit. If the tree could be a hundred thousand nodes deep, I'd switch to the iterative version."</div>
+        <div class="think"><b>想</b>主動說出「我知道另一條路,而且知道什麼時候該切過去」。這句話比寫對 code 值錢。</div>
+      </div>
+
+      <div class="move">
+        <h4><span class="mv">MOVE 5</span>複雜度講在寫 code 之前</h4>
+        <div class="say"><b>說</b>"Time is O(n), one visit per node, O(1) work each. Space is O(h) where h is the height — and to be precise, that space is the call stack, not anything I allocate. Balanced tree, that's O(log n); a skewed tree degenerates to O(n). Sound reasonable?"</div>
+        <div class="think"><b>想</b>"that space is the call stack" 這句話一定要講。說 O(1) 是最常見的扣分點。結尾 "Sound reasonable?" 是跟面試官對齊,不是求同意。</div>
+      </div>
+
+      <div class="move">
+        <h4><span class="mv">MOVE 6</span>code 分三段寫,每段一句話</h4>
+        <div class="say"><b>說</b>"First the base case — an empty node is already inverted, so I just return."</div>
+<pre><code><span class="kw">def</span> <span class="fn">invertTree</span>(self, root):
+    <span class="kw">if not</span> root:
+        <span class="kw">return</span> <span class="kw">None</span>
+</code></pre>
+        <div class="say"><b>說</b>"Then the one thing this level owns: swap the two child pointers. I'm using tuple assignment because the right-hand side is evaluated first, so I don't need a temp variable and I can't clobber one side."</div>
+<pre><code>    root.left, root.right = root.right, root.left
+</code></pre>
+        <div class="say"><b>說</b>"Then I hand the two subtrees off to the same function and return this node. I'm not going to trace into those calls — the induction I stated covers them."</div>
+<pre><code>    self.invertTree(root.left)
+    self.invertTree(root.right)
+    <span class="kw">return</span> root
+</code></pre>
+        <div class="think"><b>想</b>第二段那句 "the right-hand side is evaluated first" 是防雷句,直接對應你 #206 踩過的坑。講出來,面試官知道你懂求值順序,不是碰巧寫對。</div>
+      </div>
+
+      <div class="move">
+        <h4><span class="mv">MOVE 7</span>主動 dry run</h4>
+        <div class="say"><b>說</b>"Let me run my example. At 4, swap: left becomes the 7 subtree, right becomes the 2 subtree — note the whole subtree moves, not just the node. Recurse into 7, swap 6 and 9. Its children are leaves, they swap two nulls, no-op. Come back up to 4, recurse right into 2, swap 1 and 3. Result: 4, 7, 2, 9, 6, 3, 1. Matches what I drew."</div>
+        <div class="think"><b>想</b>不等面試官叫你跑。"the whole subtree moves" 這句順手把最容易誤解的地方澄清掉。</div>
+      </div>
+
+      <div class="move">
+        <h4><span class="mv">MOVE 8</span>主動掃 edge case,點名誰負責</h4>
+        <div class="say"><b>說</b>"Edge cases. Null root returns null — the base case handles it, no special-casing needed. Single node: swap two nulls, no-op, correct. A one-sided skewed tree is correct but that's where recursion depth would bite, and the iterative version is the fix."</div>
+        <div class="think"><b>想</b>「哪個 case 是靠哪個設計自動答對的」。說 "the base case handles it, no special-casing needed" 比列一串 case 強得多。</div>
+      </div>
+
+      <div class="move">
+        <h4><span class="mv">MOVE 9</span>主動講推廣</h4>
+        <div class="say"><b>說</b>"Two follow-ups I'd expect. One, the iterative version with an explicit stack or a BFS queue, for deep trees. Two, this same shape generalizes: Same Tree and Symmetric Tree are the same traversal with a different per-node operation. Invert is basically the write version and Symmetric is the read version of the same mirror idea."</div>
+        <div class="think"><b>想</b>解一類,不是解一題。把 #100 / #101 拉進來,展示你腦中有 pattern 地圖。</div>
+      </div>
+
+      <h3>完整 code 加「哪一句話對應哪幾行」對照表</h3>
+<pre><code><span class="kw">class</span> <span class="fn">Solution</span>:
+    <span class="kw">def</span> <span class="fn">invertTree</span>(self, root):
+        <span class="kw">if not</span> root:
+            <span class="kw">return</span> <span class="kw">None</span>
+        root.left, root.right = root.right, root.left
+        self.invertTree(root.left)
+        self.invertTree(root.right)
+        <span class="kw">return</span> root
+</code></pre>
+      <div class="tablewrap">
+      <table>
+        <tr><th>你嘴巴講的那句</th><th>白板上長出的行</th></tr>
+        <tr><td>"an empty node is already inverted"</td><td class="mono">if not root: return None</td></tr>
+        <tr><td>"the one thing this level owns"</td><td class="mono">root.left, root.right = root.right, root.left</td></tr>
+        <tr><td>"the right-hand side is evaluated first"</td><td class="mono">(同上,解釋為什麼用 tuple)</td></tr>
+        <tr><td>"hand the two subtrees off"</td><td class="mono">self.invertTree(root.left / .right)</td></tr>
+        <tr><td>"the induction I stated covers them"</td><td class="mono">(不寫 code,這是 Move 3 的回收)</td></tr>
+        <tr><td>"return this node"</td><td class="mono">return root</td></tr>
+      </table>
+      </div>
+
+      <h3>只給結論 vs 說明推理</h3>
+      <div class="tablewrap">
+      <table>
+        <tr><th>Move</th><th>只給結論</th><th>說明推理</th></tr>
+        <tr><td>3</td><td>"I'll use recursion."</td><td>"Assume the subtrees are already inverted; then swapping here finishes it. Induction."</td></tr>
+        <tr><td>4</td><td>"Recursion is cleaner."</td><td>"Same O(n)/O(h) as iterative. I'm buying readability and paying recursion limit."</td></tr>
+        <tr><td>5</td><td>"Space is O(h)."</td><td>"O(h), and that space is the call stack, not allocations. O(log n) balanced, O(n) skewed."</td></tr>
+        <tr><td>8</td><td>"Null root works."</td><td>"The base case handles null — no special-casing needed."</td></tr>
+      </table>
+      </div>
+      <p class="sub">兩欄寫的是同一份 code。差別只在有沒有把推理講出口。這不對應職級,對應的是面試官筆記本上寫得下什麼。</p>
+    </div>
+  </details>
+
+  <details>
+    <summary>這次的釐清<span class="lockhint">2026-09-10</span></summary>
+    <div class="dbody">
+      <div class="fix">
+        <div class="x">&#10007; 我以為:base case 是「這顆 node 沒有左右小孩,就 return None」</div>
+        <div class="o">&#10003; 其實是:「我收到的 root 本身就是 None」才停</div>
+        <div class="w">&#8594; 為什麼會搞混:腦中的樹沒有畫出 None。葉子看起來就是盡頭,但葉子底下真的掛著兩個 <code>None</code>,而且 <code>invertTree(None)</code> 是合法呼叫。用單顆樹 <code>[1]</code> 驗:照舊規則會回 <code>None</code>,整棵樹弄丟。</div>
+      </div>
+      <div class="fix">
+        <div class="x">&#10007; 卡住:第三個零件「委派」講不出來</div>
+        <div class="o">&#10003; 自己講出來的話:「把自己再當成 root」</div>
+        <div class="w">&#8594; 破關的是具體圖:先畫「只換 4 這一層」的結果,再對照正確答案,問「那 6 和 9 是誰換的」。抽象問法問不出來,指著圖問就出來了。</div>
+      </div>
+      <div class="fix">
+        <div class="x">&#10007; 我以為:<code>a, b = b, a</code> 是 Python「直接對調兩個標籤」</div>
+        <div class="o">&#10003; 其實是:右邊整串先求值成一個 tuple,才開始往左邊塞</div>
+        <div class="w">&#8594; 差別在於這條可以推廣:<code>a, b, c = b, c, a</code>、<code>arr[i], arr[j] = arr[j], arr[i]</code> 都安全,理由都是同一個求值順序。</div>
+      </div>
+      <div class="callout key">
+        <h3>這一場的方法論結論</h3>
+        <p>學員是<strong>心盲症(aphantasia)</strong>患者,腦中無法產生視覺影像。今天兩次卡住 &#8212; 委派、base case &#8212; 都是在補上圖之後當場通過的。</p>
+        <p>已寫進 <code>~/.claude/CLAUDE.md</code>、<code>engine/ENGINE.md</code> 的 Locked 表、<code>leetcode-coach/SKILL.md</code>:<strong>任何抽象機制都要真的畫出來,包含看不見的部分</strong>(<code>None</code> 子節點、暫停中的 stack frame、被覆蓋前的舊值)。「想像一下」是空指令,禁用。</p>
+      </div>
+    </div>
+  </details>
+
+</section>
+
+</div>
