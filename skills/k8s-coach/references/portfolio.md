@@ -15,11 +15,18 @@ Progress file, registries, and in-progress work live in:
 - `coach-rules.md`:**常駐檔,每場 session 全讀**。學員背景/教法備忘 + 教練執行紀律。
 - `session-log.md`:**熱檔,只留最近幾堂 + chunk maps**。session 1-19 封存在 `archive/session-log-s01-s19.md`。
 - `archive/`:冷檔,開課時不讀;Weekly Review trend tracking、Phase Gate 三振診斷、或要查某堂歷史時才讀。
+  - `progress-narrative-2026-09-07.md`:2026-09-07 以前 progress.md 的 Phase status / Mastery /
+    Scorecard history / Mistake Registry 敘事原文(逐字,未刪字)。要判 mastery 升降級、
+    查某場 scorecard 的逐項評註、或查某張卡的完整歷史時才拉對應段。
   - `breakpoint-history.md`:2026-08-19 以前 progress.md 的 Current Session breakpoint 疊層原文(s16-s26,該區段當時已長成 263 行日誌,違反 schema §3)。
   - `session-log-s01-s19.md`:早期 session 敘事。
   - `pre-migration/`:standalone 時期的原始狀態檔,verbatim 保存,不再更新。
 
 **寫入紀律**:`progress.md` 的 Current Session breakpoint 只留最新一堂(當前狀態 + 下一堂 resume,PROGRESS-SCHEMA §3),敘事寫 `session-log.md`,長效教練紀律寫 `coach-rules.md`「教練執行紀律」,不要在 breakpoint 疊舊堂。
+
+**寫入紀律(Mastery / Scorecard,2026-09-07 加)**:`Mastery` 一個 topic 就是**一行 level + last-updated**(PROGRESS-SCHEMA §5),`Scorecard history` 一場就是**一行六欄**(§6)。降級理由、未升級的原因、冷測歷史、逐項維度評註一律寫 `session-log.md` 對應堂或 `archive/progress-narrative-*.md`,**不要在 Mastery 行的括號裡寫整段敘事**。由來:progress.md 2026-09-07 量到 27,373 字元,Mastery(5,937)+ Scorecard(4,976)+ Registry(7,762)佔全檔 68%,三節全部違反 schema 欄位定義。這是同一個病第三次發作(2026-08-19 在 breakpoint 區、2026-09-02 在 registry 區)。
+
+**讀取紀律(2026-09-07 加)**:開場**不要整份讀 `progress.md`**。依 GOVERNANCE 的 context loading contract,先 `grep -n '^## '` 抓節標題,只讀 Meta + Current Session breakpoint;要選複習題才讀 Spaced-repetition queue 的到期列;要教某 topic 才讀該列 Mastery;Scorecard history 只在 step G / Weekly Review / Progress Report 讀。違反這條的代價實測:2026-09-07 開場整份讀完,光 repo 檔案就載入約 128 KB。
 
 **寫入紀律(Mistake Registry,2026-09-02 加)**:registry 一張卡就是**一行八欄**(PROGRESS-SCHEMA §7),queue 一行五欄(§8)。正解、判準句、L6 版、重測歷史、下次抽考題一律寫 `mistake-notes.md` 對應節,**不要在 registry 行底下疊子項、不要在 queue 行尾疊括號**。這條的由來:progress.md 曾長到 84 KB / 40.8k tokens(36 條 registry 疊出 92 條子項),開場一次全讀但一堂只抽 2 到 3 張卡。同一個病 2026-08-19 已在 breakpoint 區發生過一次。
 - `environment.md`:機器層事實(kubeconfig contexts 與安全清單、port 慣例、工具狀態、bastion 同步步驟)。

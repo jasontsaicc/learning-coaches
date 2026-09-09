@@ -294,3 +294,53 @@
 - 反直覺 payoff:`ci-system/ci-reader` 拿到的是「讀 rbac-lab 的 Pod」,回自己家 `ci-system` 反而一顆都讀不到。所以 CI 吃 403 時「把 SA 搬到目標 ns」是白做工。
 - 圖解頁:https://claude.ai/code/artifact/5a0f989c-a7f4-4668-bb7a-f5fa07b5d076
 - 09-07 抽:換皮問「RoleBinding 在 A ns、Role 在 B ns」會怎樣(考 roleRef 那條線),要求先講執行體在哪一層再答。
+
+## 2026-09-08 | RBAC 動詞看有無物件名字(get vs list vs watch)
+
+- 題目:Role 只給 `verbs: ["get"]`,客戶 CI 跑 `kubectl get pods -n rbac-lab`。學員預測「會成功,因為是 get」。實測 403 `cannot list resource "pods"`。
+- **正解**:RBAC 的動詞由**請求的形狀**決定,不是由 kubectl 指令的名字決定。
+  - `kubectl get pods`(複數、沒指定名字)→ API Server 收到 **list**
+  - `kubectl get pod my-app-7d9f`(有名字)→ 收到 **get**
+  - `kubectl get pods --watch` → 收到 **watch**(第三個獨立動詞)
+- **封印句:`kubectl get` 這個指令名字騙人。有物件名字 = `get`,沒名字 = `list`,加 `--watch` = `watch`。**
+- `watch` 為何獨立:`list` 是一次性快照拿完就關,`watch` 是長連線持續推送變更,資源成本與外洩風險不同 → 所以唯讀角色的業界慣用寫法永遠是三件套 `verbs: ["get", "list", "watch"]`。
+- **顧問層 payoff**:客戶說「我們明明給了 pod 讀取權限」不是在說謊 —— **人腦的「讀取」跟 RBAC 的動詞不是同一套詞彙**。進場先把「你們給了什麼 verb」問成具體字串,不要接受「唯讀」這種形容詞。
+- **Say it in English**: "A read-only role needs `get`, `list`, and `watch` — `watch` is a separate verb because it opens a long-lived stream, not a one-off read."
+- 09-11 抽:換皮問「Role 給了 `["get","list"]`,客戶的 dashboard 跑 `kubectl get pods -w` 為什麼還是 403」,要求先講動詞由什麼決定再答。
+
+## 2026-09-08 | 成功訊息不保證做到你以為的事(pattern 卡,ops 判準)
+
+- **同一堂撞三次**,三次都是「指令沒報錯,但沒做到學員以為的事」:
+  1. `kubectl describe role -n ALL` → `No resources found in ALL namespace`。kubectl 真的去找一個叫 `ALL` 的 ns。正解是 `-A` / `--all-namespaces`。
+  2. `kubectl get pods -n rbac-lab --as=$SA`,但 `$SA` 從沒賦值 → `--as=` 空值 → **完全沒有 impersonation,是用 admin 身分查的** → 印出 `No resources found`,學員差點當成測試通過。
+  3. `kubectl patch ... ` → 印 `patched (no change)`,但 `describe` 驗出實際已改成 `[get list watch]`。訊息誤導。
+- **封印句:k8s 的成功訊息不保證你以為的那件事發生了。輸出跟預期不符時,先懷疑「這條指令有沒有真的做到我以為的事」,再懷疑機制。**
+- 資深 vs 資淺的分界:資淺的人看到怪輸出開始改 YAML,資深的人先確認儀器沒壞。
+- 同一堂的 payoff:`No resources found in rbac-lab namespace.` 這句話出現兩次,第一次是「impersonation 沒生效」(錯的),第二次是「權限正確、ns 裡真的沒 Pod」(對的)。**同一句話兩個相反的意思。**
+- 09-11 抽:給一段假的 terminal 逐字稿(含一條沒生效但沒報錯的指令),問「你會先做什麼」。
+
+## 2026-09-08 | `auth can-i --list` 不加 `--as` 問的是自己
+
+- 同堂犯兩次。第二次是在 chunk 3 驗收題(客戶 CI `deployer` 吃 403),學員答裸指令 `kubectl auth can-i --list`,沒有 `--as` 也沒有 `-n`。
+- **正解**:`kubectl auth can-i --list -n <目標 ns> --as=system:serviceaccount:<SA住的ns>:<SA名字>`
+- **兩個 ns 不是同一個**:`--as` 裡的 ns 是 **SA 住的地方**,`-n` 是 **要查的地方**。學員這點抓對了 ✅。
+- **這串不是設計給你手打的**:403 全文裡就有完整 username,排障第一步是讀錯誤訊息、選取、貼上。手打就先 `SA=system:serviceaccount:ci:deployer` 存成變數(但要記得真的按 Enter,見上一張卡)。
+- 為何 username 長這麼醜:API Server 眼中所有身分都是**一個扁平字串**,人類叫 `jason`,SA 得擠進同一個命名空間,`system:serviceaccount:<ns>:<name>` 這個前綴保證不撞名。
+- 09-11 抽:直接丟一段 403 全文,要求 30 秒內寫出重現指令。
+
+## 2026-09-08 | `auth can-i --list` 三分判準(噪音 / 缺 resource / 缺動詞)
+
+- 首答失敗:學員把**原本那個 403 錯誤訊息**當成 `--list` 的輸出來描述,而且用「會 403」當判準 —— 兩種情況都會 403,不能區分。
+- **正解(三分,不是二分)**:
+
+| `--list` 的畫面 | 斷在哪 |
+|---|---|
+| 只剩噪音(`selfsubject*`、`/healthz` 那堆),一個 resource 都沒有 | binding **完全沒生效**(段 1-2) |
+| 有東西,但**缺這個 resource** | binding 有效,**權限沒涵蓋到它**(段 2-3) |
+| 有這個 resource,但**動詞不對** | Role 定義**少動詞**(段 3) |
+
+- 讀 `--list` 的技巧:`Non-Resource URLs` 那一整段是**每個通過 authn 的身分都自動有的** discovery 權限(綁在 `system:authenticated` group 上),不是你給的,直接跳過。只看有 resource 名字的那幾行。
+- **封印句:看那個 resource 有沒有出現在清單上。沒出現 = binding 那側的問題;出現了但動詞不對 = Role 定義的問題。**
+- **L6 收尾**:後兩種的下一發都是 `kubectl get rolebinding -n <ns> -o wide`,因為「權限沒涵蓋」可能是 Role 漏寫,也可能是有一個 Role 寫對了但**沒綁上去**,`--list` 分不出這兩者。
+- ⚠️ **教練備註**:教練第一版判準句講成二分(「沒出現 = binding 的問題」)**講太粗**,學員在換皮題沒被帶走、自己看輸出下對判斷。這是正樣本,記在此處備查。
+- 09-11 抽:給一張 `--list` 輸出 + 一段 403,問斷在第幾段、下一發指令是什麼。

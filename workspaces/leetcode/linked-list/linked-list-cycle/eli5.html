@@ -1,0 +1,653 @@
+<title>龜兔賽跑抓環</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=JetBrains+Mono:wght@400;700&family=Noto+Sans+TC:wght@400;500;700&display=swap">
+<style>
+:root{
+  --paper:#F2F0F6; --surface:#FFFFFF; --ink:#191527; --body:#302B41;
+  --muted:#6E687E; --line:#CFCADB;
+  --c1:#4A4098; --c1-soft:#E3E0F3;
+  --c2:#AE3557; --c2-soft:#F6E0E7;
+  --signal:#10726B; --signal-soft:#D8ECE9;
+  --code-bg:#131022; --code-fg:#DEDAEA;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#14121C; --surface:#1C1929; --ink:#EAE7F2; --body:#C6C1D4;
+    --muted:#8E88A0; --line:#322E44;
+    --c1:#9E94EC; --c1-soft:#241F42;
+    --c2:#E88BA4; --c2-soft:#3A1D28;
+    --signal:#4FC7B6; --signal-soft:#0F2F2C;
+    --code-bg:#0C0A14; --code-fg:#DAD5E6;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#14121C; --surface:#1C1929; --ink:#EAE7F2; --body:#C6C1D4;
+  --muted:#8E88A0; --line:#322E44;
+  --c1:#9E94EC; --c1-soft:#241F42;
+  --c2:#E88BA4; --c2-soft:#3A1D28;
+  --signal:#4FC7B6; --signal-soft:#0F2F2C;
+  --code-bg:#0C0A14; --code-fg:#DAD5E6;
+}
+
+*{box-sizing:border-box}
+body{
+  background:var(--paper); color:var(--body);
+  font-family:"Noto Sans TC","Hiragino Sans","Microsoft JhengHei",sans-serif;
+  font-size:16px; line-height:1.85;
+  padding:0 1.25rem 5rem;
+}
+.wrap{max-width:44rem; margin:0 auto}
+
+header{padding:3.5rem 0 1.5rem}
+.kicker{
+  font-family:"JetBrains Mono",monospace; font-size:.72rem; font-weight:700;
+  letter-spacing:.16em; text-transform:uppercase; color:var(--signal);
+}
+h1{
+  font-family:"Archivo","Noto Sans TC",sans-serif; font-weight:700;
+  font-size:clamp(2rem,6vw,2.9rem); line-height:1.12; letter-spacing:-.02em;
+  color:var(--ink); margin:.5rem 0 .6rem; text-wrap:balance;
+}
+.sub{color:var(--muted); font-size:1rem; margin:0}
+
+.rail{
+  height:9px; margin:2.75rem 0 2.25rem;
+  border-top:2px solid var(--line); border-bottom:2px solid var(--line);
+  background:repeating-linear-gradient(90deg,var(--line) 0 3px,transparent 3px 13px);
+}
+
+h2{
+  font-family:"Archivo","Noto Sans TC",sans-serif; font-weight:700;
+  font-size:1.4rem; color:var(--ink); letter-spacing:-.01em;
+  margin:0 0 .25rem; text-wrap:balance;
+}
+h2 .num{
+  font-family:"JetBrains Mono",monospace; font-size:.85rem; color:var(--signal);
+  margin-right:.6rem; vertical-align:.15em;
+}
+h3{font-family:"Archivo","Noto Sans TC",sans-serif;font-weight:600;font-size:1rem;color:var(--ink);margin:1.75rem 0 .4rem}
+h4{font-family:"Archivo","Noto Sans TC",sans-serif;font-weight:600;font-size:.95rem;color:var(--ink);margin:1.4rem 0 .3rem}
+section{margin-bottom:2.5rem}
+p{margin:.7rem 0}
+strong{color:var(--ink); font-weight:700}
+code{font-family:"JetBrains Mono",monospace; font-size:.87em; background:var(--signal-soft); color:var(--ink); padding:.1em .35em; border-radius:2px}
+
+.lede{font-size:1.1rem; color:var(--ink); border-left:3px solid var(--signal); padding-left:1rem; margin:1rem 0 1.25rem}
+
+.track{display:flex; align-items:center; gap:.3rem; overflow-x:auto; padding:.9rem 0; font-family:"JetBrains Mono",monospace}
+.track .lbl{color:var(--muted); font-size:.8rem; min-width:3.4rem; flex-shrink:0}
+.node{
+  display:inline-flex; align-items:center; justify-content:center;
+  min-width:2.2rem; padding:.3rem .5rem; flex-shrink:0;
+  border:2px solid var(--line); border-radius:3px; background:var(--surface);
+  font-weight:700; color:var(--ink);
+}
+.node.a{border-color:var(--c1); background:var(--c1-soft); color:var(--c1)}
+.node.b{border-color:var(--c2); background:var(--c2-soft); color:var(--c2)}
+.arrow{color:var(--muted); flex-shrink:0; font-size:.9rem}
+.nil{color:var(--muted); font-size:.85rem; flex-shrink:0}
+
+.callout{background:var(--surface); border:1px solid var(--line); border-radius:4px; padding:1.1rem 1.25rem; margin:1.25rem 0}
+.callout.warn{border-left:4px solid var(--c2)}
+.callout.key{border-left:4px solid var(--signal)}
+.callout h3{margin-top:0}
+
+ul,ol{padding-left:1.35rem; margin:.7rem 0}
+li{margin:.35rem 0}
+
+.signals{list-style:none; padding:0; display:grid; gap:.5rem}
+.signals li{
+  display:flex; gap:.75rem; align-items:baseline;
+  background:var(--surface); border:1px solid var(--line); border-radius:4px; padding:.7rem .95rem; margin:0;
+}
+.signals .n{font-family:"JetBrains Mono",monospace; font-weight:700; color:var(--signal); flex-shrink:0}
+
+.tablewrap{overflow-x:auto; margin:1.25rem 0; border:1px solid var(--line); border-radius:4px; background:var(--surface)}
+table{border-collapse:collapse; width:100%; font-size:.86rem; font-variant-numeric:tabular-nums}
+th,td{text-align:left; padding:.55rem .8rem; border-bottom:1px solid var(--line); white-space:nowrap}
+th{font-family:"Archivo",sans-serif; font-weight:600; color:var(--ink); font-size:.78rem; letter-spacing:.03em; text-transform:uppercase}
+tr:last-child td{border-bottom:none}
+td.mono,th.mono{font-family:"JetBrains Mono",monospace}
+.t1{color:var(--c1); font-weight:700}
+.t2{color:var(--c2); font-weight:700}
+.hit{color:var(--signal); font-weight:700}
+
+pre{
+  background:var(--code-bg); color:var(--code-fg); border-radius:5px;
+  padding:1.1rem 1.25rem; overflow-x:auto; margin:1rem 0;
+  font-family:"JetBrains Mono",monospace; font-size:.84rem; line-height:1.75;
+}
+pre code{background:none; color:inherit; padding:0; font-size:1em}
+.cm{color:#8A83A8}
+.kw{color:#E8A0B4}
+.fn{color:#9E94EC}
+
+details{border:1px solid var(--line); border-radius:5px; background:var(--surface); margin:.85rem 0; overflow:hidden}
+summary{
+  cursor:pointer; padding:.95rem 1.2rem; list-style:none;
+  font-family:"Archivo","Noto Sans TC",sans-serif; font-weight:600; color:var(--ink);
+  display:flex; align-items:center; gap:.7rem;
+}
+summary::-webkit-details-marker{display:none}
+summary::before{content:"\25B8"; color:var(--signal); font-size:.85rem; transition:transform .15s}
+details[open] summary::before{transform:rotate(90deg)}
+summary:focus-visible{outline:2px solid var(--signal); outline-offset:-2px}
+.dbody{padding:0 1.2rem 1.3rem; border-top:1px solid var(--line)}
+.dbody > *:first-child{margin-top:1rem}
+.lockhint{font-family:"Noto Sans TC",sans-serif;font-weight:400;font-size:.8rem;color:var(--muted);margin-left:auto}
+
+.mantra{font-family:"Archivo","Noto Sans TC",sans-serif;font-size:1.05rem;font-weight:600;color:var(--ink);background:var(--signal-soft);border-radius:4px;padding:1rem 1.2rem;margin:1rem 0}
+
+.fix{display:grid;gap:.2rem;margin:1.1rem 0;padding-left:.9rem;border-left:3px solid var(--line)}
+.fix .x{color:var(--c2)} .fix .o{color:var(--c1)} .fix .w{color:var(--muted);font-size:.92rem}
+
+.move{border-top:1px solid var(--line); padding-top:1.15rem; margin-top:1.4rem}
+.move:first-of-type{border-top:none;padding-top:0;margin-top:.6rem}
+.move h4{font-family:"Archivo","Noto Sans TC",sans-serif;font-weight:700;font-size:1rem;color:var(--ink);margin:0 0 .5rem;display:flex;gap:.6rem;align-items:baseline}
+.move h4 .mv{font-family:"JetBrains Mono",monospace;font-size:.7rem;font-weight:700;letter-spacing:.1em;color:var(--signal);border:1px solid var(--signal);border-radius:2px;padding:.1rem .35rem;flex-shrink:0}
+.say{background:var(--c1-soft);border-left:3px solid var(--c1);border-radius:0 3px 3px 0;padding:.75rem 1rem;margin:.6rem 0;font-size:.93rem;color:var(--ink)}
+.say b{display:block;font-family:"JetBrains Mono",monospace;font-size:.66rem;letter-spacing:.12em;text-transform:uppercase;color:var(--c1);margin-bottom:.3rem}
+.think{font-size:.93rem;margin:.6rem 0;padding-left:.9rem;border-left:2px dotted var(--line)}
+.think b{font-family:"JetBrains Mono",monospace;font-size:.66rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:.2rem}
+
+/* circular track diagrams */
+.frames{display:grid;grid-template-columns:repeat(auto-fit,minmax(15rem,1fr));gap:1rem;margin:1.25rem 0}
+.frame{background:var(--surface);border:1px solid var(--line);border-radius:4px;padding:.8rem .9rem}
+.frame .cap{font-family:"JetBrains Mono",monospace;font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:.2rem}
+.frame .note{font-size:.86rem;color:var(--body);margin:.35rem 0 0}
+.dia{width:100%;height:auto;display:block}
+.dia .edge{stroke:var(--line);stroke-width:2;fill:none}
+.dia .ah{fill:var(--line)}
+.dia .ring{fill:var(--surface);stroke:var(--line);stroke-width:2}
+.dia .val{fill:var(--muted);font-family:"JetBrains Mono",monospace;font-size:15px;font-weight:700;text-anchor:middle;dominant-baseline:central}
+.dia .tag{font-family:"JetBrains Mono",monospace;font-size:13px;font-weight:700;text-anchor:middle}
+.dia .s .ring{stroke:var(--c1);fill:var(--c1-soft);stroke-width:3}
+.dia .s .val{fill:var(--c1)}
+.dia .f .ring{stroke:var(--c2);fill:var(--c2-soft);stroke-width:3}
+.dia .f .val{fill:var(--c2)}
+.dia .both .ring{stroke:var(--signal);fill:var(--signal-soft);stroke-width:4}
+.dia .both .val{fill:var(--signal)}
+.dia .tag.ts{fill:var(--c1)} .dia .tag.tf{fill:var(--c2)} .dia .tag.tb{fill:var(--signal)}
+
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+<div class="wrap">
+
+<header>
+  <div class="kicker">LeetCode 141 &middot; Linked List &middot; 小龜模式</div>
+  <h1>龜兔賽跑抓環</h1>
+  <p class="sub">Linked List Cycle &mdash; 這一招之後在 #142 #143 #876 #287 全部重用</p>
+</header>
+
+<div class="rail"></div>
+
+<section>
+  <h2><span class="num">01</span>這題在幹嘛</h2>
+  <p class="lede">給你一條鏈的 head。從頭一直走 <code>.next</code>,走得完就回 <code>False</code>,走不完(繞回前面某一顆)就回 <code>True</code>。</p>
+
+  <div class="track"><span class="lbl">沒環</span><span class="node">1</span><span class="arrow">&rarr;</span><span class="node">2</span><span class="arrow">&rarr;</span><span class="node">3</span><span class="arrow">&rarr;</span><span class="node">4</span><span class="arrow">&rarr;</span><span class="nil">None</span></div>
+
+  <p>有環的話,鏈的尾巴不是 <code>None</code>,而是指回中間某一顆:</p>
+
+  <div class="frames" style="grid-template-columns:1fr">
+    <div class="frame">
+      <div class="cap">有環 &middot; 3 &rarr; 2 &rarr; 0 &rarr; -4,-4 指回 2</div>
+      <svg class="dia" viewBox="0 0 300 175" role="img" aria-label="A 指向 B,B C D 三顆繞成一圈">
+        <path class="edge" d="M60 85 H104"/><path class="ah" d="M112 85 L102 80 L102 90 Z"/>
+        <path class="edge" d="M149 78 L211 55"/><path class="ah" d="M219 52 L208 50 L212 60 Z"/>
+        <path class="edge" d="M240 65 V99"/><path class="ah" d="M240 107 L235 96 L245 96 Z"/>
+        <path class="edge" d="M221 118 L159 95"/><path class="ah" d="M151 92 L158 101 L162 91 Z"/>
+        <g><circle class="ring" cx="40" cy="85" r="20"/><text class="val" x="40" y="85">3</text></g>
+        <g><circle class="ring" cx="130" cy="85" r="20"/><text class="val" x="130" y="85">2</text></g>
+        <g><circle class="ring" cx="240" cy="45" r="20"/><text class="val" x="240" y="45">0</text></g>
+        <g><circle class="ring" cx="240" cy="125" r="20"/><text class="val" x="240" y="125">-4</text></g>
+        <text class="val" x="40" y="130" style="font-size:12px">head</text>
+      </svg>
+      <p class="note">從 3 出發,走進 2 &rarr; 0 &rarr; -4 &rarr; 2 &rarr; 0 &rarr; -4&hellip; 永遠停不下來。<strong>那條 3 是進場跑道,後面三顆才是環。</strong></p>
+    </div>
+  </div>
+
+  <div class="callout warn">
+    <h3>先講一件會害你寫錯的事</h3>
+    <p style="margin-bottom:0">環是由 <strong>node 物件的身分</strong>決定的,不是由 <code>val</code> 決定的。一條鏈裡完全可以有兩顆 <code>val</code> 都是 <code>2</code> 但不是同一顆的 node。所以等一下比較兩根指標時,要用 <code>is</code>,不能用 <code>==</code> 比值。</p>
+  </div>
+</section>
+
+<div class="rail"></div>
+
+<section>
+  <h2><span class="num">02</span>這是什麼型</h2>
+  <p>Fast &amp; Slow Pointer(快慢指標),又叫 Floyd's cycle detection。三個秒認信號:</p>
+  <ul class="signals">
+    <li><span class="n">S1</span><span>題目在問<strong>鏈的形狀</strong>(有沒有環、中點在哪、倒數第 k 個),不是問裡面的<strong>值</strong>。</span></li>
+    <li><span class="n">S2</span><span>你需要「兩個位置的相對關係」,但<strong>不能倒著走</strong>。linked list 沒有 <code>.prev</code>,所以只能用第二根指標製造距離差。</span></li>
+    <li><span class="n">S3</span><span>題目或面試官加一句 <strong>&ldquo;can you do it in O(1) space?&rdquo;</strong>。這句話幾乎等於直接點名快慢指標。</span></li>
+  </ul>
+  <div class="callout key">
+    <h3>秒認公式:形狀問題 + 不准用額外空間 = 放兩根速度不同的指標</h3>
+    <p style="margin-bottom:0">跟 #206 反轉那組指標的差別:#206 的 <code>prev</code> / <code>curr</code> 是<strong>同速</strong>,目的是改鏈。這題的 <code>slow</code> / <code>fast</code> 是<strong>異速</strong>,目的是<strong>不改鏈,只量距離</strong>。</p>
+  </div>
+</section>
+
+<div class="rail"></div>
+
+<section>
+  <h2><span class="num">03</span>暴力法長怎樣,它輸在哪</h2>
+  <p>最直覺的想法:<strong>沿路做記號</strong>。準備一個 <code>set</code>,每走到一顆就把它丟進去。</p>
+  <ul>
+    <li>走到 <code>None</code> &rarr; 走完了,<code>return False</code></li>
+    <li>走到一顆<strong>已經在 set 裡</strong>的 &rarr; 繞回來了,<code>return True</code></li>
+  </ul>
+  <p>這個做法<strong>完全正確</strong>,而且時間也是 O(n)。所以它輸的不是速度。</p>
+
+  <div class="tablewrap">
+    <table>
+      <tr><th>做法</th><th>時間</th><th>空間</th><th>輸在哪</th></tr>
+      <tr><td>hash set 記走過的 node</td><td class="mono">O(n)</td><td class="mono t2">O(n)</td><td>鏈有一千萬顆就要存一千萬個參照</td></tr>
+      <tr><td>快慢指標</td><td class="mono">O(n)</td><td class="mono t1">O(1)</td><td>需要想通「為什麼一定會相遇」</td></tr>
+    </table>
+  </div>
+
+  <div class="callout warn">
+    <h3>這是這題最容易記反的一句</h3>
+    <p style="margin-bottom:0">快慢指標<strong>不是為了跑得比較快</strong>,兩個都是 O(n)。它換掉的是<strong>記憶體</strong>。面試講「這樣比較快」會被抓,講「same time, constant space instead of linear」才對。</p>
+  </div>
+
+  <p><strong>暴力解浪費了什麼免費情報?</strong> 它把整條走過的路都背下來,可是判斷有沒有環<strong>根本不需要知道路長什麼樣</strong>。環是一個「形狀」,不是一組「內容」。你只要有兩個東西在同一條路上用不同速度跑,形狀自己會說話。</p>
+</section>
+
+<div class="rail"></div>
+
+<section>
+  <h2><span class="num">04</span>做法,一步一步(沒有 code)</h2>
+  <p>把鏈想成跑道。放兩個跑者在起點:</p>
+  <ul>
+    <li><strong class="t1">龜 slow</strong>:一次走 <strong>1 步</strong></li>
+    <li><strong class="t2">兔 fast</strong>:一次走 <strong>2 步</strong></li>
+  </ul>
+  <p>然後只看兩件事:<strong>誰先撞到路的盡頭</strong>,還是<strong>兔子從後面追上龜</strong>。</p>
+
+  <div class="tablewrap">
+    <table>
+      <tr><th>發生什麼</th><th>代表什麼</th><th>回傳</th></tr>
+      <tr><td><strong class="t2">兔子撞到 None</strong></td><td>這是一條直路,有盡頭</td><td class="mono">False</td></tr>
+      <tr><td><strong class="hit">兔子跟龜站到同一顆</strong></td><td>跑道是環形的,兔子把龜套圈了</td><td class="mono">True</td></tr>
+    </table>
+  </div>
+
+  <h3>用 3 &rarr; 2 &rarr; 0 &rarr; -4(-4 指回 2)手動走一遍</h3>
+  <p>下面四格是同一條鏈的四個瞬間。<strong class="t1">紫色</strong>是龜,<strong class="t2">紅色</strong>是兔,<strong class="hit">綠色</strong>是兩個站在一起。</p>
+
+  <div class="frames">
+
+    <div class="frame">
+      <div class="cap">起手 &middot; 都在 head</div>
+      <svg class="dia" viewBox="0 0 300 175" role="img" aria-label="龜和兔都在值 3 的節點">
+        <path class="edge" d="M60 85 H104"/><path class="ah" d="M112 85 L102 80 L102 90 Z"/>
+        <path class="edge" d="M149 78 L211 55"/><path class="ah" d="M219 52 L208 50 L212 60 Z"/>
+        <path class="edge" d="M240 65 V99"/><path class="ah" d="M240 107 L235 96 L245 96 Z"/>
+        <path class="edge" d="M221 118 L159 95"/><path class="ah" d="M151 92 L158 101 L162 91 Z"/>
+        <g class="both"><circle class="ring" cx="40" cy="85" r="20"/><text class="val" x="40" y="85">3</text></g>
+        <g><circle class="ring" cx="130" cy="85" r="20"/><text class="val" x="130" y="85">2</text></g>
+        <g><circle class="ring" cx="240" cy="45" r="20"/><text class="val" x="240" y="45">0</text></g>
+        <g><circle class="ring" cx="240" cy="125" r="20"/><text class="val" x="240" y="125">-4</text></g>
+        <text class="tag tb" x="40" y="130">slow + fast</text>
+      </svg>
+      <p class="note">兩個都從 head 出發。<strong>這時候不能判定相遇</strong>,不然第一步就直接回 True 了。</p>
+    </div>
+
+    <div class="frame">
+      <div class="cap">第 1 圈 &middot; 龜走 1、兔走 2</div>
+      <svg class="dia" viewBox="0 0 300 175" role="img" aria-label="龜在值 2,兔在值 0">
+        <path class="edge" d="M60 85 H104"/><path class="ah" d="M112 85 L102 80 L102 90 Z"/>
+        <path class="edge" d="M149 78 L211 55"/><path class="ah" d="M219 52 L208 50 L212 60 Z"/>
+        <path class="edge" d="M240 65 V99"/><path class="ah" d="M240 107 L235 96 L245 96 Z"/>
+        <path class="edge" d="M221 118 L159 95"/><path class="ah" d="M151 92 L158 101 L162 91 Z"/>
+        <g><circle class="ring" cx="40" cy="85" r="20"/><text class="val" x="40" y="85">3</text></g>
+        <g class="s"><circle class="ring" cx="130" cy="85" r="20"/><text class="val" x="130" y="85">2</text></g>
+        <g class="f"><circle class="ring" cx="240" cy="45" r="20"/><text class="val" x="240" y="45">0</text></g>
+        <g><circle class="ring" cx="240" cy="125" r="20"/><text class="val" x="240" y="125">-4</text></g>
+        <text class="tag ts" x="130" y="130">slow</text>
+        <text class="tag tf" x="240" y="20">fast</text>
+      </svg>
+      <p class="note">兔子已經領先一顆。兩個都進到環裡面了。</p>
+    </div>
+
+    <div class="frame">
+      <div class="cap">第 2 圈 &middot; 兔子繞回來了</div>
+      <svg class="dia" viewBox="0 0 300 175" role="img" aria-label="龜在值 0,兔繞回值 2">
+        <path class="edge" d="M60 85 H104"/><path class="ah" d="M112 85 L102 80 L102 90 Z"/>
+        <path class="edge" d="M149 78 L211 55"/><path class="ah" d="M219 52 L208 50 L212 60 Z"/>
+        <path class="edge" d="M240 65 V99"/><path class="ah" d="M240 107 L235 96 L245 96 Z"/>
+        <path class="edge" d="M221 118 L159 95"/><path class="ah" d="M151 92 L158 101 L162 91 Z"/>
+        <g><circle class="ring" cx="40" cy="85" r="20"/><text class="val" x="40" y="85">3</text></g>
+        <g class="f"><circle class="ring" cx="130" cy="85" r="20"/><text class="val" x="130" y="85">2</text></g>
+        <g class="s"><circle class="ring" cx="240" cy="45" r="20"/><text class="val" x="240" y="45">0</text></g>
+        <g><circle class="ring" cx="240" cy="125" r="20"/><text class="val" x="240" y="125">-4</text></g>
+        <text class="tag tf" x="130" y="130">fast</text>
+        <text class="tag ts" x="240" y="20">slow</text>
+      </svg>
+      <p class="note">兔子走 -4 &rarr; 2,<strong>繞了一圈回到環的入口</strong>。看起來像是跑到龜前面去了,其實是從後面逼近。</p>
+    </div>
+
+    <div class="frame">
+      <div class="cap">第 3 圈 &middot; 相遇</div>
+      <svg class="dia" viewBox="0 0 300 175" role="img" aria-label="龜和兔都在值 -4">
+        <path class="edge" d="M60 85 H104"/><path class="ah" d="M112 85 L102 80 L102 90 Z"/>
+        <path class="edge" d="M149 78 L211 55"/><path class="ah" d="M219 52 L208 50 L212 60 Z"/>
+        <path class="edge" d="M240 65 V99"/><path class="ah" d="M240 107 L235 96 L245 96 Z"/>
+        <path class="edge" d="M221 118 L159 95"/><path class="ah" d="M151 92 L158 101 L162 91 Z"/>
+        <g><circle class="ring" cx="40" cy="85" r="20"/><text class="val" x="40" y="85">3</text></g>
+        <g><circle class="ring" cx="130" cy="85" r="20"/><text class="val" x="130" y="85">2</text></g>
+        <g><circle class="ring" cx="240" cy="45" r="20"/><text class="val" x="240" y="45">0</text></g>
+        <g class="both"><circle class="ring" cx="240" cy="125" r="20"/><text class="val" x="240" y="125">-4</text></g>
+        <text class="tag tb" x="240" y="160">slow + fast</text>
+      </svg>
+      <p class="note">兩根指標指到<strong>同一顆 node</strong>。<code>return True</code>,結束。</p>
+    </div>
+
+  </div>
+
+  <h3>為什麼「一定」會相遇?(這段是這題的本體)</h3>
+  <p>不要用「跑久了總會遇到」這種說法,那在面試會被追問。正確的講法是<strong>看距離怎麼變</strong>:</p>
+
+  <div class="callout key">
+    <h3>兩人都進環之後,兔子每一圈就把差距<strong>剛好縮短 1</strong></h3>
+    <p>兔子一圈走 2 步,龜一圈走 1 步,所以每一圈兔子淨賺 1 步。設「兔子還差幾步追到龜」是 <code>d</code>:</p>
+    <p style="margin-bottom:0"><code>d</code> 是一個<strong>非負整數</strong>,而且<strong>每圈剛好減 1</strong>。一個每次只減 1 的數字,<strong>不可能跳過 0</strong>。所以它一定會踩到 0,也就是一定會有某一圈兩個站在同一顆。</p>
+  </div>
+
+  <p>「不可能跳過 0」是整個證明的關鍵字。<strong>如果兔子一次走 3 步,差距每圈減 2,就有可能從 1 直接跳到 -1,永遠錯過。</strong> 這就是為什麼是 2 步,不是 3 步。</p>
+
+  <div class="callout warn">
+    <h3>沒環的那半邊怎麼保證會停?</h3>
+    <p style="margin-bottom:0">沒環的鏈長度有限,而兔子每圈前進 2,所以它<strong>先</strong>撞到 <code>None</code>。撞到就跳出迴圈回 <code>False</code>。所以兩種情況都會結束,不會無限迴圈。</p>
+  </div>
+</section>
+
+<div class="rail"></div>
+
+<section>
+  <h2>接下來的區塊,你自己決定何時打開</h2>
+  <p class="sub" style="margin-bottom:1.25rem">先把上面第 4 節「為什麼一定會相遇」用自己的話講一遍,再展開 code。</p>
+
+  <details>
+    <summary>完整 code 加逐行解釋<span class="lockhint">先自己講一遍再開</span></summary>
+    <div class="dbody">
+<pre><code><span class="kw">def</span> <span class="fn">hasCycle</span>(head):
+    slow = head
+    fast = head
+
+    <span class="kw">while</span> fast <span class="kw">and</span> fast.next:
+        slow = slow.next
+        fast = fast.next.next
+        <span class="kw">if</span> slow <span class="kw">is</span> fast:
+            <span class="kw">return</span> <span class="kw">True</span>
+
+    <span class="kw">return</span> <span class="kw">False</span>
+</code></pre>
+
+      <div class="tablewrap">
+        <table>
+          <tr><th>行</th><th>它在幹嘛</th><th>為什麼一定要這樣寫</th></tr>
+          <tr><td class="mono">slow = head<br>fast = head</td><td>兩個跑者都站在起跑線</td><td>差距從 0 開始。所以<strong>不能</strong>在走之前就檢查相遇</td></tr>
+          <tr><td class="mono">while fast and fast.next</td><td>確認兔子還有 2 步可以走</td><td>下一行要讀 <code>fast.next.next</code>,需要 <code>fast</code> 活著<strong>而且</strong> <code>fast.next</code> 也活著</td></tr>
+          <tr><td class="mono">slow = slow.next</td><td>龜走 1 步</td><td>只換標籤,不動鏈</td></tr>
+          <tr><td class="mono">fast = fast.next.next</td><td>兔走 2 步</td><td>兩個 <code>.next</code> 一次跳完</td></tr>
+          <tr><td class="mono">if slow is fast</td><td>檢查是不是<strong>同一顆</strong></td><td><code>is</code> 比身分,<code>==</code> 比值。值可以重複,身分不會</td></tr>
+          <tr><td class="mono">return False</td><td>迴圈跑完 = 兔子撞牆了</td><td><strong>縮排必須在 while 外面</strong>。卡進去的話第一圈就回 False</td></tr>
+        </table>
+      </div>
+
+      <h4>為什麼 <code>while fast and fast.next</code> 的順序不能反</h4>
+      <p>Python 的 <code>and</code> 是<strong>短路求值</strong>:左邊是 <code>False</code> 就不看右邊了。</p>
+      <ul>
+        <li><code>fast and fast.next</code> &rarr; <code>fast</code> 是 <code>None</code> 時直接停,不會去讀 <code>None.next</code></li>
+        <li><code>fast.next and fast</code> &rarr; <code>fast</code> 是 <code>None</code> 時<strong>先讀 <code>None.next</code></strong> &rarr; <code>AttributeError</code></li>
+      </ul>
+      <p style="margin-bottom:0">這跟你在 stack 題犯過的「<code>not stack</code> 要放 <code>or</code> 左邊保護 <code>stack[-1]</code>」是<strong>同一條規則</strong>:把守門的條件放在會爆炸的條件前面。</p>
+    </div>
+  </details>
+
+  <details>
+    <summary>逐輪執行模擬表<span class="lockhint">跟你手算的對照</span></summary>
+    <div class="dbody">
+      <h4>有環:3 &rarr; 2 &rarr; 0 &rarr; -4,-4 指回 2</h4>
+      <div class="tablewrap">
+        <table>
+          <tr><th>圈</th><th class="mono">fast</th><th class="mono">fast.next</th><th>條件</th><th class="mono">slow 走到</th><th class="mono">fast 走到</th><th class="mono">slow is fast</th></tr>
+          <tr><td>1</td><td class="mono">3</td><td class="mono">2</td><td>過</td><td class="mono t1">2</td><td class="mono t2">0</td><td>False</td></tr>
+          <tr><td>2</td><td class="mono">0</td><td class="mono">-4</td><td>過</td><td class="mono t1">0</td><td class="mono t2">2</td><td>False</td></tr>
+          <tr><td>3</td><td class="mono">2</td><td class="mono">0</td><td>過</td><td class="mono t1">-4</td><td class="mono t2">-4</td><td class="hit">True &rarr; return</td></tr>
+        </table>
+      </div>
+      <p>第 3 圈那格,<code>slow</code> 和 <code>fast</code> 都停在 <code>-4</code> 那顆。注意<strong>它們不是「值都是 -4」,是「就是那一顆」</strong>。</p>
+
+      <h4>沒環:1 &rarr; 2 &rarr; 3 &rarr; None</h4>
+      <div class="tablewrap">
+        <table>
+          <tr><th>圈</th><th class="mono">fast</th><th class="mono">fast.next</th><th>條件</th><th class="mono">slow 走到</th><th class="mono">fast 走到</th><th class="mono">slow is fast</th></tr>
+          <tr><td>1</td><td class="mono">1</td><td class="mono">2</td><td>過</td><td class="mono t1">2</td><td class="mono t2">3</td><td>False</td></tr>
+          <tr><td>2</td><td class="mono">3</td><td class="mono">None</td><td class="t2">擋下</td><td colspan="3">跳出迴圈 &rarr; <code>return False</code></td></tr>
+        </table>
+      </div>
+      <p style="margin-bottom:0">第 2 圈就是 <code>fast.next</code> 那個條件的存在意義。如果只寫 <code>while fast:</code>,這一圈會進去,然後 <code>fast.next.next</code> 讀到 <code>None.next</code> 直接炸。</p>
+    </div>
+  </details>
+
+  <details>
+    <summary>口訣加可重複使用的模板<span class="lockhint">#143 #142 #876 會直接用到</span></summary>
+    <div class="dbody">
+      <p class="mantra">兔子撞牆就沒環,兔子撞到龜就有環。差距每圈只減 1,跳不過 0。</p>
+
+      <h4>模板本體</h4>
+<pre><code>slow = fast = head
+<span class="kw">while</span> fast <span class="kw">and</span> fast.next:
+    slow = slow.next
+    fast = fast.next.next
+    <span class="cm"># &lt;- 相遇要做的事寫這裡</span>
+<span class="cm"># &lt;- 兔子撞牆要做的事寫這裡</span>
+</code></pre>
+
+      <p>三個固定零件,每次都一樣:</p>
+      <ol>
+        <li><strong>兩根都從 <code>head</code> 起</strong></li>
+        <li><strong>迴圈條件永遠是 <code>fast and fast.next</code></strong>(因為要跳 2 格)</li>
+        <li><strong>迴圈內龜 1 步、兔 2 步</strong>,判斷寫在移動<strong>之後</strong></li>
+      </ol>
+
+      <h4>同一個模板改一點點就能解的題</h4>
+      <div class="tablewrap">
+        <table>
+          <tr><th>題</th><th>改哪裡</th><th>拿到什麼</th></tr>
+          <tr><td>#141 本題</td><td>相遇就 <code>return True</code></td><td>有沒有環</td></tr>
+          <tr><td>#876 中點</td><td>不判斷相遇,跑到底</td><td>迴圈結束時 <code>slow</code> 就在中點</td></tr>
+          <tr><td>#142 環的入口</td><td>相遇後把一根<strong>重設回 head</strong>,兩根都改成 1 步走</td><td>再次相遇處就是入口</td></tr>
+          <tr><td>#143 Reorder List</td><td>先用它找中點,再用 #206 反轉後半</td><td>中點 + 反轉 + 合併三段疊起來</td></tr>
+          <tr><td>#287 找重複數字</td><td>把 <code>nums[i]</code> 當作 <code>.next</code></td><td>陣列上的同一招</td></tr>
+        </table>
+      </div>
+      <p style="margin-bottom:0"><strong>「找中點」是這個模板最常被用到的用途,比抓環還常用。</strong> 記住迴圈結束時 <code>slow</code> 停在哪,#143 馬上要用。</p>
+    </div>
+  </details>
+
+  <details>
+    <summary>你最可能犯的錯<span class="lockhint">從你自己的紀錄撈的</span></summary>
+    <div class="dbody">
+      <h4>1. <code>return False</code> 縮排卡進 while 裡(你犯過 4 次,清單第 1 名)</h4>
+<pre><code><span class="kw">while</span> fast <span class="kw">and</span> fast.next:
+    slow = slow.next
+    fast = fast.next.next
+    <span class="kw">if</span> slow <span class="kw">is</span> fast:
+        <span class="kw">return</span> <span class="kw">True</span>
+    <span class="kw">return</span> <span class="kw">False</span>   <span class="cm"># &lt;- 卡在迴圈裡了</span>
+</code></pre>
+      <p>症狀:<strong>不報錯</strong>,但是每一條鏈都回 <code>False</code>,因為第一圈跑完就 return 掉了。這種錯最貴,因為它安靜。</p>
+
+      <h4>2. 迴圈條件只寫 <code>while fast:</code></h4>
+      <p>症狀:<code>AttributeError: 'NoneType' object has no attribute 'next'</code>。看到這行錯誤,第一個懷疑就是<strong>少檢查了一格</strong>。記法:<strong>你要跳幾格,就要檢查幾格。</strong></p>
+
+      <h4>3. 用 <code>==</code> 比兩根指標</h4>
+      <p><code>slow.val == fast.val</code> 或 <code>slow == fast</code> 比的是值。值可以重複,會誤判成有環。<strong>比 node 一律用 <code>is</code>。</strong></p>
+      <div class="fix">
+        <div class="x">&#10007; <code>if slow.val == fast.val:</code></div>
+        <div class="o">&#10003; <code>if slow is fast:</code></div>
+        <div class="w">&rarr; 你今天問的「head 跟 curr 是等於還是指向」就是這件事:標籤貼在物件上,<code>is</code> 問的是「兩張標籤貼在同一顆嗎」</div>
+      </div>
+
+      <h4>4. 在移動<strong>之前</strong>就檢查相遇</h4>
+      <p style="margin-bottom:0">兩根都從 <code>head</code> 起,所以還沒走的時候 <code>slow is fast</code> 本來就是 <code>True</code>。檢查寫在迴圈開頭 &rarr; 任何鏈都回 <code>True</code>。<strong>先走,再比。</strong></p>
+    </div>
+  </details>
+
+  <details>
+    <summary>L6 面試逐字稿<span class="lockhint">練嘴巴,不是練手</span></summary>
+    <div class="dbody">
+      <p>「說」那一格是可以直接背的英文。「想」是這句話換到什麼。「寫」是白板上長出什麼。</p>
+
+      <div class="move">
+        <h4><span class="mv">MOVE 0</span>先問 constraint,手不碰白板</h4>
+        <div class="say"><b>SAY</b>"Before I start, a few questions. Can the list be empty? Are node values unique, or can two nodes hold the same value? Do you want just true or false, or do you also want the node where the cycle starts? And is there a space limit?"</div>
+        <div class="think"><b>THINK</b>第二題是故意問的,它替你鋪好後面用 <code>is</code> 而不是 <code>==</code> 的理由。第三題把 #142 先擺上桌,顯示你知道這是一個題族。</div>
+      </div>
+
+      <div class="move">
+        <h4><span class="mv">MOVE 1</span>重述 + 自己舉例</h4>
+        <div class="say"><b>SAY</b>"So I walk the list one link at a time. If I ever come back to a node I already stood on, there is a cycle. Let me draw my own example: three, two, zero, minus four, and the last node points back to the node holding two."</div>
+        <div class="think"><b>THINK</b>自己舉例的好處是後面 dry run 直接指這張圖,不用臨時想。</div>
+        <div class="track" style="padding-top:.4rem"><span class="node">3</span><span class="arrow">&rarr;</span><span class="node b">2</span><span class="arrow">&rarr;</span><span class="node">0</span><span class="arrow">&rarr;</span><span class="node">-4</span><span class="arrow">&#8617;</span><span class="node b">2</span></div>
+      </div>
+
+      <div class="move">
+        <h4><span class="mv">MOVE 2</span>暴力解 20 秒,指出浪費了什麼</h4>
+        <div class="say"><b>SAY</b>"The simple way is a hash set of visited nodes. Linear time, but also linear space. What I am wasting there is that I keep the whole path, and I never actually need the path. A cycle is a shape, not a set of values."</div>
+        <div class="think"><b>THINK</b>"what I am wasting is&hellip;" 這個句型每一題都能用。它證明你比較過,不是背下來的。</div>
+      </div>
+
+      <div class="move">
+        <h4><span class="mv">MOVE 3</span>講出 invariant</h4>
+        <div class="say"><b>SAY</b>"Here is why two pointers work. Once both pointers are inside the loop, the fast one gains exactly one step on the slow one every round. So the gap shrinks by one each round. A gap that only drops by one can never jump over zero, so it has to land on zero. That is the guarantee they meet."</div>
+        <div class="think"><b>THINK</b>這一段是本題的分水嶺。只講「跑久就會遇到」是猜的;講「差距每次減 1,跳不過 0」是證明。</div>
+        <div class="track" style="padding-top:.4rem;font-size:.9rem"><span class="lbl">gap</span><span class="node">3</span><span class="arrow">&rarr;</span><span class="node">2</span><span class="arrow">&rarr;</span><span class="node">1</span><span class="arrow">&rarr;</span><span class="node b">0</span></div>
+      </div>
+
+      <div class="move">
+        <h4><span class="mv">MOVE 4</span>講出換掉了什麼</h4>
+        <div class="say"><b>SAY</b>"So I trade a bit of reasoning for all of the memory. Same linear time, but constant space instead of linear."</div>
+        <div class="think"><b>THINK</b>面試官在聽你有沒有把「更快」跟「更省」講反。這題<strong>沒有變快</strong>。</div>
+      </div>
+
+      <div class="move">
+        <h4><span class="mv">MOVE 5</span>複雜度講在寫 code 之前</h4>
+        <div class="say"><b>SAY</b>"Time is O of n, space is O of one. The list is walked at most a couple of times. Sound reasonable? Then I will write it."</div>
+        <div class="think"><b>THINK</b>先設計再實作,而且主動對齊。這一句是把主導權握在自己手上。</div>
+      </div>
+
+      <div class="move">
+        <h4><span class="mv">MOVE 6</span>code 分 3 段寫,每段講一句</h4>
+        <div class="say"><b>SAY</b>"Both pointers start at the head."</div>
+<pre><code>slow = head
+fast = head
+</code></pre>
+        <div class="say"><b>SAY</b>"I loop while fast and fast dot next are both alive. I need both, because the next line reads two links ahead."</div>
+<pre><code><span class="kw">while</span> fast <span class="kw">and</span> fast.next:
+    slow = slow.next
+    fast = fast.next.next
+</code></pre>
+        <div class="say"><b>SAY</b>"If they land on the same node, that is the cycle. I compare identity, not value, because two different nodes can hold the same number. If fast runs off the end, there is no cycle."</div>
+<pre><code>    <span class="kw">if</span> slow <span class="kw">is</span> fast:
+        <span class="kw">return</span> <span class="kw">True</span>
+<span class="kw">return</span> <span class="kw">False</span>
+</code></pre>
+      </div>
+
+      <div class="move">
+        <h4><span class="mv">MOVE 7</span>主動 dry run,用 Move 1 那個例子</h4>
+        <div class="say"><b>SAY</b>"Let me run my example. Round one: slow is at two, fast is at zero. Round two: slow is at zero, fast wrapped around to two. Round three: both land on minus four. Return true."</div>
+        <div class="think"><b>THINK</b>不等面試官叫你跑。跑的時候念出<strong>兩根指標的位置</strong>,不要念行號。</div>
+      </div>
+
+      <div class="move">
+        <h4><span class="mv">MOVE 8</span>主動掃 edge case,點名誰負責</h4>
+        <div class="say"><b>SAY</b>"Empty list: fast is None, the loop body never runs, I return false. Single node pointing at nothing: fast dot next is None, same path. Single node pointing at itself: one round, both land on it, true. All three fall out of the loop condition itself, I did not add a special case for any of them."</div>
+        <div class="think"><b>THINK</b>最後那句是重點。它說的是「我的設計本身就吃掉了這些 case」,比逐一 if 判斷高一級。</div>
+      </div>
+
+      <div class="move">
+        <h4><span class="mv">MOVE 9</span>主動講推廣</h4>
+        <div class="say"><b>SAY</b>"If you also want the node where the cycle starts, that is the follow-up. You reset one pointer to the head, then move both one step at a time, and they meet at the entrance. The same two-pointer shape also finds the middle of a list, which is the first step of Reorder List. And it works on an array too, if you read the value as the next index."</div>
+        <div class="think"><b>THINK</b>解一類,不是解一題。這段直接讓面試官知道你有 pattern,不是硬背了 #141。</div>
+      </div>
+
+      <h4>完整 code 加「哪一句話對應哪幾行」</h4>
+<pre><code><span class="kw">def</span> <span class="fn">hasCycle</span>(head):
+    slow = head
+    fast = head
+
+    <span class="kw">while</span> fast <span class="kw">and</span> fast.next:
+        slow = slow.next
+        fast = fast.next.next
+        <span class="kw">if</span> slow <span class="kw">is</span> fast:
+            <span class="kw">return</span> <span class="kw">True</span>
+
+    <span class="kw">return</span> <span class="kw">False</span>
+</code></pre>
+      <div class="tablewrap">
+        <table>
+          <tr><th>你講的那句</th><th>白板上的那幾行</th></tr>
+          <tr><td>"Both pointers start at the head."</td><td class="mono">slow = head / fast = head</td></tr>
+          <tr><td>"I need both, because the next line reads two links ahead."</td><td class="mono">while fast and fast.next</td></tr>
+          <tr><td>"The gap shrinks by one each round."</td><td class="mono">slow = slow.next / fast = fast.next.next</td></tr>
+          <tr><td>"I compare identity, not value."</td><td class="mono">if slow is fast</td></tr>
+          <tr><td>"If fast runs off the end, there is no cycle."</td><td class="mono">return False</td></tr>
+        </table>
+      </div>
+
+      <h4>Native English block(挑可遷移的,不挑這題專用的)</h4>
+      <ul class="signals">
+        <li><span class="n">1</span><span>"What I am wasting there is&hellip;" &mdash; 指出暴力解浪費掉的免費情報。每一題都能用。</span></li>
+        <li><span class="n">2</span><span>"So I trade a bit of reasoning for all of the memory." &mdash; 講 trade-off 的萬用句型:trade X for Y。</span></li>
+        <li><span class="n">3</span><span>"Time is O of n, space is O of one. Sound reasonable?" &mdash; 寫 code 前的固定收尾,拿回主導權。</span></li>
+        <li><span class="n">4</span><span>"That falls out of the loop condition itself, I did not add a special case." &mdash; 掃 edge case 時最加分的一句。</span></li>
+      </ul>
+
+      <h4>只給結論 vs 說明推理</h4>
+      <div class="tablewrap">
+        <table>
+          <tr><th>Move</th><th>只給結論</th><th>說明推理</th></tr>
+          <tr><td>3</td><td>"Fast and slow will meet if there is a cycle."</td><td>"The gap shrinks by exactly one each round, and a gap that drops by one cannot jump over zero."</td></tr>
+          <tr><td>4</td><td>"This is faster."</td><td>"Same time. What changes is space, linear down to constant."</td></tr>
+          <tr><td>8</td><td>"Edge cases are fine."</td><td>"Empty list and single node both fall out of the loop condition, no special case needed."</td></tr>
+        </table>
+      </div>
+      <p style="margin-bottom:0">右欄不是「比較長」,是<strong>把判斷依據講出來</strong>。左欄聽起來像背過,右欄聽起來像想過。這張表不對應任何職級,它只分辨這兩種說法。</p>
+    </div>
+  </details>
+
+  <details>
+    <summary>這次的釐清<span class="lockhint">session 進行中持續補寫</span></summary>
+    <div class="dbody">
+      <div class="fix">
+        <div class="x">&#10007; 我以為:<code>head</code> 和 <code>curr</code> 是「等於」1 這個值</div>
+        <div class="o">&#10003; 其實是:兩張<strong>標籤</strong>貼在<strong>同一顆 node 物件</strong>上,是「指向」不是「等於」</div>
+        <div class="w">&rarr; 判準:看 <code>=</code> 左邊有沒有 <code>.</code>。<code>curr = nxt</code> 只換標籤,鏈沒動;<code>curr.next = prev</code> 改物件內部,鏈真的變了,而且 <code>head</code> 也看得到</div>
+      </div>
+      <div class="fix">
+        <div class="x">&#10007; 我以為:#21 尾段要一顆一顆接</div>
+        <div class="o">&#10003; 其實是:剩下那條本身已排序,且每顆都 &ge; 剛接上的最後一顆,所以<strong>整段掛上去</strong>結果一樣</div>
+        <div class="w">&rarr; 這格 2026-09-04 和 2026-09-07 各漏一次,已升級到常犯錯清單</div>
+      </div>
+      <div class="fix">
+        <div class="x">&#10007; 我以為:<code>prev</code> 和 <code>tail</code> 都是「記錄前一個」,所以會混</div>
+        <div class="o">&#10003; 其實是:<code>prev</code> 在 <code>=</code> <strong>右邊</strong>被讀(箭頭指向的目標),<code>tail</code> 在 <code>=</code> <strong>左邊</strong>被寫(新貨掛上去的接口)</div>
+        <div class="w">&rarr; 記「左邊右邊」比記「前一個最後一個」可靠,因為它直接對到 code</div>
+      </div>
+      <p style="margin-bottom:0;color:var(--muted);font-size:.9rem">本題自己的釐清等下一場動手寫完之後補進來。</p>
+    </div>
+  </details>
+
+</section>
+
+</div>
