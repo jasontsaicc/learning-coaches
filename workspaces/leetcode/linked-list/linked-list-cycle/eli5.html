@@ -644,7 +644,11 @@ fast = head
         <div class="o">&#10003; 其實是:<code>prev</code> 在 <code>=</code> <strong>右邊</strong>被讀(箭頭指向的目標),<code>tail</code> 在 <code>=</code> <strong>左邊</strong>被寫(新貨掛上去的接口)</div>
         <div class="w">&rarr; 記「左邊右邊」比記「前一個最後一個」可靠,因為它直接對到 code</div>
       </div>
-      <p style="margin-bottom:0;color:var(--muted);font-size:.9rem">本題自己的釐清等下一場動手寫完之後補進來。</p>
+      <div class="fix">
+        <div class="x">&#10007; 我以為:<code>==</code> 一定是比 value(套 <code>int</code>/<code>str</code> 的直覺)</div>
+        <div class="o">&#10003; 其實是:<code>ListNode</code> 沒宣告 <code>__eq__</code>,<code>==</code> 會退回 Python 內建預設版本,比的是「同一個物件」,跟 <code>is</code> 是同一種比法</div>
+        <div class="w">&rarr; <code>int</code>/<code>str</code> 的 <code>==</code> 比 value,是因為它們<strong>自己覆寫了 <code>__eq__</code></strong>,不是所有物件的通用規則。比 node 是不是同一顆永遠用 <code>is</code>,不依賴預設行為(萬一哪天有人幫 <code>ListNode</code> 加 <code>__eq__</code>,<code>==</code> 會悄悄比錯)</div>
+      </div>
     </div>
   </details>
 

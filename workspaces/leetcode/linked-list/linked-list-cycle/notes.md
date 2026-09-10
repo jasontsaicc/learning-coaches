@@ -1,6 +1,7 @@
 # #141 Linked List Cycle
 
-圖解頁:https://claude.ai/code/artifact/55e9083f-6246-4ac5-846c-f3a555f3a8ad
+圖解頁:https://claude.ai/code/artifact/54ce4b5d-bf52-44e5-958b-a5f35f6f44fd
+(舊連結 55e9083f... 已失效 2026-09-10 重新發布)
 
 模式:小龜(fast-slow 是新招,不是 #206 換皮)。
 
@@ -26,4 +27,7 @@
 
 - 2026-09-07:開場默寫過(#206 全對、#21 (d) 走到階 2)。拷問 ① 未答(學員要下班)。
   圖解頁已產出,學員自行閱讀。**下次從拷問 ② 起跑,然後拷問 ④ 獨立寫 + harness。**
-- 未做:solution.py、pytest harness、拷問 ②③④、溫度計 ②。
+- 2026-09-10:收掉。拷問 ②③④ + 溫度計 ② 全跑完,drill.py 7/7 PASS(詳細記錄見
+  `progress.md`)。學員之後自主做隔堂留存測(cold-write 模板),卡住看答案,
+  存口訣。過程中 `==`/`is` 的誤解(以為 `==` 一定比 value)已澄清,寫進上方
+  圖解頁「這次的釐清」。

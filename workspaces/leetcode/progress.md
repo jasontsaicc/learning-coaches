@@ -27,6 +27,17 @@
 - 模式:速刷 = 每題冷寫 → 卡住協定 → harness → 變形題。學員確認這個節奏 ok。
   診斷:零件(prev=None、存在改之前、dummy/tail 分工)分開問都懂,從空白頁組不起來;
   9/07 複測有改善,骨架默得出來,弱點收斂到「尾段 invariant」與「指標角色的精確描述」。
+- **2026-09-10 續場(下班前)**:學員自主做完 #141 的隔堂留存測(卡住看答案,見上方),
+  帶著這個結果進場。順手補了兩題 notes.md 跟 progress.md 沒同步的舊帳(#141/#226 進度欄位
+  停在 09-07/教學當下,已補到跟這裡一致)。額外教學:`==` vs `is`(`ListNode` 沒宣告
+  `__eq__`,`==` 預設退回比 identity,跟 `is` 一樣;學員原本以為 `==` 一定比 value,
+  已澄清,寫進 #141 圖解頁「這次的釐清」)。開場默寫 `dfs(node)` 三零件模板**沒寫出來**,
+  對照抄一次(第三層留存測第 2 次考,這次沒過,不記債)。
+  接著開 **#104 Max Depth**:拷問① 學員先答「隨便選一邊 +1」,用具體反例
+  (`2` 只有左小孩 `4`,選右邊漏算整條左邊)糾正成「取 max」,Socratic 帶出完整公式
+  `max(left, right) + 1`。已組出完整函式,開始 dry run(1-2-3-4 樹),coach 畫出完整
+  call stack 圖。**收在「`dfs(1)` 最後 `max(2,1)+1` 這兩個數字從哪來」這題,學員還沒
+  答就下班,不記債,下次直接接著問。**
 
 ## Pattern 狀態
 
@@ -35,7 +46,8 @@
 | Linked List 反轉(prev/curr/nxt) | ✓(notes) | ✓ | ✅ 9/07 隔堂冷默全對(起手式+4 行+return) | ✓ |
 | Linked List 合併(dummy + tail) | ✓ | ✓ | 🟡 骨架冷默出來,尾段仍需階 2 提示 | ✓ |
 | Fast-slow pointer(龜兔) | ✓(9/07 圖解頁) | ✓ 9/10 | 🟡 9/10 冷寫走到階 3;harness 7/7 綠 | ✓ |
-| Tree DFS 遞迴(base/本層/委派) | ✓(9/10 圖解頁) | ✓ 9/10 | ✅ 9/10 #226 五行冷寫一次過 8/8 | ✓ |
+| Tree DFS 遞迴(base/本層/委派) | ✓(9/10 圖解頁) | ✓ 9/10 | ✅ 9/10 #226 五行冷寫一次過 8/8;續場開場默寫沒過,對照抄一次 | ✓ |
+| Tree DFS 吃下屬回傳值(#104 `1+max(left,right)`) | 對話中 ASCII,無圖解頁 | | 🟡 公式靠拷問 ① 階梯提示 Socratic 推出,尚未獨立打 code | 待補 |
 | Heap k-way merge(每條一個 head) | ✓ | | ✓ | ✓ |
 | Hashmap + 雙向鏈(LRU) | | | | |
 
@@ -55,7 +67,7 @@
   2026-09-02 複盤:merge two → naive merge-one-by-one(TLE 原因)→ heap,拷問 ① 補上,
   學員獨立寫出 heap code(抓到漏 `import heapq`)。
 - **#141 Linked List Cycle** — `linked-list/linked-list-cycle/`
-  圖解頁:https://claude.ai/code/artifact/55e9083f-6246-4ac5-846c-f3a555f3a8ad
+  圖解頁:https://claude.ai/code/artifact/54ce4b5d-bf52-44e5-958b-a5f35f6f44fd(舊連結已失效,09-10 重發)
   2026-09-07:圖解頁產出(含 L6 逐字稿、逐輪模擬表、模板遷移表)。拷問 ① 未答(學員下班)。
   未做:solution.py、harness、拷問 ②③④、溫度計 ②。重點:換的是空間不是時間;
   差距每圈減 1 跳不過 0;`while fast and fast.next`;比指標用 `is`。
@@ -65,6 +77,10 @@
   圖解頁、drill.py(8 組 case,空 stub 7/8 FAIL、參考解 8/8 PASS 已驗)、L6 逐字稿。
   2026-09-10 全跑完:拷問 ①②③④ + 溫度計 ②,drill.py 8/8 綠。
   第 05 節「逐格走一次」是為心盲症加的:看不見的 None 子節點圖 + 7 格 call stack。
+- **#104 Maximum Depth of Binary Tree** — `tree/maximum-depth-of-binary-tree/`
+  2026-09-10:對話中 Socratic 推公式(反例糾正「隨便選一邊」為「取 max」),組出完整
+  `maxDepth(root)`,dry run 到一半(call stack 圖已畫)下班。未做:eli5 圖解頁、
+  drill.py、拷問 ②③④、溫度計 ②、L6 逐字稿。詳細記錄與 dry run 圖見該題 `notes.md`。
 - **#146 LRU Cache** — `hashmap-doubly-linked-list/lru-cache/`
   圖解頁:https://claude.ai/code/artifact/69673f1c-d044-49b9-bb01-42082143e263
   本場產出:圖解頁(寄物間號碼牌比喻)、暴力解對照、L6 面試逐字稿(含 code 對照表)、pytest harness。
@@ -75,8 +91,10 @@
 
 ## 接下來
 
-1. 開場默寫考 `dfs(node)` 三零件模板(隔堂留存)。**重點考 base case 是「root 是 None」不是「沒有小孩」**
-2. #104 Max Depth(龜):第一題**真的要吃下屬回傳值**的。這裡順序鎖死,#226 的「愛擺哪擺哪」不再成立
+1. **直接接著問**:「`dfs(1)` 最後 `max(2,1)+1` 這兩個數字從哪來」(見 #104 notes.md 的
+   call stack 圖)。確認 dry run 看得懂之後走拷問 ②(預測下一步)③(填關鍵 code)
+   ④(獨立寫 + harness)+ 溫度計 ②
+2. #104 收尾後補產出:eli5 圖解頁、drill.py、L6 逐字稿(照 #226 規格補)
 3. 之後 #100 Same Tree / #543 Diameter,模板填空
-5. Linked list 停在原地,不記債,隨時可回:#143 Reorder List、#146 LRU(拷問 ① 前)、
+4. Linked list 停在原地,不記債,隨時可回:#143 Reorder List、#146 LRU(拷問 ① 前)、
    #206 缺 eli5 圖解頁 + L6 逐字稿
