@@ -1,0 +1,768 @@
+<title>路在我這裡轉彎</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=JetBrains+Mono:wght@400;700&family=Noto+Sans+TC:wght@400;500;700&display=swap">
+<style>
+:root{
+  --paper:#F2F0F6; --surface:#FFFFFF; --ink:#191527; --body:#302B41;
+  --muted:#6E687E; --line:#CFCADB;
+  --c1:#4A4098; --c1-soft:#E3E0F3;
+  --c2:#AE3557; --c2-soft:#F6E0E7;
+  --signal:#10726B; --signal-soft:#D8ECE9;
+  --code-bg:#131022; --code-fg:#DEDAEA;
+  --hold:#EDEAF3;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#14121C; --surface:#1C1929; --ink:#EAE7F2; --body:#C6C1D4;
+    --muted:#8E88A0; --line:#322E44;
+    --c1:#9E94EC; --c1-soft:#241F42;
+    --c2:#E88BA4; --c2-soft:#3A1D28;
+    --signal:#4FC7B6; --signal-soft:#0F2F2C;
+    --code-bg:#0C0A14; --code-fg:#DAD5E6;
+    --hold:#1F1C2C;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#14121C; --surface:#1C1929; --ink:#EAE7F2; --body:#C6C1D4;
+  --muted:#8E88A0; --line:#322E44;
+  --c1:#9E94EC; --c1-soft:#241F42;
+  --c2:#E88BA4; --c2-soft:#3A1D28;
+  --signal:#4FC7B6; --signal-soft:#0F2F2C;
+  --code-bg:#0C0A14; --code-fg:#DAD5E6;
+  --hold:#1F1C2C;
+}
+
+*{box-sizing:border-box}
+body{
+  background:var(--paper); color:var(--body);
+  font-family:"Noto Sans TC","Hiragino Sans","Microsoft JhengHei",sans-serif;
+  font-size:16px; line-height:1.85;
+  padding:0 1.25rem 5rem;
+}
+.wrap{max-width:44rem; margin:0 auto}
+
+header{padding-block:3.5rem 1.5rem}
+.kicker{
+  font-family:"JetBrains Mono",monospace; font-size:.72rem; font-weight:700;
+  letter-spacing:.16em; text-transform:uppercase; color:var(--signal);
+}
+h1{
+  font-family:"Archivo","Noto Sans TC",sans-serif; font-weight:700;
+  font-size:clamp(2rem,6vw,2.9rem); line-height:1.12; letter-spacing:-.02em;
+  color:var(--ink); margin:.5rem 0 .6rem; text-wrap:balance;
+}
+.sub{color:var(--muted); font-size:1rem; margin:0}
+
+.rail{
+  height:9px; margin:2.75rem 0 2.25rem;
+  border-top:2px solid var(--line); border-bottom:2px solid var(--line);
+  background:repeating-linear-gradient(90deg,var(--line) 0 3px,transparent 3px 13px);
+}
+
+h2{
+  font-family:"Archivo","Noto Sans TC",sans-serif; font-weight:700;
+  font-size:1.4rem; color:var(--ink); letter-spacing:-.01em;
+  margin:0 0 .25rem; text-wrap:balance;
+}
+h2 .num{
+  font-family:"JetBrains Mono",monospace; font-size:.85rem; color:var(--signal);
+  margin-right:.6rem; vertical-align:.15em;
+}
+h3{font-family:"Archivo","Noto Sans TC",sans-serif;font-weight:600;font-size:1rem;color:var(--ink);margin:1.75rem 0 .4rem}
+h4{font-family:"Archivo","Noto Sans TC",sans-serif;font-weight:600;font-size:.95rem;color:var(--ink);margin:1.4rem 0 .3rem}
+section{margin-bottom:2.5rem}
+p{margin:.7rem 0}
+strong{color:var(--ink); font-weight:700}
+code{font-family:"JetBrains Mono",monospace; font-size:.87em; background:var(--signal-soft); color:var(--ink); padding:.1em .35em; border-radius:2px}
+
+.lede{font-size:1.1rem; color:var(--ink); border-left:3px solid var(--signal); padding-left:1rem; margin:1rem 0 1.25rem}
+
+.callout{background:var(--surface); border:1px solid var(--line); border-radius:4px; padding:1.1rem 1.25rem; margin:1.25rem 0}
+.callout.warn{border-left:4px solid var(--c2)}
+.callout.key{border-left:4px solid var(--signal)}
+.callout h3,.callout h4{margin-top:0}
+
+ul,ol{padding-left:1.35rem; margin:.7rem 0}
+li{margin:.35rem 0}
+
+.signals{list-style:none; padding:0; display:grid; gap:.5rem}
+.signals li{
+  display:flex; gap:.75rem; align-items:baseline;
+  background:var(--surface); border:1px solid var(--line); border-radius:4px; padding:.7rem .95rem; margin:0;
+}
+.signals .n{font-family:"JetBrains Mono",monospace; font-weight:700; color:var(--signal); flex-shrink:0}
+
+.tablewrap{overflow-x:auto; margin:1.25rem 0; border:1px solid var(--line); border-radius:4px; background:var(--surface)}
+table{border-collapse:collapse; width:100%; font-size:.86rem; font-variant-numeric:tabular-nums}
+th,td{text-align:left; padding:.55rem .8rem; border-bottom:1px solid var(--line); white-space:nowrap}
+th{font-family:"Archivo",sans-serif; font-weight:600; color:var(--ink); font-size:.78rem; letter-spacing:.03em; text-transform:uppercase}
+tr:last-child td{border-bottom:none}
+td.mono,th.mono{font-family:"JetBrains Mono",monospace}
+.t1{color:var(--c1); font-weight:700}
+.t2{color:var(--c2); font-weight:700}
+.hit{color:var(--signal); font-weight:700}
+
+pre{
+  background:var(--code-bg); color:var(--code-fg); border-radius:5px;
+  padding:1.1rem 1.25rem; overflow-x:auto; margin:1rem 0;
+  font-family:"JetBrains Mono",monospace; font-size:.84rem; line-height:1.75;
+}
+pre .cm{color:#8C86A8}
+pre .kw{color:#C39BEE}
+pre .fn{color:#7FD6C6}
+pre .hl{background:rgba(127,214,198,.14); display:block; margin:0 -1.25rem; padding:0 1.25rem}
+
+details{background:var(--surface); border:1px solid var(--line); border-radius:4px; margin:1rem 0; overflow:hidden}
+summary{
+  cursor:pointer; padding:.9rem 1.15rem; list-style:none;
+  font-family:"Archivo","Noto Sans TC",sans-serif; font-weight:600; color:var(--ink);
+  display:flex; align-items:baseline; gap:.6rem;
+}
+summary::-webkit-details-marker{display:none}
+summary::before{content:"▸"; color:var(--signal); font-size:.8rem}
+details[open] summary::before{content:"▾"}
+summary:focus-visible{outline:2px solid var(--signal); outline-offset:-2px}
+.lockhint{font-family:"Noto Sans TC",sans-serif;font-weight:400;font-size:.8rem;color:var(--muted);margin-left:auto}
+.dbody{padding:0 1.15rem 1.15rem; border-top:1px solid var(--line)}
+
+.mantra{font-family:"Archivo","Noto Sans TC",sans-serif;font-size:1.05rem;font-weight:600;color:var(--ink);background:var(--signal-soft);border-radius:4px;padding:1rem 1.2rem;margin:1rem 0}
+
+/* ── 樹 ── */
+.dia{display:block;max-width:100%;height:auto;margin:1.25rem auto}
+.dia .edge{stroke:var(--line);stroke-width:2}
+.dia .edge.nil{stroke-dasharray:4 4}
+.dia .box{fill:var(--surface);stroke:var(--line);stroke-width:2}
+.dia .box.a{fill:var(--c1-soft);stroke:var(--c1)}
+.dia .box.b{fill:var(--c2-soft);stroke:var(--c2)}
+.dia .nilbox{fill:none;stroke:var(--muted);stroke-width:1.5;stroke-dasharray:3 3}
+.dia .tval{fill:var(--ink);font-family:"JetBrains Mono",monospace;font-size:15px;font-weight:700;text-anchor:middle;dominant-baseline:central}
+.dia .nilv{fill:var(--muted);font-family:"JetBrains Mono",monospace;font-size:11px;text-anchor:middle;dominant-baseline:central}
+.dia .tag{fill:var(--muted);font-family:"JetBrains Mono",monospace;font-size:12px;text-anchor:middle}
+.dia .tag.hit{fill:var(--signal);font-weight:700}
+
+/* ── call stack 分鏡 ── */
+.film{display:grid;gap:1rem;margin:1.5rem 0}
+.shot{background:var(--surface);border:1px solid var(--line);border-radius:4px;padding:.9rem 1rem}
+.shot .hd{display:flex;gap:.7rem;align-items:baseline;flex-wrap:wrap;margin-bottom:.6rem}
+.shot .no{font-family:"JetBrains Mono",monospace;font-size:.68rem;font-weight:700;letter-spacing:.1em;color:var(--signal);border:1px solid var(--signal);border-radius:2px;padding:.1rem .35rem;flex-shrink:0}
+.shot .cap{font-size:.9rem;color:var(--body);line-height:1.6}
+.tower{display:flex;flex-direction:column;gap:3px;font-family:"JetBrains Mono",monospace;font-size:.78rem;overflow-x:auto}
+.fr{border:1px solid var(--line);border-radius:3px;padding:.4rem .6rem;background:var(--hold);color:var(--muted);min-width:min-content;white-space:nowrap}
+.fr.run{background:var(--signal-soft);border-color:var(--signal);color:var(--ink);font-weight:700}
+.fr.gone{border-style:dashed;background:transparent;opacity:.45;text-decoration:line-through}
+.fr .who{color:var(--ink);font-weight:700}
+.fr.run .who{color:var(--signal)}
+.fr .slot{color:var(--muted);font-weight:400}
+.fr .val{color:var(--c2);font-weight:700}
+.floor{font-family:"JetBrains Mono",monospace;font-size:.7rem;color:var(--muted);letter-spacing:.1em;border-top:2px solid var(--line);padding-top:.25rem;margin-top:2px}
+.emptystack{font-family:"JetBrains Mono",monospace;font-size:.78rem;color:var(--muted);padding:.4rem 0}
+
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(15rem,1fr));gap:1rem;margin:1.25rem 0}
+.two > div{background:var(--surface);border:1px solid var(--line);border-radius:4px;padding:.9rem 1.05rem}
+.two h4{margin-top:0}
+
+.wrongright{display:grid;gap:.5rem;margin:1rem 0}
+.wrongright > div{padding:.65rem .9rem;border-radius:3px;font-size:.92rem}
+.wr-x{background:var(--c2-soft);border-left:3px solid var(--c2)}
+.wr-o{background:var(--signal-soft);border-left:3px solid var(--signal)}
+.wr-y{background:var(--surface);border:1px solid var(--line);border-left:3px solid var(--muted)}
+
+.move{background:var(--surface);border:1px solid var(--line);border-radius:4px;padding:.9rem 1.05rem;margin:.85rem 0}
+.move h4{margin:0 0 .5rem;display:flex;gap:.6rem;align-items:baseline;flex-wrap:wrap}
+.move h4 .mv{font-family:"JetBrains Mono",monospace;font-size:.7rem;font-weight:700;letter-spacing:.1em;color:var(--signal);border:1px solid var(--signal);border-radius:2px;padding:.1rem .35rem;flex-shrink:0}
+.say{background:var(--c1-soft);border-radius:3px;padding:.6rem .8rem;margin:.4rem 0;color:var(--ink)}
+.say b{display:block;font-family:"JetBrains Mono",monospace;font-size:.66rem;letter-spacing:.12em;text-transform:uppercase;color:var(--c1);margin-bottom:.3rem}
+.think{font-size:.88rem;color:var(--muted);margin:.4rem 0}
+.think b{font-family:"JetBrains Mono",monospace;font-size:.66rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:.2rem}
+
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+/* ── #543 專用:雙軌配色 ──
+   這一頁的顏色是有意義的,不是裝飾:
+   紫 c1 = 軌道 A「往上交」(return 給呼叫者)
+   紅 c2 = 軌道 B「記帳本」(寫進 self.ans)                       */
+.dia .edge.path{stroke:var(--c2);stroke-width:4.5;stroke-linecap:round}
+.dia .edge.up{stroke:var(--c1);stroke-width:4.5;stroke-linecap:round}
+.dia .edge.dim{opacity:.45}
+.dia .box.dim{opacity:.4}
+.dia .pip{fill:var(--c2);stroke:none}
+.dia .pipn{fill:var(--paper);font-family:"JetBrains Mono",monospace;font-size:11px;font-weight:700;text-anchor:middle;dominant-baseline:central}
+.dia .tag.a{fill:var(--c1);font-weight:700}
+.dia .tag.b{fill:var(--c2);font-weight:700}
+.dia .xout{stroke:var(--muted);stroke-width:2;opacity:.65}
+
+.tk{font-family:"JetBrains Mono",monospace;font-size:.66rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;border-radius:2px;padding:.15rem .4rem;margin-right:.5rem;white-space:nowrap}
+.tk.a{color:var(--c1);border:1px solid var(--c1);background:var(--c1-soft)}
+.tk.b{color:var(--c2);border:1px solid var(--c2);background:var(--c2-soft)}
+
+.legend{display:grid;gap:.4rem;margin:1rem 0;font-size:.88rem}
+.legend div{display:flex;gap:.6rem;align-items:baseline}
+.legend .sw{width:1.6rem;height:.4rem;border-radius:2px;flex-shrink:0;transform:translateY(-.15em)}
+.legend .sw.a{background:var(--c1)}
+.legend .sw.b{background:var(--c2)}
+
+.shot .row{display:grid;grid-template-columns:1fr auto;gap:1rem;align-items:start}
+@media (max-width:34rem){.shot .row{grid-template-columns:1fr}}
+.ledger{font-family:"JetBrains Mono",monospace;font-size:.78rem;border:2px solid var(--line);border-radius:4px;padding:.55rem .8rem;background:var(--surface);color:var(--muted);white-space:nowrap;align-self:start;text-align:center}
+.ledger b{display:block;font-size:.6rem;letter-spacing:.12em;text-transform:uppercase;margin-bottom:.3rem}
+.ledger .big{font-size:1.45rem;font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums}
+.ledger.live{border-color:var(--c2);background:var(--c2-soft);color:var(--c2)}
+.ledger.live .big{color:var(--c2)}
+.fr .valb{color:var(--c2);font-weight:700}
+.fr .vala{color:var(--c1);font-weight:700}
+
+td.a{color:var(--c1);font-weight:700}
+td.b{color:var(--c2);font-weight:700}
+.xref td:first-child{white-space:normal;min-width:14rem}
+</style>
+
+<div class="wrap">
+
+<header>
+  <div class="kicker">LeetCode #543 · Tree · 龜模式</div>
+  <h1>路在我這裡轉彎</h1>
+  <p class="sub">Diameter of Binary Tree。#104 每個 node 只算<strong>一個</strong>數字。這題開始，每個 node 身上同時有<strong>兩個</strong>數字，而且它們長得很像、意思完全不同。</p>
+</header>
+
+<div class="rail"></div>
+
+<!-- ① -->
+<section>
+  <h2><span class="num">01</span>這題在幹嘛</h2>
+  <p class="lede">這棵樹上，任意挑兩個 node 連成一條路。最長的那條有幾條<strong>邊</strong>？</p>
+  <p>題目原文的關鍵字：<em>the longest path between <strong>any two</strong> nodes</em>，還有一句 <em>this path <strong>may or may not</strong> pass through the root</em>。出題者在明講：<strong>別只算 root</strong>。</p>
+
+  <svg class="dia" viewBox="0 0 440 225" width="440" role="img" aria-label="樹 1 的左小孩是 2、右小孩是 3；2 的左小孩是 4、右小孩是 5。最長路徑 4-2-1-3 經過三條邊，答案是 3。">
+    <line class="edge path" x1="210" y1="54" x2="140" y2="80"/>
+    <line class="edge path" x1="210" y1="54" x2="280" y2="80"/>
+    <line class="edge path" x1="140" y1="114" x2="100" y2="140"/>
+    <line class="edge dim"  x1="140" y1="114" x2="180" y2="140"/>
+    <rect class="box" x="188" y="20" width="44" height="34" rx="4"/><text class="tval" x="210" y="37">1</text>
+    <rect class="box" x="118" y="80" width="44" height="34" rx="4"/><text class="tval" x="140" y="97">2</text>
+    <rect class="box" x="258" y="80" width="44" height="34" rx="4"/><text class="tval" x="280" y="97">3</text>
+    <rect class="box" x="78"  y="140" width="44" height="34" rx="4"/><text class="tval" x="100" y="157">4</text>
+    <rect class="box dim" x="158" y="140" width="44" height="34" rx="4"/><text class="tval" x="180" y="157">5</text>
+    <circle class="pip" cx="120" cy="127" r="9"/><text class="pipn" x="120" y="127">1</text>
+    <circle class="pip" cx="175" cy="67"  r="9"/><text class="pipn" x="175" y="67">2</text>
+    <circle class="pip" cx="245" cy="67"  r="9"/><text class="pipn" x="245" y="67">3</text>
+    <text class="tag b" x="355" y="140">4 → 2 → 1 → 3</text>
+    <text class="tag b" x="355" y="160">3 條邊 → 答案 3</text>
+    <text class="tag"   x="355" y="185">（4 個 node，但只數邊）</text>
+  </svg>
+
+  <div class="callout warn">
+    <h4>第一號坑：length 數的是「邊」，不是「node」</h4>
+    <p>一顆孤零零的 node，diameter 是 <code>0</code>，不是 <code>1</code>。兩個 node 是 <code>1</code>，不是 <code>2</code>。<strong>面試時第一句就要跟面試官確認這件事</strong>，因為 #104 剛好數的是 node，兩題差一格最容易翻車。</p>
+  </div>
+</section>
+
+<!-- ② -->
+<section>
+  <h2><span class="num">02</span>這是什麼型，怎麼秒認</h2>
+  <p>型別：<strong>一趟 DFS，順路記帳</strong>（tree DP 的入門款）。三個秒認信號：</p>
+  <ul class="signals">
+    <li><span class="n">1</span><div>題目說「<strong>任兩個</strong> node 之間」 → 答案可能長在任何一個 node 身上，不只 root。</div></li>
+    <li><span class="n">2</span><div>題目主動提醒「<strong>不一定經過 root</strong>」 → 這是出題者在戳你最可能犯的錯。</div></li>
+    <li><span class="n">3</span><div>樹 + 求一個最大值 → <strong>雙軌</strong>：遞迴回傳值餵上級，全域變數收答案。</div></li>
+  </ul>
+  <p>秒認之後要馬上想到的下一句：「<strong>路徑一定有一個最高點</strong>。」每條路都是先往上爬、在某個 node 轉彎、再往下走。那個轉彎點是唯一的。所以只要對<strong>每個 node 都問一次「路在你這裡轉彎的話多長」</strong>，就不會漏掉任何一條路。</p>
+</section>
+
+<!-- ③ -->
+<section>
+  <h2><span class="num">03</span>暴力法長怎樣、為什麼慢</h2>
+  <p>照著上面那句話直接翻成 code：每個 node 都當一次轉彎點，左右各叫一次 #104 的 <code>maxDepth</code>。</p>
+  <pre><span class="cm"># 暴力:每個 node 都當一次「最高點」</span>
+ans = 0
+<span class="kw">for</span> X <span class="kw">in</span> 每個 node:
+    ans = max(ans, maxDepth(X.left) + maxDepth(X.right))</pre>
+  <p>它是<strong>對的</strong>，只是慢。慢在同一塊子樹被重複走了很多次：</p>
+
+  <div class="tablewrap">
+    <table>
+      <tr><th>當你在算</th><th>maxDepth 走過哪些 node</th></tr>
+      <tr><td class="mono">node 1</td><td class="mono">2, 4, 5, 3</td></tr>
+      <tr><td class="mono">node 2</td><td class="mono">4, 5 <span class="t2">← 又走一次</span></td></tr>
+      <tr><td class="mono">node 4</td><td class="mono">（葉子）</td></tr>
+    </table>
+  </div>
+
+  <p>外層 n 個 node，內層每次 O(n) → <strong>O(n²)</strong>。</p>
+
+  <div class="callout key">
+    <h4>浪費掉的免費情報</h4>
+    <p><code>maxDepth(X)</code> 在 <code>return</code> 之前那一瞬間，它手上<strong>同時</strong>握著 <code>L</code> 和 <code>R</code>。也就是說，它當下就已經知道「穿過 X 的最長路 = L + R」了 —— 然後它把這個情報丟掉，等外層迴圈再花 O(n) 把它算回來。</p>
+    <p><strong>O(n²) → O(n) 的全部內容，就是「順手把它記下來」。</strong></p>
+  </div>
+</section>
+
+<div class="rail"></div>
+
+<!-- ④ -->
+<section>
+  <h2><span class="num">04</span>每個 node 身上有兩個數字（無 code，純圖）</h2>
+  <p class="lede">這一節是整題的心臟。這兩個數字搞混 = 這題寫不出來。</p>
+
+  <div class="legend">
+    <div><span class="sw a"></span><span><strong>軌道 A · 往上交</strong>　<code>return</code> 給呼叫我的那一張紙。上級要拿去繼續往下走。</span></div>
+    <div><span class="sw b"></span><span><strong>軌道 B · 記帳本</strong>　寫進 <code>self.ans</code>。這是答案本人，不交給任何人。</span></div>
+  </div>
+
+  <div class="two">
+    <div>
+      <h4><span class="tk a">軌道 A</span>只能挑一邊</h4>
+      <svg class="dia" viewBox="0 0 300 250" width="300" role="img" aria-label="軌道 A：從 me 往上有一個箭頭。左邊子樹深度 2 被標成紫色，右邊子樹深度 1 被打叉變灰。回傳 max(2,1)+1 等於 3。">
+        <line class="edge up" x1="150" y1="42" x2="150" y2="14"/>
+        <polygon points="150,6 145,18 155,18" fill="var(--c1)"/>
+        <line class="edge up"  x1="150" y1="76" x2="98"  y2="102"/>
+        <line class="edge dim" x1="150" y1="76" x2="205" y2="102"/>
+        <line class="edge up"  x1="98"  y1="136" x2="70" y2="162"/>
+        <rect class="box a" x="128" y="42" width="44" height="34" rx="4"/><text class="tval" x="150" y="59">me</text>
+        <rect class="box a" x="76"  y="102" width="44" height="34" rx="4"/><text class="tval" x="98" y="119">·</text>
+        <rect class="box dim" x="183" y="102" width="44" height="34" rx="4"/><text class="tval" x="205" y="119">·</text>
+        <rect class="box a" x="48"  y="162" width="44" height="34" rx="4"/><text class="tval" x="70" y="179">·</text>
+        <line class="xout" x1="192" y1="109" x2="218" y2="129"/>
+        <line class="xout" x1="218" y1="109" x2="192" y2="129"/>
+        <text class="tag" x="150" y="228">上級要繼續往下走，</text>
+        <text class="tag" x="150" y="243">不可能同時走我兩邊</text>
+        <text class="tag a" x="60" y="212">L = 2</text>
+        <text class="tag" x="225" y="155">R = 1</text>
+      </svg>
+      <p class="mantra" style="font-size:.95rem"><code>return max(L, R) + 1</code></p>
+      <p style="font-size:.9rem;color:var(--muted)">= <code>max(2,1)+1</code> = <strong>3</strong>。這行跟 #104 <strong>一個字都沒改</strong>。</p>
+    </div>
+
+    <div>
+      <h4><span class="tk b">軌道 B</span>兩邊都吃</h4>
+      <svg class="dia" viewBox="0 0 300 250" width="300" role="img" aria-label="軌道 B：路徑從左下角的孫子往上經過 me 再往右下角走，三條邊各標上 1、2、3，總長 2 加 1 等於 3 條邊。">
+        <line class="edge path" x1="150" y1="76" x2="98"  y2="102"/>
+        <line class="edge path" x1="150" y1="76" x2="205" y2="102"/>
+        <line class="edge path" x1="98"  y1="136" x2="70" y2="162"/>
+        <rect class="box b" x="128" y="42" width="44" height="34" rx="4"/><text class="tval" x="150" y="59">me</text>
+        <rect class="box b" x="76"  y="102" width="44" height="34" rx="4"/><text class="tval" x="98" y="119">·</text>
+        <rect class="box b" x="183" y="102" width="44" height="34" rx="4"/><text class="tval" x="205" y="119">·</text>
+        <rect class="box b" x="48"  y="162" width="44" height="34" rx="4"/><text class="tval" x="70" y="179">·</text>
+        <circle class="pip" cx="84"  cy="149" r="9"/><text class="pipn" x="84" y="149">1</text>
+        <circle class="pip" cx="124" cy="89"  r="9"/><text class="pipn" x="124" y="89">2</text>
+        <circle class="pip" cx="178" cy="89"  r="9"/><text class="pipn" x="178" y="89">3</text>
+        <text class="tag b" x="150" y="216">路在 me 這裡轉彎 ↰</text>
+        <text class="tag" x="150" y="235">它不需要再往上走，</text>
+        <text class="tag" x="150" y="248">所以兩邊都可以用</text>
+        <text class="tag b" x="52" y="200">L = 2</text>
+        <text class="tag b" x="240" y="145">R = 1</text>
+      </svg>
+      <p class="mantra" style="font-size:.95rem"><code>self.ans = max(self.ans, L + R)</code></p>
+      <p style="font-size:.9rem;color:var(--muted)">= <code>2 + 1</code> = <strong>3 條邊</strong>。<strong>不用 +1，也不用 −1。</strong></p>
+    </div>
+  </div>
+
+  <p class="mantra">往上交要挑一邊（<code>max</code>），記帳本可以吃兩邊（<code>+</code>）。</p>
+
+  <div class="callout key">
+    <h4>為什麼 <code>L + R</code> 剛好就是邊數？</h4>
+    <p><code>L = 2</code> 的意思是「左邊最長往下有 <strong>2 個 node</strong>」。從 <code>me</code> 走到那個最深的子孫，<strong>正好跨 2 條邊</strong>。右邊同理跨 1 條。合起來 3 條。</p>
+    <p>單位在這裡<strong>自動換掉了</strong>：回傳值是 node 數，相加之後變成 edge 數。這種地方是 off-by-one 的高發區，面試時要主動講出來，面試官會加分。</p>
+  </div>
+
+  <div class="callout warn">
+    <h4>最後一個轉折：<code>depth(root)</code> 的回傳值沒人要</h4>
+    <p>整棵樹跑完之後，最外面那個 <code>depth(root)</code> 會吐出一個數字。<strong>那個數字是樹的最大深度，不是答案。</strong>直接丟掉。答案在帳本裡。</p>
+    <div class="wrongright">
+      <div class="wr-x"><code>return depth(root)</code>　→　回到 #104，答案全部偏小</div>
+      <div class="wr-o"><code>depth(root)</code>　然後　<code>return self.ans</code></div>
+    </div>
+  </div>
+</section>
+
+<div class="rail"></div>
+
+<!-- ⑤ -->
+<section>
+  <h2><span class="num">05</span>逐格走一次（None 全部畫出來）</h2>
+  <p>用第 01 節那棵樹。先把<strong>看不見的東西</strong>補上：每個葉子底下都還有兩個 <code>None</code>。它們不是「沒有」，它們是實際會被呼叫到的參數。</p>
+
+  <svg class="dia" viewBox="0 0 470 300" width="470" role="img" aria-label="完整的樹，包含每個葉子底下的 None 子節點：node 4 和 5 各有兩個 None，node 3 也有兩個 None，一共六個 None。">
+    <line class="edge" x1="230" y1="54" x2="140" y2="85"/>
+    <line class="edge" x1="230" y1="54" x2="330" y2="85"/>
+    <line class="edge" x1="140" y1="119" x2="95" y2="150"/>
+    <line class="edge" x1="140" y1="119" x2="190" y2="150"/>
+    <line class="edge nil" x1="330" y1="119" x2="298" y2="152"/>
+    <line class="edge nil" x1="330" y1="119" x2="364" y2="152"/>
+    <line class="edge nil" x1="95" y1="184" x2="65" y2="217"/>
+    <line class="edge nil" x1="95" y1="184" x2="125" y2="217"/>
+    <line class="edge nil" x1="190" y1="184" x2="165" y2="217"/>
+    <line class="edge nil" x1="190" y1="184" x2="222" y2="217"/>
+    <rect class="box" x="208" y="20"  width="44" height="34" rx="4"/><text class="tval" x="230" y="37">1</text>
+    <rect class="box" x="118" y="85"  width="44" height="34" rx="4"/><text class="tval" x="140" y="102">2</text>
+    <rect class="box" x="308" y="85"  width="44" height="34" rx="4"/><text class="tval" x="330" y="102">3</text>
+    <rect class="box" x="73"  y="150" width="44" height="34" rx="4"/><text class="tval" x="95" y="167">4</text>
+    <rect class="box" x="168" y="150" width="44" height="34" rx="4"/><text class="tval" x="190" y="167">5</text>
+    <rect class="nilbox" x="281" y="152" width="34" height="24" rx="3"/><text class="nilv" x="298" y="164">None</text>
+    <rect class="nilbox" x="347" y="152" width="34" height="24" rx="3"/><text class="nilv" x="364" y="164">None</text>
+    <rect class="nilbox" x="48"  y="217" width="34" height="24" rx="3"/><text class="nilv" x="65" y="229">None</text>
+    <rect class="nilbox" x="108" y="217" width="34" height="24" rx="3"/><text class="nilv" x="125" y="229">None</text>
+    <rect class="nilbox" x="148" y="217" width="34" height="24" rx="3"/><text class="nilv" x="165" y="229">None</text>
+    <rect class="nilbox" x="205" y="217" width="34" height="24" rx="3"/><text class="nilv" x="222" y="229">None</text>
+    <text class="tag" x="235" y="270">6 個 None。每一個都會真的被呼叫一次，每一個都回傳 0。</text>
+    <text class="tag" x="235" y="288">「沒有小孩」在 code 裡不是空白，是一次完整的函式呼叫。</text>
+  </svg>
+
+  <div class="callout key">
+    <h4>帳本放在哪裡？</h4>
+    <p>下面每一格都有兩個東西：<strong>左邊是便條紙疊</strong>（call stack，會疊上去、會被撕掉），<strong>右邊是帳本</strong>（<code>self.ans</code>）。</p>
+    <p><strong>帳本不在任何一張紙上。</strong>紙撕掉的時候帳本不會跟著消失，這就是為什麼它撐得住整趟遞迴。</p>
+  </div>
+
+  <div class="film">
+    <div class="shot"><div class="hd"><span class="no">01</span><span class="cap">一路衝到底，先撞到 <code>4</code> 底下的 <code>None</code>。煞車，<code>return 0</code>。左右兩個都是，所以 <code>depth(4)</code> 拿到 <code>L=0 R=0</code>。</span></div>
+      <div class="row">
+        <div class="tower">
+          <div class="fr run"><span class="who">depth(4)</span> <span class="slot">L=<span class="vala">0</span> R=<span class="vala">0</span></span></div>
+          <div class="fr"><span class="who">depth(2)</span> <span class="slot">⏸ 卡在 L = ▢</span></div>
+          <div class="fr"><span class="who">depth(1)</span> <span class="slot">⏸ 卡在 L = ▢</span></div>
+          <div class="floor">────── stack 底 ──────</div>
+        </div>
+        <div class="ledger"><b>帳本 ans</b><span class="big">0</span></div>
+      </div></div>
+
+    <div class="shot"><div class="hd"><span class="no">02</span><span class="cap"><span class="tk b">記帳</span><code>max(0, 0+0)</code> = <strong>0</strong>，帳本沒變。<span class="tk a">往上交</span><code>max(0,0)+1</code> = <strong>1</strong>，<code>depth(4)</code> 撕掉。</span></div>
+      <div class="row">
+        <div class="tower">
+          <div class="fr gone"><span class="who">depth(4)</span> <span class="slot">return <span class="vala">1</span> → 撕掉</span></div>
+          <div class="fr run"><span class="who">depth(2)</span> <span class="slot">◀ L=<span class="vala">1</span>，接著跑 R = depth(5)</span></div>
+          <div class="fr"><span class="who">depth(1)</span> <span class="slot">⏸ 卡在 L = ▢</span></div>
+          <div class="floor">────── stack 底 ──────</div>
+        </div>
+        <div class="ledger"><b>帳本 ans</b><span class="big">0</span></div>
+      </div></div>
+
+    <div class="shot"><div class="hd"><span class="no">03</span><span class="cap"><code>depth(5)</code> 跟 <code>4</code> 一模一樣：記帳 <code>0+0</code>，往上交 <code>1</code>。現在 <code>depth(2)</code> 兩格都滿了。</span></div>
+      <div class="row">
+        <div class="tower">
+          <div class="fr gone"><span class="who">depth(5)</span> <span class="slot">return <span class="vala">1</span> → 撕掉</span></div>
+          <div class="fr run"><span class="who">depth(2)</span> <span class="slot">L=<span class="vala">1</span> R=<span class="vala">1</span> ▶ 可以算自己了</span></div>
+          <div class="fr"><span class="who">depth(1)</span> <span class="slot">⏸ 卡在 L = ▢</span></div>
+          <div class="floor">────── stack 底 ──────</div>
+        </div>
+        <div class="ledger"><b>帳本 ans</b><span class="big">0</span></div>
+      </div></div>
+
+    <div class="shot"><div class="hd"><span class="no">04</span><span class="cap"><strong>帳本第一次被改。</strong><span class="tk b">記帳</span><code>max(0, 1+1)</code> = <strong>2</strong>，這是路徑 <code>4-2-5</code>。<span class="tk a">往上交</span><code>max(1,1)+1</code> = <strong>2</strong>。兩個數字剛好都是 2，<strong>但意思完全不同</strong>。</span></div>
+      <div class="row">
+        <div class="tower">
+          <div class="fr gone"><span class="who">depth(2)</span> <span class="slot">return <span class="vala">2</span> → 撕掉</span></div>
+          <div class="fr run"><span class="who">depth(1)</span> <span class="slot">◀ L=<span class="vala">2</span>，接著跑 R = depth(3)</span></div>
+          <div class="floor">────── stack 底 ──────</div>
+        </div>
+        <div class="ledger live"><b>帳本 ans</b><span class="big">2</span></div>
+      </div></div>
+
+    <div class="shot"><div class="hd"><span class="no">05</span><span class="cap"><code>depth(3)</code> 是葉子，<code>L=0 R=0</code>。<span class="tk b">記帳</span><code>max(2, 0)</code> = <strong>2</strong>，帳本不動（<code>max</code> 自動擋掉比較小的）。<span class="tk a">往上交</span><code>1</code>。</span></div>
+      <div class="row">
+        <div class="tower">
+          <div class="fr gone"><span class="who">depth(3)</span> <span class="slot">return <span class="vala">1</span> → 撕掉</span></div>
+          <div class="fr run"><span class="who">depth(1)</span> <span class="slot">L=<span class="vala">2</span> R=<span class="vala">1</span> ▶ 可以算自己了</span></div>
+          <div class="floor">────── stack 底 ──────</div>
+        </div>
+        <div class="ledger"><b>帳本 ans</b><span class="big">2</span></div>
+      </div></div>
+
+    <div class="shot"><div class="hd"><span class="no">06</span><span class="cap"><span class="tk b">記帳</span><code>max(2, 2+1)</code> = <strong>3</strong>，這是路徑 <code>4-2-1-3</code>。<span class="tk a">往上交</span><code>max(2,1)+1</code> = <strong>3</strong> —— <strong>但外面沒有任何人接這個值，它直接被丟掉。</strong></span></div>
+      <div class="row">
+        <div class="tower">
+          <div class="fr gone"><span class="who">depth(1)</span> <span class="slot">return <span class="vala">3</span> → 🗑 沒人接</span></div>
+          <div class="emptystack">（便條紙疊空了）</div>
+        </div>
+        <div class="ledger live"><b>帳本 ans</b><span class="big">3</span></div>
+      </div></div>
+
+    <div class="shot"><div class="hd"><span class="no">07</span><span class="cap"><code>return self.ans</code> → <strong>3</strong>。紙全部撕光了，帳本還在。</span></div>
+      <div class="row">
+        <div class="tower"><div class="emptystack">（空）</div></div>
+        <div class="ledger live"><b>答案</b><span class="big">3</span></div>
+      </div></div>
+  </div>
+
+  <div class="callout warn">
+    <h4>第 04 格是整題最容易騙過自己的地方</h4>
+    <p>那裡「記帳」算出 2，「往上交」也算出 2。你會覺得「啊那不是同一個東西嗎」。<strong>不是。</strong>看第 06 格：記帳算出 3（<code>2+1</code>），往上交也算出 3（<code>max(2,1)+1</code>），數字又撞在一起。</p>
+    <p>兩個數字差多少，其實有公式。把它們相減：</p>
+    <pre><span class="cm">記帳 − 往上交</span>
+= (L + R) − (max(L,R) + 1)
+= min(L,R) − 1        <span class="cm"># 因為 L+R = max(L,R) + min(L,R)</span></pre>
+    <p>所以它們<strong>只有在 <code>min(L,R) == 1</code> 的時候才會剛好相等</strong>。第 04 和第 06 格都踩中這個巧合（<code>min(1,1)=1</code>、<code>min(2,1)=1</code>），所以你看不出差別。</p>
+    <div class="tablewrap">
+      <table>
+        <tr><th class="mono">L, R</th><th class="mono">min</th><th class="b">記帳 L+R</th><th class="a">往上交 max+1</th><th>差</th></tr>
+        <tr><td class="mono">0, 0（葉子）</td><td class="mono">0</td><td class="mono b">0</td><td class="mono a">1</td><td class="hit">−1</td></tr>
+        <tr><td class="mono">2, 1</td><td class="mono">1</td><td class="mono b">3</td><td class="mono a">3</td><td>0 ← 巧合</td></tr>
+        <tr><td class="mono">5, 1</td><td class="mono">1</td><td class="mono b">6</td><td class="mono a">6</td><td>0 ← 又是巧合</td></tr>
+        <tr><td class="mono">5, 2</td><td class="mono">2</td><td class="mono b">7</td><td class="mono a">6</td><td class="hit">+1</td></tr>
+        <tr><td class="mono">5, 4</td><td class="mono">4</td><td class="mono b">9</td><td class="mono a">6</td><td class="hit">+3</td></tr>
+      </table>
+    </div>
+    <p>看第一列：<strong>連葉子都已經分岔了</strong>（記帳 0、往上交 1）。它們從頭到尾就不是同一件事，只是這棵小樹上撞了兩次同值。</p>
+  </div>
+</section>
+
+<div class="rail"></div>
+
+<details>
+  <summary>完整 code 加逐行解釋<span class="lockhint">自己寫完再展開</span></summary>
+  <div class="dbody">
+<pre><span class="kw">class</span> <span class="fn">Solution</span>:
+    <span class="kw">def</span> <span class="fn">diameterOfBinaryTree</span>(self, root):
+        self.ans = 0                            <span class="cm"># 帳本,從 0 開始</span>
+
+        <span class="kw">def</span> <span class="fn">depth</span>(node):
+            <span class="kw">if</span> <span class="kw">not</span> node:                        <span class="cm"># 煞車:空的往下 0 格</span>
+                <span class="kw">return</span> 0
+            L = depth(node.left)                <span class="cm"># 委派左邊</span>
+            R = depth(node.right)               <span class="cm"># 委派右邊</span>
+<span class="hl">            self.ans = max(self.ans, L + R)     <span class="cm"># ★ 軌道 B:記帳</span></span>
+            <span class="kw">return</span> max(L, R) + 1                <span class="cm"># 軌道 A:往上交 (= #104)</span>
+
+        depth(root)                             <span class="cm"># 跑完整棵樹,回傳值故意不接</span>
+        <span class="kw">return</span> self.ans                         <span class="cm"># 答案在帳本裡</span></pre>
+
+    <div class="tablewrap">
+      <table>
+        <tr><th>行</th><th>做什麼</th><th>拿掉會怎樣</th></tr>
+        <tr><td class="mono">self.ans = 0</td><td>開一個不會被撕掉的帳本</td><td class="mono">AttributeError</td></tr>
+        <tr><td class="mono">if not node: return 0</td><td>煞車。回 <code>0</code> 因為空子樹往下 0 格</td><td>無限遞迴 → RecursionError</td></tr>
+        <tr><td class="mono">L = depth(node.left)</td><td>委派左邊，<strong>等它跑完</strong></td><td>算不出自己這層</td></tr>
+        <tr><td class="mono a">return max(L,R)+1</td><td>軌道 A。上級只能走我一邊</td><td>上級收到 <code>None</code></td></tr>
+        <tr><td class="mono b">self.ans = max(...)</td><td>軌道 B。整題唯一的新增行</td><td>退化成 #104</td></tr>
+        <tr><td class="mono">return self.ans</td><td>交帳本，不是交回傳值</td><td>答案變成最大深度</td></tr>
+      </table>
+    </div>
+
+    <h4>複雜度</h4>
+    <p><strong>Time O(n)</strong>：每個 node 進去一次、出來一次，記帳是 O(1)。<br>
+    <strong>Space O(h)</strong>：h 是樹高。平衡樹 O(log n)，<strong>退化成一條鏈就是 O(n)</strong>。</p>
+    <p style="color:var(--muted);font-size:.9rem">題目說 node 數可到 10⁴。如果測資是一條 10⁴ 長的斜鏈，Python 預設 recursion limit 是 1000，會爆 <code>RecursionError</code>。面試講到這裡就夠加分了；真要解就 <code>sys.setrecursionlimit</code> 或改成 iterative post-order。</p>
+  </div>
+</details>
+
+<details>
+  <summary>逐輪執行模擬表<span class="lockhint">跟第 05 節同一棵樹</span></summary>
+  <div class="dbody">
+    <div class="tablewrap">
+      <table>
+        <tr><th>步</th><th>誰在跑</th><th class="mono">L</th><th class="mono">R</th><th class="b">記帳 max(ans, L+R)</th><th class="a">往上交 max(L,R)+1</th></tr>
+        <tr><td>1</td><td class="mono">depth(None)</td><td>—</td><td>—</td><td>—</td><td class="mono a">0</td></tr>
+        <tr><td>2</td><td class="mono">depth(4)</td><td class="mono">0</td><td class="mono">0</td><td class="mono b">max(0, 0) = 0</td><td class="mono a">1</td></tr>
+        <tr><td>3</td><td class="mono">depth(5)</td><td class="mono">0</td><td class="mono">0</td><td class="mono b">max(0, 0) = 0</td><td class="mono a">1</td></tr>
+        <tr><td>4</td><td class="mono">depth(2)</td><td class="mono">1</td><td class="mono">1</td><td class="mono b">max(0, 2) = <span class="hit">2</span></td><td class="mono a">2</td></tr>
+        <tr><td>5</td><td class="mono">depth(3)</td><td class="mono">0</td><td class="mono">0</td><td class="mono b">max(2, 0) = 2</td><td class="mono a">1</td></tr>
+        <tr><td>6</td><td class="mono">depth(1)</td><td class="mono">2</td><td class="mono">1</td><td class="mono b">max(2, 3) = <span class="hit">3</span></td><td class="mono a">3 🗑</td></tr>
+      </table>
+    </div>
+    <p>最後 <code>return self.ans</code> = <strong>3</strong>。注意第 6 步「往上交」那格的 <code>3</code> 被丟掉了，跟答案的 <code>3</code> 只是巧合同值。</p>
+  </div>
+</details>
+
+<details>
+  <summary>口訣加模板<span class="lockhint">可以直接搬到下一題</span></summary>
+  <div class="dbody">
+    <p class="mantra">往上交要挑一邊（<code>max</code>），記帳本可以吃兩邊（<code>+</code>）。</p>
+
+    <h4>雙軌 tree DP 通用模板</h4>
+<pre><span class="kw">def</span> <span class="fn">solve</span>(self, root):
+    self.ans = 初始值
+    <span class="kw">def</span> <span class="fn">dfs</span>(node):
+        <span class="kw">if</span> <span class="kw">not</span> node: <span class="kw">return</span> 中性值
+        L = dfs(node.left)
+        R = dfs(node.right)
+        self.ans = max(self.ans, <span class="cm">「以 node 為最高點」的值</span>)   <span class="cm"># 軌道 B</span>
+        <span class="kw">return</span> <span class="cm">「能往上延伸」的值</span>                        <span class="cm"># 軌道 A</span>
+    dfs(root)
+    <span class="kw">return</span> self.ans</pre>
+
+    <p>整個系列只換那兩行：</p>
+    <div class="tablewrap">
+      <table class="xref">
+        <tr><th>題</th><th class="b">軌道 B（記帳）</th><th class="a">軌道 A（往上交）</th></tr>
+        <tr><td>#543 Diameter</td><td class="mono b">L + R</td><td class="mono a">max(L,R) + 1</td></tr>
+        <tr><td>#124 Max Path Sum</td><td class="mono b">node.val + L + R</td><td class="mono a">node.val + max(L,R,0)</td></tr>
+        <tr><td>#110 Balanced Tree</td><td class="mono b">abs(L − R) ≤ 1 ?</td><td class="mono a">max(L,R) + 1</td></tr>
+        <tr><td>#104 Max Depth</td><td class="mono">（沒有軌道 B）</td><td class="mono a">max(L,R) + 1</td></tr>
+      </table>
+    </div>
+    <p><strong>看出來了嗎：#104 就是「只有軌道 A」的特例。</strong>所以 #543 不是新題型，是同一個模板長出第二條軌道。</p>
+  </div>
+</details>
+
+<details>
+  <summary>L6 面試逐字稿<span class="lockhint">英文可直接背，shadowing 用</span></summary>
+  <div class="dbody">
+    <p style="color:var(--muted);font-size:.88rem">完整答題示範與英文 shadowing 素材。逐字稿流利不等於能獨立實作，兩件事分開記錄。</p>
+
+    <div class="move"><h4><span class="mv">MOVE 0</span>先問 constraint（手不碰白板）</h4>
+      <div class="say"><b>說</b>"Before I start — a few clarifying questions. First, when you say the <em>length</em> of a path, do you mean the number of edges or the number of nodes? Second, how large can the tree get? And third, can the tree be skewed, or is it roughly balanced?"</div>
+      <div class="think"><b>想</b>第一題就是這題的坑。主動問出來 = 你知道 off-by-one 在哪。第三題是在鋪 <code>O(h)</code> space 跟 recursion limit 的伏筆。</div>
+    </div>
+
+    <div class="move"><h4><span class="mv">MOVE 1</span>重述 + 自己舉例</h4>
+      <div class="say"><b>說</b>"So the diameter is the longest path between any two nodes, measured in edges, and it doesn't have to go through the root. Let me draw an example I'll reuse later."</div>
+      <div class="think"><b>想</b>自己畫的例子後面 dry run 直接指它，省時間。而且你選的例子要故意讓答案穿過 root，等下好對比。</div>
+      <div class="say" style="background:var(--hold)"><b>寫</b><span style="font-family:'JetBrains Mono',monospace;white-space:pre">   1
+  / \
+ 2   3      answer = 3  (4-2-1-3)
+/ \
+4  5</span></div>
+    </div>
+
+    <div class="move"><h4><span class="mv">MOVE 2</span>暴力解 20 秒 + 指出浪費了什麼</h4>
+      <div class="say"><b>說</b>"The brute force is: every path has exactly one highest node where it turns. So for each node, compute <code>maxDepth(left) + maxDepth(right)</code> and take the max. That's correct but O(n²), because <code>maxDepth</code> re-walks the same subtrees over and over."</div>
+      <div class="think"><b>想</b>「every path has exactly one turning point」這句話是整題的 insight。先在暴力解講出來，後面優化就順了。</div>
+    </div>
+
+    <div class="move"><h4><span class="mv">MOVE 3</span>講 invariant</h4>
+      <div class="say"><b>說</b>"Here's the key: when <code>depth(node)</code> is about to return, it already holds both <code>L</code> and <code>R</code>. At that exact moment it knows the best path turning at this node — it's <code>L + R</code>. So I don't need a second pass. <strong>One DFS, and I record the answer on the way back up.</strong>"</div>
+      <div class="think"><b>想</b>這是把 O(n²) 砍成 O(n) 的唯一一句話。面試官在等的就是這句。</div>
+    </div>
+
+    <div class="move"><h4><span class="mv">MOVE 4</span>關鍵手法 + 換掉了什麼</h4>
+      <div class="say"><b>說</b>"Each node produces two different numbers. The one I <em>return</em> is <code>max(L,R)+1</code> — the parent can only extend through one side. The one I <em>record</em> is <code>L+R</code> — this path turns here, so it uses both sides. I'm trading one extra variable of state for a whole factor of n."</div>
+      <div class="think"><b>想</b>「two different numbers」講清楚，面試官就知道你不是背的。</div>
+    </div>
+
+    <div class="move"><h4><span class="mv">MOVE 5</span>複雜度講在寫 code 之前</h4>
+      <div class="say"><b>說</b>"Time is O(n) — every node visited once. Space is O(h) for the call stack, which is O(log n) balanced but O(n) if the tree is skewed. Sound reasonable?"</div>
+      <div class="think"><b>想</b>先設計、先對齊，再動手。<code>"Sound reasonable?"</code> 是換取修正的最便宜方式。</div>
+    </div>
+
+    <div class="move"><h4><span class="mv">MOVE 6</span>code 分 3 段寫</h4>
+      <div class="say"><b>說</b>（第 1 段）"I'll keep the running answer on the instance so it survives the whole traversal."</div>
+      <div class="say" style="background:var(--hold)"><b>寫</b><span style="font-family:'JetBrains Mono',monospace;white-space:pre">self.ans = 0</span></div>
+      <div class="say"><b>說</b>（第 2 段）"Base case returns 0 — an empty subtree goes down zero levels. Then I recurse both sides and wait for both."</div>
+      <div class="say" style="background:var(--hold)"><b>寫</b><span style="font-family:'JetBrains Mono',monospace;white-space:pre">def depth(node):
+    if not node:
+        return 0
+    L = depth(node.left)
+    R = depth(node.right)</span></div>
+      <div class="say"><b>說</b>（第 3 段）"Now the two tracks. Record <code>L+R</code>, return <code>max(L,R)+1</code>. And at the top I deliberately discard the return value — the answer lives in <code>self.ans</code>."</div>
+      <div class="say" style="background:var(--hold)"><b>寫</b><span style="font-family:'JetBrains Mono',monospace;white-space:pre">    self.ans = max(self.ans, L + R)
+    return max(L, R) + 1
+
+depth(root)
+return self.ans</span></div>
+    </div>
+
+    <div class="move"><h4><span class="mv">MOVE 7</span>主動 dry run（用 Move 1 的例子）</h4>
+      <div class="say"><b>說</b>"Let me trace it. <code>depth(4)</code> and <code>depth(5)</code> both return 1 and record 0. At node 2, L and R are both 1, so I record <code>1+1 = 2</code> and return 2. At node 3 I record 0 and return 1. At the root, L is 2 and R is 1, so I record <code>2+1 = 3</code>. Answer 3, matching the picture."</div>
+    </div>
+
+    <div class="move"><h4><span class="mv">MOVE 8</span>主動掃 edge case</h4>
+      <div class="say"><b>說</b>"Single node: both children are None, so I record <code>0+0 = 0</code> — correct, no edges. Empty tree: the base case returns 0 immediately and <code>self.ans</code> stays 0. And the case the problem warns about — diameter not through the root — is handled automatically, because I record at <em>every</em> node, not just the root."</div>
+      <div class="think"><b>想</b>最後一句是關鍵：點名「哪個設計自動答對了哪個 case」，這比列 case 清單有價值得多。</div>
+    </div>
+
+    <div class="move"><h4><span class="mv">MOVE 9</span>主動講 follow-up</h4>
+      <div class="say"><b>說</b>"Two follow-ups worth flagging. If the tree can be 10⁴ deep and skewed, Python's default recursion limit will blow up — I'd convert this to an iterative post-order with an explicit stack. And this same shape generalizes: swap the two lines and you get max path sum, or a balanced-tree check. It's one template with two slots."</div>
+      <div class="think"><b>想</b>解一類，不是解一題。這是 L4 跟 L6 最大的分野。</div>
+    </div>
+
+    <h4>「只給結論」vs「說明推理」</h4>
+    <div class="tablewrap">
+      <table class="xref">
+        <tr><th>Move</th><th>只給結論</th><th>說明推理</th></tr>
+        <tr><td>Move 0</td><td>直接開始寫</td><td>先問 edges 還是 nodes</td></tr>
+        <tr><td>Move 3</td><td>「用 DFS 算高度」</td><td>「return 前那一刻它已經同時握有 L 和 R」</td></tr>
+        <tr><td>Move 4</td><td>「記一個全域 max」</td><td>「兩個數字不同：交出去挑一邊，記帳吃兩邊」</td></tr>
+        <tr><td>Move 8</td><td>列 edge case</td><td>點名哪個設計讓哪個 case 自動答對</td></tr>
+      </table>
+    </div>
+    <p style="color:var(--muted);font-size:.88rem">這張表示範的是「講法差異」，不對應職級判定。</p>
+
+    <h4>Native English（挑可遷移的句型）</h4>
+    <ul>
+      <li>"Every path has exactly <strong>one</strong> highest node where it turns." ← 講 invariant 的句型</li>
+      <li>"At that exact moment it already holds both values, so I don't need a second pass." ← 講優化來源</li>
+      <li>"I'm trading one extra variable of state for a whole factor of n." ← 講 trade-off</li>
+      <li>"That case is handled automatically, because I record at <em>every</em> node." ← 講設計自動覆蓋 edge case</li>
+    </ul>
+  </div>
+</details>
+
+<details>
+  <summary>這次的釐清<span class="lockhint">session 結束時補寫</span></summary>
+  <div class="dbody">
+    <p style="color:var(--muted);font-size:.88rem">2026-09-11 讀書會。<strong>drill.py 冷寫一次 9/9 綠</strong>，五格全對，只掛在 <code>amx</code> 手滑。下面兩個洞都是你自己主動問出來的。</p>
+
+    <h4>① 遞迴的第一步，是「衝到最深的 node」嗎？</h4>
+    <div class="wrongright">
+      <div class="wr-x"><strong>✗ 我以為</strong>　第一步就直接跳到最深的節點。</div>
+      <div class="wr-o"><strong>✓ 其實是</strong>　它一路向<strong>左</strong>鑽，撞到 <code>None</code> 才停。程式<strong>不知道</strong>哪裡最深 —— 那正是它要算的東西。</div>
+      <div class="wr-y"><strong>→ 為什麼會搞混</strong>　把「<strong>開始</strong>執行的順序」跟「<strong>結束</strong>執行的順序」當成同一個。</div>
+    </div>
+
+    <div class="tablewrap">
+      <table>
+        <tr><th>階段</th><th>順序</th><th>這個階段誰在做事</th></tr>
+        <tr><td>往下鑽</td><td class="mono">1 → 2 → 4 → None</td><td>沒人。全部卡在 stack 上等小孩</td></tr>
+        <tr><td>往回收</td><td class="mono">None → 4 → 5 → 2 → 3 → 1</td><td><span class="t2">記帳全部發生在這裡</span></td></tr>
+      </table>
+    </div>
+
+    <p><strong>反例：最左 ≠ 最深。</strong>下面這棵樹，第一個跑完的是 <code>2</code> 底下的 <code>None</code>，離真正最深的 <code>6</code> 十萬八千里：</p>
+
+    <svg class="dia" viewBox="0 0 400 250" width="400" role="img" aria-label="反例樹：1 的左小孩 2 是葉子，右小孩 3 底下有 4 和 5，5 底下還有 6。最左邊的 2 深度只有 2，最深的 6 深度是 4。">
+      <line class="edge path" x1="200" y1="44" x2="120" y2="75"/>
+      <line class="edge" x1="200" y1="44" x2="285" y2="75"/>
+      <line class="edge" x1="285" y1="109" x2="240" y2="140"/>
+      <line class="edge" x1="285" y1="109" x2="330" y2="140"/>
+      <line class="edge" x1="330" y1="174" x2="305" y2="205"/>
+      <rect class="box" x="178" y="10"  width="44" height="34" rx="4"/><text class="tval" x="200" y="27">1</text>
+      <rect class="box b" x="98"  y="75"  width="44" height="34" rx="4"/><text class="tval" x="120" y="92">2</text>
+      <rect class="box" x="263" y="75"  width="44" height="34" rx="4"/><text class="tval" x="285" y="92">3</text>
+      <rect class="box" x="218" y="140" width="44" height="34" rx="4"/><text class="tval" x="240" y="157">4</text>
+      <rect class="box" x="308" y="140" width="44" height="34" rx="4"/><text class="tval" x="330" y="157">5</text>
+      <rect class="box a" x="283" y="205" width="44" height="34" rx="4"/><text class="tval" x="305" y="222">6</text>
+      <text class="tag b" x="80" y="132">最左，深度 2</text>
+      <text class="tag b" x="80" y="150">第一個跑完的在這</text>
+      <text class="tag a" x="305" y="252">最深，深度 4</text>
+    </svg>
+
+    <p class="mantra" style="font-size:1rem">往下鑽只負責<strong>拆題</strong>，往回收才負責<strong>算答案</strong>。</p>
+
+    <h4>② <code>self.ans</code> 為什麼不用宣告？<code>nonlocal</code> 又是什麼？</h4>
+    <div class="wrongright">
+      <div class="wr-y"><strong>判準（你 2026-09-07 自己問出來的那條）</strong>　看 <code>=</code> 左邊有沒有 <code>.</code> 或 <code>[]</code>。</div>
+      <div class="wr-x"><strong>✗ <code>ans = ans + 1</code></strong>　左邊是光禿禿的名字 → 觸發「local 蓋章」→ <code>UnboundLocalError</code>。</div>
+      <div class="wr-o"><strong>✓ <code>self.ans = ...</code></strong>　左邊有 <code>.</code>，這是 <code>setattr</code>，不是名字賦值。<code>self</code> 只被<strong>讀</strong>，所以不用宣告。</div>
+      <div class="wr-o"><strong>✓ <code>nonlocal ans</code></strong>　明講「我要改外層那個」，Python 配一個 closure cell 給你。</div>
+    </div>
+
+    <p><strong>關鍵是這是編譯期決定的，不是執行期：</strong></p>
+<pre><span class="cm"># 編譯 bump 的時候(一行都還沒跑)</span>
+<span class="kw">def</span> <span class="fn">bump</span>():
+    ans = ans + 1
+    ─┬─   ─┬─
+     │     └── 讀:被迫查 local
+     └──────── 寫:光禿禿的名字 → 把 ans 蓋章成 LOCAL,<span class="cm">整個函式都算</span>
+<span class="cm">
+  → 右邊那次讀取被左邊那次賦值毒死
+  → local 的 ans 還沒放過值
+  → UnboundLocalError</span></pre>
+
+    <p><strong>三種寫法其實是同一招</strong>：不要改標籤，改盒子裡的東西。</p>
+    <div class="tablewrap">
+      <table>
+        <tr><th>寫法</th><th>盒子是什麼</th><th>要宣告嗎</th><th class="mono">co_freevars</th></tr>
+        <tr><td class="mono">self.ans</td><td>Solution 物件</td><td>不用</td><td class="mono">('self',)</td></tr>
+        <tr><td class="mono">nonlocal ans</td><td>closure cell</td><td><strong>要</strong></td><td class="mono">('ans',)</td></tr>
+        <tr><td class="mono">ans[0]</td><td>一個 list</td><td>不用</td><td class="mono">('ans',)</td></tr>
+      </table>
+    </div>
+    <p style="font-size:.9rem;color:var(--muted)">可跑的對照在題目資料夾的 <code>scope-demo.py</code>。<br>
+    面試選 <code>self.ans</code>(白板少寫一個 keyword = 少一個手滑機會)，但<strong>第一行 <code>self.ans = 0</code> 不能省</strong> —— 忘了它，同一個 <code>Solution</code> 實例跑第二棵樹會吃到上一次的帳本，而且不報錯。</p>
+  </div>
+</details>
+
+<div class="rail"></div>
+<p style="color:var(--muted);font-size:.85rem;text-align:center">LeetCode #543 · 配色有意義：<span style="color:var(--c1);font-weight:700">紫＝往上交</span>　<span style="color:var(--c2);font-weight:700">紅＝記帳本</span></p>
+
+</div>
