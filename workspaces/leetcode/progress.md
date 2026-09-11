@@ -4,7 +4,7 @@
 
 # leetcode
 
-- 今天做到:2026-09-10。**#141 收掉了**:drill.py 冷寫走到階 3(dummy 問對了、
+- 今天做到:2026-09-11。**#141 收掉了**:drill.py 冷寫走到階 3(dummy 問對了、
   兩指標起手式與 `while` 條件想不起來),對照打後 7/7 PASS,`return False` 縮排自己貼對
   (頭號慣犯這次沒中)。溫度計 ② 答「還是抓得到」**正確**,「多花步數」錯(同或更少)。
   **coach 的提示與 notes.md 原本寫錯**(說走 3 步會跳過 0),已模擬驗證並更正:
@@ -39,6 +39,19 @@
   call stack 圖。**收在「`dfs(1)` 最後 `max(2,1)+1` 這兩個數字從哪來」這題,學員還沒
   答就下班,不記債,下次直接接著問。**
 
+- **2026-09-11 #104 續場**:開場默寫(第三層留存測,`dfs` 模板第 3 次考)**沒過**,三格全錯:
+  `if not root`(參數叫 `node`,在裡面檢查 `root` 會無限遞迴)、`return False`(型別錯,
+  但 Python `bool` 是 `int` subclass 所以這題會意外跑對)、`dfa(left)`(拼字 + `left` 不在 scope)。
+  對照抄一次,不記債。接著收 dry run:**「`max(2,1)` 的兩個數字從哪來」第一次答對一半**
+  (`2` 對;`1` 指到 `dfs(2)` 那行的 `max(1,0)`,差一代輩分),narrowing 後答出 `dfs(3)` **正確**。
+  結構重點已講明:`max(left,right)` 兩格被 `node.left` / `node.right` 綁死,孫子輩不會直接跳上來。
+  **拷問 ② 不會**(`dfs(4)` return 之後控制權去哪),走卡住協定階 2 仍不會,學員主動要求 eli5。
+  **→ 產出圖解頁**(見下方 URL),第 04 節用 **11 格分鏡**把整疊 call stack 畫出來:
+  疊紙/撕紙兩種動作、暫停中 frame 卡在哪一行、`▢` 未填格、五個 `None` 子節點全部畫實。
+  **升級 my-common-bugs 表二第 2 列**:「`return` 做的兩件事只認得第一件」(3 次,吸收原
+  `print`/`return` 那列);表一「變數名手滑」3→4。
+  **收在拷問 ③ 之前**(學員要先自讀圖解頁第 04 節)。下次從拷問 ③ 填空起跑,再走 ④ + 溫度計 ②。
+
 ## Pattern 狀態
 
 | Pattern | 圖解看過 | 對照打過 | 自己寫出來 | 口訣 |
@@ -47,7 +60,7 @@
 | Linked List 合併(dummy + tail) | ✓ | ✓ | 🟡 骨架冷默出來,尾段仍需階 2 提示 | ✓ |
 | Fast-slow pointer(龜兔) | ✓(9/07 圖解頁) | ✓ 9/10 | 🟡 9/10 冷寫走到階 3;harness 7/7 綠 | ✓ |
 | Tree DFS 遞迴(base/本層/委派) | ✓(9/10 圖解頁) | ✓ 9/10 | ✅ 9/10 #226 五行冷寫一次過 8/8;續場開場默寫沒過,對照抄一次 | ✓ |
-| Tree DFS 吃下屬回傳值(#104 `1+max(left,right)`) | 對話中 ASCII,無圖解頁 | | 🟡 公式靠拷問 ① 階梯提示 Socratic 推出,尚未獨立打 code | 待補 |
+| Tree DFS 吃下屬回傳值(#104 `max(left,right)+1`) | ✓ 9/11 圖解頁(11 格 call stack 分鏡) | | 🟡 公式靠階梯提示推出;dry run 數字出處答對;**call stack 控制權轉移仍要看圖才過** | ✓ 先問兩邊再算自己 |
 | Heap k-way merge(每條一個 head) | ✓ | | ✓ | ✓ |
 | Hashmap + 雙向鏈(LRU) | | | | |
 
@@ -78,9 +91,11 @@
   2026-09-10 全跑完:拷問 ①②③④ + 溫度計 ②,drill.py 8/8 綠。
   第 05 節「逐格走一次」是為心盲症加的:看不見的 None 子節點圖 + 7 格 call stack。
 - **#104 Maximum Depth of Binary Tree** — `tree/maximum-depth-of-binary-tree/`
-  2026-09-10:對話中 Socratic 推公式(反例糾正「隨便選一邊」為「取 max」),組出完整
-  `maxDepth(root)`,dry run 到一半(call stack 圖已畫)下班。未做:eli5 圖解頁、
-  drill.py、拷問 ②③④、溫度計 ②、L6 逐字稿。詳細記錄與 dry run 圖見該題 `notes.md`。
+  圖解頁:https://claude.ai/code/artifact/e77e837d-6fab-4986-98f9-02920132a8f5
+  2026-09-10:Socratic 推出 `max(left,right)+1`,dry run 走一半。
+  2026-09-11:dry run 收掉(數字出處答對);拷問 ② 不會 → 產出圖解頁(11 格 call stack
+  分鏡 + L6 逐字稿 + 這次的釐清)、`drill.py`(9 組 case,空 stub 9/9 FAIL、參考解 9/9 PASS 已驗)。
+  未做:拷問 ③④、溫度計 ②、solution.py。詳細記錄見該題 `notes.md`。
 - **#146 LRU Cache** — `hashmap-doubly-linked-list/lru-cache/`
   圖解頁:https://claude.ai/code/artifact/69673f1c-d044-49b9-bb01-42082143e263
   本場產出:圖解頁(寄物間號碼牌比喻)、暴力解對照、L6 面試逐字稿(含 code 對照表)、pytest harness。
@@ -91,10 +106,12 @@
 
 ## 接下來
 
-1. **直接接著問**:「`dfs(1)` 最後 `max(2,1)+1` 這兩個數字從哪來」(見 #104 notes.md 的
-   call stack 圖)。確認 dry run 看得懂之後走拷問 ②(預測下一步)③(填關鍵 code)
-   ④(獨立寫 + harness)+ 溫度計 ②
-2. #104 收尾後補產出:eli5 圖解頁、drill.py、L6 逐字稿(照 #226 規格補)
+1. **開場先問一句**:「圖解頁第 04 節讀了嗎」。讀過就直接進**拷問 ③**(填空:給三格骨架,
+   挖掉 `return 0` 和 `return max(left,right)+1`),再走 ④(在 `drill.py` 冷寫,目標 9/9)
+   + 溫度計 ②。變形題已備:「`+1` 拿掉會怎樣」「`max` 換成 `min` 會回什麼」
+2. 開場默寫照常考 `dfs` 三格模板(第 4 次)。前兩次都沒過,這次重點看
+   **煞車踩的是 `node` 不是 `root`**,以及煞車值有沒有寫 `0`
+3. #104 收尾後補:`solution.py`、圖解頁「這次的釐清」再補一輪
 3. 之後 #100 Same Tree / #543 Diameter,模板填空
 4. Linked list 停在原地,不記債,隨時可回:#143 Reorder List、#146 LRU(拷問 ① 前)、
    #206 缺 eli5 圖解頁 + L6 逐字稿

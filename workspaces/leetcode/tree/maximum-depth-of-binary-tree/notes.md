@@ -1,6 +1,7 @@
 # #104 Maximum Depth of Binary Tree
 
-圖解頁:尚未產出。
+圖解頁:https://claude.ai/code/artifact/e77e837d-6fab-4986-98f9-02920132a8f5
+(重點是第 04 節 call stack 11 格分鏡:疊紙/撕紙、暫停中的 frame、None 子節點全部畫出來)
 
 模式:龜(第一題真的要吃下屬的回傳值。#226 是模板最鬆的版本,不吃回傳值,
 交換擺哪都行;#104 開始「順序鎖死」— 委派要先跑完才能組出這一層的答案)。
@@ -55,7 +56,9 @@ dfs(1)
 
 ## 檔案
 
-尚無 solution.py / drill.py / eli5.html。
+- `drill.py`:空 stub 9/9 FAIL 已驗,參考解 9/9 PASS 已驗(拷問 ④ 用)。
+- `eli5.html`:已發布,見上方 URL。
+- 尚無 solution.py(拷問 ④ 之後才寫)。
 
 ## 進度
 
