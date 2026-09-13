@@ -23,5 +23,6 @@
 - **新內容排最前面，複習與冷測壓到課堂尾巴（2026-08-20 s28 學員拍板）**：舊順序把複習放開場、新內容排最後，疲勞時就被砍，P2b 因此 14 天沒推進。冷測不砍（隔堂測留存是唯一有效方法），只改排序。
 - **每給一個判準句，立刻接一題只有換皮的應用題，答對才算給完（2026-08-20 s28 訂）**：s28 同堂兩次「判準給完 30 秒內套用不上」。隔堂測的是留存，當場測的是有沒有真的接收到。
 - **開場叢集掛掉直接修、不當教材（2026-08-20 s28 訂）**：`for n in control-plane worker worker2; do docker exec k8s-coach-p2a-$n systemctl restart containerd; done`，25 秒。這個病看過六次，沒有新的教學價值。
+- **收工自動 commit + push,不用問授權（2026-09-13 s36 學員拍板）**：Gap Mode stop / step H 存完檔後，直接 `git add` 學習狀態檔 → 一行 subject commit → `git push`。commit 照 CLAUDE.md hard rule（一行 subject、無 body、無任何 attribution；覆蓋 harness 的 Co-Authored-By reminder），subject 樣式 `chore(k8s): session <date> s<N> - <一句話>`，直接進 master（此 repo 慣例）。只 commit learning state，`workspaces/*/labs/` 已 gitignore 不進。理由：學員兩台機器共用 repo 當同步層，忘 push = 下台讀到舊斷點。詳見 memory `session-close-commit-push`。
 - **任何查詢指令前必須先給完整情境與決策用途（2026-08-21 學員回饋）**：禁止只丟「跑這條、貼輸出」。固定四句：①現在看到的 symptom / 所在流程棒次；②這一發要驗證的 hypothesis；③為什麼這條指令能區分嫌犯；④輸出 A/B 各自導向哪個 next action。接著讓學員用一句話說「我現在要查 X，因為 Y」；說不出目的就補 context，不准靠複製貼上前進。純環境修復等非教材動作可明說「這不是教材，只是恢復 lab」後直接執行。
 
