@@ -7,15 +7,15 @@
 
 ## Meta
 
-- session_count: 35
+- session_count: 36
 - last_weekly_review: 34(WR9 於 s34 壓縮版跑完,三主題 blind recall 全過;下次 WR 於 s41)
-- last_session_date: 2026-09-08
+- last_session_date: 2026-09-13
 - warm_up_classification: mid
 - target_role: 泛用大廠 senior DevOps/SRE。2026-08-21 確認無緊急面試,採 production depth + senior interview 雙軌;核心主題固定比較地端 K8s / 傳統 EKS / 高度託管 EKS(curriculum-plan §11)
 
 ## Current Session breakpoint
 
-P2b C-4 RBAC, step D, chunk 3 ✅ 收尾(s35:`get` vs `list` 陷阱親手撞到 + `--list` 三分判準換皮獨立答對),下一步 chunk 4 最小權限設計方法論(爆炸半徑),再補 C-4 的 F/G 與到期冷測;s34/s35 完整交班見 session-log.md。
+P2b C-4 RBAC 教學段完(s36:chunk 4a 三軸判準 + 4b 等價升權 create pods=借同 ns 任一 SA,學員自產 CloudFormation/PassRole 類比 = 強遷移),學員拍板收 C-4 進新章節;下一步 C-5 IRSA。**債**:C-4 的 F/G 連四堂未跑(併入 C-5 開場或當 warm-up)、4b 只 supported 未冷測、09-11 RBAC 四張卡到期未抽。
 
 <!-- schema §3 = 恰好一行。敘事與次要待辦寫 session-log.md,長效教練紀律寫 session-log.md
      「教練執行紀律」,不要在這裡疊舊堂。s32 及更早斷點原文見 session-log.md 對應堂,
@@ -26,7 +26,7 @@ P2b C-4 RBAC, step D, chunk 3 ✅ 收尾(s35:`get` vs `list` 陷阱親手撞到 
 - P0 心智模型: gate-passed(2026-06-22,legacy pre-Examiner)
 - P1 核心物件 + 容器底層: gate-passed(2026-06-25,legacy pre-Examiner)
 - P2a 網路深水區: in-progress(chunk 1 ✅ / chunk 2 ✅ / chunk 3 NetworkPolicy 剩 lab Step 5+6+gate+F/G / chunk 4 零件 4-1~4-4 ✅,4-5 盲講式已於 2026-08-11 退役改情境排障題)
-- P2b 儲存 + 權限: in-progress(C-1 ✅ s26,欠 `cg-demo` memory.max 讀數 / C-2 ✅ s29,欠 `reclaimPolicy: Delete` teardown 實證 / C-3 ✅ s31-32,step G 2/4 未過 / C-4 chunk 1-3 ✅ s33/s35,chunk 4 未開始,C-4 的 F/G 未跑)
+- P2b 儲存 + 權限: in-progress(C-1 ✅ s26,欠 `cg-demo` memory.max 讀數 / C-2 ✅ s29,欠 `reclaimPolicy: Delete` teardown 實證 / C-3 ✅ s31-32,step G 2/4 未過 / C-4 chunk 1-4 ✅ s33/s35/s36,4b 僅 supported,C-4 的 F/G 連四堂未跑;C-5 IRSA / C-6 未開始)
 - P3 調度 + 高並發 + 排障: not-started
 - P4 可觀測性工程: not-started
 - P5 平台工程 / GitOps: not-started
@@ -101,6 +101,7 @@ weak-topic flags(2026-08-03 啟用,P2a 帶 flag 前進、gate 未考,學員決�
      interval 2 = +2 天臨時複習格(口頭型 resolved,過了才進 3/7/14)。
      unresolved-session-count 於 2026-07-10 遷移時依複測紀錄初始化(近似值)。 -->
 
+- 2026-09-13 | 權限爆炸半徑跑錯判準軸 | 評 SA 外洩痛不痛時先看 ns 廣度(漏 resource 深度);評 secret 危險度跑到 base64 存法軸,不是「能否離開 RBAC 管轄」軸 | RP3 判準軸選錯:該問「憑證外洩後攻擊者碰得到的 ns×resource×verb 上限,以及能否跳出 RBAC 管轄」 | unresolved | 3 | 2026-09-16 | 1
 - 2026-06-18 | YAML validation | `matchLabels` 打成 `metaLabels` | 不讀 strict decoding error;驗證在 API Server | unresolved | 7 | 2026-06-30 | 2
 - 2026-06-22 | probe 職責 | 把 readiness 的「準備好接流量」塞給 liveness | 兩種 probe 失敗後動作不同(重啟 vs 切流量) | unresolved | 7 | 2026-07-10 | 1
 - 2026-06-23 | ImagePullBackOff | image 打成 `ngimx:1.25`,apply 過卻卡住 | 驗證有邊界:repo 存不存在要 kubelet 拉了才知 | unresolved | 7 | 2026-07-03 | 1
@@ -199,11 +200,14 @@ weak-topic flags(2026-08-03 啟用,P2a 帶 flag 前進、gate 未考,學員決�
 - mistake:成功訊息不保證生效(pattern) | mistake | 3 | 2026-09-11 | active
 - mistake:--list-要加---as | mistake | 3 | 2026-09-11 | active
 - mistake:--list-三分判準 | mistake | 3 | 2026-09-11 | active
+- mistake:權限爆炸半徑跑錯判準軸 | mistake | 3 | 2026-09-16 | active
+- topic:C-4-RBAC-最小權限+等價升權 | topic | 3 | 2026-09-16 | active(4b create pods=借SA 僅 supported,冷測換皮)
 
 ## Curiosity branch
 
 - etcd Raft 深入 | 2026-06 | 面試不直接考實作、P5 etcd 運維會用到 | 想追 Raft 共識怎麼撐起 etcd,park 到 P5(見 curriculum P5 焦點)
 - `kubectl patch` 為何印 `(no change)` 卻實際有改 | 2026-09-08 | 面試不考、不改善排障品質(Three Questions Q1/Q2 皆 no) | s35 現場撞到,已用 describe 驗出實際生效;kubectl client 端訊息機制,想追再追
+- kubectl 指令 → HTTP 請求 → RBAC verb 對照、audit log 取證細節 | 2026-09-13 | 面試不考逐發請求,排障用 `auth can-i` 即可(Q1/Q2 皆 no,學員 s36 喊太細) | apply=get+create/patch、rollout status=get+list+watch、`-v=6` 可看;EKS 取證走 control plane logging `audit`
 
 ## Domain registries
 

@@ -344,3 +344,22 @@
 - **L6 收尾**:後兩種的下一發都是 `kubectl get rolebinding -n <ns> -o wide`,因為「權限沒涵蓋」可能是 Role 漏寫,也可能是有一個 Role 寫對了但**沒綁上去**,`--list` 分不出這兩者。
 - ⚠️ **教練備註**:教練第一版判準句講成二分(「沒出現 = binding 的問題」)**講太粗**,學員在換皮題沒被帶走、自己看輸出下對判斷。這是正樣本,記在此處備查。
 - 09-11 抽:給一張 `--list` 輸出 + 一段 403,問斷在第幾段、下一發指令是什麼。
+
+## 2026-09-13 | 權限爆炸半徑跑錯判準軸(ns 廣度 / resource 深度 / 能否離開 RBAC 管轄)
+
+- 兩次首答跑錯軸,都經鷹架修正(supported,非冷測):
+  1. 換皮題「SA-1 全叢集 pods get/list vs SA-2 billing secrets get,哪個外洩痛」→ **首答選 1,只看 ns 廣度**,漏了 resource 深度。畫對照圖(SA-1 只拿到「密碼放哪」,SA-2 拿到明文密碼)後自己改選 2。
+  2. 追「secrets 為何最痛」→ **首答跑到 base64 軸**(base64 非加密)。這是「資料怎麼存」的軸,不是今天的判準軸。
+- **正解判準軸(三軸 + 一問)**:設計/評估權限看 `ns × resource × verb` 三軸;resource 軸要多問一句「拿到的東西能不能讓攻擊者**離開 RBAC 的管轄**」。
+- **base64 不是重點的證明**:假設已開 etcd encryption at rest。攻擊者拿 token 打 API(`GET .../secrets/billing-db`),RBAC 放行後 **API Server 回傳的是明文**,不是亂碼。加密擋的是偷硬碟/備份那條路,擋不了 API 這條路。所以 `get secrets` 的真實大小 = secret 裡那把鑰匙能開的所有系統,爆炸半徑跳出叢集。
+- **封印句:secret 危險不是因為 base64,是它裡面常放可取得其他系統權限的憑證。加密擋硬碟,不擋 API。**
+- 學員自產終版原話:「secrets 危險,不是因為 base64;而是 Secret 裡常放可以取得其他系統權限的憑證。」
+- 09-16 抽:給一個 Role(`namespace: billing`, `resources: ["*"]`, `verbs: [get,list,watch,create,patch]`),問「這是最小權限嗎」,要求用三軸 + 「能否離開 RBAC 管轄」作答,不接受只說「沒收斂」。
+
+## 2026-09-13 | C-4 chunk 4b 等價升權:create pods = 借同 ns 任一 SA(k8s 版 PassRole)
+
+- **這是正樣本卡**(學員自產強遷移),留作 4b 冷測錨點,非 mistake。
+- 機制:`create pods` 讓你在 Pod spec 填 `serviceAccountName`,kubelet 把那個 SA 的 token 掛進容器,容器內 process 就是那個 SA 的身分。**攻擊者自己沒有 secrets 權限,卻能建一顆指定高權 SA 的 Pod 借到。** 所以 `create pods` 的真實大小 = 同 ns 所有 SA 權限的聯集。
+- **學員自產類比(命中)**:AWS CloudFormation —— 你有 `create stack` 的權限,跟 stack 的 service role 有沒有 `delete` 是分開的兩件事;建 stack 等於借那個 role 的手。AWS 用 `iam:PassRole` 專門擋這個。**k8s 沒有 PassRole 這道內建閘。**
+- 三種防法:①別給 `create pods`,CI 改 `patch deployments` 讓 controller 用它自己受控的 SA 去建 Pod;②Kyverno/admission 擋「Pod 不准指定高權 SA」= k8s 版 PassRole 閘;③高權 SA 設 `automountServiceAccountToken: false`。
+- 09-16 抽(換皮):某 SA 只有 `create jobs`,ns 裡有個 `backup` SA 能讀所有 PVC 快照。問攻擊者能不能拿到快照、怎麼防。
