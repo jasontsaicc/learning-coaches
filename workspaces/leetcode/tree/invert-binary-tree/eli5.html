@@ -707,6 +707,117 @@ root.right = root.left   <span class="cm"># root.left 已經被上一行改掉�
     </div>
   </details>
 
+  <details>
+    <summary>這次的釐清<span class="lockhint">2026-09-14 隔堂複習</span></summary>
+    <div class="dbody">
+      <p class="sub">隔 4 天冷寫,只記得 swap 那一行。下面是當場補起來的四個洞,每個洞一張圖。</p>
+
+      <h3>洞 1:呼叫自己,小孩從 node 身上拿</h3>
+      <div class="fix">
+        <div class="x">&#10007; 我寫:<code>self.left(left)</code></div>
+        <div class="o">&#10003; 其實是:<code>self.invertTree(root.left)</code></div>
+        <div class="w">&#8594; frame 裡只有兩個名字。<code>left</code> 不在裡面,它掛在 <code>root</code> 身上。同 9/11 的 <code>dfa(left)</code>。</div>
+      </div>
+      <div class="stack">
+        <div class="sf top"><span class="who">invertTree 的紙</span> &nbsp;<span class="var">(root = 4)</span></div>
+        <div class="sf"><span class="who">self</span> &nbsp;<span class="var">&#8594; Solution 物件,它的方法叫 invertTree</span></div>
+        <div class="sf"><span class="who">root</span> &nbsp;<span class="var">&#8594; node 4,小孩是 root.left / root.right</span></div>
+        <div class="sf done"><span class="who">left</span> &nbsp;<span class="var">&#8594; &#10007; 這張紙上沒有這個名字</span></div>
+      </div>
+
+      <h3>洞 2:base case 回傳的東西,要跟整個函式一樣</h3>
+      <div class="fix">
+        <div class="x">&#10007; 我寫:<code>if not root: return 0</code></div>
+        <div class="o">&#10003; 其實是:<code>return None</code></div>
+        <div class="w">&#8594; 把 #104 的契約帶過來了。<code>if not root</code> 那半句是對的。</div>
+      </div>
+      <div class="tablewrap">
+      <table>
+        <tr><th>題</th><th>整個函式交回什麼</th><th>空的 ▢ 交回什麼</th></tr>
+        <tr><td class="mono">#226 Invert</td><td>一棵樹(它的 root)</td><td class="mono hit">None</td></tr>
+        <tr><td class="mono">#104 Max Depth</td><td>一個數字(深度)</td><td class="mono hit">0</td></tr>
+      </table>
+      </div>
+      <div class="callout warn">
+        <h3><code>return 0</code> 會碰巧過一個 case</h3>
+        <p>測試把 <code>0</code> 當成空的,所以 <code>[]</code> 那組會綠。<strong>綠燈不代表對。</strong>跟 9/11 <code>return False</code> 碰巧跑對是同一種運氣。</p>
+      </div>
+
+      <h3>洞 3:沒有 <code>return root</code>,樹翻好了但沒交出去</h3>
+      <div class="fix">
+        <div class="x">&#10007; 症狀:7 組全部 <code>got []</code></div>
+        <div class="o">&#10003; 自己推出來:最後補 <code>return root</code></div>
+        <div class="w">&#8594; 函式走到底沒寫 return,Python 自動交回 <code>None</code>。樹在記憶體裡確實翻好了,只是呼叫的人拿到空手。</div>
+      </div>
+
+      <h3>洞 4:<code>return</code> 之後,控制權去哪</h3>
+      <p>用行號講。<code>return</code> 做兩件事:<strong>交回一個值</strong>,以及<strong>撕掉自己這張紙,回到呼叫者停住的那一行的下一行</strong>。</p>
+<pre><code>L1  <span class="kw">if not</span> root:
+L2      <span class="kw">return</span> <span class="kw">None</span>
+L3  root.left, root.right = root.right, root.left
+L4  self.invertTree(root.left)     <span class="cm"># 呼叫 = 停在這行,等對方做完</span>
+L5  self.invertTree(root.right)    <span class="cm"># 醒來從這行接著跑</span>
+L6  <span class="kw">return</span> root
+</code></pre>
+      <div class="pair">
+        <div class="frame">
+          <div class="cap">撕之前</div>
+          <div class="stack">
+            <div class="sf top"><span class="who">invertTree(9)</span> &nbsp;<span class="var">&#9654; L6 return root</span></div>
+            <div class="sf"><span class="who">invertTree(7)</span> &nbsp;<span class="var">&#9208; 停在 L4</span></div>
+            <div class="sf"><span class="who">invertTree(4)</span> &nbsp;<span class="var">&#9208; 停在 L4</span></div>
+          </div>
+        </div>
+        <div class="frame">
+          <div class="cap">撕之後</div>
+          <div class="stack">
+            <div class="sf done"><span class="who">invertTree(9)</span> &nbsp;<span class="var">&#9986; 撕掉</span></div>
+            <div class="sf top"><span class="who">invertTree(7)</span> &nbsp;<span class="var">&#9654; 醒來跑 L5,翻 6</span></div>
+            <div class="sf"><span class="who">invertTree(4)</span> &nbsp;<span class="var">&#9208; 停在 L4</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="fix">
+        <div class="x">&#10007; ABCD 選擇題:卡住</div>
+        <div class="o">&#10003; 只看 <code>invertTree(7)</code> 一張紙:答對 L5 翻 6。再往上一層自己答出:7 撕掉 &#8594; 4 從 L4 醒來跑 L5 &#8594; 翻 2</div>
+        <div class="w">&#8594; 一次看三張紙太多。先只看一張,問「L4 的下一行是誰」,就出來了。</div>
+      </div>
+      <div class="mantra"><code>return</code> = 撕掉自己的紙,回到呼叫我的那張紙,從它停住那行的下一行接著跑。</div>
+
+      <h3>溫度計 &#9313;:刪掉 <code>self.invertTree(root.right)</code></h3>
+      <div class="fix">
+        <div class="x">&#10007; 我答:4 2 7 1 6</div>
+        <div class="o">&#10003; 其實是:<code>[4, 7, 2, 9, 6, 1, 3]</code>(跑 code 驗過)</div>
+        <div class="w">&#8594; 每一層只呼叫左邊。4 換完,2 跑到右邊,<strong>從此沒有人呼叫 invertTree(2)</strong>。</div>
+      </div>
+      <div class="frame">
+        <div class="cap">少一條委派的結果</div>
+        <svg class="dia" viewBox="0 0 340 210" role="img" aria-label="刪掉右邊委派後的樹:4 和 7 翻好了,2 底下的 1 和 3 沒翻">
+          <line class="edge" x1="170" y1="30" x2="90" y2="100"/>
+          <line class="edge" x1="170" y1="30" x2="250" y2="100"/>
+          <line class="edge" x1="90" y1="100" x2="50" y2="170"/>
+          <line class="edge" x1="90" y1="100" x2="130" y2="170"/>
+          <line class="edge" x1="250" y1="100" x2="210" y2="170" stroke-dasharray="5 4"/>
+          <line class="edge" x1="250" y1="100" x2="290" y2="170" stroke-dasharray="5 4"/>
+          <g class="swapped"><circle class="tnode" cx="170" cy="30" r="18"/><text class="tval" x="170" y="30">4</text></g>
+          <g class="swapped"><circle class="tnode" cx="90" cy="100" r="18"/><text class="tval" x="90" y="100">7</text></g>
+          <g><circle class="tnode" cx="250" cy="100" r="18" stroke-dasharray="4 3"/><text class="tval" x="250" y="100">2</text></g>
+          <g><circle class="tnode" cx="50" cy="170" r="18"/><text class="tval" x="50" y="170">9</text></g>
+          <g><circle class="tnode" cx="130" cy="170" r="18"/><text class="tval" x="130" y="170">6</text></g>
+          <g><circle class="tnode" cx="210" cy="170" r="18" stroke-dasharray="4 3"/><text class="tval" x="210" y="170">1</text></g>
+          <g><circle class="tnode" cx="290" cy="170" r="18" stroke-dasharray="4 3"/><text class="tval" x="290" y="170">3</text></g>
+        </svg>
+        <p class="note">紅框 = 有人呼叫、有翻。虛線 = 沒人呼叫,1、3 還是舊順序(想要的是 3、1)。</p>
+      </div>
+      <div class="mantra">沒有被呼叫到的 node 就不會翻。刪一條委派,整包子樹沒人管。</div>
+
+      <div class="callout key">
+        <h3>這一場的方法論結論</h3>
+        <p>卡住時學員要求<strong>換中文</strong>。把問題從「三張紙一起看」切成「只看一張紙的下一行」之後當場通過,還自己往上推了一層。</p>
+      </div>
+    </div>
+  </details>
+
 </section>
 
 </div>

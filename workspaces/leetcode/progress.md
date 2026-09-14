@@ -4,7 +4,18 @@
 
 # leetcode
 
-- 今天做到:2026-09-11。**#141 收掉了**:drill.py 冷寫走到階 3(dummy 問對了、
+- 今天做到:2026-09-14。**#226 隔堂複習(隔 4 天)**,`drill-review.py` 冷寫(空 stub 7/8 FAIL 已驗)。
+  只記得 swap 那行。委派走到階 3:階 2 答 `self.left(left)`(函式名錯 + 裸 `left` 不在 scope,
+  同 9/11 `dfa(left)`,**升級 my-common-bugs 表一**)。對照打後跑出 `NoneType has no attribute 'right'`,
+  指著踩空的 ▢ 圖問,`if not root` 自己寫對,但寫成 `return 0`(把 #104 的契約帶過來,
+  同 9/11 `return False`,**升級表二第 8 列**)。`got []` 自己推出 `return root`,8/8 綠。
+  溫度計 ②(刪 `self.invertTree(root.right)` 畫結果)答錯,學員要求直接給答案:
+  `[4,7,2,9,6,1,3]`,node 2 沒人呼叫所以 1、3 沒翻(已跑 code 驗證)。
+  **`return` 控制權去哪(表二第 2 列)**:ABCD 選擇題卡住,學員要求**換中文**;切成
+  「只看 `invertTree(7)` 一張紙 + 時間軸圖」後答對 L5 翻 6,**再往上推一層自己答出翻 2**。
+  **學員卡住時改用中文,拆成單張紙的問題有效。** 第 4 步(#226→#104→#543 同模板)沒做,學員選收工。
+  圖解頁補 2026-09-14 釐清區塊(撕紙前後、少一條委派的樹、base case 回傳型別表)。
+- 前一場 2026-09-11。**#141 收掉了**:drill.py 冷寫走到階 3(dummy 問對了、
   兩指標起手式與 `while` 條件想不起來),對照打後 7/7 PASS,`return False` 縮排自己貼對
   (頭號慣犯這次沒中)。溫度計 ② 答「還是抓得到」**正確**,「多花步數」錯(同或更少)。
   **coach 的提示與 notes.md 原本寫錯**(說走 3 步會跳過 0),已模擬驗證並更正:
@@ -73,8 +84,8 @@
 | Linked List 反轉(prev/curr/nxt) | ✓(notes) | ✓ | ✅ 9/07 隔堂冷默全對(起手式+4 行+return) | ✓ |
 | Linked List 合併(dummy + tail) | ✓ | ✓ | 🟡 骨架冷默出來,尾段仍需階 2 提示 | ✓ |
 | Fast-slow pointer(龜兔) | ✓(9/07 圖解頁) | ✓ 9/10 | 🟡 9/10 冷寫走到階 3;harness 7/7 綠 | ✓ |
-| Tree DFS 遞迴(base/本層/委派) | ✓(9/10 圖解頁) | ✓ 9/10 | ✅ 9/10 #226 五行冷寫一次過 8/8;續場開場默寫沒過,對照抄一次 | ✓ |
-| Tree DFS 吃下屬回傳值(#104 `max(left,right)+1`) | ✓ 9/11 圖解頁(11 格 call stack 分鏡) | | 🟡 公式靠階梯提示推出;dry run 數字出處答對;**call stack 控制權轉移仍要看圖才過** | ✓ 先問兩邊再算自己 |
+| Tree DFS 遞迴(base/本層/委派) | ✓(9/10 圖解頁) | ✓ 9/10、9/14 | 🟡 9/10 #226 五行冷寫一次過 8/8;**9/14 隔 4 天只記得 swap**,委派對照打,base case 型別錯,`return root` 自推 | ✓ |
+| Tree DFS 吃下屬回傳值(#104 `max(left,right)+1`) | ✓ 9/11 圖解頁(11 格 call stack 分鏡) | | 🟡 公式靠階梯提示推出;dry run 數字出處答對;**控制權轉移 9/14 切成單張紙後答對,並自推一層** | ✓ 先問兩邊再算自己 |
 | Tree 雙軌(回傳值 + 全域帳本,#543) | ✓ 9/11 圖解頁 | | ✅ 9/11 冷寫一次過 9/9,五格全對 | ✓ 往上交挑一邊,記帳吃兩邊 |
 | Heap k-way merge(每條一個 head) | ✓ | | ✓ | ✓ |
 | Hashmap + 雙向鏈(LRU) | | | | |
@@ -105,6 +116,7 @@
   圖解頁、drill.py(8 組 case,空 stub 7/8 FAIL、參考解 8/8 PASS 已驗)、L6 逐字稿。
   2026-09-10 全跑完:拷問 ①②③④ + 溫度計 ②,drill.py 8/8 綠。
   第 05 節「逐格走一次」是為心盲症加的:看不見的 None 子節點圖 + 7 格 call stack。
+  2026-09-14:隔堂複習,`drill-review.py` 冷寫 8/8 綠(過程見最上方)。圖解頁補 09-14 釐清並 redeploy。
 - **#104 Maximum Depth of Binary Tree** — `tree/maximum-depth-of-binary-tree/`
   圖解頁:https://claude.ai/code/artifact/e77e837d-6fab-4986-98f9-02920132a8f5
   2026-09-10:Socratic 推出 `max(left,right)+1`,dry run 走一半。
@@ -129,6 +141,8 @@
 
 ## 接下來
 
+0. 9/14 沒做的第 4 步:#226 → #104 → #543 同一個 `dfs` 模板,只差 base case 回什麼 +
+   本層拼什麼那兩行(順便戳表二第 8 列 base case 型別)。學員卡住時改用中文。
 1. **開場先收 #543 的溫度計 ②**(已出題,學員未答):記帳那行的 `max` 拿掉、寫成
    `self.ans = L + R`,9 個 case 會掛幾個?答案是只掛 ★ 那個
    (`[1,2,None,3,4,5,None,None,6]`),因為最後一個記帳的永遠是 root,

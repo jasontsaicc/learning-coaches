@@ -37,3 +37,7 @@ Tree pattern 的第一題,也是 Layer 0「遞迴」的教學載體(curriculum �
   drill.py 8/8 綠。拷問 ① 三零件只講對 1 個,base case 少了「None 這一格」,指著
   具體圖問「6 和 9 是誰換的」才講出「委派」。第 05 節「逐格走一次」是為心盲症加的:
   看不見的 None 子節點圖 + 7 格 call stack。
+- 2026-09-14:隔堂複習,在 `drill-review.py` 冷寫(`drill.py` 保留 9/10 的解)。只記得 swap;
+  委派給答案(`self.left(left)`);base case 寫成 `return 0`(#104 契約混入);`return root` 從
+  `got []` 自己推出,8/8 綠。溫度計 ② 刪右邊委派 -> `[4,7,2,9,6,1,3]` 答錯,當場補。
+  `return` 控制權:切成單張紙後答對,並自己往上推一層。圖解頁補 09-14 釐清並 redeploy。
