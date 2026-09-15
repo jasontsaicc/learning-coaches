@@ -15,7 +15,7 @@
 
 ## Current Session breakpoint
 
-P2b C-4 RBAC 教學段完(s36);2026-09-15 忙碌日 ROI 篩(非正式堂,不計 session):09-11 四張 RBAC 卡學員決定跳過 → get-vs-list、`--list` 三分退役,成功訊息 pattern 改 lab 中即測,`--as` 問答 supported 答對 A 框。下一步 C-5 IRSA,**引子題**:「AWS IAM role 能 assume,k8s Role 能 `--as` 嗎?同叫 role 差在哪」;09-16 兩張卡(爆炸半徑、create pods 借 SA)併進 C-5 的 IAM policy 收斂抽。**債**:C-4 的 F/G 連四堂未跑(併入 C-5)、4b 只 supported 未冷測。
+P2b C-4 RBAC 教學段完(s36);2026-09-15 忙碌日 ROI 篩(非正式堂,不計 session):09-11 四張 RBAC 卡學員決定跳過 → get-vs-list、`--list` 三分退役,成功訊息 pattern 改 lab 中即測,`--as` 問答 supported 答對 A 框。下一步 C-5 IRSA,**引子題**:「AWS IAM role 能 assume,k8s Role 能 `--as` 嗎?同叫 role 差在哪」(09-15 學員要求快速說明,答案已給 = acquisition,C-5 開場改為不看筆記自講一遍的留存測);09-16 兩張卡(爆炸半徑、create pods 借 SA)併進 C-5 的 IAM policy 收斂抽。**債**:C-4 的 F/G 連四堂未跑(併入 C-5)、4b 只 supported 未冷測。
 
 <!-- schema §3 = 恰好一行。敘事與次要待辦寫 session-log.md,長效教練紀律寫 session-log.md
      「教練執行紀律」,不要在這裡疊舊堂。s32 及更早斷點原文見 session-log.md 對應堂,

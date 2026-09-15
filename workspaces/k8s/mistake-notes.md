@@ -329,7 +329,7 @@
 - 09-11 抽:直接丟一段 403 全文,要求 30 秒內寫出重現指令。
 - **2026-09-15 抽(忙碌日 ROI 篩,非正式堂)**:換角度問「`--as=` 填 subject(A 框)還是 Role(B 框)」。首答「用那個 role 去模擬」(錯,把權限清單當身分);提示 09-08 敲過的指令後答 A,理由「查看 SA 能做什麼」= 講用途,沒講為什麼不是 B。supported,非冷測。
   - **判準**:API Server 只認身分字串;Role 是權限清單不是身分,權限是從身分沿 RoleBinding 查出來的,所以沒有東西可以「假扮成 Role」。
-  - C-5 引子題(冷問,不給答案):「AWS IAM role 可以 assume,k8s Role 可以 `--as` 嗎?兩個都叫 role 差在哪」,要求用上面判準作答。
+  - C-5 引子題:「AWS IAM role 可以 assume,k8s Role 可以 `--as` 嗎?兩個都叫 role 差在哪」。09-15 學員要求快速說明,答案已給(IAM role = 身分+權限一體,assume 拿 STS 臨時憑證;k8s Role 只有權限清單,身分在 User/SA,靠 RoleBinding 連;IRSA = SA token 經 `AssumeRoleWithWebIdentity` 換 IAM role 憑證,trust policy 驗 `sub=system:serviceaccount:<ns>:<sa>`)。C-5 開場改為不看筆記自講一遍的留存測。
 
 ## 2026-09-08 | `auth can-i --list` 三分判準(噪音 / 缺 resource / 缺動詞)
 
