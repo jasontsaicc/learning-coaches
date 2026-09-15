@@ -15,7 +15,7 @@
 
 ## Current Session breakpoint
 
-P2b C-4 RBAC 教學段完(s36:chunk 4a 三軸判準 + 4b 等價升權 create pods=借同 ns 任一 SA,學員自產 CloudFormation/PassRole 類比 = 強遷移),學員拍板收 C-4 進新章節;下一步 C-5 IRSA。**債**:C-4 的 F/G 連四堂未跑(併入 C-5 開場或當 warm-up)、4b 只 supported 未冷測、09-11 RBAC 四張卡到期未抽。
+P2b C-4 RBAC 教學段完(s36);2026-09-15 忙碌日 ROI 篩(非正式堂,不計 session):09-11 四張 RBAC 卡學員決定跳過 → get-vs-list、`--list` 三分退役,成功訊息 pattern 改 lab 中即測,`--as` 問答 supported 答對 A 框。下一步 C-5 IRSA,**引子題**:「AWS IAM role 能 assume,k8s Role 能 `--as` 嗎?同叫 role 差在哪」;09-16 兩張卡(爆炸半徑、create pods 借 SA)併進 C-5 的 IAM policy 收斂抽。**債**:C-4 的 F/G 連四堂未跑(併入 C-5)、4b 只 supported 未冷測。
 
 <!-- schema §3 = 恰好一行。敘事與次要待辦寫 session-log.md,長效教練紀律寫 session-log.md
      「教練執行紀律」,不要在這裡疊舊堂。s32 及更早斷點原文見 session-log.md 對應堂,
@@ -140,10 +140,10 @@ weak-topic flags(2026-08-03 啟用,P2a 帶 flag 前進、gate 未考,學員決�
 - 2026-08-28 | StatefulSet 每個 replica 一份獨立資料(不是共用一份) | 3 開到 5 問幾份資料,答「still is 3 data」 | 把「每人一份儲存」誤讀成「大家共用一份」 | unresolved | 3 | 2026-09-04 | 0
 - 2026-08-28 | 排障兩步:先鎖 fault domain 再查內部(MTTR 核心卡) | 同堂兩次先跳單一成員內部狀態 | 沒先問「這條路徑上有幾個東西」 | unresolved | 3 | 2026-08-31 | 0
 - 2026-09-01 | 建 Pod 的權限 vs Pod 裡程式呼叫 API 的權限(誰用誰的身分) | 答「不會,因為根本沒有到建立 pod」 | controller 建 Pod 與 Pod 呼叫 API 誤用同一身分 | unresolved | 3 | 2026-09-04 | 0
-- 2026-09-08 | RBAC 動詞看有無物件名字(get vs list vs watch) | Role 只給 get,預測 `kubectl get pods` 會成功,實測 403 cannot list | 把 kubectl 指令名字當成 RBAC 動詞 | unresolved | 3 | 2026-09-11 | 0
-- 2026-09-08 | 成功訊息不保證做到你以為的事(pattern 卡,ops 判準,同堂三次) | `-n ALL` 查了不存在的 ns、`--as=$SA` 空變數沒假扮、`patched (no change)` | 不先驗證指令是否真的生效就改結論 | unresolved | 3 | 2026-09-11 | 0
-- 2026-09-08 | `auth can-i --list` 不加 `--as` 問的是自己 | chunk 3 驗收給裸指令,無 `--as` 無 `-n`(同堂第二次) | 排障要問壞掉的身分,預設問的是自己 | unresolved | 3 | 2026-09-11 | 0
-- 2026-09-08 | `--list` 三分判準(只剩噪音 / 缺 resource / 缺動詞) | 首答把原本 403 訊息當成 `--list` 輸出,且用「會 403」當判準(兩種都 403) | 兩個不同指令的輸出混為一談 | unresolved | 3 | 2026-09-11 | 0
+- 2026-09-08 | RBAC 動詞看有無物件名字(get vs list vs watch) | Role 只給 get,預測 `kubectl get pods` 會成功,實測 403 cannot list | 把 kubectl 指令名字當成 RBAC 動詞 | parked(2026-09-15 ROI 篩:Q1 no,403 訊息本身就寫出 verb `cannot list`,背對照表 ROI 低;學員決定退役,判準留檔備查) | - | - | 0
+- 2026-09-08 | 成功訊息不保證做到你以為的事(pattern 卡,ops 判準,同堂三次) | `-n ALL` 查了不存在的 ns、`--as=$SA` 空變數沒假扮、`patched (no change)` | 不先驗證指令是否真的生效就改結論 | unresolved | 3 | lab 中即測(2026-09-15 起不排卡) | 0
+- 2026-09-08 | `auth can-i --list` 不加 `--as` 問的是自己 | chunk 3 驗收給裸指令,無 `--as` 無 `-n`(同堂第二次);09-15 首答「`--as` 用 role 去模擬」 | 排障要問壞掉的身分,預設問的是自己;Role 是權限清單不是身分 | unresolved | 3 | C-5 引子題 | 0
+- 2026-09-08 | `--list` 三分判準(只剩噪音 / 缺 resource / 缺動詞) | 首答把原本 403 訊息當成 `--list` 輸出,且用「會 403」當判準(兩種都 403) | 兩個不同指令的輸出混為一談 | parked(2026-09-15 ROI 篩:Q1 no,面試不考讀 `--list` 輸出;學員決定退役,判準留檔備查) | - | - | 0
 
 ## Spaced-repetition queue
 
@@ -196,12 +196,12 @@ weak-topic flags(2026-08-03 啟用,P2a 帶 flag 前進、gate 未考,學員決�
 - mistake:Ingress-YAML-schema | mistake | 3 | 2026-07-10 | active
 - term:(07-10 到期各卡) | term | - | 2026-07-10 | active(見 term-registry.md)
 - mistake:ClusterIP-全鏈(謎題B) | mistake | 14 | 2026-07-13 | active(resolved,考精度)
-- mistake:RBAC動詞-get-vs-list | mistake | 3 | 2026-09-11 | active
-- mistake:成功訊息不保證生效(pattern) | mistake | 3 | 2026-09-11 | active
-- mistake:--list-要加---as | mistake | 3 | 2026-09-11 | active
-- mistake:--list-三分判準 | mistake | 3 | 2026-09-11 | active
-- mistake:權限爆炸半徑跑錯判準軸 | mistake | 3 | 2026-09-16 | active
-- topic:C-4-RBAC-最小權限+等價升權 | topic | 3 | 2026-09-16 | active(4b create pods=借SA 僅 supported,冷測換皮)
+- mistake:RBAC動詞-get-vs-list | mistake | - | 2026-09-11 | retired(2026-09-15 ROI 篩)
+- mistake:成功訊息不保證生效(pattern) | mistake | 3 | 2026-09-11 | active(2026-09-15 起不排卡,lab 中即測)
+- mistake:--list-要加---as | mistake | 3 | 2026-09-11 | active(09-15 supported 答對 A 框;C-5 引子題冷問)
+- mistake:--list-三分判準 | mistake | - | 2026-09-11 | retired(2026-09-15 ROI 篩)
+- mistake:權限爆炸半徑跑錯判準軸 | mistake | 3 | 2026-09-16 | active(併入 C-5 IAM policy 收斂抽,不另開複習堂)
+- topic:C-4-RBAC-最小權限+等價升權 | topic | 3 | 2026-09-16 | active(4b create pods=借SA 僅 supported,冷測換皮;併入 C-5)
 
 ## Curiosity branch
 
