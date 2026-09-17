@@ -11,13 +11,13 @@
 
 | # | 檢查 | 犯過 | 症狀 |
 |---|---|---|---|
-| 1 | 變數名有沒有手滑?(pairs→paris、answes、`nxt`→`next`、`dfa`→`dfs`、`amx`→`max`) | 5 | `NameError`。**語法完全合法,要等那行真的被執行才炸** — 這就是 linter(`ruff` / `pyflakes`)存在的理由 |
+| 1 | 變數名有沒有手滑?(pairs→paris、answes、`nxt`→`next`、`dfa`→`dfs`、`amx`→`max`、`sel.ans`、`isSmaeTree`) | 7 | `NameError`。**語法完全合法,要等那行真的被執行才炸** — 這就是 linter(`ruff` / `pyflakes`)存在的理由 |
 | 2 | `return` 是不是縮排卡在迴圈裡? | 4 | 找得到的全掛、找不到的全綠。不報錯,所以最貴 |
 | 3 | 算 index 有沒有用 `//`?`/` 回 float,float 不能當 index | 2 | `TypeError: list indices must be integers` |
 | 4 | 字元有沒有打錯?(`stack, append(i)` 的逗點、`len(matrix)[0]` 的括號位置) | 2 | 當場報錯,成本低 |
 | 5 | 閉區間 `[l, r]` 配 `while l <= r` 時,`r` 初始值是 `len(nums) - 1` 不是 `len(nums)` | 2 | `IndexError`,或測資不夠 hostile 而整組漏掉 |
 | 6 | `if` / `elif` / `else` / `for` / `while` / `def` 開頭的行,結尾冒號補了嗎? | 2 | `SyntaxError: invalid syntax`,箭頭指在關鍵字後 |
-| 7 | 樹的小孩要從 node 身上拿:`root.left` 不是裸 `left`;遞迴呼叫自己是 `self.invertTree`(函式名),不是 `self.left` | 2(2026-09-11 `dfa(left)`、2026-09-14 `self.left(left)`) | `NameError` / `AttributeError`。畫出 frame 裡**真正存在的名字**(`self`、`root`),`left` 不在裡面 |
+| 7 | 樹的小孩要從 node 身上拿:`root.left` 不是裸 `left`;遞迴呼叫自己是 `self.invertTree`(函式名),不是 `self.left` | 3(2026-09-11 `dfa(left)`、2026-09-14 `self.left(left)`、2026-09-17 #100 `self.isSameTree(q.left)` 少了 `p.left`) | `NameError` / `AttributeError`。畫出 frame 裡**真正存在的名字**(`self`、`root`),`left` 不在裡面 |
 | 8 | Python list 是 `.append`,沒有 `.push` | 1 | `AttributeError` |
 | 9 | `if stack` 是「有東西」,`not stack` 是「空的」。`not stack` 要放 `or` 左邊短路保護 `stack[-1]` | 1 | `IndexError` 或邏輯全反 |
 

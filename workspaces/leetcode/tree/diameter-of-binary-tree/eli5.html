@@ -759,6 +759,23 @@ return self.ans</span></div>
     </div>
     <p style="font-size:.9rem;color:var(--muted)">可跑的對照在題目資料夾的 <code>scope-demo.py</code>。<br>
     面試選 <code>self.ans</code>(白板少寫一個 keyword = 少一個手滑機會)，但<strong>第一行 <code>self.ans = 0</code> 不能省</strong> —— 忘了它，同一個 <code>Solution</code> 實例跑第二棵樹會吃到上一次的帳本，而且不報錯。</p>
+
+    <p style="color:var(--muted);font-size:.88rem;margin-top:2rem">2026-09-17 開場默寫(雙軌模板第 1 次考)。<code>return 0</code> 跟 <code>return self.ans</code> 對,記帳與往上交兩行只記得「有 <code>max</code>、有 <code>+1</code>」。</p>
+
+    <h4>③ 兩行都有 <code>max</code>,括號裡放什麼?</h4>
+    <div class="wrongright">
+      <div class="wr-x"><strong>✗ 我寫了</strong>　<code>return max(L + R) + 1</code>,把記帳那行的 <code>L + R</code> 帶進往上交。</div>
+      <div class="wr-o"><strong>✓ 其實是</strong>　<code>max(L + R)</code> 等於 <code>max(3)</code>,只丟一個數字,沒東西可比 → <code>TypeError: 'int' object is not iterable</code>。</div>
+      <div class="wr-y"><strong>→ 為什麼會搞混</strong>　兩行都叫 <code>max</code>,但比的是不同的東西。</div>
+    </div>
+    <div class="tablewrap">
+      <table>
+        <tr><th>軌道</th><th>code</th><th><code>max</code> 在比</th><th>括號裡的符號</th></tr>
+        <tr><td>B 記帳本</td><td class="mono">max(self.ans, L + R)</td><td>舊紀錄 vs 新路</td><td><code>+</code> 兩邊接成一條路</td></tr>
+        <tr><td>A 往上交</td><td class="mono">max(L, R) + 1</td><td>左深 vs 右深</td><td><code>,</code> 兩邊二選一</td></tr>
+      </table>
+    </div>
+    <p class="mantra" style="font-size:1rem">記帳吃兩邊用 <code>+</code>,往上交挑一邊用 <code>,</code>。</p>
   </div>
 </details>
 
