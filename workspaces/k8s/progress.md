@@ -7,15 +7,15 @@
 
 ## Meta
 
-- session_count: 36
+- session_count: 37
 - last_weekly_review: 34(WR9 於 s34 壓縮版跑完,三主題 blind recall 全過;下次 WR 於 s41)
-- last_session_date: 2026-09-13
+- last_session_date: 2026-09-18
 - warm_up_classification: mid
 - target_role: 泛用大廠 senior DevOps/SRE。2026-08-21 確認無緊急面試,採 production depth + senior interview 雙軌;核心主題固定比較地端 K8s / 傳統 EKS / 高度託管 EKS(curriculum-plan §11)
 
 ## Current Session breakpoint
 
-P2b C-4 RBAC 教學段完(s36);2026-09-15 忙碌日 ROI 篩(非正式堂,不計 session):09-11 四張 RBAC 卡學員決定跳過 → get-vs-list、`--list` 三分退役,成功訊息 pattern 改 lab 中即測,`--as` 問答 supported 答對 A 框。下一步 C-5 IRSA,**引子題**:「AWS IAM role 能 assume,k8s Role 能 `--as` 嗎?同叫 role 差在哪」(09-15 學員要求快速說明,答案已給 = acquisition,C-5 開場改為不看筆記自講一遍的留存測);09-16 兩張卡(爆炸半徑、create pods 借 SA)併進 C-5 的 IAM policy 收斂抽。**債**:C-4 的 F/G 連四堂未跑(併入 C-5)、4b 只 supported 未冷測。
+s37(2026-09-18)C-5 IRSA 四 chunk + F/G 跑完(chunk 3 六棒鏈僅 supported;G 2/3)。下一步 **C-6 Secrets + PSS**(新內容先),尾巴冷測 IRSA「trust policy 比 sub vs permission policy 管能做什麼」(09-21 到期,今天混兩次)。**債**:4b 只 supported 未冷測;09-16 兩張 RBAC 卡(爆炸半徑、create pods 借 SA)仍未抽。
 
 <!-- schema §3 = 恰好一行。敘事與次要待辦寫 session-log.md,長效教練紀律寫 session-log.md
      「教練執行紀律」,不要在這裡疊舊堂。s32 及更早斷點原文見 session-log.md 對應堂,
@@ -26,7 +26,7 @@ P2b C-4 RBAC 教學段完(s36);2026-09-15 忙碌日 ROI 篩(非正式堂,不計 
 - P0 心智模型: gate-passed(2026-06-22,legacy pre-Examiner)
 - P1 核心物件 + 容器底層: gate-passed(2026-06-25,legacy pre-Examiner)
 - P2a 網路深水區: in-progress(chunk 1 ✅ / chunk 2 ✅ / chunk 3 NetworkPolicy 剩 lab Step 5+6+gate+F/G / chunk 4 零件 4-1~4-4 ✅,4-5 盲講式已於 2026-08-11 退役改情境排障題)
-- P2b 儲存 + 權限: in-progress(C-1 ✅ s26,欠 `cg-demo` memory.max 讀數 / C-2 ✅ s29,欠 `reclaimPolicy: Delete` teardown 實證 / C-3 ✅ s31-32,step G 2/4 未過 / C-4 chunk 1-4 ✅ s33/s35/s36,4b 僅 supported,C-4 的 F/G 連四堂未跑;C-5 IRSA / C-6 未開始)
+- P2b 儲存 + 權限: in-progress(C-1 ✅ s26,欠 `cg-demo` memory.max 讀數 / C-2 ✅ s29,欠 `reclaimPolicy: Delete` teardown 實證 / C-3 ✅ s31-32,step G 2/4 未過 / C-4 chunk 1-4 ✅ s33/s35/s36,4b 僅 supported,C-4 F/G 併入 s37 的 C-5 F/G;C-5 ✅ s37(chunk 3 supported、kind JWT 教練代跑);C-6 未開始)
 - P3 調度 + 高並發 + 排障: not-started
 - P4 可觀測性工程: not-started
 - P5 平台工程 / GitOps: not-started
@@ -64,6 +64,8 @@ weak-topic flags(2026-08-03 啟用,P2a 帶 flag 前進、gate 未考,學員決�
 - P2b C-3 StatefulSet identity(ordinal / per-replica PVC / per-Pod DNS): med-high (s32)
 - P2b C-4 RBAC 四象限: low(scaffolded) (s33)
 - P2b C-4 RBAC 兩地基性質(純 allow / SA 是 Pod 身分): low(scaffolded) (s33)
+- P2b C-5 instance profile vs IRSA 爆炸半徑(粒度 = SA): med (s37)
+- P2b C-5 IRSA 鏈(trust policy 比 sub vs permission policy): low(scaffolded) (s37)
 - kubectl debug / ephemeral container: low (2026-09-01,ad hoc 非主線,未經 gate)
 
 ## Scorecard history
@@ -72,6 +74,7 @@ weak-topic flags(2026-08-03 啟用,P2a 帶 flag 前進、gate 未考,學員決�
      每場的完整維度符號與逐項評註逐字保存在 archive/progress-narrative-2026-09-07.md
      的 Scorecard history 節;Phase Gate 三振診斷或 trend tracking 時才拉。 -->
 
+- 2026-09-18 | step G (s37, tier 2, MTTR 未測故分母 3) | 2/3 | 機制那格要講出 JWT → STS 比 trust policy 的 sub → 臨時憑證,不能停在「SA 取得 assume 權限」 | F 段 3 副本題自己拿 IRSA(同一 role)對照舊做法(看在哪台 node) | coach
 - 2026-08-28 | step G (s32, tier 2) | 2/4 | 排障題先強迫答「我這一發是第 1 步還是第 2 步」再給指令 | MTTR 第一題自帶完整判準句型,無提示正樣本第 6 次 | coach
 - 2026-08-24 | step G (s30, tier 2) | 3/4 | 先用 direct-to-target 對照 bypass 嫌疑層,別第一刀就 describe pod | 自己修正成「繞過後正常只鎖定被繞過的整段路徑,不能直接定罪 Proxy」 | coach
 - 2026-08-20 | 冷測三題 + F 段折算 (s28, tier 2) | 1/4 | 每給一個判準,當場接一題換皮應用題,答對才算給完 | 排障順序題把 `reboot` 排最後,restart-vs-採證這張卡首次做對 | coach
@@ -101,6 +104,7 @@ weak-topic flags(2026-08-03 啟用,P2a 帶 flag 前進、gate 未考,學員決�
      interval 2 = +2 天臨時複習格(口頭型 resolved,過了才進 3/7/14)。
      unresolved-session-count 於 2026-07-10 遷移時依複測紀錄初始化(近似值)。 -->
 
+- 2026-09-18 | IRSA trust vs permission policy | 首答「擋在 B policy」;誘答「改 SA annotation 就能讀別人的 S3」同意;F 段又同意「STS 看 policy 有無 s3:GetObject 就放行」 | RP2 驗身分(trust policy 比 JWT sub)與授權(permission policy)混成一步;annotation 只是申請單 | unresolved | 3 | 2026-09-21 | 0
 - 2026-09-13 | 權限爆炸半徑跑錯判準軸 | 評 SA 外洩痛不痛時先看 ns 廣度(漏 resource 深度);評 secret 危險度跑到 base64 存法軸,不是「能否離開 RBAC 管轄」軸 | RP3 判準軸選錯:該問「憑證外洩後攻擊者碰得到的 ns×resource×verb 上限,以及能否跳出 RBAC 管轄」 | unresolved | 3 | 2026-09-16 | 1
 - 2026-06-18 | YAML validation | `matchLabels` 打成 `metaLabels` | 不讀 strict decoding error;驗證在 API Server | unresolved | 7 | 2026-06-30 | 2
 - 2026-06-22 | probe 職責 | 把 readiness 的「準備好接流量」塞給 liveness | 兩種 probe 失敗後動作不同(重啟 vs 切流量) | unresolved | 7 | 2026-07-10 | 1
@@ -151,6 +155,7 @@ weak-topic flags(2026-08-03 啟用,P2a 帶 flag 前進、gate 未考,學員決�
      檢視序:過期優先、interval 小者優先;step A 每堂 ~2 題上限。
      每張卡的重測歷史與下次抽考題在 mistake-notes.md;term 卡到期日在 term-registry.md。 -->
 
+- mistake:IRSA-trust-vs-permission | mistake | 3 | 2026-09-21 | active
 - mistake:YAML-validation | mistake | 3 | 2026-08-08 | active
 - mistake:ImagePullBackOff | mistake | 3 | 2026-08-09 | active
 - mistake:dry-run-兩層 | mistake | 3 | 2026-08-09 | active

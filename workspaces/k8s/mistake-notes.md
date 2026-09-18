@@ -366,3 +366,10 @@
 - **學員自產類比(命中)**:AWS CloudFormation —— 你有 `create stack` 的權限,跟 stack 的 service role 有沒有 `delete` 是分開的兩件事;建 stack 等於借那個 role 的手。AWS 用 `iam:PassRole` 專門擋這個。**k8s 沒有 PassRole 這道內建閘。**
 - 三種防法:①別給 `create pods`,CI 改 `patch deployments` 讓 controller 用它自己受控的 SA 去建 Pod;②Kyverno/admission 擋「Pod 不准指定高權 SA」= k8s 版 PassRole 閘;③高權 SA 設 `automountServiceAccountToken: false`。
 - 09-16 抽(換皮):某 SA 只有 `create jobs`,ns 裡有個 `backup` SA 能讀所有 PVC 快照。問攻擊者能不能拿到快照、怎麼防。
+
+## 2026-09-18 | IRSA trust vs permission policy
+
+- 正解:STS 收到 JWT 先拿 `sub`(`system:serviceaccount:<ns>:<sa>`)比 role 的 **trust policy**(誰可以 assume 我),過了才發臨時憑證;**permission policy** 只決定 assume 之後能做什麼。SA annotation 只告訴 SDK 去申請哪個 role,不能證明身分;`sub` 由 k8s 簽名,Pod 改不了。
+- 判準句:「我看的是 JWT 的 `sub`,因為 STS 用它比 trust policy,annotation 只是申請單。」
+- s37 證據:首答「擋在 B policy」;誘答「改 annotation 就能讀 S3」同意,縮成「sub 會變嗎」二選一答對;F 段又同意「看 policy 有 s3:GetObject 就放行」,反證法(拿 log-agent 的 JWT assume billing role)後改答「甲」。判準句只給 X 沒給因為。
+- 下次抽考題(換皮):GitHub Actions OIDC 對 AWS,staging branch 的 workflow 改了 `role-to-assume` 指向 prod deploy role,能 assume 嗎?看哪個欄位、比哪份文件?
