@@ -1,0 +1,530 @@
+
+<title>腿長差不過一</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=JetBrains+Mono:wght@400;700&family=Noto+Sans+TC:wght@400;500;700&display=swap">
+<style>
+:root{
+  --paper:#F2F0F6; --surface:#FFFFFF; --ink:#191527; --body:#302B41;
+  --muted:#6E687E; --line:#CFCADB;
+  --c1:#4A4098; --c1-soft:#E3E0F3;
+  --c2:#AE3557; --c2-soft:#F6E0E7;
+  --signal:#10726B; --signal-soft:#D8ECE9;
+  --code-bg:#131022; --code-fg:#DEDAEA;
+  --hold:#EDEAF3;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#14121C; --surface:#1C1929; --ink:#EAE7F2; --body:#C6C1D4;
+    --muted:#8E88A0; --line:#322E44;
+    --c1:#9E94EC; --c1-soft:#241F42;
+    --c2:#E88BA4; --c2-soft:#3A1D28;
+    --signal:#4FC7B6; --signal-soft:#0F2F2C;
+    --code-bg:#0C0A14; --code-fg:#DAD5E6;
+    --hold:#1F1C2C;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#14121C; --surface:#1C1929; --ink:#EAE7F2; --body:#C6C1D4;
+  --muted:#8E88A0; --line:#322E44;
+  --c1:#9E94EC; --c1-soft:#241F42;
+  --c2:#E88BA4; --c2-soft:#3A1D28;
+  --signal:#4FC7B6; --signal-soft:#0F2F2C;
+  --code-bg:#0C0A14; --code-fg:#DAD5E6;
+  --hold:#1F1C2C;
+}
+
+*{box-sizing:border-box}
+body{
+  background:var(--paper); color:var(--body);
+  font-family:"Noto Sans TC","Hiragino Sans","Microsoft JhengHei",sans-serif;
+  font-size:16px; line-height:1.85;
+  padding:0 1.25rem 5rem;
+}
+.wrap{max-width:44rem; margin:0 auto}
+
+header{padding-block:3.5rem 1.5rem}
+.kicker{
+  font-family:"JetBrains Mono",monospace; font-size:.72rem; font-weight:700;
+  letter-spacing:.16em; text-transform:uppercase; color:var(--signal);
+}
+h1{
+  font-family:"Archivo","Noto Sans TC",sans-serif; font-weight:700;
+  font-size:clamp(2rem,6vw,2.9rem); line-height:1.12; letter-spacing:-.02em;
+  color:var(--ink); margin:.5rem 0 .6rem; text-wrap:balance;
+}
+.sub{color:var(--muted); font-size:1rem; margin:0}
+
+.rail{
+  height:9px; margin:2.75rem 0 2.25rem;
+  border-top:2px solid var(--line); border-bottom:2px solid var(--line);
+  background:repeating-linear-gradient(90deg,var(--line) 0 3px,transparent 3px 13px);
+}
+
+h2{
+  font-family:"Archivo","Noto Sans TC",sans-serif; font-weight:700;
+  font-size:1.4rem; color:var(--ink); letter-spacing:-.01em;
+  margin:0 0 .25rem; text-wrap:balance;
+}
+h2 .num{
+  font-family:"JetBrains Mono",monospace; font-size:.85rem; color:var(--signal);
+  margin-right:.6rem; vertical-align:.15em;
+}
+h3{font-family:"Archivo","Noto Sans TC",sans-serif;font-weight:600;font-size:1rem;color:var(--ink);margin:1.75rem 0 .4rem}
+h4{font-family:"Archivo","Noto Sans TC",sans-serif;font-weight:600;font-size:.95rem;color:var(--ink);margin:1.4rem 0 .3rem}
+section{margin-bottom:2.5rem}
+p{margin:.7rem 0}
+strong{color:var(--ink); font-weight:700}
+code{font-family:"JetBrains Mono",monospace; font-size:.87em; background:var(--signal-soft); color:var(--ink); padding:.1em .35em; border-radius:2px}
+
+.lede{font-size:1.1rem; color:var(--ink); border-left:3px solid var(--signal); padding-left:1rem; margin:1rem 0 1.25rem}
+
+.callout{background:var(--surface); border:1px solid var(--line); border-radius:4px; padding:1.1rem 1.25rem; margin:1.25rem 0}
+.callout.warn{border-left:4px solid var(--c2)}
+.callout.key{border-left:4px solid var(--signal)}
+.callout h3,.callout h4{margin-top:0}
+
+ul,ol{padding-left:1.35rem; margin:.7rem 0}
+li{margin:.35rem 0}
+
+.signals{list-style:none; padding:0; display:grid; gap:.5rem}
+.signals li{
+  display:flex; gap:.75rem; align-items:baseline;
+  background:var(--surface); border:1px solid var(--line); border-radius:4px; padding:.7rem .95rem; margin:0;
+}
+.signals .n{font-family:"JetBrains Mono",monospace; font-weight:700; color:var(--signal); flex-shrink:0}
+
+.tablewrap{overflow-x:auto; margin:1.25rem 0; border:1px solid var(--line); border-radius:4px; background:var(--surface)}
+table{border-collapse:collapse; width:100%; font-size:.86rem; font-variant-numeric:tabular-nums}
+th,td{text-align:left; padding:.55rem .8rem; border-bottom:1px solid var(--line); white-space:nowrap}
+th{font-family:"Archivo",sans-serif; font-weight:600; color:var(--ink); font-size:.78rem; letter-spacing:.03em; text-transform:uppercase}
+tr:last-child td{border-bottom:none}
+td.mono,th.mono{font-family:"JetBrains Mono",monospace}
+.t1{color:var(--c1); font-weight:700}
+.t2{color:var(--c2); font-weight:700}
+.hit{color:var(--signal); font-weight:700}
+
+pre{
+  background:var(--code-bg); color:var(--code-fg); border-radius:5px;
+  padding:1.1rem 1.25rem; overflow-x:auto; margin:1rem 0;
+  font-family:"JetBrains Mono",monospace; font-size:.84rem; line-height:1.75;
+}
+pre .cm{color:#8C86A8}
+pre .kw{color:#C39BEE}
+pre .fn{color:#7FD6C6}
+pre .hl{background:rgba(127,214,198,.14); display:block; margin:0 -1.25rem; padding:0 1.25rem}
+
+details{background:var(--surface); border:1px solid var(--line); border-radius:4px; margin:1rem 0; overflow:hidden}
+summary{
+  cursor:pointer; padding:.9rem 1.15rem; list-style:none;
+  font-family:"Archivo","Noto Sans TC",sans-serif; font-weight:600; color:var(--ink);
+  display:flex; align-items:baseline; gap:.6rem;
+}
+summary::-webkit-details-marker{display:none}
+summary::before{content:"▸"; color:var(--signal); font-size:.8rem}
+details[open] summary::before{content:"▾"}
+summary:focus-visible{outline:2px solid var(--signal); outline-offset:-2px}
+.lockhint{font-family:"Noto Sans TC",sans-serif;font-weight:400;font-size:.8rem;color:var(--muted);margin-left:auto}
+.dbody{padding:0 1.15rem 1.15rem; border-top:1px solid var(--line)}
+
+.mantra{font-family:"Archivo","Noto Sans TC",sans-serif;font-size:1.05rem;font-weight:600;color:var(--ink);background:var(--signal-soft);border-radius:4px;padding:1rem 1.2rem;margin:1rem 0}
+
+/* ── 樹 ── */
+.dia{display:block;max-width:100%;height:auto;margin:1.25rem auto}
+.dia .edge{stroke:var(--line);stroke-width:2}
+.dia .edge.nil{stroke-dasharray:4 4}
+.dia .box{fill:var(--surface);stroke:var(--line);stroke-width:2}
+.dia .box.a{fill:var(--c1-soft);stroke:var(--c1)}
+.dia .box.b{fill:var(--c2-soft);stroke:var(--c2)}
+.dia .nilbox{fill:none;stroke:var(--muted);stroke-width:1.5;stroke-dasharray:3 3}
+.dia .tval{fill:var(--ink);font-family:"JetBrains Mono",monospace;font-size:15px;font-weight:700;text-anchor:middle;dominant-baseline:central}
+.dia .nilv{fill:var(--muted);font-family:"JetBrains Mono",monospace;font-size:11px;text-anchor:middle;dominant-baseline:central}
+.dia .tag{fill:var(--muted);font-family:"JetBrains Mono",monospace;font-size:12px;text-anchor:middle}
+.dia .tag.hit{fill:var(--signal);font-weight:700}
+
+/* ── call stack 分鏡 ── */
+.film{display:grid;gap:1rem;margin:1.5rem 0}
+.shot{background:var(--surface);border:1px solid var(--line);border-radius:4px;padding:.9rem 1rem}
+.shot .hd{display:flex;gap:.7rem;align-items:baseline;flex-wrap:wrap;margin-bottom:.6rem}
+.shot .no{font-family:"JetBrains Mono",monospace;font-size:.68rem;font-weight:700;letter-spacing:.1em;color:var(--signal);border:1px solid var(--signal);border-radius:2px;padding:.1rem .35rem;flex-shrink:0}
+.shot .cap{font-size:.9rem;color:var(--body);line-height:1.6}
+.tower{display:flex;flex-direction:column;gap:3px;font-family:"JetBrains Mono",monospace;font-size:.78rem;overflow-x:auto}
+.fr{border:1px solid var(--line);border-radius:3px;padding:.4rem .6rem;background:var(--hold);color:var(--muted);min-width:min-content;white-space:nowrap}
+.fr.run{background:var(--signal-soft);border-color:var(--signal);color:var(--ink);font-weight:700}
+.fr.gone{border-style:dashed;background:transparent;opacity:.45;text-decoration:line-through}
+.fr .who{color:var(--ink);font-weight:700}
+.fr.run .who{color:var(--signal)}
+.fr .slot{color:var(--muted);font-weight:400}
+.fr .val{color:var(--c2);font-weight:700}
+.floor{font-family:"JetBrains Mono",monospace;font-size:.7rem;color:var(--muted);letter-spacing:.1em;border-top:2px solid var(--line);padding-top:.25rem;margin-top:2px}
+.emptystack{font-family:"JetBrains Mono",monospace;font-size:.78rem;color:var(--muted);padding:.4rem 0}
+
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(15rem,1fr));gap:1rem;margin:1.25rem 0}
+.two > div{background:var(--surface);border:1px solid var(--line);border-radius:4px;padding:.9rem 1.05rem}
+.two h4{margin-top:0}
+
+.wrongright{display:grid;gap:.5rem;margin:1rem 0}
+.wrongright > div{padding:.65rem .9rem;border-radius:3px;font-size:.92rem}
+.wr-x{background:var(--c2-soft);border-left:3px solid var(--c2)}
+.wr-o{background:var(--signal-soft);border-left:3px solid var(--signal)}
+.wr-y{background:var(--surface);border:1px solid var(--line);border-left:3px solid var(--muted)}
+
+.move{background:var(--surface);border:1px solid var(--line);border-radius:4px;padding:.9rem 1.05rem;margin:.85rem 0}
+.move h4{margin:0 0 .5rem;display:flex;gap:.6rem;align-items:baseline;flex-wrap:wrap}
+.move h4 .mv{font-family:"JetBrains Mono",monospace;font-size:.7rem;font-weight:700;letter-spacing:.1em;color:var(--signal);border:1px solid var(--signal);border-radius:2px;padding:.1rem .35rem;flex-shrink:0}
+.say{background:var(--c1-soft);border-radius:3px;padding:.6rem .8rem;margin:.4rem 0;color:var(--ink)}
+.say b{display:block;font-family:"JetBrains Mono",monospace;font-size:.66rem;letter-spacing:.12em;text-transform:uppercase;color:var(--c1);margin-bottom:.3rem}
+.think{font-size:.88rem;color:var(--muted);margin:.4rem 0}
+.think b{font-family:"JetBrains Mono",monospace;font-size:.66rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:.2rem}
+
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+/* ── #543 專用:雙軌配色 ──
+   這一頁的顏色是有意義的,不是裝飾:
+   紫 c1 = 軌道 A「往上交」(return 給呼叫者)
+   紅 c2 = 軌道 B「記帳本」(寫進 self.ans)                       */
+.dia .edge.path{stroke:var(--c2);stroke-width:4.5;stroke-linecap:round}
+.dia .edge.up{stroke:var(--c1);stroke-width:4.5;stroke-linecap:round}
+.dia .edge.dim{opacity:.45}
+.dia .box.dim{opacity:.4}
+.dia .pip{fill:var(--c2);stroke:none}
+.dia .pipn{fill:var(--paper);font-family:"JetBrains Mono",monospace;font-size:11px;font-weight:700;text-anchor:middle;dominant-baseline:central}
+.dia .tag.a{fill:var(--c1);font-weight:700}
+.dia .tag.b{fill:var(--c2);font-weight:700}
+.dia .xout{stroke:var(--muted);stroke-width:2;opacity:.65}
+
+.tk{font-family:"JetBrains Mono",monospace;font-size:.66rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;border-radius:2px;padding:.15rem .4rem;margin-right:.5rem;white-space:nowrap}
+.tk.a{color:var(--c1);border:1px solid var(--c1);background:var(--c1-soft)}
+.tk.b{color:var(--c2);border:1px solid var(--c2);background:var(--c2-soft)}
+
+.legend{display:grid;gap:.4rem;margin:1rem 0;font-size:.88rem}
+.legend div{display:flex;gap:.6rem;align-items:baseline}
+.legend .sw{width:1.6rem;height:.4rem;border-radius:2px;flex-shrink:0;transform:translateY(-.15em)}
+.legend .sw.a{background:var(--c1)}
+.legend .sw.b{background:var(--c2)}
+
+.shot .row{display:grid;grid-template-columns:1fr auto;gap:1rem;align-items:start}
+@media (max-width:34rem){.shot .row{grid-template-columns:1fr}}
+.ledger{font-family:"JetBrains Mono",monospace;font-size:.78rem;border:2px solid var(--line);border-radius:4px;padding:.55rem .8rem;background:var(--surface);color:var(--muted);white-space:nowrap;align-self:start;text-align:center}
+.ledger b{display:block;font-size:.6rem;letter-spacing:.12em;text-transform:uppercase;margin-bottom:.3rem}
+.ledger .big{font-size:1.45rem;font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums}
+.ledger.live{border-color:var(--c2);background:var(--c2-soft);color:var(--c2)}
+.ledger.live .big{color:var(--c2)}
+.fr .valb{color:var(--c2);font-weight:700}
+.fr .vala{color:var(--c1);font-weight:700}
+
+td.a{color:var(--c1);font-weight:700}
+td.b{color:var(--c2);font-weight:700}
+.xref td:first-child{white-space:normal;min-width:14rem}
+</style>
+
+<style>
+.dia .box.ok{fill:var(--signal-soft);stroke:var(--signal)}
+.dia .ht{fill:var(--c1);font-family:"JetBrains Mono",monospace;font-size:12px;font-weight:700}
+.dia .gap{fill:var(--muted);font-family:"JetBrains Mono",monospace;font-size:11px}
+.dia .gap.bad{fill:var(--c2);font-weight:700}
+.dia .note{fill:var(--muted);font-family:"Noto Sans TC",sans-serif;font-size:12px}
+.pair{display:grid;grid-template-columns:repeat(auto-fit,minmax(15rem,1fr));gap:1rem;margin:1.25rem 0}
+.pair .callout{margin:0}
+.flag{display:inline-block;font-family:"JetBrains Mono",monospace;font-weight:700;padding:.05rem .45rem;border-radius:3px}
+.flag.t{background:var(--signal-soft);color:var(--signal)}
+.flag.f{background:var(--c2-soft);color:var(--c2)}
+td.bad{color:var(--c2);font-weight:700}
+</style>
+
+<div class="wrap">
+
+<header>
+  <div class="kicker">LeetCode #110 · Tree · 兔模式(母題 #543)</div>
+  <h1>腿長差不過一</h1>
+  <p class="sub">Balanced Binary Tree。外殼跟 #543 直徑一模一樣,<strong>只換記帳那一行</strong>。</p>
+</header>
+
+<div class="rail"></div>
+
+<section>
+  <h2><span class="num">01</span>這題在幹嘛</h2>
+  <p class="lede">樹裡的<strong>每一個</strong> node,左邊高度和右邊高度最多差 1。全部符合就回傳 <code>True</code>。</p>
+  <p>先認識「高度」:從這個 node 往下,最深那條腿有幾層。<code>None</code> 的高度是 0。</p>
+  <svg class="dia" viewBox="0 0 400 200" width="400" role="img" aria-label="樹 3,左小孩 9,右小孩 20;20 底下有 15 和 7。高度:3 是 3,9 是 1,20 是 2,15 和 7 是 1。">
+<line class="edge" x1="180" y1="48" x2="90" y2="84"/>
+<line class="edge" x1="180" y1="48" x2="270" y2="84"/>
+<line class="edge" x1="270" y1="118" x2="220" y2="154"/>
+<line class="edge" x1="270" y1="118" x2="320" y2="154"/>
+<rect class="box " x="158" y="14" width="44" height="34" rx="4"/><text class="tval" x="180" y="31">3</text>
+<text class="ht" x="208" y="27">高 3</text>
+<rect class="box " x="68" y="84" width="44" height="34" rx="4"/><text class="tval" x="90" y="101">9</text>
+<text class="ht" x="118" y="97">高 1</text>
+<rect class="box " x="248" y="84" width="44" height="34" rx="4"/><text class="tval" x="270" y="101">20</text>
+<text class="ht" x="298" y="97">高 2</text>
+<rect class="box " x="198" y="154" width="44" height="34" rx="4"/><text class="tval" x="220" y="171">15</text>
+<text class="ht" x="248" y="167">高 1</text>
+<rect class="box " x="298" y="154" width="44" height="34" rx="4"/><text class="tval" x="320" y="171">7</text>
+<text class="ht" x="348" y="167">高 1</text>
+</svg>
+  <p>站在 <code>3</code> 上:左邊 <code>9</code> 高 1,右邊 <code>20</code> 高 2。差 1,OK。其他 node 也都 OK,所以這棵平衡。</p>
+</section>
+
+<section>
+  <h2><span class="num">02</span>這個「平衡」不是日常用語的平衡</h2>
+  <div class="tablewrap"><table>
+    <tr><th>你可能以為</th><th>比的是</th><th>題目比的是</th></tr>
+    <tr><td>左右 node 數量一樣</td><td>有幾個</td><td>有<strong>多高</strong></td></tr>
+    <tr><td>葉子都一樣深</td><td>差 0 層</td><td>差 <strong>≤ 1</strong> 層都可以</td></tr>
+    <tr><td>看 root 就好</td><td>一個 node</td><td><strong>每一個</strong> node</td></tr>
+  </table></div>
+  <p>這棵左右 node 數量一樣(各 3 個),root 自己也沒問題。但它<strong>不平衡</strong>:</p>
+  <svg class="dia" viewBox="0 0 500 270" width="500" role="img" aria-label="樹 1 有左右兩個 2。左邊的 2 往左下接 3 再接 4;右邊的 2 往右下接 3 再接 4。root 左右都高 3,差 0;兩個 2 都是一邊高 2、一邊高 0,差 2,不平衡。">
+<line class="edge" x1="220" y1="48" x2="120" y2="84"/>
+<line class="edge" x1="220" y1="48" x2="320" y2="84"/>
+<line class="edge" x1="120" y1="118" x2="70" y2="154"/>
+<line class="edge" x1="320" y1="118" x2="370" y2="154"/>
+<line class="edge" x1="70" y1="188" x2="30" y2="224"/>
+<line class="edge" x1="370" y1="188" x2="410" y2="224"/>
+<rect class="box ok" x="198" y="14" width="44" height="34" rx="4"/><text class="tval" x="220" y="31">1</text>
+<text class="ht" x="248" y="27">高 4</text>
+<text class="gap" x="248" y="43">L3 R3 差0 ✓</text>
+<rect class="box b" x="98" y="84" width="44" height="34" rx="4"/><text class="tval" x="120" y="101">2</text>
+<text class="ht" x="148" y="97">高 3</text>
+<text class="gap bad" x="148" y="113">L2 R0 差2 ✗</text>
+<rect class="box b" x="298" y="84" width="44" height="34" rx="4"/><text class="tval" x="320" y="101">2</text>
+<text class="ht" x="348" y="97">高 3</text>
+<text class="gap bad" x="348" y="113">L0 R2 差2 ✗</text>
+<rect class="box " x="48" y="154" width="44" height="34" rx="4"/><text class="tval" x="70" y="171">3</text>
+<text class="ht" x="98" y="167">高 2</text>
+<text class="gap" x="98" y="183">差1 ✓</text>
+<rect class="box " x="348" y="154" width="44" height="34" rx="4"/><text class="tval" x="370" y="171">3</text>
+<text class="ht" x="398" y="167">高 2</text>
+<text class="gap" x="398" y="183">差1 ✓</text>
+<rect class="box " x="8" y="224" width="44" height="34" rx="4"/><text class="tval" x="30" y="241">4</text>
+<text class="ht" x="58" y="237">高 1</text>
+<rect class="box " x="388" y="224" width="44" height="34" rx="4"/><text class="tval" x="410" y="241">4</text>
+<text class="ht" x="438" y="237">高 1</text>
+</svg>
+  <div class="callout warn">
+    <h4>陷阱:只檢查 root</h4>
+    <p>root 左右都高 3,差 0。壞掉的是下面兩個 <code>2</code>:一邊高 2、另一邊是空的。所以一定要<strong>每個 node 都檢查</strong>。這棵在 <code>drill.py</code> 裡標 ★。</p>
+  </div>
+</section>
+
+<section>
+  <h2><span class="num">03</span>這是什麼型</h2>
+  <ul class="signals">
+    <li><span class="n">1</span><span>要看<strong>每一個</strong> node → 樹 DFS,全部走一遍</span></li>
+    <li><span class="n">2</span><span>每個 node 要先知道左右的<strong>高度</strong> → 小孩交上來 → <strong>後序</strong>(左 右 中)</span></li>
+    <li><span class="n">3</span><span>一個 node 要做<strong>兩件事</strong>:檢查自己、交高度給爸爸 → <strong>雙軌</strong>,跟 #543 同款</span></li>
+  </ul>
+  <pre><span class="cm">                爸爸</span>
+                 ▲
+                 │  <span class="fn">往上交:我的高度 = 1 + max(L, R)</span>   ← 跟 #543 一模一樣
+               [node]
+              ╱      ╲
+            L          R
+
+       <span class="kw">記帳:|L - R| > 1 就在紙條寫 False</span>    ← 只有這裡換掉</pre>
+  <div class="callout key">
+    <h4>往上交的永遠是高度</h4>
+    <p>爸爸拿到小孩的數字,要拿來算<strong>自己</strong>的左右差。所以小孩只能交高度。交差距的話,爸爸算不出自己的差距。</p>
+  </div>
+</section>
+
+<section>
+  <h2><span class="num">04</span>暴力法:每個 node 都重新量一次高度</h2>
+  <p>最直覺的寫法:站在每個 node 上,呼叫一個 <code>height()</code> 去量左邊、再量右邊。</p>
+  <pre><span class="cm">站在 1 上:量 2 那條腿 → 走過 2、3、4、...
+站在 2 上:量 3 那條腿 → 又走過 3、4、...   ← 同一段又走一次
+站在 3 上:量 4 那條腿 → 又走過 4、...     ← 又一次</span></pre>
+  <p>下面的 node 被量了很多次。斜鏈的樹會變成 <strong>O(n²)</strong>。</p>
+  <p>浪費的情報:<strong>小孩的高度已經算過了</strong>。後序走一次,小孩把高度交上來,爸爸直接用,每個 node 只算一次,<strong>O(n)</strong>。</p>
+</section>
+
+<section>
+  <h2><span class="num">05</span>做法一步一步(同一棵 ★ 樹,沒有 code)</h2>
+  <p>先準備一張紙條,寫 <span class="flag t">True</span>。這張紙條不屬於任何一個 node,大家都看得到。</p>
+  <svg class="dia" viewBox="0 0 500 270" width="500" role="img" aria-label="樹 1 有左右兩個 2。左邊的 2 往左下接 3 再接 4;右邊的 2 往右下接 3 再接 4。root 左右都高 3,差 0;兩個 2 都是一邊高 2、一邊高 0,差 2,不平衡。">
+<line class="edge" x1="220" y1="48" x2="120" y2="84"/>
+<line class="edge" x1="220" y1="48" x2="320" y2="84"/>
+<line class="edge" x1="120" y1="118" x2="70" y2="154"/>
+<line class="edge" x1="320" y1="118" x2="370" y2="154"/>
+<line class="edge" x1="70" y1="188" x2="30" y2="224"/>
+<line class="edge" x1="370" y1="188" x2="410" y2="224"/>
+<rect class="box " x="198" y="14" width="44" height="34" rx="4"/><text class="tval" x="220" y="31">1</text>
+<text class="ht" x="248" y="27">高 4</text>
+<rect class="box " x="98" y="84" width="44" height="34" rx="4"/><text class="tval" x="120" y="101">2</text>
+<text class="ht" x="148" y="97">高 3</text>
+<rect class="box " x="298" y="84" width="44" height="34" rx="4"/><text class="tval" x="320" y="101">2</text>
+<text class="ht" x="348" y="97">高 3</text>
+<rect class="box " x="48" y="154" width="44" height="34" rx="4"/><text class="tval" x="70" y="171">3</text>
+<text class="ht" x="98" y="167">高 2</text>
+<rect class="box " x="348" y="154" width="44" height="34" rx="4"/><text class="tval" x="370" y="171">3</text>
+<text class="ht" x="398" y="167">高 2</text>
+<rect class="box " x="8" y="224" width="44" height="34" rx="4"/><text class="tval" x="30" y="241">4</text>
+<text class="ht" x="58" y="237">高 1</text>
+<rect class="box " x="388" y="224" width="44" height="34" rx="4"/><text class="tval" x="410" y="241">4</text>
+<text class="ht" x="438" y="237">高 1</text>
+</svg>
+  <p>後序走:每個 node 等左右交完高度,才輪到自己。結束的順序如下:</p>
+  <div class="tablewrap"><table>
+    <tr><th>順序</th><th>node</th><th>L</th><th>R</th><th>差</th><th>紙條</th><th>交給爸爸</th></tr>
+    <tr><td>1</td><td>左下的 4</td><td>0</td><td>0</td><td>0</td><td><span class="flag t">True</span></td><td>1</td></tr>
+    <tr><td>2</td><td>左邊的 3</td><td>1</td><td>0</td><td>1</td><td><span class="flag t">True</span></td><td>2</td></tr>
+    <tr><td>3</td><td>左邊的 2</td><td>2</td><td>0</td><td class="bad">2 ✗</td><td><span class="flag f">False</span> ← 改了</td><td>3</td></tr>
+    <tr><td>4</td><td>右下的 4</td><td>0</td><td>0</td><td>0</td><td><span class="flag f">False</span></td><td>1</td></tr>
+    <tr><td>5</td><td>右邊的 3</td><td>0</td><td>1</td><td>1</td><td><span class="flag f">False</span></td><td>2</td></tr>
+    <tr><td>6</td><td>右邊的 2</td><td>0</td><td>2</td><td class="bad">2 ✗</td><td><span class="flag f">False</span></td><td>3</td></tr>
+    <tr><td>7</td><td>root 1</td><td>3</td><td>3</td><td>0</td><td><span class="flag f">False</span> ← 改不回去</td><td>4</td></tr>
+  </table></div>
+  <p>最後交出紙條:<span class="flag f">False</span>。</p>
+  <p>注意第 3 行:左邊的 2 雖然壞掉,<strong>還是照樣交高度 3 給爸爸</strong>。兩件事互不干擾。</p>
+
+  <div class="callout key">
+    <h4>為什麼紙條一開始寫 True?</h4>
+    <p>檢查那行只會寫 <code>False</code>,沒有任何一行寫 <code>True</code>。一棵平衡的樹,沒有 node 會去碰紙條,紙條停在一開始的值。所以一開始的值 = <strong>沒找到問題時的答案</strong> = <code>True</code>。</p>
+  </div>
+</section>
+
+<details>
+<summary>完整 code 加逐行解釋<span class="lockhint">先自己寫過再打開</span></summary>
+<div class="dbody">
+<pre><span class="kw">class</span> Solution:
+    <span class="kw">def</span> <span class="fn">isBalanced</span>(self, root):
+        self.ok = <span class="kw">True</span>                  <span class="cm"># 1 紙條:先假設平衡</span>
+
+        <span class="kw">def</span> <span class="fn">depth</span>(node):                <span class="cm"># 2 內層:交的是「高度」</span>
+            <span class="kw">if not</span> node:
+                <span class="kw">return</span> 0                <span class="cm"># 3 None 高度 0</span>
+            L = depth(node.left)        <span class="cm"># 4 左邊交高度上來</span>
+            R = depth(node.right)       <span class="cm"># 5 右邊交高度上來</span>
+<span class="hl">            <span class="kw">if</span> abs(L - R) > 1:          <span class="cm"># 6 記帳:差超過 1</span>
+                self.ok = <span class="kw">False</span>       <span class="cm">#   在紙條寫 False</span></span>
+            <span class="kw">return</span> 1 + max(L, R)        <span class="cm"># 7 往上交:我的高度</span>
+
+        depth(root)                     <span class="cm"># 8 走完整棵樹</span>
+        <span class="kw">return</span> self.ok                  <span class="cm"># 9 交出紙條</span></pre>
+<div class="tablewrap"><table>
+  <tr><th>行</th><th>做什麼</th><th>容易寫錯</th></tr>
+  <tr><td>1</td><td>開紙條,放在 <code>self</code> 上</td><td>初始寫成 <code>False</code>,永遠交 False</td></tr>
+  <tr><td>2</td><td>內層函式,交高度(數字)</td><td>把 5 行直接寫在 <code>isBalanced</code> 裡,交的東西就混了</td></tr>
+  <tr><td>4、5</td><td>遞迴叫 <code>depth</code></td><td>叫成 <code>isBalanced(node.left)</code> → <code>NameError</code></td></tr>
+  <tr><td>6</td><td>只記帳,不 return</td><td><code>false</code> 小寫 → <code>NameError</code></td></tr>
+  <tr><td>7</td><td>跟 #543 一樣</td><td>換成相減:爸爸拿到差距,算不出自己的差距</td></tr>
+</table></div>
+</div>
+</details>
+
+<details>
+<summary>逐輪執行模擬表<span class="lockhint">用第 05 節同一棵 ★ 樹</span></summary>
+<div class="dbody">
+<p>跟第 05 節的表是同一件事:第 05 節用手走,這裡對到 code 的行號。</p>
+<div class="tablewrap"><table>
+  <tr><th>呼叫</th><th>第 4 行 L</th><th>第 5 行 R</th><th>第 6 行成立?</th><th>self.ok</th><th>第 7 行 return</th></tr>
+  <tr><td class="mono">depth(左下 4)</td><td>0</td><td>0</td><td>否</td><td>True</td><td>1</td></tr>
+  <tr><td class="mono">depth(左 3)</td><td>1</td><td>0</td><td>否</td><td>True</td><td>2</td></tr>
+  <tr><td class="mono">depth(左 2)</td><td>2</td><td>0</td><td class="bad">是</td><td class="bad">False</td><td>3</td></tr>
+  <tr><td class="mono">depth(右下 4)</td><td>0</td><td>0</td><td>否</td><td>False</td><td>1</td></tr>
+  <tr><td class="mono">depth(右 3)</td><td>0</td><td>1</td><td>否</td><td>False</td><td>2</td></tr>
+  <tr><td class="mono">depth(右 2)</td><td>0</td><td>2</td><td class="bad">是</td><td>False</td><td>3</td></tr>
+  <tr><td class="mono">depth(root 1)</td><td>3</td><td>3</td><td>否</td><td>False</td><td>4</td></tr>
+</table></div>
+<p>第 8 行 <code>depth(root)</code> 回傳的 4 沒有人用。第 9 行交出 <code>self.ok</code> = <code>False</code>。</p>
+</div>
+</details>
+
+<details>
+<summary>口訣加模板</summary>
+<div class="dbody">
+<p class="mantra">往上交的永遠是高度,換題只換記帳那一軌。</p>
+<p>雙軌外殼(#543、#110、#124 共用):</p>
+<pre>self.帳本 = 初始值                <span class="cm"># 沒找到東西時的答案</span>
+
+<span class="kw">def</span> <span class="fn">depth</span>(node):
+    <span class="kw">if not</span> node:
+        <span class="kw">return</span> 0
+    L = depth(node.left)
+    R = depth(node.right)
+    <span class="cm"># 記帳:這一行隨題目換</span>
+    <span class="kw">return</span> 1 + max(L, R)
+
+depth(root)
+<span class="kw">return</span> self.帳本</pre>
+<div class="tablewrap"><table>
+  <tr><th></th><th>#543 直徑</th><th>#110 平衡</th></tr>
+  <tr><td>帳本初始值</td><td class="mono">self.ans = 0</td><td class="mono">self.ok = True</td></tr>
+  <tr><td>記帳</td><td class="mono">self.ans = max(self.ans, L + R)</td><td class="mono">if abs(L - R) > 1: self.ok = False</td></tr>
+  <tr><td>往上交</td><td class="mono">return 1 + max(L, R)</td><td>一樣</td></tr>
+  <tr><td>最後回傳</td><td class="mono">return self.ans</td><td class="mono">return self.ok</td></tr>
+</table></div>
+</div>
+</details>
+
+<details>
+<summary>L6 面試逐字稿</summary>
+<div class="dbody">
+<p>換皮題重點在 Move 3:跟 #543 差在哪一句。</p>
+<div class="tablewrap"><table>
+  <tr><th>Move</th><th>說</th><th>想</th><th>寫</th></tr>
+  <tr><td>0</td><td>"Does balanced mean every node, or just the root? Is an empty tree balanced?"</td><td>「每一個 node」是陷阱,先問出來</td><td>(手不碰白板)</td></tr>
+  <tr><td>1</td><td>"Here the root has height 3 on both sides, but node 2 has 2 on the left and 0 on the right. So it's not balanced."</td><td>自己的例子直接打中「只看 root」</td><td>★ 樹,每個 node 標 L / R</td></tr>
+  <tr><td>2</td><td>"I could measure the height at every node, but that's O(n²) on a skewed tree. I'd measure the same subtrees again and again."</td><td>浪費的情報:小孩的高度算過了</td><td class="mono">abs(h(L) - h(R)) &lt;= 1 and bal(L) and bal(R)</td></tr>
+  <tr><td>3</td><td>"It's the same shape as Diameter. Each node hands up its height. I only change what I record: a flag instead of a max."</td><td>invariant:往上交不變,只換記帳</td><td>兩軌圖</td></tr>
+  <tr><td>4</td><td>"One post-order pass gives me both heights at each node, so each height is computed once."</td><td>選後序是因為要先有 L、R</td><td class="mono">L = depth(...) / R = depth(...)</td></tr>
+  <tr><td>5</td><td>"That's O(n) time and O(h) space for the call stack. Sound reasonable?"</td><td>O(n²) 降到 O(n)</td><td class="mono">O(n) / O(h)</td></tr>
+  <tr><td>6a</td><td>"I start by assuming the tree is balanced."</td><td>紙條只會被改成 False</td><td class="mono">self.ok = True</td></tr>
+  <tr><td>6b</td><td>"At each node I get both heights, check the gap, then hand up my own height."</td><td>5 行骨架</td><td class="mono">if abs(L - R) &gt; 1: self.ok = False<br>return 1 + max(L, R)</td></tr>
+  <tr><td>6c</td><td>"Run it from the root and return the flag."</td><td>外層只做三件事</td><td class="mono">depth(root)<br>return self.ok</td></tr>
+  <tr><td>7</td><td>"On my example, node 2 sees 2 and 0, so the flag flips to false. The root sees 3 and 3, but it can't flip it back."</td><td>用 Move 1 的例子</td><td>在 node 2 打叉</td></tr>
+  <tr><td>8</td><td>"An empty tree returns true, because no node ever touches the flag."</td><td>點名哪個設計讓 edge case 自動對</td><td class="mono">[] → True</td></tr>
+  <tr><td>9</td><td>"To stop early, I could return -1 to mean 'unbalanced' and skip the rest."</td><td>follow-up:early exit</td><td class="mono">if L == -1 or R == -1 or abs(L - R) &gt; 1: return -1</td></tr>
+</table></div>
+<h4>完整 code 與「哪一句對哪幾行」</h4>
+<div class="tablewrap"><table>
+  <tr><th>Move</th><th>對到的行(上面 code 的編號)</th></tr>
+  <tr><td>6a</td><td>1</td></tr>
+  <tr><td>6b</td><td>2 到 7</td></tr>
+  <tr><td>6c</td><td>8、9</td></tr>
+  <tr><td>8</td><td>1(空樹時沒人碰紙條)</td></tr>
+</table></div>
+<h4>只給結論 vs 說明推理</h4>
+<div class="tablewrap"><table>
+  <tr><th></th><th>只給結論</th><th>說明推理</th></tr>
+  <tr><td>Move 3</td><td>"I'll use DFS."</td><td>"Same shape as Diameter. I only change what I record."</td></tr>
+  <tr><td>Move 6a</td><td>直接寫 <code>self.ok = True</code></td><td>"I start by assuming it's balanced, and only a bad node can flip it."</td></tr>
+</table></div>
+<h4>Native English</h4>
+<ul>
+  <li>"It's the same shape as X. I only change what I record."</li>
+  <li>"I start by assuming it's true, and only a bad case can flip it."</li>
+  <li>"Each height is computed once, so it's O(n)."</li>
+  <li>"It can't flip it back."</li>
+</ul>
+</div>
+</details>
+
+<details>
+<summary>這次的釐清<span class="lockhint">2026-09-18</span></summary>
+<div class="dbody">
+<pre><span class="kw">✗ 我以為:</span>平衡 = 左右 node 數量一樣,或葉子都一樣深
+<span class="fn">✓ 其實是:</span>每個 node 左右「高度」差 ≤ 1
+<span class="cm">→ 為什麼會搞混:日常用語的平衡。要看每一個 node,不是只看 root</span>
+
+<span class="kw">✗ 我以為:</span>這題把 max 換成相減
+<span class="fn">✓ 其實是:</span>相減只用在記帳;往上交的還是 1 + max(L, R)
+<span class="cm">→ 為什麼會搞混:兩軌混成一軌。爸爸要的是高度</span>
+
+<span class="kw">✗ 我以為:</span>5 行邏輯直接寫在 isBalanced 裡就好
+<span class="fn">✓ 其實是:</span>要一個內層 depth。isBalanced 交 True/False,depth 交高度
+<span class="cm">→ 為什麼會搞混:兩個函式交的東西不一樣,一個函式交不了兩種</span>
+
+<span class="kw">✗ 我以為:</span>紙條一開始應該寫 False
+<span class="fn">✓ 其實是:</span>寫 True。只有壞掉會改紙條,沒人改就停在初始值
+<span class="cm">→ 為什麼會搞混:初始值 = 沒找到問題時的答案</span>
+
+<span class="kw">✗ 我以為:</span>左右中 = 前序
+<span class="fn">✓ 其實是:</span>左右中 = 後序。看「中」放在哪</pre>
+</div>
+</details>
+
+<div class="rail"></div>
+<p style="color:var(--muted);font-size:.85rem;text-align:center">LeetCode #110 · 母題 #543 · 圖解頁:<code>tree/diameter-of-binary-tree/</code></p>
+
+</div>

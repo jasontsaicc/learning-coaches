@@ -4,7 +4,16 @@
 
 # leetcode
 
-- 今天做到:2026-09-17。**#100 Same Tree 兔模式收掉**,drill.py 9/9 綠。
+- 今天做到:2026-09-18。**#110 Balanced 兔模式收掉**,drill.py 9/9 綠(學員自己打)。
+  開場默寫雙軌模板第 2 次:**(a)(b)(c)(d) 全對**(9/17 (b)(c) 寫不出),只有 `self.and` 手滑。
+  #543 溫度計 ② 收掉:沒 `max` 帳本只剩 root 寫的數字,答對;兩棵樹選對會掛的 B(說有點亂,補拆圖)。
+  #110:「平衡」定義看不懂(以為是 node 數量一樣或葉子同深),畫高度表 + 反例後懂。
+  把往上交也換成相減(兩軌混成一軌),學員累了要求直接給答案。冷寫第 1 次:5 行邏輯對,
+  但直接寫在 `isBalanced` 裡、`if` 裡不會寫 → 補外殼 + `self.ok` 紙條 + 初始 `True` 的理由。
+  第 2 次 `isBalanced(node.left)`、`false`,指行號後自改,綠。
+  **學員回饋:「教得好亂」**(範例當場算錯改口、一則訊息糾正三件事);溫度計 ② 不要出要翻 case 清單的題。
+  **本場學員要求改用中文。**
+- 前一場 2026-09-17。**#100 Same Tree 兔模式收掉**,drill.py 9/9 綠。
   開場默寫雙軌模板(第 1 次考):(a) `return 0`、(d) `return self.ans` 對;(b)(c) 只記得「有 max、有 +1」,
   學員要求直接給答案,對照抄時把 (b) 的 `L + R` 帶進 (c) 寫成 `max(L + R) + 1`(TypeError),
   用「`+` 接成一條路 / `,` 二選一」釐清後改對。另有 `sel.ans` 手滑。#543 溫度計 ② 沒答,改天再問(不記債)。
@@ -16,7 +25,7 @@
   本層 `p.val != q.val` 一次寫對。委派第一版 `self.isSmaeTree(q.left)` 三個洞(拼字、少參數、沒接回傳值),
   學員自己覺得怪;`and` 自己答出,委派行走到階 2 骨架填空後寫對。
   溫度計 ② 拿掉比值兩行:答出回 True,說成「比數量」,修正為「比形狀」,掛 2 個 case。
-- 前一場 2026-09-14。**#226 隔堂複習(隔 4 天)**,`drill-review.py` 冷寫(空 stub 7/8 FAIL 已驗)。
+- 再前一場 2026-09-14。**#226 隔堂複習(隔 4 天)**,`drill-review.py` 冷寫(空 stub 7/8 FAIL 已驗)。
   只記得 swap 那行。委派走到階 3:階 2 答 `self.left(left)`(函式名錯 + 裸 `left` 不在 scope,
   同 9/11 `dfa(left)`,**升級 my-common-bugs 表一**)。對照打後跑出 `NoneType has no attribute 'right'`,
   指著踩空的 ▢ 圖問,`if not root` 自己寫對,但寫成 `return 0`(把 #104 的契約帶過來,
@@ -99,6 +108,7 @@
 | Tree DFS 遞迴(base/本層/委派) | ✓(9/10 圖解頁) | ✓ 9/10、9/14 | 🟡 9/10 #226 五行冷寫一次過 8/8;**9/14 隔 4 天只記得 swap**,委派對照打,base case 型別錯,`return root` 自推 | ✓ |
 | Tree DFS 吃下屬回傳值(#104 `max(left,right)+1`) | ✓ 9/11 圖解頁(11 格 call stack 分鏡) | | 🟡 公式靠階梯提示推出;dry run 數字出處答對;**控制權轉移 9/14 切成單張紙後答對,並自推一層** | ✓ 先問兩邊再算自己 |
 | Tree 雙軌(回傳值 + 全域帳本,#543) | ✓ 9/11 圖解頁 | | ✅ 9/11 冷寫一次過 9/9;9/17 隔 6 天默寫 (b)(c) 沒出來,對照抄 | ✓ 往上交挑一邊,記帳吃兩邊 |
+| Tree 雙軌換皮(#110 記帳換成 flag) | | ✓ 9/18 | 🟡 9/18 邏輯 5 行自寫,外殼(內層函式 + `self.ok`)要補 | ✓ 往上交的永遠是高度,換題只換記帳 |
 | Tree 兩棵一起走(#100 煞車 3 組合 + `and`) | | | 🟡 9/17 兔模式 9/9;煞車漏 ●▢、委派行階 2 | ✓ 先攔都空,再攔一邊空 |
 | Heap k-way merge(每條一個 head) | ✓ | | ✓ | ✓ |
 | Hashmap + 雙向鏈(LRU) | | | | |
@@ -148,6 +158,11 @@
   2026-09-17 兔模式(母題 #104):drill.py(9 組 case,空 stub 9/9 FAIL、參考解 9/9 PASS 已驗)、
   notes.md(含 L6 逐字稿、前中後序釐清表)。無圖解頁。學員版 9/9 綠,溫度計 ② 過。
 
+- **#110 Balanced Binary Tree** — `tree/balanced-binary-tree/`
+  2026-09-18 兔模式(母題 #543):drill.py(9 組 case,空 stub 9/9 FAIL、參考解 9/9 PASS 已驗)、
+  圖解頁:https://claude.ai/artifact/7X8DRQAu86S36mdc9AGBZ9(學員收工時要求補做)
+  notes.md(含 L6 逐字稿、#543 對照表、這次的釐清)。學員版 9/9 綠。
+
 - **#146 LRU Cache** — `hashmap-doubly-linked-list/lru-cache/`
   圖解頁:https://claude.ai/code/artifact/69673f1c-d044-49b9-bb01-42082143e263
   本場產出:圖解頁(寄物間號碼牌比喻)、暴力解對照、L6 面試逐字稿(含 code 對照表)、pytest harness。
@@ -158,14 +173,12 @@
 
 ## 接下來
 
-0. 開場默寫雙軌模板第 2 次(9/17 第 1 次 (b)(c) 沒出來)。重點戳 `max` 括號裡 `+` vs `,`。
-1. #543 溫度計 ②(仍未答):記帳那行拿掉 `max`,9 個 case 掛幾個?答案只掛 ★
-   `[1,2,None,3,4,5,None,None,6]`(9/17 已跑 code 驗證),因為最後記帳的是 root。
-2. 前中後序分類練習(9/17 學員跳過):#112 Path Sum(爸爸,前序)、#110 Balanced(小孩,後序)、
-   #230 Kth Smallest BST(中序)。只問「資料靠誰給」。
-3. #572 Subtree of Another Tree(兔:每個 node 呼叫 `isSameTree`)、#110 Balanced(雙軌換兩行)、
-   #124 Max Path Sum(雙軌,notes.md 有對照表)。
-4. #226 → #104 → #543 同模板比較(9/14 沒做)。學員卡住時改用中文。
+0. 開場默寫雙軌外殼(`self.帳本` + 內層 `depth` + `depth(root)` + `return self.帳本`),
+   9/18 #110 卡在外殼不是邏輯。**一則訊息只講一件事**,範例樹先驗算再貼。
+1. #572 Subtree of Another Tree(兔:每個 node 呼叫 `isSameTree`)。NeetCode tree 順序下一題。
+2. 前中後序分類練習(9/17 跳過):#112 Path Sum、#230 Kth Smallest BST。只問「資料靠誰給」。
+3. #124 Max Path Sum(雙軌,notes.md 有對照表)。
+4. #226 → #104 → #543 → #110 同模板比較(9/14 沒做)。學員卡住時改用中文。
 5. 補 #104 / #543 的 `solution.py`(目前只有 drill.py)。
 6. Linked list 停在原地,不記債,隨時可回:#143 Reorder List、#146 LRU(拷問 ① 前)、
    #206 缺 eli5 圖解頁 + L6 逐字稿

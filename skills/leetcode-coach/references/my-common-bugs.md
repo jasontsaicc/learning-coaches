@@ -11,13 +11,13 @@
 
 | # | 檢查 | 犯過 | 症狀 |
 |---|---|---|---|
-| 1 | 變數名有沒有手滑?(pairs→paris、answes、`nxt`→`next`、`dfa`→`dfs`、`amx`→`max`、`sel.ans`、`isSmaeTree`) | 7 | `NameError`。**語法完全合法,要等那行真的被執行才炸** — 這就是 linter(`ruff` / `pyflakes`)存在的理由 |
+| 1 | 變數名有沒有手滑?(pairs→paris、answes、`nxt`→`next`、`dfa`→`dfs`、`amx`→`max`、`sel.ans`、`isSmaeTree`、`self.and`、`false`→`False`) | 9 | `NameError`。**語法完全合法,要等那行真的被執行才炸** — 這就是 linter(`ruff` / `pyflakes`)存在的理由 |
 | 2 | `return` 是不是縮排卡在迴圈裡? | 4 | 找得到的全掛、找不到的全綠。不報錯,所以最貴 |
-| 3 | 算 index 有沒有用 `//`?`/` 回 float,float 不能當 index | 2 | `TypeError: list indices must be integers` |
-| 4 | 字元有沒有打錯?(`stack, append(i)` 的逗點、`len(matrix)[0]` 的括號位置) | 2 | 當場報錯,成本低 |
-| 5 | 閉區間 `[l, r]` 配 `while l <= r` 時,`r` 初始值是 `len(nums) - 1` 不是 `len(nums)` | 2 | `IndexError`,或測資不夠 hostile 而整組漏掉 |
-| 6 | `if` / `elif` / `else` / `for` / `while` / `def` 開頭的行,結尾冒號補了嗎? | 2 | `SyntaxError: invalid syntax`,箭頭指在關鍵字後 |
-| 7 | 樹的小孩要從 node 身上拿:`root.left` 不是裸 `left`;遞迴呼叫自己是 `self.invertTree`(函式名),不是 `self.left` | 3(2026-09-11 `dfa(left)`、2026-09-14 `self.left(left)`、2026-09-17 #100 `self.isSameTree(q.left)` 少了 `p.left`) | `NameError` / `AttributeError`。畫出 frame 裡**真正存在的名字**(`self`、`root`),`left` 不在裡面 |
+| 3 | 樹的小孩要從 node 身上拿:`root.left` 不是裸 `left`;遞迴呼叫自己是 `self.invertTree`(函式名),不是 `self.left` | 4(2026-09-11 `dfa(left)`、2026-09-14 `self.left(left)`、2026-09-17 #100 `self.isSameTree(q.left)` 少了 `p.left`;2026-09-18 #110 在內層 `depth` 裡呼叫 `isBalanced(node.left)`)。**遞迴呼叫的是「交同一種東西」的那個函式** | `NameError` / `AttributeError`。畫出 frame 裡**真正存在的名字**(`self`、`root`),`left` 不在裡面 |
+| 4 | 算 index 有沒有用 `//`?`/` 回 float,float 不能當 index | 2 | `TypeError: list indices must be integers` |
+| 5 | 字元有沒有打錯?(`stack, append(i)` 的逗點、`len(matrix)[0]` 的括號位置) | 2 | 當場報錯,成本低 |
+| 6 | 閉區間 `[l, r]` 配 `while l <= r` 時,`r` 初始值是 `len(nums) - 1` 不是 `len(nums)` | 2 | `IndexError`,或測資不夠 hostile 而整組漏掉 |
+| 7 | `if` / `elif` / `else` / `for` / `while` / `def` 開頭的行,結尾冒號補了嗎? | 2 | `SyntaxError: invalid syntax`,箭頭指在關鍵字後 |
 | 8 | Python list 是 `.append`,沒有 `.push` | 1 | `AttributeError` |
 | 9 | `if stack` 是「有東西」,`not stack` 是「空的」。`not stack` 要放 `or` 左邊短路保護 `stack[-1]` | 1 | `IndexError` 或邏輯全反 |
 
@@ -35,3 +35,4 @@
 | 6 | 抽象原則講得出來,套不到具體元素上(給原則加具體矩陣,講不出「這兩個 row 的每個元素都小於 target」) | 2 | 給原則加一個具體例子,要求指名是哪幾個元素 |
 | 7 | harness 掛了先看 code,沒先看 fail/pass 分布 | 2 | 給一組 fail 分布,問這是哪一類邏輯錯 |
 | 8 | **base case 回傳型別沒對齊函式契約**,把別題的 base case 搬過來(且常碰巧跑對,更難發現) | 2 次(2026-09-11 #104 默寫 `return False`;2026-09-14 #226 寫 `return 0`) | 先問「整個函式交回的是什麼東西?一棵樹、一個數字、一個 bool?」base case 交回同一種。畫一張 題 / 函式交回 / ▢ 交回 三欄表 |
+| 9 | **雙軌混成一軌**:把記帳那軌的運算帶進往上交那軌。症狀:9/17 默寫把 `L + R` 帶進 (c) 寫成 `max(L + R) + 1`;9/18 #110 以為往上交也要換成相減 | 2 次 | 問「爸爸拿到這個數字要做什麼?」爸爸要算自己的高度 → 只能收高度。畫兩軌圖:🟣 往上交永遠 `1 + max(L, R)`,🔴 記帳才隨題目換 |
