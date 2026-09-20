@@ -4,7 +4,21 @@
 
 # leetcode
 
-- 今天做到:2026-09-18。**#110 Balanced 兔模式收掉**,drill.py 9/9 綠(學員自己打)。
+- 今天做到:2026-09-20。**#572 Subtree of Another Tree 兔模式收掉**,drill.py 9/9 綠。
+  開場默寫改考**外殼**(9/18 診斷:邏輯會、外殼組不起來),用 #543 當載體。
+  **四格 (a) 帳本 (b) 內層 def (c) 啟動鈕 (d) return 帳本 內容全對**,第一次全出來。
+  失敗點全在機械面:code 寫在冷寫區註解「旁邊」導致 12 格 vs 8 格 IndentationError
+  (註解不算一層縮排,要刪掉再寫);`deepth` 拼字。學員說「格式你處理」,由 coach 整平,邏輯未動。
+  #572 開場學員把 #100 記成「相減、不要小於 0」(那是 #110),且以為 #100 是後序。
+  修正後給前序/後序判準:**這件事需不需要等小孩的答案?** → 升級 my-common-bugs 表二第 3 列。
+  拷問 ① 學員說「沒概念」,退到 #226 骨架對照(停在每一個 node 上一次)+ 走訪圖 + 看不見的 ▢。
+  逐行冷寫:`return False` 一次對(表二 base case 型別這次沒踩);`if not node` 參數名錯(第 5 次,表一第 2 列);
+  `self.isSubtree` 當比對用(infinite recursion,問題沒變小)+ 少冒號;第 3 行學員喊累,階 3 直接給。
+  **拷問 ② 用 fail/pass 分布問「你的 code 走到第幾站」,學員答對「第一站就停了」**(表二第 4 列第 3 次)。
+  溫度計 ②(拿掉煞車)答「站在 None」對位置但沒答出後果,補 AttributeError 鏈。
+  圖解頁 https://claude.ai/artifact/Wx6LVP4dEoGXNVBqPJ4gQ5(學員要求,含 #100 完整複習 + L6 逐字稿 Move 0-9 + KMP follow-up)。
+  **節奏觀察:今天學員三次主動要求「直接給」/「有點累了」,兔模式對他仍偏難,不是手速問題是模板提取。**
+- 前一場 2026-09-18。**#110 Balanced 兔模式收掉**,drill.py 9/9 綠(學員自己打)。
   開場默寫雙軌模板第 2 次:**(a)(b)(c)(d) 全對**(9/17 (b)(c) 寫不出),只有 `self.and` 手滑。
   #543 溫度計 ② 收掉:沒 `max` 帳本只剩 root 寫的數字,答對;兩棵樹選對會掛的 B(說有點亂,補拆圖)。
   #110:「平衡」定義看不懂(以為是 node 數量一樣或葉子同深),畫高度表 + 反例後懂。
@@ -13,7 +27,7 @@
   第 2 次 `isBalanced(node.left)`、`false`,指行號後自改,綠。
   **學員回饋:「教得好亂」**(範例當場算錯改口、一則訊息糾正三件事);溫度計 ② 不要出要翻 case 清單的題。
   **本場學員要求改用中文。**
-- 前一場 2026-09-17。**#100 Same Tree 兔模式收掉**,drill.py 9/9 綠。
+- 再前一場 2026-09-17。**#100 Same Tree 兔模式收掉**,drill.py 9/9 綠。
   開場默寫雙軌模板(第 1 次考):(a) `return 0`、(d) `return self.ans` 對;(b)(c) 只記得「有 max、有 +1」,
   學員要求直接給答案,對照抄時把 (b) 的 `L + R` 帶進 (c) 寫成 `max(L + R) + 1`(TypeError),
   用「`+` 接成一條路 / `,` 二選一」釐清後改對。另有 `sel.ans` 手滑。#543 溫度計 ② 沒答,改天再問(不記債)。
@@ -25,7 +39,7 @@
   本層 `p.val != q.val` 一次寫對。委派第一版 `self.isSmaeTree(q.left)` 三個洞(拼字、少參數、沒接回傳值),
   學員自己覺得怪;`and` 自己答出,委派行走到階 2 骨架填空後寫對。
   溫度計 ② 拿掉比值兩行:答出回 True,說成「比數量」,修正為「比形狀」,掛 2 個 case。
-- 再前一場 2026-09-14。**#226 隔堂複習(隔 4 天)**,`drill-review.py` 冷寫(空 stub 7/8 FAIL 已驗)。
+- 2026-09-14。**#226 隔堂複習(隔 4 天)**,`drill-review.py` 冷寫(空 stub 7/8 FAIL 已驗)。
   只記得 swap 那行。委派走到階 3:階 2 答 `self.left(left)`(函式名錯 + 裸 `left` 不在 scope,
   同 9/11 `dfa(left)`,**升級 my-common-bugs 表一**)。對照打後跑出 `NoneType has no attribute 'right'`,
   指著踩空的 ▢ 圖問,`if not root` 自己寫對,但寫成 `return 0`(把 #104 的契約帶過來,
@@ -158,6 +172,11 @@
   2026-09-17 兔模式(母題 #104):drill.py(9 組 case,空 stub 9/9 FAIL、參考解 9/9 PASS 已驗)、
   notes.md(含 L6 逐字稿、前中後序釐清表)。無圖解頁。學員版 9/9 綠,溫度計 ② 過。
 
+- **#572 Subtree of Another Tree** — `tree/subtree-of-another-tree/`
+  2026-09-20 兔模式(母題 #100):drill.py(9 組 case,空 stub 9/9 FAIL、參考解 9/9 PASS 已驗)、
+  圖解頁:https://claude.ai/artifact/Wx6LVP4dEoGXNVBqPJ4gQ5
+  notes.md(含 L6 逐字稿指路、家族表、七條釐清)。學員版 9/9 綠。
+
 - **#110 Balanced Binary Tree** — `tree/balanced-binary-tree/`
   2026-09-18 兔模式(母題 #543):drill.py(9 組 case,空 stub 9/9 FAIL、參考解 9/9 PASS 已驗)、
   圖解頁:https://claude.ai/artifact/7X8DRQAu86S36mdc9AGBZ9(學員收工時要求補做)
@@ -173,12 +192,18 @@
 
 ## 接下來
 
-0. 開場默寫雙軌外殼(`self.帳本` + 內層 `depth` + `depth(root)` + `return self.帳本`),
-   9/18 #110 卡在外殼不是邏輯。**一則訊息只講一件事**,範例樹先驗算再貼。
-1. #572 Subtree of Another Tree(兔:每個 node 呼叫 `isSameTree`)。NeetCode tree 順序下一題。
-2. 前中後序分類練習(9/17 跳過):#112 Path Sum、#230 Kth Smallest BST。只問「資料靠誰給」。
-3. #124 Max Path Sum(雙軌,notes.md 有對照表)。
-4. #226 → #104 → #543 → #110 同模板比較(9/14 沒做)。學員卡住時改用中文。
-5. 補 #104 / #543 的 `solution.py`(目前只有 drill.py)。
-6. Linked list 停在原地,不記債,隨時可回:#143 Reorder List、#146 LRU(拷問 ① 前)、
+0. 開場默寫**外殼**第 2 次(9/20 四格內容全對,但機械面掛掉)。這次連機械面一起考:
+   直接給空白 py 檔,不給冷寫區註解,看他能不能從 0 寫出縮排正確的 5 行外殼。
+1. 前中後序分類練習。`tree/traversal-templates/drill.py` 已備好(#144/#94/#145 + #102 BFS),
+   9/17 和 9/20 都沒做到。只問「資料靠誰給」+ 新判準「需不需要等小孩的答案」。
+2. #572 隔堂複習(隔 2-4 天冷寫)。9/20 第 3 行是階 3 直接給的,沒自己寫過。
+3. #100 / #572 / #110 三題並排:交回什麼 / 這一站做什麼 / 前序後序。
+   9/20 把 #110 的做法記成 #100,表二第 3 列第 3 次,這張三欄表是處方。
+4. #124 Max Path Sum(雙軌,notes.md 有對照表)。
+5. #230 Kth Smallest BST(中序的代表題,補齊前中後序三角)。
+6. 補 #104 / #543 的 `solution.py`(目前只有 drill.py)。
+7. Linked list 停在原地,不記債,隨時可回:#143 Reorder List、#146 LRU(拷問 ① 前)、
    #206 缺 eli5 圖解頁 + L6 逐字稿
+
+**節奏提醒:** 9/20 學員三次喊累 / 要求直接給。兔模式的瓶頸是**模板提取**(想不起來上一題長什麼樣),
+不是理解。下次開場先把母題的 code 貼出來放在旁邊,再進兔模式,別讓他從記憶裡撈。

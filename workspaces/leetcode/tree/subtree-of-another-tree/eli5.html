@@ -1,0 +1,757 @@
+<title>剪下來像不像</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@700&family=JetBrains+Mono:wght@400;700&display=swap">
+<style>
+  :root {
+    --bg: #eceff3;
+    --surface: #ffffff;
+    --surface-2: #f4f6f9;
+    --ink: #17202b;
+    --muted: #5d6b7a;
+    --rule: #d2dae2;
+    --walker: #1d4ed8;
+    --walker-soft: #dbe6ff;
+    --cmp: #0d6e66;
+    --cmp-soft: #d3f0ec;
+    --no: #b0281c;
+    --no-soft: #fbe0dd;
+    --yes: #15713c;
+    --yes-soft: #d8f0e2;
+    --shadow: 0 1px 2px rgba(23,32,43,.06), 0 8px 24px rgba(23,32,43,.05);
+  }
+  :root:not([data-theme="light"]) {
+    color-scheme: light dark;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0e1319;
+      --surface: #171f28;
+      --surface-2: #1e2732;
+      --ink: #e4ebf2;
+      --muted: #94a3b3;
+      --rule: #2b3643;
+      --walker: #7fa8ff;
+      --walker-soft: #1b2942;
+      --cmp: #4fd6c8;
+      --cmp-soft: #10312e;
+      --no: #ff9188;
+      --no-soft: #3a1f1d;
+      --yes: #6fe0a2;
+      --yes-soft: #12301f;
+      --shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.3);
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --bg: #0e1319;
+    --surface: #171f28;
+    --surface-2: #1e2732;
+    --ink: #e4ebf2;
+    --muted: #94a3b3;
+    --rule: #2b3643;
+    --walker: #7fa8ff;
+    --walker-soft: #1b2942;
+    --cmp: #4fd6c8;
+    --cmp-soft: #10312e;
+    --no: #ff9188;
+    --no-soft: #3a1f1d;
+    --yes: #6fe0a2;
+    --yes-soft: #12301f;
+    --shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.3);
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "Noto Sans TC", system-ui, sans-serif;
+    font-size: 16px;
+    line-height: 1.8;
+    padding-inline: 16px;
+    padding-block: 40px 72px;
+  }
+  .wrap { max-width: 740px; margin: 0 auto; display: flex; flex-direction: column; gap: 28px; }
+
+  .masthead { display: flex; flex-direction: column; gap: 10px; }
+  .eyebrow {
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+    font-size: 12px; letter-spacing: .14em; text-transform: uppercase;
+    color: var(--muted);
+  }
+  h1 {
+    font-family: "Noto Serif TC", Georgia, serif; font-weight: 700;
+    font-size: clamp(30px, 6vw, 40px); line-height: 1.3; margin: 0;
+    text-wrap: balance;
+  }
+  .sub { color: var(--muted); font-size: 15px; margin: 0; }
+
+  section {
+    background: var(--surface); border: 1px solid var(--rule);
+    border-radius: 10px; padding: 22px 20px; box-shadow: var(--shadow);
+  }
+  section > h2 {
+    font-family: "Noto Serif TC", Georgia, serif; font-weight: 700;
+    font-size: 21px; line-height: 1.4; margin: 0 0 14px;
+    display: flex; align-items: baseline; gap: 10px; text-wrap: balance;
+  }
+  .n {
+    font-family: "JetBrains Mono", monospace; font-size: 12px; font-weight: 700;
+    color: var(--walker); background: var(--walker-soft);
+    border-radius: 4px; padding: 2px 7px; flex: none;
+  }
+  h3 {
+    font-size: 15px; font-weight: 700; margin: 24px 0 8px;
+    color: var(--ink);
+  }
+  h3:first-of-type { margin-top: 8px; }
+  p { margin: 0 0 12px; }
+  p:last-child { margin-bottom: 0; }
+  ul, ol { margin: 0 0 12px; padding-left: 22px; }
+  li { margin-bottom: 6px; }
+  strong { font-weight: 700; }
+  code {
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+    font-size: .88em; background: var(--surface-2);
+    border: 1px solid var(--rule); border-radius: 4px; padding: 1px 5px;
+  }
+  pre {
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+    font-size: 13px; line-height: 1.65;
+    background: var(--surface-2); border: 1px solid var(--rule);
+    border-radius: 8px; padding: 14px 16px; margin: 0 0 14px;
+    overflow-x: auto;
+  }
+  pre code { background: none; border: none; padding: 0; font-size: inherit; }
+
+  .fig {
+    background: var(--surface-2); border: 1px solid var(--rule);
+    border-radius: 8px; padding: 16px; margin: 0 0 14px;
+    overflow-x: auto;
+  }
+  .fig svg { display: block; margin: 0 auto; max-width: 100%; height: auto; }
+  .cap {
+    font-size: 13px; color: var(--muted); text-align: center;
+    margin: 10px 0 0; line-height: 1.6;
+  }
+
+  .callout {
+    border-left: 3px solid var(--walker); background: var(--walker-soft);
+    border-radius: 0 8px 8px 0; padding: 12px 16px; margin: 0 0 14px;
+    font-size: 15px;
+  }
+  .callout.cmp { border-left-color: var(--cmp); background: var(--cmp-soft); }
+  .callout.bad { border-left-color: var(--no); background: var(--no-soft); }
+
+  table {
+    width: 100%; border-collapse: collapse; font-size: 14px;
+    font-variant-numeric: tabular-nums;
+  }
+  .scroll { overflow-x: auto; margin: 0 0 14px; }
+  th, td {
+    text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--rule);
+    vertical-align: top;
+  }
+  th { font-size: 12px; letter-spacing: .05em; color: var(--muted); font-weight: 700; }
+  td.mono, th.mono { font-family: "JetBrains Mono", monospace; font-size: 13px; white-space: nowrap; }
+  .yes { color: var(--yes); font-weight: 700; }
+  .no { color: var(--no); font-weight: 700; }
+
+  details {
+    background: var(--surface); border: 1px solid var(--rule);
+    border-radius: 10px; box-shadow: var(--shadow);
+  }
+  details > summary {
+    cursor: pointer; padding: 18px 20px; list-style: none;
+    font-family: "Noto Serif TC", Georgia, serif; font-weight: 700; font-size: 19px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  details > summary::-webkit-details-marker { display: none; }
+  details > summary::before {
+    content: "▸"; color: var(--walker); font-family: system-ui, sans-serif;
+    font-size: 14px; flex: none; transition: transform .15s ease;
+  }
+  details[open] > summary::before { transform: rotate(90deg); }
+  details > summary:focus-visible { outline: 2px solid var(--walker); outline-offset: -2px; border-radius: 10px; }
+  .body { padding: 0 20px 22px; }
+
+  .move { border-top: 1px solid var(--rule); padding-top: 16px; margin-top: 16px; }
+  .move:first-child { border-top: none; padding-top: 0; margin-top: 0; }
+  .move-h {
+    font-family: "JetBrains Mono", monospace; font-size: 12px; font-weight: 700;
+    letter-spacing: .08em; color: var(--muted); margin: 0 0 8px;
+  }
+  .say {
+    border-left: 3px solid var(--cmp); padding: 4px 0 4px 14px; margin: 0 0 10px;
+    font-size: 15px; font-style: italic;
+  }
+  .meta { font-size: 14px; color: var(--muted); margin: 0 0 10px; }
+  .meta b { color: var(--ink); font-style: normal; }
+
+  .fix { border-top: 1px solid var(--rule); padding-top: 14px; margin-top: 14px; }
+  .fix:first-child { border-top: none; padding-top: 0; margin-top: 0; }
+  .fix p { margin: 0 0 4px; font-size: 15px; }
+  .x { color: var(--no); font-weight: 700; }
+  .o { color: var(--yes); font-weight: 700; }
+  .why { color: var(--muted); font-size: 14px; }
+
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<div class="wrap">
+
+  <div class="masthead">
+    <div class="eyebrow">LeetCode #572 · 母題 #100 · 2026-09-20</div>
+    <h1>剪下來像不像</h1>
+    <p class="sub">Subtree of Another Tree。大樹裡有沒有一塊,整塊剪下來會跟小樹一模一樣。</p>
+  </div>
+
+  <!-- ① -->
+  <section>
+    <h2><span class="n">01</span>這題在幹嘛</h2>
+    <p>給你兩棵樹:一棵大的 <code>root</code>,一棵小的 <code>subRoot</code>。問大樹裡面有沒有一塊,<strong>整塊剪下來</strong>會跟小樹長得一模一樣。</p>
+
+    <div class="fig">
+      <svg viewBox="0 0 640 230" role="img" aria-label="大樹 3(4(1,2),5) 與小樹 4(1,2),小樹藏在大樹的 node 4 底下">
+        <g stroke="var(--rule)" stroke-width="2">
+          <line x1="150" y1="58" x2="105" y2="105"/>
+          <line x1="150" y1="58" x2="195" y2="105"/>
+          <line x1="105" y1="105" x2="65" y2="152"/>
+          <line x1="105" y1="105" x2="145" y2="152"/>
+        </g>
+        <g stroke="var(--walker)" stroke-width="2">
+          <line x1="470" y1="58" x2="430" y2="105"/>
+          <line x1="470" y1="58" x2="510" y2="105"/>
+        </g>
+        <g font-family="JetBrains Mono, monospace" font-size="15" font-weight="700" text-anchor="middle">
+          <circle cx="150" cy="45" r="19" fill="var(--surface)" stroke="var(--rule)" stroke-width="2"/>
+          <text x="150" y="51" fill="var(--ink)">3</text>
+          <circle cx="195" cy="118" r="19" fill="var(--surface)" stroke="var(--rule)" stroke-width="2"/>
+          <text x="195" y="124" fill="var(--ink)">5</text>
+
+          <circle cx="105" cy="118" r="19" fill="var(--walker-soft)" stroke="var(--walker)" stroke-width="2.5"/>
+          <text x="105" y="124" fill="var(--walker)">4</text>
+          <circle cx="65" cy="165" r="19" fill="var(--walker-soft)" stroke="var(--walker)" stroke-width="2.5"/>
+          <text x="65" y="171" fill="var(--walker)">1</text>
+          <circle cx="145" cy="165" r="19" fill="var(--walker-soft)" stroke="var(--walker)" stroke-width="2.5"/>
+          <text x="145" y="171" fill="var(--walker)">2</text>
+
+          <circle cx="470" cy="45" r="19" fill="var(--walker-soft)" stroke="var(--walker)" stroke-width="2.5"/>
+          <text x="470" y="51" fill="var(--walker)">4</text>
+          <circle cx="430" cy="118" r="19" fill="var(--walker-soft)" stroke="var(--walker)" stroke-width="2.5"/>
+          <text x="430" y="124" fill="var(--walker)">1</text>
+          <circle cx="510" cy="118" r="19" fill="var(--walker-soft)" stroke="var(--walker)" stroke-width="2.5"/>
+          <text x="510" y="124" fill="var(--walker)">2</text>
+        </g>
+        <g font-family="Noto Sans TC, sans-serif" font-size="13" fill="var(--muted)" text-anchor="middle">
+          <text x="150" y="212">root(大樹)</text>
+          <text x="470" y="212">subRoot(小樹)</text>
+        </g>
+        <path d="M 250 120 L 360 120" stroke="var(--walker)" stroke-width="2" fill="none" stroke-dasharray="6 5"/>
+        <text x="305" y="108" font-family="Noto Sans TC, sans-serif" font-size="13" fill="var(--walker)" text-anchor="middle" font-weight="700">一模一樣</text>
+      </svg>
+      <p class="cap">藍色那一塊從大樹的 <code>4</code> 整塊剪下來,跟小樹完全一致 → 答案 <span class="yes">True</span></p>
+    </div>
+
+    <h3>「整塊」是這題的關鍵字</h3>
+    <p>不能只剪一半。大樹的 <code>4</code> 底下有 <code>1</code> 也有 <code>2</code>,剪下來就一定是 <code>4(1,2)</code>。小樹如果只有 <code>4(1)</code>,那就不算。</p>
+
+    <div class="fig">
+      <svg viewBox="0 0 640 210" role="img" aria-label="大樹的 4 底下有 1 和 2,小樹只有 4 和 1,結構不同所以不算">
+        <g stroke="var(--rule)" stroke-width="2">
+          <line x1="150" y1="58" x2="105" y2="105"/>
+          <line x1="150" y1="58" x2="195" y2="105"/>
+          <line x1="105" y1="105" x2="65" y2="152"/>
+        </g>
+        <line x1="105" y1="105" x2="145" y2="152" stroke="var(--no)" stroke-width="2.5"/>
+        <line x1="470" y1="58" x2="430" y2="105" stroke="var(--rule)" stroke-width="2"/>
+        <line x1="470" y1="58" x2="510" y2="105" stroke="var(--no)" stroke-width="2" stroke-dasharray="5 4"/>
+        <g font-family="JetBrains Mono, monospace" font-size="15" font-weight="700" text-anchor="middle">
+          <circle cx="150" cy="45" r="19" fill="var(--surface)" stroke="var(--rule)" stroke-width="2"/>
+          <text x="150" y="51" fill="var(--ink)">3</text>
+          <circle cx="195" cy="118" r="19" fill="var(--surface)" stroke="var(--rule)" stroke-width="2"/>
+          <text x="195" y="124" fill="var(--ink)">5</text>
+          <circle cx="105" cy="118" r="19" fill="var(--surface)" stroke="var(--rule)" stroke-width="2"/>
+          <text x="105" y="124" fill="var(--ink)">4</text>
+          <circle cx="65" cy="165" r="19" fill="var(--surface)" stroke="var(--rule)" stroke-width="2"/>
+          <text x="65" y="171" fill="var(--ink)">1</text>
+          <circle cx="145" cy="165" r="19" fill="var(--no-soft)" stroke="var(--no)" stroke-width="2.5"/>
+          <text x="145" y="171" fill="var(--no)">2</text>
+
+          <circle cx="470" cy="45" r="19" fill="var(--surface)" stroke="var(--rule)" stroke-width="2"/>
+          <text x="470" y="51" fill="var(--ink)">4</text>
+          <circle cx="430" cy="118" r="19" fill="var(--surface)" stroke="var(--rule)" stroke-width="2"/>
+          <text x="430" y="124" fill="var(--ink)">1</text>
+          <circle cx="510" cy="118" r="19" fill="none" stroke="var(--no)" stroke-width="2" stroke-dasharray="5 4"/>
+          <text x="510" y="124" fill="var(--no)" font-size="13">▢</text>
+        </g>
+        <g font-family="Noto Sans TC, sans-serif" font-size="13" fill="var(--muted)" text-anchor="middle">
+          <text x="150" y="196">root:4 底下掛著 2</text>
+          <text x="470" y="196">subRoot:這裡是空的</text>
+        </g>
+        <text x="305" y="118" font-family="Noto Sans TC, sans-serif" font-size="14" fill="var(--no)" text-anchor="middle" font-weight="700">對不上</text>
+      </svg>
+      <p class="cap">大樹有 <code>2</code>,小樹那格是空的。多一顆也算不一樣 → 答案 <span class="no">False</span></p>
+    </div>
+  </section>
+
+  <!-- ② -->
+  <section>
+    <h2><span class="n">02</span>這是什麼型,怎麼秒認</h2>
+    <p>型:<strong>DFS 遞迴,兩層</strong>。外層走遍大樹,內層比對兩棵樹。</p>
+    <h3>三個秒認信號</h3>
+    <ol>
+      <li>題目給你<strong>兩棵</strong>樹 → 幾乎一定需要一個「比兩棵樹」的 helper。</li>
+      <li>題目出現 <strong>subtree / 藏在 / 包含</strong> → 不知道從哪開始比,所以每個 node 都要當一次起點。</li>
+      <li>題目寫 <strong>same structure and node values</strong> → 這句話本身就是 <code>#100 Same Tree</code>,直接搬過來用。</li>
+    </ol>
+    <div class="callout">
+      <strong>這題的價值不在寫,在拆。</strong>看穿「#572 = 一層 walker + 一顆 #100」比手速重要得多。NeetCode 的 tree 區段一路都在練這個:<code>#104 高度</code> → <code>#543 借高度</code> → <code>#110 借高度</code> → <code>#572 借 #100</code>。
+    </div>
+  </section>
+
+  <!-- ③ -->
+  <section>
+    <h2><span class="n">03</span>最直覺的想法為什麼不夠</h2>
+    <p>看到兩棵樹,第一個反應通常是:那就 <code>isSameTree(root, subRoot)</code> 比一次不就好了?</p>
+    <p>跑跑看會發生這件事:</p>
+    <pre><code>PASS   root=[3,4,5,1,2]   sub=[3,4,5,1,2]     ← 唯一過的一筆
+FAIL   root=[3,4,5,1,2]   sub=[4,1,2]
+FAIL   root=[1,2,3]       sub=[2]
+FAIL   ... 其他 6 筆全掛</code></pre>
+    <p>唯一過的那筆,小樹跟大樹<strong>一模一樣</strong>,也就是「站在第一站就中了」。其他每一筆答案都藏在更下面。</p>
+    <div class="callout bad">
+      <strong>比一次只能驗證一個位置。</strong>小樹可能掛在大樹的任何一個 node 底下,所以要把每個 node 都當一次起點,各比一次。
+    </div>
+    <h3>那更笨的做法長怎樣?</h3>
+    <p>把大樹的每一棵子樹都印成字串(serialize),再跟小樹的字串一個一個比。這反而比較慢,因為光是印字串就要走完整棵子樹,而且字串比對本身還有成本。</p>
+    <p>所以 <code>O(m × n)</code> 的「每站問一次」<strong>就是這題的標準答案</strong>,不是偷懶版。真正的升級版在最後一節(follow-up)。</p>
+  </section>
+
+  <!-- ④ -->
+  <section>
+    <h2><span class="n">04</span>做法一步一步(先不看 code)</h2>
+
+    <h3>整件事分成兩層</h3>
+    <div class="fig">
+      <svg viewBox="0 0 600 260" role="img" aria-label="外層 isSubtree 負責走路，內層 isSameTree 負責比對，外層每站呼叫內層一次">
+        <rect x="20" y="20" width="560" height="220" rx="12" fill="var(--walker-soft)" stroke="var(--walker)" stroke-width="2"/>
+        <text x="44" y="52" font-family="JetBrains Mono, monospace" font-size="15" font-weight="700" fill="var(--walker)">isSubtree(root, subRoot)</text>
+        <text x="44" y="76" font-family="Noto Sans TC, sans-serif" font-size="14" fill="var(--walker)">外層:走路的。停在大樹的每一個 node 上一次。</text>
+        <path d="M 300 96 L 300 128" stroke="var(--walker)" stroke-width="2" marker-end="url(#ar)"/>
+        <text x="316" y="118" font-family="Noto Sans TC, sans-serif" font-size="13" fill="var(--walker)">每站呼叫一次</text>
+        <defs>
+          <marker id="ar" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+            <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--walker)"/>
+          </marker>
+        </defs>
+        <rect x="60" y="136" width="480" height="84" rx="10" fill="var(--cmp-soft)" stroke="var(--cmp)" stroke-width="2"/>
+        <text x="84" y="168" font-family="JetBrains Mono, monospace" font-size="15" font-weight="700" fill="var(--cmp)">isSameTree(p, q)</text>
+        <text x="84" y="192" font-family="Noto Sans TC, sans-serif" font-size="14" fill="var(--cmp)">內層:比對的。就是 #100,一個字都不用改。</text>
+        <text x="84" y="210" font-family="Noto Sans TC, sans-serif" font-size="13" fill="var(--muted)">問的是「這兩棵整棵一不一樣」</text>
+      </svg>
+      <p class="cap">兩個函式問的是不同的問題。外層問「藏在哪裡」,內層問「整棵一不一樣」。</p>
+    </div>
+
+    <div class="callout cmp">
+      <code>isSubtree(A, B)</code> 問:B 有沒有<strong>藏在</strong> A 裡面的某個地方?<br>
+      <code>isSameTree(A, B)</code> 問:A 和 B <strong>整棵</strong>一不一樣?
+    </div>
+
+    <h3>外層走一遍給你看</h3>
+    <p>大樹 <code>[3,4,5,1,2]</code>,小樹 <code>[4,1,2]</code>。外層停在每一站,問一次:</p>
+
+    <div class="fig">
+      <svg viewBox="0 0 620 250" role="img" aria-label="第一站站在 node 3 比對失敗，第二站站在 node 4 比對成功">
+        <text x="20" y="28" font-family="Noto Sans TC, sans-serif" font-size="14" font-weight="700" fill="var(--muted)">第 1 站</text>
+        <g stroke="var(--rule)" stroke-width="2">
+          <line x1="120" y1="58" x2="88" y2="92"/><line x1="120" y1="58" x2="152" y2="92"/>
+          <line x1="88" y1="92" x2="62" y2="126"/><line x1="88" y1="92" x2="114" y2="126"/>
+        </g>
+        <g font-family="JetBrains Mono, monospace" font-size="13" font-weight="700" text-anchor="middle">
+          <circle cx="120" cy="48" r="15" fill="var(--no-soft)" stroke="var(--no)" stroke-width="2.5"/><text x="120" y="53" fill="var(--no)">3</text>
+          <circle cx="88" cy="102" r="15" fill="var(--no-soft)" stroke="var(--no)" stroke-width="2"/><text x="88" y="107" fill="var(--no)">4</text>
+          <circle cx="152" cy="102" r="15" fill="var(--no-soft)" stroke="var(--no)" stroke-width="2"/><text x="152" y="107" fill="var(--no)">5</text>
+          <circle cx="62" cy="136" r="15" fill="var(--no-soft)" stroke="var(--no)" stroke-width="2"/><text x="62" y="141" fill="var(--no)">1</text>
+          <circle cx="114" cy="136" r="15" fill="var(--no-soft)" stroke="var(--no)" stroke-width="2"/><text x="114" y="141" fill="var(--no)">2</text>
+        </g>
+        <text x="120" y="172" font-family="Noto Sans TC, sans-serif" font-size="12" fill="var(--muted)" text-anchor="middle">從 3 整塊剪下來</text>
+        <text x="215" y="100" font-family="Noto Sans TC, sans-serif" font-size="16" fill="var(--muted)" text-anchor="middle">vs</text>
+        <g stroke="var(--rule)" stroke-width="2">
+          <line x1="300" y1="58" x2="274" y2="92"/><line x1="300" y1="58" x2="326" y2="92"/>
+        </g>
+        <g font-family="JetBrains Mono, monospace" font-size="13" font-weight="700" text-anchor="middle">
+          <circle cx="300" cy="48" r="15" fill="var(--surface)" stroke="var(--rule)" stroke-width="2"/><text x="300" y="53" fill="var(--ink)">4</text>
+          <circle cx="274" cy="102" r="15" fill="var(--surface)" stroke="var(--rule)" stroke-width="2"/><text x="274" y="107" fill="var(--ink)">1</text>
+          <circle cx="326" cy="102" r="15" fill="var(--surface)" stroke="var(--rule)" stroke-width="2"/><text x="326" y="107" fill="var(--ink)">2</text>
+        </g>
+        <text x="300" y="172" font-family="Noto Sans TC, sans-serif" font-size="12" fill="var(--muted)" text-anchor="middle">subRoot</text>
+        <text x="470" y="96" font-family="Noto Sans TC, sans-serif" font-size="15" fill="var(--no)" font-weight="700">3 ≠ 4,不像</text>
+        <text x="470" y="120" font-family="Noto Sans TC, sans-serif" font-size="14" fill="var(--muted)">→ 往下走</text>
+
+        <line x1="20" y1="196" x2="600" y2="196" stroke="var(--rule)" stroke-width="1"/>
+        <text x="20" y="226" font-family="Noto Sans TC, sans-serif" font-size="14" font-weight="700" fill="var(--muted)">第 2 站</text>
+        <g stroke="var(--walker)" stroke-width="2">
+          <line x1="120" y1="228" x2="94" y2="238"/><line x1="120" y1="228" x2="146" y2="238"/>
+        </g>
+        <g font-family="JetBrains Mono, monospace" font-size="13" font-weight="700" text-anchor="middle">
+          <circle cx="120" cy="222" r="14" fill="var(--yes-soft)" stroke="var(--yes)" stroke-width="2.5"/><text x="120" y="227" fill="var(--yes)">4</text>
+        </g>
+        <text x="200" y="228" font-family="Noto Sans TC, sans-serif" font-size="15" fill="var(--yes)" font-weight="700">站在 4:剪下來 = 4(1,2) = subRoot</text>
+        <text x="200" y="246" font-family="Noto Sans TC, sans-serif" font-size="14" fill="var(--muted)">→ 交回 True,整個函式立刻停。5、1、2 都不用走了</text>
+      </svg>
+    </div>
+
+    <h3>沒中的話會走到底,包含看不見的 ▢</h3>
+    <p>大樹 <code>[1,2,3]</code>,小樹 <code>[9]</code>。大樹裡根本沒有 9,所以每一站都不中,連 <code>None</code> 那幾格都要走:</p>
+    <div class="fig">
+      <svg viewBox="0 0 560 250" role="img" aria-label="外層走訪順序：1、2、2 的兩個空小孩、3、3 的兩個空小孩，全部不中">
+        <g stroke="var(--rule)" stroke-width="2">
+          <line x1="110" y1="52" x2="72" y2="94"/><line x1="110" y1="52" x2="148" y2="94"/>
+          <line x1="72" y1="120" x2="44" y2="158"/><line x1="72" y1="120" x2="100" y2="158"/>
+          <line x1="148" y1="120" x2="126" y2="158"/><line x1="148" y1="120" x2="176" y2="158"/>
+        </g>
+        <g font-family="JetBrains Mono, monospace" font-size="14" font-weight="700" text-anchor="middle">
+          <circle cx="110" cy="40" r="17" fill="var(--surface)" stroke="var(--rule)" stroke-width="2"/><text x="110" y="45" fill="var(--ink)">1</text>
+          <circle cx="72" cy="106" r="17" fill="var(--surface)" stroke="var(--rule)" stroke-width="2"/><text x="72" y="111" fill="var(--ink)">2</text>
+          <circle cx="148" cy="106" r="17" fill="var(--surface)" stroke="var(--rule)" stroke-width="2"/><text x="148" y="111" fill="var(--ink)">3</text>
+          <rect x="31" y="158" width="26" height="26" rx="4" fill="none" stroke="var(--no)" stroke-width="2" stroke-dasharray="4 3"/>
+          <rect x="87" y="158" width="26" height="26" rx="4" fill="none" stroke="var(--no)" stroke-width="2" stroke-dasharray="4 3"/>
+          <rect x="113" y="158" width="26" height="26" rx="4" fill="none" stroke="var(--no)" stroke-width="2" stroke-dasharray="4 3"/>
+          <rect x="163" y="158" width="26" height="26" rx="4" fill="none" stroke="var(--no)" stroke-width="2" stroke-dasharray="4 3"/>
+        </g>
+        <text x="110" y="212" font-family="Noto Sans TC, sans-serif" font-size="13" fill="var(--muted)" text-anchor="middle">虛線 ▢ = None,它們也是「一站」</text>
+        <g font-family="JetBrains Mono, monospace" font-size="13" fill="var(--muted)">
+          <text x="250" y="46">站在 1  → 1 ≠ 9  不中</text>
+          <text x="250" y="70">站在 2  → 2 ≠ 9  不中</text>
+          <text x="250" y="94">站在 ▢  → 煞車!  False</text>
+          <text x="250" y="118">站在 ▢  → 煞車!  False</text>
+          <text x="250" y="142">站在 3  → 3 ≠ 9  不中</text>
+          <text x="250" y="166">站在 ▢  → 煞車!  False</text>
+          <text x="250" y="190">站在 ▢  → 煞車!  False</text>
+        </g>
+        <text x="250" y="222" font-family="Noto Sans TC, sans-serif" font-size="14" fill="var(--no)" font-weight="700">全部 False → 最後交回 False</text>
+      </svg>
+      <p class="cap">煞車不是禮貌。沒有它,站在 <code>▢</code> 時下一行會對 <code>None</code> 取 <code>.left</code> → <code>AttributeError</code></p>
+    </div>
+
+    <h3>or 還是 and</h3>
+    <div class="scroll">
+      <table>
+        <thead><tr><th>站在 3,左右兩邊</th><th class="mono">用 or</th><th class="mono">用 and</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>左邊 <code>isSubtree(4…)</code> → <span class="yes">True</span><br>右邊 <code>isSubtree(5…)</code> → <span class="no">False</span></td>
+            <td class="mono"><span class="yes">True</span><br>✅ 找到就算找到</td>
+            <td class="mono"><span class="no">False</span><br>❌ 變成左右都要有</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p>小樹只會藏在<strong>一個</strong>地方,不可能左右同時各有一棵。所以 <code>and</code> 永遠答不出 <code>True</code>。</p>
+  </section>
+
+  <!-- 完整 code -->
+  <details>
+    <summary>完整 code 加逐行解釋</summary>
+    <div class="body">
+      <h3>外層:走路的</h3>
+      <pre><code>def isSubtree(self, root, subRoot):
+    if not root:
+        return False
+    if self.isSameTree(root, subRoot):
+        return True
+    return self.isSubtree(root.left, subRoot) or self.isSubtree(root.right, subRoot)</code></pre>
+      <div class="scroll">
+        <table>
+          <thead><tr><th class="mono">行</th><th>在做什麼</th><th>為什麼一定要有</th></tr></thead>
+          <tbody>
+            <tr><td class="mono">if not root:</td><td>煞車。走到空的大樹了</td><td>沒有它,下一行 <code>root.left</code> 會對 <code>None</code> 取屬性 → <code>AttributeError</code></td></tr>
+            <tr><td class="mono">return False</td><td>交回「這條路沒找到」</td><td>函式契約是 <code>bool</code>。base case 要交回<strong>同一種型別</strong>,不能交 <code>None</code> 或 <code>0</code></td></tr>
+            <tr><td class="mono">if self.isSameTree(…)</td><td>站在這一站問一次:從我這裡剪下來,整棵像不像</td><td>這是整題唯一「做事」的那一行。其他都是走路</td></tr>
+            <tr><td class="mono">return True</td><td>像的話,整個函式立刻收工</td><td>early exit。剩下的 node 完全不用走</td></tr>
+            <tr><td class="mono">return … or …</td><td>委派:左邊走一次、右邊走一次</td><td><code>root.left</code> 讓問題<strong>變小</strong>,這是遞迴會停下來的原因。<code>subRoot</code> 全程不變</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>內層:比對的(這就是 #100,直接搬)</h3>
+      <pre><code>def isSameTree(self, p, q):
+    if not p and not q:
+        return True
+    if not p or not q:
+        return False
+    if p.val != q.val:
+        return False
+    return self.isSameTree(p.left, q.left) and self.isSameTree(p.right, q.right)</code></pre>
+      <div class="scroll">
+        <table>
+          <thead><tr><th class="mono">行</th><th>在做什麼</th></tr></thead>
+          <tbody>
+            <tr><td class="mono">not p and not q</td><td>兩邊都空 → 一樣(都沒東西也是一種一樣)</td></tr>
+            <tr><td class="mono">not p or not q</td><td>只有一邊空 → 不一樣。這一行接住「多一顆 / 少一顆」</td></tr>
+            <tr><td class="mono">p.val != q.val</td><td>值不同 → 不一樣。放在委派<strong>前面</strong>是為了 early exit</td></tr>
+            <tr><td class="mono">… and …</td><td>左右<strong>都</strong>要一樣才算一樣</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="callout cmp">
+        <strong>#100 為什麼是前序,#110 為什麼是後序?</strong><br>
+        判準只有一句:<strong>這件事需不需要等小孩的答案?</strong><br>
+        <code>p.val != q.val</code> 不需要 → 放委派前面(前序),還能提早收工。<br>
+        <code>abs(L - R)</code> 非得等 <code>L</code> 和 <code>R</code> 回來 → 只能放委派後面(後序)。
+      </div>
+
+      <h3>複雜度</h3>
+      <ul>
+        <li><strong>Time <code>O(m × n)</code></strong>:大樹 <code>m</code> 個 node,每一站最壞要把小樹 <code>n</code> 個 node 整個比一遍。</li>
+        <li><strong>Space <code>O(h)</code></strong>:遞迴堆疊的深度,<code>h</code> 是大樹的高度。斜樹最壞 <code>O(m)</code>。</li>
+      </ul>
+    </div>
+  </details>
+
+  <!-- 模擬表 -->
+  <details>
+    <summary>逐輪執行模擬表</summary>
+    <div class="body">
+      <h3>案例 A:<code>root=[3,4,5,1,2]</code>,<code>subRoot=[4,1,2]</code> → True</h3>
+      <div class="scroll">
+        <table>
+          <thead><tr><th class="mono">#</th><th class="mono">站在</th><th>從這裡剪下來</th><th class="mono">isSameTree?</th><th>下一步</th></tr></thead>
+          <tbody>
+            <tr><td class="mono">1</td><td class="mono">3</td><td class="mono">3(4(1,2), 5)</td><td class="no">False</td><td>往左走</td></tr>
+            <tr><td class="mono">2</td><td class="mono">4</td><td class="mono">4(1, 2)</td><td class="yes">True</td><td><strong>整個函式交回 True,停</strong></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p><code>5</code>、<code>1</code>、<code>2</code> 三站完全沒被走到。這就是 early exit 省下來的。</p>
+
+      <h3>案例 B:<code>root=[1,2,3]</code>,<code>subRoot=[1,2]</code> → False</h3>
+      <p>小樹是「<code>1</code> 有左小孩 <code>2</code>,右邊是空的」。大樹的 <code>1</code> 左右都有小孩,所以對不上。</p>
+      <div class="scroll">
+        <table>
+          <thead><tr><th class="mono">#</th><th class="mono">站在</th><th class="mono">isSameTree?</th><th>為什麼</th><th class="mono">交回</th></tr></thead>
+          <tbody>
+            <tr><td class="mono">1</td><td class="mono">1</td><td class="no">False</td><td>右邊:大樹有 <code>3</code>,小樹是 ▢</td><td class="mono">往下</td></tr>
+            <tr><td class="mono">2</td><td class="mono">2</td><td class="no">False</td><td><code>2 ≠ 1</code></td><td class="mono">往下</td></tr>
+            <tr><td class="mono">3</td><td class="mono">▢</td><td>—</td><td>煞車</td><td class="mono no">False</td></tr>
+            <tr><td class="mono">4</td><td class="mono">▢</td><td>—</td><td>煞車</td><td class="mono no">False</td></tr>
+            <tr><td class="mono">5</td><td class="mono">3</td><td class="no">False</td><td><code>3 ≠ 1</code></td><td class="mono">往下</td></tr>
+            <tr><td class="mono">6</td><td class="mono">▢</td><td>—</td><td>煞車</td><td class="mono no">False</td></tr>
+            <tr><td class="mono">7</td><td class="mono">▢</td><td>—</td><td>煞車</td><td class="mono no">False</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>往回收的時候:<code>False or False</code> → <code>False</code>,一路 <code>or</code> 上去,最後整個交回 <code>False</code>。</p>
+
+      <h3>案例 C:拿掉煞車會怎樣</h3>
+      <pre><code># if not root:          ← 拿掉
+#     return False
+if self.isSameTree(root, subRoot):
+    return True
+return self.isSubtree(root.left, subRoot) or self.isSubtree(root.right, subRoot)</code></pre>
+      <p>走到 <code>▢</code> 那一站時:</p>
+      <ol>
+        <li><code>isSameTree(None, subRoot)</code> → <code>isSameTree</code> 自己有煞車,回 <code>False</code>。這步沒事。</li>
+        <li>下一行 <code>root.left</code>,而 <code>root</code> 現在是 <code>None</code>。</li>
+        <li><code>AttributeError: 'NoneType' object has no attribute 'left'</code></li>
+      </ol>
+      <p>跟 2026-09-14 <code>#226</code> 踩到的是同一個。<strong>煞車的真正工作是擋住下一行對 <code>None</code> 取屬性。</strong></p>
+    </div>
+  </details>
+
+  <!-- 口訣 -->
+  <details>
+    <summary>口訣加模板</summary>
+    <div class="body">
+      <div class="callout">
+        <strong>找一個 → <code>or</code>。比全部 → <code>and</code>。</strong><br>
+        <code>#572</code> 是找(藏在哪裡都行),<code>#100</code> 是比(每個 node 都要一樣)。
+      </div>
+      <h3>可重複使用的模板:交回 bool 的樹走訪</h3>
+      <pre><code>def walk(self, root, ...):
+    if not root:              # 1. 煞車 — 交回「沒找到」的那個值
+        return False
+    if &lt;這一站中了嗎&gt;:         # 2. 做事 — 整題唯一有內容的一行
+        return True
+    return self.walk(root.left, ...) or self.walk(root.right, ...)   # 3. 委派</code></pre>
+      <h3>三個一定要自己檢查的格子</h3>
+      <div class="scroll">
+        <table>
+          <thead><tr><th>格子</th><th>怎麼決定</th></tr></thead>
+          <tbody>
+            <tr><td>base case 交回什麼</td><td>看函式契約。交 <code>bool</code> 就交 <code>False</code>,交數字就交 <code>0</code>,交樹就交 <code>None</code></td></tr>
+            <tr><td>做事放委派前面還後面</td><td>需不需要等小孩的答案?不需要 → 前面(前序,可 early exit)。需要 → 後面(後序)</td></tr>
+            <tr><td><code>or</code> 還是 <code>and</code></td><td>找一個 → <code>or</code>。全部都要 → <code>and</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <h3>整個 tree 區段的家族表</h3>
+      <div class="scroll">
+        <table>
+          <thead><tr><th class="mono">題</th><th>交回什麼</th><th>這一站做的事</th><th>順序</th><th>借了誰</th></tr></thead>
+          <tbody>
+            <tr><td class="mono">#104</td><td>數字(高度)</td><td><code>1 + max(L, R)</code></td><td>後序</td><td>—</td></tr>
+            <tr><td class="mono">#543</td><td>數字(直徑)</td><td>記帳 <code>max(ans, L+R)</code></td><td>後序</td><td>#104</td></tr>
+            <tr><td class="mono">#110</td><td>bool</td><td>記帳 <code>abs(L-R) &gt; 1</code></td><td>後序</td><td>#104</td></tr>
+            <tr><td class="mono">#100</td><td>bool</td><td><code>p.val != q.val</code></td><td>前序</td><td>—</td></tr>
+            <tr><td class="mono">#572</td><td>bool</td><td><code>isSameTree(root, subRoot)</code></td><td>前序</td><td>#100</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </details>
+
+  <!-- L6 -->
+  <details>
+    <summary>L6 面試逐字稿</summary>
+    <div class="body">
+      <p class="meta">完整答題示範,也是英文 shadowing 素材。每個 move 三格:<b>說</b>(嘴巴講的,可以直接背)、<b>想</b>(為什麼這樣講)、<b>寫</b>(白板上長出什麼)。</p>
+
+      <div class="move">
+        <p class="move-h">MOVE 0 · 先問 constraint,手不碰白板</p>
+        <p class="say">"Before I jump in, let me clarify a few things. First, can <code>subRoot</code> be empty, or is it guaranteed to have at least one node? Second, how large can these trees get? And third, can node values repeat inside the tree?"</p>
+        <p class="meta"><b>想:</b>第三個問題是這題的關鍵。值會重複代表「找到一個值相同的 node」不等於「找到答案」,必須整棵比對。問這一題等於告訴面試官你已經看穿陷阱。</p>
+        <p class="meta"><b>寫:</b>什麼都不寫。</p>
+      </div>
+
+      <div class="move">
+        <p class="move-h">MOVE 1 · 重述題目,自己舉例</p>
+        <p class="say">"So I need to find a node in the big tree where the <em>entire</em> subtree rooted at that node is identical to <code>subRoot</code>. Not a partial match. Let me draw a case I'll come back to later."</p>
+        <p class="meta"><b>想:</b>"entire" 這個字要重讀。後面 dry run 直接指這張圖,省時間。</p>
+        <pre><code>root:  3            subRoot:  4
+      / \                    / \
+     4   5                  1   2
+    / \
+   1   2</code></pre>
+      </div>
+
+      <div class="move">
+        <p class="move-h">MOVE 2 · 暴力解 20 秒,指出浪費了什麼</p>
+        <p class="say">"The naive read is to compare the two roots once. But that only catches the case where <code>subRoot</code> sits at the very top. The match can live anywhere, so a single comparison throws away every other candidate position."</p>
+        <p class="meta"><b>想:</b>這句話證明你比較過,不是背下來的。面試官筆記本上記的是「有 consider alternatives」。</p>
+        <p class="meta"><b>寫:</b>在圖上圈出 <code>3</code>、<code>4</code>、<code>5</code>、<code>1</code>、<code>2</code> 五個候選起點。</p>
+      </div>
+
+      <div class="move">
+        <p class="move-h">MOVE 3 · 講出 invariant</p>
+        <p class="say">"Here's the invariant. <code>isSubtree(node)</code> is true if and only if either the subtree rooted at <code>node</code> matches <code>subRoot</code> exactly, or the answer lives in <code>node</code>'s left or right subtree. Every node gets tested exactly once as a starting point, so I can't miss a match."</p>
+        <p class="meta"><b>想:</b>"if and only if" 是 invariant 的標準句型,把正確性推理講死。"exactly once" 是覆蓋性證明。</p>
+        <pre><code>isSubtree(node) = isSameTree(node, subRoot)
+                  or isSubtree(node.left,  subRoot)
+                  or isSubtree(node.right, subRoot)</code></pre>
+      </div>
+
+      <div class="move">
+        <p class="move-h">MOVE 4 · 關鍵手法,以及換掉了什麼</p>
+        <p class="say">"I'll split this into two functions. The outer one walks the big tree. The inner one compares two trees node by node, which is exactly the Same Tree problem. I'm trading time for clarity here: re-comparing from scratch at every station costs me <code>O(m times n)</code>, but each function does one job and the inner one I already know is correct."</p>
+        <p class="meta"><b>想:</b>「我把它拆成兩個函式,內層是我剛才寫的那題」是很值錢的一個 move。面試官聽到的是「會組裝已知零件」,不是「背了一題」。</p>
+        <p class="meta"><b>寫:</b>畫兩個方框,外層套內層,箭頭標 "calls at every node"。</p>
+      </div>
+
+      <div class="move">
+        <p class="move-h">MOVE 5 · 複雜度講在寫 code 之前</p>
+        <p class="say">"Time is <code>O(m times n)</code> in the worst case: <code>m</code> nodes in the big tree, and each one can trigger a comparison that walks up to <code>n</code> nodes. Space is <code>O(h)</code> for the recursion stack, which degrades to <code>O(m)</code> on a skewed tree. Sound reasonable?"</p>
+        <p class="meta"><b>想:</b>先設計再實作。結尾那句 "Sound reasonable?" 是跟面試官對齊,一定要問,不要自己埋頭寫下去。</p>
+        <p class="meta"><b>寫:</b><code>Time O(m·n) / Space O(h)</code> 寫在白板角落。</p>
+      </div>
+
+      <div class="move">
+        <p class="move-h">MOVE 6 · code 分 3 段寫,每段講一句</p>
+        <p class="say">"First the guard. If I've walked off the end of the big tree, there's nothing here to match, so I return false."</p>
+        <pre><code>def isSubtree(self, root, subRoot):
+    if not root:
+        return False</code></pre>
+        <p class="say">"Then the check at this station. I ask whether the subtree rooted right here is identical to <code>subRoot</code>. If it is, I'm done, I bail out immediately."</p>
+        <pre><code>    if self.isSameTree(root, subRoot):
+        return True</code></pre>
+        <p class="say">"And then I recurse into both children. I use <code>or</code> because a match on either side counts as a match overall."</p>
+        <pre><code>    return self.isSubtree(root.left, subRoot) or self.isSubtree(root.right, subRoot)</code></pre>
+        <p class="meta"><b>想:</b>三段各一句話,邊寫邊防自己的雷。第三段那句 "either side counts" 直接堵住面試官問 "why not <code>and</code>?"。</p>
+      </div>
+
+      <div class="move">
+        <p class="move-h">MOVE 7 · 主動 dry run,用 Move 1 那張圖</p>
+        <p class="say">"Let me trace my example. Station one, I'm at <code>3</code>. Comparing <code>3</code> against <code>4</code> fails on the first value, so I go left. Station two, I'm at <code>4</code>. Comparing <code>4, 1, 2</code> against <code>4, 1, 2</code> matches all the way down, so I return true and the whole thing short-circuits. Nodes <code>5</code>, <code>1</code> and <code>2</code> are never visited."</p>
+        <p class="meta"><b>想:</b>不要等面試官叫你跑。主動 dry run 是 senior 訊號。</p>
+      </div>
+
+      <div class="move">
+        <p class="move-h">MOVE 8 · 主動掃 edge case,點名誰擋住的</p>
+        <p class="say">"Three edge cases. An empty big tree hits my first guard and returns false. A single-node <code>subRoot</code> matching a leaf works, because <code>isSameTree</code> treats two nulls as equal. And a partial match, where the big tree has an extra child the small tree doesn't, is caught by the <code>not p or not q</code> line inside <code>isSameTree</code>."</p>
+        <p class="meta"><b>想:</b>「哪個 case 是靠哪一行自動答對的」這種講法,證明你的設計是想出來的,不是試出來的。</p>
+      </div>
+
+      <div class="move">
+        <p class="move-h">MOVE 9 · 主動講 follow-up</p>
+        <p class="say">"If the interviewer wants better than <code>O(m times n)</code>, there's a linear approach. Serialize both trees into strings with explicit null markers, then the subtree question becomes a substring question, which KMP solves in <code>O(m plus n)</code>. The null markers matter: without them two different shapes can serialize to the same string."</p>
+        <p class="meta"><b>想:</b>解一類,不是解一題。最後那句 "the null markers matter" 是細節,證明你真的懂,不是聽過名詞。</p>
+        <pre><code>3(4(1(),2()),5())   ← 括號就是 null marker</code></pre>
+      </div>
+
+      <h3>只給結論 vs 說明推理</h3>
+      <div class="scroll">
+        <table>
+          <thead><tr><th class="mono">Move</th><th>只給結論</th><th>說明推理</th></tr></thead>
+          <tbody>
+            <tr><td class="mono">0</td><td>直接開始寫</td><td>先問「值會不會重複」,把陷阱先擺上檯面</td></tr>
+            <tr><td class="mono">3</td><td>"I'll check every node."</td><td>"…if and only if… so I can't miss a match." 把正確性講死</td></tr>
+            <tr><td class="mono">4</td><td>"I'll use a helper."</td><td>"I'm trading time for clarity here." 說出成本換了什麼</td></tr>
+            <tr><td class="mono">8</td><td>"It handles edge cases."</td><td>"…is caught by the <code>not p or not q</code> line." 點名是哪一行擋的</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="meta">逐字稿流利、harness 綠、講得出 invariant,這三件事分開看,都不單獨代表職級。職級還取決於目標公司的要求與真實工作影響。</p>
+
+      <h3>挑進 Native English 的四句</h3>
+      <ul>
+        <li>"The naive read is to … but that only catches the case where …"</li>
+        <li>"I'm trading time for clarity here."</li>
+        <li>"Each one can trigger a comparison that walks up to <code>n</code> nodes."</li>
+        <li>"Sound reasonable?"</li>
+      </ul>
+    </div>
+  </details>
+
+  <!-- 釐清 -->
+  <details>
+    <summary>這次的釐清(2026-09-20)</summary>
+    <div class="body">
+      <div class="fix">
+        <p><span class="x">✗ 我以為:</span><code>#100 Same Tree</code> 是「相減、不要小於 0」</p>
+        <p><span class="o">✓ 其實是:</span>那是 <code>#110 Balanced</code>。<code>#100</code> 從頭到尾沒碰過數字,只比 <code>p.val</code> 和 <code>q.val</code> 相不相等</p>
+        <p class="why">→ 為什麼會搞混:兩題都交回 <code>bool</code>,而且是連著兩天做的。<strong>「交回什麼」相同,不代表「做的事」相同。</strong></p>
+      </div>
+      <div class="fix">
+        <p><span class="x">✗ 我以為:</span><code>#100</code> 是後序</p>
+        <p><span class="o">✓ 其實是:</span>前序。<code>p.val != q.val</code> 寫在兩個委派<strong>前面</strong></p>
+        <p class="why">→ 判準:這件事需不需要等小孩的答案?不需要 → 前序,還能提早收工。需要 → 後序。<code>#110</code> 的 <code>abs(L-R)</code> 非等不可,所以只能後序。</p>
+      </div>
+      <div class="fix">
+        <p><span class="x">✗ 我寫成:</span><code>if not node:</code></p>
+        <p><span class="o">✓ 應該是:</span><code>if not root:</code></p>
+        <p class="why">→ 第 5 次了(表一第 3 列)。<code>node</code> 是 <code>#110</code> 內層 <code>depth</code> 的參數,那張 frame 早就撕掉了。處方:畫 frame,列出裡面<strong>真正存在的名字</strong>。<code>isSubtree</code> 的 frame 只有 <code>self</code>、<code>root</code>、<code>subRoot</code>。</p>
+      </div>
+      <div class="fix">
+        <p><span class="x">✗ 我寫成:</span><code>if self.isSubtree(root, subRoot):</code></p>
+        <p><span class="o">✓ 應該是:</span><code>if self.isSameTree(root, subRoot):</code></p>
+        <p class="why">→ 參數原封不動傳給自己,是 infinite recursion 的標準長相:<strong>問題沒有變小</strong>。遞迴要收斂,每一次呼叫的輸入必須比上一次更小。<code>root.left</code> 才是變小。</p>
+      </div>
+      <div class="fix">
+        <p><span class="x">✗ 我以為:</span>code 可以寫在註解旁邊</p>
+        <p><span class="o">✓ 其實是:</span>註解在 tokenizer 階段就被丟掉,<strong>它不算一層縮排</strong>。跟著註解縮排 = 憑空多縮 4 格 → <code>IndentationError</code></p>
+        <p class="why">→ 冷寫區的註解要<strong>刪掉</strong>,不是繞著它寫。</p>
+      </div>
+      <div class="fix">
+        <p><span class="x">✗ 沒注意到:</span><code>SyntaxError</code> 擋住了後面的 <code>NameError</code></p>
+        <p><span class="o">✓ 其實是:</span>語法錯在<strong>整個檔案讀進來時</strong>就炸,一行都還沒執行。執行錯(<code>NameError</code>、<code>AttributeError</code>)要等那行真的跑到</p>
+        <p class="why">→ 所以少一個冒號會把其他錯全部蓋掉。修完語法錯再跑,才看得到真正的邏輯問題。</p>
+      </div>
+      <div class="fix">
+        <p><span class="x">✗ 習慣動作:</span>harness 掛了先讀 code</p>
+        <p><span class="o">✓ 應該先:</span>看 <strong>fail/pass 分布</strong>。今天 1/9 的那筆 PASS 是「小樹 = 大樹」,直接告訴你「只走了第一站」</p>
+        <p class="why">→ 表二第 7 列,第 3 次。工作上 CI 紅了也一樣:先看哪些 test 掛、哪些沒掛,那個交集就是 bug 的範圍。</p>
+      </div>
+    </div>
+  </details>
+
+</div>

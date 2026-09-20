@@ -4,3 +4,5 @@
 
 # lab scratch (workspaces/*/labs 為 lab 暫存,見 portfolio.md)
 workspaces/k8s/labs/
+__pycache__/
+*.pyc
