@@ -67,7 +67,15 @@ class Solution:
 
     def postorderTraversal(self, root):
         # ── 冷寫區 ── 跟 preorder 只差一行的位置
-        return None
+        res = []
+        def deepth(node):
+            if not node:
+                return
+            deepth(node.left)
+            deepth(node.right)
+            res.append(node.val)
+        deepth(root)
+        return res
 
     def levelOrder(self, root):
         # ── 冷寫區 ── 第二層再做。提示: 換掉的不是「做事」的位置,是資料結構
