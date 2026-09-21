@@ -524,6 +524,54 @@ depth(root)
 </div>
 </details>
 
+<details>
+<summary>這次的釐清<span class="lockhint">2026-09-21 隔 3 天冷寫</span></summary>
+<div class="dbody">
+<pre><span class="cm">今天的卡點全部在「外殼」,邏輯 6 行一路都對。</span>
+
+<span class="kw">✗ 我以為:</span>帳本寫 <span class="fn">self.ans = 0</span>
+<span class="fn">✓ 其實是:</span><span class="fn">self.ok = True</span>。#543 記的是「最長幾條邊」所以是數字;
+            #110 記的是「平不平」所以是 True/False
+<span class="cm">→ 為什麼會搞混:帳本記什麼,看最後 return 的型別</span>
+
+<span class="kw">✗ 我以為:</span>base case 寫 <span class="fn">return False</span>
+<span class="fn">✓ 其實是:</span><span class="fn">return 0</span>。內層 depth 交給爸爸的是高度,空樹高度 = 0
+<span class="cm">→ 判準(一問就解):這個函式交回去的是什麼東西?數字還是 True/False?</span>
+
+<span class="kw">✗ 我以為:</span>記帳寫 <span class="fn">return self.ok = False</span>
+<span class="fn">✓ 其實是:</span><span class="fn">self.ok = False</span>,這裡不 return
+<span class="cm">→ 記帳 = 在旁邊劃一筆,人還站在這一站,後面的行照跑</span>
+<span class="cm">→ return = 撕掉這張紙走人,return 1 + max(L,R) 就永遠跑不到</span>
+<span class="cm">→ 另外 return 後面只能接一個「值」,接賦值動作是 SyntaxError</span>
+
+<span class="kw">✗ 我以為:</span>if not node / L / R 可以直接寫在 isBalanced 裡
+<span class="fn">✓ 其實是:</span>那些是「內層」的東西。isBalanced 這張紙上沒有 node、沒有 L、沒有 R
+            (參數叫 root),跑起來 NameError
+<span class="cm">→ 兩層樓:isBalanced 交 True/False、被叫 1 次;depth 交高度、自己叫自己很多次</span>
+
+<span class="kw">✗ 我以為:</span>L = depth(node.left) 以下要縮在 <span class="fn">if not node:</span> 裡面
+<span class="fn">✓ 其實是:</span>要退回來跟 if 對齊。if 那個房間裡只有 return 0 一行
+<span class="cm">→ 後果:縮進去的話,只有空樹才進得去那個房間,但一進去就 return 0 走人,</span>
+<span class="cm">  所以 L、R、記帳、return 1+max 四件事永遠不執行</span>
+
+<span class="kw">✗ 我不知道:</span><span class="fn">return 1 + max(L, R)</span> 是什麼意思
+<span class="fn">✓ 兩個零件:</span>max(L, R) = 我底下最深有多深;1 + = 我到小孩那條邊也要算
+<span class="cm">→ 這行 #104 / #543 / #110 三題一個字都沒改。換題只換記帳那一軌</span>
+
+<span class="kw">重犯(9/18 已釐清過):</span>紙條初始值。反例推法:初始寫 False、丟 [1] 進去、
+            沒有任何一行改過那個盒子 → return 讀盒子 → 拿到 False → 答錯
+<span class="cm">→ return self.ok 是「去讀盒子」,不是「去算正確答案」</span>
+
+<span class="fn">溫度計 ② 過:</span>刪掉 depth(root) 這行 → 「根本沒有跑,直接回傳預設的 True」
+
+<span class="kw">外殼四格,每一格都在做事:</span>
+  (a) self.ok = True   沒有它 → 沒東西可記
+  (b) def depth(node)  沒有它 → 只是一份沒人看的說明書
+  (c) depth(root)      沒有它 → 說明書沒人執行,帳本一片空白
+  (d) return self.ok   沒有它 → 算完不交卷,回 None</pre>
+</div>
+</details>
+
 <div class="rail"></div>
 <p style="color:var(--muted);font-size:.85rem;text-align:center">LeetCode #110 · 母題 #543 · 圖解頁:<code>tree/diameter-of-binary-tree/</code></p>
 

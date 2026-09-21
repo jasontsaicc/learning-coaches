@@ -35,16 +35,35 @@ class Solution:
     def preorderTraversal(self, root):
         # ── 冷寫區 ────────────────────────────────────────
         # 0. 收集答案的 list 放哪?
+        res = [] 
         # 1. 煞車   -> 空 node 做什麼?
+        def deepth(node):
+            if not node:
+                return
         # 2. 做事   -> 把 node.val 收進 list。放在時刻 A / B / C 哪一格?
+            res.append(node.val)
+
         # 3. 委派   -> 左右各叫一次 (注意 node.)
+            deepth(node.left)
+            deepth(node.right)
         # 4. 啟動 + 交答案
-        return None
+            return None
+        deepth(root)
+        return res
         # ────────────────────────────────────────────────
 
     def inorderTraversal(self, root):
         # ── 冷寫區 ── 跟 preorder 只差一行的位置
-        return None
+        res = []
+        def deepth(node):
+            if not node:
+                return
+            
+            deepth(node.left)
+            res.append(node.val)
+            deepth(node.right)
+        deepth(root)
+        return res
 
     def postorderTraversal(self, root):
         # ── 冷寫區 ── 跟 preorder 只差一行的位置
