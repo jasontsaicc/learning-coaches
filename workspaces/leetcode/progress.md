@@ -4,7 +4,18 @@
 
 # leetcode
 
-- 今天做到:2026-09-21。**DFS 前中後序 21/21 綠,下次 `levelOrder`(BFS)。**以下第一段:**#110 Balanced 隔 3 天冷寫收掉**,學員自己在 NeetCode 上跑過。
+- 今天做到:2026-09-24。**BFS 三個卡點(q 兩頭 / while vs for / `len(q)`)用填表走完,#199 Right Side View 兔模式 6/6。**
+  開場默寫 `levelOrder` 想不起來,對照抄 7/7。抄完說「還是不太懂」,自選卡在 A(while/for 各管什麼)、B(為什麼 `len(q)`)、C(q 哪頭進出)。
+  順序 C → A → B,每步一張變數值表 + 一個填空。C 一次對。A 第一次答「while 4 圈、第 2 圈 for 3 次」(兩個都錯),
+  回「ok」沒填表,縮成「只填一格」後逐格答對。B 算 q 時只做了 popleft 漏掉兩個 append,改成一行一格後對;
+  「刪掉 `len(q)`」答「混在一起」方向對。**一句話:while 一圈一層,`len(q)` 先數好,for 只拿這麼多個。**
+  #199:「從 `[[1],[2,3],[5,4]]` 變 `[1,3,4]`」答「用 index 0, 1」→ 列表格後答「從右邊數」→ `level[-1]` 直接給(語法)。
+  問改哪一行答成 `popleft` 那行、填空答 `popright`,**連錯 2 次直接給答案** `res.append(level[-1])`,學員自己改,6/6。
+  溫度計 ②:只往 `.right` 走 → `[1, 3]`,一次答對(漏掉長在左子樹的 4)。
+  **節奏觀察:學員會用「ok」「好像懂了」帶過沒填的格子。要求具體值,一次只挖一格。**
+- 前一場 2026-09-23(補記,當天沒寫進 progress)。#102 Level Order 龜模式首刷:圖解頁產出(含 L6 逐字稿),
+  `traversal-templates/drill.py` 的 `levelOrder` 7/7,`for _ in range(len(q))` 那行階 2 後自寫。
+- 2026-09-21。**DFS 前中後序 21/21 綠。**以下第一段:**#110 Balanced 隔 3 天冷寫收掉**,學員自己在 NeetCode 上跑過。
   開場原本排 #543 外殼默寫,**學員自己改成回頭寫 #110**,卡住進場,順勢變成隔堂冷寫。
   **邏輯 6 行最後一路全對,今天的卡點 100% 在外殼與機械面**(第 3 次確認同一個診斷)。
   依序踩到:(a) 帳本寫 `self.ans = 0`(#543 的數字帳本搬過來)、base case `return False`(型別錯,
@@ -156,6 +167,7 @@
 | Tree 雙軌(回傳值 + 全域帳本,#543) | ✓ 9/11 圖解頁 | | ✅ 9/11 冷寫一次過 9/9;9/17 隔 6 天默寫 (b)(c) 沒出來,對照抄 | ✓ 往上交挑一邊,記帳吃兩邊 |
 | Tree 雙軌換皮(#110 記帳換成 flag) | ✓ 9/18 圖解頁 | ✓ 9/18、9/21 | 🟡 **9/21 隔 3 天冷寫:邏輯 6 行全對,外殼四格全掛**(帳本型別、base case 型別、記帳寫成 return、內外層混寫、縮排);骨架填空 + 判準提示後綠,溫度計 ② 一次過 | ✓ 往上交的永遠是高度,換題只換記帳 |
 | Tree 走訪前中後序(`append` 的位置) | | | ✅ 9/21 前序自寫 7/7(外殼四格自己排,機械面階 1 修)、中序、後序各複製搬一行 7/7;#104 判成後序一次對 | ✓ 名字的字 = 中排第幾 |
+| Tree BFS(queue + `len(q)` 先數人頭) | ✓ 9/23 圖解頁 | ✓ 9/24 默寫不出對照抄 | 🟡 9/23 首刷 7/7(for 行階 2);9/24 #199 換皮只改一行,指錯行 + `popright` 後給答案 | ✓ while 一圈一層,`len(q)` 先數好 |
 | Tree 兩棵一起走(#100 煞車 3 組合 + `and`) | | | 🟡 9/17 兔模式 9/9;煞車漏 ●▢、委派行階 2 | ✓ 先攔都空,再攔一邊空 |
 | Heap k-way merge(每條一個 head) | ✓ | | ✓ | ✓ |
 | Hashmap + 雙向鏈(LRU) | | | | |
@@ -210,6 +222,10 @@
   圖解頁:https://claude.ai/artifact/Wx6LVP4dEoGXNVBqPJ4gQ5
   notes.md(含 L6 逐字稿指路、家族表、七條釐清)。學員版 9/9 綠。
 
+- **#102 Binary Tree Level Order Traversal** — `tree/binary-tree-level-order-traversal/`(harness 在 `traversal-templates/drill.py`)
+
+- **#199 Binary Tree Right Side View** — `tree/binary-tree-right-side-view/`
+
 - **#110 Balanced Binary Tree** — `tree/balanced-binary-tree/`
   2026-09-18 兔模式(母題 #543):drill.py(9 組 case,空 stub 9/9 FAIL、參考解 9/9 PASS 已驗)、
   圖解頁:https://claude.ai/artifact/7X8DRQAu86S36mdc9AGBZ9(學員收工時要求補做)
@@ -227,7 +243,8 @@
 
 ## 接下來
 
-0. **後序**:`postorderTraversal` 還是 0/7。一句話就能做完:`append` 放哪?(複製中序搬一行)
+0. **BFS 隔堂默寫**:開場默 `levelOrder`,先問「while 一圈做什麼、`len(q)` 為什麼先算」再寫。9/24 對照抄,還沒自己寫過。
+   之後兔模式接 #637 Average of Levels 或 #103 Zigzag(一層結束時改一行)。NeetCode 順序下一題是 #1448 Count Good Nodes(DFS 前序)。
 1. 外殼從 0 寫:9/21 前序已在「只有註解、沒有骨架」下自己排出四格。下一次連註解都拿掉,
    用 `tree/dual-track-shell/drill.py`(清空 Solution)。
 2. #572 隔堂複習(隔 2-4 天冷寫)。9/20 第 3 行是階 3 直接給的,沒自己寫過。

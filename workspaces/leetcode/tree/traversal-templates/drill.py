@@ -78,8 +78,23 @@ class Solution:
         return res
 
     def levelOrder(self, root):
-        # ── 冷寫區 ── 第二層再做。提示: 換掉的不是「做事」的位置,是資料結構
-        return None
+        # ── 冷寫區 ── 2026-09-23 學員版(for 那行階 2 後自寫)
+        from collections import deque   # LeetCode 預先 import,本地要自己加
+        if not root:
+            return []
+        res = []
+        q = deque([root])
+        while q:
+            level = []
+            for _ in range(len(q)):
+                node = q.popleft()
+                level.append(node.val)
+                if node.left:
+                    q.append(node.left)
+                if node.right:
+                    q.append(node.right)
+            res.append(level)
+        return res
 
 
 # ── 以下不用改 ────────────────────────────────────────────

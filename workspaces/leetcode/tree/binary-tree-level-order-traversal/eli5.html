@@ -1,0 +1,602 @@
+<title>一層一層排隊</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=JetBrains+Mono:wght@400;700&family=Noto+Sans+TC:wght@400;500;700&display=swap">
+<style>
+:root{
+  --paper:#F2F0F6; --surface:#FFFFFF; --ink:#191527; --body:#302B41;
+  --muted:#6E687E; --line:#CFCADB;
+  --c1:#4A4098; --c1-soft:#E3E0F3;
+  --c2:#AE3557; --c2-soft:#F6E0E7;
+  --signal:#10726B; --signal-soft:#D8ECE9;
+  --code-bg:#131022; --code-fg:#DEDAEA;
+  --hold:#EDEAF3;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#14121C; --surface:#1C1929; --ink:#EAE7F2; --body:#C6C1D4;
+    --muted:#8E88A0; --line:#322E44;
+    --c1:#9E94EC; --c1-soft:#241F42;
+    --c2:#E88BA4; --c2-soft:#3A1D28;
+    --signal:#4FC7B6; --signal-soft:#0F2F2C;
+    --code-bg:#0C0A14; --code-fg:#DAD5E6;
+    --hold:#1F1C2C;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#14121C; --surface:#1C1929; --ink:#EAE7F2; --body:#C6C1D4;
+  --muted:#8E88A0; --line:#322E44;
+  --c1:#9E94EC; --c1-soft:#241F42;
+  --c2:#E88BA4; --c2-soft:#3A1D28;
+  --signal:#4FC7B6; --signal-soft:#0F2F2C;
+  --code-bg:#0C0A14; --code-fg:#DAD5E6;
+  --hold:#1F1C2C;
+}
+
+*{box-sizing:border-box}
+body{
+  background:var(--paper); color:var(--body);
+  font-family:"Noto Sans TC","Hiragino Sans","Microsoft JhengHei",sans-serif;
+  font-size:16px; line-height:1.85;
+  padding:0 1.25rem 5rem;
+}
+.wrap{max-width:44rem; margin:0 auto}
+
+header{padding-block:3.5rem 1.5rem}
+.kicker{
+  font-family:"JetBrains Mono",monospace; font-size:.72rem; font-weight:700;
+  letter-spacing:.16em; text-transform:uppercase; color:var(--signal);
+}
+h1{
+  font-family:"Archivo","Noto Sans TC",sans-serif; font-weight:700;
+  font-size:clamp(2rem,6vw,2.9rem); line-height:1.12; letter-spacing:-.02em;
+  color:var(--ink); margin:.5rem 0 .6rem; text-wrap:balance;
+}
+.sub{color:var(--muted); font-size:1rem; margin:0}
+
+.rail{
+  height:9px; margin:2.75rem 0 2.25rem;
+  border-top:2px solid var(--line); border-bottom:2px solid var(--line);
+  background:repeating-linear-gradient(90deg,var(--line) 0 3px,transparent 3px 13px);
+}
+
+h2{
+  font-family:"Archivo","Noto Sans TC",sans-serif; font-weight:700;
+  font-size:1.4rem; color:var(--ink); letter-spacing:-.01em;
+  margin:0 0 .25rem; text-wrap:balance;
+}
+h2 .num{
+  font-family:"JetBrains Mono",monospace; font-size:.85rem; color:var(--signal);
+  margin-right:.6rem; vertical-align:.15em;
+}
+h3{font-family:"Archivo","Noto Sans TC",sans-serif;font-weight:600;font-size:1rem;color:var(--ink);margin:1.75rem 0 .4rem}
+h4{font-family:"Archivo","Noto Sans TC",sans-serif;font-weight:600;font-size:.95rem;color:var(--ink);margin:1.4rem 0 .3rem}
+section{margin-bottom:2.5rem}
+p{margin:.7rem 0}
+strong{color:var(--ink); font-weight:700}
+code{font-family:"JetBrains Mono",monospace; font-size:.87em; background:var(--signal-soft); color:var(--ink); padding:.1em .35em; border-radius:2px}
+
+.lede{font-size:1.1rem; color:var(--ink); border-left:3px solid var(--signal); padding-left:1rem; margin:1rem 0 1.25rem}
+
+.callout{background:var(--surface); border:1px solid var(--line); border-radius:4px; padding:1.1rem 1.25rem; margin:1.25rem 0}
+.callout.warn{border-left:4px solid var(--c2)}
+.callout.key{border-left:4px solid var(--signal)}
+.callout h3,.callout h4{margin-top:0}
+
+ul,ol{padding-left:1.35rem; margin:.7rem 0}
+li{margin:.35rem 0}
+
+.signals{list-style:none; padding:0; display:grid; gap:.5rem}
+.signals li{
+  display:flex; gap:.75rem; align-items:baseline;
+  background:var(--surface); border:1px solid var(--line); border-radius:4px; padding:.7rem .95rem; margin:0;
+}
+.signals .n{font-family:"JetBrains Mono",monospace; font-weight:700; color:var(--signal); flex-shrink:0}
+
+.tablewrap{overflow-x:auto; margin:1.25rem 0; border:1px solid var(--line); border-radius:4px; background:var(--surface)}
+table{border-collapse:collapse; width:100%; font-size:.86rem; font-variant-numeric:tabular-nums}
+th,td{text-align:left; padding:.55rem .8rem; border-bottom:1px solid var(--line); white-space:nowrap}
+th{font-family:"Archivo",sans-serif; font-weight:600; color:var(--ink); font-size:.78rem; letter-spacing:.03em; text-transform:uppercase}
+tr:last-child td{border-bottom:none}
+td.mono,th.mono{font-family:"JetBrains Mono",monospace}
+.t1{color:var(--c1); font-weight:700}
+.t2{color:var(--c2); font-weight:700}
+.hit{color:var(--signal); font-weight:700}
+
+pre{
+  background:var(--code-bg); color:var(--code-fg); border-radius:5px;
+  padding:1.1rem 1.25rem; overflow-x:auto; margin:1rem 0;
+  font-family:"JetBrains Mono",monospace; font-size:.84rem; line-height:1.75;
+}
+pre .cm{color:#8C86A8}
+pre .kw{color:#C39BEE}
+pre .fn{color:#7FD6C6}
+pre .hl{background:rgba(127,214,198,.14); display:block; margin:0 -1.25rem; padding:0 1.25rem}
+
+details{background:var(--surface); border:1px solid var(--line); border-radius:4px; margin:1rem 0; overflow:hidden}
+summary{
+  cursor:pointer; padding:.9rem 1.15rem; list-style:none;
+  font-family:"Archivo","Noto Sans TC",sans-serif; font-weight:600; color:var(--ink);
+  display:flex; align-items:baseline; gap:.6rem;
+}
+summary::-webkit-details-marker{display:none}
+summary::before{content:"▸"; color:var(--signal); font-size:.8rem}
+details[open] summary::before{content:"▾"}
+summary:focus-visible{outline:2px solid var(--signal); outline-offset:-2px}
+.lockhint{font-family:"Noto Sans TC",sans-serif;font-weight:400;font-size:.8rem;color:var(--muted);margin-left:auto}
+.dbody{padding:0 1.15rem 1.15rem; border-top:1px solid var(--line)}
+
+.mantra{font-family:"Archivo","Noto Sans TC",sans-serif;font-size:1.05rem;font-weight:600;color:var(--ink);background:var(--signal-soft);border-radius:4px;padding:1rem 1.2rem;margin:1rem 0}
+
+/* ── 樹 ── */
+.dia{display:block;max-width:100%;height:auto;margin:1.25rem auto}
+.dia .edge{stroke:var(--line);stroke-width:2}
+.dia .edge.nil{stroke-dasharray:4 4}
+.dia .box{fill:var(--surface);stroke:var(--line);stroke-width:2}
+.dia .box.a{fill:var(--c1-soft);stroke:var(--c1)}
+.dia .box.b{fill:var(--c2-soft);stroke:var(--c2)}
+.dia .nilbox{fill:none;stroke:var(--muted);stroke-width:1.5;stroke-dasharray:3 3}
+.dia .tval{fill:var(--ink);font-family:"JetBrains Mono",monospace;font-size:15px;font-weight:700;text-anchor:middle;dominant-baseline:central}
+.dia .nilv{fill:var(--muted);font-family:"JetBrains Mono",monospace;font-size:11px;text-anchor:middle;dominant-baseline:central}
+.dia .tag{fill:var(--muted);font-family:"JetBrains Mono",monospace;font-size:12px;text-anchor:middle}
+.dia .tag.hit{fill:var(--signal);font-weight:700}
+
+/* ── call stack 分鏡 ── */
+.film{display:grid;gap:1rem;margin:1.5rem 0}
+.shot{background:var(--surface);border:1px solid var(--line);border-radius:4px;padding:.9rem 1rem}
+.shot .hd{display:flex;gap:.7rem;align-items:baseline;flex-wrap:wrap;margin-bottom:.6rem}
+.shot .no{font-family:"JetBrains Mono",monospace;font-size:.68rem;font-weight:700;letter-spacing:.1em;color:var(--signal);border:1px solid var(--signal);border-radius:2px;padding:.1rem .35rem;flex-shrink:0}
+.shot .cap{font-size:.9rem;color:var(--body);line-height:1.6}
+.tower{display:flex;flex-direction:column;gap:3px;font-family:"JetBrains Mono",monospace;font-size:.78rem;overflow-x:auto}
+.fr{border:1px solid var(--line);border-radius:3px;padding:.4rem .6rem;background:var(--hold);color:var(--muted);min-width:min-content;white-space:nowrap}
+.fr.run{background:var(--signal-soft);border-color:var(--signal);color:var(--ink);font-weight:700}
+.fr.gone{border-style:dashed;background:transparent;opacity:.45;text-decoration:line-through}
+.fr .who{color:var(--ink);font-weight:700}
+.fr.run .who{color:var(--signal)}
+.fr .slot{color:var(--muted);font-weight:400}
+.fr .val{color:var(--c2);font-weight:700}
+.floor{font-family:"JetBrains Mono",monospace;font-size:.7rem;color:var(--muted);letter-spacing:.1em;border-top:2px solid var(--line);padding-top:.25rem;margin-top:2px}
+.emptystack{font-family:"JetBrains Mono",monospace;font-size:.78rem;color:var(--muted);padding:.4rem 0}
+
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(15rem,1fr));gap:1rem;margin:1.25rem 0}
+.two > div{background:var(--surface);border:1px solid var(--line);border-radius:4px;padding:.9rem 1.05rem}
+.two h4{margin-top:0}
+
+.wrongright{display:grid;gap:.5rem;margin:1rem 0}
+.wrongright > div{padding:.65rem .9rem;border-radius:3px;font-size:.92rem}
+.wr-x{background:var(--c2-soft);border-left:3px solid var(--c2)}
+.wr-o{background:var(--signal-soft);border-left:3px solid var(--signal)}
+.wr-y{background:var(--surface);border:1px solid var(--line);border-left:3px solid var(--muted)}
+
+.move{background:var(--surface);border:1px solid var(--line);border-radius:4px;padding:.9rem 1.05rem;margin:.85rem 0}
+.move h4{margin:0 0 .5rem;display:flex;gap:.6rem;align-items:baseline;flex-wrap:wrap}
+.move h4 .mv{font-family:"JetBrains Mono",monospace;font-size:.7rem;font-weight:700;letter-spacing:.1em;color:var(--signal);border:1px solid var(--signal);border-radius:2px;padding:.1rem .35rem;flex-shrink:0}
+.say{background:var(--c1-soft);border-radius:3px;padding:.6rem .8rem;margin:.4rem 0;color:var(--ink)}
+.say b{display:block;font-family:"JetBrains Mono",monospace;font-size:.66rem;letter-spacing:.12em;text-transform:uppercase;color:var(--c1);margin-bottom:.3rem}
+.think{font-size:.88rem;color:var(--muted);margin:.4rem 0}
+.think b{font-family:"JetBrains Mono",monospace;font-size:.66rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:.2rem}
+
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+/* ── #543 專用:雙軌配色 ──
+   這一頁的顏色是有意義的,不是裝飾:
+   紫 c1 = 軌道 A「往上交」(return 給呼叫者)
+   紅 c2 = 軌道 B「記帳本」(寫進 self.ans)                       */
+.dia .edge.path{stroke:var(--c2);stroke-width:4.5;stroke-linecap:round}
+.dia .edge.up{stroke:var(--c1);stroke-width:4.5;stroke-linecap:round}
+.dia .edge.dim{opacity:.45}
+.dia .box.dim{opacity:.4}
+.dia .pip{fill:var(--c2);stroke:none}
+.dia .pipn{fill:var(--paper);font-family:"JetBrains Mono",monospace;font-size:11px;font-weight:700;text-anchor:middle;dominant-baseline:central}
+.dia .tag.a{fill:var(--c1);font-weight:700}
+.dia .tag.b{fill:var(--c2);font-weight:700}
+.dia .xout{stroke:var(--muted);stroke-width:2;opacity:.65}
+
+.tk{font-family:"JetBrains Mono",monospace;font-size:.66rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;border-radius:2px;padding:.15rem .4rem;margin-right:.5rem;white-space:nowrap}
+.tk.a{color:var(--c1);border:1px solid var(--c1);background:var(--c1-soft)}
+.tk.b{color:var(--c2);border:1px solid var(--c2);background:var(--c2-soft)}
+
+.legend{display:grid;gap:.4rem;margin:1rem 0;font-size:.88rem}
+.legend div{display:flex;gap:.6rem;align-items:baseline}
+.legend .sw{width:1.6rem;height:.4rem;border-radius:2px;flex-shrink:0;transform:translateY(-.15em)}
+.legend .sw.a{background:var(--c1)}
+.legend .sw.b{background:var(--c2)}
+
+.shot .row{display:grid;grid-template-columns:1fr auto;gap:1rem;align-items:start}
+@media (max-width:34rem){.shot .row{grid-template-columns:1fr}}
+.ledger{font-family:"JetBrains Mono",monospace;font-size:.78rem;border:2px solid var(--line);border-radius:4px;padding:.55rem .8rem;background:var(--surface);color:var(--muted);white-space:nowrap;align-self:start;text-align:center}
+.ledger b{display:block;font-size:.6rem;letter-spacing:.12em;text-transform:uppercase;margin-bottom:.3rem}
+.ledger .big{font-size:1.45rem;font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums}
+.ledger.live{border-color:var(--c2);background:var(--c2-soft);color:var(--c2)}
+.ledger.live .big{color:var(--c2)}
+.fr .valb{color:var(--c2);font-weight:700}
+.fr .vala{color:var(--c1);font-weight:700}
+
+td.a{color:var(--c1);font-weight:700}
+td.b{color:var(--c2);font-weight:700}
+.xref td:first-child{white-space:normal;min-width:14rem}
+</style>
+
+<style>
+.dia .box.ok{fill:var(--signal-soft);stroke:var(--signal)}
+.dia .ht{fill:var(--c1);font-family:"JetBrains Mono",monospace;font-size:12px;font-weight:700}
+.dia .gap{fill:var(--muted);font-family:"JetBrains Mono",monospace;font-size:11px}
+.dia .gap.bad{fill:var(--c2);font-weight:700}
+.dia .note{fill:var(--muted);font-family:"Noto Sans TC",sans-serif;font-size:12px}
+.pair{display:grid;grid-template-columns:repeat(auto-fit,minmax(15rem,1fr));gap:1rem;margin:1.25rem 0}
+.pair .callout{margin:0}
+.flag{display:inline-block;font-family:"JetBrains Mono",monospace;font-weight:700;padding:.05rem .45rem;border-radius:3px}
+.flag.t{background:var(--signal-soft);color:var(--signal)}
+.flag.f{background:var(--c2-soft);color:var(--c2)}
+td.bad{color:var(--c2);font-weight:700}
+</style>
+<style>
+.dia .band{fill:var(--hold)}
+.dia .bandl{fill:var(--muted);font-family:"JetBrains Mono",monospace;font-size:11px}
+.dia .ans{fill:var(--c1);font-family:"JetBrains Mono",monospace;font-size:13px;font-weight:700}
+.dia .pip.s{fill:var(--signal)}
+.dia .pip.p{fill:var(--c1)}
+.qline{display:flex;flex-wrap:wrap;gap:4px;align-items:center;font-family:"JetBrains Mono",monospace;font-size:.82rem;margin:.35rem 0}
+.ql{color:var(--muted);font-size:.72rem;margin:0 .3rem}
+.qc{border:2px solid var(--line);border-radius:3px;padding:.15rem .55rem;min-width:2.3rem;text-align:center;background:var(--surface);font-weight:700;color:var(--ink)}
+.qc.now{border-color:var(--c1);background:var(--c1-soft);color:var(--c1)}
+.qc.nx{border-color:var(--signal);background:var(--signal-soft);color:var(--signal)}
+.qc.out{border-style:dashed;opacity:.45;text-decoration:line-through}
+.qc.empty{border-style:dashed;color:var(--muted);font-weight:400}
+.qbar{width:3px;align-self:stretch;background:var(--c2);border-radius:2px;margin:0 .2rem}
+.stat{font-size:.86rem;color:var(--muted);display:flex;flex-wrap:wrap;gap:.3rem 1rem}
+.stat b{color:var(--c2);font-family:"JetBrains Mono",monospace}
+.sw.s{background:var(--signal)}
+.sw.r{background:var(--c2)}
+</style>
+
+<div class="wrap">
+
+<header>
+  <div class="kicker">LeetCode #102 · Tree · BFS 首刷(龜模式)</div>
+  <h1>一層一層排隊</h1>
+  <p class="sub">Binary Tree Level Order Traversal。你已經會 DFS 一條路走到底。今天換一種走法:<strong>一層走完才下一層</strong>。</p>
+</header>
+
+<div class="rail"></div>
+
+<section>
+  <h2><span class="num">01</span>這題在幹嘛</h2>
+  <p class="lede">從上到下,<strong>一層一層</strong>把 node 的值拿出來。同一層從左到右,每一層裝成一個 list。</p>
+
+  <svg class="dia" viewBox="0 0 520 210" width="520" role="img" aria-label="樹 3,左小孩 9,右小孩 20;9 的兩個小孩都是 None;20 的小孩是 15 和 7。第 0 層答案 [3],第 1 層 [9, 20],第 2 層 [15, 7]。">
+<rect class="band" x="0" y="10" width="520" height="46" rx="3"/>
+<rect class="band" x="0" y="78" width="520" height="46" rx="3"/>
+<rect class="band" x="0" y="148" width="520" height="50" rx="3"/>
+<text class="bandl" x="8" y="37">第 0 層</text>
+<text class="bandl" x="8" y="105">第 1 層</text>
+<text class="bandl" x="8" y="176">第 2 層</text>
+<line class="edge" x1="230" y1="50" x2="140" y2="84"/>
+<line class="edge" x1="230" y1="50" x2="320" y2="84"/>
+<line class="edge nil" x1="140" y1="118" x2="100" y2="160"/>
+<line class="edge nil" x1="140" y1="118" x2="180" y2="160"/>
+<line class="edge" x1="320" y1="118" x2="270" y2="154"/>
+<line class="edge" x1="320" y1="118" x2="370" y2="154"/>
+<rect class="box" x="208" y="16" width="44" height="34" rx="4"/><text class="tval" x="230" y="33">3</text>
+<rect class="box" x="118" y="84" width="44" height="34" rx="4"/><text class="tval" x="140" y="101">9</text>
+<rect class="box" x="298" y="84" width="44" height="34" rx="4"/><text class="tval" x="320" y="101">20</text>
+<rect class="nilbox" x="82" y="160" width="36" height="22" rx="3"/><text class="nilv" x="100" y="171">None</text>
+<rect class="nilbox" x="162" y="160" width="36" height="22" rx="3"/><text class="nilv" x="180" y="171">None</text>
+<rect class="box" x="248" y="154" width="44" height="34" rx="4"/><text class="tval" x="270" y="171">15</text>
+<rect class="box" x="348" y="154" width="44" height="34" rx="4"/><text class="tval" x="370" y="171">7</text>
+<text class="ans" x="430" y="37">[3]</text>
+<text class="ans" x="430" y="105">[9, 20]</text>
+<text class="ans" x="430" y="176">[15, 7]</text>
+  </svg>
+  <p>答案:<code>[[3], [9, 20], [15, 7]]</code>。灰色虛線框是 <code>None</code>,它們不是 node,不會出現在答案裡。</p>
+</section>
+
+<section>
+  <h2><span class="num">02</span>這是什麼型</h2>
+  <p><strong>BFS(Breadth-First Search,廣度優先)</strong>,工具是 <strong>queue(排隊)</strong>。</p>
+  <ul class="signals">
+    <li><span class="n">1</span><span>題目出現「<strong>level / 層 / 每一層</strong>」:每層的平均、每層最右邊那個、之字形走。</span></li>
+    <li><span class="n">2</span><span>題目問「<strong>最短 / 最近 / 最少幾步</strong>」:一層一層往外擴,第一次碰到就是最近的。</span></li>
+    <li><span class="n">3</span><span>答案的形狀是 <strong>list 裡面裝 list</strong>,一格一層。</span></li>
+  </ul>
+
+  <h3>跟你 9/21 寫的 DFS 前序比一比</h3>
+  <div class="tablewrap"><table>
+    <tr><th></th><th>DFS 前序(你會的)</th><th>BFS 一層一層(今天)</th></tr>
+    <tr><td>走法</td><td>一條路走到底,再回頭</td><td>這一層全部走完,才下一層</td></tr>
+    <tr><td>「還沒走的」記在哪</td><td>call stack(便條紙一張疊一張)</td><td>queue(一個 list,左邊拿、右邊加)</td></tr>
+    <tr><td>誰先被處理</td><td>最後疊上去的那張</td><td class="hit">最早排進來的那個</td></tr>
+    <tr><td>外殼</td><td>res + 內層 def + 啟動 + return res</td><td class="hit">res + while 迴圈 + return res(沒有內層 def)</td></tr>
+  </table></div>
+</section>
+
+<section>
+  <h2><span class="num">03</span>用你會的前序,為什麼不行</h2>
+  <p>換一棵滿樹 <code>[1,2,3,4,5,6,7]</code>。圓圈裡的數字是「第幾個被拿到」。</p>
+  <div class="pair">
+    <div>
+      <h4>前序(DFS)拿到的順序</h4>
+      <svg class="dia" viewBox="0 0 420 200" width="420" role="img" aria-label="前序順序:1 第 1,2 第 2,4 第 3,5 第 4,3 第 5,6 第 6,7 第 7。先鑽到左下角才回頭。">
+<line class="edge" x1="210" y1="48" x2="110" y2="84"/><line class="edge" x1="210" y1="48" x2="310" y2="84"/>
+<line class="edge" x1="110" y1="118" x2="60" y2="154"/><line class="edge" x1="110" y1="118" x2="160" y2="154"/>
+<line class="edge" x1="310" y1="118" x2="260" y2="154"/><line class="edge" x1="310" y1="118" x2="360" y2="154"/>
+<rect class="box" x="188" y="14" width="44" height="34" rx="4"/><text class="tval" x="210" y="31">1</text>
+<rect class="box" x="88" y="84" width="44" height="34" rx="4"/><text class="tval" x="110" y="101">2</text>
+<rect class="box" x="288" y="84" width="44" height="34" rx="4"/><text class="tval" x="310" y="101">3</text>
+<rect class="box" x="38" y="154" width="44" height="34" rx="4"/><text class="tval" x="60" y="171">4</text>
+<rect class="box" x="138" y="154" width="44" height="34" rx="4"/><text class="tval" x="160" y="171">5</text>
+<rect class="box" x="238" y="154" width="44" height="34" rx="4"/><text class="tval" x="260" y="171">6</text>
+<rect class="box" x="338" y="154" width="44" height="34" rx="4"/><text class="tval" x="360" y="171">7</text>
+<circle class="pip p" cx="240" cy="14" r="10"/><text class="pipn" x="240" y="14">1</text>
+<circle class="pip p" cx="140" cy="84" r="10"/><text class="pipn" x="140" y="84">2</text>
+<circle class="pip p" cx="340" cy="84" r="10"/><text class="pipn" x="340" y="84">5</text>
+<circle class="pip p" cx="90" cy="154" r="10"/><text class="pipn" x="90" y="154">3</text>
+<circle class="pip p" cx="190" cy="154" r="10"/><text class="pipn" x="190" y="154">4</text>
+<circle class="pip p" cx="290" cy="154" r="10"/><text class="pipn" x="290" y="154">6</text>
+<circle class="pip p" cx="390" cy="154" r="10"/><text class="pipn" x="390" y="154">7</text>
+      </svg>
+      <p>拿到:<code>1 2 4 5 3 6 7</code>。4 比 3 早,<strong>跨層了</strong>。</p>
+    </div>
+    <div>
+      <h4>這題要的順序</h4>
+      <svg class="dia" viewBox="0 0 420 200" width="420" role="img" aria-label="一層一層的順序:1 第 1,2 第 2,3 第 3,4 第 4,5 第 5,6 第 6,7 第 7。">
+<line class="edge" x1="210" y1="48" x2="110" y2="84"/><line class="edge" x1="210" y1="48" x2="310" y2="84"/>
+<line class="edge" x1="110" y1="118" x2="60" y2="154"/><line class="edge" x1="110" y1="118" x2="160" y2="154"/>
+<line class="edge" x1="310" y1="118" x2="260" y2="154"/><line class="edge" x1="310" y1="118" x2="360" y2="154"/>
+<rect class="box" x="188" y="14" width="44" height="34" rx="4"/><text class="tval" x="210" y="31">1</text>
+<rect class="box" x="88" y="84" width="44" height="34" rx="4"/><text class="tval" x="110" y="101">2</text>
+<rect class="box" x="288" y="84" width="44" height="34" rx="4"/><text class="tval" x="310" y="101">3</text>
+<rect class="box" x="38" y="154" width="44" height="34" rx="4"/><text class="tval" x="60" y="171">4</text>
+<rect class="box" x="138" y="154" width="44" height="34" rx="4"/><text class="tval" x="160" y="171">5</text>
+<rect class="box" x="238" y="154" width="44" height="34" rx="4"/><text class="tval" x="260" y="171">6</text>
+<rect class="box" x="338" y="154" width="44" height="34" rx="4"/><text class="tval" x="360" y="171">7</text>
+<circle class="pip s" cx="240" cy="14" r="10"/><text class="pipn" x="240" y="14">1</text>
+<circle class="pip s" cx="140" cy="84" r="10"/><text class="pipn" x="140" y="84">2</text>
+<circle class="pip s" cx="340" cy="84" r="10"/><text class="pipn" x="340" y="84">3</text>
+<circle class="pip s" cx="90" cy="154" r="10"/><text class="pipn" x="90" y="154">4</text>
+<circle class="pip s" cx="190" cy="154" r="10"/><text class="pipn" x="190" y="154">5</text>
+<circle class="pip s" cx="290" cy="154" r="10"/><text class="pipn" x="290" y="154">6</text>
+<circle class="pip s" cx="390" cy="154" r="10"/><text class="pipn" x="390" y="154">7</text>
+      </svg>
+      <p>要的:<code>1 | 2 3 | 4 5 6 7</code>。一層拿完才下一層。</p>
+    </div>
+  </div>
+  <div class="callout warn">
+    <h4>暴力法:一層跑一次 DFS</h4>
+    <p>先算樹有幾層。然後「只收第 0 層」跑一次 DFS、「只收第 1 層」再跑一次……每次都從 root 重走整棵樹。
+    n 個 node、h 層,總共 <strong>O(n × h)</strong>。樹歪成一條鏈時 h = n,變成 O(n²)。</p>
+    <p><strong>浪費的免費情報:</strong>站在 node 2 的時候,你已經知道 4 和 5 是「下一層」。暴力法把這個情報丟掉,之後再從 root 走一次去找。</p>
+  </div>
+</section>
+
+<section>
+  <h2><span class="num">04</span>做法:看 q 裡面裝什麼</h2>
+<pre>      3          第 0 層
+     / \
+    9   20       第 1 層
+       /  \
+      15   7     第 2 層</pre>
+  <p><code>q</code> 是一個 list,裡面放<strong>還沒處理的 node</strong>。每一步只做一件事:<strong>從左邊拿一個出來,把它的小孩加到右邊。</strong><code>None</code> 不加。</p>
+<pre>q = [3]
+拿 3,加 9、20     →  q = [9, 20]     <span class="cm">← 剛好是第 1 層</span>
+拿 9,沒有小孩     →  q = [20]
+拿 20,加 15、7    →  q = [15, 7]     <span class="cm">← 剛好是第 2 層</span>
+拿 15,沒有小孩    →  q = [7]
+拿 7,沒有小孩     →  q = []          <span class="cm">停</span></pre>
+  <p>拿出來的順序是 <code>3 9 20 15 7</code>,剛好一層一層、由左到右。</p>
+  <div class="callout warn">
+    <h4>還差一步</h4>
+    <p>這樣只得到一條 <code>[3, 9, 20, 15, 7]</code>(已跑 code 驗證)。題目要分層:<code>[[3], [9, 20], [15, 7]]</code>。</p>
+    <p><code>q = [9, 20]</code> 的時候,這一層要拿幾個?你怎麼知道?</p>
+  </div>
+  <details>
+    <summary>答案:每層開始前先記下 len(q)<span class="lockhint">想好了再展開</span></summary>
+    <div class="dbody">
+<pre>q = [3]        len(q) = 1 → 拿 1 個:3        加 9、20  →  level = [3]
+q = [9, 20]    len(q) = 2 → 拿 2 個:9、20    加 15、7  →  level = [9, 20]
+q = [15, 7]    len(q) = 2 → 拿 2 個:15、7              →  level = [15, 7]
+q = []         停</pre>
+      <p>每一層開始的那一刻,<code>q</code> 裡剛好只有這一層的 node。先把 <code>len(q)</code> 記下來,只拿這麼多個。</p>
+      <p>拿 20 的時候 15、7 被加進 <code>q</code>,但這一層已經說好只拿 2 個,所以 15、7 留到下一層。</p>
+      <p>不記 <code>len(q)</code> 會一直拿到 <code>q</code> 空掉,全部混成一層:<code>[[3, 9, 20, 15, 7]]</code>。</p>
+    </div>
+  </details>
+</section>
+
+<details>
+  <summary>完整 code 加逐行解釋<span class="lockhint">想好了再展開</span></summary>
+  <div class="dbody">
+<pre><span class="kw">from</span> collections <span class="kw">import</span> deque
+
+<span class="kw">class</span> Solution:
+    <span class="kw">def</span> <span class="fn">levelOrder</span>(self, root):
+        <span class="kw">if not</span> root:                         <span class="cm"># ① 空樹直接交 []</span>
+            <span class="kw">return</span> []
+        res = []                             <span class="cm"># ② 收答案(外殼 a)</span>
+        q = deque([root])                    <span class="cm"># ③ q 先放 root</span>
+<span class="hl">        <span class="kw">while</span> q:                             <span class="cm"># ④ 一圈 = 一層</span></span>            level = []                       <span class="cm"># ⑤ 這一層的小 list</span>
+<span class="hl">            <span class="kw">for</span> _ <span class="kw">in</span> range(len(q)):          <span class="cm"># ⑥ 這一層有幾個</span></span>                node = q.popleft()           <span class="cm"># ⑦ 從前面拿</span>
+                level.append(node.val)
+                <span class="kw">if</span> node.left:                <span class="cm"># ⑧ None 不排隊</span>
+                    q.append(node.left)      <span class="cm">#    小孩排隊尾</span>
+                <span class="kw">if</span> node.right:
+                    q.append(node.right)
+            res.append(level)                <span class="cm"># ⑨ 一層收完,交給 res</span>
+        <span class="kw">return</span> res                           <span class="cm"># ⑩ 交答案(外殼 d)</span></pre>
+    <div class="tablewrap"><table>
+      <tr><th>行</th><th>做什麼</th><th>拿掉會怎樣</th></tr>
+      <tr><td class="mono">①</td><td>空樹擋在門口</td><td>q 變成 <code>[None]</code>,拿出來讀 <code>.val</code>,AttributeError</td></tr>
+      <tr><td class="mono">③</td><td><code>deque</code> 是兩頭都能快速進出的 list</td><td>用 list 的 <code>pop(0)</code> 也對,但每次要把後面全部往前挪一格,O(n)</td></tr>
+      <tr><td class="mono">④</td><td>q 還有 node 就繼續</td><td></td></tr>
+      <tr><td class="mono">⑥</td><td><code>len(q)</code> <strong>只在 for 開始時算一次</strong>。之後排進來的人不影響這個數字</td><td>分層消失,全部混成一層</td></tr>
+      <tr><td class="mono">⑦</td><td><code>popleft</code> = 從前面拿(先來先拿)</td><td>改成 <code>pop()</code> 會從後面拿,變成 stack,走法變 DFS</td></tr>
+      <tr><td class="mono">⑧</td><td>只加真的 node</td><td><code>None</code> 進 q,之後讀 <code>.val</code> 就掛</td></tr>
+      <tr><td class="mono">⑨</td><td>縮排在 while 裡、for 外面</td><td>縮進 for 裡:每拿一個人就交一次</td></tr>
+    </table></div>
+    <p>外殼對照:DFS 是「res、內層 def、啟動、return res」四格。BFS 只有三格:<strong>res、while 迴圈、return res</strong>。沒有內層函式,也沒有啟動那一行,因為 while 自己就在跑。</p>
+  </div>
+</details>
+
+<details>
+  <summary>逐輪執行模擬表(跟 04 同一棵樹)<span class="lockhint">摺疊</span></summary>
+  <div class="dbody">
+    <div class="tablewrap"><table>
+      <tr><th>while 第幾圈</th><th class="mono">圈頭 q</th><th class="mono">range(len(q))</th><th>for 第幾次</th><th class="mono">popleft</th><th class="mono">level</th><th class="mono">這次之後 q</th><th class="mono">res</th></tr>
+      <tr><td>1</td><td class="mono">[3]</td><td class="mono t2">range(1)</td><td>1</td><td class="mono">3</td><td class="mono">[3]</td><td class="mono">[9, 20]</td><td class="mono">[[3]]</td></tr>
+      <tr><td>2</td><td class="mono">[9, 20]</td><td class="mono t2">range(2)</td><td>1</td><td class="mono">9</td><td class="mono">[9]</td><td class="mono">[20]</td><td class="mono"></td></tr>
+      <tr><td></td><td></td><td></td><td>2</td><td class="mono">20</td><td class="mono">[9, 20]</td><td class="mono">[15, 7]</td><td class="mono">[[3], [9, 20]]</td></tr>
+      <tr><td>3</td><td class="mono">[15, 7]</td><td class="mono t2">range(2)</td><td>1</td><td class="mono">15</td><td class="mono">[15]</td><td class="mono">[7]</td><td class="mono"></td></tr>
+      <tr><td></td><td></td><td></td><td>2</td><td class="mono">7</td><td class="mono">[15, 7]</td><td class="mono">[]</td><td class="mono">[[3], [9, 20], [15, 7]]</td></tr>
+      <tr><td>4</td><td class="mono">[]</td><td colspan="6">q 是空的,while 不進去。<code>return res</code></td></tr>
+    </table></div>
+    <p>這張表跟 04 手走的是同一件事。04 的「記下 len(q)」= 表裡紅色的 <code>range(len(q))</code>。</p>
+  </div>
+</details>
+
+<details>
+  <summary>口訣加模板<span class="lockhint">摺疊</span></summary>
+  <div class="dbody">
+    <div class="mantra">先記 len(q),只拿這麼多個;小孩加到右邊。</div>
+<pre>q = deque([root])
+<span class="kw">while</span> q:
+    <span class="kw">for</span> _ <span class="kw">in</span> range(len(q)):     <span class="cm"># 這一層有幾個</span>
+        node = q.popleft()
+        <span class="cm"># ← 對 node 做這題要的事</span>
+        <span class="kw">if</span> node.left:  q.append(node.left)
+        <span class="kw">if</span> node.right: q.append(node.right)
+    <span class="cm"># ← 一層結束,做這題要的事</span></pre>
+    <div class="tablewrap"><table>
+      <tr><th>換皮題</th><th>只改哪裡</th></tr>
+      <tr><td>Right Side View(每層最右邊那個)</td><td>一層結束時,只收 <code>level[-1]</code></td></tr>
+      <tr><td>Average of Levels(每層平均)</td><td>一層結束時,收 <code>sum(level) / len(level)</code></td></tr>
+      <tr><td>Zigzag(之字形)</td><td>一層結束時,單數層反過來</td></tr>
+      <tr><td>Minimum Depth(最淺的葉子)</td><td>拿到第一個葉子就直接 return 層數</td></tr>
+    </table></div>
+  </div>
+</details>
+
+<details>
+  <summary>L6 面試逐字稿<span class="lockhint">摺疊</span></summary>
+  <div class="dbody">
+    <div class="move"><h4><span class="mv">MOVE 0</span>先問 constraint,手不碰白板</h4>
+      <div class="say"><b>說</b>Before I start: can the tree be empty, and if so, do I return an empty list? Within a level, is it left to right? And about how many nodes, up to two thousand?</div>
+      <div class="think"><b>想</b>空樹的答案是 <code>[]</code> 不是 <code>[[]]</code>,先問清楚,Move 8 就有東西可以指。</div></div>
+
+    <div class="move"><h4><span class="mv">MOVE 1</span>重述加自己的例子</h4>
+      <div class="say"><b>說</b>So I return the values grouped by depth, top to bottom, left to right. Here's my example: 3 has children 9 and 20, and 20 has 15 and 7. The answer is [[3], [9, 20], [15, 7]].</div>
+      <div class="think"><b>寫</b>白板畫 01 那棵樹,每層旁邊寫答案。</div></div>
+
+    <div class="move"><h4><span class="mv">MOVE 2</span>暴力解 20 秒</h4>
+      <div class="say"><b>說</b>A brute-force way is to run a DFS once per depth and keep only the nodes at that depth. That's O(n times h). It throws away free information: when I visit a node, I already know its children belong to the next level.</div></div>
+
+    <div class="move"><h4><span class="mv">MOVE 3</span>Invariant</h4>
+      <div class="say"><b>說</b>At the start of each round of the while loop, the queue holds exactly one full level, in left-to-right order. So if I take out exactly len(queue) nodes, I get that level and nothing else.</div>
+      <div class="think"><b>想</b>這句話同時說明了兩件事:為什麼要先記 len(q)(分層),為什麼用 queue(左到右)。</div></div>
+
+    <div class="move"><h4><span class="mv">MOVE 4</span>關鍵手法和它換掉了什麼</h4>
+      <div class="say"><b>說</b>The key tools are a FIFO queue and a level-size snapshot. The queue gives me left-to-right order for free, and the snapshot draws the line between this level and the next. I pay O(width) extra memory to get a single pass.</div></div>
+
+    <div class="move"><h4><span class="mv">MOVE 5</span>複雜度,寫 code 之前講</h4>
+      <div class="say"><b>說</b>Each node goes into the queue once and comes out once, so time is O(n). The queue holds at most one level, which can be about n over 2 nodes, so space is O(n) in the worst case. Sound reasonable?</div></div>
+
+    <div class="move"><h4><span class="mv">MOVE 6</span>code 分 3 段</h4>
+      <div class="say"><b>說 · 第 1 段</b>First I handle the empty tree, so the loop never sees None. Then I put the root in a deque.</div>
+<pre><span class="kw">if not</span> root:
+    <span class="kw">return</span> []
+res = []
+q = deque([root])</pre>
+      <div class="say"><b>說 · 第 2 段</b>Each round of the while loop is one level. I read len(q) once, before I pop anything.</div>
+<pre><span class="kw">while</span> q:
+    level = []
+    <span class="kw">for</span> _ <span class="kw">in</span> range(len(q)):</pre>
+      <div class="say"><b>說 · 第 3 段</b>For each node in this level, I record its value and add its real children to the back. When the level is done, I add it to the result.</div>
+<pre>        node = q.popleft()
+        level.append(node.val)
+        <span class="kw">if</span> node.left:  q.append(node.left)
+        <span class="kw">if</span> node.right: q.append(node.right)
+    res.append(level)
+<span class="kw">return</span> res</pre></div>
+
+    <div class="move"><h4><span class="mv">MOVE 7</span>主動 dry run(Move 1 的例子)</h4>
+      <div class="say"><b>說</b>Let me run my example. Round one: the queue is [3], size one. I pop 3 and push 9 and 20. Level is [3]. Round two: size two. I pop 9, no children, then 20, and push 15 and 7. Level is [9, 20]. Round three: size two, I pop 15 and 7. The queue is empty, so I stop.</div></div>
+
+    <div class="move"><h4><span class="mv">MOVE 8</span>主動掃 edge case</h4>
+      <div class="say"><b>說</b>Empty tree: the guard returns an empty list. One node: one round, [[1]]. A tree that's just a line: every level has size one, and it still works. Nodes on the same level with different parents: they sit next to each other in the queue, so they land in the same list without extra code.</div></div>
+
+    <div class="move"><h4><span class="mv">MOVE 9</span>推廣</h4>
+      <div class="say"><b>說</b>The same template solves right side view: I keep only the last value of each level. For zigzag, I reverse every other level. For minimum depth, I return as soon as I pop the first leaf. On a general graph, I'd also need a visited set, because a graph can have cycles and a tree can't.</div></div>
+
+    <h3>完整 code 和「哪句話對應哪幾行」</h3>
+<pre><span class="kw">def</span> <span class="fn">levelOrder</span>(self, root):
+    <span class="kw">if not</span> root:                 <span class="cm"># A</span>
+        <span class="kw">return</span> []
+    res = []
+    q = deque([root])            <span class="cm"># A</span>
+    <span class="kw">while</span> q:                     <span class="cm"># B</span>
+        level = []
+        <span class="kw">for</span> _ <span class="kw">in</span> range(len(q)):  <span class="cm"># B, C</span>
+            node = q.popleft()   <span class="cm"># D</span>
+            level.append(node.val)
+            <span class="kw">if</span> node.left:  q.append(node.left)    <span class="cm"># D</span>
+            <span class="kw">if</span> node.right: q.append(node.right)   <span class="cm"># D</span>
+        res.append(level)
+    <span class="kw">return</span> res</pre>
+    <div class="tablewrap"><table>
+      <tr><th>標記</th><th>那句話</th><th>行</th></tr>
+      <tr><td class="mono">A</td><td>so the loop never sees None / put the root in a deque</td><td class="mono">if not root … q = deque([root])</td></tr>
+      <tr><td class="mono">B</td><td>each round of the while loop is one level</td><td class="mono">while q / for … range(len(q))</td></tr>
+      <tr><td class="mono">C</td><td>the queue holds exactly one full level (Move 3)</td><td class="mono">range(len(q))</td></tr>
+      <tr><td class="mono">D</td><td>record its value and add its real children to the back</td><td class="mono">popleft / append / if node.left</td></tr>
+    </table></div>
+
+    <h3>只給結論 vs 說明推理</h3>
+    <div class="tablewrap"><table>
+      <tr><th>Move</th><th>只給結論</th><th>說明推理</th></tr>
+      <tr><td>3</td><td>I use a queue.</td><td>At the start of each round, the queue holds exactly one level, so I take len(q) nodes.</td></tr>
+      <tr><td>5</td><td>It's O(n).</td><td>Each node goes in once and comes out once, so it's O(n).</td></tr>
+      <tr><td>8</td><td>Edge cases are fine.</td><td>Same-level nodes from different parents sit next to each other in the queue, so they group without extra code.</td></tr>
+    </table></div>
+
+    <div class="callout key"><h4>Native English(可以搬到別題)</h4>
+      <ul>
+        <li>At the start of each round, the queue holds exactly one full level.</li>
+        <li>Each node goes in once and comes out once, so it's O(n).</li>
+        <li>I'll handle the empty case first, so the loop never sees None.</li>
+        <li>The same template works here. I only change what I keep from each level.</li>
+      </ul></div>
+  </div>
+</details>
+
+<details>
+  <summary>這次的釐清<span class="lockhint">2026-09-23 首刷、09-24 隔天</span></summary>
+  <div class="dbody">
+<pre><span class="cm">09-23 首刷:levelOrder 7/7,for 那行靠階 2 提示後自己寫出。</span>
+<span class="cm">09-24 隔天默寫想不起來,對照抄 7/7。抄完說「還是不太懂」,卡 A/B/C 三個點。</span>
+
+<span class="kw">✗ C 不懂:</span>q 從哪一頭進、哪一頭出
+<span class="fn">✓ 其實是:</span>popleft() 從左邊拿走一個,append(x) 從右邊放進一個
+            q=[4,5] → append(6) → [4,5,6] → popleft() 拿到 4 → [5,6]
+
+<span class="kw">✗ A 不懂:</span>while 和 for 各管什麼。第一次答「while 4 圈、第 2 圈 for 3 次」
+<span class="fn">✓ 其實是:</span>while 一圈 = 一整層;for 一次 = 這層裡的一個 node
+            [1,2,3,4,5,6,7] → while 3 圈,for 分別跑 1 / 2 / 4 次
+<span class="cm">→ 解法:填表「第幾圈 / 開始時的 q / for 幾次」,每圈開始時 q 剛好是那一層</span>
+
+<span class="kw">✗ B 不懂:</span>為什麼要 len(q)
+<span class="fn">✓ 其實是:</span>for 跑到一半 q 會混兩層。第 2 圈拿走 2、放進 4,5 → q=[3,4,5]
+            3 是第 2 層,4,5 是第 3 層。len(q) 在 for 開始前只算一次(=2),
+            所以 for 剛好停在第 2 層最後一個
+<span class="cm">→ 刪掉 len(q) 一直 popleft 到空 → [[1,2,3,4,5,6,7]] 全塞一格</span>
+<span class="cm">→ 第一次算 q 時只做了 popleft,漏掉後面兩個 append。一行一格填表後答對</span>
+
+<span class="fn">一句話:</span>while 一圈處理一層,len(q) 先數好這層有幾個,for 就只拿這麼多個。
+
+<span class="kw">#199 Right Side View(兔模式,改一行):</span>res.append(level) → res.append(level[-1])
+  答「用 index 0, 1」→ 列表格看每層要的值 → 「從右邊數」→ level[-1] 直接給
+  改哪行答成 popleft 那行、填空答 popright → 連錯 2 次,直接給答案
+<span class="cm">→ q.popleft() 是「拿走」(q 變短);level[-1] 是「看一下」(level 不變)</span>
+<span class="fn">溫度計 ② 過:</span>只往 .right 走 → [1,3],漏掉長在左子樹的 4</pre>
+  </div>
+</details>
+
+</div>
