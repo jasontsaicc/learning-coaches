@@ -4,6 +4,10 @@
      正解、判準句、L6 顧問版、歷史重測紀錄、下次抽考題寫在這裡,節標題 = registry 行的 `date | topic`。
      開場不讀這個檔;step A 抽考到哪張卡,才讀哪一節。新的重測紀錄追加到對應節,不要寫回 registry。 -->
 
+## 2026-09-25 | container 存取兩道門
+
+- 正解:存取檔案先過門 1(mnt namespace:看不看得到),再過門 2(UID:准不准)。container 的 root 在共用 kernel 眼中就是 UID 0,但沒翻牆時 node 的 /etc/shadow 不在它的 filesystem 視野裡,讀到的是 image 自帶那份。翻牆 = 拆門 1,只剩門 2,UID 0 直接過 → 所以 runAsNonRoot 是第二層防線。下次抽考:2×2 表(UID 0/1000 × 翻牆/沒翻牆)隨機挖一格,要求講出卡哪道門。
+
 ## 2026-06-18 | YAML validation
 
 - 正解:讀 `unknown field "A.B.C"` 完整路徑回檔案定位;selector 認親欄位是 `matchLabels` 且必須等於 template.metadata.labels。06-23 抽考需引導才答對「檢查在 API Server、與 etcd 無關」,推 +7。**s23 實戰現形**:allow-dns 重寫把 selector 塞進 ports 清單,dry-run 前自行「猜修」把 apiVersion 改成大寫 V1(`no matches for kind ... in version` 第二次親手撞,s16 同款),拿到錯誤後學員選擇跳過讀圖、教練代打。讀圖 rep 仍欠,WR9 用帶錯 YAML 現場讀圖。**s25 rep 首次自己讀圖過關**:`strict decoding error: unknown field "spec.sccessModes"`,教練只說「訊息把座標給你了」,學員**自己回檔案找到打錯的字並改對**,apply 成功 —— 建卡以來第一次不用代打。但同一段稍早學員說「直接給我 yaml」跳過自寫 PVC,rep 打折,故留 3 不推 7;08-08 換一個不同型別的錯(`cannot unmarshal` 或 enum 大小寫)再測一次,過了才 resolved。

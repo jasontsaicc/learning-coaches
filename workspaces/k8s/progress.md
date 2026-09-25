@@ -7,15 +7,15 @@
 
 ## Meta
 
-- session_count: 38
+- session_count: 39
 - last_weekly_review: 34(WR9 於 s34 壓縮版跑完,三主題 blind recall 全過;下次 WR 於 s41)
-- last_session_date: 2026-09-21
+- last_session_date: 2026-09-25
 - warm_up_classification: mid
 - target_role: 泛用大廠 senior DevOps/SRE。2026-08-21 確認無緊急面試,採 production depth + senior interview 雙軌;核心主題固定比較地端 K8s / 傳統 EKS / 高度託管 EKS(curriculum-plan §11)
 
 ## Current Session breakpoint
 
-s38(2026-09-21)學員喊停:C-6 chunk 1(encryption at rest vs RBAC 各擋誰)supported、chunk 2(env 快照 vs volume 同步)pass。下一步 **C-6 chunk 3 securityContext + PSS**(`kubectl create ns pss-lab` + label enforce=restricted,naked nginx 被退件);接著 C-6 F/G(未跑,不是債,留斷點)。尾巴冷測 IRSA trust vs permission(09-21 到期未抽)+ 爆炸半徑軸卡(09-24)。lab 殘留:default ns 的 `db-cred` Secret、`cred-demo` Pod。
+s39(2026-09-25,家用 VM,context `kind-k8s-coach-p2a`)學員喊停:C-6 chunk 3 前半「container 的 root = host kernel 的 UID 0 / 存取兩道門(namespace 管看得到、UID 管准不准)」已教,gate 未過(UID 1000 翻牆題答對帶判準;壓測「UID 0 沒翻牆讀 node /etc/shadow」答讀得到 ✗)。下一步 **先收換皮題「UID 1000 沒翻牆卡哪道門」**(答:讀不到,卡門 1),過了再講 securityContext 四欄位 → PSS lab(`kubectl create ns pss-lab` + label enforce=restricted,naked nginx 被退件);接著 C-6 F/G。尾巴冷測 IRSA trust vs permission(09-21 過期)+ 爆炸半徑軸卡(09-24 過期)。bastion lab 殘留:default ns 的 `db-cred`、`cred-demo`。
 
 <!-- schema §3 = 恰好一行。敘事與次要待辦寫 session-log.md,長效教練紀律寫 session-log.md
      「教練執行紀律」,不要在這裡疊舊堂。s32 及更早斷點原文見 session-log.md 對應堂,
@@ -106,6 +106,7 @@ weak-topic flags(2026-08-03 啟用,P2a 帶 flag 前進、gate 未考,學員決�
      interval 2 = +2 天臨時複習格(口頭型 resolved,過了才進 3/7/14)。
      unresolved-session-count 於 2026-07-10 遷移時依複測紀錄初始化(近似值)。 -->
 
+- 2026-09-25 | container 存取兩道門(namespace 視野 vs UID 身分) | 「UID 0 沒翻牆讀得到 node 的 /etc/shadow 嗎」答「可以,因為是 root」 | RP2 兩道獨立檢查混成一步(同 IRSA trust vs permission 形狀):只看 UID 欄,漏 mnt ns 決定看不看得到 | unresolved | 3 | 2026-09-28 | 0
 - 2026-09-18 | IRSA trust vs permission policy | 首答「擋在 B policy」;誘答「改 SA annotation 就能讀別人的 S3」同意;F 段又同意「STS 看 policy 有無 s3:GetObject 就放行」 | RP2 驗身分(trust policy 比 JWT sub)與授權(permission policy)混成一步;annotation 只是申請單 | unresolved | 3 | 2026-09-21 | 0
 - 2026-09-13 | 權限爆炸半徑跑錯判準軸 | 評 SA 外洩痛不痛時先看 ns 廣度(漏 resource 深度);評 secret 危險度跑到 base64 存法軸,不是「能否離開 RBAC 管轄」軸 | RP3 判準軸選錯:該問「憑證外洩後攻擊者碰得到的 ns×resource×verb 上限,以及能否跳出 RBAC 管轄」 | unresolved | 3 | 2026-09-24 | 2
 - 2026-06-18 | YAML validation | `matchLabels` 打成 `metaLabels` | 不讀 strict decoding error;驗證在 API Server | unresolved | 7 | 2026-06-30 | 2
@@ -119,7 +120,7 @@ weak-topic flags(2026-08-03 啟用,P2a 帶 flag 前進、gate 未考,學員決�
 - 2026-07-17 | NetworkPolicy 出廠全通 | 預測「陌生 Pod 連不到 db」,實測連得到 | 出廠全通;namespace 不做網路隔離 | unresolved | 3 | 2026-07-23 | 1
 - 2026-07-23 | 跨 node 走路由表不是 iptables(層級混淆家族) | 問跨 node 第一個指令答 iptables,縮小重問答 resolv.conf | 改寫層(NAT)與轉送層(routing)混淆 | unresolved | 7 | 2026-09-10 | 0
 - 2026-07-23 | kube-proxy 不在 Pod 啟動路徑上 | 把 kube-proxy 列為 kubelet 建 Pod 三件事之一 | 控制路徑 vs 資料路徑混淆 | unresolved | 3 | 2026-08-07 | 1
-- 2026-07-23 | 只給結論不給判準(pattern 卡,升級追蹤) | 同堂三次只給結論不 show work;2026-09-08 續犯(「因為是 get」=複述觀察非判準) | 輸出習慣不是能力;面試官無法區分會與猜對 | unresolved | 3 | 2026-09-24 | 7
+- 2026-07-23 | 只給結論不給判準(pattern 卡,升級追蹤) | 同堂三次只給結論不 show work;2026-09-08 續犯(「因為是 get」=複述觀察非判準);09-25 續犯(「B 因為」後空白) | 輸出習慣不是能力;面試官無法區分會與猜對 | unresolved | 3 | 2026-09-24 | 7
 - 2026-07-17 | default-deny 後的分層(DNS 層 vs 連線層) | 只答「連線不到」,不分辨死在 DNS 層還是連線層 | 層級混淆;兩步都被鎖時不問哪步先發生 | unresolved | 3 | 2026-07-26 | 1
 - 2026-07-28 | veth 誤記「跨 node 連線」 | 答「veth 是跨 node 的網卡連線」 | veth 只管 Pod netns 到 root netns 那段 | unresolved | 7 | 2026-08-10 | 1
 - 2026-07-28 | iptables=一棟樓(nat 表/filter 表) | 幻影站 4 + 誘答「DNAT 做完才進 iptables」 | 把 iptables 當一站,不知 DNAT 就在 nat 表裡 | unresolved | 3 | 2026-07-31 | 0
@@ -158,6 +159,7 @@ weak-topic flags(2026-08-03 啟用,P2a 帶 flag 前進、gate 未考,學員決�
      每張卡的重測歷史與下次抽考題在 mistake-notes.md;term 卡到期日在 term-registry.md。 -->
 
 - mistake:IRSA-trust-vs-permission | mistake | 3 | 2026-09-21 | active
+- mistake:兩道門(namespace視野vsUID身分) | mistake | 3 | 2026-09-28 | active
 - mistake:YAML-validation | mistake | 3 | 2026-08-08 | active
 - mistake:ImagePullBackOff | mistake | 3 | 2026-08-09 | active
 - mistake:dry-run-兩層 | mistake | 3 | 2026-08-09 | active
