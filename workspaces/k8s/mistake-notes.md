@@ -4,6 +4,10 @@
      正解、判準句、L6 顧問版、歷史重測紀錄、下次抽考題寫在這裡,節標題 = registry 行的 `date | topic`。
      開場不讀這個檔;step A 抽考到哪張卡,才讀哪一節。新的重測紀錄追加到對應節,不要寫回 registry。 -->
 
+## 2026-09-26 | app 為什麼要 root
+
+- 正解:一般 app 要 root 通常只因兩件普通事:綁 1024 以下 port(或給 CAP_NET_BIND_SERVICE)、寫 root 擁有的目錄。改路由表/iptables 是 CNI、kube-proxy 這類 node 元件(要 NET_ADMIN,放 kube-system privileged)。解法:換非 root image(nginx-unprivileged 聽 8080、USER 101)或 runAsUser + emptyDir。下次抽考:給一個 app 起不來的 log(`bind() to 0.0.0.0:80 failed (13: Permission denied)`),問為什麼、兩種修法。
+
 ## 2026-09-25 | container 存取兩道門
 
 - 正解:存取檔案先過門 1(mnt namespace:看不看得到),再過門 2(UID:准不准)。container 的 root 在共用 kernel 眼中就是 UID 0,但沒翻牆時 node 的 /etc/shadow 不在它的 filesystem 視野裡,讀到的是 image 自帶那份。翻牆 = 拆門 1,只剩門 2,UID 0 直接過 → 所以 runAsNonRoot 是第二層防線。下次抽考:2×2 表(UID 0/1000 × 翻牆/沒翻牆)隨機挖一格,要求講出卡哪道門。
