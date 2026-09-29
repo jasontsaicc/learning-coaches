@@ -181,9 +181,10 @@ def bfs(root):
         return []
     queue = deque([root])
     result = []
-    while queue:
+    while queue:                       # while = 一層
         level = []
-        for _ in range(len(queue)):
+        level_size = len(queue)        # 先數這層(只數一次,後面塞的是下一層)
+        for _ in range(level_size):    # for = 這層的人
             node = queue.popleft()
             level.append(node.val)
             if node.left: queue.append(node.left)

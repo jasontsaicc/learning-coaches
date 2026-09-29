@@ -4,7 +4,16 @@
 
 # leetcode
 
-- 今天做到:2026-09-24。**BFS 三個卡點(q 兩頭 / while vs for / `len(q)`)用填表走完,#199 Right Side View 兔模式 6/6。**
+- 今天做到:2026-09-27。**教法改版,不是題目進度。** 開場 BFS 重建:第 2 圈開始 `q=[9,20]` 對;
+  `for` 跑完 `q=?` 答「`[]`,第三圈才加進來」(以為小孩在下一圈才 append,縮排歸屬沒看);
+  `len(q)` 答「知道這層有幾個」方向對;換內層 `while` 的反事實題答「不知道」。
+  學員說**「你的教學我常常卡住看不懂」**,貼出 ChatGPT 教 BFS 的紀錄(排隊模型,自評好懂很多)。
+  診斷:流程跟 teaching-loop 一樣,差在步伐太大(一題三件事、太早貼整份模板、反事實題、每則換樹)。
+  改動:`teaching-loop.md` 新增「步伐規則」+ 開場只默自己寫過的 + 卡住階 2 改成縮到一格狀態;
+  `pattern-cheatsheet.md` BFS 改 `level_size = len(queue)`;學員筆記存成
+  `tree/binary-tree-level-order-traversal/bfs-queue-model.md`(BFS 母版)。
+  **下次:#637 Average of Levels 兔模式,開場先貼 `bfs-queue-model.md`,用 `1-2-3-4-5` 那棵樹。**
+- 前一場 2026-09-24。**BFS 三個卡點(q 兩頭 / while vs for / `len(q)`)用填表走完,#199 Right Side View 兔模式 6/6。**
   開場默寫 `levelOrder` 想不起來,對照抄 7/7。抄完說「還是不太懂」,自選卡在 A(while/for 各管什麼)、B(為什麼 `len(q)`)、C(q 哪頭進出)。
   順序 C → A → B,每步一張變數值表 + 一個填空。C 一次對。A 第一次答「while 4 圈、第 2 圈 for 3 次」(兩個都錯),
   回「ok」沒填表,縮成「只填一格」後逐格答對。B 算 q 時只做了 popleft 漏掉兩個 append,改成一行一格後對;
@@ -243,7 +252,7 @@
 
 ## 接下來
 
-0. **BFS 隔堂默寫**:開場默 `levelOrder`,先問「while 一圈做什麼、`len(q)` 為什麼先算」再寫。9/24 對照抄,還沒自己寫過。
+0. **BFS 兔模式 #637**:開場貼 `bfs-queue-model.md`(排隊模型),照 teaching-loop「步伐規則」一格一格走。
    之後兔模式接 #637 Average of Levels 或 #103 Zigzag(一層結束時改一行)。NeetCode 順序下一題是 #1448 Count Good Nodes(DFS 前序)。
 1. 外殼從 0 寫:9/21 前序已在「只有註解、沒有骨架」下自己排出四格。下一次連註解都拿掉,
    用 `tree/dual-track-shell/drill.py`(清空 Solution)。
