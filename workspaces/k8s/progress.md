@@ -7,15 +7,15 @@
 
 ## Meta
 
-- session_count: 39
+- session_count: 40
 - last_weekly_review: 34(WR9 於 s34 壓縮版跑完,三主題 blind recall 全過;下次 WR 於 s41)
-- last_session_date: 2026-09-27
+- last_session_date: 2026-09-29
 - warm_up_classification: mid
 - target_role: 泛用大廠 senior DevOps/SRE。2026-08-21 確認無緊急面試,採 production depth + senior interview 雙軌;核心主題固定比較地端 K8s / 傳統 EKS / 高度託管 EKS(curriculum-plan §11)
 
 ## Current Session breakpoint
 
-s39(2026-09-25~27,家用 VM,context `kind-k8s-coach-p2a`)收工:C-6 chunk 3 ✅(supported)。3a 兩道門 + runAsNonRoot 只改翻牆後那欄;3b PSS lab 實證:naked nginx 被 admission 退件(四條違規)→ 補四欄仍 `CreateContainerConfigError`(kubelet:image will run as root)→ 換 `nginxinc/nginx-unprivileged` Running、`id` = uid 101。下一步 **C-6 F/G**(未跑,不是債);F 可用兩個檢查點圖(admission 看 YAML / kubelet 看 image user)。尾巴冷測 IRSA trust vs permission(09-21 過期)+ 爆炸半徑軸卡(09-24 過期)。家用 VM lab 殘留:ns `pss-lab` + Pod `dressed-nginx`。eli5 頁:https://claude.ai/artifact/5BMgeH7bvfwwwJBwLopqvZ
+s40(2026-09-29)收工:C-6 F ✅、G 2/4 未過(根因「PSS 只查 Pod 不查 Deployment」沒講出)。**學員拍板:下堂直接進新課** → P2b 核心 C-4~C-6 教學段已完,下堂開 P3 chunk 1(開場依 curriculum 定 chunk map);WR 於 s41 到期、P2b gate、冷測(IRSA trust vs permission / 爆炸半徑軸 / PSS Deployment 換皮)一律壓課尾,不擋新課。家用 VM lab 殘留:ns `pss-lab` + Pod `dressed-nginx`。
 
 <!-- schema §3 = 恰好一行。敘事與次要待辦寫 session-log.md,長效教練紀律寫 session-log.md
      「教練執行紀律」,不要在這裡疊舊堂。s32 及更早斷點原文見 session-log.md 對應堂,
@@ -26,7 +26,7 @@ s39(2026-09-25~27,家用 VM,context `kind-k8s-coach-p2a`)收工:C-6 chunk 3 ✅(
 - P0 心智模型: gate-passed(2026-06-22,legacy pre-Examiner)
 - P1 核心物件 + 容器底層: gate-passed(2026-06-25,legacy pre-Examiner)
 - P2a 網路深水區: in-progress(chunk 1 ✅ / chunk 2 ✅ / chunk 3 NetworkPolicy 剩 lab Step 5+6+gate+F/G / chunk 4 零件 4-1~4-4 ✅,4-5 盲講式已於 2026-08-11 退役改情境排障題)
-- P2b 儲存 + 權限: in-progress(C-1 ✅ s26,欠 `cg-demo` memory.max 讀數 / C-2 ✅ s29,欠 `reclaimPolicy: Delete` teardown 實證 / C-3 ✅ s31-32,step G 2/4 未過 / C-4 chunk 1-4 ✅ s33/s35/s36,4b 僅 supported,C-4 F/G 併入 s37 的 C-5 F/G;C-5 ✅ s37(chunk 3 supported、kind JWT 教練代跑);C-6 chunk 1 supported / 2 ✅ s38 / 3 ✅ supported s39,F/G 未跑)
+- P2b 儲存 + 權限: in-progress(C-1 ✅ s26,欠 `cg-demo` memory.max 讀數 / C-2 ✅ s29,欠 `reclaimPolicy: Delete` teardown 實證 / C-3 ✅ s31-32,step G 2/4 未過 / C-4 chunk 1-4 ✅ s33/s35/s36,4b 僅 supported,C-4 F/G 併入 s37 的 C-5 F/G;C-5 ✅ s37(chunk 3 supported、kind JWT 教練代跑);C-6 chunk 1 supported / 2 ✅ s38 / 3 ✅ supported s39,F ✅ s40,G 2/4 未過 s40)
 - P3 調度 + 高並發 + 排障: not-started
 - P4 可觀測性工程: not-started
 - P5 平台工程 / GitOps: not-started
@@ -68,6 +68,7 @@ weak-topic flags(2026-08-03 啟用,P2a 帶 flag 前進、gate 未考,學員決�
 - P2b C-5 IRSA 鏈(trust policy 比 sub vs permission policy): low(scaffolded) (s37)
 - P2b C-6 Secret 分層(etcd 明文 / encryption at rest 擋備份 / RBAC 擋 API 讀者): low(scaffolded) (s38)
 - P2b C-6 env vs volume 輪替(啟動快照 vs kubelet 同步): med (s38)
+- P2b C-6 PSS 兩個檢查點(admission 看 YAML / kubelet 看 image user): low(scaffolded) (s40)
 - kubectl debug / ephemeral container: low (2026-09-01,ad hoc 非主線,未經 gate)
 
 ## Scorecard history
@@ -76,6 +77,7 @@ weak-topic flags(2026-08-03 啟用,P2a 帶 flag 前進、gate 未考,學員決�
      每場的完整維度符號與逐項評註逐字保存在 archive/progress-narrative-2026-09-07.md
      的 Scorecard history 節;Phase Gate 三振診斷或 trend tracking 時才拉。 -->
 
+- 2026-09-29 | step G (s40, tier 2, C-6 PSS Deployment 被擋) | 2/4 | 「先查 rs」的因為要講到機制:Pod 由 RS controller 建,被擋時錯誤只留在送請求的 RS event | 第一刀直接選 `kubectl get rs` → describe events | coach
 - 2026-09-18 | step G (s37, tier 2, MTTR 未測故分母 3) | 2/3 | 機制那格要講出 JWT → STS 比 trust policy 的 sub → 臨時憑證,不能停在「SA 取得 assume 權限」 | F 段 3 副本題自己拿 IRSA(同一 role)對照舊做法(看在哪台 node) | coach
 - 2026-08-28 | step G (s32, tier 2) | 2/4 | 排障題先強迫答「我這一發是第 1 步還是第 2 步」再給指令 | MTTR 第一題自帶完整判準句型,無提示正樣本第 6 次 | coach
 - 2026-08-24 | step G (s30, tier 2) | 3/4 | 先用 direct-to-target 對照 bypass 嫌疑層,別第一刀就 describe pod | 自己修正成「繞過後正常只鎖定被繞過的整段路徑,不能直接定罪 Proxy」 | coach
@@ -106,6 +108,8 @@ weak-topic flags(2026-08-03 啟用,P2a 帶 flag 前進、gate 未考,學員決�
      interval 2 = +2 天臨時複習格(口頭型 resolved,過了才進 3/7/14)。
      unresolved-session-count 於 2026-07-10 遷移時依複測紀錄初始化(近似值)。 -->
 
+- 2026-09-29 | 啟動前被擋 vs 啟動後自己死(CreateContainerConfigError vs CrashLoopBackOff) | 原版 nginx + runAsUser 1000,預測 STATUS 答 CreateContainerConfigError(同時自己填 kubelet 放行) | 沒用 STATUS 定位死在哪一棒:kubelet 放行 = 容器已啟動,綁 port 80 失敗 = 程序退出 = CrashLoopBackOff;反證後改對(supported),/root 寫檔換皮帶因為 ✅ | unresolved | 3 | 2026-10-02 | 0
+- 2026-09-29 | PSS 只檢查 Pod 不檢查 Deployment(產生者找錯人) | G 題 Deployment apply configured 但新 Pod 不出現,根因沒講出「PSS 擋的是 RS controller 建 Pod 的請求」;先查 rs 的因為只給「看不出來」 | 產生者 vs 消費者 + 成功訊息不保證生效 兩張舊卡同題重現 | unresolved | 3 | 2026-10-02 | 0
 - 2026-09-26 | app 為什麼要 root | 猜 nginx 要 root 是因為「會改 kernel 的路由表」 | 把一般 app 要 root 的普通原因(綁 <1024 port、寫 root 擁有的目錄)跟 node 系統元件(CNI/kube-proxy 要 NET_ADMIN)混為一談 | unresolved | 3 | 2026-09-30 | 0
 - 2026-09-25 | container 存取兩道門(namespace 視野 vs UID 身分) | 「UID 0 沒翻牆讀得到 node 的 /etc/shadow 嗎」答「可以,因為是 root」 | RP2 兩道獨立檢查混成一步(同 IRSA trust vs permission 形狀):只看 UID 欄,漏 mnt ns 決定看不看得到 | unresolved | 3 | 2026-09-28 | 0
 - 2026-09-18 | IRSA trust vs permission policy | 首答「擋在 B policy」;誘答「改 SA annotation 就能讀別人的 S3」同意;F 段又同意「STS 看 policy 有無 s3:GetObject 就放行」 | RP2 驗身分(trust policy 比 JWT sub)與授權(permission policy)混成一步;annotation 只是申請單 | unresolved | 3 | 2026-09-21 | 0
@@ -213,6 +217,8 @@ weak-topic flags(2026-08-03 啟用,P2a 帶 flag 前進、gate 未考,學員決�
 - mistake:權限爆炸半徑跑錯判準軸 | mistake | 3 | 2026-09-24 | active(併入 C-5 IAM policy 收斂抽,不另開複習堂)
 - topic:C-6-Secrets(分層+輪替) | topic | 3 | 2026-09-24 | active
 - topic:C-6-PSS(admission 看 YAML / kubelet 看 image user) | topic | 3 | 2026-09-30 | active
+- mistake:啟動前被擋vs啟動後自己死 | mistake | 3 | 2026-10-02 | active
+- mistake:PSS只查Pod不查Deployment | mistake | 3 | 2026-10-02 | active
 - mistake:app為什麼要root(port<1024/root目錄) | mistake | 3 | 2026-09-30 | active
 - topic:C-4-RBAC-最小權限+等價升權 | topic | 3 | 2026-09-16 | active(4b create pods=借SA 僅 supported,冷測換皮;併入 C-5)
 

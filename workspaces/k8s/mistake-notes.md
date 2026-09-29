@@ -383,3 +383,17 @@
 - 判準句:「我看的是 JWT 的 `sub`,因為 STS 用它比 trust policy,annotation 只是申請單。」
 - s37 證據:首答「擋在 B policy」;誘答「改 annotation 就能讀 S3」同意,縮成「sub 會變嗎」二選一答對;F 段又同意「看 policy 有 s3:GetObject 就放行」,反證法(拿 log-agent 的 JWT assume billing role)後改答「甲」。判準句只給 X 沒給因為。
 - 下次抽考題(換皮):GitHub Actions OIDC 對 AWS,staging branch 的 workflow 改了 `role-to-assume` 指向 prod deploy role,能 assume 嗎?看哪個欄位、比哪份文件?
+
+## 2026-09-29 | 啟動前被擋 vs 啟動後自己死(CreateContainerConfigError vs CrashLoopBackOff)
+
+- 正解:STATUS 看的是死在哪一棒。CreateContainerConfigError = kubelet 啟動前拒絕(容器從沒跑過);CrashLoopBackOff = 容器跑起來了,程序自己退出,kubelet 一直重啟。
+- 情境:原版 nginx(USER root)+ `runAsUser: 1000` → PSS 過(YAML 合規)、kubelet 過(非 root)、nginx 用 UID 1000 綁 port 80 → kernel 拒絕(<1024 要 root 或 CAP_NET_BIND_SERVICE)→ 退出 → CrashLoopBackOff。
+- 重測:s40 首答錯,反證(「你自己填 kubelet 放行」)後改對;換皮「runAsUser 1000 寫 /root/app.log」答 CrashLoopBackOff + 沒權限 + 容器已跑起來 ✅(supported)。
+- 下次抽考:image 需要讀 `/etc/shadow`-類 root 檔 vs YAML 缺欄位被拒,兩種各給 STATUS + 因為。
+
+## 2026-09-29 | PSS 只檢查 Pod 不檢查 Deployment(產生者找錯人)
+
+- 正解:PSS enforce 只檢查 Pod。`deployment configured` 只代表 desired state 被收下;RS controller 送出建 Pod 請求時被 admission 拒絕,沒有 Pod 物件,錯誤只留在 RS event:`FailedCreate ... violates PodSecurity "restricted:latest"`。舊 Pod 還在 = rolling update 等不到新 Pod ready。
+- L6 版:先 `kubectl describe rs -n prod`(因為 Pod 由 RS 建,拒絕留在送請求者);lead 錯在 PSS 有生效;收尾 CI 加 `kubectl rollout status --timeout`,升 restricted 前先 warn/audit mode 或對 ns label `--dry-run=server`。
+- 重測:s40 G 首答第一刀 `get rs` 方向對,因為只給「看不出來」,根因未講出(第 2 題為貼上文字)。
+- 下次抽考換皮:CronJob / StatefulSet 在 restricted ns 新 Pod 不出現,第一刀查誰、因為什麼。

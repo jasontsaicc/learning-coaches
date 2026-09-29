@@ -22,9 +22,9 @@ mistake 時才納入此數字。
 以下以 `workspace / topic` 指向原始 evidence。分類是多對一治理，不改動 progress.md
 內原有的 `root-cause-tag`。一筆 evidence 只指定一個 primary pattern，避免重複計數。
 
-### K8s（30）
+### K8s（32）
 
-- RP1（14）：YAML validation、probe 職責、ImagePullBackOff、dry-run 兩層 + Service port、L4 vs L7、跨 node 走路由表不是 iptables、kube-proxy 不在 Pod 啟動路徑上、default-deny 後的分層、veth 誤記跨 node、iptables=一棟樓、分層判準、誰把 limit 寫進 cgroup、PV↔PVC 1:1、container 可寫層。
+- RP1（16）：YAML validation、probe 職責、ImagePullBackOff、dry-run 兩層 + Service port、L4 vs L7、跨 node 走路由表不是 iptables、kube-proxy 不在 Pod 啟動路徑上、default-deny 後的分層、veth 誤記跨 node、iptables=一棟樓、分層判準、誰把 limit 寫進 cgroup、PV↔PVC 1:1、container 可寫層、啟動前被擋 vs 啟動後自己死(STATUS 定位棒次)、PSS 只查 Pod 不查 Deployment(產生者找錯人)。
 - RP2（5）：規則/狀態/資料三分類、NetworkPolicy 靜默無效、emptyDir 綁 Pod、Pod 不會重啟、NAPI/CNI 類整鏈以 K8s 的 CNI 基本合約列代表。
 - RP3（4）：叢集 DNS 排障、只給結論不給判準、兩張獨立名單、LVM 三層 + 擴容四步。
 - RP4（1）：restart 排在採證前面。
