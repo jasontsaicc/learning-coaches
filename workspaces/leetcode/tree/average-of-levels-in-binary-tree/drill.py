@@ -23,7 +23,21 @@ class TreeNode:
 
 class Solution:
     def averageOfLevels(self, root):
-        pass
+        queue = deque([root])
+        res = []
+        while queue:
+            level_size = len(queue)
+            level = []
+
+            for _ in range(level_size):
+                node = queue.popleft()
+                level.append(node.val)
+                if node.left:
+                    queue.append(node.left)
+                if node.right:
+                    queue.append(node.right)
+            res.append(sum(level) / len(level))
+        return res
 
 
 # ── 以下不用改 ────────────────────────────────────────────

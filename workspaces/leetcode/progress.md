@@ -4,7 +4,14 @@
 
 # leetcode
 
-- 今天做到:2026-09-27。**教法改版,不是題目進度。** 開場 BFS 重建:第 2 圈開始 `q=[9,20]` 對;
+- 今天做到:2026-09-29。**#637 Average of Levels 兔模式 5/5,整份學員自己寫,只有 `sum` 一個字是 coach 改的。**
+  開場貼 `bfs-queue-model.md` + `1-2-3-4-5` 樹。認型一次對(「分層一樣」),公式寫成 `len(sum)/len(level)`,說一次後仍沒改,
+  harness 跑出 `TypeError` 後直接給。依序補:`for` 整段縮在 `while` 外(畫房間後一次改對)、缺 `queue` 初始化
+  (import 寫成 `import collection from dequeue` → 給語法;`deque()` 空的 → 畫 `while []` 不跑後自補 `[root]`)、
+  缺 `res = []`、缺 `return res`(自答「跟 while 對齊」)。溫度計:第 2 圈 `level = ?` 答 `2`(拿成 `level_size`),
+  列兩變數對照表後答 `[2, 3]`。**學員定案:照 NeetCode 150 順序走,#637 / #103 這類清單外的換皮題不再排。**
+  **下次:#1448 Count Good Nodes(DFS 前序,往下傳目前最大值)。**
+- 前一場 2026-09-27。**教法改版,不是題目進度。** 開場 BFS 重建:第 2 圈開始 `q=[9,20]` 對;
   `for` 跑完 `q=?` 答「`[]`,第三圈才加進來」(以為小孩在下一圈才 append,縮排歸屬沒看);
   `len(q)` 答「知道這層有幾個」方向對;換內層 `while` 的反事實題答「不知道」。
   學員說**「你的教學我常常卡住看不懂」**,貼出 ChatGPT 教 BFS 的紀錄(排隊模型,自評好懂很多)。
@@ -176,7 +183,7 @@
 | Tree 雙軌(回傳值 + 全域帳本,#543) | ✓ 9/11 圖解頁 | | ✅ 9/11 冷寫一次過 9/9;9/17 隔 6 天默寫 (b)(c) 沒出來,對照抄 | ✓ 往上交挑一邊,記帳吃兩邊 |
 | Tree 雙軌換皮(#110 記帳換成 flag) | ✓ 9/18 圖解頁 | ✓ 9/18、9/21 | 🟡 **9/21 隔 3 天冷寫:邏輯 6 行全對,外殼四格全掛**(帳本型別、base case 型別、記帳寫成 return、內外層混寫、縮排);骨架填空 + 判準提示後綠,溫度計 ② 一次過 | ✓ 往上交的永遠是高度,換題只換記帳 |
 | Tree 走訪前中後序(`append` 的位置) | | | ✅ 9/21 前序自寫 7/7(外殼四格自己排,機械面階 1 修)、中序、後序各複製搬一行 7/7;#104 判成後序一次對 | ✓ 名字的字 = 中排第幾 |
-| Tree BFS(queue + `len(q)` 先數人頭) | ✓ 9/23 圖解頁 | ✓ 9/24 默寫不出對照抄 | 🟡 9/23 首刷 7/7(for 行階 2);9/24 #199 換皮只改一行,指錯行 + `popright` 後給答案 | ✓ while 一圈一層,`len(q)` 先數好 |
+| Tree BFS(queue + `len(q)` 先數人頭) | ✓ 9/23 圖解頁 | ✓ 9/24 默寫不出對照抄 | 🟡 9/23 首刷 7/7(for 行階 2);9/24 #199 換皮只改一行,指錯行 + `popright` 後給答案;**9/29 #637 整份自寫**,外殼(queue/res/return)與 `for` 縮排逐格補,5/5 | ✓ while 一圈一層,`len(q)` 先數好 |
 | Tree 兩棵一起走(#100 煞車 3 組合 + `and`) | | | 🟡 9/17 兔模式 9/9;煞車漏 ●▢、委派行階 2 | ✓ 先攔都空,再攔一邊空 |
 | Heap k-way merge(每條一個 head) | ✓ | | ✓ | ✓ |
 | Hashmap + 雙向鏈(LRU) | | | | |
@@ -235,6 +242,9 @@
 
 - **#199 Binary Tree Right Side View** — `tree/binary-tree-right-side-view/`
 
+- **#637 Average of Levels in Binary Tree** — `tree/average-of-levels-in-binary-tree/`
+  2026-09-29 兔模式(母題 #102):drill.py 學員版 5/5 綠。
+
 - **#110 Balanced Binary Tree** — `tree/balanced-binary-tree/`
   2026-09-18 兔模式(母題 #543):drill.py(9 組 case,空 stub 9/9 FAIL、參考解 9/9 PASS 已驗)、
   圖解頁:https://claude.ai/artifact/7X8DRQAu86S36mdc9AGBZ9(學員收工時要求補做)
@@ -252,8 +262,10 @@
 
 ## 接下來
 
-0. **BFS 兔模式 #637**:開場貼 `bfs-queue-model.md`(排隊模型),照 teaching-loop「步伐規則」一格一格走。
-   之後兔模式接 #637 Average of Levels 或 #103 Zigzag(一層結束時改一行)。NeetCode 順序下一題是 #1448 Count Good Nodes(DFS 前序)。
+0. **照 NeetCode 150 Trees 順序**(學員 9/29 定案,清單外的題不排):
+   #102 ✓ → #199 ✓ → **#1448 Count Good Nodes(下一題)** → #98 Validate BST → #230 Kth Smallest BST
+   → #105 Construct from Pre+Inorder → #124 Max Path Sum(Hard)→ #297 Serialize(Hard)。
+   #1448 開場先貼前序模板(9/21 自寫過,可以默),差別是往下多傳一個參數。
 1. 外殼從 0 寫:9/21 前序已在「只有註解、沒有骨架」下自己排出四格。下一次連註解都拿掉,
    用 `tree/dual-track-shell/drill.py`(清空 Solution)。
 2. #572 隔堂複習(隔 2-4 天冷寫)。9/20 第 3 行是階 3 直接給的,沒自己寫過。

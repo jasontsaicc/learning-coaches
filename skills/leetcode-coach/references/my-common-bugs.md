@@ -11,9 +11,9 @@
 
 | # | 檢查 | 犯過 | 症狀 |
 |---|---|---|---|
-| 1 | 變數名有沒有手滑?(pairs→paris、answes、`nxt`→`next`、`dfa`→`dfs`、`amx`→`max`、`sel.ans`、`isSmaeTree`、`self.and`、`false`→`False`、`deepth`→`depth`、`reutrn`) | 11 | `NameError`。**語法完全合法,要等那行真的被執行才炸** — 這就是 linter(`ruff` / `pyflakes`)存在的理由 |
+| 1 | 變數名有沒有手滑?(pairs→paris、answes、`nxt`→`next`、`dfa`→`dfs`、`amx`→`max`、`sel.ans`、`isSmaeTree`、`self.and`、`false`→`False`、`deepth`→`depth`、`reutrn`、`dequeue`→`deque`、`collection`→`collections`) | 12 | `NameError`。**語法完全合法,要等那行真的被執行才炸** — 這就是 linter(`ruff` / `pyflakes`)存在的理由 |
 | 2 | 用的名字在這張 frame 裡嗎?樹的小孩要從 node 身上拿:`root.left` 不是裸 `left`;遞迴呼叫自己是 `self.invertTree`(函式名),不是 `self.left`;參數叫 `root` 就不要寫 `node` | 7(2026-09-11 `dfa(left)`、2026-09-14 `self.left(left)`、2026-09-17 #100 `self.isSameTree(q.left)` 少了 `p.left`、2026-09-18 #110 在內層 `depth` 裡呼叫 `isBalanced(node.left)`、2026-09-20 #572 `if not node` 但參數叫 `root`、**2026-09-21 #110 把 `if not node` / `L` / `R` 整段寫在外層 `isBalanced` 裡**、2026-09-21 前序又把 `if not node` 寫在外層,委派寫成 `preorderTraversal(root.left)`) | `NameError` / `AttributeError`。處方固定:**畫 frame,列出裡面真正存在的名字**。上一題的參數名不在這張紙上 |
-| 3 | **縮排歸誰管**:`return` 卡在迴圈裡;`if` 後面該退回來的行縮進去了 | 5(2026-09-21 #110:`L =` 以下整段縮進 `if not node:`,那四件事永遠不執行) | 找得到的全掛、找不到的全綠。不報錯,所以最貴。**處方:`if` 開一個房間,問「這個房間裡該有幾行」** |
+| 3 | **縮排歸誰管**:`return` 卡在迴圈裡;`if` 後面該退回來的行縮進去了 | 6(2026-09-21 #110:`L =` 以下整段縮進 `if not node:`,那四件事永遠不執行;2026-09-29 #637 `for` 整段掉到 `while` 外面) | 找得到的全掛、找不到的全綠。不報錯,所以最貴。**處方:`if` 開一個房間,問「這個房間裡該有幾行」** |
 | 4 | `if` / `elif` / `else` / `for` / `while` / `def` 開頭的行,結尾冒號補了嗎? | 4 | `SyntaxError: invalid syntax`,箭頭指在關鍵字後。**語法錯在整個檔案讀進來時就炸,會把後面所有執行錯蓋掉** |
 | 5 | 算 index 有沒有用 `//`?`/` 回 float,float 不能當 index | 2 | `TypeError: list indices must be integers` |
 | 6 | 字元有沒有打錯?(`stack, append(i)` 的逗點、`len(matrix)[0]` 的括號位置) | 2 | 當場報錯,成本低 |

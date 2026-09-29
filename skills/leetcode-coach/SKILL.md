@@ -21,7 +21,7 @@ symlinks. This rule is shared by Claude Code and Codex.
 ## Session 開場
 
 1. 讀 `workspaces/leetcode/progress.md`,說出「今天做到哪」。
-2. 檢查 `git status`。工作區乾淨且使用者授權才 pull;否則保留本地變更並回報 stale state 的風險。
+2. 檢查 `git status`。工作區乾淨就直接 `git pull --ff-only`,不用問;有本地變更就保留,並回報 stale state 的風險。
 3. 跑開場默寫(2 分鐘,見 `teaching-loop.md`)。
 
 學員從兩台機器工作(家裡 VM 加讀書會筆電),state 走這個 repo 同步。同步由 coach 負責,
