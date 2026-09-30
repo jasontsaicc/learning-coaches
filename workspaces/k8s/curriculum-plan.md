@@ -303,11 +303,12 @@ EKS lab 仍遵守安全規則:公司 `eks` context 不當教材；需雲端實�
 | P4 可觀測性 | SLI/SLO/error budget、alerting philosophy、Prometheus、OTel 打通一條 trace | 開場寫小型 Python API + Postgres(被監控、之後被遷移的服務);加 node-exporter;DCGM exporter 概念 | 8 |
 | Terraform senior(6 場) | Senior Fast Path | capstone 改為 EKS + RDS(遷移目的地),CDK 對照一場 | 6 |
 | P5 平台 / GitOps | Helm、ArgoCD、EKS prod terraform;**恢復動手**:etcd backup/restore、admission webhook、progressive delivery | kubeadm minor 升級(control plane → add-on → node)+ 憑證過期演練;EKS 升級對照;§4.6 migration 模組實做(服務 + DB 從 kubeadm 遷上 EKS + RDS、cutover、rollback runbook) | 11-12 |
+| Controller 選修(新,[FLEX]) | | 寫一個小 controller(Python `kopf` 或 Go `controller-runtime`):reconcile loop、watch、finalizer、status。學員 2026-09-30 同意加入 | 3-4 |
 | GPU 模組(新) | | driver → container toolkit → device plugin → GPU Operator、MIG、driver 升級順序;GPU spot lab 一次,當天 destroy | 3 |
 | P6 面試衝刺 | full loop mock、§10.4 四題 L6 情境(multi-tenancy、multi-cluster/DR、cost、upgrade-at-scale) | mock 題分 NVIDIA 情境 / AWS 顧問情境兩組 | 8 |
 
 - 貫穿不變:§10.4 cost 收尾問、§10.5 security / data layer 卡片、P2b 殘債(gate、WR、冷測)壓課尾。
-- 總計約 46 堂。每週 3 堂:P5 約 2027-01 畢業、P6 約 2027-02 至 03。
+- 總計約 46 堂(含 controller 選修約 50 堂)。每週 3 堂:P5 約 2027-01 畢業、P6 約 2027-02 至 03。
 - [FLEX] CKA:P5 做完 kubeadm/etcd/升級後邊際成本低,屆時由學員決定要不要考。
 
 ### 12.3 跨 coach 分工
