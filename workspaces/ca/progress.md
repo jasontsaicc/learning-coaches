@@ -14,6 +14,7 @@
 - language preference (asked once): simple English as main language; short Traditional Chinese assists for hard concepts. Ramp to full-English mocks in W4 per language hook.
 
 ## Current Session breakpoint
+- 2026-09-30: coach 恢復(撤銷 k8s curriculum-plan §10.3 停用)。新目標 AWS ProServe DC Cloud Architect(台灣),每週 1 堂,範圍見 k8s curriculum-plan §12.3(方案 B)。下堂先重跑 gap-scan 確認舊債,再進 AWS 廣度 + migration。
 - Linux bank session 1 (P0-1 IRQ/softirq) in progress: chunks 1-3 taught (門鈴比喻), chunk 4 (si/`/proc` 判讀) one-pass only; NAPI 整鏈未自產 → next-action: next linux session opens with cold assembly of the NAPI chain (對圖講、一次一格 fade out), pass required before P0-2 starts.
 - 2026-07-22 block unchanged: 4 mistake items + 15 P1 retests (gap-scan.md) + NAPI 整鏈冷測.
 - Student's plan: resume self-prep with model-answers.md in parallel; BQ/LP via fsi-devops-english.

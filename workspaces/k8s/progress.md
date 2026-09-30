@@ -11,11 +11,11 @@
 - last_weekly_review: 34(WR9 於 s34 壓縮版跑完,三主題 blind recall 全過;下次 WR 於 s41)
 - last_session_date: 2026-09-29
 - warm_up_classification: mid
-- target_role: 泛用大廠 senior DevOps/SRE。2026-08-21 確認無緊急面試,採 production depth + senior interview 雙軌;核心主題固定比較地端 K8s / 傳統 EKS / 高度託管 EKS(curriculum-plan §11)
+- target_role: 雙目標 NVIDIA Pre-Production Engineer + AWS ProServe DC Cloud Architect,兼顧台廠資深 SRE(2026-09-30,curriculum-plan §12);投遞最快 2027-01
 
 ## Current Session breakpoint
 
-s40(2026-09-29)收工:C-6 F ✅、G 2/4 未過(根因「PSS 只查 Pod 不查 Deployment」沒講出)。**學員拍板:下堂直接進新課** → P2b 核心 C-4~C-6 教學段已完,下堂開 P3 chunk 1(開場依 curriculum 定 chunk map);WR 於 s41 到期、P2b gate、冷測(IRSA trust vs permission / 爆炸半徑軸 / PSS Deployment 換皮)一律壓課尾,不擋新課。家用 VM lab 殘留:ns `pss-lab` + Pod `dressed-nginx`。
+s40(2026-09-29)收工:C-6 F ✅、G 2/4 未過(根因「PSS 只查 Pod 不查 Deployment」沒講出)。**學員拍板:下堂直接進新課** → P2b 核心 C-4~C-6 教學段已完,**2026-09-30 改(curriculum-plan §12 方案 B):下堂開 P3,開場用 Terraform 在 billing-dev 獨立 VPC 開 3 台 t3.medium + Ansible 建 kubeadm 叢集**;WR 於 s41 到期、P2b gate、冷測(IRSA trust vs permission / 爆炸半徑軸 / PSS Deployment 換皮)一律壓課尾,不擋新課。家用 VM lab 殘留:ns `pss-lab` + Pod `dressed-nginx`。
 
 <!-- schema §3 = 恰好一行。敘事與次要待辦寫 session-log.md,長效教練紀律寫 session-log.md
      「教練執行紀律」,不要在這裡疊舊堂。s32 及更早斷點原文見 session-log.md 對應堂,

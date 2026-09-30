@@ -280,3 +280,40 @@ Senior 面試常考「你會怎麼把一個現有服務搬進 k8s」,而且導�
 - **Delivery/security/cost**:Terraform、Helm/ArgoCD、policy/supply chain、Secrets Manager、cost allocation/right-sizing/FinOps。
 
 EKS lab 仍遵守安全規則:公司 `eks` context 不當教材；需雲端實證時使用隔離 dev cluster、`billing-dev-eks-*` 命名、IaC 建立、當堂 destroy + 查空。地端 kind lab 先證明 Kubernetes/OS 原理，再用 EKS lab 證明 AWS integration delta。
+
+## §12 雙目標北極星 + 方案 B(2026-09-30,學員拍板;取代 §10/§11 的目標定義與修剪幅度,§11.1 雙軌驗收、§11.2 三欄比較、§11.3 EKS 主線保留)
+
+目標:**NVIDIA Pre-Production Engineer(台北,DSX OS pre-prod)** + **AWS ProServe Delivery Consultant - Cloud Architect(台灣)**,同時涵蓋台廠資深 SRE/DevOps。投遞最快 2027-01,可到 2027-04。英文暫不處理。
+
+**方案 B = 原本 phase 骨架與 gate 全部照走,原本內容一項不砍(含 §10.1 降為口頭的項目恢復動手),只換 lab 環境與題材,並插入新目標的缺口。** 學員理由:原本進度跑很久,要完整走完。
+
+### 12.1 Lab 環境改版(取代 kind 為主,§4.3 作廢)
+
+- 主 lab:billing-dev 帳號獨立 VPC,3 台 t3.medium(cp-1 / worker-1 / worker-2),kubeadm 建,Terraform 開、Ansible 裝。原則:最小規格、不上課就 stop、標 tag、不碰既有 VPC。
+- `billing-eks-bastion` 只當控制台(ssh / ansible / terraform),**不裝 kubeadm、不當 node**:它有 PROD `eks` kubeconfig,故障演練不能在這台。
+- EKS:只在 Terraform 模組與 P5 遷移段開,當堂 destroy + 查空。
+- kind(bastion / 家用 VM)保留給不需要真 node 的小實驗。
+- 預算:3 台每月開約 40 小時 + EBS,約 US$10/月;忘記 stop 約 US$90/月,每堂收工必查。
+
+### 12.2 Phase 對照(原本內容 + 新插入)
+
+| Phase | 原本內容(全保留) | 新插入 / 換題材 | 估堂數 |
+|---|---|---|---|
+| P3 調度 + 排障 | scheduler、HPA、PDB、node 壓力、capacity runbook、大 chaos、七站情境排障(§10.2)、incident commander 情境(§10.5)、迷你 mock | 開場 Terraform 開 3 台 EC2 + Ansible 建 kubeadm 叢集;裝 Calico 後補 P2a NetworkPolicy lab Step 5-6;排障 drill 改 node 層(kubelet、containerd/`crictl`、disk/inode、NotReady、MTU、`journalctl`/`dmesg`) | 10-11 |
+| P4 可觀測性 | SLI/SLO/error budget、alerting philosophy、Prometheus、OTel 打通一條 trace | 開場寫小型 Python API + Postgres(被監控、之後被遷移的服務);加 node-exporter;DCGM exporter 概念 | 8 |
+| Terraform senior(6 場) | Senior Fast Path | capstone 改為 EKS + RDS(遷移目的地),CDK 對照一場 | 6 |
+| P5 平台 / GitOps | Helm、ArgoCD、EKS prod terraform;**恢復動手**:etcd backup/restore、admission webhook、progressive delivery | kubeadm minor 升級(control plane → add-on → node)+ 憑證過期演練;EKS 升級對照;§4.6 migration 模組實做(服務 + DB 從 kubeadm 遷上 EKS + RDS、cutover、rollback runbook) | 11-12 |
+| GPU 模組(新) | | driver → container toolkit → device plugin → GPU Operator、MIG、driver 升級順序;GPU spot lab 一次,當天 destroy | 3 |
+| P6 面試衝刺 | full loop mock、§10.4 四題 L6 情境(multi-tenancy、multi-cluster/DR、cost、upgrade-at-scale) | mock 題分 NVIDIA 情境 / AWS 顧問情境兩組 | 8 |
+
+- 貫穿不變:§10.4 cost 收尾問、§10.5 security / data layer 卡片、P2b 殘債(gate、WR、冷測)壓課尾。
+- 總計約 46 堂。每週 3 堂:P5 約 2027-01 畢業、P6 約 2027-02 至 03。
+- [FLEX] CKA:P5 做完 kubeadm/etcd/升級後邊際成本低,屆時由學員決定要不要考。
+
+### 12.3 跨 coach 分工
+
+- k8s-coach:上表。
+- cloud-architect-coach:**恢復**(撤銷 §10.3 停用),每週 1 堂,AWS 廣度 + migration 設計 + 半導體/FSI 情境 + FSC 合規卡片。
+- terraform-coach:上表 Terraform senior 6 場 + P3 開場的 EC2/VPC。
+- sd-coach:照原進度,題目偏 AWS 架構(multi-account、hybrid、migration)。
+- leetcode-coach:維持一天一題。

@@ -15,6 +15,13 @@
 
 判準:context 是 `kind` 或 `kind-k8s-coach-*` 都安全;只有 `eks` 是公司 PROD。**別因 context 名叫 `kind` 就誤觸警報卡住學員**(2026-07-07 已確認)。
 
+## kubeadm 主 lab(2026-09-30 定,P3 起用;尚未建立)
+
+- 位置:billing-dev 帳號獨立 VPC,3 台 t3.medium(cp-1 / worker-1 / worker-2),Terraform 開、Ansible 裝。最小規格、標 tag、不碰既有 VPC。
+- `billing-eks-bastion` 只當控制台,**不裝 kubeadm、不當 node**(有 PROD `eks` kubeconfig)。
+- 每堂收工:stop 3 台並查 instance state;EKS 當堂 destroy + 查空。
+- 詳見 curriculum-plan §12.1。
+
 ## 機器
 
 - **家用 VM**(Oracle):kind 在 `~/.local/bin`;s12/s14 在這台。kind p0 叢集 3 節點(control-plane + worker×2)。
