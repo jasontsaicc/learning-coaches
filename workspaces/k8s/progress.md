@@ -7,15 +7,15 @@
 
 ## Meta
 
-- session_count: 41
-- last_weekly_review: 34(WR9 於 s34 壓縮版跑完,三主題 blind recall 全過;下次 WR 於 s41)
+- session_count: 42
+- last_weekly_review: 34(WR9 於 s34 壓縮版跑完,三主題 blind recall 全過;下次 WR 於 s41,s42 仍未跑,已逾期)
 - last_session_date: 2026-10-06
 - warm_up_classification: mid
 - target_role: 雙目標 NVIDIA Pre-Production Engineer + AWS ProServe DC Cloud Architect,兼顧台廠資深 SRE(2026-09-30,curriculum-plan §12);投遞最快 2027-01
 
 ## Current Session breakpoint
 
-s41(2026-09-30 + 10-06,bastion)收工:P3 chunk 0-1 ✅;**chunk 0-2 進行中**:學員改架構,lab 改放既有 dev VPC `vpc-0c7e9a0b66afe8007`(10.86.0.0/16,bastion 同 VPC,不建 VPC/IGW/peering);`labs/kubeadm/terraform/main.tf` 已有 provider + data `aws_subnet.lab`(private-Subnet1)+ SG `k8s-lab-nodes`(plan 1 to add ✅,**未 apply**)。**下一步:第 4 塊 key pair(`~/.ssh/k8s-lab.pub`)+ data aws_ami(Ubuntu 24.04)+ `aws_instance.node` for_each 3 台,開場先問預測「Plan: X to add」(答案 5)**,code 已在 s41 對話給過,學員未加入。0-3 Ansible kubeadm。WR/P2b gate/冷測(IRSA trust vs permission / 爆炸半徑軸 / PSS Deployment 換皮 / SG 開在 listen 方)壓課尾。家用 VM lab 殘留:ns `pss-lab` + Pod `dressed-nginx`。
+s42(2026-10-06,bastion)收工:P3 **chunk 0-2 ✅**:`labs/kubeadm/terraform/main.tf` apply 完成 5 added(SG `sg-0e339ce43dd3492e3` + key pair `k8s-lab` + `aws_instance.node` for_each cp/w1/w2 t3.medium Ubuntu 24.04),bastion SSH cp(10.86.47.25)通。**3 台未 stop 則開場先查 state;每堂收工 stop 不 destroy**(整個 P3 結束才 destroy)。**下一步:chunk 0-3** Ansible inventory → containerd + kubeadm → init/join → Calico(Pod 192.168/16、Svc 10.96/12)。WR(逾期)/P2b gate/冷測(IRSA trust vs permission / 爆炸半徑軸 / PSS Deployment 換皮 / SG listen 方 10-09 冷測 / terraform 哪步發現錯誤)壓課尾。家用 VM lab 殘留:ns `pss-lab` + Pod `dressed-nginx`。
 
 <!-- schema §3 = 恰好一行。敘事與次要待辦寫 session-log.md,長效教練紀律寫 session-log.md
      「教練執行紀律」,不要在這裡疊舊堂。s32 及更早斷點原文見 session-log.md 對應堂,
@@ -108,7 +108,7 @@ weak-topic flags(2026-08-03 啟用,P2a 帶 flag 前進、gate 未考,學員決�
      interval 2 = +2 天臨時複習格(口頭型 resolved,過了才進 3/7/14)。
      unresolved-session-count 於 2026-07-10 遷移時依複測紀錄初始化(近似值)。 -->
 
-- 2026-10-06 | SG inbound 開在誰身上(listen 方 vs 發起方) | 6443 忘了 port 號;答「6443 三台都開,因為要互相溝通」;10250 二選一選「只開 cp-1,來源 worker」 | 用「誰發起連線」決定 inbound,沒看「冒號後面的 port 在誰身上 listen」;apiserver 只在 cp-1,kubelet 在每台 | unresolved | 3 | 2026-10-09 | 0
+- 2026-10-06 | SG inbound 開在誰身上(listen 方 vs 發起方) | 6443 忘了 port 號;答「6443 三台都開,因為要互相溝通」;10250 二選一選「只開 cp-1,來源 worker」 | 用「誰發起連線」決定 inbound,沒看「冒號後面的 port 在誰身上 listen」;apiserver 只在 cp-1,kubelet 在每台。s42 同日:bastion→cp:22 SSH 事後解釋,首答只給 port,一階提示後答「listen 的 cp SG 過濾進來流量」✅ 帶判準;換皮 cp→bastion 給對 port+source(SG 優於 IP),未明講改哪個 SG(supported,未冷測) | unresolved | 3 | 2026-10-09 | 0
 - 2026-09-30 | terraform 哪一步發現錯誤(validate / plan / apply) | 假 AMI 字串答「plan 發現」(兩次);換皮 data "aws_ami" 查不到又答「apply」 | plan 只 refresh 既有資源 + 讀 data 區塊;新 resource 參數要 apply 才送 AWS。學員二分法只有「plan 打不打 API」,沒分 data 查詢 vs resource 建立。10-06:預測 data 查 subnet「apply 才打」✗ → 假 subnet id 實驗 plan 報錯自己推翻;換皮 t3.meduim 打錯字答 apply + 因為 resource ✅(supported,未冷測) | unresolved | 3 | 2026-10-09 | 1
 - 2026-09-30 | node Ready 是誰回報的(kubelet heartbeat 走 6443) | SG 缺 IPIP 預測 nodes NotReady,理由「etcd 和 calico 沒開」;提示後改答「metrics-server」 | Ready = kubelet → apiserver heartbeat,與 etcd(cp 本機)/ CNI 資料面 / metrics-server 無關;P0 symptom→棒次地圖留存不足 | unresolved | 3 | 2026-10-03 | 1
 - 2026-09-29 | 啟動前被擋 vs 啟動後自己死(CreateContainerConfigError vs CrashLoopBackOff) | 原版 nginx + runAsUser 1000,預測 STATUS 答 CreateContainerConfigError(同時自己填 kubelet 放行) | 沒用 STATUS 定位死在哪一棒:kubelet 放行 = 容器已啟動,綁 port 80 失敗 = 程序退出 = CrashLoopBackOff;反證後改對(supported),/root 寫檔換皮帶因為 ✅ | unresolved | 3 | 2026-10-02 | 0

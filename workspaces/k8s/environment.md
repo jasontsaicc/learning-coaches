@@ -15,11 +15,11 @@
 
 判準:context 是 `kind` 或 `kind-k8s-coach-*` 都安全;只有 `eks` 是公司 PROD。**別因 context 名叫 `kind` 就誤觸警報卡住學員**(2026-07-07 已確認)。
 
-## kubeadm 主 lab(2026-09-30 定,P3 起用;尚未建立)
+## kubeadm 主 lab(2026-09-30 定,P3 起用;2026-10-06 s42 EC2 已 apply,未裝 kubeadm)
 
 - 位置(2026-10-06 改):billing-dev 既有 VPC `vpc-0c7e9a0b66afe8007`(SharedInfraStackDev/billing-dev-env,10.86.0.0/16,us-west-2),private-Subnet1 `subnet-031425f6c9b3838bd`(2a,與 bastion 同 subnet);3 台 t3.medium Ubuntu 24.04(cp-1 / worker-1 / worker-2),Terraform 開、Ansible 裝。VPC 用 data 引用,不建不刪。
 - 網段:Pod `192.168.0.0/16`(Calico)/ Service `10.96.0.0/12`,與 VPC 及 peering(10.2/10.48/10.51/10.87/10.88/10.90/16、10.129.32/20)不重疊。
-- SG `k8s-lab-nodes`:22/6443 來源 bastion SG `sg-03f8578ae1ba8fc3a`,node 間 self 全開。SSH key `~/.ssh/k8s-lab`。
+- SG `k8s-lab-nodes`(`sg-0e339ce43dd3492e3`):22/6443 來源 bastion SG `sg-03f8578ae1ba8fc3a`,node 間 self 全開。SSH key `~/.ssh/k8s-lab`。
 - `billing-eks-bastion` 只當控制台,**不裝 kubeadm、不當 node**(有 PROD `eks` kubeconfig)。
 - 每堂收工:stop 3 台並查 instance state;EKS 當堂 destroy + 查空。
 - 詳見 curriculum-plan §12.1。
