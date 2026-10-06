@@ -289,7 +289,7 @@ EKS lab 仍遵守安全規則:公司 `eks` context 不當教材；需雲端實�
 
 ### 12.1 Lab 環境改版(取代 kind 為主,§4.3 作廢)
 
-- 主 lab:billing-dev 帳號獨立 VPC,3 台 t3.medium(cp-1 / worker-1 / worker-2),kubeadm 建,Terraform 開、Ansible 裝。原則:最小規格、不上課就 stop、標 tag、不碰既有 VPC。
+- 主 lab:billing-dev 既有 dev VPC(2026-10-06 改,見 environment.md),3 台 t3.medium(cp-1 / worker-1 / worker-2),kubeadm 建,Terraform 開、Ansible 裝。原則:最小規格、不上課就 stop、標 tag、不碰既有 VPC。
 - `billing-eks-bastion` 只當控制台(ssh / ansible / terraform),**不裝 kubeadm、不當 node**:它有 PROD `eks` kubeconfig,故障演練不能在這台。
 - EKS:只在 Terraform 模組與 P5 遷移段開,當堂 destroy + 查空。
 - kind(bastion / 家用 VM)保留給不需要真 node 的小實驗。

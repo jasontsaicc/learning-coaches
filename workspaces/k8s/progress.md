@@ -7,15 +7,15 @@
 
 ## Meta
 
-- session_count: 40
+- session_count: 41
 - last_weekly_review: 34(WR9 於 s34 壓縮版跑完,三主題 blind recall 全過;下次 WR 於 s41)
-- last_session_date: 2026-09-29
+- last_session_date: 2026-10-06
 - warm_up_classification: mid
 - target_role: 雙目標 NVIDIA Pre-Production Engineer + AWS ProServe DC Cloud Architect,兼顧台廠資深 SRE(2026-09-30,curriculum-plan §12);投遞最快 2027-01
 
 ## Current Session breakpoint
 
-s40(2026-09-29)收工:C-6 F ✅、G 2/4 未過(根因「PSS 只查 Pod 不查 Deployment」沒講出)。**學員拍板:下堂直接進新課** → P2b 核心 C-4~C-6 教學段已完,**2026-09-30 改(curriculum-plan §12 方案 B):下堂開 P3,開場用 Terraform 在 billing-dev 獨立 VPC 開 3 台 t3.medium + Ansible 建 kubeadm 叢集**;WR 於 s41 到期、P2b gate、冷測(IRSA trust vs permission / 爆炸半徑軸 / PSS Deployment 換皮)一律壓課尾,不擋新課。家用 VM lab 殘留:ns `pss-lab` + Pod `dressed-nginx`。
+s41(2026-09-30 + 10-06,bastion)收工:P3 chunk 0-1 ✅;**chunk 0-2 進行中**:學員改架構,lab 改放既有 dev VPC `vpc-0c7e9a0b66afe8007`(10.86.0.0/16,bastion 同 VPC,不建 VPC/IGW/peering);`labs/kubeadm/terraform/main.tf` 已有 provider + data `aws_subnet.lab`(private-Subnet1)+ SG `k8s-lab-nodes`(plan 1 to add ✅,**未 apply**)。**下一步:第 4 塊 key pair(`~/.ssh/k8s-lab.pub`)+ data aws_ami(Ubuntu 24.04)+ `aws_instance.node` for_each 3 台,開場先問預測「Plan: X to add」(答案 5)**,code 已在 s41 對話給過,學員未加入。0-3 Ansible kubeadm。WR/P2b gate/冷測(IRSA trust vs permission / 爆炸半徑軸 / PSS Deployment 換皮 / SG 開在 listen 方)壓課尾。家用 VM lab 殘留:ns `pss-lab` + Pod `dressed-nginx`。
 
 <!-- schema §3 = 恰好一行。敘事與次要待辦寫 session-log.md,長效教練紀律寫 session-log.md
      「教練執行紀律」,不要在這裡疊舊堂。s32 及更早斷點原文見 session-log.md 對應堂,
@@ -108,6 +108,9 @@ weak-topic flags(2026-08-03 啟用,P2a 帶 flag 前進、gate 未考,學員決�
      interval 2 = +2 天臨時複習格(口頭型 resolved,過了才進 3/7/14)。
      unresolved-session-count 於 2026-07-10 遷移時依複測紀錄初始化(近似值)。 -->
 
+- 2026-10-06 | SG inbound 開在誰身上(listen 方 vs 發起方) | 6443 忘了 port 號;答「6443 三台都開,因為要互相溝通」;10250 二選一選「只開 cp-1,來源 worker」 | 用「誰發起連線」決定 inbound,沒看「冒號後面的 port 在誰身上 listen」;apiserver 只在 cp-1,kubelet 在每台 | unresolved | 3 | 2026-10-09 | 0
+- 2026-09-30 | terraform 哪一步發現錯誤(validate / plan / apply) | 假 AMI 字串答「plan 發現」(兩次);換皮 data "aws_ami" 查不到又答「apply」 | plan 只 refresh 既有資源 + 讀 data 區塊;新 resource 參數要 apply 才送 AWS。學員二分法只有「plan 打不打 API」,沒分 data 查詢 vs resource 建立。10-06:預測 data 查 subnet「apply 才打」✗ → 假 subnet id 實驗 plan 報錯自己推翻;換皮 t3.meduim 打錯字答 apply + 因為 resource ✅(supported,未冷測) | unresolved | 3 | 2026-10-09 | 1
+- 2026-09-30 | node Ready 是誰回報的(kubelet heartbeat 走 6443) | SG 缺 IPIP 預測 nodes NotReady,理由「etcd 和 calico 沒開」;提示後改答「metrics-server」 | Ready = kubelet → apiserver heartbeat,與 etcd(cp 本機)/ CNI 資料面 / metrics-server 無關;P0 symptom→棒次地圖留存不足 | unresolved | 3 | 2026-10-03 | 1
 - 2026-09-29 | 啟動前被擋 vs 啟動後自己死(CreateContainerConfigError vs CrashLoopBackOff) | 原版 nginx + runAsUser 1000,預測 STATUS 答 CreateContainerConfigError(同時自己填 kubelet 放行) | 沒用 STATUS 定位死在哪一棒:kubelet 放行 = 容器已啟動,綁 port 80 失敗 = 程序退出 = CrashLoopBackOff;反證後改對(supported),/root 寫檔換皮帶因為 ✅ | unresolved | 3 | 2026-10-02 | 0
 - 2026-09-29 | PSS 只檢查 Pod 不檢查 Deployment(產生者找錯人) | G 題 Deployment apply configured 但新 Pod 不出現,根因沒講出「PSS 擋的是 RS controller 建 Pod 的請求」;先查 rs 的因為只給「看不出來」 | 產生者 vs 消費者 + 成功訊息不保證生效 兩張舊卡同題重現 | unresolved | 3 | 2026-10-02 | 0
 - 2026-09-26 | app 為什麼要 root | 猜 nginx 要 root 是因為「會改 kernel 的路由表」 | 把一般 app 要 root 的普通原因(綁 <1024 port、寫 root 擁有的目錄)跟 node 系統元件(CNI/kube-proxy 要 NET_ADMIN)混為一談 | unresolved | 3 | 2026-09-30 | 0
