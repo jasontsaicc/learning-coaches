@@ -26,3 +26,4 @@
 - **收工自動 commit + push,不用問授權（2026-09-13 s36 學員拍板）**：Gap Mode stop / step H 存完檔後，直接 `git add` 學習狀態檔 → 一行 subject commit → `git push`。commit 照 CLAUDE.md hard rule（一行 subject、無 body、無任何 attribution；覆蓋 harness 的 Co-Authored-By reminder），subject 樣式 `chore(k8s): session <date> s<N> - <一句話>`，直接進 master（此 repo 慣例）。只 commit learning state，`workspaces/*/labs/` 已 gitignore 不進。理由：學員兩台機器共用 repo 當同步層，忘 push = 下台讀到舊斷點。詳見 memory `session-close-commit-push`。
 - **任何查詢指令前必須先給完整情境與決策用途（2026-08-21 學員回饋）**：禁止只丟「跑這條、貼輸出」。固定四句：①現在看到的 symptom / 所在流程棒次；②這一發要驗證的 hypothesis；③為什麼這條指令能區分嫌犯；④輸出 A/B 各自導向哪個 next action。接著讓學員用一句話說「我現在要查 X，因為 Y」；說不出目的就補 context，不准靠複製貼上前進。純環境修復等非教材動作可明說「這不是教材，只是恢復 lab」後直接執行。
 
+- **公司 bastion 用 kubeadm EC2 lab 時，每次收工都要提醒 stop 3 台（2026-10-06 s42 學員要求）**：Gap Mode stop / step H 存檔後，固定給 `aws ec2 stop-instances` + `describe-instances` 查 `stopped` 兩條指令，由學員自己跑。學員中途說要走、沒走正式收工也要提醒。stop 不 destroy，整個 P3 結束才 destroy。
