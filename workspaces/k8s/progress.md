@@ -7,15 +7,15 @@
 
 ## Meta
 
-- session_count: 42
-- last_weekly_review: 34(WR9 於 s34 壓縮版跑完,三主題 blind recall 全過;下次 WR 於 s41,s42 仍未跑,已逾期)
-- last_session_date: 2026-10-06
+- session_count: 43
+- last_weekly_review: 34(WR9 於 s34 壓縮版跑完,三主題 blind recall 全過;下次 WR 於 s41,s42/s43 仍未跑,已逾期)
+- last_session_date: 2026-10-08
 - warm_up_classification: mid
 - target_role: 雙目標 NVIDIA Pre-Production Engineer + AWS ProServe DC Cloud Architect,兼顧台廠資深 SRE(2026-09-30,curriculum-plan §12);投遞最快 2027-01
 
 ## Current Session breakpoint
 
-s42(2026-10-06,bastion)收工:P3 **chunk 0-2 ✅**:`labs/kubeadm/terraform/main.tf` apply 完成 5 added(SG `sg-0e339ce43dd3492e3` + key pair `k8s-lab` + `aws_instance.node` for_each cp/w1/w2 t3.medium Ubuntu 24.04),bastion SSH cp(10.86.47.25)通。**3 台未 stop 則開場先查 state;每堂收工 stop 不 destroy**(整個 P3 結束才 destroy)。**下一步:chunk 0-3** Ansible inventory → containerd + kubeadm → init/join → Calico(Pod 192.168/16、Svc 10.96/12)。WR(逾期)/P2b gate/冷測(IRSA trust vs permission / 爆炸半徑軸 / PSS Deployment 換皮 / SG listen 方 10-09 冷測 / terraform 哪步發現錯誤)壓課尾。家用 VM lab 殘留:ns `pss-lab` + Pod `dressed-nginx`。
+s43(2026-10-08,bastion)收工:P3 chunk 0-3 進行中,**step 1 inventory ✅ / 2a kernel ✅ / 2b swap ✅(3 台本來無 swap,不寫 task,preflight 會擋)/ 2c containerd ✅(SystemdCgroup=true,handler 已重啟)**。檔案在 bastion `labs/kubeadm/ansible/{inventory.ini,node-prep.yml}`(labs gitignored,只在 bastion)。**下一步:2d** 先收尾換皮題「先升 cp 因為先升 worker 的 kubelet 會 ___(比 API Server 新)」→ node-prep.yml 加 pkgs.k8s.io v1.36 repo + kubelet/kubeadm/kubectl + apt-mark hold → step 3 init。**3 台若未 stop 開場先查 state;收工 stop 不 destroy**。WR(逾期)/P2b gate/冷測(IRSA trust vs permission / 爆炸半徑軸 / PSS Deployment 換皮 / SG listen 方 / terraform 哪步發現錯誤)壓課尾。家用 VM lab 殘留:ns `pss-lab` + Pod `dressed-nginx`。
 
 <!-- schema §3 = 恰好一行。敘事與次要待辦寫 session-log.md,長效教練紀律寫 session-log.md
      「教練執行紀律」,不要在這裡疊舊堂。s32 及更早斷點原文見 session-log.md 對應堂,
