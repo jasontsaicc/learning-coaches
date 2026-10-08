@@ -383,6 +383,7 @@
 - 判準句:「我看的是 JWT 的 `sub`,因為 STS 用它比 trust policy,annotation 只是申請單。」
 - s37 證據:首答「擋在 B policy」;誘答「改 annotation 就能讀 S3」同意,縮成「sub 會變嗎」二選一答對;F 段又同意「看 policy 有 s3:GetObject 就放行」,反證法(拿 log-agent 的 JWT assume billing role)後改答「甲」。判準句只給 X 沒給因為。
 - 下次抽考題(換皮):GitHub Actions OIDC 對 AWS,staging branch 的 workflow 改了 `role-to-assume` 指向 prod deploy role,能 assume 嗎?看哪個欄位、比哪份文件?
+- s44 重測(2026-10-09):GitHub OIDC 換皮答對 + 誘答「收窄 permission policy」自己拒絕 ✅ 無提示 → interval 7。下次換皮:EKS Pod Identity(非 IRSA)情境,誰比對身分。
 
 ## 2026-09-29 | 啟動前被擋 vs 啟動後自己死(CreateContainerConfigError vs CrashLoopBackOff)
 
@@ -397,3 +398,4 @@
 - L6 版:先 `kubectl describe rs -n prod`(因為 Pod 由 RS 建,拒絕留在送請求者);lead 錯在 PSS 有生效;收尾 CI 加 `kubectl rollout status --timeout`,升 restricted 前先 warn/audit mode 或對 ns label `--dry-run=server`。
 - 重測:s40 G 首答第一刀 `get rs` 方向對,因為只給「看不出來」,根因未講出(第 2 題為貼上文字)。
 - 下次抽考換皮:CronJob / StatefulSet 在 restricted ns 新 Pod 不出現,第一刀查誰、因為什麼。
+- s44 重測(2026-10-09):CronJob 版卡住,首答套舊形狀「ReplicaSet」,二選一後答 Job;StatefulSet 換皮自答 ✅(首答缺因為)。判準記成「describe 缺席 Pod 的上一層 controller」。下次:DaemonSet 版,不給鏈圖。

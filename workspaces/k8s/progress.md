@@ -7,15 +7,15 @@
 
 ## Meta
 
-- session_count: 43
+- session_count: 44
 - last_weekly_review: 34(WR9 於 s34 壓縮版跑完,三主題 blind recall 全過;下次 WR 於 s41,s42/s43 仍未跑,已逾期)
-- last_session_date: 2026-10-08
+- last_session_date: 2026-10-09
 - warm_up_classification: mid
 - target_role: 雙目標 NVIDIA Pre-Production Engineer + AWS ProServe DC Cloud Architect,兼顧台廠資深 SRE(2026-09-30,curriculum-plan §12);投遞最快 2027-01
 
 ## Current Session breakpoint
 
-s43(2026-10-08,bastion)收工:P3 chunk 0-3 進行中,**step 1 inventory ✅ / 2a kernel ✅ / 2b swap ✅(3 台本來無 swap,不寫 task,preflight 會擋)/ 2c containerd ✅(SystemdCgroup=true,handler 已重啟)**。檔案在 bastion `labs/kubeadm/ansible/{inventory.ini,node-prep.yml}`(labs gitignored,只在 bastion)。**下一步:2d** 先收尾換皮題「先升 cp 因為先升 worker 的 kubelet 會 ___(比 API Server 新)」→ node-prep.yml 加 pkgs.k8s.io v1.36 repo + kubelet/kubeadm/kubectl + apt-mark hold → step 3 init。**3 台若未 stop 開場先查 state;收工 stop 不 destroy**。WR(逾期)/P2b gate/冷測(IRSA trust vs permission / 爆炸半徑軸 / PSS Deployment 換皮 / SG listen 方 / terraform 哪步發現錯誤)壓課尾。家用 VM lab 殘留:ns `pss-lab` + Pod `dressed-nginx`。
+s44(2026-10-09,家用 VM,純冷測無 lab)收工:3 題高價值冷測跑完(IRSA trust vs permission ✅ 無提示 / 爆炸半徑粒度 = SA supported / version skew 先升 cp supported(二選一)/ PSS CronJob 換皮 supported 經 2 提示,StatefulSet 換皮自答 ✅)。**下一步(bastion):2d 換皮題已收尾,直接 node-prep.yml 加 pkgs.k8s.io v1.36 repo + kubelet/kubeadm/kubectl + apt-mark hold → step 3 init**。3 台開場先查 state;收工 stop 不 destroy。剩餘債壓課尾:WR(逾期)/ P2b gate / 冷測(terraform 哪步發現錯誤;SG listen 方已判低價值砍)。家用 VM lab 殘留:ns `pss-lab` + Pod `dressed-nginx`。
 
 <!-- schema §3 = 恰好一行。敘事與次要待辦寫 session-log.md,長效教練紀律寫 session-log.md
      「教練執行紀律」,不要在這裡疊舊堂。s32 及更早斷點原文見 session-log.md 對應堂,
@@ -112,11 +112,11 @@ weak-topic flags(2026-08-03 啟用,P2a 帶 flag 前進、gate 未考,學員決�
 - 2026-09-30 | terraform 哪一步發現錯誤(validate / plan / apply) | 假 AMI 字串答「plan 發現」(兩次);換皮 data "aws_ami" 查不到又答「apply」 | plan 只 refresh 既有資源 + 讀 data 區塊;新 resource 參數要 apply 才送 AWS。學員二分法只有「plan 打不打 API」,沒分 data 查詢 vs resource 建立。10-06:預測 data 查 subnet「apply 才打」✗ → 假 subnet id 實驗 plan 報錯自己推翻;換皮 t3.meduim 打錯字答 apply + 因為 resource ✅(supported,未冷測) | unresolved | 3 | 2026-10-09 | 1
 - 2026-09-30 | node Ready 是誰回報的(kubelet heartbeat 走 6443) | SG 缺 IPIP 預測 nodes NotReady,理由「etcd 和 calico 沒開」;提示後改答「metrics-server」 | Ready = kubelet → apiserver heartbeat,與 etcd(cp 本機)/ CNI 資料面 / metrics-server 無關;P0 symptom→棒次地圖留存不足 | unresolved | 3 | 2026-10-03 | 1
 - 2026-09-29 | 啟動前被擋 vs 啟動後自己死(CreateContainerConfigError vs CrashLoopBackOff) | 原版 nginx + runAsUser 1000,預測 STATUS 答 CreateContainerConfigError(同時自己填 kubelet 放行) | 沒用 STATUS 定位死在哪一棒:kubelet 放行 = 容器已啟動,綁 port 80 失敗 = 程序退出 = CrashLoopBackOff;反證後改對(supported),/root 寫檔換皮帶因為 ✅ | unresolved | 3 | 2026-10-02 | 0
-- 2026-09-29 | PSS 只檢查 Pod 不檢查 Deployment(產生者找錯人) | G 題 Deployment apply configured 但新 Pod 不出現,根因沒講出「PSS 擋的是 RS controller 建 Pod 的請求」;先查 rs 的因為只給「看不出來」 | 產生者 vs 消費者 + 成功訊息不保證生效 兩張舊卡同題重現 | unresolved | 3 | 2026-10-02 | 0
+- 2026-09-29 | PSS 只檢查 Pod 不檢查 Deployment(產生者找錯人) | G 題 Deployment apply configured 但新 Pod 不出現,根因沒講出「PSS 擋的是 RS controller 建 Pod 的請求」;先查 rs 的因為只給「看不出來」 | 產生者 vs 消費者 + 成功訊息不保證生效 兩張舊卡同題重現 | unresolved | 3 | 2026-10-12 | 1
 - 2026-09-26 | app 為什麼要 root | 猜 nginx 要 root 是因為「會改 kernel 的路由表」 | 把一般 app 要 root 的普通原因(綁 <1024 port、寫 root 擁有的目錄)跟 node 系統元件(CNI/kube-proxy 要 NET_ADMIN)混為一談 | unresolved | 3 | 2026-09-30 | 0
 - 2026-09-25 | container 存取兩道門(namespace 視野 vs UID 身分) | 「UID 0 沒翻牆讀得到 node 的 /etc/shadow 嗎」答「可以,因為是 root」 | RP2 兩道獨立檢查混成一步(同 IRSA trust vs permission 形狀):只看 UID 欄,漏 mnt ns 決定看不看得到 | unresolved | 3 | 2026-09-28 | 0
-- 2026-09-18 | IRSA trust vs permission policy | 首答「擋在 B policy」;誘答「改 SA annotation 就能讀別人的 S3」同意;F 段又同意「STS 看 policy 有無 s3:GetObject 就放行」 | RP2 驗身分(trust policy 比 JWT sub)與授權(permission policy)混成一步;annotation 只是申請單 | unresolved | 3 | 2026-09-21 | 0
-- 2026-09-13 | 權限爆炸半徑跑錯判準軸 | 評 SA 外洩痛不痛時先看 ns 廣度(漏 resource 深度);評 secret 危險度跑到 base64 存法軸,不是「能否離開 RBAC 管轄」軸 | RP3 判準軸選錯:該問「憑證外洩後攻擊者碰得到的 ns×resource×verb 上限,以及能否跳出 RBAC 管轄」 | unresolved | 3 | 2026-09-24 | 2
+- 2026-09-18 | IRSA trust vs permission policy | 首答「擋在 B policy」;誘答「改 SA annotation 就能讀別人的 S3」同意;F 段又同意「STS 看 policy 有無 s3:GetObject 就放行」 | RP2 驗身分(trust policy 比 JWT sub)與授權(permission policy)混成一步;annotation 只是申請單 | unresolved | 7 | 2026-10-16 | 0
+- 2026-09-13 | 權限爆炸半徑跑錯判準軸 | 評 SA 外洩痛不痛時先看 ns 廣度(漏 resource 深度);評 secret 危險度跑到 base64 存法軸,不是「能否離開 RBAC 管轄」軸 | RP3 判準軸選錯:該問「憑證外洩後攻擊者碰得到的 ns×resource×verb 上限,以及能否跳出 RBAC 管轄」 | unresolved | 3 | 2026-10-12 | 3
 - 2026-06-18 | YAML validation | `matchLabels` 打成 `metaLabels` | 不讀 strict decoding error;驗證在 API Server | unresolved | 7 | 2026-06-30 | 2
 - 2026-06-22 | probe 職責 | 把 readiness 的「準備好接流量」塞給 liveness | 兩種 probe 失敗後動作不同(重啟 vs 切流量) | unresolved | 7 | 2026-07-10 | 1
 - 2026-06-23 | ImagePullBackOff | image 打成 `ngimx:1.25`,apply 過卻卡住 | 驗證有邊界:repo 存不存在要 kubelet 拉了才知 | unresolved | 7 | 2026-07-03 | 1
@@ -166,7 +166,7 @@ weak-topic flags(2026-08-03 啟用,P2a 帶 flag 前進、gate 未考,學員決�
      檢視序:過期優先、interval 小者優先;step A 每堂 ~2 題上限。
      每張卡的重測歷史與下次抽考題在 mistake-notes.md;term 卡到期日在 term-registry.md。 -->
 
-- mistake:IRSA-trust-vs-permission | mistake | 3 | 2026-09-21 | active
+- mistake:IRSA-trust-vs-permission | mistake | 7 | 2026-10-16 | active
 - mistake:兩道門(namespace視野vsUID身分) | mistake | 3 | 2026-09-28 | active
 - mistake:YAML-validation | mistake | 3 | 2026-08-08 | active
 - mistake:ImagePullBackOff | mistake | 3 | 2026-08-09 | active
@@ -217,11 +217,11 @@ weak-topic flags(2026-08-03 啟用,P2a 帶 flag 前進、gate 未考,學員決�
 - mistake:成功訊息不保證生效(pattern) | mistake | 3 | 2026-09-11 | active(2026-09-15 起不排卡,lab 中即測)
 - mistake:--list-要加---as | mistake | 3 | 2026-09-11 | active(09-15 supported 答對 A 框;C-5 引子題冷問)
 - mistake:--list-三分判準 | mistake | - | 2026-09-11 | retired(2026-09-15 ROI 篩)
-- mistake:權限爆炸半徑跑錯判準軸 | mistake | 3 | 2026-09-24 | active(併入 C-5 IAM policy 收斂抽,不另開複習堂)
+- mistake:權限爆炸半徑跑錯判準軸 | mistake | 3 | 2026-10-12 | active(併入 C-5 IAM policy 收斂抽,不另開複習堂)
 - topic:C-6-Secrets(分層+輪替) | topic | 3 | 2026-09-24 | active
 - topic:C-6-PSS(admission 看 YAML / kubelet 看 image user) | topic | 3 | 2026-09-30 | active
 - mistake:啟動前被擋vs啟動後自己死 | mistake | 3 | 2026-10-02 | active
-- mistake:PSS只查Pod不查Deployment | mistake | 3 | 2026-10-02 | active
+- mistake:PSS只查Pod不查Deployment | mistake | 3 | 2026-10-12 | active
 - mistake:app為什麼要root(port<1024/root目錄) | mistake | 3 | 2026-09-30 | active
 - topic:C-4-RBAC-最小權限+等價升權 | topic | 3 | 2026-09-16 | active(4b create pods=借SA 僅 supported,冷測換皮;併入 C-5)
 
