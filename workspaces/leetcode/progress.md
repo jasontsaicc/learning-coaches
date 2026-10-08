@@ -4,7 +4,16 @@
 
 # leetcode
 
-- 今天做到:2026-09-29。**#637 Average of Levels 兔模式 5/5,整份學員自己寫,只有 `sum` 一個字是 coach 改的。**
+- 今天做到:2026-10-08。**#235 LCA of BST 龜模式 7/7,整份自寫,只補一個 `elif` 行尾冒號。**
+  開場默前序想不起來(「救命」)→ 貼 4 塊對照,做成 `traversal-templates/drill-preorder.py`(空殼),
+  依序修 `def def`、dfs 內容沒縮排、`clearappend`,邏輯一開始就全對,4/4。
+  #235:BST 規則用「找 2」走 5→3→1→2,比較與目的地全對,但 3、1 兩站「左右」兩字講反(一次修正後 9>5 右對)。
+  兩個 target:p=1,q=4 逐站填表,自己判出在 3 分叉、答案 3;p=3,q=4 相等情況答 3;原例 p=3,q=8 一站分邊答 5。
+  code 一行一行長:`node.left` 對、`elif` 寫成 `if`(講 `None.val` 風險)、`else: return node` 對。
+  溫度計 ② 刪 `else`:答「分叉了」,縮成 `node = ?` 答 5 → 補無窮迴圈。空間 O(1) 自答,時間 O(h) 給。
+  學員問「為什麼要 `node = root`」→ 畫 node 每圈值,`NameError`;「分叉前的 node」確認指 3(最後共同站)。
+  L6 逐字稿只寫進圖解頁,沒有對話練。**下次:回 NeetCode 順序 #1448 Count Good Nodes。**
+- 前一場 2026-09-29。**#637 Average of Levels 兔模式 5/5,整份學員自己寫,只有 `sum` 一個字是 coach 改的。**
   開場貼 `bfs-queue-model.md` + `1-2-3-4-5` 樹。認型一次對(「分層一樣」),公式寫成 `len(sum)/len(level)`,說一次後仍沒改,
   harness 跑出 `TypeError` 後直接給。依序補:`for` 整段縮在 `while` 外(畫房間後一次改對)、缺 `queue` 初始化
   (import 寫成 `import collection from dequeue` → 給語法;`deque()` 空的 → 畫 `while []` 不跑後自補 `[root]`)、
@@ -184,12 +193,16 @@
 | Tree 雙軌換皮(#110 記帳換成 flag) | ✓ 9/18 圖解頁 | ✓ 9/18、9/21 | 🟡 **9/21 隔 3 天冷寫:邏輯 6 行全對,外殼四格全掛**(帳本型別、base case 型別、記帳寫成 return、內外層混寫、縮排);骨架填空 + 判準提示後綠,溫度計 ② 一次過 | ✓ 往上交的永遠是高度,換題只換記帳 |
 | Tree 走訪前中後序(`append` 的位置) | | | ✅ 9/21 前序自寫 7/7(外殼四格自己排,機械面階 1 修)、中序、後序各複製搬一行 7/7;#104 判成後序一次對 | ✓ 名字的字 = 中排第幾 |
 | Tree BFS(queue + `len(q)` 先數人頭) | ✓ 9/23 圖解頁 | ✓ 9/24 默寫不出對照抄 | 🟡 9/23 首刷 7/7(for 行階 2);9/24 #199 換皮只改一行,指錯行 + `popright` 後給答案;**9/29 #637 整份自寫**,外殼(queue/res/return)與 `for` 縮排逐格補,5/5 | ✓ while 一圈一層,`len(q)` 先數好 |
+| BST 走訪(`while node` 比大小選一邊,#235) | ✓ 10/08 圖解頁 | | 🟡 10/08 首刷整份自寫 7/7(逐行長出,非冷寫);左右用字講反 1 次 | ✓ 同邊一起走,分叉那站就是答案 |
 | Tree 兩棵一起走(#100 煞車 3 組合 + `and`) | | | 🟡 9/17 兔模式 9/9;煞車漏 ●▢、委派行階 2 | ✓ 先攔都空,再攔一邊空 |
 | Heap k-way merge(每條一個 head) | ✓ | | ✓ | ✓ |
 | Hashmap + 雙向鏈(LRU) | | | | |
 
 ## 做過
 
+- **#235 Lowest Common Ancestor of a BST** — `tree/lowest-common-ancestor-of-a-binary-search-tree/`
+  圖解頁:https://claude.ai/artifact/4YuVYzmwUqcQShxohbVotB
+  2026-10-08 龜模式首刷,整份自寫 7/7。L6 逐字稿在圖解頁,未口頭練。
 - **Layer 0 執行模型**:跑了概念 1(變數是貼標籤)、4(縮排歸誰管)、5(迴圈變數每圈重算)、
   7(node / pointer / `.next`)。概念 2(`//`)、3(list 方法名)、6(`while` 條件)當天跳過,
   linked list 用不到,卡到再翻。
@@ -263,7 +276,7 @@
 ## 接下來
 
 0. **照 NeetCode 150 Trees 順序**(學員 9/29 定案,清單外的題不排):
-   #102 ✓ → #199 ✓ → **#1448 Count Good Nodes(下一題)** → #98 Validate BST → #230 Kth Smallest BST
+   #235 ✓(10/08 補)→ #102 ✓ → #199 ✓ → **#1448 Count Good Nodes(下一題)** → #98 Validate BST → #230 Kth Smallest BST
    → #105 Construct from Pre+Inorder → #124 Max Path Sum(Hard)→ #297 Serialize(Hard)。
    #1448 開場先貼前序模板(9/21 自寫過,可以默),差別是往下多傳一個參數。
 1. 外殼從 0 寫:9/21 前序已在「只有註解、沒有骨架」下自己排出四格。下一次連註解都拿掉,

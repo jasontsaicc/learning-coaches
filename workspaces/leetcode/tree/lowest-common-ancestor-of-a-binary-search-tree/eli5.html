@@ -1,0 +1,436 @@
+<title>BST 分叉點</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=JetBrains+Mono:wght@400;700&family=Noto+Sans+TC:wght@400;500;700&display=swap">
+<style>
+:root{
+  --paper:#F2F0F6; --surface:#FFFFFF; --ink:#191527; --body:#302B41;
+  --muted:#6E687E; --line:#CFCADB;
+  --c1:#4A4098; --c1-soft:#E3E0F3;
+  --c2:#AE3557; --c2-soft:#F6E0E7;
+  --signal:#10726B; --signal-soft:#D8ECE9;
+  --code-bg:#131022; --code-fg:#DEDAEA;
+  --hold:#EDEAF3;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#14121C; --surface:#1C1929; --ink:#EAE7F2; --body:#C6C1D4;
+    --muted:#8E88A0; --line:#322E44;
+    --c1:#9E94EC; --c1-soft:#241F42;
+    --c2:#E88BA4; --c2-soft:#3A1D28;
+    --signal:#4FC7B6; --signal-soft:#0F2F2C;
+    --code-bg:#0C0A14; --code-fg:#DAD5E6;
+    --hold:#1F1C2C;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#14121C; --surface:#1C1929; --ink:#EAE7F2; --body:#C6C1D4;
+  --muted:#8E88A0; --line:#322E44;
+  --c1:#9E94EC; --c1-soft:#241F42;
+  --c2:#E88BA4; --c2-soft:#3A1D28;
+  --signal:#4FC7B6; --signal-soft:#0F2F2C;
+  --code-bg:#0C0A14; --code-fg:#DAD5E6;
+  --hold:#1F1C2C;
+}
+
+*{box-sizing:border-box}
+body{
+  background:var(--paper); color:var(--body);
+  font-family:"Noto Sans TC","Hiragino Sans","Microsoft JhengHei",sans-serif;
+  font-size:16px; line-height:1.85;
+  padding:0 1.25rem 5rem;
+}
+.wrap{max-width:44rem; margin:0 auto}
+
+header{padding-block:3.5rem 1.5rem}
+.kicker{
+  font-family:"JetBrains Mono",monospace; font-size:.72rem; font-weight:700;
+  letter-spacing:.16em; text-transform:uppercase; color:var(--signal);
+}
+h1{
+  font-family:"Archivo","Noto Sans TC",sans-serif; font-weight:700;
+  font-size:clamp(2rem,6vw,2.9rem); line-height:1.12; letter-spacing:-.02em;
+  color:var(--ink); margin:.5rem 0 .6rem; text-wrap:balance;
+}
+.sub{color:var(--muted); font-size:1rem; margin:0}
+
+.rail{
+  height:9px; margin:2.75rem 0 2.25rem;
+  border-top:2px solid var(--line); border-bottom:2px solid var(--line);
+  background:repeating-linear-gradient(90deg,var(--line) 0 3px,transparent 3px 13px);
+}
+
+h2{
+  font-family:"Archivo","Noto Sans TC",sans-serif; font-weight:700;
+  font-size:1.4rem; color:var(--ink); letter-spacing:-.01em;
+  margin:0 0 .25rem; text-wrap:balance;
+}
+h2 .num{
+  font-family:"JetBrains Mono",monospace; font-size:.85rem; color:var(--signal);
+  margin-right:.6rem; vertical-align:.15em;
+}
+h3{font-family:"Archivo","Noto Sans TC",sans-serif;font-weight:600;font-size:1rem;color:var(--ink);margin:1.75rem 0 .4rem}
+h4{font-family:"Archivo","Noto Sans TC",sans-serif;font-weight:600;font-size:.95rem;color:var(--ink);margin:1.4rem 0 .3rem}
+section{margin-bottom:2.5rem}
+p{margin:.7rem 0}
+strong{color:var(--ink); font-weight:700}
+code{font-family:"JetBrains Mono",monospace; font-size:.87em; background:var(--signal-soft); color:var(--ink); padding:.1em .35em; border-radius:2px}
+
+.lede{font-size:1.1rem; color:var(--ink); border-left:3px solid var(--signal); padding-left:1rem; margin:1rem 0 1.25rem}
+
+.callout{background:var(--surface); border:1px solid var(--line); border-radius:4px; padding:1.1rem 1.25rem; margin:1.25rem 0}
+.callout.warn{border-left:4px solid var(--c2)}
+.callout.key{border-left:4px solid var(--signal)}
+.callout h3,.callout h4{margin-top:0}
+
+ul,ol{padding-left:1.35rem; margin:.7rem 0}
+li{margin:.35rem 0}
+
+.signals{list-style:none; padding:0; display:grid; gap:.5rem}
+.signals li{
+  display:flex; gap:.75rem; align-items:baseline;
+  background:var(--surface); border:1px solid var(--line); border-radius:4px; padding:.7rem .95rem; margin:0;
+}
+.signals .n{font-family:"JetBrains Mono",monospace; font-weight:700; color:var(--signal); flex-shrink:0}
+
+.tablewrap{overflow-x:auto; margin:1.25rem 0; border:1px solid var(--line); border-radius:4px; background:var(--surface)}
+table{border-collapse:collapse; width:100%; font-size:.86rem; font-variant-numeric:tabular-nums}
+th,td{text-align:left; padding:.55rem .8rem; border-bottom:1px solid var(--line); white-space:nowrap}
+th{font-family:"Archivo",sans-serif; font-weight:600; color:var(--ink); font-size:.78rem; letter-spacing:.03em; text-transform:uppercase}
+tr:last-child td{border-bottom:none}
+td.mono,th.mono{font-family:"JetBrains Mono",monospace}
+.t1{color:var(--c1); font-weight:700}
+.t2{color:var(--c2); font-weight:700}
+.hit{color:var(--signal); font-weight:700}
+
+pre{
+  background:var(--code-bg); color:var(--code-fg); border-radius:5px;
+  padding:1.1rem 1.25rem; overflow-x:auto; margin:1rem 0;
+  font-family:"JetBrains Mono",monospace; font-size:.84rem; line-height:1.75;
+}
+pre .cm{color:#8C86A8}
+pre .kw{color:#C39BEE}
+pre .fn{color:#7FD6C6}
+pre .hl{background:rgba(127,214,198,.14); display:block; margin:0 -1.25rem; padding:0 1.25rem}
+
+details{background:var(--surface); border:1px solid var(--line); border-radius:4px; margin:1rem 0; overflow:hidden}
+summary{
+  cursor:pointer; padding:.9rem 1.15rem; list-style:none;
+  font-family:"Archivo","Noto Sans TC",sans-serif; font-weight:600; color:var(--ink);
+  display:flex; align-items:baseline; gap:.6rem;
+}
+summary::-webkit-details-marker{display:none}
+summary::before{content:"▸"; color:var(--signal); font-size:.8rem}
+details[open] summary::before{content:"▾"}
+summary:focus-visible{outline:2px solid var(--signal); outline-offset:-2px}
+.lockhint{font-family:"Noto Sans TC",sans-serif;font-weight:400;font-size:.8rem;color:var(--muted);margin-left:auto}
+.dbody{padding:0 1.15rem 1.15rem; border-top:1px solid var(--line)}
+
+.mantra{font-family:"Archivo","Noto Sans TC",sans-serif;font-size:1.05rem;font-weight:600;color:var(--ink);background:var(--signal-soft);border-radius:4px;padding:1rem 1.2rem;margin:1rem 0}
+
+/* ── 樹 ── */
+.dia{display:block;max-width:100%;height:auto;margin:1.25rem auto}
+.dia .edge{stroke:var(--line);stroke-width:2}
+.dia .edge.nil{stroke-dasharray:4 4}
+.dia .box{fill:var(--surface);stroke:var(--line);stroke-width:2}
+.dia .box.a{fill:var(--c1-soft);stroke:var(--c1)}
+.dia .box.b{fill:var(--c2-soft);stroke:var(--c2)}
+.dia .nilbox{fill:none;stroke:var(--muted);stroke-width:1.5;stroke-dasharray:3 3}
+.dia .tval{fill:var(--ink);font-family:"JetBrains Mono",monospace;font-size:15px;font-weight:700;text-anchor:middle;dominant-baseline:central}
+.dia .nilv{fill:var(--muted);font-family:"JetBrains Mono",monospace;font-size:11px;text-anchor:middle;dominant-baseline:central}
+.dia .tag{fill:var(--muted);font-family:"JetBrains Mono",monospace;font-size:12px;text-anchor:middle}
+.dia .tag.hit{fill:var(--signal);font-weight:700}
+
+/* ── call stack 分鏡 ── */
+.film{display:grid;gap:1rem;margin:1.5rem 0}
+.shot{background:var(--surface);border:1px solid var(--line);border-radius:4px;padding:.9rem 1rem}
+.shot .hd{display:flex;gap:.7rem;align-items:baseline;flex-wrap:wrap;margin-bottom:.6rem}
+.shot .no{font-family:"JetBrains Mono",monospace;font-size:.68rem;font-weight:700;letter-spacing:.1em;color:var(--signal);border:1px solid var(--signal);border-radius:2px;padding:.1rem .35rem;flex-shrink:0}
+.shot .cap{font-size:.9rem;color:var(--body);line-height:1.6}
+.tower{display:flex;flex-direction:column;gap:3px;font-family:"JetBrains Mono",monospace;font-size:.78rem;overflow-x:auto}
+.fr{border:1px solid var(--line);border-radius:3px;padding:.4rem .6rem;background:var(--hold);color:var(--muted);min-width:min-content;white-space:nowrap}
+.fr.run{background:var(--signal-soft);border-color:var(--signal);color:var(--ink);font-weight:700}
+.fr.gone{border-style:dashed;background:transparent;opacity:.45;text-decoration:line-through}
+.fr .who{color:var(--ink);font-weight:700}
+.fr.run .who{color:var(--signal)}
+.fr .slot{color:var(--muted);font-weight:400}
+.fr .val{color:var(--c2);font-weight:700}
+.floor{font-family:"JetBrains Mono",monospace;font-size:.7rem;color:var(--muted);letter-spacing:.1em;border-top:2px solid var(--line);padding-top:.25rem;margin-top:2px}
+.emptystack{font-family:"JetBrains Mono",monospace;font-size:.78rem;color:var(--muted);padding:.4rem 0}
+
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(15rem,1fr));gap:1rem;margin:1.25rem 0}
+.two > div{background:var(--surface);border:1px solid var(--line);border-radius:4px;padding:.9rem 1.05rem}
+.two h4{margin-top:0}
+
+.wrongright{display:grid;gap:.5rem;margin:1rem 0}
+.wrongright > div{padding:.65rem .9rem;border-radius:3px;font-size:.92rem}
+.wr-x{background:var(--c2-soft);border-left:3px solid var(--c2)}
+.wr-o{background:var(--signal-soft);border-left:3px solid var(--signal)}
+.wr-y{background:var(--surface);border:1px solid var(--line);border-left:3px solid var(--muted)}
+
+.move{background:var(--surface);border:1px solid var(--line);border-radius:4px;padding:.9rem 1.05rem;margin:.85rem 0}
+.move h4{margin:0 0 .5rem;display:flex;gap:.6rem;align-items:baseline;flex-wrap:wrap}
+.move h4 .mv{font-family:"JetBrains Mono",monospace;font-size:.7rem;font-weight:700;letter-spacing:.1em;color:var(--signal);border:1px solid var(--signal);border-radius:2px;padding:.1rem .35rem;flex-shrink:0}
+.say{background:var(--c1-soft);border-radius:3px;padding:.6rem .8rem;margin:.4rem 0;color:var(--ink)}
+.say b{display:block;font-family:"JetBrains Mono",monospace;font-size:.66rem;letter-spacing:.12em;text-transform:uppercase;color:var(--c1);margin-bottom:.3rem}
+.think{font-size:.88rem;color:var(--muted);margin:.4rem 0}
+.think b{font-family:"JetBrains Mono",monospace;font-size:.66rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:.2rem}
+
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+.dia .box.p{fill:var(--c1-soft);stroke:var(--c1)}
+.dia .box.q{fill:var(--c2-soft);stroke:var(--c2)}
+.dia .box.ans{fill:var(--signal-soft);stroke:var(--signal);stroke-width:3}
+.dia .edge.walk{stroke:var(--signal);stroke-width:4;stroke-linecap:round}
+.dia .tag.p{fill:var(--c1);font-weight:700}
+.dia .tag.q{fill:var(--c2);font-weight:700}
+td.l{color:var(--c1);font-weight:700}
+td.r{color:var(--c2);font-weight:700}
+</style>
+
+<div class="wrap">
+
+<header>
+  <div class="kicker">LeetCode #235 · Tree · BST 首刷(龜模式)· 2026-10-08</div>
+  <h1>BST 分叉點</h1>
+  <p class="sub">Lowest Common Ancestor of a Binary Search Tree。每一站只比一次大小,p 和 q 分開走的那一站就是答案。</p>
+</header>
+
+<div class="rail"></div>
+
+<section>
+  <h2><span class="num">01</span>這題在幹嘛</h2>
+  <p class="lede">樹上有兩個 node <code>p</code> 和 <code>q</code>。從 root 往下走,兩條路一開始重疊,在某一站分開。<strong>兩條路最後一個一樣的站</strong>就是答案。</p>
+
+  <svg class="dia" viewBox="0 0 520 270" width="520" role="img" aria-label="BST:5 的小孩 3 和 8;3 的小孩 1 和 4;8 的小孩 7 和 9;1 的右小孩 2。p=1,q=4,從 5 走到 3,在 3 分叉,答案 3。">
+<line class="edge walk" x1="260" y1="50" x2="150" y2="96"/>
+<line class="edge" x1="260" y1="50" x2="370" y2="96"/>
+<line class="edge" x1="150" y1="130" x2="95" y2="166"/>
+<line class="edge" x1="150" y1="130" x2="205" y2="166"/>
+<line class="edge" x1="370" y1="130" x2="315" y2="166"/>
+<line class="edge" x1="370" y1="130" x2="425" y2="166"/>
+<line class="edge" x1="95" y1="200" x2="140" y2="226"/>
+<rect class="box" x="238" y="16" width="44" height="34" rx="4"/><text class="tval" x="260" y="33">5</text>
+<rect class="box ans" x="128" y="96" width="44" height="34" rx="4"/><text class="tval" x="150" y="113">3</text>
+<rect class="box" x="348" y="96" width="44" height="34" rx="4"/><text class="tval" x="370" y="113">8</text>
+<rect class="box p" x="73" y="166" width="44" height="34" rx="4"/><text class="tval" x="95" y="183">1</text>
+<rect class="box q" x="183" y="166" width="44" height="34" rx="4"/><text class="tval" x="205" y="183">4</text>
+<rect class="box" x="293" y="166" width="44" height="34" rx="4"/><text class="tval" x="315" y="183">7</text>
+<rect class="box" x="403" y="166" width="44" height="34" rx="4"/><text class="tval" x="425" y="183">9</text>
+<rect class="box" x="118" y="226" width="44" height="34" rx="4"/><text class="tval" x="140" y="243">2</text>
+<text class="tag hit" x="40" y="117">答案 3</text>
+<text class="tag p" x="58" y="187">p</text>
+<text class="tag q" x="244" y="187">q</text>
+  </svg>
+
+  <div class="tablewrap"><table>
+    <tr><th>路</th><th class="mono">經過的站</th></tr>
+    <tr><td>到 p = 1</td><td class="mono">5 → <b>3</b> → 1</td></tr>
+    <tr><td>到 q = 4</td><td class="mono">5 → <b>3</b> → 4</td></tr>
+    <tr><td>最後一個一樣的站</td><td class="mono hit">3</td></tr>
+  </table></div>
+</section>
+
+<section>
+  <h2><span class="num">02</span>這是什麼型</h2>
+  <ul class="signals">
+    <li><span class="n">1</span><span>題目寫 <strong>BST</strong>:每個 node 都是「左邊全部 &lt; node.val &lt; 右邊全部」。看到 BST 就問:能不能每站比一次大小,只走一邊?</span></li>
+    <li><span class="n">2</span><span>題目要找<strong>兩個 node 的共同祖先</strong>(LCA)。</span></li>
+    <li><span class="n">3</span><span>題目說 <strong>node 可以是自己的祖先</strong>:p 剛好就是那一站時,答案就是 p。</span></li>
+  </ul>
+</section>
+
+<section>
+  <h2><span class="num">03</span>暴力法,為什麼慢</h2>
+  <p>不管 BST 規則:先從 root 找出到 p 的整條路,存成 list;再找到 q 的整條路;最後從頭比兩個 list,最後一個一樣的就是答案。</p>
+  <div class="tablewrap"><table>
+    <tr><th></th><th>暴力(當普通樹)</th><th>用 BST 規則</th></tr>
+    <tr><td>找一個 node</td><td>不知道往哪,左右都要找</td><td class="hit">比一次大小就知道往哪</td></tr>
+    <tr><td>時間</td><td>O(n)</td><td class="hit">O(h)</td></tr>
+    <tr><td>空間</td><td>O(h) 存兩條路</td><td class="hit">O(1) 只有 node</td></tr>
+  </table></div>
+  <p>暴力法浪費的情報:<strong>BST 已經幫你排好序了</strong>。</p>
+</section>
+
+<section>
+  <h2><span class="num">04</span>做法:每站比兩次,手動走一遍</h2>
+  <div class="callout key">
+    <h3>三列表</h3>
+    <div class="tablewrap" style="margin:0"><table>
+      <tr><th>在 node 這一站</th><th>動作</th></tr>
+      <tr><td>p、q 都比 node 小</td><td>往左 <code>node.left</code></td></tr>
+      <tr><td>p、q 都比 node 大</td><td>往右 <code>node.right</code></td></tr>
+      <tr><td>其他全部(分邊,或其中一個就是 node)</td><td class="hit">答案就是 node</td></tr>
+    </table></div>
+  </div>
+
+  <h3>p = 1, q = 4</h3>
+  <div class="tablewrap"><table>
+    <tr><th>站</th><th>p=1</th><th>q=4</th><th>結果</th></tr>
+    <tr><td class="mono">5</td><td class="l">1 &lt; 5 左</td><td class="l">4 &lt; 5 左</td><td>同邊 → 到 3</td></tr>
+    <tr><td class="mono">3</td><td class="l">1 &lt; 3 左</td><td class="r">4 &gt; 3 右</td><td class="hit">分邊 → 答案 3</td></tr>
+  </table></div>
+
+  <h3>p = 3, q = 4(p 就是那一站)</h3>
+  <div class="tablewrap"><table>
+    <tr><th>站</th><th>p=3</th><th>q=4</th><th>結果</th></tr>
+    <tr><td class="mono">5</td><td class="l">3 &lt; 5 左</td><td class="l">4 &lt; 5 左</td><td>同邊 → 到 3</td></tr>
+    <tr><td class="mono">3</td><td>3 = 3</td><td class="r">4 &gt; 3 右</td><td class="hit">其他 → 答案 3</td></tr>
+  </table></div>
+
+  <h3>p = 3, q = 8(題目原例)</h3>
+  <div class="tablewrap"><table>
+    <tr><th>站</th><th>p=3</th><th>q=8</th><th>結果</th></tr>
+    <tr><td class="mono">5</td><td class="l">3 &lt; 5 左</td><td class="r">8 &gt; 5 右</td><td class="hit">分邊 → 答案 5</td></tr>
+  </table></div>
+</section>
+
+<details>
+  <summary>完整 code 加逐行解釋<span class="lockhint">你 10/08 自己寫出來的</span></summary>
+  <div class="dbody">
+<pre>
+<span class="kw">def</span> <span class="fn">lowestCommonAncestor</span>(self, root, p, q):
+    node = root                                    <span class="cm"># 出發點:我現在站在哪</span>
+    <span class="kw">while</span> node:
+        <span class="kw">if</span> p.val &lt; node.val <span class="kw">and</span> q.val &lt; node.val:  <span class="cm"># 都比我小</span>
+            node = node.left
+        <span class="kw">elif</span> p.val &gt; node.val <span class="kw">and</span> q.val &gt; node.val:  <span class="cm"># 都比我大</span>
+            node = node.right
+        <span class="kw">else</span>:                                      <span class="cm"># 分邊,或相等</span>
+            <span class="kw">return</span> node
+</pre>
+    <div class="tablewrap"><table>
+      <tr><th>行</th><th>做什麼</th></tr>
+      <tr><td class="mono">node = root</td><td>沒有這行,<code>while node</code> 會 <code>NameError</code>。也可以直接改 <code>root</code>,多一個名字只是讀起來清楚</td></tr>
+      <tr><td class="mono">p.val</td><td>p、q 是 node,比大小要拿 <code>.val</code></td></tr>
+      <tr><td class="mono">elif</td><td>寫成第二個 <code>if</code>:node 已經換成 <code>node.left</code>,會拿新的 node 再比一次,可能是 <code>None.val</code></td></tr>
+      <tr><td class="mono">else: return node</td><td>兩個作用:<strong>交出答案</strong>,也<strong>讓迴圈停下來</strong></td></tr>
+    </table></div>
+  </div>
+</details>
+
+<details>
+  <summary>逐輪執行模擬表(p = 1, q = 4,跟 04 同一個例子)</summary>
+  <div class="dbody">
+    <div class="tablewrap"><table>
+      <tr><th>時間點</th><th class="mono">node</th><th>哪一行跑</th></tr>
+      <tr><td>開始</td><td class="mono">5</td><td><code>node = root</code></td></tr>
+      <tr><td>第 1 圈</td><td class="mono">5 → 3</td><td><code>if</code>(1&lt;5 且 4&lt;5)</td></tr>
+      <tr><td>第 2 圈</td><td class="mono">3</td><td><code>else</code>(1&lt;3,4&gt;3)→ <code>return 3</code></td></tr>
+    </table></div>
+    <p>04 用手走的兩站,就是 code 跑的兩圈。</p>
+    <h4>刪掉 else 會怎樣(p = 3, q = 8)</h4>
+    <div class="tablewrap"><table>
+      <tr><th>圈</th><th class="mono">node</th><th>if</th><th>elif</th></tr>
+      <tr><td>1</td><td class="mono">5 → 5</td><td>不跑</td><td>不跑</td></tr>
+      <tr><td>2</td><td class="mono">5 → 5</td><td>不跑</td><td>不跑</td></tr>
+      <tr><td>...</td><td class="mono">5</td><td colspan="2">node 永遠不變 → 無窮迴圈</td></tr>
+    </table></div>
+  </div>
+</details>
+
+<details>
+  <summary>口訣加模板</summary>
+  <div class="dbody">
+    <div class="mantra">同邊就一起走,分叉前最後那站就是答案。</div>
+    <p>模板:BST 走訪 = <code>while node</code> + 每站比大小選一邊。同一個骨架也用在 BST 搜尋(#700)、BST 插入(#701)。</p>
+    <div class="tablewrap"><table>
+      <tr><th></th><th>複雜度</th></tr>
+      <tr><td>時間</td><td><strong>O(h)</strong>;平衡 O(log n),歪成一條線 O(n)</td></tr>
+      <tr><td>空間</td><td><strong>O(1)</strong>;遞迴版是 O(h)(call stack)</td></tr>
+    </table></div>
+  </div>
+</details>
+
+<details>
+  <summary>L6 面試逐字稿</summary>
+  <div class="dbody">
+    <div class="move"><h4><span class="mv">MOVE 0</span>先問 constraint</h4>
+      <div class="say"><b>說</b>"Are all values unique? Are p and q guaranteed to be in the tree? Can p be an ancestor of q?"</div>
+      <p class="think"><b>想</b>unique 決定「相等」只會是 p 或 q 自己;保證存在決定不用檢查找不到的情況。</p>
+      <p><b>寫</b>白板先不寫。</p></div>
+    <div class="move"><h4><span class="mv">MOVE 1</span>舉例</h4>
+      <div class="say"><b>說</b>"Let me use this tree: 5, 3, 8, 1, 4, 7, 9. With p = 1 and q = 4, the answer should be 3."</div>
+      <p><b>寫</b>畫 01 那棵樹,圈 1 和 4。</p></div>
+    <div class="move"><h4><span class="mv">MOVE 2</span>暴力解 20 秒</h4>
+      <div class="say"><b>說</b>"A brute force way is to store the path to p and the path to q, then compare them. That is O(n), and it ignores the BST order."</div>
+      <p class="think"><b>想</b>點出浪費的情報:排序。</p></div>
+    <div class="move"><h4><span class="mv">MOVE 3</span>Invariant</h4>
+      <div class="say"><b>說</b>"If both values are smaller than the current node, both nodes are in the left subtree, so the answer is also there. The first node where they split is the lowest common ancestor."</div>
+      <p class="think"><b>想</b>這句證明「往一邊走不會錯過答案」。</p></div>
+    <div class="move"><h4><span class="mv">MOVE 4</span>關鍵手法換了什麼</h4>
+      <div class="say"><b>說</b>"The BST order lets me throw away half of the tree at each step, so I don't need recursion or extra lists."</div></div>
+    <div class="move"><h4><span class="mv">MOVE 5</span>複雜度先講</h4>
+      <div class="say"><b>說</b>"This is O(h) time, which is O(log n) if the tree is balanced and O(n) in the worst case. Space is O(1). Sound reasonable?"</div></div>
+    <div class="move"><h4><span class="mv">MOVE 6</span>code 分 3 段</h4>
+      <div class="say"><b>說</b>"I start at the root."</div>
+<pre>node = root
+<span class="kw">while</span> node:</pre>
+      <div class="say"><b>說</b>"If both are smaller, go left. If both are bigger, go right."</div>
+<pre>    <span class="kw">if</span> p.val &lt; node.val <span class="kw">and</span> q.val &lt; node.val:
+        node = node.left
+    <span class="kw">elif</span> p.val &gt; node.val <span class="kw">and</span> q.val &gt; node.val:
+        node = node.right</pre>
+      <div class="say"><b>說</b>"Otherwise they split here, or one of them is this node. That is the answer."</div>
+<pre>    <span class="kw">else</span>:
+        <span class="kw">return</span> node</pre></div>
+    <div class="move"><h4><span class="mv">MOVE 7</span>主動 dry run</h4>
+      <div class="say"><b>說</b>"With p = 1 and q = 4: at 5, both are smaller, so I go left. At 3, 1 goes left and 4 goes right, so I return 3."</div></div>
+    <div class="move"><h4><span class="mv">MOVE 8</span>主動掃 edge case</h4>
+      <div class="say"><b>說</b>"If p is an ancestor of q, the values are equal at p, so the else branch returns p. No special case is needed."</div>
+      <p class="think"><b>想</b>點名哪個設計讓它自動答對:<code>else</code> 收掉了「相等」。</p></div>
+    <div class="move"><h4><span class="mv">MOVE 9</span>推廣</h4>
+      <div class="say"><b>說</b>"If the tree is not a BST, I can't pick a side, so I need to search both subtrees. That is LeetCode 236, and it takes O(n)."</div></div>
+
+    <h4>這句話對應哪幾行</h4>
+    <div class="tablewrap"><table>
+      <tr><th>說</th><th class="mono">code</th></tr>
+      <tr><td>I start at the root</td><td class="mono">node = root / while node</td></tr>
+      <tr><td>both smaller, go left</td><td class="mono">if ... node = node.left</td></tr>
+      <tr><td>both bigger, go right</td><td class="mono">elif ... node = node.right</td></tr>
+      <tr><td>otherwise, that is the answer</td><td class="mono">else: return node</td></tr>
+    </table></div>
+
+    <h4>只給結論 vs 說明推理</h4>
+    <div class="tablewrap"><table>
+      <tr><th>Move</th><th>只給結論</th><th>說明推理</th></tr>
+      <tr><td>3</td><td>"Go left when both are smaller."</td><td>"... so the answer is also in the left subtree."</td></tr>
+      <tr><td>5</td><td>"It's O(log n)."</td><td>"O(h): log n if balanced, n in the worst case."</td></tr>
+      <tr><td>8</td><td>"It handles edge cases."</td><td>"The else branch covers p being the ancestor."</td></tr>
+    </table></div>
+
+    <h4>Native English(可背、可換題用)</h4>
+    <ul>
+      <li>"Let me use a small example to check my idea."</li>
+      <li>"If both are smaller, the answer must be on the left side."</li>
+      <li>"This is O(h) time, which is log n if the tree is balanced."</li>
+      <li>"No special case is needed, because the else branch covers it."</li>
+    </ul>
+  </div>
+</details>
+
+<details>
+  <summary>這次的釐清(2026-10-08)</summary>
+  <div class="dbody">
+    <div class="wrongright">
+      <div class="wr-x">✗ 我說:站 3 找 2,「2 &lt; 3 右邊」;站 1,「2 &gt; 1 左」</div>
+      <div class="wr-o">✓ 其實是:比我小 → 左,比我大 → 右。比較和走到的 node 都對,只有「左右」兩個字講反</div>
+      <div class="wr-y">→ 規則:<code>val &lt; node.val</code> → <code>node.left</code></div>
+    </div>
+    <div class="wrongright">
+      <div class="wr-x">✗ 我以為:<code>node = root</code> 好像是多的,找分叉那站就好</div>
+      <div class="wr-o">✓ 其實是:<code>node</code> 是「我現在站在哪」,要有出發點。沒有它,<code>while node</code> 會 <code>NameError</code></div>
+      <div class="wr-y">→ 答案是分叉的那站(兩條路最後一個一樣的站),不是分叉之前經過的 5</div>
+    </div>
+    <div class="wrongright">
+      <div class="wr-x">✗ 刪掉 <code>else</code>:答得出「分叉了」,沒想到下一步</div>
+      <div class="wr-o">✓ 其實是:if、elif 都不跑,node 不變,每圈都是 5 → 無窮迴圈</div>
+      <div class="wr-y">→ <code>else: return node</code> 同時交答案、停迴圈</div>
+    </div>
+    <div class="wrongright">
+      <div class="wr-x">✗ 語法:<code>def def(node)</code>、dfs 內容沒縮排、<code>clearappend</code>、<code>elif</code> 行尾沒冒號</div>
+      <div class="wr-o">✓ 邏輯全對,四個都是語法。每次看錯誤訊息的行號就自己修好</div>
+    </div>
+  </div>
+</details>
+
+</div>
