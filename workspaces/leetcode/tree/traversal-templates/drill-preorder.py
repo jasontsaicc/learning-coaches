@@ -4,9 +4,6 @@
 看不懂就打開 warmup-preorder.py 對照抄。
 """
 
-from types import resolve_bases
-
-
 class TreeNode:
     def __init__(self, val=0, left=None, right=None):
         self.val = val
@@ -18,19 +15,18 @@ class Solution:
     def preorderTraversal(self, root):
         # ── 打在這裡 ──────────────────────────────────────
         # (1) 裝結果的 list
-        # (2) def dfs(node): 走到 None 就停
-        # (3)               先記下自己
-        # (4)               再往左、再往右
-        # 最後:從 root 開始走,交回結果
         res = []
-
+        # (2) def dfs(node): 走到 None 就停
         def dfs(node):
             if not node:
                 return
+        # (3)               先記下自己
             res.append(node.val)
             dfs(node.left)
             dfs(node.right)
 
+        # (4)               再往左、再往右
+        # 最後:從 root 開始走,交回結果
         dfs(root)
         return res
 

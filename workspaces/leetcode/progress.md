@@ -4,7 +4,15 @@
 
 # leetcode
 
-- 今天做到:2026-10-08。**#235 LCA of BST 龜模式 7/7,整份自寫,只補一個 `elif` 行尾冒號。**
+- 今天做到:2026-10-09。**#1448 Count Good Nodes 龜模式 7/7,第二次整份自寫(第一次對照圖解頁打)。**
+  開場默前序 4/4,只有 `reutrn` 拼錯。學員問「這是背起來嗎」→ 說明背的是 4 個理由,code 是理由翻出來的。
+  圖解頁後學員說「code 實際看不太懂」→ 收掉整份,從前序一行一行改:紙條 `dfs(9, ?)` 答 3、9 good 答對、
+  `if` 空格自己打。第一次整份對照打 7/7,接著 `dfs(4,3)` 的 `new_max` 答 4、9 結束後 root 的 `new_max` 答 3(關鍵格一次對)。
+  清空重寫:(1)-(4) 對;(5) 交 `node.val` 不是新紙條 → 改例子成 `3→1→2`,第一次答「交 node.val」,
+  縮成 `2 >= 1` 答 True 後自己看出錯、改成 `new_max`;最後一行 `dfs(node, max_so_far)` 在外層 → 畫兩個房間,答 `root`、`root.val`,7/7。
+  加壓 `dfs(root, 0)` + `[-1]`:答 False(root 漏數)一次對。L6 逐字稿只在圖解頁,沒練。
+  **下次:#98 Validate BST(同招,往下傳上下界兩張紙條)。開場默 #1448。**
+- 前一場 2026-10-08。**#235 LCA of BST 龜模式 7/7,整份自寫,只補一個 `elif` 行尾冒號。**
   開場默前序想不起來(「救命」)→ 貼 4 塊對照,做成 `traversal-templates/drill-preorder.py`(空殼),
   依序修 `def def`、dfs 內容沒縮排、`clearappend`,邏輯一開始就全對,4/4。
   #235:BST 規則用「找 2」走 5→3→1→2,比較與目的地全對,但 3、1 兩站「左右」兩字講反(一次修正後 9>5 右對)。
@@ -194,12 +202,16 @@
 | Tree 走訪前中後序(`append` 的位置) | | | ✅ 9/21 前序自寫 7/7(外殼四格自己排,機械面階 1 修)、中序、後序各複製搬一行 7/7;#104 判成後序一次對 | ✓ 名字的字 = 中排第幾 |
 | Tree BFS(queue + `len(q)` 先數人頭) | ✓ 9/23 圖解頁 | ✓ 9/24 默寫不出對照抄 | 🟡 9/23 首刷 7/7(for 行階 2);9/24 #199 換皮只改一行,指錯行 + `popright` 後給答案;**9/29 #637 整份自寫**,外殼(queue/res/return)與 `for` 縮排逐格補,5/5 | ✓ while 一圈一層,`len(q)` 先數好 |
 | BST 走訪(`while node` 比大小選一邊,#235) | ✓ 10/08 圖解頁 | | 🟡 10/08 首刷整份自寫 7/7(逐行長出,非冷寫);左右用字講反 1 次 | ✓ 同邊一起走,分叉那站就是答案 |
+| Tree 前序 + 往下傳值(#1448 紙條 `max_so_far`) | ✓ 10/09 圖解頁 | ✓ 10/09 | 🟡 10/09 清空重寫 7/7;(5) 交錯紙條 `node.val`、啟動行用內層名字,各一格修 | ✓ 爸爸把路上最大交給小孩 |
 | Tree 兩棵一起走(#100 煞車 3 組合 + `and`) | | | 🟡 9/17 兔模式 9/9;煞車漏 ●▢、委派行階 2 | ✓ 先攔都空,再攔一邊空 |
 | Heap k-way merge(每條一個 head) | ✓ | | ✓ | ✓ |
 | Hashmap + 雙向鏈(LRU) | | | | |
 
 ## 做過
 
+- **#1448 Count Good Nodes in Binary Tree** — `tree/count-good-nodes-in-binary-tree/`
+  圖解頁:https://claude.ai/artifact/JzFxwemQcQvzKKHqFbEoNm
+  2026-10-09 龜模式首刷,對照打一次後清空重寫 7/7。L6 逐字稿在圖解頁,未口頭練。
 - **#235 Lowest Common Ancestor of a BST** — `tree/lowest-common-ancestor-of-a-binary-search-tree/`
   圖解頁:https://claude.ai/artifact/4YuVYzmwUqcQShxohbVotB
   2026-10-08 龜模式首刷,整份自寫 7/7。L6 逐字稿在圖解頁,未口頭練。
@@ -276,9 +288,9 @@
 ## 接下來
 
 0. **照 NeetCode 150 Trees 順序**(學員 9/29 定案,清單外的題不排):
-   #235 ✓(10/08 補)→ #102 ✓ → #199 ✓ → **#1448 Count Good Nodes(下一題)** → #98 Validate BST → #230 Kth Smallest BST
+   #235 ✓(10/08 補)→ #102 ✓ → #199 ✓ → #1448 ✓(10/09)→ **#98 Validate BST(下一題)** → #230 Kth Smallest BST
    → #105 Construct from Pre+Inorder → #124 Max Path Sum(Hard)→ #297 Serialize(Hard)。
-   #1448 開場先貼前序模板(9/21 自寫過,可以默),差別是往下多傳一個參數。
+   #98 開場默 #1448(10/09 自寫過)。#98 是同一招換成兩張紙條(下界、上界),往左只改上界、往右只改下界。
 1. 外殼從 0 寫:9/21 前序已在「只有註解、沒有骨架」下自己排出四格。下一次連註解都拿掉,
    用 `tree/dual-track-shell/drill.py`(清空 Solution)。
 2. #572 隔堂複習(隔 2-4 天冷寫)。9/20 第 3 行是階 3 直接給的,沒自己寫過。
