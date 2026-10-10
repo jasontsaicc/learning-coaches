@@ -86,25 +86,25 @@ def parse_table(text):
     return (cells[0], rows) if cells else ([], [])
 
 
-# Learning-point sources per coach: (file, section heading or None, title, columns to show)
+# Learning-point sources per coach: (file, section heading or None, title, columns to show, flashcard prompt)
 KEYPOINTS = {
-    "sd": [("workspaces/sd/one-liner-library.md", None, "One-liners", ["Topic", "One-Liner"]),
-           ("workspaces/sd/pattern-map.md", "Pattern 總表", "Pattern map", ["Pattern", "核心零件", "狀態"])],
-    "k8s": [("workspaces/k8s/term-registry.md", None, "術語", ["術語 (EN)", "中文點破", "一句英文定義"])],
-    "leetcode": [("workspaces/leetcode/one-liner-library.md", None, "Pattern 口訣", ["Pattern", "One-Liner"])],
+    "sd": [("workspaces/sd/one-liner-library.md", None, "One-liners", ["Topic", "One-Liner"], "用一句話講給面試官聽"),
+           ("workspaces/sd/pattern-map.md", "Pattern 總表", "Pattern map", ["Pattern", "核心零件", "狀態"], "核心零件有哪些？")],
+    "k8s": [("workspaces/k8s/term-registry.md", None, "術語", ["術語 (EN)", "中文點破", "一句英文定義"], "中文點破 + 英文定義？")],
+    "leetcode": [("workspaces/leetcode/one-liner-library.md", None, "Pattern 口訣", ["Pattern", "One-Liner"], "口訣是什麼？")],
 }
 
 
 def keypoints(coach):
     out = []
-    for path, heading, title, cols in KEYPOINTS.get(coach, []):
+    for path, heading, title, cols, prompt in KEYPOINTS.get(coach, []):
         text = (ROOT / path).read_text()
         header, rows = parse_table(section(text, heading) if heading else text)
         missing = [c for c in cols if c not in header]
         if missing:
             raise ValueError(f"{path}: table lost columns {missing} (header: {header})")
         idx = [header.index(c) for c in cols]
-        out.append({"title": title, "cols": cols, "rows": [[r[i] for i in idx] for r in rows if len(r) == len(header)]})
+        out.append({"title": title, "cols": cols, "prompt": prompt, "rows": [[r[i] for i in idx] for r in rows if len(r) == len(header)]})
     return out
 
 

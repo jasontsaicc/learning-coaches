@@ -130,6 +130,19 @@ h2 { font-size: 19px; font-weight: 600; color: var(--ink); margin: 40px 0 16px; 
 .cap { margin: 18px 0 8px; font-size: 12px; letter-spacing: .08em; color: var(--muted); display: flex; justify-content: space-between; }
 .item { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 10px 12px; margin-bottom: 8px; border-radius: 10px; background: var(--soft); cursor: pointer; font-size: 14px; }
 
+/* flashcards */
+.fc { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 22px; padding: 24px; }
+.fc-card { width: min(560px, 100%); min-height: 260px; padding: 28px; border: 1px solid var(--bd-1); border-radius: 18px; background: #fff; box-shadow: 0 4px 0 var(--bd-1), 0 5px 0 var(--bd); display: flex; flex-direction: column; justify-content: center; gap: 14px; text-align: center; }
+.fc-card .q { font-size: 24px; font-weight: 700; color: var(--ink); }
+.fc-card .p { color: var(--muted); font-size: 14px; }
+.fc-card .a { text-align: left; line-height: 1.7; border-top: 1px dashed var(--line); padding-top: 14px; }
+.fc-card .a p { margin: 0 0 8px; }
+.fc-btns { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
+.fc-prog { color: var(--muted); font-size: 13px; }
+.btn.bad { background: #fdebe5; border-color: var(--red); box-shadow: 0 4px 0 var(--red-1), 0 5px 0 var(--red); }
+.btn.mid { background: #fff5df; border-color: var(--amber); box-shadow: 0 4px 0 var(--amber-1), 0 5px 0 var(--amber); }
+.btn.good { background: var(--sky-bg); border-color: var(--sky); box-shadow: 0 4px 0 var(--sky-1), 0 5px 0 var(--sky); }
+
 /* tree nodes (shared by preview + modal) */
 .stage { position: absolute; left: 0; top: 0; transform-origin: 0 0; }
 .stage svg { position: absolute; overflow: visible; pointer-events: none; }
@@ -192,7 +205,7 @@ fetch('data.json', { cache: 'no-cache' }).then(r => r.json()).then(data => {
   document.getElementById('nav').innerHTML = '<a href="#/" data-r="">Home</a>' + coaches.map(c => `<a href="#/c/${esc(c.id)}" data-r="${esc(c.id)}">${esc(c.label)}</a>`).join('');
 
   // ---------- modal ----------
-  const close = () => { modal.classList.remove('open'); sheet.innerHTML = ''; };
+  const close = () => { const wasCards = !!document.getElementById('fc'); modal.classList.remove('open'); sheet.innerHTML = ''; if (wasCards) route(true); };
   modal.onclick = e => { if (e.target === modal) close(); };
   document.addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
   function openSheet(title, body, narrow) {
@@ -216,6 +229,41 @@ fetch('data.json', { cache: 'no-cache' }).then(r => r.json()).then(data => {
     if (n.files?.length === 1 && !n.point && n.kind === 'problem') return openFile(n.files[0]);
     openSheet(n.label, `<div class="sheet-s">${h}</div>`, true);
     sheet.querySelectorAll('[data-file]').forEach(b => b.onclick = () => openFile(b.dataset.file));
+  }
+
+  // ---------- flashcards (Leitner boxes, per-browser) ----------
+  // Review state lives only in this browser's localStorage; progress.md stays the source of truth.
+  const BOX_DAYS = [0, 1, 3, 7, 14, 30];
+  const today = () => Math.floor(Date.now() / 864e5);
+  const loadSrs = () => { try { return JSON.parse(localStorage.getItem('srs') || '{}'); } catch { return {}; } };
+  const saveSrs = st => { try { localStorage.setItem('srs', JSON.stringify(st)); } catch {} };
+  const deckOf = c => (c.keypoints || []).flatMap(t => t.rows.map(r => ({ id: `${c.id}|${t.title}|${r[0]}`, q: r[0], prompt: t.prompt, a: r.slice(1).filter(Boolean) })));
+  const dueOf = (deck, st) => deck.filter(x => (st[x.id]?.due ?? 0) <= today());
+  function grade(st, id, g) {   // g: 0 不會 / 1 模糊 / 2 會了
+    const box = st[id]?.box ?? 0, next = g === 0 ? 1 : g === 1 ? Math.max(box, 1) : Math.min(box + 1, BOX_DAYS.length - 1);
+    st[id] = { box: next, due: today() + BOX_DAYS[next] };
+  }
+  function openCards(c) {
+    const st = loadSrs(), queue = dueOf(deckOf(c), st).sort(() => Math.random() - .5).slice(0, 20);
+    let done = 0, total = queue.length;
+    openSheet(`${TITLE[c.id] || c.id} · 複習`, '<div class="fc" id="fc"></div>', true);
+    const show = (flipped = false) => {
+      const box = document.getElementById('fc');
+      if (!box) return;
+      const x = queue[0];
+      if (!x) { box.innerHTML = `<div class="fc-card"><div class="q">今天複習完了</div><div class="p">${total ? `複習了 ${total} 張` : '目前沒有到期的卡'}。下次到期依熟練度排 1 / 3 / 7 / 14 / 30 天。</div></div>`; return; }
+      box.innerHTML = `<div class="fc-prog">${done}/${total} · 第 ${st[x.id]?.box ?? 0} 盒</div>
+        <div class="fc-card"><div class="q">${esc(x.q)}</div><div class="p">${esc(x.prompt)}</div>${flipped ? `<div class="a">${x.a.map(t => `<p>${esc(t)}</p>`).join('')}</div>` : ''}</div>
+        <div class="fc-btns">${flipped ? '<button class="btn bad" data-g="0">不會</button><button class="btn mid" data-g="1">模糊</button><button class="btn good" data-g="2">會了</button>' : '<button class="btn" id="flip">先在心裡講一遍，再翻面</button>'}</div>`;
+      box.querySelector('#flip')?.addEventListener('click', () => show(true));
+      box.querySelectorAll('[data-g]').forEach(b => b.onclick = () => {
+        const g = +b.dataset.g;
+        grade(st, x.id, g); saveSrs(st); queue.shift();
+        if (g === 0) queue.push(x); else done++;   // missed cards come back once more this session
+        show();
+      });
+    };
+    show();
   }
 
   // ---------- tree (learning map) ----------
@@ -263,7 +311,8 @@ fetch('data.json', { cache: 'no-cache' }).then(r => r.json()).then(data => {
   function home() {
     const all = coaches.flatMap(c => leavesOf(c.id)).filter(l => !l.planned);
     app.className = 'wide';
-    app.innerHTML = `<h1>我的學習地圖</h1><p class="lead">${coaches.length} 門課 · ${all.length} 個 topic · ${count(all, 'high')} 個 high</p><div class="grid">` +
+    const st = loadSrs(), due = coaches.reduce((n, c) => n + dueOf(deckOf(c), st).length, 0);
+    app.innerHTML = `<h1>我的學習地圖</h1><p class="lead">${coaches.length} 門課 · ${all.length} 個 topic · ${count(all, 'high')} 個 high · 今天 ${due} 張卡到期</p><div class="grid">` +
       coaches.map(c => {
         const ls = leavesOf(c.id), secs = childrenOf(c.id).filter(n => !isLeaf(n)).length;
         return `<a class="course" href="#/c/${esc(c.id)}">${hero(c.id)}<div class="body"><div class="name">${esc(TITLE[c.id] || c.label)}</div><div class="sub">${secs} sections · ${ls.length - count(ls, 'plan')}/${ls.length} topics · ${(c.files || []).length} notes</div>${bar(ls)}</div></a>`;
@@ -286,7 +335,7 @@ fetch('data.json', { cache: 'no-cache' }).then(r => r.json()).then(data => {
 
     let h = hero(id) + `<h1>${esc(TITLE[id] || c.label)}</h1>`;
     h += `<div class="meta"><span>${ICON.layers}${secs.length} sections</span><span>${ICON.book}${ls.length - count(ls, 'plan')}/${ls.length} topics 已學</span><span>${ICON.clock}${(c.files || []).length} notes</span></div>`;
-    h += `<div class="actions"><button class="btn" data-jump="path">${ICON.map} View path</button><button class="btn" id="mapBtn">${ICON.map} Learning map</button>${kp.length ? `<button class="btn" data-jump="points">${ICON.chat} 學習重點</button>` : ''}</div>`;
+    h += `<div class="actions"><button class="btn" data-jump="path">${ICON.map} View path</button><button class="btn" id="mapBtn">${ICON.map} Learning map</button>${kp.length ? `<button class="btn" data-jump="points">${ICON.chat} 學習重點</button><button class="btn good" id="cardsBtn">${ICON.done} 複習 · ${dueOf(deckOf(c), loadSrs()).length} 張到期</button>` : ''}</div>`;
     if (mastered.length) h += `<h2>已經掌握</h2><ul class="lead" style="padding-left:20px">${mastered.map(l => `<li>${esc(l.label)}</li>`).join('')}</ul>`;
     if (kp.length) h += '<h2 id="points">學習重點</h2><div class="kp-tabs">' + kp.map((t, i) => `<button data-kp="${i}" class="${i ? '' : 'on'}">${esc(t.title)} · ${t.rows.length}</button>`).join('') + '</div><div class="kp" id="kp"></div>';
     h += '<h2 id="path">Learning Path</h2><div class="legend"><span><i style="border-color:var(--sky);background:var(--sky-bg)"></i>high</span><span><i style="border-color:var(--amber);background:#fff5df"></i>med</span><span><i style="border-color:var(--red);background:#fdebe5"></i>low</span><span><i style="border-color:var(--bd)"></i>已學未評</span><span><i style="border-color:var(--bd);border-style:dashed"></i>課綱未開</span></div>';
@@ -320,17 +369,19 @@ fetch('data.json', { cache: 'no-cache' }).then(r => r.json()).then(data => {
     const pv = document.getElementById('mapPreview');
     if (pv) { drawTree(pv, id); pv.onclick = () => openMap(id); }
     document.getElementById('mapBtn').onclick = () => openMap(id);
+    document.getElementById('cardsBtn')?.addEventListener('click', () => openCards(c));
     document.getElementById('mapOpen')?.addEventListener('click', () => openMap(id));
   }
 
-  function route() {
-    close();
+  function route(keepModal) {
+    if (!keepModal) close();
     const m = location.hash.match(/^#\/c\/([^/]+)/), id = m ? decodeURIComponent(m[1]) : '';
     document.querySelectorAll('#nav a').forEach(a => a.classList.toggle('on', a.dataset.r === id));
+    const y = window.scrollY;
     id ? course(id) : home();
-    window.scrollTo(0, 0);
+    window.scrollTo(0, keepModal ? y : 0);
   }
-  window.addEventListener('hashchange', route);
+  window.addEventListener('hashchange', () => route());
   route();
 });
 </script>
