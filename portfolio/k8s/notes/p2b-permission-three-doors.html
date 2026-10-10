@@ -1,0 +1,768 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>權限三道門</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC:wght@400;700&family=IBM+Plex+Mono:wght@400;600&family=Noto+Sans+TC:wght@400;700&display=swap">
+<style>
+:root{
+  --bg:#F6F8FA; --surface:#FFFFFF; --ink:#23313E; --muted:#61707D; --line:#9AAAB8;
+  --see:#0E7F93; --who:#9A6A00; --may:#B0336E; --ok:#2C8A4E; --no:#C4382B;
+  --soft-see:#BDEEF6; --soft-who:#FFE98A; --soft-may:#F9CDE0; --soft-ok:#CDEFD8; --soft-no:#FAD4CF;
+  --code-bg:#EAF0F4; --grid:rgba(90,130,170,.16); --tape:rgba(255,226,110,.75);
+  --sans:"LXGW WenKai TC","Noto Sans TC","PingFang TC","Microsoft JhengHei",serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --bg:#1A2320; --surface:#212C28; --ink:#E6EEE8; --muted:#9FB0A7; --line:#56675F;
+    --see:#71D4E3; --who:#F2CF5B; --may:#F29BC3; --ok:#7FD39A; --no:#F28072;
+    --soft-see:#1C4148; --soft-who:#4A4219; --soft-may:#4A2436; --soft-ok:#1F3D2A; --soft-no:#4A2420;
+    --code-bg:#2A3833; --grid:rgba(200,230,215,.06); --tape:rgba(242,207,91,.35);
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#1A2320; --surface:#212C28; --ink:#E6EEE8; --muted:#9FB0A7; --line:#56675F;
+  --see:#71D4E3; --who:#F2CF5B; --may:#F29BC3; --ok:#7FD39A; --no:#F28072;
+  --soft-see:#1C4148; --soft-who:#4A4219; --soft-may:#4A2436; --soft-ok:#1F3D2A; --soft-no:#4A2420;
+  --code-bg:#2A3833; --grid:rgba(200,230,215,.06); --tape:rgba(242,207,91,.35);
+}
+body{
+  background-color:var(--bg);color:var(--ink);font-family:var(--sans);font-size:17px;line-height:1.75;
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+  background-size:22px 22px;
+  padding-inline:16px;padding-block:28px 72px
+}
+.wrap{max-width:920px;margin:0 auto;display:grid;gap:60px}
+h1,h2{font-weight:700;text-wrap:balance;line-height:1.3;margin:0}
+h1{font-size:clamp(40px,8vw,64px)}
+h2{font-size:clamp(24px,4.5vw,32px)}
+h3{font-size:20px;margin:0}
+p{margin:0;max-width:65ch}
+section{display:grid;gap:18px}
+.layer{font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+code,.mono{font-family:var(--mono);font-size:.84em}
+code{background:var(--code-bg);padding:1px 6px;border-radius:3px}
+.see{color:var(--see)} .who{color:var(--who)} .may{color:var(--may)} .ok{color:var(--ok)} .no{color:var(--no)}
+
+/* highlighter */
+.pill,.hl-who,.hl-see,.hl-may{background:linear-gradient(transparent 42%,var(--hl) 42%);padding:0 3px;font-weight:700;color:var(--ink)}
+.pill.who,.hl-who{--hl:var(--soft-who)} .pill.see,.hl-see{--hl:var(--soft-see)} .pill.may,.hl-may{--hl:var(--soft-may)}
+.legend{display:flex;flex-wrap:wrap;gap:18px;font-size:19px}
+
+/* taped figure cards */
+.fig{position:relative;overflow-x:auto;background:var(--surface);border:1px solid var(--line);border-radius:2px;padding:26px 12px 12px;box-shadow:0 2px 0 var(--line)}
+.fig:not(pre)::before{content:"";position:sticky;display:block;left:calc(50% - 45px);width:90px;height:18px;margin:-20px auto 8px;background:var(--tape);transform:rotate(-2deg)}
+pre.fig{padding:12px 14px;box-shadow:none}
+.fig svg{display:block;width:100%;min-width:680px;height:auto}
+.note{font-size:15px;color:var(--muted)}
+.stuck{border-left:3px solid var(--no);padding:4px 0 4px 14px;font-size:17px}
+.stuck::before{content:"我錯在這:";color:var(--no);font-weight:700}
+
+.tbl{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:16px;background:var(--surface)}
+th,td{border-bottom:1.5px solid var(--line);padding:9px 10px;text-align:left;vertical-align:top}
+th{font-weight:700;border-bottom:2px solid var(--ink)}
+tr > th:first-child{border-bottom:1.5px solid var(--line)}
+tr:first-child > th:first-child{border-bottom:2px solid var(--ink)}
+td.c{text-align:center}
+
+.chips{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px}
+.chip{border:2px solid var(--ink);border-radius:4px;padding:8px 12px;display:grid;gap:2px;background:var(--surface)}
+.chip.on{background:var(--soft-may)}
+.chip b{font-family:var(--mono);font-size:13px}
+.chip span{font-size:15px}
+.chip small{font-size:13px;color:var(--muted)}
+.keybar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;font-weight:700}
+.bigkey{background:linear-gradient(transparent 42%,var(--soft-who) 42%);padding:0 4px}
+
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}
+.card{background:var(--surface);border:2px solid var(--ink);border-radius:4px;padding:14px 16px;display:grid;gap:8px;align-content:start}
+.card pre{margin:0;white-space:pre-wrap;word-break:break-all;font-family:var(--mono);font-size:12px;background:var(--code-bg);padding:8px;border-radius:3px}
+.tag{font-size:13px;font-weight:700;padding:0 4px;justify-self:start}
+.tag.see{background:linear-gradient(transparent 40%,var(--soft-see) 40%)}
+.tag.who{background:linear-gradient(transparent 40%,var(--soft-who) 40%)}
+.tag.may{background:linear-gradient(transparent 40%,var(--soft-may) 40%)}
+.tag.adm{background:linear-gradient(transparent 40%,var(--code-bg) 40%)}
+.answer{background:var(--surface);border:2px dashed var(--ink);border-radius:6px;padding:16px 18px;display:grid;gap:10px}
+.answer .en{font-family:var(--mono);font-size:13px;color:var(--muted);line-height:1.7}
+
+/* comic panels */
+.panels{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+@media (max-width:620px){.panels{grid-template-columns:1fr}}
+.pn{background:var(--surface);border:2px solid var(--ink);border-radius:4px;padding:10px 12px 12px;display:grid;gap:6px}
+.pn svg{width:100%;height:auto;display:block}
+.pn .k{font-family:var(--mono);font-size:12px;color:var(--muted)}
+.pn .no-{color:var(--no);font-weight:700} .pn .ok-{color:var(--ok);font-weight:700}
+
+/* svg */
+svg text{fill:var(--ink);font-family:var(--sans);font-size:15px}
+svg .th{font-weight:700;font-size:17px}
+svg .ts{font-size:13px;fill:var(--muted)}
+svg .tm{font-family:var(--mono);font-size:13px}
+svg .tm11{font-family:var(--mono);font-size:11px}
+svg .t-see{fill:var(--see)} svg .t-who{fill:var(--who)} svg .t-may{fill:var(--may)} svg .t-ok{fill:var(--ok)} svg .t-no{fill:var(--no)}
+.bx{fill:var(--surface);stroke:var(--line);stroke-width:1.5}
+.bx-ink{fill:var(--surface);stroke:var(--ink);stroke-width:2}
+.bx-see{fill:var(--soft-see);stroke:var(--see);stroke-width:2}
+.bx-who{fill:var(--soft-who);stroke:var(--who);stroke-width:2}
+.bx-may{fill:var(--soft-may);stroke:var(--may);stroke-width:2}
+.bx-ok{fill:var(--soft-ok);stroke:var(--ok);stroke-width:2}
+.bx-no{fill:var(--soft-no);stroke:var(--no);stroke-width:2}
+.bx-bg{fill:var(--bg);stroke:var(--line);stroke-width:1.5}
+.hl{fill:var(--soft-no)}
+.ln{stroke:var(--ink);stroke-width:1.8;fill:none;stroke-linecap:round}
+.ln-see{stroke:var(--see);stroke-width:1.8;fill:none}
+.ln-may{stroke:var(--may);stroke-width:1.8;fill:none}
+.ln-who{stroke:var(--who);stroke-width:1.8;fill:none}
+.ln-no{stroke:var(--no);stroke-width:2;fill:none}
+.wall{stroke:var(--see);stroke-width:8;stroke-linecap:round}
+.dash{stroke-dasharray:6 5}
+.m-ink{fill:var(--ink)} .m-no{fill:var(--no)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="m-ink"/></marker>
+    <marker id="ahn" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="m-no"/></marker>
+  </defs>
+</svg>
+
+<div class="wrap">
+
+<!-- HERO -->
+<section>
+  <div class="layer">Linux · Kubernetes · EKS · s39</div>
+  <h1>權限三道門</h1>
+  <p>不管是 Linux、Kubernetes 還是 AWS,每一套權限系統都只在回答三個問題。整頁都用這三支螢光筆。</p>
+  <div class="legend">
+    <span class="pill who">你是誰?(identity)</span>
+    <span class="pill see">① 看得到嗎?(visibility)</span>
+    <span class="pill may">② 准不准?(permission)</span>
+  </div>
+  <div class="fig">
+    <svg viewBox="0 -10 840 260" role="img" aria-label="身分、視野、權限三道檢查">
+      <path d="M101,60 C101,6 556,6 556,30" class="ln-who dash" marker-end="url(#ah)"/>
+      <text x="330" y="4" class="ts" text-anchor="middle">走到門 ② 時,才拿出識別證比對</text>
+      <rect x="16" y="60" width="170" height="130" rx="10" class="bx-who"/>
+      <text x="101" y="92" class="th t-who" text-anchor="middle">你是誰?</text>
+      <text x="101" y="116" class="ts" text-anchor="middle">identity</text>
+      <text x="101" y="146" class="tm" text-anchor="middle">UID / SA / IAM</text>
+      <text x="101" y="170" class="ts" text-anchor="middle">身上帶著的識別證</text>
+      <line x1="190" y1="125" x2="232" y2="125" class="ln" marker-end="url(#ah)"/>
+      <rect x="236" y="30" width="180" height="190" rx="10" class="bx-see"/>
+      <text x="326" y="62" class="th t-see" text-anchor="middle">① 看得到嗎?</text>
+      <text x="326" y="86" class="ts" text-anchor="middle">visibility</text>
+      <text x="326" y="120" class="tm" text-anchor="middle">Linux namespace</text>
+      <text x="326" y="142" class="tm" text-anchor="middle">NetworkPolicy</text>
+      <text x="326" y="198" class="ts" text-anchor="middle">走得到,才有下一關</text>
+      <line x1="420" y1="125" x2="462" y2="125" class="ln" marker-end="url(#ah)"/>
+      <rect x="466" y="30" width="180" height="190" rx="10" class="bx-may"/>
+      <text x="556" y="62" class="th t-may" text-anchor="middle">② 准不准?</text>
+      <text x="556" y="86" class="ts" text-anchor="middle">permission</text>
+      <text x="556" y="120" class="tm" text-anchor="middle">檔案 rwx</text>
+      <text x="556" y="142" class="tm" text-anchor="middle">RBAC Role</text>
+      <text x="556" y="164" class="tm" text-anchor="middle">IAM policy</text>
+      <text x="556" y="198" class="ts" text-anchor="middle">身分 × 規則表</text>
+      <line x1="650" y1="125" x2="692" y2="125" class="ln" marker-end="url(#ah)"/>
+      <rect x="696" y="70" width="128" height="110" rx="10" class="bx-ink"/>
+      <text x="760" y="108" class="th" text-anchor="middle">資源</text>
+      <text x="760" y="134" class="ts" text-anchor="middle">檔案 / Pod</text>
+      <text x="760" y="154" class="ts" text-anchor="middle">Secret / S3</text>
+    </svg>
+  </div>
+  <p class="note">第一性原理:電腦只能檢查「一個數字或名字」對不對得上「一張規則表」。所以每一層都要先有身分,再有規則表,中間用一座橋把兩者綁起來。</p>
+  <div class="answer">
+    <h3>s39 帶走三句</h3>
+    <p>1. container 裡的 root = node 的 root(共用同一顆 kernel)。</p>
+    <p>2. PSS 是 API Server 門口的警衛,不合規的 Pod 根本進不了叢集。</p>
+    <p>3. YAML 寫了 non-root 還不夠,image 也要支援用非 root 跑。</p>
+    <p class="note">不用背:capability 清單、seccomp 內部運作、user namespace。這些超過面試和 on-call 需要的深度。</p>
+  </div>
+</section>
+
+<!-- LINUX -->
+<section>
+  <div class="layer">第 1 層 · Linux</div>
+  <h2>Linux:每個 process 身上貼一個 UID</h2>
+  <p>檔案上寫著「屬於誰」和「誰能做什麼」。kernel 拿 process 的 UID 去對這張表。</p>
+  <div class="fig">
+    <svg viewBox="0 0 840 320" role="img" aria-label="Linux 檔案權限檢查">
+      <rect x="20" y="20" width="40" height="40" rx="6" class="bx"/><text x="40" y="46" class="tm" text-anchor="middle">-</text>
+      <rect x="66" y="20" width="70" height="40" rx="6" class="bx-may"/><text x="101" y="46" class="tm" text-anchor="middle">rw-</text>
+      <rect x="142" y="20" width="70" height="40" rx="6" class="bx-may"/><text x="177" y="46" class="tm" text-anchor="middle">r--</text>
+      <rect x="218" y="20" width="70" height="40" rx="6" class="bx-may"/><text x="253" y="46" class="tm" text-anchor="middle">---</text>
+      <rect x="310" y="20" width="90" height="40" rx="6" class="bx-who"/><text x="355" y="46" class="tm" text-anchor="middle">root</text>
+      <rect x="406" y="20" width="100" height="40" rx="6" class="bx-who"/><text x="456" y="46" class="tm" text-anchor="middle">shadow</text>
+      <rect x="512" y="20" width="150" height="40" rx="6" class="bx"/><text x="587" y="46" class="tm" text-anchor="middle">/etc/shadow</text>
+      <text x="40" y="80" class="ts" text-anchor="middle">檔案</text>
+      <text x="101" y="80" class="ts" text-anchor="middle">擁有者可</text>
+      <text x="177" y="80" class="ts" text-anchor="middle">群組可</text>
+      <text x="253" y="80" class="ts" text-anchor="middle">其他人可</text>
+      <text x="355" y="80" class="ts" text-anchor="middle">擁有者</text>
+      <text x="456" y="80" class="ts" text-anchor="middle">群組</text>
+      <text x="587" y="80" class="ts" text-anchor="middle">檔名</text>
+      <line x1="66" y1="92" x2="288" y2="92" class="ln-may"/>
+      <text x="177" y="112" class="ts t-may" text-anchor="middle">規則表(准不准)</text>
+      <line x1="310" y1="92" x2="506" y2="92" class="ln-who"/>
+      <text x="408" y="112" class="ts t-who" text-anchor="middle">檔案屬於誰(身分)</text>
+      <rect x="20" y="140" width="200" height="64" rx="10" class="bx-who"/>
+      <text x="120" y="166" class="th" text-anchor="middle">nginx</text>
+      <text x="120" y="190" class="tm" text-anchor="middle">UID 0 (root)</text>
+      <line x1="224" y1="172" x2="286" y2="172" class="ln" marker-end="url(#ah)"/>
+      <rect x="290" y="140" width="330" height="64" rx="10" class="bx"/>
+      <text x="455" y="166" text-anchor="middle">kernel:UID 0?</text>
+      <text x="455" y="190" class="ts" text-anchor="middle">直接跳過 rwx 檢查(CAP_DAC_OVERRIDE)</text>
+      <line x1="624" y1="172" x2="656" y2="172" class="ln" marker-end="url(#ah)"/>
+      <rect x="660" y="140" width="160" height="64" rx="10" class="bx-ok"/>
+      <text x="740" y="178" class="th t-ok" text-anchor="middle">✓ 讀得到</text>
+      <rect x="20" y="236" width="200" height="64" rx="10" class="bx-who"/>
+      <text x="120" y="262" class="th" text-anchor="middle">app</text>
+      <text x="120" y="286" class="tm" text-anchor="middle">UID 1000</text>
+      <line x1="224" y1="268" x2="286" y2="268" class="ln" marker-end="url(#ah)"/>
+      <rect x="290" y="236" width="330" height="64" rx="10" class="bx"/>
+      <text x="455" y="262" text-anchor="middle">不是 root,也不在 shadow 群組</text>
+      <text x="455" y="286" class="ts" text-anchor="middle">→ 看「其他人」那格:---</text>
+      <line x1="624" y1="268" x2="656" y2="268" class="ln" marker-end="url(#ah)"/>
+      <rect x="660" y="236" width="160" height="64" rx="10" class="bx-no"/>
+      <text x="740" y="264" class="th t-no" text-anchor="middle">✗ 讀不到</text>
+      <text x="740" y="286" class="tm11 t-no" text-anchor="middle">Permission denied</text>
+    </svg>
+  </div>
+
+  <h3>root 太大,所以被拆成小鑰匙:capabilities</h3>
+  <div class="keybar">
+    <span class="bigkey">以前:UID 0 = 一把萬能鑰匙</span>
+    <span>→</span>
+    <span>現在:拆成約 40 把小鑰匙,一把一把給</span>
+  </div>
+  <div class="chips">
+    <div class="chip on"><b>CAP_DAC_OVERRIDE</b><span>無視檔案 rwx</span><small>container 預設有</small></div>
+    <div class="chip on"><b>CAP_CHOWN</b><span>改檔案擁有者</span><small>container 預設有</small></div>
+    <div class="chip on"><b>CAP_SETUID</b><span>把自己換成別的 UID</span><small>container 預設有</small></div>
+    <div class="chip on"><b>CAP_NET_BIND_SERVICE</b><span>綁 1024 以下的 port</span><small>container 預設有</small></div>
+    <div class="chip on"><b>CAP_NET_RAW</b><span>發 raw 封包(ping、偽造)</span><small>container 預設有</small></div>
+    <div class="chip"><b>CAP_NET_ADMIN</b><span>改網卡、路由、iptables</span><small>預設拿掉</small></div>
+    <div class="chip"><b>CAP_SYS_PTRACE</b><span>偷看別的 process 記憶體</span><small>預設拿掉</small></div>
+    <div class="chip"><b>CAP_SYS_ADMIN</b><span>mount 等,等於半個 root</span><small>預設拿掉</small></div>
+  </div>
+  <p class="note">containerd 預設留給 container 14 把(粉紅格是其中 5 把)。<code>capabilities: drop: ["ALL"]</code> 就是一把都不留。要綁 80 port 再單獨 <code>add: ["NET_BIND_SERVICE"]</code>。</p>
+</section>
+
+<!-- TWO DOORS -->
+<section>
+  <div class="layer">第 1 層 · Linux · 今天卡住的地方</div>
+  <h2>namespace 管「走得到」,UID 管「打得開」</h2>
+  <div class="stuck">09-25 以為「UID 0 沒翻牆,也讀得到 node 的 /etc/shadow」。root 只過得了門 ②。門 ① 擋住時,root 沒用。</div>
+  <div class="fig">
+    <svg viewBox="0 0 840 300" role="img" aria-label="大樓比喻:會議室與機房">
+      <text x="10" y="20" class="th">node = 一棟大樓(只有一套門禁系統 = 一顆 kernel)</text>
+      <rect x="10" y="32" width="820" height="258" rx="14" class="bx"/>
+      <rect x="40" y="62" width="300" height="200" rx="10" class="bx-see"/>
+      <text x="190" y="90" class="th t-see" text-anchor="middle">會議室 = container</text>
+      <rect x="62" y="110" width="130" height="66" rx="8" class="bx-who"/>
+      <text x="127" y="136" class="th" text-anchor="middle">nginx</text>
+      <text x="127" y="160" class="ts" text-anchor="middle">總經理卡 UID 0</text>
+      <rect x="208" y="110" width="116" height="66" rx="8" class="bx-bg"/>
+      <text x="266" y="136" text-anchor="middle">假保險箱</text>
+      <text x="266" y="160" class="ts" text-anchor="middle">image 自帶的</text>
+      <text x="190" y="214" class="ts t-see" text-anchor="middle">牆 + 門 = namespace</text>
+      <text x="190" y="236" class="ts t-see" text-anchor="middle">它的 / 只是 image 的檔案樹</text>
+      <line x1="340" y1="62" x2="340" y2="262" class="wall"/>
+      <text x="430" y="150" class="ts t-no" text-anchor="middle">翻牆 = escape</text>
+      <line x1="348" y1="162" x2="582" y2="162" class="ln-no dash" marker-end="url(#ahn)"/>
+      <text x="430" y="186" class="ts t-no" text-anchor="middle">拆掉門 ①</text>
+      <rect x="520" y="62" width="290" height="200" rx="10" class="bx-may"/>
+      <text x="665" y="90" class="th t-may" text-anchor="middle">機房 = node 本體</text>
+      <rect x="590" y="118" width="150" height="80" rx="8" class="bx-ink"/>
+      <text x="665" y="150" class="th" text-anchor="middle">保險箱</text>
+      <text x="665" y="176" class="tm" text-anchor="middle">/etc/shadow</text>
+      <text x="665" y="232" class="ts t-may" text-anchor="middle">門 ② 刷卡機 = 檢查 UID</text>
+    </svg>
+  </div>
+  <h3>四格漫畫:誰讀得到 /etc/shadow?</h3>
+  <div class="panels" id="panels"></div>
+  <p class="note">上排兩格結局一樣:沒翻牆時,root 和非 root 都卡在門 ①。<code>runAsNonRoot</code> 只改變右下那格,也就是「牆被翻過去之後」。</p>
+</section>
+
+<!-- CONTAINER = PROCESS -->
+<section>
+  <div class="layer">第 2 層 · Container</div>
+  <h2>同一個 process,兩個視角</h2>
+  <p>pid namespace 把 PID 號碼改掉(<span class="hl-see">視野</span>)。UID 沒有改(<span class="hl-who">身分</span>)。所以 container 裡的 root 就是 node 的 root。</p>
+  <div class="fig">
+    <svg viewBox="0 0 840 250" role="img" aria-label="container 內外看到的 process">
+      <text x="20" y="28" class="th t-see">container 裡跑 ps</text>
+      <rect x="20" y="40" width="330" height="150" rx="10" class="bx-see"/>
+      <text x="40" y="72" class="tm ts">PID   USER   CMD</text>
+      <text x="40" y="100" class="tm">1     root   nginx</text>
+      <text x="40" y="160" class="ts">只看得到自己這一個</text>
+      <text x="490" y="28" class="th">node 上跑 ps</text>
+      <rect x="490" y="40" width="330" height="150" rx="10" class="bx"/>
+      <rect x="500" y="128" width="310" height="24" rx="4" class="hl"/>
+      <text x="510" y="72" class="tm ts">PID     USER   CMD</text>
+      <text x="510" y="98" class="tm">1       root   systemd</text>
+      <text x="510" y="122" class="tm">812     root   kubelet</text>
+      <text x="510" y="146" class="tm">48213   root   nginx  ◀</text>
+      <line x1="300" y1="96" x2="496" y2="140" class="ln" marker-end="url(#ah)"/>
+      <text x="420" y="100" class="ts" text-anchor="middle">同一個 process</text>
+      <text x="20" y="226" class="t-see">PID 1 → 48213:號碼被改(視野)</text>
+      <text x="490" y="226" class="t-who">root → root:身分沒改</text>
+    </svg>
+  </div>
+  <p class="note">Linux 有 user namespace 可以把裡面的 UID 0 對應成外面的 100000(普通人),但 Kubernetes 預設沒開(<code>hostUsers: false</code> 才會用)。</p>
+
+  <h3>securityContext:每一欄都是在設定一個 Linux 機制</h3>
+  <div class="tbl">
+    <table>
+      <tr><th>Pod spec 欄位</th><th>對到的 Linux 機制</th><th>擋什麼</th><th>哪道門</th></tr>
+      <tr><td><code>runAsNonRoot: true</code> / <code>runAsUser</code></td><td>process 的 UID</td><td>逃出去後手上只剩實習生卡</td><td><span class="hl-who">身分</span></td></tr>
+      <tr><td><code>capabilities.drop: [ALL]</code></td><td>capabilities</td><td>root 的小鑰匙一把不留</td><td><span class="hl-may">②</span></td></tr>
+      <tr><td><code>allowPrivilegeEscalation: false</code></td><td>no_new_privs 旗標</td><td>用 setuid 程式把自己升成 root</td><td><span class="hl-may">②</span></td></tr>
+      <tr><td><code>readOnlyRootFilesystem: true</code></td><td>rootfs 用唯讀 mount</td><td>寫入後門、改 binary</td><td><span class="hl-may">②</span></td></tr>
+      <tr><td><code>seccompProfile: RuntimeDefault</code></td><td>seccomp 系統呼叫過濾</td><td>少見又危險的 syscall</td><td><span class="hl-may">②</span></td></tr>
+      <tr><td><code>hostPID</code> / <code>hostNetwork</code> / <code>hostPath</code></td><td>不建 namespace,直接用 node 的</td><td>這是你自己把牆拆掉</td><td><span class="hl-see">①</span></td></tr>
+      <tr><td><code>privileged: true</code></td><td>全部 capabilities + 所有裝置</td><td>什麼都不擋</td><td class="no"><b>全開</b></td></tr>
+    </table>
+  </div>
+</section>
+
+<!-- ESCAPE -->
+<section>
+  <div class="layer">第 2 層 · Container</div>
+  <h2>翻牆 = container escape</h2>
+  <p>container 裡的 process 跑出 namespace,摸到 node 本體。牆有三種破法:</p>
+  <div class="fig">
+    <svg viewBox="0 0 840 220" role="img" aria-label="container escape 的三種洞">
+      <rect x="20" y="30" width="360" height="170" rx="12" class="bx-see"/>
+      <text x="200" y="56" class="th t-see" text-anchor="middle">container(namespace 圍起來)</text>
+      <rect x="50" y="90" width="110" height="50" rx="8" class="bx-who"/>
+      <text x="105" y="121" class="th" text-anchor="middle">process</text>
+      <line x1="165" y1="115" x2="516" y2="70" class="ln-no" marker-end="url(#ahn)"/>
+      <line x1="165" y1="115" x2="516" y2="115" class="ln-no" marker-end="url(#ahn)"/>
+      <line x1="165" y1="115" x2="516" y2="160" class="ln-no" marker-end="url(#ahn)"/>
+      <text x="450" y="66" class="ts t-no" text-anchor="middle">① kernel bug</text>
+      <text x="450" y="108" class="ts t-no" text-anchor="middle">② runtime bug</text>
+      <text x="450" y="176" class="ts t-no" text-anchor="middle">③ 設定開門</text>
+      <rect x="520" y="30" width="300" height="170" rx="12" class="bx-may"/>
+      <text x="670" y="56" class="th t-may" text-anchor="middle">node 本體</text>
+      <text x="670" y="98" class="tm" text-anchor="middle">/etc/shadow</text>
+      <text x="670" y="126" class="tm" text-anchor="middle">kubelet</text>
+      <text x="670" y="154" class="tm" text-anchor="middle">其他 Pod 的檔案</text>
+    </svg>
+  </div>
+  <div class="tbl">
+    <table>
+      <tr><th>洞</th><th>例子</th><th>擋得住嗎</th></tr>
+      <tr><td>① kernel bug</td><td>所有 container 共用同一顆 kernel</td><td>要等 patch</td></tr>
+      <tr><td>② runtime bug</td><td>runc CVE-2019-5736:container 裡的 root 覆寫 node 上的 runc</td><td>要等 patch</td></tr>
+      <tr><td>③ 設定開門</td><td><code>hostPath: /</code>、<code>privileged: true</code>、<code>hostPID</code></td><td class="ok"><b>擋得住,也最常見</b></td></tr>
+    </table>
+  </div>
+  <p><b>assume breach</b>〔假設已被攻破〕:① 和 ② 擋不住,所以設計上先假設牆總有一天會破,再決定破了之後對方手上拿什麼。<code>runAsNonRoot</code> 讓他拿到實習生卡。</p>
+</section>
+
+<!-- K8S API -->
+<section>
+  <div class="layer">第 3 層 · Kubernetes API</div>
+  <h2>每個請求都在 API Server 過三關</h2>
+  <div class="fig">
+    <svg viewBox="0 0 860 300" role="img" aria-label="API Server 的 AuthN、AuthZ、Admission">
+      <rect x="10" y="40" width="140" height="56" rx="10" class="bx"/>
+      <text x="80" y="64" class="th" text-anchor="middle">kubectl</text>
+      <text x="80" y="86" class="ts" text-anchor="middle">人:cert / token</text>
+      <rect x="10" y="130" width="140" height="56" rx="10" class="bx"/>
+      <text x="80" y="154" class="th" text-anchor="middle">Pod</text>
+      <text x="80" y="176" class="ts" text-anchor="middle">SA token</text>
+      <line x1="150" y1="68" x2="202" y2="108" class="ln" marker-end="url(#ah)"/>
+      <line x1="150" y1="158" x2="202" y2="128" class="ln" marker-end="url(#ah)"/>
+      <rect x="190" y="18" width="520" height="190" rx="14" class="bx"/>
+      <text x="450" y="44" class="th" text-anchor="middle">API Server</text>
+      <rect x="205" y="64" width="150" height="110" rx="10" class="bx-who"/>
+      <text x="280" y="96" class="th" text-anchor="middle">AuthN</text>
+      <text x="280" y="122" text-anchor="middle">你是誰?</text>
+      <text x="280" y="148" class="ts" text-anchor="middle">驗 cert / token</text>
+      <line x1="355" y1="119" x2="373" y2="119" class="ln" marker-end="url(#ah)"/>
+      <rect x="375" y="64" width="150" height="110" rx="10" class="bx-may"/>
+      <text x="450" y="96" class="th" text-anchor="middle">AuthZ</text>
+      <text x="450" y="122" text-anchor="middle">准不准?</text>
+      <text x="450" y="148" class="ts" text-anchor="middle">RBAC</text>
+      <line x1="525" y1="119" x2="543" y2="119" class="ln" marker-end="url(#ah)"/>
+      <rect x="545" y="64" width="150" height="110" rx="10" class="bx-ink"/>
+      <text x="620" y="96" class="th" text-anchor="middle">Admission</text>
+      <text x="620" y="122" text-anchor="middle">內容合規嗎?</text>
+      <text x="620" y="148" class="ts" text-anchor="middle">PSS</text>
+      <line x1="710" y1="119" x2="748" y2="119" class="ln" marker-end="url(#ah)"/>
+      <rect x="750" y="90" width="100" height="56" rx="10" class="bx"/>
+      <text x="800" y="114" class="th" text-anchor="middle">etcd</text>
+      <text x="800" y="134" class="ts" text-anchor="middle">存進去</text>
+      <line x1="280" y1="174" x2="280" y2="226" class="ln-no dash"/>
+      <line x1="450" y1="174" x2="450" y2="226" class="ln-no dash"/>
+      <line x1="620" y1="174" x2="620" y2="226" class="ln-no dash"/>
+      <text x="280" y="246" class="tm t-no" text-anchor="middle">401 Unauthorized</text>
+      <text x="450" y="246" class="tm t-no" text-anchor="middle">403 cannot list</text>
+      <text x="620" y="246" class="tm t-no" text-anchor="middle">403 violates PodSecurity</text>
+      <text x="450" y="284" class="ts" text-anchor="middle">被擋下的 Pod 不會進 etcd,kubelet 永遠看不到它</text>
+    </svg>
+  </div>
+  <p class="note">k8s namespace 在這裡只是 RBAC 的「範圍」,不是隔離牆。它跟 Linux namespace 撞名,不是同一個東西。</p>
+
+  <h3>RBAC:身分和規則分開存,用 Binding 綁起來</h3>
+  <div class="fig">
+    <svg viewBox="0 0 840 200" role="img" aria-label="Subject、RoleBinding、Role">
+      <rect x="20" y="40" width="220" height="110" rx="10" class="bx-who"/>
+      <text x="130" y="74" class="th" text-anchor="middle">誰(Subject)</text>
+      <text x="130" y="102" class="tm" text-anchor="middle">User / Group</text>
+      <text x="130" y="126" class="tm" text-anchor="middle">ServiceAccount</text>
+      <line x1="240" y1="95" x2="308" y2="95" class="ln" marker-start="url(#ah)"/>
+      <rect x="310" y="62" width="220" height="66" rx="10" class="bx-ink"/>
+      <text x="420" y="90" class="th" text-anchor="middle">RoleBinding</text>
+      <text x="420" y="114" class="ts" text-anchor="middle">一座橋,兩頭各綁一個</text>
+      <line x1="530" y1="95" x2="598" y2="95" class="ln" marker-end="url(#ah)"/>
+      <rect x="600" y="40" width="220" height="110" rx="10" class="bx-may"/>
+      <text x="710" y="74" class="th" text-anchor="middle">能做什麼(Role)</text>
+      <text x="710" y="102" class="tm" text-anchor="middle">verbs × resources</text>
+      <text x="710" y="126" class="tm ts" text-anchor="middle">get,list × pods</text>
+      <text x="420" y="186" class="ts" text-anchor="middle">Role + RoleBinding = 一個 namespace。ClusterRole + ClusterRoleBinding = 整個叢集。</text>
+    </svg>
+  </div>
+  <p><b>爆炸半徑</b>(這張 SA 的 token 被偷,最多能做到哪):先算 <span class="hl-may">namespace 數 × resource × verb</span>,再問一句「它能不能跳出 RBAC 管轄」。</p>
+  <div class="chips">
+    <div class="chip on"><b>create pods</b><span>建一個 Pod 掛 ns 裡任何 SA,借走它的身分</span></div>
+    <div class="chip on"><b>get secrets</b><span>讀到別人的 token 和密碼</span></div>
+    <div class="chip on"><b>escalate / bind</b><span>自己給自己加權限</span></div>
+    <div class="chip on"><b>impersonate</b><span>用 --as 冒充任何人</span></div>
+  </div>
+
+  <h3>Secret:兩種鎖各擋不同的小偷</h3>
+  <div class="tbl">
+    <table>
+      <tr><th>小偷</th><th>從哪偷</th><th>誰擋他</th></tr>
+      <tr><td>偷到 CI 的 SA token</td><td>走 API Server,<code>kubectl get secret</code></td><td><span class="hl-may">RBAC</span>(櫃員看身分證)。encryption at rest 擋不住,因為 API Server 會幫他解密</td></tr>
+      <tr><td>偷到 etcd 備份檔</td><td>繞過 API Server,直接讀檔</td><td><span class="hl-see">encryption at rest</span>(金庫鎖)。RBAC 擋不住,因為他根本沒經過櫃員</td></tr>
+    </table>
+  </div>
+</section>
+
+<!-- PSS LAB -->
+<section>
+  <div class="layer">第 3 層 · Kubernetes · s39 lab</div>
+  <h2>PSS:門口警衛,加上第二個檢查點</h2>
+  <p>在 namespace 貼一張 label,API Server 的 Admission 就會照標準檢查每個 Pod。</p>
+  <pre class="fig mono" style="margin:0;font-size:13px">kubectl label namespace pss-lab pod-security.kubernetes.io/enforce=restricted</pre>
+  <div class="tbl">
+    <table>
+      <tr><th></th><th>PSS</th><th>Kyverno</th></tr>
+      <tr><td>從哪來</td><td>k8s 內建</td><td>另外裝,本身也是一組 Pod</td></tr>
+      <tr><td>規則</td><td>固定三檔:privileged / baseline / restricted</td><td>自己寫</td></tr>
+      <tr><td>例子</td><td>「不准用 root」</td><td>「image 只能來自我們的 ECR」</td></tr>
+      <tr><td>比喻</td><td>現成的制服規定</td><td>公司自訂的員工守則</td></tr>
+    </table>
+  </div>
+  <p class="note">除了 <code>enforce</code>,還有 <code>warn</code> 和 <code>audit</code> 兩種模式:先看誰會被擋,再真的執法。正式環境通常這樣逐步導入。</p>
+
+  <h3>同一個 nginx 試了三次</h3>
+  <div class="fig">
+    <svg viewBox="0 0 860 340" role="img" aria-label="PSS lab 三次嘗試:admission 與 kubelet 兩個檢查點">
+      <text x="100" y="24" class="th" text-anchor="middle">你送出的 Pod</text>
+      <text x="380" y="24" class="th t-see" text-anchor="middle">① API Server 警衛</text>
+      <text x="380" y="44" class="ts" text-anchor="middle">只看 YAML</text>
+      <text x="595" y="24" class="th t-may" text-anchor="middle">② kubelet</text>
+      <text x="595" y="44" class="ts" text-anchor="middle">看 image 實際用誰跑</text>
+      <text x="780" y="24" class="th" text-anchor="middle">結果</text>
+      <rect x="10" y="64" width="180" height="70" rx="10" class="bx"/>
+      <text x="100" y="92" class="th" text-anchor="middle">try 1</text>
+      <text x="100" y="116" class="ts" text-anchor="middle">nginx,什麼都沒寫</text>
+      <line x1="190" y1="99" x2="286" y2="99" class="ln" marker-end="url(#ah)"/>
+      <rect x="290" y="64" width="180" height="70" rx="10" class="bx-no"/>
+      <text x="380" y="92" class="th t-no" text-anchor="middle">✗ Forbidden</text>
+      <text x="380" y="116" class="ts" text-anchor="middle">缺 4 個欄位</text>
+      <rect x="510" y="64" width="170" height="70" rx="10" class="bx-bg dash"/>
+      <text x="595" y="104" class="ts" text-anchor="middle">沒走到這裡</text>
+      <rect x="705" y="64" width="150" height="70" rx="10" class="bx-no"/>
+      <text x="780" y="92" class="th" text-anchor="middle">沒有 Pod</text>
+      <text x="780" y="116" class="ts" text-anchor="middle">get pods 是空的</text>
+      <rect x="10" y="160" width="180" height="70" rx="10" class="bx"/>
+      <text x="100" y="188" class="th" text-anchor="middle">try 2</text>
+      <text x="100" y="212" class="ts" text-anchor="middle">nginx + 4 欄位</text>
+      <line x1="190" y1="195" x2="286" y2="195" class="ln" marker-end="url(#ah)"/>
+      <rect x="290" y="160" width="180" height="70" rx="10" class="bx-ok"/>
+      <text x="380" y="188" class="th t-ok" text-anchor="middle">✓ created</text>
+      <text x="380" y="212" class="ts" text-anchor="middle">YAML 有寫就放行</text>
+      <line x1="470" y1="195" x2="506" y2="195" class="ln" marker-end="url(#ah)"/>
+      <rect x="510" y="160" width="170" height="70" rx="10" class="bx-no"/>
+      <text x="595" y="188" class="th t-no" text-anchor="middle">✗ 拒絕啟動</text>
+      <text x="595" y="212" class="ts" text-anchor="middle">image 會用 root 跑</text>
+      <line x1="680" y1="195" x2="701" y2="195" class="ln" marker-end="url(#ah)"/>
+      <rect x="705" y="160" width="150" height="70" rx="10" class="bx-no"/>
+      <text x="780" y="188" class="tm11" text-anchor="middle">CreateContainer</text>
+      <text x="780" y="206" class="tm11" text-anchor="middle">ConfigError</text>
+      <rect x="10" y="256" width="180" height="70" rx="10" class="bx"/>
+      <text x="100" y="284" class="th" text-anchor="middle">try 3</text>
+      <text x="100" y="308" class="ts" text-anchor="middle">unprivileged + 4 欄位</text>
+      <line x1="190" y1="291" x2="286" y2="291" class="ln" marker-end="url(#ah)"/>
+      <rect x="290" y="256" width="180" height="70" rx="10" class="bx-ok"/>
+      <text x="380" y="284" class="th t-ok" text-anchor="middle">✓ created</text>
+      <line x1="470" y1="291" x2="506" y2="291" class="ln" marker-end="url(#ah)"/>
+      <rect x="510" y="256" width="170" height="70" rx="10" class="bx-ok"/>
+      <text x="595" y="284" class="th t-ok" text-anchor="middle">✓ UID 101</text>
+      <line x1="680" y1="291" x2="701" y2="291" class="ln" marker-end="url(#ah)"/>
+      <rect x="705" y="256" width="150" height="70" rx="10" class="bx-ok"/>
+      <text x="780" y="284" class="th t-ok" text-anchor="middle">Running</text>
+      <text x="780" y="308" class="tm11" text-anchor="middle">id → uid=101</text>
+    </svg>
+  </div>
+  <p>try 2 的證據在 <code>describe pod</code> 的 Events。第 3 欄寫的是 <code>kubelet</code>,不是 API Server:</p>
+  <pre class="fig mono" style="margin:0;font-size:12px;white-space:pre-wrap">Warning  Failed  kubelet  Error: container has runAsNonRoot and image will run as root</pre>
+  <p class="note"><code>pod/... created</code> 只代表過了警衛,不代表跑起來。一定要再 <code>get pod</code> 確認。</p>
+
+  <h3>一定要 root 嗎?</h3>
+  <div class="stuck">s39 以為 nginx 要 root 是因為「會改 kernel 的路由表」。改路由表是 CNI 和 kube-proxy 的事,nginx 不碰。</div>
+  <div class="tbl">
+    <table>
+      <tr><th></th><th>一般 app(nginx 等)</th><th>node 系統元件(CNI、kube-proxy、log agent)</th></tr>
+      <tr><td>為什麼想要 root</td><td>1. 綁 1024 以下的 port(如 80)<br>2. 寫屬於 root 的目錄(如 <code>/var/cache/nginx</code>)</td><td>改網卡、路由、iptables,讀 node 上的檔案</td></tr>
+      <tr><td>真的需要嗎</td><td class="ok"><b>不需要</b></td><td class="no"><b>需要</b></td></tr>
+      <tr><td>怎麼做</td><td>換非 root image(<code>nginx-unprivileged</code> 聽 8080、<code>USER 101</code>),或 <code>runAsUser</code> + 可寫路徑掛 <code>emptyDir</code></td><td>放 <code>kube-system</code>,該 namespace 的 PSS 設 privileged</td></tr>
+    </table>
+  </div>
+</section>
+
+<!-- EKS -->
+<section>
+  <div class="layer">第 4 層 · EKS</div>
+  <h2>EKS:兩個世界,兩座橋</h2>
+  <p>AWS 有自己的身分系統(IAM),Kubernetes 也有一套(User / SA)。EKS 的權限問題,幾乎都是在問「哪座橋沒接好」。</p>
+  <div class="fig">
+    <svg viewBox="0 0 880 480" role="img" aria-label="EKS 的兩座橋:人到叢集、Pod 到 AWS">
+      <rect x="10" y="20" width="250" height="440" rx="14" class="bx"/>
+      <text x="135" y="46" class="th" text-anchor="middle">AWS IAM 世界</text>
+      <rect x="620" y="20" width="250" height="440" rx="14" class="bx"/>
+      <text x="745" y="46" class="th" text-anchor="middle">Kubernetes 世界</text>
+      <text x="440" y="46" class="th" text-anchor="middle">橋 A:人 → 叢集</text>
+      <rect x="30" y="80" width="210" height="60" rx="10" class="bx-who"/>
+      <text x="135" y="106" class="th" text-anchor="middle">工程師 IAM role</text>
+      <text x="135" y="128" class="tm11" text-anchor="middle">arn:aws:iam::…:role/dev</text>
+      <line x1="240" y1="110" x2="286" y2="110" class="ln" marker-end="url(#ah)"/>
+      <rect x="290" y="70" width="150" height="80" rx="10" class="bx"/>
+      <text x="365" y="100" class="tm" text-anchor="middle">aws eks get-token</text>
+      <text x="365" y="126" class="ts" text-anchor="middle">IAM 簽名的 token</text>
+      <line x1="440" y1="110" x2="453" y2="110" class="ln" marker-end="url(#ah)"/>
+      <rect x="455" y="70" width="150" height="80" rx="10" class="bx-who"/>
+      <text x="530" y="100" class="th" text-anchor="middle">Access entry</text>
+      <text x="530" y="126" class="ts" text-anchor="middle">IAM ARN → k8s group</text>
+      <line x1="605" y1="110" x2="636" y2="110" class="ln" marker-end="url(#ah)"/>
+      <rect x="640" y="80" width="210" height="60" rx="10" class="bx-may"/>
+      <text x="745" y="106" class="th" text-anchor="middle">RBAC</text>
+      <text x="745" y="128" class="ts" text-anchor="middle">group 綁 Role,決定准不准</text>
+      <text x="530" y="176" class="ts t-no" text-anchor="middle">沒有 entry → 401 Unauthorized</text>
+      <line x1="270" y1="206" x2="610" y2="206" class="ln dash"/>
+      <text x="440" y="236" class="th" text-anchor="middle">橋 B:Pod → AWS(IRSA)</text>
+      <rect x="640" y="252" width="210" height="80" rx="10" class="bx-ink"/>
+      <text x="745" y="280" class="th" text-anchor="middle">Pod</text>
+      <text x="745" y="304" class="tm" text-anchor="middle">SA: s3-reader</text>
+      <text x="745" y="324" class="ts" text-anchor="middle">ns: shop</text>
+      <line x1="640" y1="292" x2="609" y2="292" class="ln" marker-end="url(#ah)"/>
+      <rect x="455" y="252" width="150" height="80" rx="10" class="bx-who"/>
+      <text x="530" y="280" class="th" text-anchor="middle">SA token (JWT)</text>
+      <text x="530" y="306" class="tm11" text-anchor="middle">sub=…:shop:s3-reader</text>
+      <line x1="455" y1="292" x2="444" y2="292" class="ln" marker-end="url(#ah)"/>
+      <rect x="290" y="252" width="150" height="80" rx="10" class="bx"/>
+      <text x="365" y="282" class="th" text-anchor="middle">STS</text>
+      <text x="365" y="306" class="tm11" text-anchor="middle">AssumeRoleWith</text>
+      <text x="365" y="322" class="tm11" text-anchor="middle">WebIdentity</text>
+      <line x1="290" y1="292" x2="229" y2="292" class="ln" marker-end="url(#ah)"/>
+      <rect x="30" y="236" width="210" height="200" rx="10" class="bx-bg"/>
+      <text x="135" y="256" class="tm11" text-anchor="middle">IAM role: s3-reader-role</text>
+      <rect x="45" y="266" width="180" height="60" rx="8" class="bx-who"/>
+      <text x="135" y="292" class="th" text-anchor="middle">trust policy</text>
+      <text x="135" y="314" class="ts" text-anchor="middle">誰能拿這個 role?</text>
+      <line x1="135" y1="326" x2="135" y2="352" class="ln" marker-end="url(#ah)"/>
+      <rect x="45" y="356" width="180" height="60" rx="8" class="bx-may"/>
+      <text x="135" y="382" class="th" text-anchor="middle">permission policy</text>
+      <text x="135" y="404" class="ts" text-anchor="middle">拿到後能做什麼?</text>
+      <line x1="225" y1="390" x2="286" y2="398" class="ln" marker-end="url(#ah)"/>
+      <rect x="290" y="372" width="150" height="56" rx="10" class="bx-ok"/>
+      <text x="365" y="396" class="th" text-anchor="middle">S3 bucket</text>
+      <text x="365" y="418" class="tm11" text-anchor="middle">s3:GetObject ✓</text>
+      <line x1="700" y1="332" x2="609" y2="394" class="ln-no dash" marker-end="url(#ahn)"/>
+      <rect x="455" y="372" width="150" height="56" rx="10" class="bx-no"/>
+      <text x="530" y="396" class="th" text-anchor="middle">node IAM role</text>
+      <text x="530" y="418" class="ts" text-anchor="middle">經由 IMDS 撿到</text>
+      <text x="530" y="452" class="ts t-no" text-anchor="middle">IRSA 沒接好,SDK 就退回用它</text>
+    </svg>
+  </div>
+  <p class="note">EKS Pod Identity 是橋 B 的新版做法:改在 EKS API 建 association,trust policy 信任 <code>pods.eks.amazonaws.com</code>。形狀一樣,還是「身分 → trust → permission」。</p>
+</section>
+
+<!-- SAME SHAPE -->
+<section>
+  <div class="layer">跨層規律</div>
+  <h2>每一層都是同一個形狀</h2>
+  <p>你這個月的兩個錯,都是把「身分那張」和「規則那張」當成同一張。</p>
+  <div class="tbl">
+    <table>
+      <tr><th>層</th><th><span class="hl-who">身分那張</span></th><th><span class="hl-may">規則那張</span></th><th>中間的橋</th><th>你混過的</th></tr>
+      <tr><td>Linux</td><td>process 的 UID</td><td>檔案 rwx + capabilities</td><td>kernel 當場比對</td><td>09-25:以為 root 就讀得到 node 的檔(漏了門 ①)</td></tr>
+      <tr><td>Kubernetes</td><td>User / SA</td><td>Role</td><td>RoleBinding</td><td></td></tr>
+      <tr><td>EKS 橋 A</td><td>IAM ARN</td><td>RBAC Role</td><td>Access entry</td><td></td></tr>
+      <tr><td>EKS 橋 B</td><td>trust policy(比 JWT 的 sub)</td><td>permission policy</td><td>STS</td><td>09-18:以為 STS 看 permission policy 就放行</td></tr>
+    </table>
+  </div>
+  <p>遇到任何權限錯誤,先問一句:<b>卡在「它是誰」,還是卡在「它能做什麼」?</b>如果是檔案或網路,再往前問:它走得到嗎?</p>
+</section>
+
+<!-- DESIGN -->
+<section>
+  <div class="layer">設計理念</div>
+  <h2>為什麼要設計成這樣</h2>
+  <div class="cards">
+    <div class="card"><h3>身分和規則分開存</h3><p>100 個人 × 20 條規則,如果綁死要改 2000 處。拆開後,換人只改橋,改規則不用動人。RoleBinding、trust policy、Access entry 都是這座橋。</p></div>
+    <div class="card"><h3>最小權限</h3><p>只給剛好夠用的鑰匙。caps 先 drop ALL 再加回、Role 只給用得到的 verb、IAM 只開一個 bucket。</p></div>
+    <div class="card"><h3>短命憑證</h3><p>SA token 和 STS 憑證會自己過期。被偷了,也只能用一陣子。長效的 access key 被偷,就是一直能用。</p></div>
+    <div class="card"><h3>縱深防禦</h3><p>每一層都有洞,這是設計的前提。疊很多層,而且每層的洞不在同一個地方。</p></div>
+  </div>
+  <div class="fig">
+    <svg viewBox="0 0 840 230" role="img" aria-label="瑞士起司模型:五層防線">
+      <text x="20" y="84">攻擊者</text>
+      <rect x="120" y="30" width="60" height="150" rx="6" class="bx-see"/><ellipse cx="150" cy="80" rx="16" ry="14" class="bx-bg"/>
+      <rect x="250" y="30" width="60" height="150" rx="6" class="bx-may"/><ellipse cx="280" cy="80" rx="16" ry="14" class="bx-bg"/>
+      <rect x="380" y="30" width="60" height="150" rx="6" class="bx-may"/><ellipse cx="410" cy="148" rx="16" ry="14" class="bx-bg"/>
+      <rect x="510" y="30" width="60" height="150" rx="6" class="bx-see"/><ellipse cx="540" cy="60" rx="16" ry="14" class="bx-bg"/>
+      <rect x="640" y="30" width="60" height="150" rx="6" class="bx-may"/><ellipse cx="670" cy="120" rx="16" ry="14" class="bx-bg"/>
+      <line x1="80" y1="80" x2="376" y2="80" class="ln-no" marker-end="url(#ahn)"/>
+      <text x="410" y="88" class="th t-no" text-anchor="middle">✗</text>
+      <text x="150" y="202" class="ts" text-anchor="middle">NetworkPolicy</text><text x="150" y="222" class="ts" text-anchor="middle">擋橫向移動</text>
+      <text x="280" y="202" class="ts" text-anchor="middle">RBAC</text><text x="280" y="222" class="ts" text-anchor="middle">擋 API 越權</text>
+      <text x="410" y="202" class="ts" text-anchor="middle">PSS</text><text x="410" y="222" class="ts" text-anchor="middle">擋 runtime 提權</text>
+      <text x="540" y="202" class="ts" text-anchor="middle">encryption</text><text x="540" y="222" class="ts" text-anchor="middle">擋偷備份</text>
+      <text x="670" y="202" class="ts" text-anchor="middle">IAM 最小權限</text><text x="670" y="222" class="ts" text-anchor="middle">擋偷 AWS 憑證</text>
+      <text x="780" y="110" class="ts" text-anchor="middle">資料</text>
+    </svg>
+  </div>
+
+  <h3>預設是開著,還是關著?</h3>
+  <p class="note">預設開著的地方,就是稽核報告最常寫的地方。</p>
+  <div class="tbl">
+    <table>
+      <tr><th>機制</th><th>預設</th><th>意思是</th></tr>
+      <tr><td>container 用什麼身分跑</td><td class="no">開(UID 0 + 14 把 caps)</td><td>image 沒指定 USER,就是 root</td></tr>
+      <tr><td>PSS</td><td class="no">開(沒 label = privileged)</td><td>要自己在 namespace 貼 label</td></tr>
+      <tr><td>NetworkPolicy</td><td class="no">開(全通)</td><td>貼上第一條 policy 才開始擋</td></tr>
+      <tr><td>Pod 拿 AWS 權限</td><td class="no">開(撿 node role)</td><td>IMDSv2 hop limit 設 1 才擋得掉</td></tr>
+      <tr><td>RBAC</td><td class="ok">關(default deny)</td><td>沒綁 Role 就什麼都不能做</td></tr>
+      <tr><td>IAM</td><td class="ok">關(default deny)</td><td>沒寫 Allow 就不行</td></tr>
+      <tr><td>Secret encryption at rest</td><td>地端關 / EKS 開</td><td>地端要自己寫 EncryptionConfiguration</td></tr>
+    </table>
+  </div>
+</section>
+
+<!-- INCIDENTS -->
+<section>
+  <div class="layer">實務現場</div>
+  <h2>實務上常碰到嗎</h2>
+  <p>你不會每天手寫 securityContext,但下面這些場合一定會碰到:</p>
+  <div class="tbl">
+    <table>
+      <tr><th>場合</th><th>頻率</th><th>你要會的</th></tr>
+      <tr><td>公司 Helm chart / 平台範本裡已經寫好</td><td>每天都在,沒人去看</td><td>看得懂那幾行在做什麼</td></tr>
+      <tr><td>稽核或 scanner 報「Pod runs as root」</td><td>常見</td><td>講得出為什麼危險,知道怎麼改</td></tr>
+      <tr><td>加了 non-root 後 Pod 起不來</td><td>常見,會被 page</td><td>看懂錯誤,知道是 image 不配合</td></tr>
+      <tr><td>部署被 PSS / Kyverno 擋下</td><td>平台團隊常碰</td><td>讀退件訊息,照著補欄位</td></tr>
+      <tr><td>面試:「Pod 用 root 有什麼問題?」</td><td>senior DevOps/SRE 常考</td><td>講兩道門</td></tr>
+    </table>
+  </div>
+
+  <h2>看到這個錯誤,卡在哪道門</h2>
+  <div class="cards">
+    <div class="card">
+      <span class="tag who">身分 · EKS 橋 A</span>
+      <pre>error: You must be logged in to the server (Unauthorized)</pre>
+      <p>401 = 叢集不認得你,跟 RBAC 無關。先看你是哪個 IAM ARN,再查有沒有 access entry。</p>
+      <pre>aws sts get-caller-identity
+aws eks list-access-entries --cluster-name &lt;name&gt;</pre>
+    </div>
+    <div class="card">
+      <span class="tag may">② 准不准 · RBAC</span>
+      <pre>pods is forbidden: User "system:serviceaccount:shop:app" cannot list resource "pods"</pre>
+      <p>403 = 認得你,但 Role 裡沒有這個 verb。用壞掉的那個身分去問,不要問自己。</p>
+      <pre>kubectl auth can-i list pods --as=system:serviceaccount:shop:app -n shop</pre>
+    </div>
+    <div class="card">
+      <span class="tag who">身分 · EKS 橋 B</span>
+      <pre>AccessDenied ... assumed-role/eks-node-role/i-0abc...</pre>
+      <p>錯誤裡的 role 是 node 的,表示 IRSA 沒接上。查 SA 有沒有 <code>eks.amazonaws.com/role-arn</code> annotation、Pod 有沒有重建、trust policy 的 sub 對不對。</p>
+    </div>
+    <div class="card">
+      <span class="tag may">② 准不准 · IAM</span>
+      <pre>AccessDenied ... assumed-role/s3-reader-role/...</pre>
+      <p>role 名字對了,身分這關已經過。問題在 permission policy 少了 action 或 bucket ARN。和上一張只差一個字,查的地方完全不同。</p>
+    </div>
+    <div class="card">
+      <span class="tag adm">Admission · PSS</span>
+      <pre>pods "web" is forbidden: violates PodSecurity "restricted:latest": allowPrivilegeEscalation != false ...</pre>
+      <p>Deployment 建的 Pod 被擋時,<code>get pods</code> 看不到任何東西,只會卡在 0/3。要去看 ReplicaSet 的 events。</p>
+      <pre>kubectl describe rs -n &lt;ns&gt;</pre>
+    </div>
+    <div class="card">
+      <span class="tag who">身分 · kubelet</span>
+      <pre>STATUS: CreateContainerConfigError
+Error: container has runAsNonRoot and image will run as root</pre>
+      <p>過了警衛,但 kubelet 發現 image 預設用 root 跑。YAML 沒錯,要換支援非 root 的 image,或設 <code>runAsUser</code>。</p>
+      <pre>kubectl describe pod &lt;name&gt; -n &lt;ns&gt;</pre>
+    </div>
+    <div class="card">
+      <span class="tag may">② 准不准 · Linux</span>
+      <pre>nginx: [emerg] mkdir() "/var/cache/nginx/client_temp" failed (13: Permission denied)</pre>
+      <p>改成 non-root 或 rootfs 唯讀之後,image 還想寫 root 的目錄。掛 emptyDir 到那個路徑,或換成 <code>nginx-unprivileged</code> image。唯讀時錯誤碼會是 <code>30: Read-only file system</code>。</p>
+    </div>
+  </div>
+</section>
+
+<!-- INTERVIEW -->
+<section>
+  <div class="layer">面試</div>
+  <h2>「Pod 用 root 跑有什麼問題?」</h2>
+  <div class="answer">
+    <p>container 跟 node 共用同一顆 kernel,裡面的 root 就是 UID 0。namespace 只限制它<span class="hl-see">看得到什麼</span>,不改它<span class="hl-who">是誰</span>。一旦 escape,它就是 node 上的 root。所以我會設 <code>runAsNonRoot</code>、drop ALL capabilities、關掉 privilege escalation,再用 PSS restricted 在 admission 強制執行,讓不合規的 Pod 根本進不了叢集。image 本身也要支援非 root,不然 kubelet 會拒絕啟動。</p>
+    <p class="en">"Containers share the host kernel, so root inside is UID 0 on the node. Namespaces limit what a process can see, not who it is. If it breaks out, it's root on the host. So I set runAsNonRoot, drop all capabilities, block privilege escalation, and enforce the restricted Pod Security Standard at admission. The image also has to support non-root, or the kubelet refuses to start it."</p>
+  </div>
+</section>
+
+</div>
+
+<script>
+// 四格漫畫:識別證 × 有沒有翻牆
+function panel(uid, out, i) {
+  const root = uid === 0;
+  const px = out ? 250 : 70;
+  const stop = out ? (root ? null : 'd2') : 'd1';
+  const res = stop === null ? '<span class="ok-">✓ 讀得到</span>'
+    : `<span class="no-">✗ 讀不到,卡在門 ${stop === 'd1' ? '①' : '②'}</span>`;
+  const mark = stop === null ? ''
+    : stop === 'd1' ? '<text x="152" y="60" class="th t-no" text-anchor="middle">✗</text>'
+                    : '<text x="301" y="30" class="th t-no" text-anchor="middle">✗</text>';
+  return `<div class="pn">
+    <span class="k">${i}. UID ${uid}${root ? ' 總經理卡' : ' 實習生卡'} · ${out ? '翻牆後' : '沒翻牆'}</span>
+    <svg viewBox="0 0 340 120" role="img" aria-label="UID ${uid} ${out ? '翻牆後' : '沒翻牆'}">
+      <rect x="6" y="14" width="124" height="96" rx="6" class="bx-see"/>
+      <text x="68" y="104" class="ts t-see" text-anchor="middle">會議室</text>
+      <line x1="134" y1="14" x2="134" y2="110" class="wall" style="${out ? 'stroke-dasharray:6 8;opacity:.45' : ''}"/>
+      <rect x="170" y="14" width="164" height="96" rx="6" class="bx-may"/>
+      <text x="252" y="104" class="ts t-may" text-anchor="middle">機房</text>
+      <rect x="276" y="34" width="50" height="40" rx="4" class="bx-ink"/>
+      <text x="301" y="59" class="tm" text-anchor="middle" style="font-size:10px">shadow</text>
+      <circle cx="${px}" cy="54" r="17" class="bx-who"/>
+      <text x="${px}" y="59" class="tm" text-anchor="middle" style="font-size:12px">${uid}</text>
+      ${mark}
+    </svg>
+    <span>${res}</span>
+  </div>`;
+}
+document.getElementById('panels').innerHTML =
+  panel(0, false, 1) + panel(1000, false, 2) + panel(0, true, 3) + panel(1000, true, 4);
+</script>
+
+</body></html>

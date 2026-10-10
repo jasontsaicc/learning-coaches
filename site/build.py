@@ -115,7 +115,7 @@ def note_target(filename, topics, phases):
     if m := re.match(r"p(\d+[a-z]?)-", stem):
         return [pid for pid in phases if pid.lower() == f"p{m.group(1)}"]
     if m := re.match(r"s(\d+)-", stem):
-        return [t["id"] for t in topics if t["session"] == int(m.group(1))]
+        return [t["id"] for t in topics if t.get("session") == int(m.group(1))]
     if m := re.match(r"day(\d+)", stem):
         day = int(m.group(1))
         hits = []
@@ -205,7 +205,7 @@ def build():
                       if (m := re.search(r"Day (\d+)(?:-(\d+))?", t["label"]))]
             for j, (pid, a, b, title) in enumerate(sd_plan((refs / "curriculum-detail.md").read_text())):
                 if pid in phases and not any(x <= b and a <= (y or x) for x, y in taught):
-                    add(f"{c}:plan{j}", f"{title} (Day {a}{f'-{b}' if b != a else ''})", "topic", f"{c}:{pid}", planned=True)
+                    topics.append(add(f"{c}:plan{j}", f"{title} (Day {a}{f'-{b}' if b != a else ''})", "topic", f"{c}:{pid}", planned=True, files=[]))
         else:
             for pid, ph in phases.items():
                 if ph["status"] == "not-started" and not any(t["parent"] == ph["id"] for t in topics):
@@ -230,9 +230,20 @@ def build():
     have |= {n["id"].rsplit("/", 1)[-1] for n in nodes if n["id"].startswith("lc:") and "/" in n["id"]}
     for num, title in LC_ROW_RE.findall((ROOT / "skills/leetcode-coach/references/curriculum.md").read_text()):
         if num not in have and slug(title) not in have:
-            add(f"lc:plan{num}", f"#{num} {title}", "problem", "lc:linked-list", planned=True)
+            add(f"lc:plan{num}", f"#{num} {title}", "problem", "lc:linked-list", planned=True, files=[])
+    # extra leetcode notes (e.g. saved artifact pages) attach by slug: notes/<problem-slug>.html
+    by_slug = {slug(re.sub(r"^#\d+ ", "", n["label"])): n for n in nodes if n["kind"] == "problem"}
+    by_slug |= {n["id"].rsplit("/", 1)[-1]: n for n in nodes if n["kind"] == "problem" and "/" in n["id"]}
+    for f in files_in(ROOT / "portfolio" / "leetcode" / "notes"):
+        if (n := by_slug.get(Path(f).stem)):
+            n["files"] = n.get("files", []) + [f]
 
-    return {"nodes": nodes}
+    titles = {}
+    for f in {f for n in nodes for f in n.get("files", []) if f.endswith(".html")}:
+        m = re.search(r"<title>([^<]+)", (ROOT / f).read_text(errors="ignore"))
+        if m:
+            titles[f] = m.group(1).strip()
+    return {"nodes": nodes, "titles": titles}
 
 
 def main():

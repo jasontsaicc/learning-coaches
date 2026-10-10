@@ -1,0 +1,227 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>PSS 門禁筆記</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC:wght@400;700&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: one notebook column on graph paper; figures on taped cards, scenarios as 2x2 comic panels */
+:root {
+  --paper: #F6F8FA;
+  --grid: rgba(90,130,170,.16);
+  --ink: #23313E;
+  --ink-soft: #55677A;
+  --card: #FFFFFF;
+  --tape: rgba(240,214,140,.75);
+  --who: #FFE98A;
+  --see: #BDEEF6;
+  --may: #F9CDE0;
+  --wrong: #D2453A;
+  --ok: #2F8F5B;
+  --line: #9DB0C2;
+  --font-hand: "LXGW WenKai TC", "Noto Sans TC", "PingFang TC", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #1A2320; --grid: rgba(200,230,210,.08); --ink: #E6EDE8; --ink-soft: #A9BAB1;
+    --card: #24302C; --tape: rgba(200,180,110,.45); --who: #8A7A2A; --see: #2B6A74; --may: #7A3F57;
+    --wrong: #FF8A7E; --ok: #7FD3A1; --line: #5E7268; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #1A2320; --grid: rgba(200,230,210,.08); --ink: #E6EDE8; --ink-soft: #A9BAB1;
+  --card: #24302C; --tape: rgba(200,180,110,.45); --who: #8A7A2A; --see: #2B6A74; --may: #7A3F57;
+  --wrong: #FF8A7E; --ok: #7FD3A1; --line: #5E7268; color-scheme: dark;
+}
+body {
+  background-color: var(--paper);
+  background-image: linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 22px 22px;
+  color: var(--ink);
+  font-family: var(--font-hand);
+  font-size: 17px;
+  line-height: 1.75;
+}
+.page { max-width: 760px; margin: 0 auto; padding-inline: 18px; padding-block: 32px 64px; display: grid; gap: 34px; }
+h1, h2 { text-wrap: balance; line-height: 1.3; margin: 0; }
+h1 { font-size: 2.1rem; }
+h2 { font-size: 1.45rem; display: flex; align-items: baseline; gap: 10px; }
+h2 .tag { font-family: var(--font-mono); font-size: .72rem; letter-spacing: .08em; color: var(--ink-soft); text-transform: uppercase; }
+p { margin: 0; }
+section { display: grid; gap: 14px; min-width: 0; }
+.sub { color: var(--ink-soft); font-size: .95rem; }
+mark { background: linear-gradient(transparent 52%, var(--who) 52%); color: inherit; padding: 0 2px; }
+mark.see { background: linear-gradient(transparent 52%, var(--see) 52%); }
+mark.may { background: linear-gradient(transparent 52%, var(--may) 52%); }
+code { font-family: var(--font-mono); font-size: .86em; background: color-mix(in srgb, var(--line) 22%, transparent); padding: 1px 5px; border-radius: 3px; }
+.card { position: relative; background: var(--card); padding: 22px 18px 16px; box-shadow: 0 1px 3px rgba(0,0,0,.12); min-width: 0; }
+.card::before { content: ""; position: absolute; top: -9px; left: 50%; width: 92px; height: 20px; transform: translateX(-50%) rotate(-2deg); background: var(--tape); }
+.scroll { overflow-x: auto; }
+svg text { font-family: var(--font-mono); fill: var(--ink); }
+svg .hand { font-family: var(--font-hand); }
+.rule { border-left: 4px solid var(--ok); padding: 6px 12px; font-size: 1.08rem; }
+.wrong { border-left: 4px solid var(--wrong); padding: 4px 12px; display: grid; gap: 2px; }
+.wrong b { color: var(--wrong); font-size: .85rem; letter-spacing: .05em; }
+.panels { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 14px; }
+.panel { border: 2px solid var(--ink); background: var(--card); padding: 10px; display: grid; gap: 6px; min-width: 0; }
+.panel h3 { margin: 0; font-size: 1rem; font-family: var(--font-mono); }
+.panel p { font-size: .92rem; }
+@media (max-width: 520px) { .panels { grid-template-columns: 1fr; } }
+table { border-collapse: collapse; width: 100%; font-size: .95rem; }
+th, td { border-bottom: 1px dashed var(--line); padding: 8px 6px; text-align: left; vertical-align: top; }
+th { font-family: var(--font-mono); font-size: .78rem; letter-spacing: .05em; color: var(--ink-soft); font-weight: 600; }
+ol { margin: 0; padding-left: 1.3em; display: grid; gap: 6px; }
+blockquote { margin: 0; padding: 12px 16px; background: var(--card); border: 2px dashed var(--line); }
+.en { font-family: var(--font-mono); font-size: .9rem; color: var(--ink-soft); }
+</style>
+
+<main class="page">
+  <header style="display:grid;gap:8px">
+    <p class="sub">k8s-coach · s44 · 2026-10-09 · P2b C-6</p>
+    <h1>PSS 門禁筆記</h1>
+    <p>Pod Security Standards。apply 成功，Pod 卻不見了，錯誤要去哪裡找。</p>
+  </header>
+
+  <section>
+    <h2>這是什麼？<span class="tag">one line</span></h2>
+    <p class="rule">PSS 是貼在 <mark>namespace</mark> 上的規則，由 API Server 的 admission 在 <mark>Pod 建立當下</mark>檢查 Pod 的長相（是不是 root、有沒有 privileged）。它<mark class="may">只檢查 Pod</mark>，不檢查 Deployment、CronJob 這些上層物件。</p>
+  </section>
+
+  <section>
+    <h2>用什麼比喻理解？<span class="tag">factory gate</span></h2>
+    <p>工廠門禁。你送的是<mark class="see">訂單</mark>，主管照訂單帶<mark>工人</mark>進門，警衛只看工人有沒有戴安全帽。退件單交給<mark class="may">帶人來的主管</mark>，不會交給你。</p>
+    <div class="card scroll">
+      <svg viewBox="0 0 700 360" width="700" height="360" role="img" aria-label="Flow: kubectl apply to API Server, controller creates Pod, PSS admission rejects, error goes to parent events">
+        <defs>
+          <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="var(--ink)"/></marker>
+          <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="var(--wrong)"/></marker>
+        </defs>
+        <rect x="20" y="20" width="150" height="54" fill="var(--see)" stroke="var(--ink)" stroke-width="2"/>
+        <text x="95" y="44" text-anchor="middle" font-size="14">kubectl apply</text>
+        <text x="95" y="63" text-anchor="middle" font-size="13" class="hand">你送訂單</text>
+        <line x1="170" y1="47" x2="248" y2="47" stroke="var(--ink)" stroke-width="2" marker-end="url(#ar)"/>
+        <rect x="250" y="20" width="200" height="54" fill="var(--card)" stroke="var(--ink)" stroke-width="2"/>
+        <text x="350" y="44" text-anchor="middle" font-size="14">API Server</text>
+        <text x="350" y="63" text-anchor="middle" font-size="13" class="hand">回 configured = 訂單收到</text>
+        <line x1="350" y1="74" x2="350" y2="118" stroke="var(--ink)" stroke-width="2" marker-end="url(#ar)"/>
+        <text x="360" y="102" font-size="12">watch</text>
+        <rect x="250" y="120" width="200" height="54" fill="var(--who)" stroke="var(--ink)" stroke-width="2"/>
+        <text x="350" y="144" text-anchor="middle" font-size="14">parent controller</text>
+        <text x="350" y="163" text-anchor="middle" font-size="13" class="hand">主管帶工人：create Pod</text>
+        <line x1="350" y1="174" x2="350" y2="218" stroke="var(--ink)" stroke-width="2" marker-end="url(#ar)"/>
+        <rect x="250" y="220" width="200" height="54" fill="var(--may)" stroke="var(--ink)" stroke-width="2"/>
+        <text x="350" y="244" text-anchor="middle" font-size="14">PSS admission</text>
+        <text x="350" y="263" text-anchor="middle" font-size="13" class="hand">警衛：只看 Pod spec</text>
+        <line x1="250" y1="247" x2="172" y2="247" stroke="var(--ok)" stroke-width="2" marker-end="url(#ar)"/>
+        <text x="186" y="238" font-size="12" fill="var(--ok)">pass</text>
+        <rect x="20" y="220" width="150" height="54" fill="var(--card)" stroke="var(--ok)" stroke-width="2"/>
+        <text x="95" y="244" text-anchor="middle" font-size="13">Pod 寫進 etcd</text>
+        <text x="95" y="263" text-anchor="middle" font-size="12" class="hand">get pods 看得到</text>
+        <line x1="450" y1="247" x2="528" y2="247" stroke="var(--wrong)" stroke-width="2" marker-end="url(#arr)"/>
+        <text x="462" y="238" font-size="12" fill="var(--wrong)">reject</text>
+        <rect x="530" y="220" width="150" height="54" fill="var(--card)" stroke="var(--wrong)" stroke-width="2" stroke-dasharray="6 4"/>
+        <text x="605" y="244" text-anchor="middle" font-size="13" fill="var(--wrong)">沒有 Pod 物件</text>
+        <text x="605" y="263" text-anchor="middle" font-size="12" class="hand">沒有 Pod events</text>
+        <path d="M605 220 C605 150, 520 147, 452 147" fill="none" stroke="var(--wrong)" stroke-width="2" stroke-dasharray="5 4" marker-end="url(#arr)"/>
+        <text x="520" y="132" font-size="12" fill="var(--wrong)">FailedCreate</text>
+        <text x="520" y="148" font-size="12" class="hand" fill="var(--wrong)">退件單回給主管</text>
+        <text x="20" y="320" font-size="13" class="hand">你看到的兩個症狀：</text>
+        <text x="20" y="342" font-size="13">1) apply: configured    2) get pods: (empty)</text>
+      </svg>
+    </div>
+    <p class="rule">判準句：「Pod 不見了，就 <code>describe</code> 它的<mark>上一層 controller</mark>，因為被拒絕的 Pod 從沒存進 etcd，錯誤只留在送出請求的人身上。」</p>
+  </section>
+
+  <section>
+    <h2>四條鏈，查誰？<span class="tag">comic panels</span></h2>
+    <div class="panels">
+      <div class="panel">
+        <h3>Deployment</h3>
+        <svg viewBox="0 0 300 60" width="100%" role="img" aria-label="Deployment to ReplicaSet to Pod, rejected at Pod">
+          <text x="4" y="34" font-size="12">Deploy</text><line x1="54" y1="30" x2="84" y2="30" stroke="var(--ink)" stroke-width="2"/>
+          <rect x="86" y="14" width="100" height="30" fill="var(--who)" stroke="var(--ink)"/><text x="136" y="34" text-anchor="middle" font-size="12">ReplicaSet</text>
+          <line x1="186" y1="30" x2="226" y2="30" stroke="var(--wrong)" stroke-width="2"/><text x="232" y="34" font-size="14" fill="var(--wrong)">X Pod</text>
+        </svg>
+        <p><code>describe rs</code>。s40 考過的原型。</p>
+      </div>
+      <div class="panel">
+        <h3>CronJob</h3>
+        <svg viewBox="0 0 300 60" width="100%" role="img" aria-label="CronJob to Job to Pod, rejected at Pod">
+          <text x="4" y="34" font-size="12">CronJob</text><line x1="62" y1="30" x2="84" y2="30" stroke="var(--ink)" stroke-width="2"/>
+          <rect x="86" y="14" width="100" height="30" fill="var(--who)" stroke="var(--ink)"/><text x="136" y="34" text-anchor="middle" font-size="12">Job</text>
+          <line x1="186" y1="30" x2="226" y2="30" stroke="var(--wrong)" stroke-width="2"/><text x="232" y="34" font-size="14" fill="var(--wrong)">X Pod</text>
+        </svg>
+        <p><code>describe job</code>。Job controller 才是建 Pod 的人。</p>
+      </div>
+      <div class="panel">
+        <h3>StatefulSet</h3>
+        <svg viewBox="0 0 300 60" width="100%" role="img" aria-label="StatefulSet directly to Pod, rejected at Pod">
+          <rect x="4" y="14" width="182" height="30" fill="var(--who)" stroke="var(--ink)"/><text x="95" y="34" text-anchor="middle" font-size="12">StatefulSet</text>
+          <line x1="186" y1="30" x2="226" y2="30" stroke="var(--wrong)" stroke-width="2"/><text x="232" y="34" font-size="14" fill="var(--wrong)">X Pod</text>
+        </svg>
+        <p><code>describe sts</code>。中間沒有 RS，自己直接建。</p>
+      </div>
+      <div class="panel">
+        <h3>DaemonSet</h3>
+        <svg viewBox="0 0 300 60" width="100%" role="img" aria-label="DaemonSet directly to Pod, rejected at Pod">
+          <rect x="4" y="14" width="182" height="30" fill="var(--who)" stroke="var(--ink)"/><text x="95" y="34" text-anchor="middle" font-size="12">DaemonSet</text>
+          <line x1="186" y1="30" x2="226" y2="30" stroke="var(--wrong)" stroke-width="2"/><text x="232" y="34" font-size="14" fill="var(--wrong)">X Pod</text>
+        </svg>
+        <p><code>describe ds</code>。同 StatefulSet，自己直接建。</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>實務怎麼設？<span class="tag">rollout</span></h2>
+    <p>設在 namespace 的 label，三種模式可以同時貼不同等級：</p>
+    <div class="card scroll"><pre style="margin:0;font-family:var(--font-mono);font-size:.85rem;line-height:1.6">metadata:
+  labels:
+    pod-security.kubernetes.io/enforce: baseline   # 違規就拒絕
+    pod-security.kubernetes.io/warn: restricted    # kubectl 印警告，放行
+    pod-security.kubernetes.io/audit: restricted   # 寫 audit log，放行</pre></div>
+    <p>等級由鬆到嚴：<code>privileged</code> → <code>baseline</code> → <code>restricted</code>。導入順序是先觀察再強制：</p>
+    <ol>
+      <li>enforce 設 baseline，warn 與 audit 設 restricted，先不弄壞任何東西。</li>
+      <li>用 <code>kubectl label --dry-run=server --overwrite ns &lt;ns&gt; pod-security.kubernetes.io/enforce=restricted</code> 列出會被擋的 workload。</li>
+      <li>app team 修 workload：non-root、<code>drop: ["ALL"]</code>、non-root image（nginx 改用 unprivileged 版聽 8080）。</li>
+      <li>逐個 namespace 用 GitOps PR 切成 enforce restricted。</li>
+    </ol>
+    <p>例外：kube-system、CNI（Calico）、log/metrics DaemonSet 需要 hostPath 或 hostNetwork，維持 privileged 或 baseline。namespace label 由 platform team 管，app team 沒有 <code>patch namespaces</code> 權限。</p>
+  </section>
+
+  <section>
+    <h2>跟 AWS SCP 比<span class="tag">analogy</span></h2>
+    <div class="card scroll">
+      <table>
+        <tr><th></th><th>AWS SCP</th><th>K8s PSS</th></tr>
+        <tr><td>掛在哪</td><td>Organization / OU</td><td>Namespace label</td></tr>
+        <tr><td>角色</td><td>天花板，只限制不授權</td><td>天花板，只限制不授權</td></tr>
+        <tr><td>蓋過誰</td><td>account admin 照樣被擋</td><td>cluster-admin 照樣被擋</td></tr>
+        <tr><td>檢查什麼</td><td><mark class="see">動作</mark>：哪個 API call</td><td><mark>內容</mark>：Pod 長什麼樣</td></tr>
+        <tr><td>K8s 裡看動作的是</td><td colspan="2">RBAC（誰能 create pods）。RBAC 和 PSS 兩道都要過。</td></tr>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <h2>踩過什麼雷？<span class="tag">my mistakes</span></h2>
+    <div class="wrong"><b>我錯在這 · s40</b><span>看到 <code>deployment configured</code> 以為 PSS 沒生效。configured 只代表訂單收到，Pod 還沒過門禁。</span></div>
+    <div class="wrong"><b>我錯在這 · s44</b><span>CronJob 版第一刀答 ReplicaSet，直接套 Deployment 的舊形狀。要先畫出這條鏈，再找 Pod 的上一層。</span></div>
+    <div class="wrong"><b>我錯在這 · s44</b><span>說「CronJob 用 Job controller 建 Job」。建 Job 的是 CronJob controller，建 Pod 的才是 Job controller。</span></div>
+    <div class="wrong"><b>我錯在這 · s44</b><span>把 PSS 擋和 Taint 擋混在一起。PSS 擋在 admission，Pod 不存在，查 parent。Taint 擋在 scheduler，Pod 已存在、卡 Pending，查 Pod 自己的 <code>FailedScheduling</code>。</span></div>
+    <div class="wrong"><b>我錯在這 · 固定短板</b><span>只給結論不給「因為」。StatefulSet 首答又漏了。</span></div>
+  </section>
+
+  <section>
+    <h2>面試怎麼回答？<span class="tag">L6 script</span></h2>
+    <p class="sub">題目：客戶把 prod namespace 升到 restricted 之後，Deployment apply 成功，但新版 Pod 一直沒出現，舊 Pod 還在。</p>
+    <blockquote>
+      <p>「我先確認 namespace 的 PSS label，因為 PSS 只檢查 Pod，Deployment 本身一定 apply 得進去。接著 <code>kubectl describe rs</code> 看新的 ReplicaSet，因為被拒絕的 Pod 從沒存進 etcd，錯誤只會留在送出 create 請求的 RS 上，會看到 <code>FailedCreate ... violates PodSecurity "restricted:latest"</code>。舊 Pod 還在，是因為 rolling update 等不到新 Pod ready。</p>
+      <p style="margin-top:8px">修法是讓 workload 符合 restricted：non-root、drop ALL capabilities。預防面我會建議三件事：CI 加 <code>kubectl rollout status --timeout</code>，讓這種靜默失敗變成 pipeline 失敗；升級等級前先跑 warn 和 audit 模式；用 <code>--dry-run=server</code> 預先列出會被擋的 workload。」</p>
+    </blockquote>
+    <p class="en">Native: "We roll out PSS in warn and audit mode first, fix the violators, then flip namespaces to enforce."</p>
+  </section>
+</main>
+
+</body></html>

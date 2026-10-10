@@ -198,7 +198,7 @@ fetch('data.json', { cache: 'no-cache' }).then(r => r.json()).then(data => {
   const coaches = childrenOf('me');
   const app = document.getElementById('app'), modal = document.getElementById('modal'), sheet = document.getElementById('sheet');
   const count = (ls, k) => ls.filter(l => lvl(l) === k).length;
-  const fileBtn = f => `<button class="file" data-file="${esc(f)}"><span>${esc(f.split('/').pop())}</span><span class="badge">${f.endsWith('.md') ? '閱讀' : '開新頁'}</span></button>`;
+  const fileBtn = f => `<button class="file" data-file="${esc(f)}"><span>${esc(data.titles?.[f] || f.split('/').pop())}</span><span class="badge">${f.endsWith('.md') ? '閱讀' : '開新頁'}</span></button>`;
   const bar = ls => `<div class="bar">${[['high', 'sky'], ['med', 'amber'], ['low', 'red']].map(([k, v]) => `<span style="width:${ls.length ? count(ls, k) / ls.length * 100 : 0}%;background:var(--${v})"></span>`).join('')}</div>`;
   const hero = id => `<div class="hero t-${esc(id)}"><img src="img/${esc(id)}.svg" alt=""></div>`;
 

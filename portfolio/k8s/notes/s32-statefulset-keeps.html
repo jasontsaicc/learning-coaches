@@ -1,0 +1,661 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1"><style>:root{color-scheme:light}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}</style></head><body>
+<title>What a StatefulSet Keeps</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=IBM+Plex+Mono:wght@400;600&family=Newsreader:opsz,wght@6..72,400;6..72,500&display=swap">
+
+<style>
+:root{
+  --bg:#eaeaef;
+  --surface:#fcfcfe;
+  --sunk:#e1e2e9;
+  --ink:#181822;
+  --muted:#5d5f70;
+  --line:#cbccd7;
+  --line-2:#a3a5b6;
+  --id:#3f4aa0;        /* identity */
+  --id-fill:#e0e2f4;
+  --store:#5a7526;     /* storage */
+  --store-fill:#e3ecd2;
+  --dns:#1a6b7d;       /* dns */
+  --dns-fill:#d6e9ee;
+  --dead:#a2333f;
+  --dead-fill:#f3dade;
+}
+:root:not([data-theme="light"]){ color-scheme:light; }
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --bg:#121219; --surface:#1b1b25; --sunk:#16161f;
+    --ink:#e7e7f0; --muted:#9698ac; --line:#2e2f3d; --line-2:#4a4c60;
+    --id:#98a2ee; --id-fill:#24263f;
+    --store:#a8c96a; --store-fill:#242c17;
+    --dns:#5fbdd0; --dns-fill:#132a30;
+    --dead:#e4707c; --dead-fill:#331a1e;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#121219; --surface:#1b1b25; --sunk:#16161f;
+  --ink:#e7e7f0; --muted:#9698ac; --line:#2e2f3d; --line-2:#4a4c60;
+  --id:#98a2ee; --id-fill:#24263f;
+  --store:#a8c96a; --store-fill:#242c17;
+  --dns:#5fbdd0; --dns-fill:#132a30;
+  --dead:#e4707c; --dead-fill:#331a1e;
+}
+
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Newsreader",Georgia,serif;font-size:1.0625rem;line-height:1.6;-webkit-font-smoothing:antialiased}
+.wrap{max-width:70rem;margin-inline:auto;padding-inline:clamp(1.1rem,4vw,3rem)}
+.col{max-width:38rem}
+h1,h2,h3{font-family:"Archivo","Helvetica Neue",sans-serif;text-wrap:balance;margin:0}
+h1{font-weight:800;letter-spacing:-.028em;line-height:1.02;font-size:clamp(2.3rem,6.2vw,4.3rem)}
+h2{font-weight:800;letter-spacing:-.02em;line-height:1.07;font-size:clamp(1.65rem,3.4vw,2.4rem)}
+h3{font-weight:700;letter-spacing:-.01em;font-size:1.02rem}
+p{margin:0}
+.mono,code{font-family:"IBM Plex Mono",ui-monospace,monospace}
+code{font-size:.86em}
+
+.eyebrow{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:.16em;color:var(--muted);display:flex;align-items:center;gap:.6rem;margin-bottom:.9rem}
+.eyebrow::before{content:"";width:1.4rem;height:2px;background:var(--id);flex:none}
+
+.hero{border-bottom:1px solid var(--line);padding:clamp(2.8rem,8vw,5.5rem) 0 clamp(2rem,5vw,3.5rem)}
+.kicker{font-family:"IBM Plex Mono",monospace;font-size:.72rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin-bottom:1.5rem}
+.hero h1 em{font-style:normal;color:var(--id)}
+.lede{font-size:clamp(1.1rem,2.1vw,1.4rem);color:var(--muted);margin-top:1.3rem;max-width:34rem}
+.zh{font-family:"IBM Plex Mono",monospace;font-size:.85rem;color:var(--muted);letter-spacing:.02em;line-height:1.7}
+.hero .zh{margin-top:.9rem}
+
+section{padding:clamp(2.4rem,5.5vw,4.2rem) 0;border-bottom:1px solid var(--line)}
+section.sunk{background:var(--sunk)}
+.head{display:flex;flex-direction:column;gap:.85rem;max-width:40rem;margin-bottom:2rem}
+.head p{color:var(--muted)}
+
+figure{margin:0;background:var(--surface);border:1px solid var(--line);border-radius:3px;padding:clamp(1rem,2.4vw,1.7rem)}
+figure svg{display:block;width:100%;height:auto}
+figcaption{margin-top:1rem;padding-top:.85rem;border-top:1px solid var(--line);font-size:.92rem;color:var(--muted);max-width:46rem}
+.scroll{overflow-x:auto}
+.gap{margin-top:1.5rem}
+
+.callout{border-left:3px solid var(--id);background:var(--surface);padding:clamp(1.1rem,3vw,1.9rem);display:flex;flex-direction:column;gap:.85rem;max-width:46rem}
+.callout.warn{border-left-color:var(--dead)}
+.callout .big{font-family:"Archivo",sans-serif;font-weight:700;font-size:clamp(1.15rem,2.4vw,1.55rem);line-height:1.22;letter-spacing:-.01em}
+.callout p{color:var(--muted)}
+.callout strong{color:var(--ink)}
+
+.tbl{width:100%;border-collapse:collapse;font-size:.94rem;background:var(--surface);border:1px solid var(--line)}
+.tbl th,.tbl td{text-align:left;padding:.75rem 1rem;border-bottom:1px solid var(--line);vertical-align:top}
+.tbl thead th{font-family:"IBM Plex Mono",monospace;font-size:.66rem;text-transform:uppercase;letter-spacing:.13em;color:var(--muted);font-weight:600}
+.tbl tbody tr:last-child td{border-bottom:0}
+.tbl td.k{font-family:"IBM Plex Mono",monospace;font-size:.83rem;font-weight:600;white-space:nowrap}
+.tbl td.d{color:var(--muted)}
+.tbl td.good{color:var(--store);font-family:"IBM Plex Mono",monospace;font-size:.83rem}
+.tbl td.bad{color:var(--dead);font-family:"IBM Plex Mono",monospace;font-size:.83rem}
+
+.split{display:grid;gap:1px;background:var(--line);border:1px solid var(--line);grid-template-columns:1fr}
+@media(min-width:46rem){.split{grid-template-columns:1fr 1fr}}
+.split > div{background:var(--surface);padding:1.3rem 1.4rem}
+.split h3{margin-bottom:.85rem;display:flex;align-items:center;gap:.5rem}
+.dot{width:.55rem;height:.55rem;border-radius:50%;flex:none}
+.dot.ok{background:var(--store)}
+.dot.no{background:var(--dead)}
+.split ul{margin:0;padding-left:1.1rem;color:var(--muted);font-size:.95rem}
+.split li{margin-bottom:.5rem}
+.split li b{color:var(--ink);font-family:"Archivo",sans-serif;font-weight:700;font-size:.93rem}
+
+.cmds{display:flex;flex-direction:column;gap:1px;background:var(--line);border:1px solid var(--line)}
+.cmds div{background:var(--surface);padding:.95rem 1.15rem}
+.cmds .c{font-family:"IBM Plex Mono",monospace;font-size:.8rem;overflow-x:auto;white-space:pre;display:block}
+.cmds .w{color:var(--muted);font-size:.87rem;margin-top:.3rem}
+
+pre.yaml{margin:0;background:var(--surface);border:1px solid var(--line);border-left:3px solid var(--store);padding:1rem 1.2rem;overflow-x:auto;font-family:"IBM Plex Mono",monospace;font-size:.8rem;line-height:1.65;color:var(--ink)}
+pre.yaml b{color:var(--store);font-weight:600}
+pre.yaml i{color:var(--muted);font-style:normal}
+
+.myth{display:grid;gap:1px;background:var(--line);border:1px solid var(--line)}
+.myth > div{background:var(--surface);padding:1rem 1.2rem;display:grid;gap:.3rem;grid-template-columns:1fr}
+@media(min-width:52rem){.myth > div{grid-template-columns:1fr 1.2fr;gap:1.5rem}}
+.myth .m{color:var(--dead);font-size:.95rem}
+.myth .m::before{content:"✗ ";font-family:"IBM Plex Mono",monospace}
+.myth .t{color:var(--ink);font-size:.95rem}
+.myth .t::before{content:"✓ ";font-family:"IBM Plex Mono",monospace;color:var(--store)}
+
+footer{padding:3rem 0 4rem;color:var(--muted);font-size:.9rem}
+
+.s-label{font-family:"Archivo",sans-serif;font-size:13px;font-weight:700;fill:var(--ink)}
+.s-big{font-family:"Archivo",sans-serif;font-size:24px;font-weight:800;fill:var(--ink)}
+.s-sub{font-family:"IBM Plex Mono",monospace;font-size:11px;fill:var(--muted)}
+.s-tag{font-family:"IBM Plex Mono",monospace;font-size:11.5px;font-weight:600;fill:var(--ink)}
+.s-note{font-family:"IBM Plex Mono",monospace;font-size:10.5px;letter-spacing:.06em;fill:var(--muted)}
+.box{fill:var(--surface);stroke:var(--line-2);stroke-width:1.5}
+.box-sunk{fill:var(--sunk);stroke:var(--line);stroke-width:1.5}
+.grp{fill:none;stroke:var(--line-2);stroke-width:1.5;stroke-dasharray:6 5}
+.wireline{stroke:var(--line-2);stroke-width:2;fill:none}
+.ctrl{stroke:var(--muted);stroke-width:1.5;fill:none;stroke-dasharray:5 4}
+.hot{stroke:var(--id);stroke-width:2.5;fill:none}
+.bad{stroke:var(--dead);stroke-width:2.5;fill:none}
+.okl{stroke:var(--store);stroke-width:2.5;fill:none}
+.c-id{fill:var(--id-fill);stroke:var(--id);stroke-width:1.5}
+.c-store{fill:var(--store-fill);stroke:var(--store);stroke-width:1.5}
+.c-dns{fill:var(--dns-fill);stroke:var(--dns);stroke-width:1.5}
+.c-dead{fill:var(--dead-fill);stroke:var(--dead);stroke-width:1.5}
+:focus-visible{outline:2px solid var(--id);outline-offset:3px}
+</style>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="kicker">k8s coach · session 31 · statefulset</div>
+    <h1>Kill <code style="font-size:.8em">db-0</code>.<br><em>db-0 comes back.</em></h1>
+    <p class="lede">Same name. Same disk. Same DNS record. Everything else about that pod is brand new.</p>
+    <p class="zh">StatefulSet 保留的是 logical identity 與 storage identity，不是同一具 Pod runtime。</p>
+
+    <figure style="margin-top:clamp(1.8rem,4.5vw,3rem)">
+      <svg viewBox="0 0 760 300" role="img" aria-label="One StatefulSet replica keeps its ordinal name, its PVC and its DNS name, while its pod UID, pod IP and node are all replaceable.">
+        <defs>
+          <marker id="a1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="var(--line-2)"/></marker>
+        </defs>
+
+        <rect class="c-id" x="290" y="16" width="180" height="64" rx="3"/>
+        <text class="s-big" x="380" y="49" text-anchor="middle">db-0</text>
+        <text class="s-sub" x="380" y="67" text-anchor="middle">one replica</text>
+
+        <path class="wireline" d="M340 80 C280 80 174 96 174 126" marker-end="url(#a1)"/>
+        <path class="wireline" d="M420 80 C480 80 586 96 586 126" marker-end="url(#a1)"/>
+
+        <rect class="grp" x="24" y="130" width="300" height="152" rx="3"/>
+        <text class="s-note" x="40" y="152" fill="var(--ink)">stays the same</text>
+        <rect class="c-id" x="40" y="162" width="268" height="34" rx="3"/>
+        <text class="s-tag" x="54" y="184">name · db-0</text>
+        <rect class="c-store" x="40" y="202" width="268" height="34" rx="3"/>
+        <text class="s-tag" x="54" y="224">storage · data-db-0</text>
+        <rect class="c-dns" x="40" y="242" width="268" height="34" rx="3"/>
+        <text class="s-tag" x="54" y="264">dns · db-0.db-hl</text>
+
+        <rect class="grp" x="436" y="130" width="300" height="152" rx="3"/>
+        <text class="s-note" x="452" y="152" fill="var(--ink)">gets replaced</text>
+        <rect class="box-sunk" x="452" y="162" width="268" height="34" rx="3"/>
+        <text class="s-tag" x="466" y="184" fill="var(--muted)">pod UID · new object</text>
+        <rect class="box-sunk" x="452" y="202" width="268" height="34" rx="3"/>
+        <text class="s-tag" x="466" y="224" fill="var(--muted)">pod IP · new address</text>
+        <rect class="box-sunk" x="452" y="242" width="268" height="34" rx="3"/>
+        <text class="s-tag" x="466" y="264" fill="var(--muted)">node · may differ</text>
+      </svg>
+      <figcaption>Three colours run through this whole page: <span style="color:var(--id)">identity</span>, <span style="color:var(--store)">storage</span>, <span style="color:var(--dns)">DNS</span>.</figcaption>
+    </figure>
+  </div>
+</header>
+
+<main>
+
+<section>
+  <div class="wrap">
+    <div class="head">
+      <div class="eyebrow">why not a deployment</div>
+      <h2>Three walls a database hits.</h2>
+      <p>A Deployment says every replica is interchangeable. A database says the opposite.</p>
+    </div>
+    <div class="scroll">
+    <figure>
+      <svg viewBox="0 0 760 320" role="img" aria-label="A Deployment gives random pod names and no per-pod disk, so writers collide. A StatefulSet gives ordered names, one PVC per pod and one DNS name per pod.">
+        <defs>
+          <marker id="a2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="var(--line-2)"/></marker>
+          <marker id="a2c" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="var(--store)"/></marker>
+        </defs>
+        <line x1="380" y1="8" x2="380" y2="312" stroke="var(--line)" stroke-width="1"/>
+        <text class="s-note" x="24" y="20" fill="var(--ink)">deployment</text>
+        <text class="s-note" x="404" y="20" fill="var(--ink)">statefulset</text>
+
+        <rect class="box" x="140" y="40" width="120" height="32" rx="3"/>
+        <text class="s-sub" x="200" y="61" text-anchor="middle">Service</text>
+        <path class="wireline" d="M180 72 L84 104" marker-end="url(#a2)"/>
+        <path class="wireline" d="M200 72 L200 104" marker-end="url(#a2)"/>
+        <path class="wireline" d="M220 72 L316 104" marker-end="url(#a2)"/>
+        <rect class="box-sunk" x="24" y="108" width="112" height="42" rx="3"/>
+        <text class="s-sub" x="80" y="134" text-anchor="middle">pod-7f9x</text>
+        <rect class="box-sunk" x="144" y="108" width="112" height="42" rx="3"/>
+        <text class="s-sub" x="200" y="134" text-anchor="middle">pod-2k1p</text>
+        <rect class="box-sunk" x="264" y="108" width="112" height="42" rx="3"/>
+        <text class="s-sub" x="320" y="134" text-anchor="middle">pod-9dza</text>
+        <text class="s-note" x="200" y="170" text-anchor="middle">random names, any order</text>
+
+        <path class="bad" d="M80 186 L184 216"/>
+        <path class="bad" d="M200 186 L200 216"/>
+        <path class="bad" d="M320 186 L216 216"/>
+        <rect class="c-dead" x="110" y="222" width="180" height="42" rx="3"/>
+        <text class="s-tag" x="200" y="248" text-anchor="middle" fill="var(--dead)">one shared disk</text>
+        <text class="s-note" x="200" y="288" text-anchor="middle" fill="var(--dead)">writers collide, data corrupts</text>
+
+        <text class="s-note" x="426" y="88">db-0.db-hl</text>
+        <text class="s-note" x="546" y="88">db-1.db-hl</text>
+        <text class="s-note" x="666" y="88">db-2.db-hl</text>
+        <path class="ctrl" d="M462 92 L462 106"/>
+        <path class="ctrl" d="M582 92 L582 106"/>
+        <path class="ctrl" d="M702 92 L702 106"/>
+
+        <rect class="c-id" x="406" y="108" width="112" height="42" rx="3"/>
+        <text class="s-tag" x="462" y="134" text-anchor="middle">db-0</text>
+        <rect class="c-id" x="526" y="108" width="112" height="42" rx="3"/>
+        <text class="s-tag" x="582" y="134" text-anchor="middle">db-1</text>
+        <rect class="c-id" x="646" y="108" width="112" height="42" rx="3"/>
+        <text class="s-tag" x="702" y="134" text-anchor="middle">db-2</text>
+
+        <text class="s-note" x="406" y="46">created 0 → 1 → 2, removed 2 → 1 → 0</text>
+        <path class="ctrl" d="M406 54 L758 54"/>
+
+        <path class="okl" d="M462 150 L462 216" marker-end="url(#a2c)"/>
+        <path class="okl" d="M582 150 L582 216" marker-end="url(#a2c)"/>
+        <path class="okl" d="M702 150 L702 216" marker-end="url(#a2c)"/>
+        <rect class="c-store" x="406" y="222" width="112" height="42" rx="3"/>
+        <text class="s-sub" x="462" y="248" text-anchor="middle">data-db-0</text>
+        <rect class="c-store" x="526" y="222" width="112" height="42" rx="3"/>
+        <text class="s-sub" x="582" y="248" text-anchor="middle">data-db-1</text>
+        <rect class="c-store" x="646" y="222" width="112" height="42" rx="3"/>
+        <text class="s-sub" x="702" y="248" text-anchor="middle">data-db-2</text>
+        <text class="s-note" x="582" y="288" text-anchor="middle">one disk per member, forever</text>
+      </svg>
+      <figcaption>Storage, identity, order. A StatefulSet solves exactly these three at the Kubernetes layer, and nothing above them.</figcaption>
+    </figure>
+    </div>
+
+    <div class="callout warn gap">
+      <p class="big">A StatefulSet does not make PostgreSQL highly available.</p>
+      <p>It will not pick a primary, replicate data, elect a leader, take backups, fail over, or promote a replica. It hands you three named boxes with three disks. <strong>Everything a DBA does is still missing.</strong></p>
+      <p class="zh">這是最常見的誤解。StatefulSet 給的是「身分與磁碟」，不是「資料庫能力」。</p>
+    </div>
+  </div>
+</section>
+
+<section class="sunk">
+  <div class="wrap">
+    <div class="head">
+      <div class="eyebrow">volumeClaimTemplates</div>
+      <h2>The disk name is calculated, not random.</h2>
+      <p>That is the whole trick. A predictable name means the same pod always finds the same disk again.</p>
+    </div>
+    <div class="scroll">
+    <figure>
+      <svg viewBox="0 0 720 250" role="img" aria-label="The PVC name is built from the volumeClaimTemplate name, the StatefulSet name and the ordinal, so web-0 always reattaches to www-web-0.">
+        <defs>
+          <marker id="a3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="var(--line-2)"/></marker>
+        </defs>
+        <rect class="c-store" x="24" y="24" width="86" height="34" rx="3"/>
+        <text class="s-tag" x="67" y="46" text-anchor="middle">www</text>
+        <text class="s-note" x="67" y="74" text-anchor="middle">template</text>
+        <text class="s-tag" x="122" y="46" text-anchor="middle" fill="var(--muted)">-</text>
+        <rect class="c-id" x="134" y="24" width="86" height="34" rx="3"/>
+        <text class="s-tag" x="177" y="46" text-anchor="middle">web</text>
+        <text class="s-note" x="177" y="74" text-anchor="middle">statefulset</text>
+        <text class="s-tag" x="232" y="46" text-anchor="middle" fill="var(--muted)">-</text>
+        <rect class="c-id" x="244" y="24" width="52" height="34" rx="3"/>
+        <text class="s-tag" x="270" y="46" text-anchor="middle">0</text>
+        <text class="s-note" x="270" y="74" text-anchor="middle">ordinal</text>
+        <path class="wireline" d="M306 41 L356 41" marker-end="url(#a3)"/>
+        <rect class="box" x="366" y="24" width="180" height="34" rx="3"/>
+        <text class="s-tag" x="456" y="46" text-anchor="middle">www-web-0</text>
+        <text class="s-note" x="456" y="74" text-anchor="middle">the pvc, every time</text>
+
+        <line x1="24" y1="104" x2="696" y2="104" stroke="var(--line)" stroke-width="1"/>
+
+        <rect class="c-id" x="24" y="126" width="140" height="40" rx="3"/>
+        <text class="s-tag" x="94" y="151" text-anchor="middle">web-0</text>
+        <path class="wireline" d="M164 146 L214 146" marker-end="url(#a3)"/>
+        <rect class="c-store" x="224" y="126" width="176" height="40" rx="3"/>
+        <text class="s-tag" x="312" y="151" text-anchor="middle">www-web-0</text>
+        <path class="wireline" d="M400 146 L450 146" marker-end="url(#a3)"/>
+        <rect class="box" x="460" y="126" width="140" height="40" rx="3"/>
+        <text class="s-sub" x="530" y="151" text-anchor="middle">PV A</text>
+
+        <rect class="c-id" x="24" y="180" width="140" height="40" rx="3"/>
+        <text class="s-tag" x="94" y="205" text-anchor="middle">web-1</text>
+        <path class="wireline" d="M164 200 L214 200" marker-end="url(#a3)"/>
+        <rect class="c-store" x="224" y="180" width="176" height="40" rx="3"/>
+        <text class="s-tag" x="312" y="205" text-anchor="middle">www-web-1</text>
+        <path class="wireline" d="M400 200 L450 200" marker-end="url(#a3)"/>
+        <rect class="box" x="460" y="180" width="140" height="40" rx="3"/>
+        <text class="s-sub" x="530" y="205" text-anchor="middle">PV B</text>
+
+        <text class="s-note" x="616" y="151">never crosses</text>
+        <text class="s-note" x="616" y="205">never crosses</text>
+      </svg>
+      <figcaption>Delete the pod and the PVC stays. Scale down to 1 and back to 3, and <code>web-2</code> finds its old data waiting.</figcaption>
+    </figure>
+    </div>
+
+    <div class="callout warn gap">
+      <p class="big"><code>ReadWriteOnce</code> means one <em style="font-style:normal;color:var(--dead)">node</em>, not one pod.</p>
+      <p>Two pods on the same node can both mount it. Two database processes writing one data directory will corrupt it. The access mode will not save you.</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="head">
+      <div class="eyebrow">headless service</div>
+      <h2><code>clusterIP: None</code> turns the Service into a phone book.</h2>
+      <p>No virtual IP. No kernel rewrite. DNS hands back the pod address and then steps out of the way.</p>
+    </div>
+    <div class="scroll">
+    <figure>
+      <svg viewBox="0 0 760 270" role="img" aria-label="A normal Service sends traffic through a ClusterIP that the node kernel rewrites to a random pod. A headless Service has no ClusterIP; CoreDNS returns the pod IP and the client connects directly.">
+        <defs>
+          <marker id="a4" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="var(--id)"/></marker>
+          <marker id="a4b" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="var(--muted)"/></marker>
+        </defs>
+        <line x1="380" y1="8" x2="380" y2="262" stroke="var(--line)" stroke-width="1"/>
+        <text class="s-note" x="24" y="20" fill="var(--ink)">normal service</text>
+        <text class="s-note" x="404" y="20" fill="var(--ink)">headless service</text>
+
+        <rect class="box" x="24" y="106" width="96" height="44" rx="3"/>
+        <text class="s-sub" x="72" y="133" text-anchor="middle">client</text>
+        <path class="hot" d="M120 128 L154 128" marker-end="url(#a4)"/>
+        <rect class="c-id" x="158" y="98" width="126" height="60" rx="3"/>
+        <text class="s-sub" x="221" y="122" text-anchor="middle">ClusterIP</text>
+        <text class="s-tag" x="221" y="140" text-anchor="middle">10.96.0.10</text>
+        <path class="hot" d="M284 128 L318 128" marker-end="url(#a4)"/>
+        <text class="s-note" x="221" y="176" text-anchor="middle">kernel DNAT picks one</text>
+        <rect class="box-sunk" x="322" y="82" width="42" height="30" rx="3"/>
+        <rect class="box-sunk" x="322" y="114" width="42" height="30" rx="3"/>
+        <rect class="box-sunk" x="322" y="146" width="42" height="30" rx="3"/>
+        <text class="s-note" x="200" y="216" text-anchor="middle">you cannot choose which pod</text>
+
+        <rect class="box" x="404" y="106" width="96" height="44" rx="3"/>
+        <text class="s-sub" x="452" y="133" text-anchor="middle">client</text>
+        <path class="ctrl" d="M452 106 L452 62 L536 62" marker-end="url(#a4b)"/>
+        <rect class="box" x="540" y="40" width="150" height="44" rx="3"/>
+        <text class="s-sub" x="615" y="60" text-anchor="middle">CoreDNS</text>
+        <text class="s-note" x="615" y="76" text-anchor="middle">db-0.db-hl ?</text>
+        <path class="ctrl" d="M540 84 L470 84 L470 104" marker-end="url(#a4b)"/>
+        <text class="s-note" x="512" y="99" text-anchor="middle">answers an IP</text>
+
+        <path class="hot" d="M500 128 L602 128" marker-end="url(#a4)"/>
+        <rect class="c-dns" x="606" y="106" width="130" height="44" rx="3"/>
+        <text class="s-tag" x="671" y="126" text-anchor="middle">db-0</text>
+        <text class="s-note" x="671" y="142" text-anchor="middle">direct connection</text>
+        <text class="s-note" x="560" y="176" text-anchor="middle">no clusterip, no DNAT</text>
+        <text class="s-note" x="570" y="216" text-anchor="middle">you name the exact member you want</text>
+      </svg>
+      <figcaption>Same lesson as kube-proxy: DNS answers, the kernel forwards, and neither one carries your bytes for you. Asking for the bare name <code>db-hl</code> returns <em>all</em> the pod IPs, so name the ordinal when you mean one member.</figcaption>
+    </figure>
+    </div>
+
+    <div class="gap scroll">
+      <table class="tbl">
+        <thead><tr><th>you ask for</th><th>you get back</th><th>use it for</th></tr></thead>
+        <tbody>
+          <tr><td class="k">db-hl</td><td class="d">Every ready pod IP, in no fixed order</td><td class="d">Client-side discovery, seed lists, gossip clusters</td></tr>
+          <tr><td class="k">db-0.db-hl</td><td class="d">Exactly one pod IP</td><td class="d">Talking to a named member on purpose</td></tr>
+          <tr><td class="k">db (ClusterIP)</td><td class="d">One virtual IP, random backend per connection</td><td class="d">Stateless replicas only</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section class="sunk">
+  <div class="wrap">
+    <div class="head">
+      <div class="eyebrow">endpoints vs endpointslice</div>
+      <h2>The backend list. Neither one moves traffic.</h2>
+    </div>
+    <div class="scroll">
+      <table class="tbl">
+        <thead><tr><th>api</th><th>shape</th><th>why</th></tr></thead>
+        <tbody>
+          <tr><td class="k">Endpoints</td><td class="d">One object holding the whole list</td><td class="d">Old, simple, easy to eyeball. Falls over on huge Services.</td></tr>
+          <tr><td class="k">EndpointSlice</td><td class="d">The list split across several objects</td><td class="d">Scales, and carries address type, readiness and topology. This is what kube-proxy actually reads.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="cmds gap">
+      <div><code class="c">kubectl get endpointslice -l kubernetes.io/service-name=web-hl -o wide</code><p class="w"><code>-l</code> filters to one Service, <code>-o wide</code> adds columns. Both optional, both save you time.</p></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="head">
+      <div class="eyebrow">the classic bug</div>
+      <h2>"Writes work. Sometimes."</h2>
+      <p>Intermittent <code>read-only transaction</code> errors from an app that has not changed. This one shows up in real incidents constantly.</p>
+    </div>
+    <div class="scroll">
+    <figure>
+      <svg viewBox="0 0 720 230" role="img" aria-label="One ordinary Service selects both the primary and the replicas, so writes land on a read-only replica about two thirds of the time.">
+        <defs>
+          <marker id="a5" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="var(--store)"/></marker>
+          <marker id="a5b" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="var(--dead)"/></marker>
+        </defs>
+        <rect class="box" x="24" y="90" width="110" height="46" rx="3"/>
+        <text class="s-sub" x="79" y="118" text-anchor="middle">app</text>
+        <path class="wireline" d="M134 113 L186 113"/>
+        <rect class="c-id" x="190" y="90" width="150" height="46" rx="3"/>
+        <text class="s-tag" x="265" y="112" text-anchor="middle">Service: db</text>
+        <text class="s-note" x="265" y="128" text-anchor="middle">selects all 3 pods</text>
+
+        <path class="okl" d="M340 108 C400 108 400 40 460 40" marker-end="url(#a5)"/>
+        <path class="bad" d="M340 116 C400 116 400 113 460 113" marker-end="url(#a5b)"/>
+        <path class="bad" d="M340 124 C400 124 400 186 460 186" marker-end="url(#a5b)"/>
+
+        <rect class="c-store" x="466" y="18" width="230" height="44" rx="3"/>
+        <text class="s-tag" x="581" y="38" text-anchor="middle">db-0 · primary</text>
+        <text class="s-note" x="581" y="54" text-anchor="middle">write succeeds</text>
+        <rect class="c-dead" x="466" y="91" width="230" height="44" rx="3"/>
+        <text class="s-tag" x="581" y="111" text-anchor="middle" fill="var(--dead)">db-1 · replica</text>
+        <text class="s-note" x="581" y="127" text-anchor="middle" fill="var(--dead)">read-only error</text>
+        <rect class="c-dead" x="466" y="164" width="230" height="44" rx="3"/>
+        <text class="s-tag" x="581" y="184" text-anchor="middle" fill="var(--dead)">db-2 · replica</text>
+        <text class="s-note" x="581" y="200" text-anchor="middle" fill="var(--dead)">read-only error</text>
+
+        <text class="s-note" x="265" y="176" text-anchor="middle">2 of 3 connections fail</text>
+      </svg>
+      <figcaption>First cut: list the real backends. If a write Service selects replicas, you found it in one command.</figcaption>
+    </figure>
+    </div>
+    <div class="cmds gap">
+      <div><code class="c">kubectl get endpointslice -l kubernetes.io/service-name=db -o wide</code><p class="w">Three addresses behind a Service that should only reach the primary. That is the bug.</p></div>
+    </div>
+    <div class="callout gap">
+      <p class="big">The fix is not "point at the headless name".</p>
+      <p>That still returns all three. You need something that knows <strong>which pod is primary right now</strong>: a per-role Service maintained by an operator, or a proxy such as PgBouncer or PgPool. Hardcoding <code>db-0</code> works until the day <code>db-0</code> stops being the primary, which is the exact day you needed it to work.</p>
+    </div>
+  </div>
+</section>
+
+<section class="sunk">
+  <div class="wrap">
+    <div class="head">
+      <div class="eyebrow">your lab, session 31</div>
+      <h2>What the evidence proved.</h2>
+    </div>
+    <div class="scroll">
+      <table class="tbl">
+        <thead><tr><th>field</th><th>before delete</th><th>after rebuild</th><th>meaning</th></tr></thead>
+        <tbody>
+          <tr><td class="k">name</td><td class="good">web-0</td><td class="good">web-0</td><td class="d">Ordinal identity is stable</td></tr>
+          <tr><td class="k">uid</td><td class="k">e8dd54a4…</td><td class="bad">657cd3ca…</td><td class="d">A different API object. Not the same pod.</td></tr>
+          <tr><td class="k">pod ip</td><td class="k">192.168.46.86</td><td class="bad">192.168.46.90</td><td class="d">Network identity is disposable</td></tr>
+          <tr><td class="k">node</td><td class="k">…-worker</td><td class="k">…-worker</td><td class="d">Same by luck, not by promise</td></tr>
+          <tr><td class="k">data</td><td class="good">readable</td><td class="good">readable</td><td class="d">Reattached to the same PVC and PV</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="callout warn gap">
+      <p class="big">One thing is still unverified.</p>
+      <p>Per-pod DNS resolution was never actually observed. A leftover <code>dnstest</code> pod blocked the run. EndpointSlice proved the Service selects both pods, which is <strong>not the same claim</strong>. Close it before moving on:</p>
+      <div class="cmds" style="margin-top:.4rem">
+        <div><code class="c">kubectl delete pod dnstest --ignore-not-found</code></div>
+        <div><code class="c">kubectl run dnstest --rm -it --restart=Never --image=busybox:1.36 -- nslookup web-0.web-hl.default.svc.cluster.local</code><p class="w">Expect one A record holding web-0's current pod IP.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="head">
+      <div class="eyebrow">the real world</div>
+      <h2>Who actually runs StatefulSets.</h2>
+      <p>Almost nobody writes a bare StatefulSet for a database. They install an operator that writes one for them.</p>
+    </div>
+    <div class="split">
+      <div>
+        <h3><span class="dot ok"></span>Good fit</h3>
+        <ul>
+          <li><b>Kafka, ZooKeeper, etcd</b> — members must know each other by fixed name</li>
+          <li><b>Cassandra, Elasticsearch, ClickHouse</b> — sharded data, each node owns its slice</li>
+          <li><b>Redis Cluster, MinIO, Vault</b> — quorum members with per-node state</li>
+          <li><b>Prometheus</b> — local TSDB per replica, deployed by the Prometheus Operator</li>
+        </ul>
+      </div>
+      <div>
+        <h3><span class="dot no"></span>Bad fit</h3>
+        <ul>
+          <li><b>Hand-rolled PostgreSQL or MySQL HA</b> — no failover logic exists in a StatefulSet</li>
+          <li><b>Anything you can buy managed</b> — RDS, Aurora, MSK, ElastiCache, OpenSearch</li>
+          <li><b>Shared file workloads</b> — that is a ReadWriteMany volume, not a StatefulSet problem</li>
+          <li><b>Single replica "just for the disk"</b> — a Deployment plus a PVC is simpler</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="callout gap">
+      <p class="big">The real division of labour.</p>
+      <p><strong>StatefulSet</strong> gives identity, disks and ordering. <strong>The operator</strong> gives brains: leader election, replication setup, failover, promotion, backups, and a <code>-rw</code> / <code>-ro</code> Service pair that always points at the right members. CloudNativePG, Zalando Postgres Operator, CrunchyData, Strimzi for Kafka.</p>
+      <p class="zh">面試答法：StatefulSet 是 primitive，不是 solution。Production HA 一定有 operator 或 managed service 在上面。</p>
+    </div>
+
+    <div class="gap scroll">
+      <table class="tbl">
+        <thead><tr><th>production knob</th><th>why it bites</th></tr></thead>
+        <tbody>
+          <tr><td class="k">podManagementPolicy</td><td class="d">Default <code>OrderedReady</code> blocks forever on one stuck pod. Kafka-style clusters usually want <code>Parallel</code>.</td></tr>
+          <tr><td class="k">updateStrategy.partition</td><td class="d">Rolling updates go highest ordinal first. Set a partition to canary only the top members.</td></tr>
+          <tr><td class="k">PodDisruptionBudget</td><td class="d">Without one, a node drain can take out quorum. With 3 members, allow at most 1 unavailable.</td></tr>
+          <tr><td class="k">topologySpreadConstraints</td><td class="d">Three replicas on one node is not high availability, it is one blast radius.</td></tr>
+          <tr><td class="k">pvcRetentionPolicy</td><td class="d">PVCs survive by default. Delete the StatefulSet and the disks stay, and keep billing.</td></tr>
+          <tr><td class="k">terminationGracePeriod</td><td class="d">Databases need time to flush and close cleanly. The 30s default is often too short.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section class="sunk">
+  <div class="wrap">
+    <div class="head">
+      <div class="eyebrow">on aws / eks</div>
+      <h2>An EBS volume lives in one Availability Zone. Forever.</h2>
+      <p>This is the number one StatefulSet incident on EKS. The disk cannot move, so the pod cannot move.</p>
+    </div>
+    <div class="scroll">
+    <figure>
+      <svg viewBox="0 0 760 290" role="img" aria-label="An EBS-backed volume in one Availability Zone cannot be attached by a node in another Availability Zone, so the pod stays Pending there.">
+        <defs>
+          <marker id="a6" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="var(--store)"/></marker>
+          <marker id="a6b" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="var(--dead)"/></marker>
+        </defs>
+        <rect class="grp" x="24" y="30" width="330" height="216" rx="3"/>
+        <text class="s-note" x="40" y="52" fill="var(--ink)">us-east-1a</text>
+        <rect class="grp" x="406" y="30" width="330" height="216" rx="3"/>
+        <text class="s-note" x="422" y="52" fill="var(--ink)">us-east-1b</text>
+
+        <rect class="box" x="48" y="66" width="282" height="52" rx="3"/>
+        <text class="s-label" x="189" y="90" text-anchor="middle">node</text>
+        <text class="s-sub" x="189" y="107" text-anchor="middle">ip-10-0-1-24</text>
+        <rect class="c-id" x="86" y="132" width="206" height="42" rx="3"/>
+        <text class="s-tag" x="189" y="158" text-anchor="middle">db-0 · Running</text>
+        <path class="okl" d="M189 174 L189 196" marker-end="url(#a6)"/>
+        <rect class="c-store" x="86" y="200" width="206" height="42" rx="3"/>
+        <text class="s-tag" x="189" y="220" text-anchor="middle">EBS vol-0a1b</text>
+        <text class="s-note" x="189" y="235" text-anchor="middle">gp3, 100 GiB</text>
+
+        <rect class="box" x="430" y="66" width="282" height="52" rx="3"/>
+        <text class="s-label" x="571" y="90" text-anchor="middle">node</text>
+        <text class="s-sub" x="571" y="107" text-anchor="middle">ip-10-0-2-91</text>
+        <rect class="c-dead" x="468" y="132" width="206" height="42" rx="3" stroke-dasharray="5 4"/>
+        <text class="s-tag" x="571" y="158" text-anchor="middle" fill="var(--dead)">db-0 · Pending</text>
+
+        <path class="bad" d="M468 196 L306 214" marker-end="url(#a6b)"/>
+        <line x1="376" y1="192" x2="398" y2="216" stroke="var(--dead)" stroke-width="2.5"/>
+        <line x1="398" y1="192" x2="376" y2="216" stroke="var(--dead)" stroke-width="2.5"/>
+        <text class="s-note" x="571" y="204" text-anchor="middle" fill="var(--dead)">cannot attach across an AZ</text>
+        <text class="s-note" x="380" y="274" text-anchor="middle">the volume decides where the pod may run</text>
+      </svg>
+      <figcaption>Symptom in the wild: a spot node dies, the replacement comes up in another AZ, and the pod sits <code>Pending</code> with <code>volume node affinity conflict</code>. Nothing is broken, and nothing will fix itself.</figcaption>
+    </figure>
+    </div>
+
+    <h3 class="gap" style="margin-bottom:.7rem">The StorageClass that avoids most of this</h3>
+    <pre class="yaml">apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: ebs-gp3
+provisioner: ebs.csi.aws.com
+<b>volumeBindingMode: WaitForFirstConsumer</b>   <i># schedule the pod first, then make the disk in ITS az</i>
+<b>allowVolumeExpansion: true</b>                <i># you can never shrink, so at least allow growth</i>
+<b>reclaimPolicy: Retain</b>                     <i># for databases. Delete = the data is gone with the PVC</i>
+parameters:
+  type: gp3
+  iops: "3000"
+  throughput: "125"
+  encrypted: "true"
+  kmsKeyId: alias/eks-ebs</pre>
+
+    <div class="gap scroll">
+      <table class="tbl">
+        <thead><tr><th>eks reality</th><th>what to do</th></tr></thead>
+        <tbody>
+          <tr><td class="k">EBS CSI driver</td><td class="d">Not installed by default. Add the <code>aws-ebs-csi-driver</code> EKS add-on, and give its controller an IAM role through Pod Identity or IRSA. No driver means every PVC stays <code>Pending</code>.</td></tr>
+          <tr><td class="k">in-tree → CSI</td><td class="d">The old <code>kubernetes.io/aws-ebs</code> provisioner is gone. Anything still referencing it breaks on upgrade.</td></tr>
+          <tr><td class="k">Multi-AZ</td><td class="d">One replica per AZ, one EBS volume per AZ. Use <code>topologySpreadConstraints</code> and make sure your node group or Karpenter NodePool can actually launch in every AZ you spread into.</td></tr>
+          <tr><td class="k">Karpenter</td><td class="d">It reads the PV's node affinity when a pod is already bound to a volume, so consolidation cannot move that pod out of its AZ. Expect fewer consolidation wins on stateful nodes.</td></tr>
+          <tr><td class="k">Snapshots</td><td class="d"><code>VolumeSnapshot</code> needs the external-snapshotter CRDs and controller, which EKS does not ship. Snapshots are crash-consistent, not application-consistent. They are not a database backup.</td></tr>
+          <tr><td class="k">EFS instead</td><td class="d">ReadWriteMany and multi-AZ, so no AZ pinning. Also NFS latency. Fine for shared assets and uploads, wrong for a database data directory.</td></tr>
+          <tr><td class="k">Node upgrades</td><td class="d">Drain detaches the volume, waits, and reattaches on the new node. A single-replica StatefulSet takes real downtime on every node rotation.</td></tr>
+          <tr><td class="k">Orphaned volumes</td><td class="d">Deleted StatefulSet, retained PVCs, retained PVs, and EBS volumes billing at rest with nothing attached. Sweep for these.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout gap">
+      <p class="big">The senior answer: run stateless in EKS, buy the state.</p>
+      <p>RDS or Aurora, MSK, ElastiCache, OpenSearch, DocumentDB. You give up some control and you delete an entire category of 3am pages. Self-host in EKS when you need a version, an extension, or a cost profile that the managed service will not give you, and when you have an operator plus someone who can restore a backup under pressure.</p>
+      <p class="zh">面試時這句很值錢：選擇 self-host 要說得出「為什麼不用 managed」，而不是「因為我們用 k8s」。</p>
+    </div>
+
+    <div class="cmds gap">
+      <div><code class="c">aws eks describe-addon --cluster-name my-cluster --addon-name aws-ebs-csi-driver</code><p class="w">Confirm the driver and its service account role.</p></div>
+      <div><code class="c">aws ec2 describe-volumes --filters Name=status,Values=available --query 'Volumes[].[VolumeId,Size,CreateTime]' --output table</code><p class="w">Every row is an unattached EBS volume you are paying for. Usually orphaned PVCs.</p></div>
+      <div><code class="c">kubectl get pv -o custom-columns=NAME:.metadata.name,CLAIM:.spec.claimRef.name,AZ:.spec.nodeAffinity.required.nodeSelectorTerms[0].matchExpressions[0].values[0]</code><p class="w">Which AZ each volume pinned itself to. The fastest way to explain a Pending pod.</p></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="head">
+      <div class="eyebrow">corrections from this session</div>
+      <h2>Say it right.</h2>
+    </div>
+    <div class="myth">
+      <div><p class="m">StatefulSet keeps the pod IP stable</p><p class="t">It keeps the ordinal name and the DNS name. The IP changes on every rebuild.</p></div>
+      <div><p class="m">Pod UID is like a PID</p><p class="t">UID identifies an API object. PID identifies a running process. Different layers entirely.</p></div>
+      <div><p class="m">The client looks the pod up by some internal ID</p><p class="t">The client resolves a fixed DNS name and gets today's pod IP.</p></div>
+      <div><p class="m">CoreDNS routes the traffic</p><p class="t">CoreDNS answers with an address. The client opens the connection itself.</p></div>
+      <div><p class="m">A StatefulSet makes PostgreSQL production-ready</p><p class="t">It gives you names and disks. Replication, failover and backups are all still your job.</p></div>
+      <div><p class="m">ReadWriteOnce means one pod can mount it</p><p class="t">It means one node. Two pods on that node can both mount it and corrupt the data.</p></div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="wrap col">
+    <p><strong style="color:var(--ink)">One sentence to keep:</strong> a StatefulSet promises a name, a disk and a DNS record. It promises nothing about the pod, the IP, the node, or your data being safe.</p>
+  </div>
+</footer>
+
+</body></html>

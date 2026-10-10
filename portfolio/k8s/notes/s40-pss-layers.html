@@ -1,0 +1,431 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>PSS 七層</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC:wght@400;700&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: one notebook column on graph paper; figures on taped cards, scenarios as 2x2 comic panels */
+:root {
+  --paper: #F6F8FA;
+  --grid: rgba(90,130,170,.16);
+  --ink: #23313E;
+  --ink-soft: #55677A;
+  --card: #FFFFFF;
+  --tape: rgba(240,214,140,.75);
+  --who: #FFE98A;
+  --see: #BDEEF6;
+  --may: #F9CDE0;
+  --wrong: #D2453A;
+  --ok: #2F8F5B;
+  --line: #9DB0C2;
+  --font-hand: "LXGW WenKai TC", "Noto Sans TC", "PingFang TC", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #1A2320; --grid: rgba(200,230,210,.08); --ink: #E6EDE8; --ink-soft: #A9BAB1;
+    --card: #24302C; --tape: rgba(200,180,110,.45); --who: #8A7A2A; --see: #2B6A74; --may: #7A3F57;
+    --wrong: #FF8A7E; --ok: #7FD3A1; --line: #5E7268; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #1A2320; --grid: rgba(200,230,210,.08); --ink: #E6EDE8; --ink-soft: #A9BAB1;
+  --card: #24302C; --tape: rgba(200,180,110,.45); --who: #8A7A2A; --see: #2B6A74; --may: #7A3F57;
+  --wrong: #FF8A7E; --ok: #7FD3A1; --line: #5E7268; color-scheme: dark;
+}
+body {
+  background-color: var(--paper);
+  background-image: linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 22px 22px;
+  color: var(--ink);
+  font-family: var(--font-hand);
+  font-size: 17px;
+  line-height: 1.75;
+}
+.page { max-width: 760px; margin: 0 auto; padding-inline: 18px; padding-block: 32px 64px; display: grid; gap: 34px; }
+h1, h2 { text-wrap: balance; line-height: 1.3; margin: 0; }
+h1 { font-size: 2.1rem; }
+h2 { font-size: 1.45rem; display: flex; align-items: baseline; gap: 10px; }
+h2 .tag { font-family: var(--font-mono); font-size: .72rem; letter-spacing: .08em; color: var(--ink-soft); text-transform: uppercase; }
+p { margin: 0; }
+section { display: grid; gap: 14px; min-width: 0; }
+.sub { color: var(--ink-soft); font-size: .95rem; }
+mark { background: linear-gradient(transparent 52%, var(--who) 52%); color: inherit; padding: 0 2px; }
+mark.see { background: linear-gradient(transparent 52%, var(--see) 52%); }
+mark.may { background: linear-gradient(transparent 52%, var(--may) 52%); }
+code { font-family: var(--font-mono); font-size: .86em; background: color-mix(in srgb, var(--line) 22%, transparent); padding: 1px 5px; border-radius: 3px; }
+.card { position: relative; background: var(--card); padding: 22px 18px 16px; box-shadow: 0 1px 3px rgba(0,0,0,.12); min-width: 0; }
+.card::before { content: ""; position: absolute; top: -9px; left: 50%; width: 92px; height: 20px; transform: translateX(-50%) rotate(-2deg); background: var(--tape); }
+.scroll { overflow-x: auto; }
+svg text { font-family: var(--font-mono); fill: var(--ink); }
+svg .hand { font-family: var(--font-hand); }
+.rule { border-left: 4px solid var(--ok); padding: 6px 12px; font-size: 1.08rem; }
+.wrong { border-left: 4px solid var(--wrong); padding: 4px 12px; display: grid; gap: 2px; }
+.wrong b { color: var(--wrong); font-size: .85rem; letter-spacing: .05em; }
+.panels { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 14px; }
+.panel { border: 2px solid var(--ink); background: var(--card); padding: 10px; display: grid; gap: 6px; min-width: 0; }
+.panel h3 { margin: 0; font-size: 1rem; font-family: var(--font-mono); }
+.panel p { font-size: .92rem; }
+@media (max-width: 520px) { .panels { grid-template-columns: 1fr; } }
+table { border-collapse: collapse; width: 100%; font-size: .95rem; }
+th, td { border-bottom: 1px dashed var(--line); padding: 8px 6px; text-align: left; vertical-align: top; }
+th { font-family: var(--font-mono); font-size: .78rem; letter-spacing: .05em; color: var(--ink-soft); font-weight: 600; }
+ol { margin: 0; padding-left: 1.3em; display: grid; gap: 6px; }
+blockquote { margin: 0; padding: 12px 16px; background: var(--card); border: 2px dashed var(--line); }
+.en { font-family: var(--font-mono); font-size: .9rem; color: var(--ink-soft); }
+details summary{cursor:pointer}
+</style>
+<main class="page">
+  <header style="display:grid;gap:8px">
+    <p class="sub">layers · Pod Security Admission · Layer 0–7</p>
+    <h1>PSS 七層</h1>
+    <p>從「apply 成功，Pod 卻不見」一路挖到 admission chain、取捨、EKS 落地與面試。</p>
+  </header>
+
+  <section>
+    <h2>Layer 0 · 一張圖<span class="tag">analogy</span></h2>
+    <div class="card scroll">
+      <svg viewBox="0 0 700 170" width="700" height="170" role="img" aria-label="Factory gate: order accepted at office, manager brings worker, guard checks worker only, rejection slip goes to manager">
+        <defs><marker id="a0" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="var(--ink)"/></marker>
+        <marker id="r0" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="var(--wrong)"/></marker></defs>
+        <rect x="10" y="30" width="130" height="56" fill="var(--see)" stroke="var(--ink)" stroke-width="2"/>
+        <text x="75" y="54" text-anchor="middle" font-size="13" class="hand">辦公室收訂單</text><text x="75" y="74" text-anchor="middle" font-size="11">Deployment ok</text>
+        <line x1="140" y1="58" x2="198" y2="58" stroke="var(--ink)" stroke-width="2" marker-end="url(#a0)"/>
+        <rect x="200" y="30" width="140" height="56" fill="var(--who)" stroke="var(--ink)" stroke-width="2"/>
+        <text x="270" y="54" text-anchor="middle" font-size="13" class="hand">主管帶工人</text><text x="270" y="74" text-anchor="middle" font-size="11">controller</text>
+        <line x1="340" y1="58" x2="398" y2="58" stroke="var(--ink)" stroke-width="2" marker-end="url(#a0)"/>
+        <rect x="400" y="30" width="130" height="56" fill="var(--may)" stroke="var(--ink)" stroke-width="2"/>
+        <text x="465" y="54" text-anchor="middle" font-size="13" class="hand">警衛只看工人</text><text x="465" y="74" text-anchor="middle" font-size="11">PSS on Pod</text>
+        <line x1="530" y1="58" x2="588" y2="58" stroke="var(--wrong)" stroke-width="2" marker-end="url(#r0)"/>
+        <rect x="590" y="30" width="100" height="56" fill="var(--card)" stroke="var(--wrong)" stroke-width="2" stroke-dasharray="6 4"/>
+        <text x="640" y="62" text-anchor="middle" font-size="13" class="hand" fill="var(--wrong)">沒進廠</text>
+        <path d="M640 86 C640 140, 270 140, 270 90" fill="none" stroke="var(--wrong)" stroke-width="2" stroke-dasharray="5 4" marker-end="url(#r0)"/>
+        <text x="455" y="150" text-anchor="middle" font-size="12" class="hand" fill="var(--wrong)">退件單交給主管（FailedCreate），不是交給你</text>
+      </svg>
+    </div>
+    <p>PSS 是工廠門口的警衛，只檢查工人（Pod）有沒有戴安全帽。你的訂單（Deployment）一定收得下來。工人被擋時，退件單在主管手上。</p>
+  </section>
+
+  <section>
+    <h2>Layer 1 · 第一性原理<span class="tag">why it must exist</span></h2>
+    <p><b>無法迴避的限制：容器共用同一顆 kernel。</b>VM 有 hypervisor 隔開，容器只靠 namespace、cgroup、capabilities 這幾道 kernel 功能隔開。Pod spec 裡有幾個欄位，可以直接把這些隔離拆掉。</p>
+    <div class="card scroll">
+      <svg viewBox="0 0 700 250" width="700" height="250" role="img" aria-label="Node kernel shared by containers; privileged, hostPID, hostPath fields punch holes to the node">
+        <rect x="20" y="190" width="660" height="44" fill="var(--who)" stroke="var(--ink)" stroke-width="2"/>
+        <text x="350" y="217" text-anchor="middle" font-size="14">Node Linux kernel (shared by ALL containers)</text>
+        <rect x="40" y="40" width="180" height="110" fill="var(--card)" stroke="var(--ok)" stroke-width="2"/>
+        <text x="130" y="64" text-anchor="middle" font-size="13">Pod A (restricted)</text>
+        <text x="130" y="90" text-anchor="middle" font-size="11">runAsNonRoot: true</text>
+        <text x="130" y="108" text-anchor="middle" font-size="11">caps: drop ALL</text>
+        <text x="130" y="126" text-anchor="middle" font-size="11">no host* fields</text>
+        <line x1="130" y1="150" x2="130" y2="188" stroke="var(--ok)" stroke-width="2"/>
+        <text x="140" y="176" font-size="11" fill="var(--ok)">syscalls only</text>
+        <rect x="300" y="40" width="360" height="110" fill="var(--card)" stroke="var(--wrong)" stroke-width="2"/>
+        <text x="480" y="64" text-anchor="middle" font-size="13">Pod B (anyone who can "create pods")</text>
+        <text x="320" y="92" font-size="11">privileged: true      -> all devices + all caps</text>
+        <text x="320" y="110" font-size="11">hostPID: true         -> see / kill node processes</text>
+        <text x="320" y="128" font-size="11">hostPath: /           -> read /etc/shadow, kubelet creds</text>
+        <line x1="360" y1="150" x2="360" y2="188" stroke="var(--wrong)" stroke-width="3"/>
+        <line x1="480" y1="150" x2="480" y2="188" stroke="var(--wrong)" stroke-width="3"/>
+        <line x1="600" y1="150" x2="600" y2="188" stroke="var(--wrong)" stroke-width="3"/>
+        <text x="480" y="178" text-anchor="middle" font-size="12" class="hand" fill="var(--wrong)">三個洞直通 node = node root</text>
+        <text x="20" y="22" font-size="12" class="hand">看不見的部分：VM 那層 hypervisor 在這裡不存在</text>
+      </svg>
+    </div>
+    <p>所以有一條等式：<mark class="may">能 create Pod 的人 ≈ 能拿到 node root</mark>。而 RBAC 只回答「誰能對哪種 resource 做哪個 verb」，它看不到 Pod 裡面寫了什麼欄位。</p>
+    <p>於是需要第二道檢查，它必須滿足三個限制：</p>
+    <ol>
+      <li><b>位置</b>：在 Pod 寫進 etcd 之前。寫進去之後 scheduler 會排、kubelet 會照跑，那時再擋就太晚了。</li>
+      <li><b>只能看 YAML</b>：這個時間點 image 還沒被拉下來，看不到 image 裡的 <code>USER</code>。這就是 s40 學的「admission 看 YAML、kubelet 看 image user」兩個檢查點。</li>
+      <li><b>同步又便宜</b>：它擋在每一個 Pod 建立請求的路上，慢了整個叢集的 rollout 都會變慢。</li>
+    </ol>
+    <p class="sub">拿掉它會怎樣：任何一個 CI 用的 SA 只要有 <code>create deployments</code>，被偷走 token 後就能起一個 privileged Pod 拿下整台 node，接著讀走 node 上其他 Pod 的 secret。這就是你在 s38 練過的「爆炸半徑能否跳出 RBAC 管轄」。</p>
+    <div class="wrong"><b>你的回答補正</b><span>你答「補上的是 Pod 的 image 的權限管控」。方向接近，但對象錯了：PSS <b>不看 image</b>。admission 那一刻 image 還沒拉，看不到 image 裡的 <code>USER</code>，也不管 image 從哪個 registry 來。PSS 看的是 <mark>Pod spec 欄位</mark>：<code>securityContext</code>、<code>host*</code>、<code>volumes</code>。image 那一塊由別人負責：kubelet 啟動時檢查 <code>runAsNonRoot</code>（s40 的 CreateContainerConfigError）、Kyverno <code>verifyImages</code> 管來源與簽章、ECR + Inspector 管漏洞。</span></div>
+  </section>
+
+  <section>
+    <h2>Layer 2 · 機制<span class="tag">request path</span></h2>
+    <p>因為 Layer 1 要求「寫進 etcd 前、同步檢查」，K8s 把它放在 API Server 的 <b>admission chain</b> 裡，一個內建的 validating admission plugin，名字就叫 <code>PodSecurity</code>。1.23 beta、1.25 GA，同版本 PSP 被移除。</p>
+    <div class="card scroll">
+      <svg viewBox="0 0 720 300" width="720" height="300" role="img" aria-label="API Server request path: authn, authz RBAC, mutating admission, schema validation, validating admission PodSecurity, etcd; reject returns 403 to requester">
+        <defs><marker id="a2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="var(--ink)"/></marker>
+        <marker id="r2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="var(--wrong)"/></marker></defs>
+        <rect x="10" y="20" width="120" height="50" fill="var(--who)" stroke="var(--ink)" stroke-width="2"/>
+        <text x="70" y="42" text-anchor="middle" font-size="12">Job controller</text><text x="70" y="60" text-anchor="middle" font-size="11">POST /pods</text>
+        <line x1="130" y1="45" x2="158" y2="45" stroke="var(--ink)" stroke-width="2" marker-end="url(#a2)"/>
+        <rect x="160" y="10" width="550" height="140" fill="none" stroke="var(--line)" stroke-width="2" stroke-dasharray="4 4"/>
+        <text x="170" y="28" font-size="11" fill="var(--ink-soft)">kube-apiserver</text>
+        <g font-size="11">
+          <rect x="170" y="40" width="80" height="44" fill="var(--card)" stroke="var(--ink)"/><text x="210" y="60" text-anchor="middle">authn</text><text x="210" y="76" text-anchor="middle">who?</text>
+          <line x1="250" y1="62" x2="262" y2="62" stroke="var(--ink)" stroke-width="2" marker-end="url(#a2)"/>
+          <rect x="264" y="40" width="88" height="44" fill="var(--see)" stroke="var(--ink)"/><text x="308" y="60" text-anchor="middle">authz RBAC</text><text x="308" y="76" text-anchor="middle">verb ok?</text>
+          <line x1="352" y1="62" x2="364" y2="62" stroke="var(--ink)" stroke-width="2" marker-end="url(#a2)"/>
+          <rect x="366" y="40" width="88" height="44" fill="var(--card)" stroke="var(--ink)"/><text x="410" y="60" text-anchor="middle">mutating</text><text x="410" y="76" text-anchor="middle">admission</text>
+          <line x1="454" y1="62" x2="466" y2="62" stroke="var(--ink)" stroke-width="2" marker-end="url(#a2)"/>
+          <rect x="468" y="40" width="70" height="44" fill="var(--card)" stroke="var(--ink)"/><text x="503" y="60" text-anchor="middle">schema</text><text x="503" y="76" text-anchor="middle">validate</text>
+          <line x1="538" y1="62" x2="550" y2="62" stroke="var(--ink)" stroke-width="2" marker-end="url(#a2)"/>
+          <rect x="552" y="40" width="96" height="44" fill="var(--may)" stroke="var(--ink)" stroke-width="2"/><text x="600" y="60" text-anchor="middle">validating</text><text x="600" y="76" text-anchor="middle">PodSecurity</text>
+          <line x1="648" y1="62" x2="672" y2="62" stroke="var(--ok)" stroke-width="2" marker-end="url(#a2)"/>
+          <text x="676" y="66" font-size="12" fill="var(--ok)">etcd</text>
+        </g>
+        <text x="308" y="112" text-anchor="middle" font-size="11" class="hand">看「能不能 create pods」</text>
+        <text x="600" y="112" text-anchor="middle" font-size="11" class="hand">看「Pod 長什麼樣」</text>
+        <text x="410" y="132" text-anchor="middle" font-size="11" class="hand">先 mutate 再 validate：webhook 補的欄位也會被檢查</text>
+        <path d="M600 84 C600 210, 70 210, 70 72" fill="none" stroke="var(--wrong)" stroke-width="2" stroke-dasharray="5 4" marker-end="url(#r2)"/>
+        <text x="335" y="200" text-anchor="middle" font-size="12" fill="var(--wrong)">403 Forbidden: violates PodSecurity "restricted:latest"</text>
+        <text x="335" y="220" text-anchor="middle" font-size="12" class="hand" fill="var(--wrong)">controller 收到 403 → 在自己身上記 FailedCreate event</text>
+        <rect x="10" y="244" width="700" height="44" fill="var(--card)" stroke="var(--wrong)" stroke-dasharray="6 4"/>
+        <text x="360" y="271" text-anchor="middle" font-size="12" fill="var(--wrong)">etcd: (no Pod written)  ->  scheduler 看不到  ->  kubelet 看不到  ->  get pods 空</text>
+      </svg>
+    </div>
+
+    <p><b>三個等級</b>（由鬆到嚴，每級是固定清單，不能自訂）：</p>
+    <div class="card scroll">
+      <table>
+        <tr><th>level</th><th>擋什麼（節錄）</th><th>誰該用</th></tr>
+        <tr><td><code>privileged</code></td><td>什麼都不擋</td><td>kube-system、CNI、CSI node plugin</td></tr>
+        <tr><td><code>baseline</code></td><td><code>privileged</code>、<code>hostNetwork/hostPID/hostIPC</code>、<code>hostPath</code>、<code>hostPort</code>、危險 capabilities</td><td>大多數第三方 workload 的地板</td></tr>
+        <tr><td><code>restricted</code></td><td>baseline 全部，加上：<code>runAsNonRoot: true</code>、<code>allowPrivilegeEscalation: false</code>、<code>capabilities.drop: ["ALL"]</code>（只准加回 <code>NET_BIND_SERVICE</code>）、<code>seccompProfile: RuntimeDefault</code>、volume 類型白名單</td><td>自家 app</td></tr>
+      </table>
+    </div>
+
+    <p><b>三個模式，作用對象不一樣。</b>這是你今天卡住那題的根因：</p>
+    <div class="card scroll">
+      <svg viewBox="0 0 700 230" width="700" height="230" role="img" aria-label="enforce checks Pods only; warn and audit also check workload templates such as Deployment and CronJob">
+        <text x="20" y="28" font-size="12" class="hand">送進 API Server 的物件</text>
+        <rect x="20" y="40" width="220" height="44" fill="var(--see)" stroke="var(--ink)"/><text x="130" y="60" text-anchor="middle" font-size="12">Deployment / CronJob / STS</text><text x="130" y="76" text-anchor="middle" font-size="11">(含 Pod template)</text>
+        <rect x="20" y="140" width="220" height="44" fill="var(--who)" stroke="var(--ink)"/><text x="130" y="167" text-anchor="middle" font-size="12">Pod</text>
+        <rect x="320" y="20" width="110" height="190" fill="var(--card)" stroke="var(--wrong)" stroke-width="2"/><text x="375" y="40" text-anchor="middle" font-size="13">enforce</text><text x="375" y="58" text-anchor="middle" font-size="11">違規 = 拒絕</text>
+        <rect x="450" y="20" width="110" height="190" fill="var(--card)" stroke="var(--ink)" stroke-width="2"/><text x="505" y="40" text-anchor="middle" font-size="13">warn</text><text x="505" y="58" text-anchor="middle" font-size="11">client 印警告</text>
+        <rect x="580" y="20" width="110" height="190" fill="var(--card)" stroke="var(--ink)" stroke-width="2"/><text x="635" y="40" text-anchor="middle" font-size="13">audit</text><text x="635" y="58" text-anchor="middle" font-size="11">寫 audit log</text>
+        <text x="375" y="78" text-anchor="middle" font-size="12" fill="var(--ink-soft)">不檢查</text>
+        <text x="505" y="78" text-anchor="middle" font-size="12" fill="var(--ok)">檢查</text>
+        <text x="635" y="78" text-anchor="middle" font-size="12" fill="var(--ok)">檢查</text>
+        <text x="375" y="168" text-anchor="middle" font-size="12" fill="var(--wrong)">檢查並拒絕</text>
+        <text x="505" y="168" text-anchor="middle" font-size="12" fill="var(--ok)">檢查</text>
+        <text x="635" y="168" text-anchor="middle" font-size="12" fill="var(--ok)">檢查</text>
+        <line x1="240" y1="62" x2="318" y2="62" stroke="var(--line)" stroke-dasharray="3 3"/>
+        <line x1="240" y1="162" x2="318" y2="162" stroke="var(--line)" stroke-dasharray="3 3"/>
+      </svg>
+    </div>
+    <p>只開 <code>enforce</code>，apply Deployment 時一句警告都沒有，錯誤只在 controller 那一層。<mark>同時開 <code>warn</code>，kubectl apply 當下就會印 <code>Warning: would violate PodSecurity</code></mark>。所以實務上 warn 永遠跟著 enforce 一起貼。</p>
+
+    <p><b>設定長這樣</b>（namespace label，<code>-version</code> 固定規則版本，避免叢集升級時規則跟著變）：</p>
+    <div class="card scroll"><pre style="margin:0;font-family:var(--font-mono);font-size:.85rem;line-height:1.6">pod-security.kubernetes.io/enforce: restricted
+pod-security.kubernetes.io/enforce-version: v1.33
+pod-security.kubernetes.io/warn: restricted
+pod-security.kubernetes.io/audit: restricted</pre></div>
+    <p class="sub">改 namespace label 時，API Server 會拿現有 Pod 評估一次並回警告，但<b>不會趕走</b>已經在跑的 Pod。違規的 Pod 要等下次重建才會被擋。</p>
+
+    <p><b>跟 Taint 的分界線就是 etcd：</b></p>
+    <div class="card scroll">
+      <svg viewBox="0 0 700 130" width="700" height="130" role="img" aria-label="Timeline: PSS rejects before etcd write, taint blocks after etcd write at scheduler">
+        <line x1="20" y1="60" x2="680" y2="60" stroke="var(--ink)" stroke-width="2"/>
+        <circle cx="160" cy="60" r="7" fill="var(--may)" stroke="var(--ink)"/><text x="160" y="40" text-anchor="middle" font-size="12">PodSecurity</text>
+        <rect x="335" y="44" width="30" height="32" fill="var(--who)" stroke="var(--ink)"/><text x="350" y="36" text-anchor="middle" font-size="12">etcd write</text>
+        <circle cx="520" cy="60" r="7" fill="var(--see)" stroke="var(--ink)"/><text x="520" y="40" text-anchor="middle" font-size="12">scheduler (taint)</text>
+        <text x="160" y="92" text-anchor="middle" font-size="12" class="hand" fill="var(--wrong)">Pod 不存在</text>
+        <text x="160" y="112" text-anchor="middle" font-size="11">describe parent: FailedCreate</text>
+        <text x="520" y="92" text-anchor="middle" font-size="12" class="hand">Pod 存在，卡 Pending</text>
+        <text x="520" y="112" text-anchor="middle" font-size="11">describe pod: FailedScheduling</text>
+      </svg>
+    </div>
+  </section>
+
+  <section>
+    <h2>Layer 3 · 取捨<span class="tag">why this design</span></h2>
+    <p>因為 Layer 1 要求「同步、便宜、只看 YAML」，PSA 選了最笨的設計：<mark>固定三級、只驗證不修改、貼在 namespace 上、跑在 API Server 行程內</mark>。看它打敗了誰，就懂它付了什麼代價。</p>
+    <div class="card scroll">
+      <svg viewBox="0 0 700 220" width="700" height="220" role="img" aria-label="In-process PodSecurity versus out-of-process webhook: webhook adds network hop and a failure point">
+        <defs><marker id="a3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="var(--ink)"/></marker></defs>
+        <rect x="20" y="20" width="300" height="120" fill="none" stroke="var(--line)" stroke-width="2" stroke-dasharray="4 4"/>
+        <text x="30" y="40" font-size="12">kube-apiserver process</text>
+        <rect x="60" y="60" width="220" height="50" fill="var(--may)" stroke="var(--ink)" stroke-width="2"/>
+        <text x="170" y="82" text-anchor="middle" font-size="12">PodSecurity (built-in)</text>
+        <text x="170" y="100" text-anchor="middle" font-size="11">function call, ~no latency</text>
+        <text x="170" y="165" text-anchor="middle" font-size="12" class="hand">API Server 活著它就活著</text>
+        <text x="170" y="185" text-anchor="middle" font-size="12" class="hand">不能單獨掛掉</text>
+        <rect x="380" y="20" width="140" height="120" fill="none" stroke="var(--line)" stroke-width="2" stroke-dasharray="4 4"/>
+        <text x="390" y="40" font-size="12">kube-apiserver</text>
+        <line x1="520" y1="85" x2="568" y2="85" stroke="var(--ink)" stroke-width="2" marker-end="url(#a3)"/>
+        <text x="544" y="76" text-anchor="middle" font-size="10">HTTPS</text>
+        <rect x="570" y="55" width="120" height="60" fill="var(--who)" stroke="var(--ink)" stroke-width="2"/>
+        <text x="630" y="80" text-anchor="middle" font-size="12">Kyverno /</text>
+        <text x="630" y="98" text-anchor="middle" font-size="12">Gatekeeper pods</text>
+        <text x="630" y="160" text-anchor="middle" font-size="12" class="hand" fill="var(--wrong)">pod 掛了怎麼辦？</text>
+        <text x="535" y="185" text-anchor="middle" font-size="11">failurePolicy: Fail   -&gt; 全叢集建不了 Pod</text>
+        <text x="535" y="203" text-anchor="middle" font-size="11">failurePolicy: Ignore -&gt; 安全檢查直接消失</text>
+      </svg>
+    </div>
+    <div class="card scroll">
+      <table>
+        <tr><th>方案</th><th>做法</th><th>輸在哪 / 代價</th></tr>
+        <tr><td><b>PSP</b>（1.25 移除）</td><td>多份 policy，誰套哪份由 RBAC 的 <code>use</code> verb 決定；還會<b>改</b> Pod 補預設值</td><td>同一個 Pod 用不同 SA 建，套到的 policy 不同；多份 policy 時順序難懂。沒人說得出「這個 Pod 到底被哪份 policy 放行」。</td></tr>
+        <tr><td><b>PSA</b>（現在）</td><td>三級固定、namespace label、只驗證</td><td>不能對單一 Pod 開例外；一個 Pod 需要 hostPath，整個 namespace 就得降級。不能寫自訂規則（例如限定 registry）。</td></tr>
+        <tr><td><b>Kyverno / Gatekeeper</b></td><td>外部 webhook，自訂規則、可 mutate、可開例外</td><td>多一跳網路、多一個要顧 HA 的元件，還有上圖 <code>failurePolicy</code> 的兩難。</td></tr>
+        <tr><td><b>ValidatingAdmissionPolicy</b>（1.30 GA）</td><td>CEL 規則跑在 API Server 行程內</td><td>沒有 webhook 的故障點，但只能驗證、不能 mutate，生態還在長。</td></tr>
+      </table>
+    </div>
+    <p>結論：PSA 用<b>表達力</b>換<b>可預測性和可用性</b>。所以業界常見做法是 PSA 當地板（一定在、不會掛），自訂規則再交給 policy engine。</p>
+    <p class="sub">誰會吵：Dev 要 <code>hostPath</code> 方便 debug，Security 要全部 restricted。design review 會被問：「這個例外是整個 namespace 降級，還是可以拆出獨立 namespace？」</p>
+  </section>
+
+  <section>
+    <h2>Layer 4 · AWS（EKS）怎麼做<span class="tag">production</span></h2>
+    <p>因為 Layer 3 的 PSA 只能用 namespace label 設定，而 <b>EKS 不讓你改 API Server 的 AdmissionConfiguration</b>，EKS 上 PSA 預設是全 namespace <code>privileged</code>（等於沒開）。所以在 EKS 上，<mark>沒貼 label 的 namespace 就是全開</mark>。</p>
+    <div class="card scroll">
+      <svg viewBox="0 0 720 330" width="720" height="330" role="img" aria-label="EKS architecture: GitOps repo labels namespaces, EKS control plane with PodSecurity and Kyverno webhook, audit logs to CloudWatch, GuardDuty, ECR with Inspector">
+        <defs><marker id="a4" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="var(--ink)"/></marker></defs>
+        <rect x="10" y="20" width="150" height="60" fill="var(--see)" stroke="var(--ink)" stroke-width="2"/>
+        <text x="85" y="44" text-anchor="middle" font-size="12">platform Git repo</text>
+        <text x="85" y="62" text-anchor="middle" font-size="11">ns + PSA labels</text>
+        <line x1="160" y1="50" x2="208" y2="50" stroke="var(--ink)" stroke-width="2" marker-end="url(#a4)"/>
+        <text x="184" y="42" text-anchor="middle" font-size="10">Argo CD</text>
+        <rect x="210" y="10" width="300" height="140" fill="none" stroke="var(--ink)" stroke-width="2"/>
+        <text x="220" y="28" font-size="12">EKS control plane (AWS managed)</text>
+        <rect x="225" y="40" width="130" height="44" fill="var(--may)" stroke="var(--ink)"/>
+        <text x="290" y="60" text-anchor="middle" font-size="11">PodSecurity</text><text x="290" y="76" text-anchor="middle" font-size="10">default: privileged</text>
+        <rect x="365" y="40" width="130" height="44" fill="var(--card)" stroke="var(--ink)"/>
+        <text x="430" y="60" text-anchor="middle" font-size="11">audit log</text><text x="430" y="76" text-anchor="middle" font-size="10">off by default</text>
+        <text x="360" y="120" text-anchor="middle" font-size="11" class="hand">webhook call</text>
+        <line x1="290" y1="84" x2="290" y2="188" stroke="var(--ink)" stroke-width="2" marker-end="url(#a4)"/>
+        <rect x="210" y="190" width="300" height="120" fill="none" stroke="var(--ink)" stroke-width="2"/>
+        <text x="220" y="208" font-size="12">data plane (your VPC)</text>
+        <rect x="225" y="220" width="130" height="44" fill="var(--who)" stroke="var(--ink)"/>
+        <text x="290" y="240" text-anchor="middle" font-size="11">Kyverno pods</text><text x="290" y="256" text-anchor="middle" font-size="10">image + exceptions</text>
+        <rect x="365" y="220" width="130" height="44" fill="var(--card)" stroke="var(--ink)"/>
+        <text x="430" y="240" text-anchor="middle" font-size="11">app pods</text><text x="430" y="256" text-anchor="middle" font-size="10">restricted ns</text>
+        <text x="360" y="296" text-anchor="middle" font-size="10">node SG must allow control plane -&gt; webhook port</text>
+        <line x1="495" y1="62" x2="558" y2="62" stroke="var(--ink)" stroke-width="2" marker-end="url(#a4)"/>
+        <rect x="560" y="30" width="150" height="60" fill="var(--card)" stroke="var(--ink)" stroke-width="2"/>
+        <text x="635" y="54" text-anchor="middle" font-size="12">CloudWatch Logs</text><text x="635" y="72" text-anchor="middle" font-size="10">/aws/eks/&lt;name&gt;/cluster</text>
+        <line x1="635" y1="90" x2="635" y2="128" stroke="var(--ink)" stroke-width="2" marker-end="url(#a4)"/>
+        <rect x="560" y="130" width="150" height="50" fill="var(--card)" stroke="var(--ink)" stroke-width="2"/>
+        <text x="635" y="152" text-anchor="middle" font-size="12">GuardDuty</text><text x="635" y="168" text-anchor="middle" font-size="10">EKS Protection (detect)</text>
+        <rect x="560" y="230" width="150" height="50" fill="var(--card)" stroke="var(--ink)" stroke-width="2"/>
+        <text x="635" y="252" text-anchor="middle" font-size="12">ECR + Inspector</text><text x="635" y="268" text-anchor="middle" font-size="10">image CVE scan</text>
+        <line x1="560" y1="255" x2="497" y2="242" stroke="var(--ink)" stroke-width="2" marker-end="url(#a4)"/>
+        <text x="10" y="120" font-size="11" class="hand">預防：PSA + Kyverno</text>
+        <text x="10" y="140" font-size="11" class="hand">偵測：audit log + GuardDuty</text>
+        <text x="10" y="160" font-size="11" class="hand">image：ECR + Inspector</text>
+      </svg>
+    </div>
+    <div class="card scroll">
+      <table>
+        <tr><th>服務 / 設定</th><th>做什麼</th><th>常見陷阱</th></tr>
+        <tr><td>EKS 內建 PSA</td><td>namespace label 生效</td><td>預設全 <code>privileged</code>。有人 <code>kubectl create ns</code> 臨時開一個 namespace，沒有 label，就是全開。解法：namespace 只准從 GitOps 建，或用 Kyverno 規定 namespace 必須帶 PSA label。</td></tr>
+        <tr><td>EKS control plane logging（<code>audit</code>）</td><td>audit 模式的違規寫在這裡（annotation <code>pod-security.kubernetes.io/audit-violations</code>）</td><td>預設沒開，開了才有證據。audit log 量大，CloudWatch Logs 依寫入 GB 計價（費率依 region，需確認），要設 retention。</td></tr>
+        <tr><td>Kyverno on EKS</td><td>補 PSA 做不到的：例外、image 來源、mutate</td><td>control plane 要能連到 node 上的 webhook，node SG 沒放行就會 timeout（Kyverno webhook port 需確認）。<code>failurePolicy: Fail</code> 時 Kyverno 全掛 = 建不了 Pod。</td></tr>
+        <tr><td>EKS Fargate</td><td>每個 Pod 一個 microVM</td><td>不管 PSS 怎麼設，Fargate 本身就不支援 privileged、hostNetwork、DaemonSet。安全 agent 要改成 sidecar。</td></tr>
+        <tr><td>GuardDuty EKS Protection</td><td>讀 audit log 做偵測</td><td>只偵測不阻擋。finding 類型會調整，像 <code>PrivilegeEscalation:Kubernetes/PrivilegedContainer</code> 已列入 retired，要以最新清單為準。</td></tr>
+        <tr><td>ECR + Inspector</td><td>image 漏洞掃描</td><td>PSS 不看 image。掃到高風險 CVE 也不會自動擋 deploy，要另外接 admission（Kyverno <code>verifyImages</code>）或 CI gate。</td></tr>
+      </table>
+    </div>
+    <p class="sub">成本：PSA 免費。Kyverno 吃 node 的 CPU/memory（一般跑 3 副本做 HA）。主要成本在 audit log 的 CloudWatch 寫入量。</p>
+  </section>
+
+  <section>
+    <h2>Layer 5 · 規模化<span class="tag">evolution ladder</span></h2>
+    <div class="card scroll">
+      <svg viewBox="0 0 700 300" width="700" height="300" role="img" aria-label="Evolution ladder: small team manual labels, growth GitOps namespace vending plus Kyverno, big tech policy as code with CI tests, time-boxed exceptions and VAP">
+        <rect x="20" y="210" width="210" height="76" fill="var(--card)" stroke="var(--ink)" stroke-width="2"/>
+        <text x="125" y="232" text-anchor="middle" font-size="13">1. 小團隊</text>
+        <text x="125" y="252" text-anchor="middle" font-size="11">手動貼 label</text>
+        <text x="125" y="270" text-anchor="middle" font-size="11">enforce baseline / warn restricted</text>
+        <rect x="245" y="120" width="210" height="166" fill="var(--card)" stroke="var(--ink)" stroke-width="2"/>
+        <text x="350" y="142" text-anchor="middle" font-size="13">2. 成長期（多 team）</text>
+        <text x="350" y="164" text-anchor="middle" font-size="11">namespace vending（GitOps 模板）</text>
+        <text x="350" y="182" text-anchor="middle" font-size="11">app ns enforce restricted</text>
+        <text x="350" y="200" text-anchor="middle" font-size="11">Kyverno：例外 + registry</text>
+        <text x="350" y="218" text-anchor="middle" font-size="11">CI：rollout status --timeout</text>
+        <rect x="470" y="20" width="210" height="266" fill="var(--who)" stroke="var(--ink)" stroke-width="2"/>
+        <text x="575" y="42" text-anchor="middle" font-size="13">3. 大廠（上百 cluster）</text>
+        <text x="575" y="66" text-anchor="middle" font-size="11">policy as code 中央 repo</text>
+        <text x="575" y="84" text-anchor="middle" font-size="11">policy 有 CI 測試</text>
+        <text x="575" y="102" text-anchor="middle" font-size="11">（kyverno test / conftest）</text>
+        <text x="575" y="122" text-anchor="middle" font-size="11">新規則先 audit → 看 dashboard</text>
+        <text x="575" y="140" text-anchor="middle" font-size="11">→ 再 enforce</text>
+        <text x="575" y="160" text-anchor="middle" font-size="11">例外 = 有 owner + 到期日</text>
+        <text x="575" y="178" text-anchor="middle" font-size="11">ApplicationSet 推到所有 cluster</text>
+        <text x="575" y="198" text-anchor="middle" font-size="11">VAP 取代部分 webhook</text>
+        <text x="575" y="216" text-anchor="middle" font-size="11">runtime 偵測（Falco / GuardDuty）</text>
+        <text x="125" y="196" text-anchor="middle" font-size="11" class="hand" fill="var(--wrong)">換掉的原因：</text>
+        <text x="125" y="176" text-anchor="middle" font-size="11" class="hand">新 ns 沒人記得貼</text>
+        <text x="350" y="104" text-anchor="middle" font-size="11" class="hand">例外變多、沒人清</text>
+        <text x="350" y="86" text-anchor="middle" font-size="11" class="hand" fill="var(--wrong)">換掉的原因：</text>
+      </svg>
+    </div>
+    <p>每一級換掉什麼：第 1 級換掉的是「靠人記得貼 label」，改成 namespace 一律由模板生出來。第 2 級換掉的是「例外寫死在 YAML 裡、沒人清」，改成例外本身也是資源，有 owner 和到期日，並且有 CI 測試。</p>
+    <div class="card scroll">
+      <table>
+        <tr><th>路線</th><th>組合</th><th>適合</th><th>代價</th></tr>
+        <tr><td>A</td><td>PSA + <b>Kyverno</b></td><td>規則用 YAML 寫，k8s 團隊上手快；AWS 官方 blog 也走這條</td><td>規則邏輯複雜時 YAML 變難讀</td></tr>
+        <tr><td>B</td><td>PSA + <b>OPA Gatekeeper</b></td><td>公司已用 Rego 管 Terraform（conftest），想一種語言管全部</td><td>Rego 學習曲線陡，Dev 看不懂被擋的原因</td></tr>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <h2>Layer 6 · 故障與 on-call<span class="tag">how it breaks</span></h2>
+    <p>因為 Layer 2 的錯誤只記在 parent controller 身上，PSS 的故障幾乎都是<mark>靜默的</mark>：沒有 Pod，就沒有 CrashLoop，也沒有 log。</p>
+    <div class="panels">
+      <div class="panel">
+        <h3>① rollout 卡住</h3>
+        <p>pipeline 綠燈，新 RS 0 個 Pod，舊 Pod 還在。<code>progressDeadlineSeconds</code> 預設 600 秒，到期 Deployment 才標 <code>Progressing=False</code>。</p>
+        <p><b>第一刀</b>：<code>kubectl get events -n prod --field-selector reason=FailedCreate</code></p>
+      </div>
+      <div class="panel">
+        <h3>② 延時炸彈</h3>
+        <p>label 三週前改成 restricted，舊 Pod 不會被趕走，一切正常。直到 node upgrade 做 drain，Pod 重建全被擋，維護窗口變事故。</p>
+        <p><b>預防</b>：改 label 前先 <code>--dry-run=server</code>，列出違規的 Pod 並修完。</p>
+      </div>
+      <div class="panel">
+        <h3>③ webhook 掛掉</h3>
+        <p>Kyverno 設 <code>Fail</code>，pods 全掛 → 所有 Pod 建立回 <code>failed calling webhook ... context deadline exceeded</code>，連 HPA 擴容都失敗。</p>
+        <p><b>止血</b>：webhook 排除 kube-system；Kyverno 跑多副本 + PDB。</p>
+      </div>
+      <div class="panel">
+        <h3>④ 升級變規則</h3>
+        <p><code>enforce-version: latest</code>，叢集升版後 restricted 多了新檢查項，原本合規的 Pod 突然被拒。</p>
+        <p><b>預防</b>：pin <code>enforce-version</code>，升版後先用 warn 驗新版本，再改 enforce。</p>
+      </div>
+    </div>
+    <div class="card scroll">
+      <table>
+        <tr><th>看什麼</th><th>哪裡</th></tr>
+        <tr><td><code>pod_security_evaluations_total</code>（label 有 decision、mode）</td><td>API Server metrics（<code>kubectl get --raw /metrics</code>）</td></tr>
+        <tr><td><code>kube_deployment_status_condition{condition="Progressing",status="false"}</code></td><td>kube-state-metrics → Prometheus alert</td></tr>
+        <tr><td>FailedCreate event 次數</td><td>event exporter → log 平台</td></tr>
+        <tr><td>audit-violations annotation</td><td>CloudWatch Logs Insights 查 audit log</td></tr>
+      </table>
+    </div>
+    <p><b>SLO 怎麼定</b>：PSS 不是 user-facing 服務，SLO 掛在部署上，例如「99% 的 prod deploy 在 merge 後 15 分鐘內所有 replica ready」。PSS 擋下的 deploy 會吃掉這個 error budget，逼團隊把檢查往左移到 CI。</p>
+    <p class="sub">公開 postmortem：沒有找到可以確定引用的 PSS 專屬事故，這裡不引用。</p>
+  </section>
+
+  <section>
+    <h2>Layer 7 · 面試<span class="tag">L4 vs L6</span></h2>
+    <blockquote><p><b>題目</b>：公司有 50 個 team 共用 3 個 EKS cluster。Security 要求一季內全面禁止 privileged container。你是 platform team 的 DevOps，怎麼推？</p></blockquote>
+    <p class="sub">先自己講一遍，再打開對照。</p>
+    <details class="card">
+      <summary><b>L4 回答</b></summary>
+      <p style="margin-top:8px">「把所有 namespace 貼上 <code>pod-security.kubernetes.io/enforce: restricted</code>，這樣 privileged Pod 就建不起來了。」</p>
+      <p class="sub">問題：會把 kube-system、CNI、log agent 一起打掛；已經在跑的違規 Pod 要等到下次重建才炸（延時炸彈）；沒有例外流程；沒講怎麼知道會壞多少。</p>
+    </details>
+    <details class="card">
+      <summary><b>L6 回答</b></summary>
+      <div style="display:grid;gap:8px;margin-top:8px">
+        <p><b>1. 先講為什麼</b>：容器共用 kernel，能 create privileged Pod 等於拿到 node root。RBAC 管不到 Pod 欄位，所以要 admission。</p>
+        <p><b>2. 量化影響</b>：EKS 預設 privileged，我先對所有 app namespace 貼 <code>warn</code> 和 <code>audit: restricted</code>，enforce 不動。兩週後從 audit log 和 <code>pod_security_evaluations_total</code> 拿到違規清單，按 team 排序。</p>
+        <p><b>3. 分批強制</b>：先 enforce <code>baseline</code>，它已經擋 privileged，這正是 Security 要的。restricted 當第二階段。每個 namespace 改 label 前跑 <code>--dry-run=server</code>，乾淨才切，避免 node drain 時的延時炸彈。</p>
+        <p><b>4. 例外流程</b>：系統元件留在獨立 namespace，維持 privileged。app 的例外用 Kyverno PolicyException，要有 owner 和到期日，季末清單要歸零。</p>
+        <p><b>5. 防靜默失敗</b>：CI 加 <code>kubectl rollout status --timeout</code>；alert 掛在 <code>Progressing=False</code> 和 FailedCreate 次數；pin <code>enforce-version</code>，叢集升版不會順便改規則。</p>
+        <p><b>6. 組織面</b>：namespace label 只准 platform repo 改（app team 沒有 <code>patch namespaces</code>）；每週把違規數字發給各 team lead，有 deadline。</p>
+      </div>
+      <p class="sub" style="margin-top:8px">L6 多出來的：第一性原理（kernel 共用）、先量再改、用 baseline 當跳板、延時炸彈這種故障模式、例外有到期日、組織流程。</p>
+    </details>
+    <p class="en">Native: "We'll start in audit mode, burn down the violations team by team, then flip to enforce baseline. Exceptions get an owner and an expiry date."</p>
+  </section>
+</main>
+
+</body></html>

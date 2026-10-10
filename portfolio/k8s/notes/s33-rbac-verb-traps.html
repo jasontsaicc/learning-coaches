@@ -1,0 +1,610 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1"><style>:root{color-scheme:light}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found]){display:none!important}</style></head><body>
+<title>RBAC 動詞陷阱</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=JetBrains+Mono:wght@400;700&family=Noto+Sans+TC:wght@400;500;700&display=swap">
+<style>
+  :root {
+    --ground: #F3F4F7;
+    --surface: #FFFFFF;
+    --panel: #1E212A;
+    --panel-ink: #D9DDE6;
+    --ink: #191C23;
+    --muted: #5B6272;
+    --faint: #868D9C;
+    --accent: #3644C7;
+    --accent-soft: #E5E7FA;
+    --warn: #A85A08;
+    --warn-soft: #FBEEDD;
+    --ok: #16705A;
+    --ok-soft: #DFF0EA;
+    --rule: #DDE0E8;
+    --shadow: 0 1px 2px rgba(25,28,35,.05), 0 8px 24px -16px rgba(25,28,35,.28);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground: #13151A;
+      --surface: #1B1E25;
+      --panel: #101218;
+      --panel-ink: #C9CEDA;
+      --ink: #E9EBF0;
+      --muted: #969DAC;
+      --faint: #6E7686;
+      --accent: #8B96F7;
+      --accent-soft: #23273F;
+      --warn: #E2963C;
+      --warn-soft: #2E2415;
+      --ok: #43B893;
+      --ok-soft: #14291F;
+      --rule: #2A2E38;
+      --shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px -16px rgba(0,0,0,.8);
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground: #13151A;
+    --surface: #1B1E25;
+    --panel: #101218;
+    --panel-ink: #C9CEDA;
+    --ink: #E9EBF0;
+    --muted: #969DAC;
+    --faint: #6E7686;
+    --accent: #8B96F7;
+    --accent-soft: #23273F;
+    --warn: #E2963C;
+    --warn-soft: #2E2415;
+    --ok: #43B893;
+    --ok-soft: #14291F;
+    --rule: #2A2E38;
+    --shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px -16px rgba(0,0,0,.8);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    background: var(--ground);
+    color: var(--ink);
+    font-family: 'Noto Sans TC', 'Archivo', system-ui, sans-serif;
+    font-size: 16px;
+    line-height: 1.75;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .sheet {
+    max-width: 820px;
+    margin: 0 auto;
+    padding: 56px 24px 96px;
+    display: flex;
+    flex-direction: column;
+    gap: 52px;
+  }
+
+  /* ---------- masthead ---------- */
+  .masthead { display: flex; flex-direction: column; gap: 14px; }
+  .stamp {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 11px;
+    letter-spacing: .13em;
+    text-transform: uppercase;
+    color: var(--faint);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+  }
+  .stamp b { color: var(--accent); font-weight: 700; }
+  .stamp span[aria-hidden] { color: var(--rule); }
+  h1 {
+    font-family: 'Archivo', 'Noto Sans TC', sans-serif;
+    font-weight: 800;
+    font-size: clamp(2.1rem, 6vw, 3.1rem);
+    line-height: 1.08;
+    letter-spacing: -.02em;
+    margin: 0;
+    text-wrap: balance;
+  }
+  .deck {
+    font-size: 1.05rem;
+    color: var(--muted);
+    max-width: 60ch;
+    margin: 0;
+  }
+  .deck em { color: var(--ink); font-style: normal; font-weight: 500; }
+
+  /* ---------- sections ---------- */
+  section { display: flex; flex-direction: column; gap: 18px; }
+  .eyebrow {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 11px;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--faint);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .eyebrow::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: var(--rule);
+  }
+  h2 {
+    font-family: 'Archivo', 'Noto Sans TC', sans-serif;
+    font-weight: 700;
+    font-size: clamp(1.35rem, 3.4vw, 1.72rem);
+    line-height: 1.25;
+    letter-spacing: -.012em;
+    margin: 0;
+    text-wrap: balance;
+  }
+  p { margin: 0; max-width: 66ch; }
+  p + p { margin-top: -4px; }
+  .muted { color: var(--muted); }
+
+  code {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: .87em;
+    background: var(--accent-soft);
+    color: var(--accent);
+    padding: .1em .38em;
+    border-radius: 3px;
+  }
+
+  /* ---------- terminal panel ---------- */
+  .term {
+    background: var(--panel);
+    color: var(--panel-ink);
+    border-radius: 6px;
+    padding: 18px 20px;
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 13px;
+    line-height: 1.7;
+    overflow-x: auto;
+    box-shadow: var(--shadow);
+  }
+  .term .dim { color: #6E7686; }
+  .term .hot { color: #FF9B6B; font-weight: 700; }
+  .term .who { color: #8B96F7; }
+  .term .good { color: #57C79E; }
+  .term .prompt { color: #57C79E; user-select: none; }
+
+  /* ---------- verb map ---------- */
+  .verbmap {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    gap: 0;
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: 6px;
+    overflow: hidden;
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 13px;
+  }
+  .verbmap > * {
+    padding: 13px 16px;
+    border-bottom: 1px solid var(--rule);
+    display: flex;
+    align-items: center;
+  }
+  .verbmap .cmd { overflow-x: auto; white-space: nowrap; }
+  .verbmap .arrow { color: var(--faint); padding-inline: 4px; }
+  .verbmap .verb { font-weight: 700; color: var(--accent); justify-content: flex-end; }
+  .verbmap .note {
+    grid-column: 1 / -1;
+    font-family: 'Noto Sans TC', sans-serif;
+    font-size: 12.5px;
+    color: var(--faint);
+    padding-top: 0;
+  }
+  .verbmap > *:nth-last-child(-n+4) { border-bottom: 0; }
+
+  /* ---------- rule callout ---------- */
+  .rulebox {
+    background: var(--surface);
+    border-left: 3px solid var(--accent);
+    border-radius: 0 6px 6px 0;
+    padding: 16px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    box-shadow: var(--shadow);
+  }
+  .rulebox .tag {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 10.5px;
+    letter-spacing: .13em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+  .rulebox strong { font-weight: 700; font-size: 1.02rem; line-height: 1.6; }
+
+  /* ---------- chain ---------- */
+  ol.chain {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 10px;
+    counter-reset: step;
+  }
+  ol.chain li {
+    counter-increment: step;
+    display: grid;
+    grid-template-columns: 26px 1fr;
+    gap: 14px;
+    align-items: baseline;
+  }
+  ol.chain li::before {
+    content: counter(step);
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--accent);
+    background: var(--accent-soft);
+    border-radius: 50%;
+    width: 26px;
+    height: 26px;
+    display: grid;
+    place-items: center;
+    align-self: start;
+    margin-top: 2px;
+  }
+  ol.chain b { font-weight: 700; }
+
+  /* ---------- table ---------- */
+  .tablewrap { overflow-x: auto; border: 1px solid var(--rule); border-radius: 6px; background: var(--surface); }
+  table { border-collapse: collapse; width: 100%; min-width: 560px; font-size: 14px; }
+  th, td { text-align: left; padding: 13px 16px; border-bottom: 1px solid var(--rule); vertical-align: top; }
+  tr:last-child td { border-bottom: 0; }
+  th {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 10.5px;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--faint);
+    font-weight: 400;
+    background: var(--ground);
+  }
+  td code { font-size: .84em; }
+  td b { font-weight: 700; }
+
+  /* ---------- lies ---------- */
+  .lies { display: grid; gap: 12px; }
+  .lie {
+    display: grid;
+    grid-template-columns: 22px 1fr;
+    gap: 14px;
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: 6px;
+    padding: 15px 18px;
+  }
+  .lie .n {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--warn);
+    padding-top: 3px;
+  }
+  .lie .body { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+  .lie kbd {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 12.5px;
+    font-weight: 700;
+    color: var(--ink);
+    background: none;
+    overflow-x: auto;
+    white-space: nowrap;
+    display: block;
+    padding-bottom: 2px;
+  }
+  .lie .truth { font-size: 13.5px; color: var(--muted); }
+  .lie .truth b { color: var(--warn); font-weight: 700; }
+
+  /* ---------- twin ---------- */
+  .twin { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  @media (max-width: 620px) { .twin { grid-template-columns: 1fr; } }
+  .twin > div {
+    background: var(--panel);
+    border-radius: 6px;
+    padding: 16px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    box-shadow: var(--shadow);
+  }
+  .twin .line {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 12.5px;
+    color: var(--panel-ink);
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+  .twin .verdict {
+    font-size: 13px;
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+    line-height: 1.6;
+  }
+  .twin .mark { font-family: 'JetBrains Mono', monospace; font-weight: 700; flex: none; }
+  .twin .bad .mark { color: #FF7A5C; }
+  .twin .bad .verdict { color: #E8A08C; }
+  .twin .fine .mark { color: #57C79E; }
+  .twin .fine .verdict { color: #8FD4BA; }
+
+  /* ---------- quiz ---------- */
+  .quiz { display: grid; gap: 8px; }
+  details {
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: 6px;
+    padding: 0;
+  }
+  summary {
+    cursor: pointer;
+    padding: 14px 18px;
+    font-weight: 500;
+    list-style: none;
+    display: flex;
+    gap: 12px;
+    align-items: baseline;
+  }
+  summary::-webkit-details-marker { display: none; }
+  summary::before {
+    content: "?";
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--accent);
+    flex: none;
+  }
+  summary:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; border-radius: 6px; }
+  details[open] summary { border-bottom: 1px solid var(--rule); }
+  details .answer {
+    padding: 14px 18px 16px 42px;
+    font-size: 14.5px;
+    color: var(--muted);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  details .answer b { color: var(--ok); font-weight: 700; }
+
+  /* ---------- next ---------- */
+  .next {
+    background: var(--accent-soft);
+    border-radius: 6px;
+    padding: 20px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .next .tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    letter-spacing: .13em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+  .next strong { font-family: 'Archivo','Noto Sans TC',sans-serif; font-size: 1.15rem; font-weight: 700; }
+  .next span { color: var(--muted); font-size: 14px; }
+
+  footer {
+    border-top: 1px solid var(--rule);
+    padding-top: 18px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: .06em;
+    color: var(--faint);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+</style>
+
+<div class="sheet">
+
+  <header class="masthead">
+    <div class="stamp">
+      <span>K8s Coach</span><span aria-hidden="true">/</span>
+      <b>Session 35</b><span aria-hidden="true">/</span>
+      <span>2026-09-08</span><span aria-hidden="true">/</span>
+      <span>P2b · C-4 chunk 3</span>
+    </div>
+    <h1>RBAC 動詞陷阱</h1>
+    <p class="deck">客戶說<em>「我們明明給了 pod 讀取權限」</em>—— 而 CI 還是吃 403。他沒說謊,是因為<em>人腦的「讀取」跟 RBAC 的動詞不是同一套詞彙</em>。</p>
+  </header>
+
+  <section>
+    <div class="eyebrow">證物</div>
+    <h2>403 訊息本身就是完整診斷</h2>
+    <div class="term">
+<span class="dim">$</span> kubectl get pods -n rbac-lab --as=$SA<br>
+Error from server (Forbidden): pods is forbidden:<br>
+User <span class="who">"system:serviceaccount:rbac-lab:ci-reader"</span><br>
+cannot <span class="hot">list</span> resource <span class="who">"pods"</span> in API group ""<br>
+in the namespace <span class="who">"rbac-lab"</span>
+    </div>
+    <p class="muted">四要素全寫在裡面 —— <b>誰</b> · <b>動詞</b> · <b>名詞</b> · <b>在哪</b>。這串 username 不是設計給你手打的,是給你選取、貼上去重現的。</p>
+    <p>Role 裡寫的是 <code>verbs: ["get"]</code>。訊息要的是 <code>list</code>。</p>
+  </section>
+
+  <section>
+    <div class="eyebrow">主秀</div>
+    <h2>動詞由請求的形狀決定,不是由指令的名字</h2>
+    <div class="verbmap">
+      <div class="cmd">kubectl get pods</div>
+      <div class="arrow">&rarr;</div>
+      <div class="verb">list</div>
+      <div class="note">複數、沒指定名字</div>
+
+      <div class="cmd">kubectl get pod my-app-7d9f</div>
+      <div class="arrow">&rarr;</div>
+      <div class="verb">get</div>
+      <div class="note">指定了物件名字</div>
+
+      <div class="cmd">kubectl get pods --watch</div>
+      <div class="arrow">&rarr;</div>
+      <div class="verb">watch</div>
+      <div class="note">第三個獨立動詞</div>
+    </div>
+
+    <div class="rulebox">
+      <span class="tag">封印句</span>
+      <strong><code>kubectl get</code> 這個指令名字騙人。有物件名字 = <code>get</code>,沒名字 = <code>list</code>,加 <code>--watch</code> = <code>watch</code>。</strong>
+    </div>
+
+    <p><b>為什麼 <code>watch</code> 要獨立成一個動詞:</b> <code>list</code> 是一次性快照,拿完就關;<code>watch</code> 開的是一條長連線,API Server 會把之後所有變更持續推給你。資源成本和外洩風險完全不同 —— 給了 watch 等於給對方一條常駐監聽通道。k8s 不讓你「順便」拿到它。</p>
+
+    <p>所以唯讀角色的業界慣用寫法永遠是三件套:<code>verbs: ["get", "list", "watch"]</code></p>
+
+    <div class="rulebox">
+      <span class="tag">顧問層</span>
+      <strong>進場問「你們給了哪幾個 verb」,不要接受「唯讀」這種形容詞。</strong>
+    </div>
+  </section>
+
+  <section>
+    <div class="eyebrow">工具</div>
+    <h2>403 三段鏈,一發指令看完</h2>
+    <ol class="chain">
+      <li><b>SA 存在嗎</b> —— 身分在不在</li>
+      <li><b>binding 綁對了嗎</b> —— 綁了什麼、綁在哪個 ns</li>
+      <li><b>Role 定義含這個 verb + resource 嗎</b> —— 動詞給齊了沒</li>
+    </ol>
+
+    <div class="term">
+<span class="dim">$</span> SA=system:serviceaccount:ci:deployer<br>
+<span class="dim">$</span> kubectl auth can-i --list -n payments --as=$SA
+    </div>
+    <p class="muted"><code>--as</code> 裡的 ns 是 <b>SA 住的地方</b>;<code>-n</code> 是 <b>要查的地方</b>。兩個常常不一樣,而 403 訊息裡兩個都寫好了。</p>
+
+    <div class="tablewrap">
+      <table>
+        <thead>
+          <tr><th>--list 的畫面</th><th>斷在哪</th><th>下一發</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>只剩噪音,<b>一個 resource 都沒有</b></td>
+            <td>binding 完全沒生效<br><span class="muted">段 1–2</span></td>
+            <td><code>get rolebinding -A -o wide</code></td>
+          </tr>
+          <tr>
+            <td>有東西,但<b>缺這個 resource</b></td>
+            <td>權限沒涵蓋到它<br><span class="muted">段 2–3</span></td>
+            <td><code>get rolebinding -n X -o wide</code></td>
+          </tr>
+          <tr>
+            <td>有這個 resource,但<b>動詞不對</b></td>
+            <td>Role 定義少動詞<br><span class="muted">段 3</span></td>
+            <td><code>describe role</code></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p class="muted"><b>兩個讀法:</b> 不加 <code>--as</code>,問的是你自己。<code>Non-Resource URLs</code> 那一大坨(<code>/healthz</code>、<code>selfsubject*</code>)是每個通過 authn 的身分都自動有的 discovery 權限,不是你給的 —— 直接跳過,只看有 resource 名字的那幾行。</p>
+
+    <p class="muted"><b>為什麼後兩種的下一發都是 <code>get rolebinding</code>:</b> 「權限沒涵蓋」可能是 Role 漏寫,也可能是有一個 Role 寫對了但<b>沒綁上去</b>。<code>--list</code> 只看得到聯集的結果,分不出這兩者。</p>
+  </section>
+
+  <section>
+    <div class="eyebrow">本堂最值錢的一條 · 跨主題通用</div>
+    <h2>成功訊息不保證你以為的那件事發生了</h2>
+    <p>同一堂課,<b>三次</b>撞到同一個形狀 —— 指令沒報錯,但沒做到你以為的事。</p>
+
+    <div class="lies">
+      <div class="lie">
+        <div class="n">01</div>
+        <div class="body">
+          <kbd>No resources found in ALL namespace.</kbd>
+          <div class="truth">以為查了所有 namespace。<b>kubectl 真的去找了一個叫 <code>ALL</code> 的 namespace。</b> 正解是 <code>-A</code>。</div>
+        </div>
+      </div>
+      <div class="lie">
+        <div class="n">02</div>
+        <div class="body">
+          <kbd>No resources found in rbac-lab namespace.</kbd>
+          <div class="truth">以為 impersonation 測試通過。<b><code>$SA</code> 是空的,<code>--as=</code> 沒送出去,你是用 admin 身分查的。</b></div>
+        </div>
+      </div>
+      <div class="lie">
+        <div class="n">03</div>
+        <div class="body">
+          <kbd>role.rbac.../pod-reader patched (no change)</kbd>
+          <div class="truth">以為沒改到。<b><code>describe</code> 驗出來其實已經改成 <code>[get list watch]</code>。</b> 訊息誤導。</div>
+        </div>
+      </div>
+    </div>
+
+    <p><b>而 01 和 02 印出來的是同一句話。</b></p>
+
+    <div class="twin">
+      <div class="bad">
+        <div class="line">No resources found in rbac-lab namespace.</div>
+        <div class="verdict"><span class="mark">✗</span><span>impersonation 根本沒生效 —— 你在用 admin 查一個空 namespace。</span></div>
+      </div>
+      <div class="fine">
+        <div class="line">No resources found in rbac-lab namespace.</div>
+        <div class="verdict"><span class="mark">✓</span><span>權限正確、ns 裡真的沒有 Pod。</span></div>
+      </div>
+    </div>
+
+    <div class="rulebox">
+      <span class="tag">封印句</span>
+      <strong>k8s 的成功訊息不保證你以為的那件事發生了。輸出跟預期不符時,先確認儀器沒壞,再懷疑機制。</strong>
+    </div>
+
+    <p class="muted">資淺的人看到怪輸出開始改 YAML。資深的人先確認儀器沒壞。</p>
+  </section>
+
+  <section>
+    <div class="eyebrow">09-11 冷測 · 先自己答再展開</div>
+    <h2>四題</h2>
+    <div class="quiz">
+      <details>
+        <summary>Role 已經給了 <code>["get","list"]</code>,dashboard 跑 <code>kubectl get pods -w</code> 為什麼還是 403?</summary>
+        <div class="answer">
+          <span><b><code>--watch</code> 是第三個獨立動詞</b>,Role 裡沒給。</span>
+          <span>先講「動詞由請求形狀決定」再答,才算完整。唯讀三件套 <code>["get","list","watch"]</code> 就是為了這個。</span>
+        </div>
+      </details>
+      <details>
+        <summary>丟給你一段 403 全文,30 秒內寫出重現指令。</summary>
+        <div class="answer">
+          <span><b><code>kubectl auth can-i --list -n &lt;訊息裡的 namespace&gt; --as=&lt;訊息裡的 User 字串&gt;</code></b></span>
+          <span>兩個值都在 403 訊息裡,選取貼上,不用背格式。漏了 <code>--as</code> 就是在問你自己。</span>
+        </div>
+      </details>
+      <details>
+        <summary><code>--list</code> 印出 <code>configmaps [get list watch]</code>、<code>secrets [get list]</code>,錯誤是 <code>cannot patch deployments</code>。斷在第幾段?下一發?</summary>
+        <div class="answer">
+          <span><b>段 2–3:binding 有生效(清單有東西),但權限沒涵蓋 deployments。</b></span>
+          <span>下一發 <code>kubectl get rolebinding -n payments -o wide</code> —— 因為要分「Role 漏寫」還是「Role 寫對了但沒綁上去」。</span>
+        </div>
+      </details>
+      <details>
+        <summary>你跑了一發查詢,輸出「正常」但跟預期不符。第一件事做什麼?</summary>
+        <div class="answer">
+          <span><b>確認這條指令有沒有真的做到你以為的事</b> —— 變數有值嗎?flag 送出去了嗎?查的是不是你以為的那個 namespace?</span>
+          <span>先確認儀器沒壞,再懷疑機制。不要先動 YAML。</span>
+        </div>
+      </details>
+    </div>
+  </section>
+
+  <div class="next">
+    <span class="tag">下次開場</span>
+    <strong>C-4 chunk 4 — 最小權限設計方法論</strong>
+    <span>爆炸半徑思維,RBAC keystone 收尾。之後補 C-4 的 F/G。</span>
+  </div>
+
+  <footer>
+    <span>chunk 1–3 ✅</span><span aria-hidden="true">·</span>
+    <span>4 張新卡入 Mistake Registry</span><span aria-hidden="true">·</span>
+    <span>next review 2026-09-11</span>
+  </footer>
+
+</div>
+
+</body></html>

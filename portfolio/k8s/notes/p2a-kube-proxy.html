@@ -1,0 +1,582 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1"><style>:root{color-scheme:light}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}</style></head><body>
+<title>What kube-proxy Actually Does</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=IBM+Plex+Mono:wght@400;600&family=Newsreader:opsz,wght@6..72,400;6..72,500&display=swap">
+
+<style>
+:root{
+  --bg:#e8ebef;
+  --surface:#fbfcfd;
+  --sunk:#dfe4ea;
+  --ink:#141e28;
+  --muted:#5b6a79;
+  --line:#c8d1da;
+  --line-2:#a4b2c0;
+  --accent:#b85f0c;
+  --accent-fill:#f5e3ce;
+  --wire:#136b63;
+  --wire-fill:#d7e8e5;
+  --dead:#9d3a31;
+  --dead-fill:#f2dbd8;
+}
+:root:not([data-theme="light"]){
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --bg:#0f1720;
+    --surface:#17212c;
+    --sunk:#131c25;
+    --ink:#e4ebf2;
+    --muted:#94a4b4;
+    --line:#2a3846;
+    --line-2:#455666;
+    --accent:#f0a44e;
+    --accent-fill:#3a2b18;
+    --wire:#4fbdac;
+    --wire-fill:#14332f;
+    --dead:#e2685d;
+    --dead-fill:#3a1e1b;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#0f1720;
+  --surface:#17212c;
+  --sunk:#131c25;
+  --ink:#e4ebf2;
+  --muted:#94a4b4;
+  --line:#2a3846;
+  --line-2:#455666;
+  --accent:#f0a44e;
+  --accent-fill:#3a2b18;
+  --wire:#4fbdac;
+  --wire-fill:#14332f;
+  --dead:#e2685d;
+  --dead-fill:#3a1e1b;
+}
+
+*{box-sizing:border-box}
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--ink);
+  font-family:"Newsreader",Georgia,serif;
+  font-size:1.0625rem;
+  line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:70rem;margin-inline:auto;padding-inline:clamp(1.1rem,4vw,3rem)}
+.col{max-width:36rem}
+
+h1,h2,h3{font-family:"Archivo","Helvetica Neue",sans-serif;text-wrap:balance;margin:0}
+h1{font-weight:800;letter-spacing:-.025em;line-height:1.02;font-size:clamp(2.4rem,6.6vw,4.6rem)}
+h2{font-weight:800;letter-spacing:-.02em;line-height:1.06;font-size:clamp(1.7rem,3.6vw,2.5rem)}
+h3{font-weight:700;letter-spacing:-.01em;font-size:1.05rem}
+p{margin:0}
+.mono,code,figcaption .k{font-family:"IBM Plex Mono",ui-monospace,monospace}
+
+.eyebrow{
+  font-family:"IBM Plex Mono",ui-monospace,monospace;
+  font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:.16em;
+  color:var(--muted);display:flex;align-items:center;gap:.6rem;margin-bottom:1rem;
+}
+.eyebrow::before{content:"";width:1.4rem;height:2px;background:var(--accent);flex:none}
+
+/* hero */
+.hero{border-bottom:1px solid var(--line);padding:clamp(3rem,9vw,6rem) 0 clamp(2rem,5vw,3.5rem)}
+.hero .kicker{
+  font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:.72rem;font-weight:600;
+  letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin-bottom:1.6rem;
+}
+.hero h1 .strike{color:var(--muted);text-decoration:line-through;text-decoration-thickness:.06em}
+.hero h1 em{font-style:normal;color:var(--accent)}
+.lede{font-size:clamp(1.15rem,2.2vw,1.45rem);color:var(--muted);margin-top:1.4rem;max-width:32rem}
+.zh{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:.85rem;color:var(--muted);letter-spacing:.02em}
+.hero .zh{margin-top:.9rem}
+
+/* bands */
+section{padding:clamp(2.6rem,6vw,4.6rem) 0;border-bottom:1px solid var(--line)}
+section.sunk{background:var(--sunk)}
+.head{display:flex;flex-direction:column;gap:.9rem;max-width:38rem;margin-bottom:2.2rem}
+.head p{color:var(--muted)}
+
+figure{margin:0;background:var(--surface);border:1px solid var(--line);border-radius:3px;padding:clamp(1rem,2.5vw,1.75rem)}
+figure svg{display:block;width:100%;height:auto;max-width:100%}
+figcaption{
+  margin-top:1.1rem;padding-top:.9rem;border-top:1px solid var(--line);
+  font-size:.92rem;color:var(--muted);max-width:44rem;
+}
+figcaption .k{color:var(--ink);font-size:.85rem}
+.scroll{overflow-x:auto}
+
+/* callout */
+.callout{
+  border-left:3px solid var(--accent);background:var(--surface);
+  padding:clamp(1.2rem,3vw,2rem);display:flex;flex-direction:column;gap:1rem;max-width:44rem;
+}
+.callout .big{font-family:"Archivo",sans-serif;font-weight:700;font-size:clamp(1.25rem,2.6vw,1.7rem);line-height:1.2;letter-spacing:-.01em}
+.callout code{background:var(--accent-fill);color:var(--ink);padding:.1em .35em;border-radius:2px;font-size:.85em}
+
+/* steps */
+ol.steps{list-style:none;margin:2rem 0 0;padding:0;display:grid;gap:1px;background:var(--line);border:1px solid var(--line)}
+ol.steps li{background:var(--surface);padding:1.1rem 1.3rem;display:grid;grid-template-columns:2.2rem 1fr;gap:1rem;align-items:start}
+ol.steps .n{font-family:"IBM Plex Mono",monospace;font-size:.78rem;font-weight:600;color:var(--accent);padding-top:.28rem}
+ol.steps b{font-family:"Archivo",sans-serif;font-weight:700;font-size:.98rem;display:block}
+ol.steps span{color:var(--muted);font-size:.95rem}
+ol.steps code{font-family:"IBM Plex Mono",monospace;font-size:.82rem;color:var(--ink)}
+
+/* table */
+.tbl{width:100%;border-collapse:collapse;font-size:.94rem;background:var(--surface);border:1px solid var(--line)}
+.tbl th,.tbl td{text-align:left;padding:.8rem 1rem;border-bottom:1px solid var(--line);vertical-align:top}
+.tbl thead th{
+  font-family:"IBM Plex Mono",monospace;font-size:.68rem;text-transform:uppercase;
+  letter-spacing:.13em;color:var(--muted);font-weight:600;
+}
+.tbl tbody tr:last-child td{border-bottom:0}
+.tbl td:first-child{font-family:"IBM Plex Mono",monospace;font-size:.85rem;font-weight:600;white-space:nowrap}
+.tbl td.d{color:var(--muted)}
+
+/* two lists */
+.split{display:grid;gap:1px;background:var(--line);border:1px solid var(--line);grid-template-columns:1fr}
+@media(min-width:46rem){.split{grid-template-columns:1fr 1fr}}
+.split > div{background:var(--surface);padding:1.4rem 1.5rem}
+.split h3{margin-bottom:.9rem;display:flex;align-items:center;gap:.5rem}
+.dot{width:.55rem;height:.55rem;border-radius:50%;flex:none}
+.dot.ok{background:var(--wire)}
+.dot.no{background:var(--dead)}
+.split ul{margin:0;padding-left:1.1rem;color:var(--muted);font-size:.96rem}
+.split li{margin-bottom:.5rem}
+
+/* commands */
+.cmds{display:flex;flex-direction:column;gap:1px;background:var(--line);border:1px solid var(--line)}
+.cmds div{background:var(--surface);padding:1rem 1.2rem}
+.cmds .c{font-family:"IBM Plex Mono",monospace;font-size:.82rem;overflow-x:auto;white-space:pre;display:block}
+.cmds .w{color:var(--muted);font-size:.88rem;margin-top:.35rem}
+
+footer{padding:3rem 0 4rem;color:var(--muted);font-size:.9rem}
+
+/* svg shared */
+.s-label{font-family:"Archivo",sans-serif;font-size:13px;font-weight:700;fill:var(--ink)}
+.s-sub{font-family:"IBM Plex Mono",monospace;font-size:11px;fill:var(--muted)}
+.s-tag{font-family:"IBM Plex Mono",monospace;font-size:11px;font-weight:600;fill:var(--ink)}
+.s-note{font-family:"IBM Plex Mono",monospace;font-size:10.5px;letter-spacing:.06em;fill:var(--muted)}
+.box{fill:var(--surface);stroke:var(--line-2);stroke-width:1.5}
+.box-sunk{fill:var(--sunk);stroke:var(--line);stroke-width:1.5}
+.wireline{stroke:var(--line-2);stroke-width:2;fill:none}
+.hot{stroke:var(--accent);stroke-width:2.5;fill:none}
+.ctrl{stroke:var(--muted);stroke-width:1.5;fill:none;stroke-dasharray:5 4}
+.bad{stroke:var(--dead);stroke-width:2;fill:none}
+.chip-hot{fill:var(--accent-fill);stroke:var(--accent);stroke-width:1.5}
+.chip-cool{fill:var(--wire-fill);stroke:var(--wire);stroke-width:1.5}
+.chip-dead{fill:var(--dead-fill);stroke:var(--dead);stroke-width:1.5}
+
+@keyframes travel{0%{transform:translateX(0)}100%{transform:translateX(392px)}}
+.packet{animation:travel 3.2s linear infinite}
+@media(prefers-reduced-motion:reduce){.packet{animation:none}}
+:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+</style>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="kicker">kubernetes / eks · networking</div>
+    <h1>kube-proxy is <span class="strike">a proxy</span><br><em>a rule writer</em>.</h1>
+    <p class="lede">Your packets never go through it. It only tells the kernel where to send them.</p>
+    <p class="zh">一句話：它是規則寫手，不是中間人。</p>
+
+    <figure style="margin-top:clamp(2rem,5vw,3rem)">
+      <svg viewBox="0 0 720 190" role="img" aria-label="A packet travels on a wire from an app pod straight to a backend pod, while kube-proxy sits off the path and writes rules into the kernel.">
+        <defs>
+          <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0 0 L10 5 L0 10 z" fill="var(--accent)"/>
+          </marker>
+          <marker id="ag" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0 0 L10 5 L0 10 z" fill="var(--muted)"/>
+          </marker>
+        </defs>
+
+        <rect class="box" x="16" y="104" width="132" height="54" rx="3"/>
+        <text class="s-label" x="82" y="128" text-anchor="middle">your app</text>
+        <text class="s-sub" x="82" y="145" text-anchor="middle">a pod</text>
+
+        <rect class="box" x="572" y="104" width="132" height="54" rx="3"/>
+        <text class="s-label" x="638" y="128" text-anchor="middle">backend</text>
+        <text class="s-sub" x="638" y="145" text-anchor="middle">10.244.2.7</text>
+
+        <line class="hot" x1="148" y1="131" x2="566" y2="131" marker-end="url(#ah)"/>
+        <g class="packet"><circle cx="160" cy="131" r="7" fill="var(--accent)"/></g>
+
+        <rect class="chip-cool" x="292" y="20" width="136" height="42" rx="3"/>
+        <text class="s-label" x="360" y="46" text-anchor="middle">kube-proxy</text>
+        <path class="ctrl" d="M360 62 L360 118" marker-end="url(#ag)"/>
+        <text class="s-note" x="372" y="92">writes the rule</text>
+
+        <text class="s-note" x="360" y="180" text-anchor="middle">the packet path does not touch kube-proxy</text>
+      </svg>
+      <figcaption>kube-proxy stands beside the wire, not on it. It programs the node kernel; the kernel moves every packet.</figcaption>
+    </figure>
+  </div>
+</header>
+
+<main>
+
+<section>
+  <div class="wrap">
+    <div class="head">
+      <div class="eyebrow">the problem</div>
+      <h2>Pods keep changing their IP.</h2>
+      <p>A pod dies. A new one starts somewhere else, with a new address. Anything holding the old IP now talks to nobody.</p>
+    </div>
+    <div class="scroll">
+    <figure>
+      <svg viewBox="0 0 720 210" role="img" aria-label="A client holding a hardcoded pod IP breaks when that pod is replaced by a new pod with a different IP.">
+        <defs>
+          <marker id="ab" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0 0 L10 5 L0 10 z" fill="var(--dead)"/>
+          </marker>
+        </defs>
+
+        <rect class="box" x="16" y="76" width="126" height="56" rx="3"/>
+        <text class="s-label" x="79" y="99" text-anchor="middle">client</text>
+        <text class="s-sub" x="79" y="117" text-anchor="middle">hardcoded IP</text>
+
+        <path class="bad" d="M142 104 L322 104" marker-end="url(#ab)"/>
+        <text class="s-note" x="232" y="92" text-anchor="middle" fill="var(--dead)">connect 10.244.1.9</text>
+        <line x1="222" y1="92" x2="244" y2="118" stroke="var(--dead)" stroke-width="2.5"/>
+        <line x1="244" y1="92" x2="222" y2="118" stroke="var(--dead)" stroke-width="2.5"/>
+
+        <rect class="chip-dead" x="336" y="76" width="150" height="56" rx="3" stroke-dasharray="5 4"/>
+        <text class="s-label" x="411" y="99" text-anchor="middle" fill="var(--dead)">pod (gone)</text>
+        <text class="s-sub" x="411" y="117" text-anchor="middle" fill="var(--dead)">10.244.1.9</text>
+
+        <rect class="chip-cool" x="536" y="30" width="168" height="52" rx="3"/>
+        <text class="s-label" x="620" y="51" text-anchor="middle">new pod</text>
+        <text class="s-sub" x="620" y="68" text-anchor="middle">10.244.3.2</text>
+
+        <rect class="chip-cool" x="536" y="126" width="168" height="52" rx="3"/>
+        <text class="s-label" x="620" y="147" text-anchor="middle">new pod</text>
+        <text class="s-sub" x="620" y="164" text-anchor="middle">10.244.0.8</text>
+
+        <text class="s-note" x="411" y="160" text-anchor="middle">restart = new address, new node</text>
+      </svg>
+      <figcaption>Pod IPs are disposable. You need one address that outlives every pod behind it.</figcaption>
+    </figure>
+    </div>
+  </div>
+</section>
+
+<section class="sunk">
+  <div class="wrap">
+    <div class="head">
+      <div class="eyebrow">the fix</div>
+      <h2>A Service is one fake IP that never moves.</h2>
+      <p>You call <code class="mono">10.96.0.10:80</code> forever. Kubernetes keeps the list of real pods behind it fresh.</p>
+    </div>
+    <div class="scroll">
+    <figure>
+      <svg viewBox="0 0 720 230" role="img" aria-label="A client sends to one stable ClusterIP, which fans out to three real pod addresses, one picked at random.">
+        <defs>
+          <marker id="ac" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0 0 L10 5 L0 10 z" fill="var(--wire)"/>
+          </marker>
+          <marker id="as" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="var(--accent)"/></marker>
+        </defs>
+
+        <rect class="box" x="16" y="87" width="120" height="56" rx="3"/>
+        <text class="s-label" x="76" y="120" text-anchor="middle">client</text>
+
+        <line class="hot" x1="136" y1="115" x2="228" y2="115" marker-end="url(#as)"/>
+
+        <rect class="chip-hot" x="232" y="79" width="188" height="72" rx="3"/>
+        <text class="s-note" x="326" y="101" text-anchor="middle">service · clusterip</text>
+        <text class="s-tag" x="326" y="124" text-anchor="middle" font-size="15">10.96.0.10:80</text>
+        <text class="s-note" x="326" y="141" text-anchor="middle">never changes</text>
+
+        <path class="wireline" d="M420 115 C470 115 470 42 520 42" marker-end="url(#ac)"/>
+        <path class="wireline" d="M420 115 L520 115" marker-end="url(#ac)"/>
+        <path class="wireline" d="M420 115 C470 115 470 188 520 188" marker-end="url(#ac)"/>
+
+        <rect class="chip-cool" x="528" y="20" width="176" height="44" rx="3"/>
+        <text class="s-sub" x="616" y="47" text-anchor="middle">10.244.1.4:8080</text>
+        <rect class="chip-cool" x="528" y="93" width="176" height="44" rx="3"/>
+        <text class="s-sub" x="616" y="120" text-anchor="middle">10.244.2.7:8080</text>
+        <rect class="chip-cool" x="528" y="166" width="176" height="44" rx="3"/>
+        <text class="s-sub" x="616" y="193" text-anchor="middle">10.244.3.2:8080</text>
+
+        <text class="s-note" x="470" y="208" text-anchor="middle">one picked at random</text>
+      </svg>
+      <figcaption>The live pod list lives in EndpointSlice objects. Add or kill a pod and the list updates by itself.</figcaption>
+    </figure>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="head">
+      <div class="eyebrow">the twist</div>
+      <h2>Nothing owns that IP.</h2>
+    </div>
+    <div class="callout">
+      <p class="big">No machine. No network card. No process listening.</p>
+      <p style="color:var(--muted)"><code>10.96.0.10</code> is not routed anywhere. It is not in your VPC. Ping it and you get nothing back.</p>
+      <p style="color:var(--muted)">So how does the packet arrive? Because on every node, the kernel is told to <strong style="color:var(--ink)">rewrite the destination address</strong> the moment it sees that IP. That rewrite rule is what kube-proxy exists to install.</p>
+      <p class="zh">ClusterIP 是假的。真正做事的是 node kernel 的 DNAT 規則。</p>
+    </div>
+  </div>
+</section>
+
+<section class="sunk">
+  <div class="wrap">
+    <div class="head">
+      <div class="eyebrow">the real job</div>
+      <h2>Watch the API server. Write rules. That is all.</h2>
+      <p>kube-proxy runs on every node as a DaemonSet. It watches Services and EndpointSlices, then rewrites that node's kernel rule table. Then it goes back to sleep.</p>
+    </div>
+    <div class="scroll">
+    <figure>
+      <svg viewBox="0 0 760 340" role="img" aria-label="The API server pushes Service and EndpointSlice changes to kube-proxy on each node; kube-proxy writes kernel rules; packets flow through the kernel rules only, never through kube-proxy.">
+        <defs><marker id="bh" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="var(--accent)"/></marker><marker id="bg" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="var(--muted)"/></marker></defs>
+        <rect class="box" x="292" y="12" width="176" height="48" rx="3"/>
+        <text class="s-label" x="380" y="42" text-anchor="middle">API server</text>
+
+        <path class="ctrl" d="M330 60 C330 92 176 88 176 116" marker-end="url(#bg)"/>
+        <path class="ctrl" d="M430 60 C430 92 584 88 584 116" marker-end="url(#bg)"/>
+        <text class="s-note" x="380" y="86" text-anchor="middle">watch services + endpointslices</text>
+
+        <!-- node A -->
+        <rect class="box-sunk" x="24" y="116" width="304" height="196" rx="3"/>
+        <text class="s-note" x="40" y="136">node a</text>
+        <rect class="chip-cool" x="106" y="146" width="140" height="40" rx="3"/>
+        <text class="s-label" x="176" y="171" text-anchor="middle">kube-proxy</text>
+        <path class="ctrl" d="M176 186 L176 214" marker-end="url(#bg)"/>
+        <text class="s-note" x="186" y="205">writes</text>
+        <rect class="box" x="48" y="216" width="256" height="48" rx="3"/>
+        <text class="s-label" x="176" y="240" text-anchor="middle">kernel rule table</text>
+        <text class="s-sub" x="176" y="256" text-anchor="middle">iptables / ipvs / nftables</text>
+        <rect class="box" x="48" y="276" width="112" height="26" rx="3"/>
+        <text class="s-sub" x="104" y="294" text-anchor="middle">your pod</text>
+
+        <!-- node B -->
+        <rect class="box-sunk" x="432" y="116" width="304" height="196" rx="3"/>
+        <text class="s-note" x="448" y="136">node b</text>
+        <rect class="chip-cool" x="514" y="146" width="140" height="40" rx="3"/>
+        <text class="s-label" x="584" y="171" text-anchor="middle">kube-proxy</text>
+        <path class="ctrl" d="M584 186 L584 214" marker-end="url(#bg)"/>
+        <rect class="box" x="456" y="216" width="256" height="48" rx="3"/>
+        <text class="s-label" x="584" y="240" text-anchor="middle">kernel rule table</text>
+        <text class="s-sub" x="584" y="256" text-anchor="middle">iptables / ipvs / nftables</text>
+        <rect class="box" x="600" y="276" width="112" height="26" rx="3"/>
+        <text class="s-sub" x="656" y="294" text-anchor="middle">backend pod</text>
+
+        <!-- data path -->
+        <path class="hot" d="M160 289 L200 289 L200 264"/>
+        <path class="hot" d="M304 240 L380 240 L380 289 L594 289" marker-end="url(#bh)"/>
+
+        <text class="s-note" x="380" y="326" text-anchor="middle">packets: pod → kernel rules → pod</text>
+
+        <rect class="chip-hot" x="24" y="12" width="14" height="14" rx="2"/>
+        <text class="s-note" x="46" y="24">packets</text>
+        <line class="ctrl" x1="24" y1="45" x2="38" y2="45"/>
+        <text class="s-note" x="46" y="49">config</text>
+      </svg>
+      <figcaption>Dashed = configuration flowing down. Solid = real traffic. The two lines never share a box, and that is the whole point.</figcaption>
+    </figure>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="head">
+      <div class="eyebrow">follow one packet</div>
+      <h2>What happens in 5 steps.</h2>
+    </div>
+    <div class="scroll">
+    <figure>
+      <svg viewBox="0 0 760 170" role="img" aria-label="A packet addressed to the ClusterIP hits the kernel rule table, which rewrites the destination to a real pod IP before it leaves the node.">
+        <defs><marker id="ph" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="var(--accent)"/></marker></defs>
+        <rect class="box" x="16" y="58" width="118" height="52" rx="3"/>
+        <text class="s-label" x="75" y="89" text-anchor="middle">your app</text>
+
+        <line class="hot" x1="134" y1="84" x2="216" y2="84" marker-end="url(#ph)"/>
+        <rect class="chip-hot" x="150" y="20" width="180" height="28" rx="3"/>
+        <text class="s-tag" x="240" y="39" text-anchor="middle">dst 10.96.0.10:80</text>
+        <path class="ctrl" d="M240 48 L240 70"/>
+
+        <rect class="box" x="220" y="58" width="184" height="52" rx="3"/>
+        <text class="s-label" x="312" y="82" text-anchor="middle">kernel rule table</text>
+        <text class="s-sub" x="312" y="99" text-anchor="middle">match + DNAT</text>
+
+        <line class="hot" x1="404" y1="84" x2="606" y2="84" marker-end="url(#ph)"/>
+        <rect class="chip-hot" x="416" y="20" width="192" height="28" rx="3"/>
+        <text class="s-tag" x="512" y="39" text-anchor="middle">dst 10.244.2.7:8080</text>
+        <path class="ctrl" d="M512 48 L512 70"/>
+
+        <rect class="box" x="610" y="58" width="134" height="52" rx="3"/>
+        <text class="s-label" x="677" y="89" text-anchor="middle">real pod</text>
+
+        <text class="s-note" x="312" y="140" text-anchor="middle">the address changes here</text>
+        <text class="s-note" x="380" y="160" text-anchor="middle">conntrack remembers the swap, so the reply is un-swapped on the way back</text>
+      </svg>
+      <figcaption>DNAT = destination network address translation. The source app never learns which pod answered.</figcaption>
+    </figure>
+    </div>
+
+    <ol class="steps">
+      <li><span class="n">01</span><span><b>Your app resolves the name</b><span>CoreDNS answers <code>my-svc.default.svc</code> with the ClusterIP <code>10.96.0.10</code>.</span></span></li>
+      <li><span class="n">02</span><span><b>The packet leaves the pod</b><span>Destination is an IP that belongs to nobody.</span></span></li>
+      <li><span class="n">03</span><span><b>The node kernel matches a rule</b><span>The rule kube-proxy installed says: this IP and port means this Service.</span></span></li>
+      <li><span class="n">04</span><span><b>The kernel picks one pod and rewrites the destination</b><span>Random by default. The choice is recorded in the conntrack table, so the rest of the connection sticks to the same pod.</span></span></li>
+      <li><span class="n">05</span><span><b>The reply comes back reversed</b><span>Conntrack rewrites the source back to <code>10.96.0.10</code>. Your app thinks it talked to the Service the whole time.</span></span></li>
+    </ol>
+  </div>
+</section>
+
+<section class="sunk">
+  <div class="wrap">
+    <div class="head">
+      <div class="eyebrow">the modes</div>
+      <h2>Same job, four ways to write the rules.</h2>
+      <p>The difference is how fast the kernel finds the right rule when you have thousands of Services.</p>
+    </div>
+    <div class="scroll">
+    <figure>
+      <svg viewBox="0 0 720 260" role="img" aria-label="iptables mode walks a chain of rules one by one; IPVS mode does a single hash table lookup.">
+        <defs><marker id="mh" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="var(--accent)"/></marker></defs>
+        <text class="s-note" x="24" y="22">iptables mode</text>
+        <text class="s-note" x="404" y="22">ipvs mode</text>
+        <line x1="380" y1="8" x2="380" y2="252" stroke="var(--line)" stroke-width="1"/>
+
+        <rect class="box" x="24" y="38" width="90" height="30" rx="3"/>
+        <text class="s-sub" x="69" y="58" text-anchor="middle">packet</text>
+        <path class="hot" d="M114 53 L150 53 L150 76" marker-end="url(#mh)"/>
+
+        <rect class="box-sunk" x="88" y="80" width="180" height="26" rx="2"/>
+        <text class="s-sub" x="178" y="98" text-anchor="middle">svc 1 ? no</text>
+        <rect class="box-sunk" x="88" y="112" width="180" height="26" rx="2"/>
+        <text class="s-sub" x="178" y="130" text-anchor="middle">svc 2 ? no</text>
+        <rect class="box-sunk" x="88" y="144" width="180" height="26" rx="2"/>
+        <text class="s-sub" x="178" y="162" text-anchor="middle">svc 3 ? no</text>
+        <rect class="chip-hot" x="88" y="176" width="180" height="26" rx="2"/>
+        <text class="s-tag" x="178" y="194" text-anchor="middle">svc 4 ? match</text>
+        <path class="hot" d="M150 106 L150 112"/>
+        <path class="hot" d="M150 138 L150 144"/>
+        <path class="hot" d="M150 170 L150 176"/>
+        <text class="s-note" x="178" y="228" text-anchor="middle">checks them in order</text>
+        <text class="s-note" x="178" y="245" text-anchor="middle">slow to update at scale</text>
+
+        <rect class="box" x="404" y="38" width="90" height="30" rx="3"/>
+        <text class="s-sub" x="449" y="58" text-anchor="middle">packet</text>
+        <path class="hot" d="M494 53 L560 53 L560 106" marker-end="url(#mh)"/>
+
+        <rect class="chip-hot" x="440" y="112" width="240" height="60" rx="3"/>
+        <text class="s-label" x="560" y="138" text-anchor="middle">hash table</text>
+        <text class="s-sub" x="560" y="157" text-anchor="middle">one lookup, any size</text>
+        <path class="hot" d="M560 172 L560 202" marker-end="url(#mh)"/>
+        <text class="s-note" x="560" y="228" text-anchor="middle">flat cost, real LB algorithms</text>
+        <text class="s-note" x="560" y="245" text-anchor="middle">rr, least-conn, source hash</text>
+      </svg>
+      <figcaption>Both end at the same DNAT. Only the lookup cost differs, and it only starts to hurt somewhere in the thousands of Services.</figcaption>
+    </figure>
+    </div>
+
+    <div class="scroll" style="margin-top:1.5rem">
+    <table class="tbl">
+      <thead><tr><th>mode</th><th>how it finds the rule</th><th>use it when</th></tr></thead>
+      <tbody>
+        <tr><td>iptables</td><td class="d">Walks a chain of rules</td><td class="d">Default almost everywhere, including EKS. Fine for most clusters.</td></tr>
+        <tr><td>ipvs</td><td class="d">Kernel hash table, plus real load-balancing algorithms</td><td class="d">Thousands of Services, or you want least-connection instead of random.</td></tr>
+        <tr><td>nftables</td><td class="d">One map lookup, no chain walk</td><td class="d">The modern replacement for iptables mode. Newer clusters only, check your version.</td></tr>
+        <tr><td>no kube-proxy</td><td class="d">eBPF programs, no rule table at all</td><td class="d">Cilium in kube-proxy replacement mode. You delete the DaemonSet.</td></tr>
+      </tbody>
+    </table>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="head">
+      <div class="eyebrow">when it dies</div>
+      <h2>Kill kube-proxy and nothing breaks. At first.</h2>
+      <p>The rules stay in the kernel. Traffic keeps flowing. What stops is every future change.</p>
+    </div>
+    <div class="split">
+      <div>
+        <h3><span class="dot ok"></span>Still works</h3>
+        <ul>
+          <li>Existing Services keep resolving to their current pods</li>
+          <li>Open connections stay open, conntrack is untouched</li>
+          <li>Pod-to-pod traffic by real IP, kube-proxy was never involved</li>
+        </ul>
+      </div>
+      <div>
+        <h3><span class="dot no"></span>Silently broken</h3>
+        <ul>
+          <li>New Services get no rules, so their ClusterIP is a black hole</li>
+          <li>A pod dies and traffic keeps being sent to the dead IP</li>
+          <li>Scale up, and the new pods get zero traffic</li>
+        </ul>
+      </div>
+    </div>
+    <p class="zh" style="margin-top:1.2rem">這就是最難查的那種故障：看起來活著，其實停止更新。</p>
+  </div>
+</section>
+
+<section class="sunk">
+  <div class="wrap">
+    <div class="head">
+      <div class="eyebrow">on eks</div>
+      <h2>What is different on AWS.</h2>
+    </div>
+    <div class="scroll">
+    <table class="tbl">
+      <thead><tr><th>fact</th><th>what it means for you</th></tr></thead>
+      <tbody>
+        <tr><td>managed add-on</td><td class="d">kube-proxy is one of the three default EKS add-ons, running as a DaemonSet in <code class="mono">kube-system</code>.</td></tr>
+        <tr><td>version skew</td><td class="d">It must not be newer than the control plane. A cluster upgrade does not upgrade the add-on for you, so it is an easy thing to forget.</td></tr>
+        <tr><td>VPC CNI</td><td class="d">Pods hold real VPC IPs, so pod-to-pod needs no translation at all. Only Service traffic goes through kube-proxy rules.</td></tr>
+        <tr><td>NLB instance mode</td><td class="d">Traffic lands on a NodePort, and kube-proxy rules forward it, possibly to a pod on another node.</td></tr>
+        <tr><td>NLB ip mode</td><td class="d">The load balancer targets pod IPs directly and skips kube-proxy entirely.</td></tr>
+        <tr><td>eBPF option</td><td class="d">Run Cilium in kube-proxy replacement mode and you remove the add-on. Fewer moving parts, a much bigger dependency.</td></tr>
+      </tbody>
+    </table>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="head">
+      <div class="eyebrow">see it yourself</div>
+      <h2>Three read-only commands.</h2>
+    </div>
+    <div class="cmds">
+      <div>
+        <code class="c">kubectl -n kube-system get ds kube-proxy -o wide</code>
+        <p class="w">One pod per node. If a node has none, that node's Service routing is frozen.</p>
+      </div>
+      <div>
+        <code class="c">kubectl get endpointslices -l kubernetes.io/service-name=my-svc -o yaml</code>
+        <p class="w">The real pod list kube-proxy reads. Compare it with what you expect.</p>
+      </div>
+      <div>
+        <code class="c">sudo iptables -t nat -L KUBE-SERVICES -n | head -20</code>
+        <p class="w">Run this on a node. These are the rules kube-proxy wrote. This is the ground truth.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="wrap col">
+    <p><strong style="color:var(--ink)">Remember one sentence:</strong> kube-proxy turns a fake IP into a real one by programming the kernel, and then gets out of the way.</p>
+  </div>
+</footer>
+
+</body></html>

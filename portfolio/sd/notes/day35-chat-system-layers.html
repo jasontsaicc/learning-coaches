@@ -1,0 +1,329 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>銀行客服 Chat 七層</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC:wght@400;700&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: one notebook column on graph paper; each layer is a page section, figures on taped cards */
+:root{
+  --paper:#F6F8FA; --grid:rgba(90,130,170,.16); --ink:#23313E; --muted:#5A6B7A;
+  --card:#FFFFFF; --tape:rgba(255,233,138,.75); --line:#C9D4DE;
+  --who:#FFE98A; --see:#BDEEF6; --may:#F9CDE0; --bad:#D6453D; --ok:#2E8B57; --accent:#2F6FA3;
+  --f-body:"LXGW WenKai TC","Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --paper:#1A2320; --grid:rgba(200,230,210,.07); --ink:#E4ECE6; --muted:#A3B5AA;
+  --card:#22302B; --tape:rgba(255,233,138,.35); --line:#3B4D46;
+  --who:#7A6A1E; --see:#1F5A63; --may:#6B2E47; --bad:#FF7A70; --ok:#6FD39A; --accent:#7FB6E3; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --paper:#1A2320; --grid:rgba(200,230,210,.07); --ink:#E4ECE6; --muted:#A3B5AA;
+  --card:#22302B; --tape:rgba(255,233,138,.35); --line:#3B4D46;
+  --who:#7A6A1E; --see:#1F5A63; --may:#6B2E47; --bad:#FF7A70; --ok:#6FD39A; --accent:#7FB6E3; color-scheme:dark}
+body{background-color:var(--paper);color:var(--ink);font-family:var(--f-body);font-size:17px;line-height:1.75;
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+  background-size:22px 22px}
+.wrap{max-width:860px;margin:0 auto;padding-inline:16px;padding-block:32px 64px}
+h1{font-size:2rem;margin:0 0 .3rem;text-wrap:balance}
+h2{font-size:1.45rem;margin:2.6rem 0 .6rem;text-wrap:balance;display:flex;gap:.6rem;align-items:baseline}
+h2 .n{font-family:var(--f-mono);font-size:.85rem;color:var(--muted);letter-spacing:.06em}
+h3{font-size:1.1rem;margin:1.4rem 0 .3rem}
+p,li{max-width:68ch}
+.sub{color:var(--muted);margin:0}
+code,.mono{font-family:var(--f-mono);font-size:.86em}
+code{background:color-mix(in srgb,var(--see) 45%,transparent);padding:0 .25em;border-radius:3px}
+pre{font-family:var(--f-mono);font-size:.82rem;line-height:1.55;background:var(--card);border:1px solid var(--line);padding:12px 14px;overflow-x:auto;margin:.6rem 0}
+mark{color:inherit;padding:0 .1em}
+.who{background:linear-gradient(transparent 45%,var(--who) 45%)}
+.see{background:linear-gradient(transparent 45%,var(--see) 45%)}
+.may{background:linear-gradient(transparent 45%,var(--may) 45%)}
+.card{position:relative;background:var(--card);border:1px solid var(--line);padding:18px 16px 12px;margin:1.4rem 0;box-shadow:2px 3px 0 color-mix(in srgb,var(--ink) 8%,transparent)}
+.card::before{content:"";position:absolute;top:-10px;left:50%;width:110px;height:20px;transform:translateX(-50%) rotate(-2deg);background:var(--tape)}
+.card .cap{font-size:.85rem;color:var(--muted);margin:.4rem 0 0}
+.fig{overflow-x:auto}
+.fig svg{display:block;width:100%;min-width:560px;height:auto}
+svg text{font-family:var(--f-body);fill:var(--ink)}
+svg .m{font-family:var(--f-mono);font-size:12px}
+svg .box{fill:var(--card);stroke:var(--ink);stroke-width:1.4}
+svg .hl{fill:var(--who);stroke:var(--ink);stroke-width:1.4}
+svg .hl2{fill:var(--see);stroke:var(--ink);stroke-width:1.4}
+svg .dead{fill:var(--may);stroke:var(--bad);stroke-width:1.6;stroke-dasharray:5 3}
+svg .ar{stroke:var(--ink);stroke-width:1.6;fill:none}
+svg .arb{stroke:var(--bad);stroke-width:1.6;fill:none;stroke-dasharray:5 4}
+svg .ok{stroke:var(--ok);stroke-width:2;fill:none}
+svg .t-bad{fill:var(--bad)} svg .t-mut{fill:var(--muted)} svg .t-ok{fill:var(--ok)}
+.oops{border-left:4px solid var(--bad);padding:.3rem .8rem;margin:.9rem 0;background:color-mix(in srgb,var(--may) 35%,transparent)}
+.oops b{color:var(--bad)}
+.link{font-size:.9rem;color:var(--muted);border-top:1px dashed var(--line);padding-top:.4rem;margin-top:1rem}
+.tbl{overflow-x:auto;margin:.8rem 0}
+table{border-collapse:collapse;width:100%;min-width:520px;background:var(--card);font-size:.93rem}
+th,td{border:1px solid var(--line);padding:6px 9px;text-align:left;vertical-align:top}
+th{background:color-mix(in srgb,var(--who) 40%,var(--card))}
+td{font-variant-numeric:tabular-nums}
+.toc{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:.92rem;margin:1rem 0 0;padding:0;list-style:none}
+.toc a{color:var(--accent)}
+a{color:var(--accent)}
+details{background:var(--card);border:1px solid var(--line);padding:8px 14px;margin:.8rem 0}
+summary{cursor:pointer;font-weight:700}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}
+.two>div{min-width:0}
+a:focus-visible,summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+</style>
+
+<div class="wrap">
+<h1>銀行客服 Chat 七層</h1>
+<p class="sub">S49–S51 複習用。題目：FSI 銀行網銀一對一即時客服。現況 client 每 2 秒 polling，資安長要求全部對話留存、可稽核。</p>
+<ul class="toc">
+<li><a href="#l0">0 一張圖</a></li><li><a href="#l1">1 第一性原理</a></li><li><a href="#l2">2 機制</a></li>
+<li><a href="#l3">3 取捨</a></li><li><a href="#l4">4 AWS</a></li><li><a href="#l5">5 規模化</a></li>
+<li><a href="#l6">6 故障與 on-call</a></li><li><a href="#l7">7 面試</a></li>
+</ul>
+
+<!-- ============ L0 ============ -->
+<h2 id="l0"><span class="n">LAYER 0</span>一張圖：檔案室 vs 廣播喇叭</h2>
+<p>銀行裡每張單據都要歸檔到<mark class="who">檔案室（DB）</mark>，這是稽核的依據。另外有一支<mark class="see">廣播喇叭（pub/sub）</mark>，負責喊「Bob 你有新單據」。喇叭壞了，單據還在檔案室，Bob 只是要自己去拿。</p>
+<div class="card"><div class="fig">
+<svg viewBox="0 0 640 200" role="img" aria-label="DB 是檔案室負責存，pub/sub 是喇叭負責喊">
+  <rect class="box" x="20" y="70" width="110" height="50"/><text x="75" y="100" text-anchor="middle">Alice 發訊</text>
+  <rect class="hl" x="250" y="20" width="150" height="60"/><text x="325" y="46" text-anchor="middle">檔案室 = DB</text><text x="325" y="68" text-anchor="middle" class="m">durable · audit</text>
+  <rect class="hl2" x="250" y="120" width="150" height="60"/><text x="325" y="146" text-anchor="middle">喇叭 = pub/sub</text><text x="325" y="168" text-anchor="middle" class="m">fast · forgets</text>
+  <rect class="box" x="510" y="70" width="110" height="50"/><text x="565" y="100" text-anchor="middle">Bob 收訊</text>
+  <path class="ar" d="M130 88 L250 52"/><path class="ar" d="M130 102 L250 148"/>
+  <path class="ar" d="M400 150 L510 105"/><text x="455" y="150" class="m">即時喊</text>
+  <path class="arb" d="M510 85 L400 52"/><text x="440" y="56" class="m t-mut">漏了就來拿</text>
+</svg></div>
+<p class="cap">存（不能掉）和送（要夠快）是兩件事，交給兩個元件。</p></div>
+
+<!-- ============ L1 ============ -->
+<h2 id="l1"><span class="n">LAYER 1</span>第一性原理：HTTP 只能 client 拉</h2>
+<p>限制一：<mark class="who">HTTP 是 request-response</mark>。server 沒辦法主動開口，只能等 client 來問。所以「新訊息一到就推給 Bob」在純 HTTP 裡做不到，只能讓 Bob 一直來問。</p>
+<div class="card"><div class="fig">
+<svg viewBox="0 0 640 230" role="img" aria-label="2 秒 polling 的帳">
+  <text x="20" y="24" class="m">client (Bob)</text><text x="520" y="24" class="m">server</text>
+  <line x1="60" y1="35" x2="60" y2="220" class="ar"/><line x1="560" y1="35" x2="560" y2="220" class="ar"/>
+  <path class="ar" d="M60 50 L560 60"/><path class="arb" d="M560 70 L60 80"/><text x="250" y="66" class="m t-mut">t=0  有新的嗎？ → 空的</text>
+  <path class="ar" d="M60 100 L560 110"/><path class="arb" d="M560 120 L60 130"/><text x="250" y="116" class="m t-mut">t=2s 有新的嗎？ → 空的</text>
+  <rect class="dead" x="300" y="137" width="140" height="22"/><text x="370" y="153" text-anchor="middle" class="m">t=2.1s 訊息到了</text>
+  <text x="440" y="175" class="m t-bad">Bob 要等到 t=4s</text>
+  <path class="ar" d="M60 180 L560 190"/><path class="ok" d="M560 200 L60 210"/><text x="250" y="196" class="m">t=4s 有新的嗎？ → 有 1 則</text>
+</svg></div>
+<pre>帳（S49 算過）：
+50,000 在線用戶 ÷ 每 2 秒 1 次  = 25,000 req/s
+其中真的有新訊息的       ≈ 0.1%  → 99.9% 是空包彈
+延遲：最差 2 秒，平均 1 秒</pre>
+<p class="cap">拿掉 polling 改成什麼？要一條 server 可以主動往下推的通道 → Layer 2 的 WebSocket。</p></div>
+<p>限制二：<mark class="who">資安長的稽核要求</mark>。每則訊息都要可查、不能掉。所以不管訊息怎麼送，都一定要先落地在 durable storage。這條限制直接決定了 Layer 2 的「先寫 DB，再送」。</p>
+<p>限制三：<mark class="who">一條 TCP 連線只能接在一台機器上</mark>。WebSocket 是長連線，所以每個用戶在連線的整段時間裡都綁死在同一台 server。這條限制會產生 Layer 2 的兩個後果：drain 的時候整台的用戶一起斷線、跨 server 送不到。</p>
+
+<!-- ============ L2 ============ -->
+<h2 id="l2"><span class="n">LAYER 2</span>機制</h2>
+
+<h3>2a. 三條路：方向決定 protocol</h3>
+<div class="tbl"><table>
+<tr><th>做法</th><th>本質</th><th>方向</th><th>適合</th></tr>
+<tr><td>Long polling</td><td>HTTP。server 先 hold 住 request，有資料才回</td><td>假雙向（每次回完要重新問）</td><td>相容性 fallback</td></tr>
+<tr><td>SSE</td><td>HTTP。一個 response 一直不結束，持續往下寫</td><td>server → client 單向</td><td>交易通知、股價（只需要下行）</td></tr>
+<tr><td>WebSocket</td><td>先發 HTTP <code>Upgrade</code>，server 回 <code>101 Switching Protocols</code>，之後換成 WS 協定</td><td>雙向</td><td>chat（雙方都會說話）</td></tr>
+</table></div>
+<div class="oops"><b>我錯在這（S49）</b>：把 SSE 講成「推播」。SSE 是一條 HTTP 長 response，不是 mobile push notification。</div>
+
+<h3>2b. 連線黏在單台：drain 時發生什麼（chunk 2）</h3>
+<div class="card"><div class="fig">
+<svg viewBox="0 0 680 300" role="img" aria-label="server-7 被 drain 後 thundering herd">
+  <rect class="dead" x="20" y="20" width="140" height="56"/><text x="90" y="44" text-anchor="middle">server-7</text><text x="90" y="64" text-anchor="middle" class="m">stopped</text>
+  <text x="20" y="100" class="m t-bad">20,000 條 TCP 同時斷</text>
+  <text x="20" y="118" class="m">每個 client: ws.onclose</text>
+  <text x="20" y="136" class="m">→ 「馬上重連」</text>
+  <path class="arb" d="M160 48 L250 48"/>
+  <rect class="box" x="250" y="20" width="120" height="56"/><text x="310" y="44" text-anchor="middle">ALB</text><text x="310" y="64" text-anchor="middle" class="m">20k in ~1s</text>
+  <rect class="box" x="420" y="10" width="110" height="34"/><text x="475" y="32" text-anchor="middle" class="m">server-1..9</text>
+  <text x="540" y="32" class="m t-mut">A: 9 台分攤</text>
+  <path class="ar" d="M370 40 L420 28"/>
+  <path class="ar" d="M475 44 L400 150"/><path class="ar" d="M475 44 L560 150"/>
+  <rect class="hl" x="330" y="150" width="150" height="56"/><text x="405" y="174" text-anchor="middle">auth service</text><text x="405" y="194" text-anchor="middle" class="m">B: 50/s → 20k/s</text>
+  <rect class="hl" x="500" y="150" width="160" height="56"/><text x="580" y="174" text-anchor="middle">message DB</text><text x="580" y="194" text-anchor="middle" class="m">C: history query</text>
+  <text x="330" y="236" class="m t-bad">400x 突波 · 共用元件先倒</text>
+  <text x="330" y="256" class="m">autoscaling 要幾分鐘，突波只有 1 秒</text>
+  <text x="330" y="276" class="m">C 是 stateful，幾秒內 scale out 不了</text>
+</svg></div>
+<p class="cap">名字：<b>thundering herd</b>〔受驚獸群〕。同一事件觸發一大群 client，同一瞬間撲向同一個共用資源。和 S24 的 cache stampede 同家族，差別在觸發事件：那次是 key 過期，這次是 server 掉線。</p></div>
+
+<div class="tbl"><table>
+<tr><th>側</th><th>招式</th><th>做法</th><th>解決什麼</th></tr>
+<tr><td>client</td><td><b>jitter</b></td><td>重連前先等 <code>random(0, 30s)</code></td><td>同一秒 → 攤成 30 秒（約 670/s）</td></tr>
+<tr><td>client</td><td><b>exponential backoff + cap</b></td><td><code>min(60s, 1s·2^n) + jitter</code>：1, 2, 4, 8 … 60s</td><td>下游真的掛了，重試頻率會自動往下掉，避免 retry storm</td></tr>
+<tr><td>ALB</td><td><b>deregistration delay</b></td><td>target 進入 draining：不再分配新連線，既有連線最多再保留 N 秒（預設 300s）</td><td>斷線從「一起斷」變成「慢慢流走」</td></tr>
+</table></div>
+<div class="oops"><b>我錯在這（S50、S51）</b>：deregistration delay 答成「timeout 時間」，第二次直接忘了。記法：<mark class="who">de-register = 從 target group 除名</mark>，delay = 除名之後還給既有連線的寬限期。backoff 只講到「延長一點吧」，要講出 1→2→4、上限 60 秒。</div>
+
+<h3>2c. 一則訊息怎麼跨 server（chunk 3）</h3>
+<div class="card"><div class="fig">
+<svg viewBox="0 0 680 330" role="img" aria-label="send store publish deliver 流程">
+  <rect class="box" x="10" y="20" width="90" height="40"/><text x="55" y="45" text-anchor="middle">Alice</text>
+  <rect class="box" x="160" y="20" width="110" height="40"/><text x="215" y="45" text-anchor="middle">server-1</text>
+  <rect class="hl" x="330" y="10" width="150" height="60"/><text x="405" y="36" text-anchor="middle">message DB</text><text x="405" y="56" text-anchor="middle" class="m">儲存軸</text>
+  <rect class="hl2" x="330" y="130" width="150" height="60"/><text x="405" y="156" text-anchor="middle">Redis pub/sub</text><text x="405" y="176" text-anchor="middle" class="m">投遞軸</text>
+  <rect class="box" x="530" y="130" width="110" height="60"/><text x="585" y="156" text-anchor="middle">server-7</text><text x="585" y="176" text-anchor="middle" class="m">SUB user:Bob</text>
+  <rect class="box" x="545" y="250" width="80" height="40"/><text x="585" y="275" text-anchor="middle">Bob</text>
+  <path class="ar" d="M100 40 L160 40"/><text x="112" y="34" class="m">①</text>
+  <path class="ar" d="M270 34 L330 34"/><text x="276" y="28" class="m">② INSERT</text>
+  <path class="ok" d="M330 52 L270 52"/><text x="276" y="68" class="m t-ok">③ commit OK</text>
+  <path class="ok" d="M160 54 L100 54"/><text x="104" y="74" class="m t-ok">④ ack 給 Alice</text>
+  <path class="ar" d="M240 60 L340 130"/><text x="196" y="110" class="m">⑤ PUBLISH user:Bob</text>
+  <path class="ar" d="M480 160 L530 160"/><text x="486" y="152" class="m">⑥</text>
+  <path class="ar" d="M585 190 L585 250"/><text x="595" y="226" class="m">⑦ WS push</text>
+  <text x="10" y="250" class="m">順序是重點：先 commit 再 ack，再 publish</text>
+  <text x="10" y="270" class="m">DB 失敗 → 回錯誤給 Alice（不能假裝送出）</text>
+  <text x="10" y="290" class="m">publish 失敗 → 訊息還在 DB，靠 2e 補送</text>
+</svg></div>
+<p class="cap">server-1 不需要知道 Bob 在哪台。它只往 <code>user:Bob</code> 這個 channel 喊，誰訂閱了誰就收到。server-7 在 Bob 連上時執行 SUBSCRIBE。</p></div>
+<div class="oops"><b>我錯在這（S50）</b>：把「存」和「送」摺成一軸，以為放進 DB 就送到了。DB 是被動的，它不會通知 server-7。沒有 pub/sub 的話，server-7 只能每 2 秒去問 DB，等於把 2 秒 polling 從 client→server 搬到 server→DB。</div>
+
+<h3>2d. pub/sub 是 fire-and-forget</h3>
+<div class="card"><div class="fig">
+<svg viewBox="0 0 680 190" role="img" aria-label="Redis pub/sub 沒人聽就丟掉">
+  <rect class="hl2" x="20" y="60" width="150" height="60"/><text x="95" y="86" text-anchor="middle">PUBLISH</text><text x="95" y="106" text-anchor="middle" class="m">user:Bob</text>
+  <path class="ok" d="M170 75 L330 40"/><rect class="box" x="330" y="18" width="200" height="40"/><text x="430" y="43" text-anchor="middle">有人訂閱 → 送出</text>
+  <path class="arb" d="M170 105 L330 140"/><rect class="dead" x="330" y="120" width="200" height="40"/><text x="430" y="145" text-anchor="middle">沒人訂閱 / Redis 掛了</text>
+  <text x="545" y="145" class="m t-bad">→ 直接丟掉</text>
+  <text x="330" y="182" class="m t-mut">不存、不排隊、恢復後不補送</text>
+</svg></div></div>
+<div class="oops"><b>我錯在這（S51）</b>：「pub/sub 恢復正常，Bob 就收到」。錯。Redis 恢復時手上沒有那 10 分鐘的訊息，它們只在 DB 裡。</div>
+
+<h3>2e. 斷線補送：client 拉，server 查 DB</h3>
+<div class="card"><div class="fig">
+<svg viewBox="0 0 680 250" role="img" aria-label="client 帶 last_msg_id，server 查 DB 補送">
+  <rect class="hl" x="20" y="30" width="170" height="56"/><text x="105" y="54" text-anchor="middle">Bob 的瀏覽器</text><text x="105" y="74" text-anchor="middle" class="m">last_msg_id=1042</text>
+  <rect class="box" x="300" y="30" width="120" height="56"/><text x="360" y="62" text-anchor="middle">server-7</text>
+  <rect class="hl" x="510" y="20" width="150" height="76"/><text x="585" y="44" text-anchor="middle">message DB</text><text x="585" y="64" text-anchor="middle" class="m">1043 … 1057</text><text x="585" y="82" text-anchor="middle" class="m t-mut">(漏掉的 10 分鐘)</text>
+  <path class="ar" d="M190 50 L300 50"/><text x="196" y="44" class="m">① 重連，帶 1042</text>
+  <path class="ar" d="M420 50 L510 50"/><text x="426" y="44" class="m">② SELECT</text>
+  <path class="ok" d="M510 74 L420 74"/><path class="ok" d="M300 74 L190 74"/><text x="200" y="94" class="m t-ok">③ 回 1043..1057</text>
+  <rect class="dead" x="300" y="150" width="120" height="44"/><text x="360" y="177" text-anchor="middle">Redis</text>
+  <text x="430" y="177" class="m t-mut">不參與補送：沒記憶、沒邏輯</text>
+</svg></div>
+<pre>SELECT * FROM messages
+ WHERE conversation_id = :cid AND msg_id &gt; :last_msg_id
+ ORDER BY msg_id
+ LIMIT 100;          -- 漏太多就分頁拉</pre>
+<p class="cap">前提：msg_id 在同一個 conversation 裡會遞增（per-conversation sequence 或 Snowflake），才能用 <code>&gt;</code> 判斷「之後」。補送和即時推送可能送到同一則 → client 用 msg_id 去重。</p></div>
+<div class="oops"><b>我錯在這（S51）</b>：「DB 記錄最後傳了什麼，Redis 重啟才知道補哪些」。actor 放錯了。記錄「我看到哪」的是 client，動手補的是 server-7，Redis 全程不參與。和以前「Redis 當 source of truth」是同一個舊直覺。</div>
+
+<h3>2f. 順序：誰來發號碼（chunk 4）</h3>
+<div class="card"><div class="fig">
+<svg viewBox="0 0 680 230" role="img" aria-label="clock skew 讓順序錯亂，改用 per-conversation seq">
+  <text x="10" y="22" class="m">server-1 時鐘快 300ms</text>
+  <text x="10" y="48" class="m">真實：轉帳 .100 → Alice「已轉」.400 → 取消 .500</text>
+  <text x="10" y="72" class="m t-bad">蓋章：轉帳 .100 → 取消 .500 → 已轉 .700  ← 稽核出現假劇情</text>
+  <rect class="hl" x="10" y="95" width="300" height="120"/>
+  <text x="160" y="118" text-anchor="middle">conversations 表</text>
+  <text x="25" y="145" class="m">conv-A  next_seq 1043  [locked]</text>
+  <text x="25" y="167" class="m">conv-B  next_seq 87    照常寫</text>
+  <text x="25" y="189" class="m">conv-C  next_seq 512   照常寫</text>
+  <rect class="box" x="350" y="95" width="320" height="120"/>
+  <text x="365" y="120" class="m">UPDATE conversations</text>
+  <text x="365" y="140" class="m"> SET next_seq = next_seq + 1</text>
+  <text x="365" y="160" class="m"> WHERE id = 'conv-A'</text>
+  <text x="365" y="180" class="m"> RETURNING next_seq;</text>
+  <text x="365" y="204" class="m t-ok">atomic · row-level lock</text>
+</svg></div>
+<p class="cap">單一權威發號（DB），範圍只到同一個 conversation，靠 atomic increment 保證不重複。代價：同一對話的寫入要排隊；一對一客服每秒 1–2 則，幾乎無感。萬人群組才會變 hot row。</p></div>
+<pre>收到 1045，但 last_msg_id = 1043  → 缺 1044
+  buffer 1045（先不顯示）→ 等 ~500ms
+  1044 到了 → 依序顯示
+  逾時 → catch-up: msg_id &gt; 1043 → 用 msg_id 去重</pre>
+<div class="oops"><b>我錯在這（S51）</b>：用「只會往前」的時間戳（兩台各自單調還是互相衝突）；範圍看「訊息重不重要」（應該看誰需要彼此有序）；以為 <code>WHERE id=</code> 會鎖全表（其實是 row-level lock）。</div>
+
+<!-- ============ L3 ============ -->
+<h2 id="l3"><span class="n">LAYER 3</span>取捨</h2>
+<p>Layer 1 的限制三（連線綁單台）逼出「跨 server 怎麼送」。業界有三條路：</p>
+<div class="tbl"><table>
+<tr><th>投遞方式</th><th>怎麼做</th><th>贏在</th><th>輸在</th></tr>
+<tr><td>直接 RPC</td><td>server-1 查 conn table（Bob → server-7），直接打 server-7</td><td>少一個元件，延遲最低</td><td>每台都要能互打（N² 連線）；conn table 過期時會打錯台；server-7 剛好在 drain 就掉訊息</td></tr>
+<tr><td><b>Redis pub/sub</b>（本題選這個）</td><td>往 <code>user:Bob</code> 喊，server-7 訂閱</td><td>server 之間解耦，不需要知道誰在哪；延遲低於 1ms 等級</td><td>fire-and-forget，掉了不補 → 必須搭配 DB + catch-up</td></tr>
+<tr><td>Kafka / Streams</td><td>寫進有持久性的 log，server 消費</td><td>可 replay，不怕掉</td><td>每個用戶一個 partition 不實際；延遲較高；營運成本高</td></tr>
+</table></div>
+<p><mark class="who">為什麼 pub/sub 可以掉訊息還敢用？</mark> 因為可靠性已經由另一軸保證：DB 存好了（稽核要求滿足），漏送的由 client catch-up 補。投遞軸只需要負責「大部分時候夠快」。這就是兩軸拆開的價值：<b>各自只扛一種保證</b>，元件可以選比較便宜的。</p>
+<p><mark class="who">為什麼先寫 DB 再 publish，順序不能反？</mark> 如果先 publish 再寫 DB，Bob 可能看到一則後來寫入失敗的訊息，稽核紀錄裡查不到它。對銀行來說，這是合規事故。</p>
+<p><mark class="may">代價</mark>：多一個 Redis 要維運（監控、failover），client 要寫去重與 catch-up 邏輯。補送和即時推送可能重疊，所以語意是 at-least-once，不是 exactly-once。</p>
+
+<!-- ============ L4 ============ -->
+<h2 id="l4"><span class="n">LAYER 4</span>AWS 怎麼做</h2>
+<div class="card"><div class="fig">
+<svg viewBox="0 0 700 330" role="img" aria-label="AWS 架構：ALB, ECS WS servers, ElastiCache, DynamoDB, S3 Object Lock">
+  <rect class="box" x="10" y="130" width="100" height="50"/><text x="60" y="160" text-anchor="middle">Browser</text>
+  <rect class="box" x="150" y="120" width="110" height="70"/><text x="205" y="146" text-anchor="middle">ALB</text><text x="205" y="166" text-anchor="middle" class="m">WSS, idle 60s</text><text x="205" y="182" text-anchor="middle" class="m">dereg 300s</text>
+  <rect class="box" x="300" y="110" width="140" height="90"/><text x="370" y="136" text-anchor="middle">WS servers</text><text x="370" y="156" text-anchor="middle" class="m">ECS / EKS</text><text x="370" y="176" text-anchor="middle" class="m">scale on</text><text x="370" y="192" text-anchor="middle" class="m">ActiveConnCount</text>
+  <rect class="hl2" x="490" y="20" width="190" height="60"/><text x="585" y="46" text-anchor="middle">ElastiCache Redis</text><text x="585" y="66" text-anchor="middle" class="m">pub/sub (投遞)</text>
+  <rect class="hl" x="490" y="130" width="190" height="60"/><text x="585" y="156" text-anchor="middle">DynamoDB messages</text><text x="585" y="176" text-anchor="middle" class="m">PK conv_id · SK msg_id</text>
+  <rect class="box" x="490" y="240" width="190" height="70"/><text x="585" y="264" text-anchor="middle">Streams → Firehose</text><text x="585" y="284" text-anchor="middle" class="m">→ S3 Object Lock</text><text x="585" y="300" text-anchor="middle" class="m t-mut">稽核 (WORM)</text>
+  <path class="ar" d="M110 155 L150 155"/><path class="ar" d="M260 155 L300 155"/>
+  <path class="ar" d="M440 130 L490 60"/><path class="ar" d="M440 160 L490 160"/><path class="ar" d="M585 190 L585 240"/>
+  <rect class="box" x="300" y="250" width="140" height="50"/><text x="370" y="272" text-anchor="middle">auth (Cognito/</text><text x="370" y="290" text-anchor="middle">IdP)</text>
+  <path class="ar" d="M370 200 L370 250"/>
+</svg></div>
+<p class="cap">替代路線：API Gateway WebSocket API。託管連線，不用自己養 WS fleet，但有連線時長與閒置上限，計價按連線分鐘加訊息數。</p></div>
+<div class="tbl"><table>
+<tr><th>服務</th><th>這裡的用途</th><th>常見陷阱</th></tr>
+<tr><td>ALB</td><td>WebSocket 入口</td><td>idle timeout 預設 60s：沒有心跳的連線會被靜默切掉 → app 要每 30s 左右送 ping</td></tr>
+<tr><td>ALB target group</td><td>rolling update</td><td>deregistration delay 預設 300s。WS 長連線 5 分鐘內不會自己走完，到時還是會被強切 → client 一定要有 jitter + backoff</td></tr>
+<tr><td>ECS/EKS autoscaling</td><td>WS servers</td><td>按 CPU scale 不準（長連線閒置時 CPU 很低）→ 改用 <code>ActiveConnectionCount</code> 或每台的連線數</td></tr>
+<tr><td>ElastiCache Redis</td><td>pub/sub</td><td>cluster mode 下傳統 PUBLISH 會廣播到所有 shard，量大時要改用 sharded pub/sub（Redis 7 的 SPUBLISH）；failover 期間的訊息直接丟</td></tr>
+<tr><td>DynamoDB</td><td>訊息本體</td><td>單一熱門 conversation 會撞 partition 上限（一對一客服通常不會）；msg_id 要可排序</td></tr>
+<tr><td>S3 Object Lock</td><td>稽核留存</td><td>compliance mode 連 root 都刪不掉，保留期設錯就收不回來；先在 governance mode 驗證</td></tr>
+<tr><td>API GW WebSocket</td><td>託管替代</td><td>單條連線最長 2 小時、閒置 10 分鐘會斷（需確認最新 quota）→ client 一樣要會重連</td></tr>
+</table></div>
+<p>職場面：SRE 會在 design review 問「drain 的時候 2 萬人一起重連，auth 撐不撐得住？」。財務會問 API GW 的連線分鐘計價，在 5 萬人長時間在線時是否比自養 fleet 貴。</p>
+
+<!-- ============ L5 ============ -->
+<h2 id="l5"><span class="n">LAYER 5</span>規模化</h2>
+<div class="card"><div class="fig">
+<svg viewBox="0 0 700 250" role="img" aria-label="evolution ladder 三級">
+  <rect class="box" x="10" y="160" width="200" height="80"/><text x="110" y="184" text-anchor="middle">① 單台 server</text><text x="110" y="204" text-anchor="middle" class="m">in-memory map</text><text x="110" y="222" text-anchor="middle" class="m">user → conn</text>
+  <rect class="hl2" x="250" y="90" width="200" height="90"/><text x="350" y="114" text-anchor="middle">② N 台 + Redis</text><text x="350" y="134" text-anchor="middle" class="m">pub/sub + DB</text><text x="350" y="152" text-anchor="middle" class="m">+ catch-up</text><text x="350" y="170" text-anchor="middle" class="m t-mut">本題在這</text>
+  <rect class="hl" x="490" y="10" width="200" height="100"/><text x="590" y="34" text-anchor="middle">③ 大廠</text><text x="590" y="54" text-anchor="middle" class="m">gateway tier 獨立</text><text x="590" y="72" text-anchor="middle" class="m">sharded pub/sub</text><text x="590" y="90" text-anchor="middle" class="m">cell-based 隔離</text>
+  <path class="ar" d="M210 180 L250 150"/><path class="ar" d="M450 110 L490 70"/>
+  <text x="20" y="150" class="m t-bad">換掉的原因：第 2 台出現就送不到</text>
+  <text x="250" y="210" class="m t-bad">換掉的原因：Redis 單點、廣播量、</text>
+  <text x="250" y="226" class="m t-bad">一次 drain 影響全體</text>
+</svg></div></div>
+<div class="tbl"><table>
+<tr><th>業界路線</th><th>代表做法</th><th>適合</th></tr>
+<tr><td>託管連線</td><td>API Gateway WebSocket / AppSync subscriptions</td><td>團隊小、在線數中等、不想養 WS fleet</td></tr>
+<tr><td>自建 gateway</td><td>獨立的連線層（只管 WS）＋後面的 message service，兩層分開 deploy</td><td>在線數大；連線層很少 deploy，業務層常 deploy 也不會踢掉連線</td></tr>
+</table></div>
+<p>第二條路線的關鍵是：<mark class="who">把「常改的 code」和「抓著連線的 process」拆開</mark>。這樣業務 deploy 就不會觸發 Layer 2b 的 thundering herd。儲存端可參考 Discord 用 channel_id + Snowflake message_id 存數十億則訊息的做法（<a href="https://discord.com/blog/how-discord-stores-billions-of-messages">Discord blog</a>）。</p>
+
+<!-- ============ L6 ============ -->
+<h2 id="l6"><span class="n">LAYER 6</span>故障與 on-call</h2>
+<p>兩軸拆開之後，不同元件掛掉的症狀也不一樣。on-call 看症狀就知道是哪一軸：</p>
+<div class="tbl"><table>
+<tr><th>掛了什麼</th><th>用戶看到</th><th>你看到</th><th>第一個查</th><th>止血</th></tr>
+<tr><td>DB（儲存軸）</td><td>送出失敗、轉圈</td><td>send API 5xx、DB 寫入錯誤</td><td>DB 錯誤率 / throttling metric</td><td>回錯誤給 Alice（不能假 ack）；failover</td></tr>
+<tr><td>Redis（投遞軸）</td><td>訊息有送出，但對方要重新整理才看到</td><td>send 成功率正常，delivery latency 飆高</td><td><code>redis-cli PUBSUB NUMSUB user:Bob</code>（server-7 還有沒有在訂閱）</td><td>client 自動 fallback 成定期 catch-up；Redis failover</td></tr>
+<tr><td>WS node drain</td><td>短暫斷線後重連</td><td>ALB <code>NewConnectionCount</code> 尖峰；auth / DB 延遲同時飆</td><td>是不是剛好在 deploy</td><td>暫停 rollout；確認 client 有 jitter；調整 deregistration delay</td></tr>
+</table></div>
+<pre>SLO 建議（兩軸各一條）：
+  send 成功率         99.9%      （儲存軸：失敗要明確回報）
+  在線用戶投遞 P99    &lt; 1s       （投遞軸）
+  已 ack 訊息遺失     0          （稽核：只要 ack 了就一定在 DB）
+3AM page：send 成功率 burn rate、投遞 P99、重連率突增</pre>
+<p>公開案例：Slack 2022-02-22 事故。rolling restart 讓 cache 大量失效，流量回灌 DB，引發連鎖過載，正是「一個事件觸發大群請求撲向共用資源」（<a href="https://slack.engineering/slacks-incident-on-2-22-22/">Slack Engineering</a>）。</p>
+
+<!-- ============ L7 ============ -->
+<h2 id="l7"><span class="n">LAYER 7</span>面試</h2>
+<p><b>題目</b>：「Alice 和 Bob 連在不同的 WebSocket server 上。訊息怎麼送到 Bob？中間那條路斷了怎麼辦？」</p>
+<details open><summary>L4 回答</summary>
+<p>「用 Redis pub/sub。server-1 publish，server-7 subscribe 後推給 Bob。訊息也存進 DB。」</p>
+<p class="cap">缺：沒說順序、沒說 pub/sub 掉了怎麼辦、沒有數字。</p>
+</details>
+<details open><summary>L6 回答</summary>
+<p>「我把它拆成兩軸。<mark class="who">儲存</mark>交給 DB，commit 之後才 ack 給 Alice，這滿足稽核要求：ack 過的訊息一定查得到。<mark class="see">投遞</mark>交給 Redis pub/sub，server-1 往 <code>user:Bob</code> publish，不用知道 Bob 在哪台。</p>
+<p>Redis pub/sub 是 fire-and-forget，所以投遞軸允許掉。補救靠 client：重連時帶 last_msg_id，server 查 DB 裡 msg_id 比它大的訊息補回去，client 用 msg_id 去重，語意是 at-least-once。</p>
+<p>故障面：Redis 掛了不會掉訊息，只會掉即時性，用戶要重新整理才看到。我會用兩條 SLO 分開監控：send 成功率 99.9%、投遞 P99 小於 1 秒。部署時 WS node drain 會讓 2 萬條連線同秒重連，打爆 auth 和 DB，所以 client 要做 jitter 加 exponential backoff，ALB 設 deregistration delay。規模再大，就把連線層和業務層拆開 deploy。」</p>
+<p class="cap">多了：兩軸各自的保證、ack 順序、fire-and-forget 的補救、at-least-once、具體 SLO、drain 的故障模式和數字。</p>
+</details>
+
+<p class="link">下一次 SD 課（S51 續）開場：白板默畫 2c 的兩軸圖，講出兩個元件各自掛掉的症狀差，再接 2e 的 catch-up。</p>
+</div>
+
+</body></html>
