@@ -30,4 +30,6 @@ for t in templates/coach/SKILL.md.tmpl \
   grep -qF "TODO:" "$t" || { echo "template lost its TODO sentinels: $t"; tmpl_fail=1; }
 done
 [ "$tmpl_fail" -eq 0 ] && echo "templates OK" || exit 1
+echo "== learning-map site =="
+if (cd site && python3 test_build.py) && python3 site/build.py --check; then echo "site OK"; else echo "site FAIL"; exit 1; fi
 echo "ALL PASS"

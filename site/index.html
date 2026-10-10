@@ -1,0 +1,333 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Learning Map</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;600;700&family=Share+Tech+Mono&family=Noto+Sans+TC:wght@400;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js" integrity="sha384-CjloA8y00+1SDAUkjs099PVfnY2KmDC2BZnws9kh8D/lX1s46w6EPhpXdqMfjK6i" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.2/marked.min.js" integrity="sha384-/TQbtLCAerC3jgaim+N78RZSDYV7ryeoBCVqTuzRrFec2akfBkHS7ACQ3PQhvMVi" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.1.6/purify.min.js" integrity="sha384-+VfUPEb0PdtChMwmBcBmykRMDd+v6D/oFmB3rZM/puCMDYcIvF968OimRh4KQY9a" crossorigin="anonymous"></script>
+<style>
+/* Visual language follows wondering.app's course page: cream bg, Public Sans + Share Tech Mono,
+   "3D" buttons from a stacked 4px/5px bottom shadow, path circles, section cards. */
+:root {
+  --bg: #fffcf0; --ink: #261412; --text: #171717; --muted: #6f6660; --card: #fffcf0; --soft: #f3efe3;
+  --bd: #bdb5ad; --bd-1: #d4cdc4; --line: #d9d3c4;
+  --blue: #7aceff; --blue-1: #61a5cc; --blue-2: #497e9c; --sky: #94d8ff; --sky-1: #ade1ff; --sky-bg: #d6efff;
+  --high: #c8eadb; --high-ink: #1f7a50; --med: #fbe6bf; --med-ink: #9a6400; --amber: #f2b44c; --amber-1: #f6cd85;
+  --low: #f8d3c8; --low-ink: #b23a17; --red: #ec8a6c; --red-1: #f3b09b; --none: #ebe8df; --branch: #d9dcf5;
+  --mono: "Share Tech Mono", ui-monospace, monospace;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { margin: 0; background: var(--bg); color: var(--text); font-family: "Public Sans", "Noto Sans TC", system-ui, sans-serif; }
+a { color: inherit; }
+button { font: inherit; color: inherit; }
+
+/* header */
+header { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; gap: 12px; padding: 16px max(16px, calc(50vw - 576px)); background: color-mix(in srgb, var(--bg) 85%, transparent); backdrop-filter: blur(8px); }
+.brand { padding: 6px 12px; border: 1px solid var(--line); border-radius: 10px; font-size: 17px; text-decoration: none; background: var(--card); white-space: nowrap; }
+.nav { display: flex; gap: 2px; padding: 3px; border: 1px solid var(--line); border-radius: 10px; background: var(--card); overflow-x: auto; }
+.nav a { padding: 4px 10px; border-radius: 7px; font-size: 13px; color: var(--muted); text-decoration: none; white-space: nowrap; }
+.nav a.on { background: var(--ink); color: #fff; }
+
+/* 3D buttons */
+.btn { display: inline-flex; align-items: center; gap: 8px; padding: 8px 16px; font-family: var(--mono); font-size: 14px; text-transform: uppercase; letter-spacing: .04em; background: var(--card); border: 1px solid var(--bd); border-radius: 12px; box-shadow: 0 4px 0 var(--bd-1), 0 5px 0 var(--bd); cursor: pointer; text-decoration: none; transition: transform .08s, box-shadow .08s; }
+.btn:active { transform: translateY(4px); box-shadow: 0 0 0 var(--bd-1), 0 1px 0 var(--bd); }
+.btn svg { width: 16px; height: 16px; }
+
+main { max-width: 720px; margin: 0 auto; padding: 8px 16px 96px; }
+main.wide { max-width: 1152px; }
+h1 { font-size: 30px; font-weight: 700; color: var(--ink); margin: 28px 0 10px; line-height: 1.25; }
+h2 { font-size: 19px; font-weight: 600; color: var(--ink); margin: 40px 0 16px; scroll-margin-top: 80px; }
+.lead { font-size: 16px; line-height: 1.75; color: var(--text); margin: 0 0 18px; }
+.meta { display: flex; flex-wrap: wrap; gap: 18px; color: var(--muted); font-size: 14px; margin-bottom: 22px; }
+.meta span { display: inline-flex; align-items: center; gap: 6px; }
+.meta svg { width: 15px; height: 15px; }
+.actions { display: flex; flex-wrap: wrap; gap: 12px; }
+
+/* hero tile */
+.hero { height: 300px; border-radius: 16px; display: grid; place-items: center; overflow: hidden; position: relative; }
+.hero img { width: 92%; height: 100%; object-fit: contain; }
+.t-k8s { background: linear-gradient(135deg, #bcdcf7, #a5c9ef); } .t-sd { background: linear-gradient(135deg, #d9dcf5, #c3c7ee); }
+.t-leetcode { background: linear-gradient(135deg, #cdeedd, #b2e1ca); } .t-ca { background: linear-gradient(135deg, #f9e0cf, #f3cbb2); }
+
+/* home cards */
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; }
+.course { display: block; border-radius: 16px; overflow: hidden; text-decoration: none; border: 1px solid var(--line); background: var(--card); transition: transform .12s; }
+.course:hover { transform: translateY(-2px); }
+.course .hero { height: 150px; border-radius: 0; }
+.course .body { padding: 12px 14px 14px; }
+.course .name { font-weight: 600; font-size: 16px; }
+.course .sub { color: var(--muted); font-size: 13px; margin: 4px 0 10px; }
+.bar { height: 6px; border-radius: 99px; background: var(--soft); overflow: hidden; display: flex; }
+.bar span { height: 100%; }
+
+/* path */
+.legend { display: flex; flex-wrap: wrap; gap: 14px; font-size: 13px; color: var(--muted); margin: -6px 0 18px; }
+.legend i { display: inline-block; width: 12px; height: 12px; border-radius: 50%; margin-right: 5px; vertical-align: -1px; border: 2px solid; }
+.path-title { text-align: center; font-size: 19px; font-weight: 600; color: var(--ink); margin-bottom: 24px; }
+.section { padding: 14px 24px; border: 1px solid var(--bd-1); border-radius: 16px; background: var(--card); margin: 8px 0; }
+.section .st { font-weight: 600; font-size: 16px; color: var(--ink); }
+.section .ss { font-size: 14px; color: var(--muted); margin-top: 2px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.lessons { padding: 24px 0 28px; display: flex; flex-direction: column; gap: 20px; }
+.lesson { display: flex; align-items: center; gap: 16px; background: none; border: 0; padding: 0; cursor: pointer; text-align: left; width: fit-content; }
+.lesson .c { flex: none; width: 64px; height: 64px; border-radius: 50%; display: grid; place-items: center; background: var(--card); border: 2px solid var(--sky); box-shadow: 0 4px 0 var(--sky-1), 0 5px 0 var(--sky); transition: transform .08s; }
+.lesson:hover .c { transform: translateY(-2px); }
+.lesson .c svg { width: 26px; height: 26px; }
+.lesson .lt { font-size: 16px; color: var(--ink); max-width: 340px; line-height: 1.35; }
+.c.high { background: var(--sky-bg); color: #3ea8e5; }
+.c.med { border-color: var(--amber); box-shadow: 0 4px 0 var(--amber-1), 0 5px 0 var(--amber); color: var(--med-ink); background: #fff5df; }
+.c.low { border-color: var(--red); box-shadow: 0 4px 0 var(--red-1), 0 5px 0 var(--red); color: var(--low-ink); background: #fdebe5; }
+.c.none { border-color: var(--bd); box-shadow: 0 4px 0 var(--bd-1), 0 5px 0 var(--bd); color: var(--muted); }
+
+.badge { display: inline-block; padding: 1px 10px; border-radius: 999px; border: 1px solid var(--line); font-size: 12px; color: var(--muted); background: var(--card); white-space: nowrap; }
+.badge.high { color: var(--high-ink); background: var(--high); border-color: transparent; }
+.badge.med { color: var(--med-ink); background: var(--med); border-color: transparent; }
+.badge.low { color: var(--low-ink); background: var(--low); border-color: transparent; }
+
+.mapbox { position: relative; height: 320px; border: 1px solid var(--bd-1); border-radius: 16px; overflow: hidden; background: var(--card); cursor: pointer; }
+.row { display: flex; justify-content: space-between; align-items: center; margin-top: 40px; }
+.row h2 { margin: 0; }
+.files { display: grid; gap: 10px; }
+.file { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 12px 16px; border: 1px solid var(--bd-1); border-radius: 12px; background: var(--card); cursor: pointer; text-align: left; width: 100%; }
+.kp-tabs { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; }
+.kp-tabs button { padding: 4px 12px; border-radius: 999px; border: 1px solid var(--bd-1); background: var(--card); cursor: pointer; font-size: 13px; }
+.kp-tabs button.on { background: var(--ink); color: #fff; border-color: var(--ink); }
+.kp { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 10px; }
+.kp-card { padding: 10px 14px; border: 1px solid var(--bd-1); border-radius: 12px; background: var(--card); cursor: pointer; }
+.kp-card .more { display: none; } .kp-card.open .more { display: block; } .kp-card.open .short { display: none; }
+.kp-all { margin-top: 12px; }
+.kp-card b { display: block; color: var(--ink); font-size: 15px; margin-bottom: 2px; }
+.kp-card p { margin: 2px 0 0; font-size: 14px; line-height: 1.6; color: var(--text); }
+.kp-card p + p { color: var(--muted); }
+.point { padding: 14px 16px; border-radius: 12px; background: var(--sky-bg); line-height: 1.65; margin: 12px 0; }
+.section .notes { margin-left: auto; }
+.section { display: flex; align-items: center; gap: 12px; }
+.md { font-size: 15px; line-height: 1.75; overflow-x: auto; }
+.md table { border-collapse: collapse; } .md td, .md th { border: 1px solid var(--line); padding: 2px 6px; }
+.md code { font-size: 13px; background: var(--soft); padding: 1px 4px; border-radius: 4px; }
+
+/* modal */
+.modal { position: fixed; inset: 0; z-index: 20; display: none; place-items: center; background: rgba(38,20,18,.45); padding: 20px; }
+.modal.open { display: grid; }
+.sheet { width: min(1200px, 100%); height: min(860px, 100%); background: var(--card); border-radius: 18px; display: flex; flex-direction: column; overflow: hidden; }
+.sheet.narrow { width: min(720px, 100%); }
+.sheet-h { display: flex; justify-content: space-between; align-items: center; padding: 18px 24px; border-bottom: 1px solid var(--line); }
+.sheet-h h3 { margin: 0; font-size: 18px; font-weight: 600; color: var(--ink); }
+.x { width: 32px; height: 32px; border: 0; background: none; font-size: 20px; cursor: pointer; color: var(--muted); }
+.sheet-b { flex: 1; min-height: 0; display: flex; }
+.sheet-s { flex: 1; overflow-y: auto; padding: 20px 24px; }
+#tree { flex: 1; min-width: 0; position: relative; overflow: hidden; cursor: grab; }
+#side { width: 340px; border-left: 1px solid var(--line); overflow-y: auto; padding: 22px 20px; }
+.stats { display: flex; gap: 16px; padding: 12px 16px; margin: 14px 0; border-radius: 12px; background: var(--soft); flex-wrap: wrap; }
+.stats b { font-size: 18px; margin-right: 4px; } .stats span { color: var(--muted); font-size: 13px; }
+.cap { margin: 18px 0 8px; font-size: 12px; letter-spacing: .08em; color: var(--muted); display: flex; justify-content: space-between; }
+.item { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 10px 12px; margin-bottom: 8px; border-radius: 10px; background: var(--soft); cursor: pointer; font-size: 14px; }
+
+/* tree nodes (shared by preview + modal) */
+.stage { position: absolute; left: 0; top: 0; transform-origin: 0 0; }
+.stage svg { position: absolute; overflow: visible; pointer-events: none; }
+.stage path { fill: none; stroke: var(--line); stroke-width: 1.5; }
+.tn { position: absolute; width: 168px; transform: translate(-50%, -50%); padding: 8px 10px; border-radius: 9px; font-size: 13px; line-height: 1.3; text-align: center; background: var(--none); border: 2px solid transparent; cursor: pointer; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.tn.d0 { background: #e3f2fb; border-color: var(--sky); font-weight: 600; }
+.tn.d1 { background: var(--branch); }
+.tn.high { background: var(--high); } .tn.med { background: var(--med); } .tn.low { background: var(--low); }
+.tn.sel { border-color: var(--blue-2); }
+
+@media (max-width: 760px) {
+  h1 { font-size: 25px; }
+  .hero { height: 200px; }
+  .modal { padding: 0; } .sheet { height: 100%; border-radius: 0; } .sheet-b { flex-direction: column; }
+  #tree { flex: none; height: 55%; } #side { width: auto; border-left: 0; border-top: 1px solid var(--line); }
+  .lesson .lt { max-width: 220px; }
+}
+</style>
+</head>
+<body>
+<header>
+  <a class="brand" href="#/">Learning Map</a>
+  <nav class="nav" id="nav"></nav>
+</header>
+<main id="app"></main>
+<div class="modal" id="modal"><div class="sheet" id="sheet"></div></div>
+<script>
+const ICON = {
+  layers: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m12 3 9 5-9 5-9-5 9-5Z"/><path d="m3 13 9 5 9-5"/></svg>',
+  book: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 6c-2-1.5-5-2-8-1.5v14c3-.5 6 0 8 1.5 2-1.5 5-2 8-1.5v-14c-3-.5-6 0-8 1.5Z"/><path d="M12 6v14"/></svg>',
+  clock: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
+  map: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m9 4-6 2v14l6-2 6 2 6-2V4l-6 2-6-2Z"/><path d="M9 4v14M15 6v14"/></svg>',
+  chat: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 5h16v11H9l-5 4V5Z"/></svg>',
+  done: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="m2 13 4 4 9-10"/><path d="m11 16 1 1 9-10"/></svg>',
+  half: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="m5 13 4 4 10-10"/></svg>',
+  low: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 6v8M12 18v.5"/></svg>',
+  next: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="8"/><path d="m11 9 3 3-3 3"/></svg>',
+};
+const LEVEL = { low: 'low', 'low-med': 'med', med: 'med', 'med-high': 'high', high: 'high' };
+const TITLE = { k8s: 'Kubernetes / EKS', sd: 'System Design', ca: 'Cloud Architect', leetcode: 'LeetCode' };
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+const md = s => DOMPurify.sanitize(marked.parse(s || ''));
+const lvl = n => LEVEL[n?.level] || 'none';
+const isLeaf = n => n.kind === 'topic' || n.kind === 'problem';
+
+fetch('data.json', { cache: 'no-cache' }).then(r => r.json()).then(data => {
+  const byId = new Map(data.nodes.map(n => [n.id, n]));
+  const kids = new Map();
+  for (const n of data.nodes) if (n.parent) (kids.get(n.parent) || kids.set(n.parent, []).get(n.parent)).push(n);
+  const childrenOf = id => kids.get(id) || [];
+  const leavesOf = id => childrenOf(id).flatMap(n => isLeaf(n) ? [n] : leavesOf(n.id));
+  const coaches = childrenOf('me');
+  const app = document.getElementById('app'), modal = document.getElementById('modal'), sheet = document.getElementById('sheet');
+  const count = (ls, k) => ls.filter(l => lvl(l) === k).length;
+  const fileBtn = f => `<button class="file" data-file="${esc(f)}"><span>${esc(f.split('/').pop())}</span><span class="badge">${f.endsWith('.md') ? '閱讀' : '開新頁'}</span></button>`;
+  const bar = ls => `<div class="bar">${[['high', 'sky'], ['med', 'amber'], ['low', 'red']].map(([k, v]) => `<span style="width:${ls.length ? count(ls, k) / ls.length * 100 : 0}%;background:var(--${v})"></span>`).join('')}</div>`;
+  const hero = id => `<div class="hero t-${esc(id)}"><img src="img/${esc(id)}.svg" alt=""></div>`;
+
+  document.getElementById('nav').innerHTML = '<a href="#/" data-r="">Home</a>' + coaches.map(c => `<a href="#/c/${esc(c.id)}" data-r="${esc(c.id)}">${esc(c.label)}</a>`).join('');
+
+  // ---------- modal ----------
+  const close = () => { modal.classList.remove('open'); sheet.innerHTML = ''; };
+  modal.onclick = e => { if (e.target === modal) close(); };
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
+  function openSheet(title, body, narrow) {
+    sheet.className = 'sheet' + (narrow ? ' narrow' : '');
+    sheet.innerHTML = `<div class="sheet-h"><h3>${esc(title)}</h3><button class="x" aria-label="close">✕</button></div><div class="sheet-b">${body}</div>`;
+    sheet.querySelector('.x').onclick = close;
+    modal.classList.add('open');
+  }
+  function openFile(f) {
+    const url = 'files/' + encodeURI(f);
+    if (!f.endsWith('.md')) return window.open(url, '_blank', 'noopener');
+    openSheet(f.split('/').pop(), '<div class="sheet-s md">載入中…</div>', true);
+    fetch(url).then(r => r.text()).then(t => { const s = sheet.querySelector('.sheet-s'); if (s) s.innerHTML = md(t); });
+  }
+  function openLesson(n) {
+    let h = n.level ? `<p><span class="badge ${lvl(n)}">${esc(n.level)}</span></p>` : '';
+    if (n.point) h += `<div class="point">${esc(n.point)}</div>`;
+    if (n.files?.length) h += '<div class="cap"><span>筆記 / HTML</span><span>' + n.files.length + '</span></div><div class="files">' + n.files.map(fileBtn).join('') + '</div>';
+    if (!n.point && !n.files?.length) h += '<p class="badge">這個 topic 還沒有對應的筆記</p>';
+    if (n.files?.length === 1 && !n.point && n.kind === 'problem') return openFile(n.files[0]);
+    openSheet(n.label, `<div class="sheet-s">${h}</div>`, true);
+    sheet.querySelectorAll('[data-file]').forEach(b => b.onclick = () => openFile(b.dataset.file));
+  }
+
+  // ---------- tree (learning map) ----------
+  function drawTree(box, rootId, { onSelect, selected } = {}) {
+    const nodes = [byId.get(rootId)];
+    (function walk(id) { for (const k of childrenOf(id)) { nodes.push(k); walk(k.id); } })(rootId);
+    const root = d3.stratify().id(n => n.id).parentId(n => n.id === rootId ? null : n.parent)(nodes);
+    d3.tree().nodeSize([50, 230])(root);
+    box.innerHTML = '<div class="stage"><svg></svg></div>';
+    const stage = box.firstChild;
+    d3.select(stage.firstChild).selectAll('path').data(root.links()).join('path')
+      .attr('d', d3.linkHorizontal().source(l => [l.source.y + 84, l.source.x]).target(l => [l.target.y - 84, l.target.x]));
+    for (const d of root.descendants()) {
+      const el = document.createElement('div');
+      el.className = `tn d${Math.min(d.depth, 2)} ${isLeaf(d.data) ? lvl(d.data) : ''} ${d.id === selected ? 'sel' : ''}`;
+      el.style.left = d.y + 'px'; el.style.top = d.x + 'px'; el.textContent = d.data.label; el.title = d.data.label;
+      if (onSelect) el.onclick = e => { e.stopPropagation(); onSelect(d.data); };
+      stage.appendChild(el);
+    }
+    const ns = root.descendants(), [x0, x1] = d3.extent(ns, d => d.y), [y0, y1] = d3.extent(ns, d => d.x);
+    const k = Math.min(1, box.clientWidth / (x1 - x0 + 220), box.clientHeight / (y1 - y0 + 80));
+    const t = d3.zoomIdentity.translate((box.clientWidth - (x1 - x0) * k) / 2 - x0 * k, (box.clientHeight - (y1 + y0) * k) / 2).scale(k);
+    const apply = t => { stage.style.transform = `translate(${t.x}px,${t.y}px) scale(${t.k})`; };
+    if (onSelect) { const z = d3.zoom().scaleExtent([0.2, 2]).on('zoom', e => apply(e.transform)); d3.select(box).call(z).call(z.transform, t); }
+    else apply(t);
+  }
+  function openMap(coachId, selId = coachId) {
+    openSheet(`${TITLE[coachId] || coachId} learning map`, '<div id="tree"></div><aside id="side"></aside>');
+    const select = id => {
+      const n = byId.get(id), ls = isLeaf(n) ? [] : leavesOf(id), ch = childrenOf(id);
+      drawTree(document.getElementById('tree'), coachId, { onSelect: x => select(x.id), selected: id });
+      let h = `<h3 style="margin:0 0 8px;font-size:20px">${esc(n.label)}</h3>`;
+      h += n.level ? `<span class="badge ${lvl(n)}">${esc(n.level)}</span> ` : n.status ? `<span class="badge">${esc(n.status)}</span>` : '';
+      if (ls.length) h += `<div class="stats"><div><b>${ls.length}</b><span>topics</span></div><div><b>${count(ls, 'high')}</b><span>high</span></div><div><b>${count(ls, 'med')}</b><span>med</span></div><div><b>${count(ls, 'low')}</b><span>low</span></div></div>`;
+      if (ch.length) h += `<div class="cap"><span>LINKED</span><span>${ch.length}</span></div>` + ch.map(k => `<div class="item" data-id="${esc(k.id)}"><span>${esc(k.label)}</span><span class="badge ${isLeaf(k) ? lvl(k) : ''}">${esc(k.level || k.status || leavesOf(k.id).length)}</span></div>`).join('');
+      if (isLeaf(n) || n.files?.length && n.kind === 'phase') h += `<p><button class="btn" id="openLesson">${ICON.book} 打開</button></p>`;
+      const side = document.getElementById('side'); side.innerHTML = h;
+      side.querySelectorAll('[data-id]').forEach(el => el.onclick = () => select(el.dataset.id));
+      side.querySelector('#openLesson')?.addEventListener('click', () => openLesson(n));
+    };
+    select(selId);
+  }
+
+  // ---------- pages ----------
+  function home() {
+    const all = coaches.flatMap(c => leavesOf(c.id));
+    app.className = 'wide';
+    app.innerHTML = `<h1>我的學習地圖</h1><p class="lead">${coaches.length} 門課 · ${all.length} 個 topic · ${count(all, 'high')} 個 high</p><div class="grid">` +
+      coaches.map(c => {
+        const ls = leavesOf(c.id), secs = childrenOf(c.id).filter(n => !isLeaf(n)).length;
+        return `<a class="course" href="#/c/${esc(c.id)}">${hero(c.id)}<div class="body"><div class="name">${esc(TITLE[c.id] || c.label)}</div><div class="sub">${secs} sections · ${ls.length} topics · ${(c.files || []).length} notes</div>${bar(ls)}</div></a>`;
+      }).join('') + '</div>';
+  }
+
+  function course(id) {
+    const c = byId.get(id);
+    if (!c) return home();
+    const ls = leavesOf(id), kp = c.keypoints || [];
+    const secs = childrenOf(id).filter(n => !isLeaf(n)), loose = childrenOf(id).filter(isLeaf);
+    if (loose.length && secs.length) secs.push({ label: '其他（未分 phase）', loose });
+    const lessonsOf = s => s.loose || childrenOf(s.id).filter(isLeaf);
+    const mastered = ls.filter(l => lvl(l) === 'high').slice(0, 5);
+    const offsets = [0, 30, 60, 30];
+    const lessonList = lsn => '<div class="lessons">' + lsn.map((l, j) => {
+      const k = lvl(l), icon = { high: ICON.done, med: ICON.half, low: ICON.low, none: ICON.next }[k];
+      return `<button class="lesson" data-id="${esc(l.id)}" style="margin-left:calc(50% - 120px + ${offsets[j % 4]}px)"><span class="c ${k}">${icon}</span><span class="lt">${esc(l.label)}</span></button>`;
+    }).join('') + '</div>';
+
+    let h = hero(id) + `<h1>${esc(TITLE[id] || c.label)}</h1>`;
+    h += `<div class="meta"><span>${ICON.layers}${secs.length} sections</span><span>${ICON.book}${ls.length} topics</span><span>${ICON.clock}${(c.files || []).length} notes</span></div>`;
+    h += `<div class="actions"><button class="btn" data-jump="path">${ICON.map} View path</button><button class="btn" id="mapBtn">${ICON.map} Learning map</button>${kp.length ? `<button class="btn" data-jump="points">${ICON.chat} 學習重點</button>` : ''}</div>`;
+    if (mastered.length) h += `<h2>已經掌握</h2><ul class="lead" style="padding-left:20px">${mastered.map(l => `<li>${esc(l.label)}</li>`).join('')}</ul>`;
+    if (kp.length) h += '<h2 id="points">學習重點</h2><div class="kp-tabs">' + kp.map((t, i) => `<button data-kp="${i}" class="${i ? '' : 'on'}">${esc(t.title)} · ${t.rows.length}</button>`).join('') + '</div><div class="kp" id="kp"></div>';
+    h += '<h2 id="path">Learning Path</h2><div class="legend"><span><i style="border-color:var(--sky);background:var(--sky-bg)"></i>high</span><span><i style="border-color:var(--amber);background:#fff5df"></i>med</span><span><i style="border-color:var(--red);background:#fdebe5"></i>low</span><span><i style="border-color:var(--bd)"></i>未評 / 未開</span></div>';
+    h += `<div class="path-title">${esc(TITLE[id] || c.label)}</div>`;
+    secs.forEach((s, i) => {
+      const lsn = lessonsOf(s);
+      h += `<div class="section"><div><div class="st">${i + 1}. ${esc(s.label)}</div><div class="ss">${lsn.length ? `${count(lsn, 'high')}/${lsn.length} high` : '尚無 topic'}${s.status ? ` <span class="badge">${esc(s.status)}</span>` : ''}</div></div>${s.files?.length ? `<button class="btn notes" data-sec="${esc(s.id)}">${s.files.length} 筆記</button>` : ''}</div>`;
+      if (lsn.length) h += lessonList(lsn);
+    });
+    if (!secs.length && loose.length) h += lessonList(loose);
+    if (secs.length) h += '<div class="row"><h2>Learning Map</h2><button class="btn" id="mapOpen">Open</button></div><div class="mapbox" id="mapPreview" style="margin-top:16px"></div>';
+    if (c.files?.length) h += '<h2>全部筆記 / HTML</h2><div class="files">' + c.files.map(fileBtn).join('') + '</div>';
+    app.className = '';
+    app.innerHTML = h;
+    app.querySelectorAll('.lesson').forEach(b => b.onclick = () => openLesson(byId.get(b.dataset.id)));
+    app.querySelectorAll('[data-sec]').forEach(b => b.onclick = () => openLesson(byId.get(b.dataset.sec)));
+    // Condensed view: title + the first clause of the 2nd column; tap a card for the full text.
+    const short = t => { const x = (t || '').split(/ — |—|——/)[0].trim(); return x.length > 70 ? x.slice(0, 68) + '…' : x; };
+    const showKp = (i, all = false) => {
+      const t = kp[i], rows = all ? t.rows : t.rows.slice(0, 6);
+      document.getElementById('kp').innerHTML = rows.map(r => `<div class="kp-card"><b>${esc(r[0])}</b><p class="short">${esc(short(r[1]))}</p><div class="more">${r.slice(1).filter(Boolean).map(x => `<p>${esc(x)}</p>`).join('')}</div></div>`).join('') +
+        (!all && t.rows.length > 6 ? `<button class="btn kp-all" id="kpAll">顯示全部 ${t.rows.length} 條</button>` : '');
+      document.querySelectorAll('.kp-card').forEach(c => c.onclick = () => c.classList.toggle('open'));
+      document.getElementById('kpAll')?.addEventListener('click', () => showKp(i, true));
+      app.querySelectorAll('[data-kp]').forEach(b => b.classList.toggle('on', +b.dataset.kp === i));
+    };
+    app.querySelectorAll('[data-kp]').forEach(b => b.onclick = () => showKp(+b.dataset.kp));
+    if (kp.length) showKp(0);
+    app.querySelectorAll('[data-file]').forEach(b => b.onclick = () => openFile(b.dataset.file));
+    app.querySelectorAll('[data-jump]').forEach(b => b.onclick = () => document.getElementById(b.dataset.jump).scrollIntoView());
+    const pv = document.getElementById('mapPreview');
+    if (pv) { drawTree(pv, id); pv.onclick = () => openMap(id); }
+    document.getElementById('mapBtn').onclick = () => openMap(id);
+    document.getElementById('mapOpen')?.addEventListener('click', () => openMap(id));
+  }
+
+  function route() {
+    close();
+    const m = location.hash.match(/^#\/c\/([^/]+)/), id = m ? decodeURIComponent(m[1]) : '';
+    document.querySelectorAll('#nav a').forEach(a => a.classList.toggle('on', a.dataset.r === id));
+    id ? course(id) : home();
+    window.scrollTo(0, 0);
+  }
+  window.addEventListener('hashchange', route);
+  route();
+});
+</script>
+</body>
+</html>

@@ -6,3 +6,5 @@
 workspaces/k8s/labs/
 __pycache__/
 *.pyc
+.gstack/
+site/dist/
