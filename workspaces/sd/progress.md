@@ -23,11 +23,11 @@
      S50 的 coach 自產假訊息事故與應對規則另遷入 coaching-brief.md「Coach 自檢硬規則」。
      本區段 2026-08-19 之前的完整原文封存於 archive/breakpoint-history.md(冷檔,一字未刪)。 -->
 
-P3 / Chat System(Day 35)/ chunk 3(1v1 message flow)/ catch-up 球出未收。S51 於 2026-10-10 中途停(學生「課程太久、有點混亂」,要求用 /layers 從頭整理後先複習)。session 未走 F/G/H,session_count 未加。
+P3 / Chat System(Day 35)/ chunk 3 ✅(2026-10-10 S51 續,scaffold 下過:catch-up 自答 last_msg_id + `> 1042`;範圍條件只到「and bob」,外洩後果與 conversation_id/參與者驗證由 coach 給)→ chunk 4(ordering)✅ S51 續:Recall 自組「atomic increment + 不用時間(NTP 仍不一致)+ DB 欄位 + lock 排隊」,代價 unprompted;範圍格漏掉,鎖粒度答錯(選全表)後教 row-level lock 補上;Transfer(1045 先到)「不連續→catch-up」最小單位過,buffer/逾時/去重由 coach 補。下一步 chunk 5。S51 2026-10-10 學生喊「今天先到這裡」收工,F/G 未跑(保留在 resume),session_count 未加。
 
 下一場(S51 續)resume:
-1. 重投 catch-up 球(不換題):(a) client 重連送什麼(last_msg_id)(b) server-7 查 DB 的 WHERE(`conversation_id=? AND id > last_msg_id`)。撈到再接 Redis pub/sub vs Kafka vs 直接 RPC 路線比較。
-2. chunk 4(ordering)→ 5(offline delivery)→ 6(Observability mini)。
+1. ~~catch-up 球~~ ✅ S51 續。Redis pub/sub vs Kafka vs 直接 RPC 路線比較改在 G 抽。
+2. ~~chunk 4~~ ✅ → 5(offline delivery)→ 6(Observability mini)。
 3. 收尾 drill:FSI 題 Step 1 起自己走 + 3AM page test + cost 雙問;F/G 補跑。
 4. 冷測債:thundering herd / deregistration delay 兩名詞 S51 冷抽仍失敗(+3 天,2026-10-13);separate 反面代價換場景仍未跑。
 
@@ -103,8 +103,9 @@ Weak-topic flags: 無(至今沒有帶 flag 過 gate 的紀錄)。
      無卡的設 3 天(2026-07-13)。unresolved-session-count = 40 - 建立 session(近似;≥5 依 engine
      Priority Override 置頂,step A 每堂上限內逐步清)。 -->
 
-### Live(unresolved,41 筆)
+### Live(unresolved,42 筆)
 
+- (s51) | Database(lock granularity) | `UPDATE conversations ... WHERE id='conv-A'` 會擋誰:選「別的對話 conv-B 的寫入」(以為鎖全表) | 前置知識缺口(未教過,非推理錯):row-level vs table lock;連帶 per-conversation counter 的代價範圍講不出(「這我不確定」)。教後自組「同對話排隊、不同對話不影響」 | unresolved | 3 | 2026-10-13 | 0
 - (s51) | Chat System(pub/sub 語意) | 「pub/sub 掛 10 分鐘,Bob 何時看得到」答「pub/sub 恢復正常」;接著答「DB 記錄最後傳了什麼,redis 重啟才知道補哪些」 | 兩個錯疊在一起:(1) 以為 pub/sub 會緩衝/重送(Redis pub/sub 是 fire-and-forget);(2) **actor 錯置**:把 catch-up 交給 Redis,正解是 client 帶 last_msg_id、server 查 DB 補送(RP1 layer/ownership;Redis 當 truth 強先驗家族再現)。同場儲存 vs 投遞兩軸表**自己填對**(S50 軸摺疊本場拆開) | unresolved | 3 | 2026-10-13 | 0
 - (s50) | 分散式術語(deregistration delay) | 「ALB 摘掉 target 後既有連線還保留多久」的設定名答成「timeout 時間」;提示到「預設 300 秒、你在 billing 調過」仍未撈出正解 | 術語-概念未綁定家族;機制他懂(分批送人走),缺的是**名字**。同場另一個名詞 thundering herd 也是先講機制(「羊群效應 同時打」)才由 coach 補英文。**兩個名詞下場冷抽**;對照:deregistration delay = 分批斷(server 側)/ backoff + jitter = 分散回來(client 側) | unresolved | 3 | 2026-10-13 | 1
   - **S51 冷抽 fail**(2026-10-10,隔 51 天):兩個名字都「忘記了」;機制在縮題後自推回(2 萬條 1 秒內、共用的 auth/DB 先倒),jitter 自產、backoff 只到「延長一點吧」,名字與 deregistration delay 由 coach 給。interval 重置 3

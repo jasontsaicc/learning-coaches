@@ -20,6 +20,12 @@
 - 戳 pub/sub 掛 10 分鐘:訊息沒消失 ✅;Bob 何時看到答「pub/sub 恢復」❌ → 教 fire-and-forget → 答「redis 重啟查 DB 補」❌(actor 錯置)→ 同球兩錯,依 safety valve 縮成 client/server 填空圖,未作答。
 - 學生喊「課程太久、有點混亂」,要求 /layers 從頭整理。coach 存檔停。F/G/H 未跑,三指標未計分。
 - coach 自省:暖身(chunk 2)拖了 6 輪才進主菜,Comeback 該 2-3 球就收;主菜時間被吃掉是混亂來源之一。
+- **同日續場(2026-10-10)**:學生看完 /layers 頁後只卡 WebSocket Upgrade/101 一段 → 補三層圖解後學生自判「有點底層」→ depth ceiling,只留選型句 + DevOps 句。學生拍板**開場白板默畫全部拿掉**(自行手畫,已記 coaching-brief)。
+- **chunk 3 ✅**:catch-up 自答 `last_msg_id=1042` + `> 1042`(這次直述,沒問句);戳 3,000 對話 → 只補「and bob」,外洩後果 + conversation_id + 參與者驗證由 coach 給。
+- **chunk 4 ordering ✅**:clock skew 稽核假劇情圖開場 →「時間戳+只會往前」(reductio 打回:兩台各自單調仍衝突)→「有一台中心發號嗎」(方向對、問句)→ 範圍答成「跟交易有關的比較重要」(軸錯)→ 二選一 B(DB 欄位)理由「一定會寫到 DB」✅ → 併發戳:自撈 Redis INCR 單執行緒(名稱忘、概念對)。**Recall 自組決策句含代價(lock 排隊)unprompted** 🌟;範圍格漏 → 「這我不確定」→ 選錯鎖粒度(A 全表)→ 教 row-level lock → 自組「同對話排隊、不同對話不影響」。Transfer(1045 先到):「不連續→catch-up 嗎?」最小單位過。
+- 問句收尾本場 5+ 次(其他的server嗎 / 類似SNS嗎 / 中心發號碼嗎 / 這樣嗎 / catch 去等嗎),s38 條目即測持續 fail。
+- 三指標:argument 🟡(chunk 4 Recall 首次自產代價,但範圍格漏)/ ops 未測 / capacity 未測。F/G 未跑,存在 breakpoint。
+- 筆記:`portfolio/sd/notes/day35-chat-system.md` 新建;artifact 加 2f ordering。
 
 ## S50(2026-08-19,倒帳 + WR5 收帳 + Chat System chunk 2)
 
