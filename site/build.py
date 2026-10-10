@@ -127,6 +127,46 @@ def note_target(filename, topics, phases):
     return []
 
 
+SD_DAY_RE = re.compile(r"^#{3,4} Day (\d+)(?:-(\d+))?: (.+)$", re.M)
+
+
+def sd_plan(detail_text):
+    """curriculum-detail '### Day 4-5: Load Balancer & Reverse Proxy' under '## Phase 1: ...'
+    -> [('P1', 4, 5, 'Load Balancer & Reverse Proxy'), ...]"""
+    out = []
+    for chunk in re.split(r"^## Phase (\d+):[^\n]*\n", detail_text, flags=re.M)[1:]:
+        if chunk.isdigit():
+            phase = f"P{chunk}"
+            continue
+        out += [(phase, int(a), int(b or a), re.sub(r"\s*[★☆—].*$", "", t).strip())
+                for a, b, t in SD_DAY_RE.findall(chunk)]
+    return out
+
+
+def phase_focus(curriculum_text):
+    """Phase -> (name, focus). Table rows '| **P2a 網路深水區** ⭐ | focus | ...' (k8s/sd) or
+    '## P1 Networking Gap-Scan (0.5 week)' followed by a '**焦點**:...' line (ca)."""
+    out = {}
+    for pid, name, focus in re.findall(r"^\| \*\*(P\d+[a-z]?) ([^*]+)\*\*[^|]*\| ([^|]+) \|", curriculum_text, re.M):
+        out[pid] = (re.sub(r"\(Day [^)]*\)", "", name).strip(), focus.strip())
+    for pid, name, body in re.findall(r"^## (P\d+[a-z]?) (.+?)(?: \([^)]*\))?\n(.*?)(?=^## |\Z)", curriculum_text, re.M | re.S):
+        m = re.search(r"\*\*焦點\*\*[:：]\s*(.+)", body)
+        out.setdefault(pid, (name.strip(), m.group(1).strip() if m else ""))
+    return out
+
+
+def split_focus(focus):
+    """'scheduler、affinity/taints、HPA/VPA/Karpenter' -> ['scheduler', 'affinity/taints', 'HPA/VPA/Karpenter']"""
+    return [x.strip() for x in focus.split("、") if x.strip()] if "、" in focus else []
+
+
+LC_ROW_RE = re.compile(r"^\| (\d+) \| ([^|]+?) \|", re.M)
+
+
+def slug(title):
+    return re.sub(r"[^a-z0-9]+", "-", title.lower()).strip("-")
+
+
 def build():
     nodes = [{"id": "me", "label": "me", "kind": "root"}]
 
@@ -137,14 +177,17 @@ def build():
     for c in ENGINE_COACHES:
         ws = ROOT / "workspaces" / c
         text = (ws / "progress.md").read_text()
-        curriculum = ROOT / "skills" / f"{c}-coach" / "references" / "curriculum.md"
-        ranges = day_phases(curriculum.read_text()) if curriculum.exists() else []
+        refs = ROOT / "skills" / f"{'cloud-architect' if c == 'ca' else c}-coach" / "references"
+        curriculum = (refs / "curriculum.md").read_text()
+        ranges, focus = day_phases(curriculum), phase_focus(curriculum)
         notes = files_in(ROOT / "portfolio" / c / "notes", ws / "notes")
         kp = keypoints(c)
         add(c, c, "coach", "me", files=notes, keypoints=kp)
         phases = {}
         for pid, label, status in parse_phases(text):
-            phases[pid] = add(f"{c}:{pid}", f"{pid} {label}".strip(), "phase", c, status=status, files=[])
+            name, plan = focus.get(pid, (label, ""))
+            phases[pid] = add(f"{c}:{pid}", f"{pid} {label or name}".strip(), "phase", c,
+                              status=status, plan=plan, files=[])
         topics = []
         for i, line in enumerate(l for l in section(text, "Mastery").splitlines() if l.startswith("- ")):
             parsed = parse_mastery_line(line)
@@ -156,6 +199,18 @@ def build():
             # one-liner whose topic name prefixes this topic ("Load Balancer" -> "Load Balancer (Day 4-5)")
             point = next((r[1] for t in kp if t["cols"][0] == "Topic" for r in t["rows"] if name.startswith(r[0])), None)
             topics.append(add(f"{c}:t{i}", name, "topic", parent, level=level, session=s, point=point, files=[]))
+        # planned (not yet taught) lessons from the curriculum, shown grey on the path
+        if c == "sd":
+            taught = [tuple(map(int, m.groups(default=0))) for t in topics
+                      if (m := re.search(r"Day (\d+)(?:-(\d+))?", t["label"]))]
+            for j, (pid, a, b, title) in enumerate(sd_plan((refs / "curriculum-detail.md").read_text())):
+                if pid in phases and not any(x <= b and a <= (y or x) for x, y in taught):
+                    add(f"{c}:plan{j}", f"{title} (Day {a}{f'-{b}' if b != a else ''})", "topic", f"{c}:{pid}", planned=True)
+        else:
+            for pid, ph in phases.items():
+                if ph["status"] == "not-started" and not any(t["parent"] == ph["id"] for t in topics):
+                    for j, item in enumerate(split_focus(ph["plan"])):
+                        add(f"{c}:{pid}:plan{j}", item, "topic", ph["id"], planned=True)
         by_id = {n["id"]: n for n in nodes}
         for f in notes:
             for target in note_target(f, topics, phases):
@@ -171,6 +226,11 @@ def build():
             label = done[key][0] if key in done else prob.name
             add(f"lc:{key}", label, "problem", f"lc:{group.name}",
                 level="high" if key in done else None, files=files_in(prob))
+    have = {re.match(r"#(\d+)", n["label"]).group(1) for n in nodes if re.match(r"#\d+", n["label"])}
+    have |= {n["id"].rsplit("/", 1)[-1] for n in nodes if n["id"].startswith("lc:") and "/" in n["id"]}
+    for num, title in LC_ROW_RE.findall((ROOT / "skills/leetcode-coach/references/curriculum.md").read_text()):
+        if num not in have and slug(title) not in have:
+            add(f"lc:plan{num}", f"#{num} {title}", "problem", "lc:linked-list", planned=True)
 
     return {"nodes": nodes}
 

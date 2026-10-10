@@ -82,6 +82,9 @@ h2 { font-size: 19px; font-weight: 600; color: var(--ink); margin: 40px 0 16px; 
 .c.med { border-color: var(--amber); box-shadow: 0 4px 0 var(--amber-1), 0 5px 0 var(--amber); color: var(--med-ink); background: #fff5df; }
 .c.low { border-color: var(--red); box-shadow: 0 4px 0 var(--red-1), 0 5px 0 var(--red); color: var(--low-ink); background: #fdebe5; }
 .c.none { border-color: var(--bd); box-shadow: 0 4px 0 var(--bd-1), 0 5px 0 var(--bd); color: var(--muted); }
+.c.plan { border: 2px dashed var(--bd); box-shadow: none; color: var(--bd); background: transparent; }
+.lesson.plan .lt { color: var(--muted); }
+.section .plan { font-size: 13px; color: var(--muted); margin-top: 6px; line-height: 1.5; }
 
 .badge { display: inline-block; padding: 1px 10px; border-radius: 999px; border: 1px solid var(--line); font-size: 12px; color: var(--muted); background: var(--card); white-space: nowrap; }
 .badge.high { color: var(--high-ink); background: var(--high); border-color: transparent; }
@@ -136,6 +139,7 @@ h2 { font-size: 19px; font-weight: 600; color: var(--ink); margin: 40px 0 16px; 
 .tn.d1 { background: var(--branch); }
 .tn.high { background: var(--high); } .tn.med { background: var(--med); } .tn.low { background: var(--low); }
 .tn.sel { border-color: var(--blue-2); }
+.tn.plan { background: transparent; border: 1.5px dashed var(--bd); color: var(--muted); }
 
 @media (max-width: 760px) {
   h1 { font-size: 25px; }
@@ -169,7 +173,7 @@ const LEVEL = { low: 'low', 'low-med': 'med', med: 'med', 'med-high': 'high', hi
 const TITLE = { k8s: 'Kubernetes / EKS', sd: 'System Design', ca: 'Cloud Architect', leetcode: 'LeetCode' };
 const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
 const md = s => DOMPurify.sanitize(marked.parse(s || ''));
-const lvl = n => LEVEL[n?.level] || 'none';
+const lvl = n => n?.planned ? 'plan' : LEVEL[n?.level] || 'none';
 const isLeaf = n => n.kind === 'topic' || n.kind === 'problem';
 
 fetch('data.json', { cache: 'no-cache' }).then(r => r.json()).then(data => {
@@ -204,10 +208,11 @@ fetch('data.json', { cache: 'no-cache' }).then(r => r.json()).then(data => {
     fetch(url).then(r => r.text()).then(t => { const s = sheet.querySelector('.sheet-s'); if (s) s.innerHTML = md(t); });
   }
   function openLesson(n) {
-    let h = n.level ? `<p><span class="badge ${lvl(n)}">${esc(n.level)}</span></p>` : '';
+    let h = n.planned ? '<p><span class="badge">課綱中，尚未開課</span></p>' : n.level ? `<p><span class="badge ${lvl(n)}">${esc(n.level)}</span></p>` : '';
     if (n.point) h += `<div class="point">${esc(n.point)}</div>`;
     if (n.files?.length) h += '<div class="cap"><span>筆記 / HTML</span><span>' + n.files.length + '</span></div><div class="files">' + n.files.map(fileBtn).join('') + '</div>';
-    if (!n.point && !n.files?.length) h += '<p class="badge">這個 topic 還沒有對應的筆記</p>';
+    if (!n.point && !n.files?.length && !n.planned) h += '<p class="badge">這個 topic 還沒有對應的筆記</p>';
+    if (n.plan) h += `<div class="point">課綱：${esc(n.plan)}</div>`;
     if (n.files?.length === 1 && !n.point && n.kind === 'problem') return openFile(n.files[0]);
     openSheet(n.label, `<div class="sheet-s">${h}</div>`, true);
     sheet.querySelectorAll('[data-file]').forEach(b => b.onclick = () => openFile(b.dataset.file));
@@ -244,7 +249,7 @@ fetch('data.json', { cache: 'no-cache' }).then(r => r.json()).then(data => {
       drawTree(document.getElementById('tree'), coachId, { onSelect: x => select(x.id), selected: id });
       let h = `<h3 style="margin:0 0 8px;font-size:20px">${esc(n.label)}</h3>`;
       h += n.level ? `<span class="badge ${lvl(n)}">${esc(n.level)}</span> ` : n.status ? `<span class="badge">${esc(n.status)}</span>` : '';
-      if (ls.length) h += `<div class="stats"><div><b>${ls.length}</b><span>topics</span></div><div><b>${count(ls, 'high')}</b><span>high</span></div><div><b>${count(ls, 'med')}</b><span>med</span></div><div><b>${count(ls, 'low')}</b><span>low</span></div></div>`;
+      if (ls.length) h += `<div class="stats"><div><b>${ls.length}</b><span>topics</span></div><div><b>${count(ls, 'high')}</b><span>high</span></div><div><b>${count(ls, 'med')}</b><span>med</span></div><div><b>${count(ls, 'low')}</b><span>low</span></div><div><b>${count(ls, 'plan')}</b><span>未開</span></div></div>`;
       if (ch.length) h += `<div class="cap"><span>LINKED</span><span>${ch.length}</span></div>` + ch.map(k => `<div class="item" data-id="${esc(k.id)}"><span>${esc(k.label)}</span><span class="badge ${isLeaf(k) ? lvl(k) : ''}">${esc(k.level || k.status || leavesOf(k.id).length)}</span></div>`).join('');
       if (isLeaf(n) || n.files?.length && n.kind === 'phase') h += `<p><button class="btn" id="openLesson">${ICON.book} 打開</button></p>`;
       const side = document.getElementById('side'); side.innerHTML = h;
@@ -256,12 +261,12 @@ fetch('data.json', { cache: 'no-cache' }).then(r => r.json()).then(data => {
 
   // ---------- pages ----------
   function home() {
-    const all = coaches.flatMap(c => leavesOf(c.id));
+    const all = coaches.flatMap(c => leavesOf(c.id)).filter(l => !l.planned);
     app.className = 'wide';
     app.innerHTML = `<h1>我的學習地圖</h1><p class="lead">${coaches.length} 門課 · ${all.length} 個 topic · ${count(all, 'high')} 個 high</p><div class="grid">` +
       coaches.map(c => {
         const ls = leavesOf(c.id), secs = childrenOf(c.id).filter(n => !isLeaf(n)).length;
-        return `<a class="course" href="#/c/${esc(c.id)}">${hero(c.id)}<div class="body"><div class="name">${esc(TITLE[c.id] || c.label)}</div><div class="sub">${secs} sections · ${ls.length} topics · ${(c.files || []).length} notes</div>${bar(ls)}</div></a>`;
+        return `<a class="course" href="#/c/${esc(c.id)}">${hero(c.id)}<div class="body"><div class="name">${esc(TITLE[c.id] || c.label)}</div><div class="sub">${secs} sections · ${ls.length - count(ls, 'plan')}/${ls.length} topics · ${(c.files || []).length} notes</div>${bar(ls)}</div></a>`;
       }).join('') + '</div>';
   }
 
@@ -275,20 +280,20 @@ fetch('data.json', { cache: 'no-cache' }).then(r => r.json()).then(data => {
     const mastered = ls.filter(l => lvl(l) === 'high').slice(0, 5);
     const offsets = [0, 30, 60, 30];
     const lessonList = lsn => '<div class="lessons">' + lsn.map((l, j) => {
-      const k = lvl(l), icon = { high: ICON.done, med: ICON.half, low: ICON.low, none: ICON.next }[k];
-      return `<button class="lesson" data-id="${esc(l.id)}" style="margin-left:calc(50% - 120px + ${offsets[j % 4]}px)"><span class="c ${k}">${icon}</span><span class="lt">${esc(l.label)}</span></button>`;
+      const k = lvl(l), icon = { high: ICON.done, med: ICON.half, low: ICON.low, none: ICON.next, plan: ICON.next }[k];
+      return `<button class="lesson ${k}" data-id="${esc(l.id)}" style="margin-left:calc(50% - 120px + ${offsets[j % 4]}px)"><span class="c ${k}">${icon}</span><span class="lt">${esc(l.label)}</span></button>`;
     }).join('') + '</div>';
 
     let h = hero(id) + `<h1>${esc(TITLE[id] || c.label)}</h1>`;
-    h += `<div class="meta"><span>${ICON.layers}${secs.length} sections</span><span>${ICON.book}${ls.length} topics</span><span>${ICON.clock}${(c.files || []).length} notes</span></div>`;
+    h += `<div class="meta"><span>${ICON.layers}${secs.length} sections</span><span>${ICON.book}${ls.length - count(ls, 'plan')}/${ls.length} topics 已學</span><span>${ICON.clock}${(c.files || []).length} notes</span></div>`;
     h += `<div class="actions"><button class="btn" data-jump="path">${ICON.map} View path</button><button class="btn" id="mapBtn">${ICON.map} Learning map</button>${kp.length ? `<button class="btn" data-jump="points">${ICON.chat} 學習重點</button>` : ''}</div>`;
     if (mastered.length) h += `<h2>已經掌握</h2><ul class="lead" style="padding-left:20px">${mastered.map(l => `<li>${esc(l.label)}</li>`).join('')}</ul>`;
     if (kp.length) h += '<h2 id="points">學習重點</h2><div class="kp-tabs">' + kp.map((t, i) => `<button data-kp="${i}" class="${i ? '' : 'on'}">${esc(t.title)} · ${t.rows.length}</button>`).join('') + '</div><div class="kp" id="kp"></div>';
-    h += '<h2 id="path">Learning Path</h2><div class="legend"><span><i style="border-color:var(--sky);background:var(--sky-bg)"></i>high</span><span><i style="border-color:var(--amber);background:#fff5df"></i>med</span><span><i style="border-color:var(--red);background:#fdebe5"></i>low</span><span><i style="border-color:var(--bd)"></i>未評 / 未開</span></div>';
+    h += '<h2 id="path">Learning Path</h2><div class="legend"><span><i style="border-color:var(--sky);background:var(--sky-bg)"></i>high</span><span><i style="border-color:var(--amber);background:#fff5df"></i>med</span><span><i style="border-color:var(--red);background:#fdebe5"></i>low</span><span><i style="border-color:var(--bd)"></i>已學未評</span><span><i style="border-color:var(--bd);border-style:dashed"></i>課綱未開</span></div>';
     h += `<div class="path-title">${esc(TITLE[id] || c.label)}</div>`;
     secs.forEach((s, i) => {
       const lsn = lessonsOf(s);
-      h += `<div class="section"><div><div class="st">${i + 1}. ${esc(s.label)}</div><div class="ss">${lsn.length ? `${count(lsn, 'high')}/${lsn.length} high` : '尚無 topic'}${s.status ? ` <span class="badge">${esc(s.status)}</span>` : ''}</div></div>${s.files?.length ? `<button class="btn notes" data-sec="${esc(s.id)}">${s.files.length} 筆記</button>` : ''}</div>`;
+      h += `<div class="section"><div><div class="st">${i + 1}. ${esc(s.label)}</div><div class="ss">${lsn.length ? `${count(lsn, 'high')}/${lsn.length} high${count(lsn, 'plan') ? ` · ${count(lsn, 'plan')} 未開` : ''}` : '尚無 topic'}${s.status ? ` <span class="badge">${esc(s.status)}</span>` : ''}</div>${s.plan ? `<div class="plan">課綱：${esc(s.plan)}</div>` : ''}</div>${s.files?.length ? `<button class="btn notes" data-sec="${esc(s.id)}">${s.files.length} 筆記</button>` : ''}</div>`;
       if (lsn.length) h += lessonList(lsn);
     });
     if (!secs.length && loose.length) h += lessonList(loose);

@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Parser self-check for site/build.py. Run: python3 site/test_build.py"""
-from build import day_phases, leetcode_done, note_target, parse_mastery_line, parse_phases, parse_table, phase_by_day
+from build import (day_phases, leetcode_done, note_target, parse_mastery_line, parse_phases, parse_table,
+                   phase_by_day, phase_focus, sd_plan, slug, split_focus)
 
 # Real lines from workspaces/*/progress.md (## Mastery), plus one synthetic colon-in-name case.
 MASTERY = [
@@ -73,5 +74,24 @@ assert note_target("portfolio/sd/notes/day10-message-queue-part2.md", TOPICS, PH
 assert note_target("workspaces/k8s/notes/s38-secrets.md", TOPICS, PH) == ["t2"]
 assert note_target("portfolio/k8s/notes/p2a-ingress.md", TOPICS, PH) == ["P2a"]
 assert note_target("portfolio/sd/notes/go-01-fundamentals.md", TOPICS, PH) == []
+
+DETAIL = """## Phase 0: Thinking Framework (Day 1-3)
+### Day 1: What SD Interviews Actually Test
+### Phase 0 Gate
+## Phase 3: Classic SD Problems (Day 27-59)
+### Tier 1: Must Do (Day 27-45)
+#### Day 35-37: Chat System ★★★★
+#### Day 58-59: Ride Matching (Uber) ★★★★ — Geo Capstone
+"""
+assert sd_plan(DETAIL) == [("P0", 1, 1, "What SD Interviews Actually Test"), ("P3", 35, 37, "Chat System"),
+                           ("P3", 58, 59, "Ride Matching (Uber)")], sd_plan(DETAIL)
+
+K8S_CURR = "| **P2a 網路深水區** ⭐ | Service/kube-proxy、Ingress | P1 gate | x |\n| **P1 Core Building Blocks**(Day 4-16) | LB、caching | P0 gate | y |\n"
+CA_CURR = "## P1 Networking Gap-Scan (0.5 week)\n\n**焦點**:找出 AWS networking 的洞。前置:P0。\n\n- x\n\n## Sidecar: Linux\n"
+assert phase_focus(K8S_CURR) == {"P2a": ("網路深水區", "Service/kube-proxy、Ingress"), "P1": ("Core Building Blocks", "LB、caching")}, phase_focus(K8S_CURR)
+assert phase_focus(CA_CURR) == {"P1": ("Networking Gap-Scan", "找出 AWS networking 的洞。前置:P0。")}, phase_focus(CA_CURR)
+assert split_focus("scheduler、affinity/taints、PDB") == ["scheduler", "affinity/taints", "PDB"]
+assert split_focus("把 migration 練到能推理,前置:P1") == []
+assert slug("Remove Nth Node From End") == "remove-nth-node-from-end"
 
 print("site/test_build.py OK")
