@@ -11,4 +11,5 @@ k8s / sd / terraform / ca 共用 `engine/`。leetcode-coach 是 standalone(節�
 - `workspaces/` is git-tracked learner state. Coaching sessions write it; dev work must not touch it.
 - `legacy/`, `workspaces/*/archive/pre-migration/`, and `workspaces/leetcode/archive/pre-rebuild/`
   are frozen history. Read-only.
+- Learning-map web: `site/` (build, data sources, note naming, traps in `site/README.md`). Read it before changing the site or adding notes/HTML.
 - New coach: `./scripts/new-coach.sh <name>` (scaffolds with TODO markers, fails lint until filled).

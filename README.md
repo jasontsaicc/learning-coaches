@@ -82,6 +82,7 @@ learning-coaches/
 │   │                                        #   archive/pre-rebuild/ (engine-era state)
 │   └── ca/                                  # progress.md (engine schema), gap-scan records,
 │                                            #   thread-pull list, mock scorecards
+├── site/                                    # learning-map static site (see site/README.md)
 └── portfolio/                               # recruiter-facing artifacts
     ├── k8s/                                 # notes/ + manifests/ (+ observability/,
     │                                        #   gitops/, terraform-eks/ as phases grow)
