@@ -13,6 +13,14 @@
      - docs/curriculum-roadmap.md、docs/planning-review.md → workspaces/sd/archive/pre-migration/
      - sd-coach skill 本體         → skills/sd-coach/(curriculum 詳文=references/curriculum-detail.md) -->
 
+## S51(2026-10-10,Comeback 隔 51 天;中途停)
+
+- Comeback Protocol:暖身 chunk 2 冷回憶。「忘記了」→ 縮成時間線填空,2 萬條重連數量自答、「1 秒內」自答;哪個框先倒以問句(「其他的server嗎」)丟球 → 畫 A/B/C 三框數字圖後答「A 有多台分散,auth/DB 最可能爆」,被戳「auth 也有多台」只答到「平常撐得住、一次性過重」,400x 與 autoscaling 分鐘級由 coach 補。jitter 自產;backoff 只到「延長一點吧」。thundering herd / deregistration delay 名字冷抽失敗,registry interval 重置。
+- chunk 3 重投:DB 會不會主動通知 → 「沒有印象了 類似SNS 嗎」(方向對 = pub/sub 家族,問句丟球再現)。coach 補「沒 pub/sub = server→DB 的 2 秒 polling」。**兩軸表(儲存=DB 掛→message loss / 投遞=pub/sub 掛→server-7 不知道)學生自己填對**,S50 軸摺疊本場拆開。
+- 戳 pub/sub 掛 10 分鐘:訊息沒消失 ✅;Bob 何時看到答「pub/sub 恢復」❌ → 教 fire-and-forget → 答「redis 重啟查 DB 補」❌(actor 錯置)→ 同球兩錯,依 safety valve 縮成 client/server 填空圖,未作答。
+- 學生喊「課程太久、有點混亂」,要求 /layers 從頭整理。coach 存檔停。F/G/H 未跑,三指標未計分。
+- coach 自省:暖身(chunk 2)拖了 6 輪才進主菜,Comeback 該 2-3 球就收;主菜時間被吃掉是混亂來源之一。
+
 ## S50(2026-08-19,倒帳 + WR5 收帳 + Chat System chunk 2)
 
 - **間隔 8 天,Comeback 條件成立**;開場照 [Re-plan 2026-08-11] 的複習制走,coach 單方倒帳不徵詢。過期卡 14 → 7 張(判準:有 open registry 條目或明確回退史),7 張封存,到期日錯開。

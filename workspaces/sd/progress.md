@@ -13,7 +13,7 @@
 
 - session_count: 50
 - last_weekly_review: 50 — WR5 於 S50 收帳(Topic 1 @S42 / Topic 2 @S45 / **Topic 3 @S50 學生選「收」**;過期卡 sweep 以 S50 倒帳形式完成:14 → 7 張 + 7 封存)。⚠️ **artifact audit 未跑**(engine WR flow 第 6 步),掛在下一次 WR
-- last_session_date: 2026-08-19
+- last_session_date: 2026-10-10
 - warm_up_classification: (standalone 時期未記錄;學員已 P3,Step 0 模式預設 Exploration)
 
 ## Current Session breakpoint
@@ -23,13 +23,14 @@
      S50 的 coach 自產假訊息事故與應對規則另遷入 coaching-brief.md「Coach 自檢硬規則」。
      本區段 2026-08-19 之前的完整原文封存於 archive/breakpoint-history.md(冷檔,一字未刪)。 -->
 
-P3 / Chat System(Day 35)/ chunk 3(1v1 message flow)/ 球出未收。S50 於 2026-08-19 正常收工(學生喊「今天先到這裡」),S51 第一顆球重投。
+P3 / Chat System(Day 35)/ chunk 3(1v1 message flow)/ catch-up 球出未收。S51 於 2026-10-10 中途停(學生「課程太久、有點混亂」,要求用 /layers 從頭整理後先複習)。session 未走 F/G/H,session_count 未加。
 
-下一場(S51)resume:
-1. **第一顆球重投(不換題)**:訊息寫進 DB 之後,server-7 怎麼知道有新訊息 → 拆開**儲存(DB)vs 投遞(pub/sub)兩軸**,接 Redis pub/sub vs Kafka vs 直接 RPC 的路線比較。
-2. Chat System chunk 3 → 4(ordering)→ 5(offline delivery)→ 6(Observability mini)。
-3. 收尾 drill:學生自己把 FSI 題從 Step 1 clarify 走一遍(題目與四抽屜 scaffold S49 已給,不再重給)+ 收尾雙問(3AM page test + cost)。
-4. 冷測債:**deregistration delay / thundering herd 兩個名詞**冷抽;**separate anything 的反面代價**換場景(shard/cell 隔離)複測仍未跑。
+下一場(S51 續)resume:
+1. 開場白板默畫 chunk 3 的兩軸圖(DB=儲存 / pub/sub=投遞)+ 兩個元件各自掛掉的症狀差(DB 掛=掉訊息;pub/sub 掛=只掉即時性)。
+2. 重投 catch-up 球(不換題):(a) client 重連送什麼(last_msg_id)(b) server-7 查 DB 的 WHERE(`conversation_id=? AND id > last_msg_id`)。撈到再接 Redis pub/sub vs Kafka vs 直接 RPC 路線比較。
+3. chunk 4(ordering)→ 5(offline delivery)→ 6(Observability mini)。
+4. 收尾 drill:FSI 題 Step 1 起自己走 + 3AM page test + cost 雙問;F/G 補跑。
+5. 冷測債:thundering herd / deregistration delay 兩名詞 S51 冷抽仍失敗(+3 天,2026-10-13);separate 反面代價換場景仍未跑。
 
 ## Phase status
 
@@ -103,9 +104,11 @@ Weak-topic flags: 無(至今沒有帶 flag 過 gate 的紀錄)。
      無卡的設 3 天(2026-07-13)。unresolved-session-count = 40 - 建立 session(近似;≥5 依 engine
      Priority Override 置頂,step A 每堂上限內逐步清)。 -->
 
-### Live(unresolved,40 筆)
+### Live(unresolved,41 筆)
 
-- (s50) | 分散式術語(deregistration delay) | 「ALB 摘掉 target 後既有連線還保留多久」的設定名答成「timeout 時間」;提示到「預設 300 秒、你在 billing 調過」仍未撈出正解 | 術語-概念未綁定家族;機制他懂(分批送人走),缺的是**名字**。同場另一個名詞 thundering herd 也是先講機制(「羊群效應 同時打」)才由 coach 補英文。**兩個名詞下場冷抽**;對照:deregistration delay = 分批斷(server 側)/ backoff + jitter = 分散回來(client 側) | unresolved | 3 | 2026-08-22 | 0
+- (s51) | Chat System(pub/sub 語意) | 「pub/sub 掛 10 分鐘,Bob 何時看得到」答「pub/sub 恢復正常」;接著答「DB 記錄最後傳了什麼,redis 重啟才知道補哪些」 | 兩個錯疊在一起:(1) 以為 pub/sub 會緩衝/重送(Redis pub/sub 是 fire-and-forget);(2) **actor 錯置**:把 catch-up 交給 Redis,正解是 client 帶 last_msg_id、server 查 DB 補送(RP1 layer/ownership;Redis 當 truth 強先驗家族再現)。同場儲存 vs 投遞兩軸表**自己填對**(S50 軸摺疊本場拆開) | unresolved | 3 | 2026-10-13 | 0
+- (s50) | 分散式術語(deregistration delay) | 「ALB 摘掉 target 後既有連線還保留多久」的設定名答成「timeout 時間」;提示到「預設 300 秒、你在 billing 調過」仍未撈出正解 | 術語-概念未綁定家族;機制他懂(分批送人走),缺的是**名字**。同場另一個名詞 thundering herd 也是先講機制(「羊群效應 同時打」)才由 coach 補英文。**兩個名詞下場冷抽**;對照:deregistration delay = 分批斷(server 側)/ backoff + jitter = 分散回來(client 側) | unresolved | 3 | 2026-10-13 | 1
+  - **S51 冷抽 fail**(2026-10-10,隔 51 天):兩個名字都「忘記了」;機制在縮題後自推回(2 萬條 1 秒內、共用的 auth/DB 先倒),jitter 自產、backoff 只到「延長一點吧」,名字與 deregistration delay 由 coach 給。interval 重置 3
 - (s50) | Interview habit(質疑題目正當性) | 盲測球 1 首答「完整怎麼切應該不重要」把題目降級,且該答案漏掉題目明寫的 100 台(machine ID 那格) | 逃避家族第 3 次面具(S42 兩次 →S50);⚠️ **coach 自我修正**:精確 bit 數確實不是考點,學生這半邊有道理,**下次不要拿「面試會考」硬撐,直接指出他的答案漏了題目給的數字**,那才是有效施壓點 | unresolved | 3 | 每場 drill 即測 | 0
 - (s48) | Capacity(modeling) | `130 台 worker × 每台佔 36s → 每秒空出幾台` 講不出算式:縮到單一除法後仍問「要怎麼算啊」,給 rate 模型骨架(一台 36s 放手一次 = 1/36 台/秒)後即答 3.6 | ⚠️ **與棄權家族分家的新根因**:算術沒問題(同場 `(10+2)×3=36` unprompted 算對),缺的是**把場景翻成算式**的 modeling 步驟;治法=每場塞一題「先寫出單位式(X per second 是什麼除什麼)」再算數字 | unresolved | 7 | 2026-08-18 | 0
   - **S49 複測 pass**(2026-08-11):Little's Law 冷測 `300/s × 200ms = 60 台` unprompted,並自補「這是最少」。coach 當場把它與卡死的 `130÷36` 對焊(**一台每 W 秒放手一次 = 1/W 台/秒**,乘除只是同式兩面)。interval 3→7。缺口剩:安全係數的**機制**(見下方 s49 headroom 條),數字面已通
