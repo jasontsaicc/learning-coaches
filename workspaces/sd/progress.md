@@ -26,11 +26,10 @@
 P3 / Chat System(Day 35)/ chunk 3(1v1 message flow)/ catch-up 球出未收。S51 於 2026-10-10 中途停(學生「課程太久、有點混亂」,要求用 /layers 從頭整理後先複習)。session 未走 F/G/H,session_count 未加。
 
 下一場(S51 續)resume:
-1. 開場白板默畫 chunk 3 的兩軸圖(DB=儲存 / pub/sub=投遞)+ 兩個元件各自掛掉的症狀差(DB 掛=掉訊息;pub/sub 掛=只掉即時性)。
-2. 重投 catch-up 球(不換題):(a) client 重連送什麼(last_msg_id)(b) server-7 查 DB 的 WHERE(`conversation_id=? AND id > last_msg_id`)。撈到再接 Redis pub/sub vs Kafka vs 直接 RPC 路線比較。
-3. chunk 4(ordering)→ 5(offline delivery)→ 6(Observability mini)。
-4. 收尾 drill:FSI 題 Step 1 起自己走 + 3AM page test + cost 雙問;F/G 補跑。
-5. 冷測債:thundering herd / deregistration delay 兩名詞 S51 冷抽仍失敗(+3 天,2026-10-13);separate 反面代價換場景仍未跑。
+1. 重投 catch-up 球(不換題):(a) client 重連送什麼(last_msg_id)(b) server-7 查 DB 的 WHERE(`conversation_id=? AND id > last_msg_id`)。撈到再接 Redis pub/sub vs Kafka vs 直接 RPC 路線比較。
+2. chunk 4(ordering)→ 5(offline delivery)→ 6(Observability mini)。
+3. 收尾 drill:FSI 題 Step 1 起自己走 + 3AM page test + cost 雙問;F/G 補跑。
+4. 冷測債:thundering herd / deregistration delay 兩名詞 S51 冷抽仍失敗(+3 天,2026-10-13);separate 反面代價換場景仍未跑。
 
 ## Phase status
 
