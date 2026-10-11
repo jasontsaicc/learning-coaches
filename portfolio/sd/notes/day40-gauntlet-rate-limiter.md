@@ -1,5 +1,7 @@
 # S40 — Drill Gauntlet #1: Distributed Rate Limiter + 逾期複習清倉
 
+<!-- topic: Distributed Rate Limiter (Day 31-32) -->
+
 > execution-heavy 場。前半換情境冷測清 4 筆逾期複習,後半 L3 bar-raiser drill。
 > 重點不在分數(~3/9 訓練場),在**暴露輸出習慣**:第一句永遠裸結論。
 

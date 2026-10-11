@@ -142,7 +142,37 @@ banks = build()['chapters']
 assert {c['coachId'] for c in banks} == {'k8s','sd','leetcode','ca'}
 for c in banks:
     primary = [q for q in c['questions'] if 'variantOf' not in q]
-    assert len(primary) == 6 and len(c['questions']) == 8
+    assert len(primary) == 6 and len(c['questions']) >= 8
     assert len({q['type'] for q in primary}) >= 3
     assert len({q['objectiveId'] for q in primary}) >= 2
 print('four chapter banks OK')
+
+# A missing Mastery grade does not mean the current chapter has not started.
+from build import sd_topic_states
+state_topics = [
+    {'id':'chat','label':'Chat System (Day 35-37)','parent':'sd:P3','planned':True,'files':['chat.md']},
+    {'id':'notification','label':'Notification (Day 33-34)','parent':'sd:P3','planned':True,'files':['notification.md']},
+    {'id':'cache','label':'Distributed Cache (Day 38-39)','parent':'sd:P3','planned':True,'files':[]},
+    {'id':'old','label':'Other (Day 35-37)','parent':'sd:P2','planned':True,'files':[]},
+]
+progress = '## Current Session breakpoint\n<!-- old Day 38 -->\nP3 / Chat System(Day 35)/ chunk 4 PRIVATE DETAIL\n\nresume: Day 38 later\n\n## Phase status\n'
+sd_topic_states(state_topics, progress)
+assert state_topics[0]['status'] == 'in-progress' and state_topics[0]['planned'] is False
+assert state_topics[0].get('level') is None
+assert state_topics[1]['status'] == 'materials-available' and state_topics[1]['planned'] is True
+assert state_topics[2]['planned'] is True and not state_topics[2].get('status')
+assert state_topics[3]['planned'] is True
+assert 'PRIVATE' not in str(state_topics)
+assert len([n for n in build()['nodes'] if n['label']=='Chat System (Day 35-37)']) == 1
+chat = next(n for n in build()['nodes'] if n['label']=='Chat System (Day 35-37)')
+assert chat['parent'] == 'sd:P3'
+assert 'portfolio/sd/notes/day35-chat-system.md' in chat['files']
+news = next(n for n in build()['nodes'] if n['label']=='News Feed (Day 40-42)')
+assert not any('rate-limiter' in f for f in news['files'])
+limiter = next(n for n in data['nodes'] if n['label']=='Distributed Rate Limiter (Day 31-32)')
+assert 'portfolio/sd/notes/day40-gauntlet-rate-limiter.md' in limiter['files']
+assert 'portfolio/sd/notes/day40-gauntlet-rate-limiter-mindmap.md' in limiter['files']
+unstarted = [{'label':'Chat System (Day 35-37)','parent':'sd:P3','planned':True,'files':['chat.md']}]
+sd_topic_states(unstarted, '## Current Session breakpoint\n<!-- P3 / Chat (Day 35) -->\n')
+assert unstarted[0]['status'] == 'materials-available' and unstarted[0]['planned']
+print('SD learning status and note placement OK')

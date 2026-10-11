@@ -29,6 +29,7 @@ systemctl --user status learning-map   # serves site/dist on 100.86.161.122:8123
 |---|---|
 | phases | `workspaces/<c>/progress.md` `## Phase status`; names/focus from `skills/<c>-coach/references/curriculum.md` (ca: `cloud-architect-coach`) |
 | learned topics + level | `## Mastery` lines, parsed by `parse_mastery_line` |
+| SD current topic | phase and Day derived from `## Current Session breakpoint`; only the derived status is exported |
 | planned (dashed) lessons | sd: `curriculum-detail.md` `### Day a-b: Title`; k8s: not-started phase focus split on `、`; leetcode: curriculum table rows |
 | leetcode problems (practiced, not automatically high) | folders `workspaces/leetcode/<group>/<slug>/` + `## 做過` for labels |
 | key points / flashcards | `KEYPOINTS` in `build.py` (one-liner tables, k8s term-registry, sd pattern-map) |
@@ -43,6 +44,7 @@ Never shown: session logs, breakpoint text, story-bank, career files.
 | `p2a-*.md/html` | phase P2a |
 | `s40-*` | every topic whose Mastery line ends `(s40)` |
 | any HTML with `<meta name="topic" content="<exact Mastery label>">` | that one topic (wins over the prefix; unknown label fails the build) |
+| any Markdown with `<!-- topic: <exact topic label> -->` on its own line | explicit topic attachment, before filename rules; unknown label fails the build |
 | `day10-*` | sd topic/planned lesson whose `(Day a-b)` covers 10 |
 | `portfolio/leetcode/notes/<problem-slug>.html` | that problem (folder slug or title slug) |
 | anything else | course-level "全部筆記 / HTML" only |
@@ -61,6 +63,14 @@ HTML buttons show the page `<title>`. To bring in a claude.ai artifact: `Artifac
 
 
 ## Chapter exercises
+
+繁中新增與維護步驟：[AUTHORING.md](AUTHORING.md)。
+
+SD activity and assessment are separate: the current breakpoint chapter shows
+「進行中 · 尚未評量」 without inventing a grade. Unassessed planned chapters with notes
+show 「已有教材 · 尚未評量」; other planned chapters show 「課綱待學」.
+Notes alone do not prove completion. Current-topic detection expects a breakpoint line
+starting with `P3 / Chat System(Day 35)/ ...`; changing that format requires updating the parser.
 
 Initial coverage: Pod probes, Cache-Aside, Linked List Cycle and VPC Peering.
 Each has six primary questions plus two variants. Other chapters explicitly show that

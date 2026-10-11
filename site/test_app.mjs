@@ -41,3 +41,18 @@ test("recent topic requires unambiguous stable parent and label", () => {
     null,
   );
 });
+
+test("lesson labels separate activity, materials, plans and assessment", async () => {
+  const { level } = await import("./app.js");
+  assert.equal(level({ status: "in-progress" }), "進行中 · 尚未評量");
+  assert.equal(
+    level({ status: "in-progress", level: "med" }),
+    "進行中 · 教練評量 med",
+  );
+  assert.equal(
+    level({ planned: true, status: "materials-available" }),
+    "已有教材 · 尚未評量",
+  );
+  assert.equal(level({ planned: true }), "課綱待學");
+  assert.equal(level({ level: "high" }), "教練評量 · high");
+});

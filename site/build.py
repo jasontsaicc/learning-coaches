@@ -110,17 +110,18 @@ def keypoints(coach):
 
 
 TOPIC_META_RE = re.compile(r'<meta name="topic" content="([^"]+)"')
+TOPIC_COMMENT_RE = re.compile(r'^<!-- topic: (.+?) -->$', re.M)
 
 
 def note_target(filename, topics, phases, topic=None):
     """Which nodes a note belongs to: 'p2a-ingress.md' -> phase P2a, 's38-secrets.md' -> topics at
     session 38, 'day10-message-queue.md' -> topic whose '(Day 10-11)' range covers 10.
-    `topic` (from an HTML note's <meta name="topic">) pins it to the topic with exactly that label
+    `topic` (from HTML meta or a Markdown topic comment) pins it to the topic with exactly that label
     and wins over the filename rules; a label that matches nothing raises."""
     if topic is not None:
         hits = [t["id"] for t in topics if t["label"] == topic]
         if not hits:
-            raise ValueError(f"{filename}: <meta name=\"topic\"> {topic!r} matches no Mastery topic")
+            raise ValueError(f"{filename}: topic {topic!r} matches no topic")
         return hits
     stem = Path(filename).stem.lower()
     if m := re.match(r"p(\d+[a-z]?)-", stem):
@@ -152,6 +153,20 @@ def sd_plan(detail_text):
         out += [(phase, int(a), int(b or a), re.sub(r"\s*[★☆—].*$", "", t).strip())
                 for a, b, t in SD_DAY_RE.findall(chunk)]
     return out
+
+
+def sd_topic_states(topics, progress_text):
+    """Derive activity separately from grades; never export the private breakpoint text."""
+    breakpoint = re.sub(r'<!--.*?-->', '', section(progress_text, 'Current Session breakpoint'), flags=re.S)
+    current = re.search(r'^(P\d+[a-z]?)\s*/[^\n]*?\(\s*Day\s+(\d+)(?:-\d+)?\s*\)', breakpoint, re.M)
+    for topic in topics:
+        days = re.search(r'Day (\d+)(?:-(\d+))?', topic['label'])
+        if (current and days and topic['parent'] == f'sd:{current[1]}'
+                and int(days[1]) <= int(current[2]) <= int(days[2] or days[1])):
+            topic.update(status='in-progress', planned=False)
+        elif topic.get('planned') and topic.get('files'):
+            # A prepared note is evidence of material, not of completed learning.
+            topic['status'] = 'materials-available'
 
 
 def phase_focus(curriculum_text):
@@ -300,9 +315,12 @@ def build():
                         add(f"{c}:{pid}:plan{j}", item, "topic", ph["id"], planned=True)
         by_id = {n["id"]: n for n in nodes}
         for f in notes:
-            meta = TOPIC_META_RE.search((ROOT / f).read_text()) if f.endswith(".html") else None
+            pattern = TOPIC_META_RE if f.endswith('.html') else TOPIC_COMMENT_RE
+            meta = pattern.search((ROOT / f).read_text())
             for target in note_target(f, topics, phases, meta and html.unescape(meta.group(1))):
                 (phases[target] if target in phases else by_id[target])["files"].append(f)
+        if c == 'sd':
+            sd_topic_states(topics, text)
 
     lc = ROOT / "workspaces" / "leetcode"
     done = leetcode_done((lc / "progress.md").read_text())

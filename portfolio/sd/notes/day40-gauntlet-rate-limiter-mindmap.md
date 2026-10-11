@@ -1,5 +1,7 @@
 # S40 Mind Map — Distributed Rate Limiter (hand-write practice)
 
+<!-- topic: Distributed Rate Limiter (Day 31-32) -->
+
 ```
                                     ┌─ local counter → 100×50 = 5000/min (BROKEN)
                                     │
