@@ -42,6 +42,7 @@ Never shown: session logs, breakpoint text, story-bank, career files.
 |---|---|
 | `p2a-*.md/html` | phase P2a |
 | `s40-*` | every topic whose Mastery line ends `(s40)` |
+| any HTML with `<meta name="topic" content="<exact Mastery label>">` | that one topic (wins over the prefix; unknown label fails the build) |
 | `day10-*` | sd topic/planned lesson whose `(Day a-b)` covers 10 |
 | `portfolio/leetcode/notes/<problem-slug>.html` | that problem (folder slug or title slug) |
 | anything else | course-level "全部筆記 / HTML" only |

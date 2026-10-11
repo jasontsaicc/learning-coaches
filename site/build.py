@@ -4,6 +4,7 @@
 Usage: python3 site/build.py [--check]   (--check parses everything, writes nothing)
 Any unparseable input raises, so a bad build never reaches deploy.
 """
+import html
 import json
 import re
 import shutil
@@ -108,9 +109,19 @@ def keypoints(coach):
     return out
 
 
-def note_target(filename, topics, phases):
+TOPIC_META_RE = re.compile(r'<meta name="topic" content="([^"]+)"')
+
+
+def note_target(filename, topics, phases, topic=None):
     """Which nodes a note belongs to: 'p2a-ingress.md' -> phase P2a, 's38-secrets.md' -> topics at
-    session 38, 'day10-message-queue.md' -> topic whose '(Day 10-11)' range covers 10."""
+    session 38, 'day10-message-queue.md' -> topic whose '(Day 10-11)' range covers 10.
+    `topic` (from an HTML note's <meta name="topic">) pins it to the topic with exactly that label
+    and wins over the filename rules; a label that matches nothing raises."""
+    if topic is not None:
+        hits = [t["id"] for t in topics if t["label"] == topic]
+        if not hits:
+            raise ValueError(f"{filename}: <meta name=\"topic\"> {topic!r} matches no Mastery topic")
+        return hits
     stem = Path(filename).stem.lower()
     if m := re.match(r"p(\d+[a-z]?)-", stem):
         return [pid for pid in phases if pid.lower() == f"p{m.group(1)}"]
@@ -289,7 +300,8 @@ def build():
                         add(f"{c}:{pid}:plan{j}", item, "topic", ph["id"], planned=True)
         by_id = {n["id"]: n for n in nodes}
         for f in notes:
-            for target in note_target(f, topics, phases):
+            meta = TOPIC_META_RE.search((ROOT / f).read_text()) if f.endswith(".html") else None
+            for target in note_target(f, topics, phases, meta and html.unescape(meta.group(1))):
                 (phases[target] if target in phases else by_id[target])["files"].append(f)
 
     lc = ROOT / "workspaces" / "leetcode"

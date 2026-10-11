@@ -74,6 +74,13 @@ assert note_target("portfolio/sd/notes/day10-message-queue-part2.md", TOPICS, PH
 assert note_target("workspaces/k8s/notes/s38-secrets.md", TOPICS, PH) == ["t2"]
 assert note_target("portfolio/k8s/notes/p2a-ingress.md", TOPICS, PH) == ["P2a"]
 assert note_target("portfolio/sd/notes/go-01-fundamentals.md", TOPICS, PH) == []
+# <meta name="topic"> pins one topic even when the s-prefix would match others; unknown label fails loud
+assert note_target("portfolio/k8s/notes/s40-load.html", TOPICS, PH, "Message Queue (Day 10-11)") == ["t3"]
+try:
+    note_target("portfolio/k8s/notes/s38-x.html", TOPICS, PH, "No Such Topic")
+    raise AssertionError("unknown meta topic must raise")
+except ValueError:
+    pass
 
 DETAIL = """## Phase 0: Thinking Framework (Day 1-3)
 ### Day 1: What SD Interviews Actually Test
