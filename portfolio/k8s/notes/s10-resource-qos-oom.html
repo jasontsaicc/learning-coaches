@@ -1,0 +1,311 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"></head><body>
+<title>QoS 與 OOM 機制</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC:wght@400;700&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: one notebook column on graph paper; figures on taped cards, scenarios as 2x2 comic panels */
+:root {
+  --paper: #F6F8FA;
+  --grid: rgba(90,130,170,.16);
+  --ink: #23313E;
+  --ink-soft: #55677A;
+  --card: #FFFFFF;
+  --tape: rgba(240,214,140,.75);
+  --who: #FFE98A;
+  --see: #BDEEF6;
+  --may: #F9CDE0;
+  --wrong: #D2453A;
+  --ok: #2F8F5B;
+  --line: #9DB0C2;
+  --font-hand: "LXGW WenKai TC", "Noto Sans TC", "PingFang TC", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #1A2320; --grid: rgba(200,230,210,.08); --ink: #E6EDE8; --ink-soft: #A9BAB1;
+    --card: #24302C; --tape: rgba(200,180,110,.45); --who: #8A7A2A; --see: #2B6A74; --may: #7A3F57;
+    --wrong: #FF8A7E; --ok: #7FD3A1; --line: #5E7268; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #1A2320; --grid: rgba(200,230,210,.08); --ink: #E6EDE8; --ink-soft: #A9BAB1;
+  --card: #24302C; --tape: rgba(200,180,110,.45); --who: #8A7A2A; --see: #2B6A74; --may: #7A3F57;
+  --wrong: #FF8A7E; --ok: #7FD3A1; --line: #5E7268; color-scheme: dark;
+}
+body {
+  background-color: var(--paper);
+  background-image: linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 22px 22px;
+  color: var(--ink);
+  font-family: var(--font-hand);
+  font-size: 17px;
+  line-height: 1.75;
+}
+.page { max-width: 760px; margin: 0 auto; padding-inline: 18px; padding-block: 32px 64px; display: grid; gap: 34px; }
+h1, h2 { text-wrap: balance; line-height: 1.3; margin: 0; }
+h1 { font-size: 2.1rem; }
+h2 { font-size: 1.45rem; display: flex; align-items: baseline; gap: 10px; }
+h2 .tag { font-family: var(--font-mono); font-size: .72rem; letter-spacing: .08em; color: var(--ink-soft); text-transform: uppercase; }
+p { margin: 0; }
+section { display: grid; gap: 14px; min-width: 0; }
+.sub { color: var(--ink-soft); font-size: .95rem; }
+mark { background: linear-gradient(transparent 52%, var(--who) 52%); color: inherit; padding: 0 2px; }
+mark.see { background: linear-gradient(transparent 52%, var(--see) 52%); }
+mark.may { background: linear-gradient(transparent 52%, var(--may) 52%); }
+code { font-family: var(--font-mono); font-size: .86em; background: color-mix(in srgb, var(--line) 22%, transparent); padding: 1px 5px; border-radius: 3px; }
+.card { position: relative; background: var(--card); padding: 22px 18px 16px; box-shadow: 0 1px 3px rgba(0,0,0,.12); min-width: 0; }
+.card::before { content: ""; position: absolute; top: -9px; left: 50%; width: 92px; height: 20px; transform: translateX(-50%) rotate(-2deg); background: var(--tape); }
+.scroll { overflow-x: auto; }
+svg text { font-family: var(--font-mono); fill: var(--ink); }
+svg .hand { font-family: var(--font-hand); }
+.rule { border-left: 4px solid var(--ok); padding: 6px 12px; font-size: 1.08rem; }
+.wrong { border-left: 4px solid var(--wrong); padding: 4px 12px; display: grid; gap: 2px; }
+.wrong b { color: var(--wrong); font-size: .85rem; letter-spacing: .05em; }
+.panels { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 14px; }
+.panel { border: 2px solid var(--ink); background: var(--card); padding: 10px; display: grid; gap: 6px; min-width: 0; }
+.panel h3 { margin: 0; font-size: 1rem; font-family: var(--font-mono); }
+.panel p { font-size: .92rem; }
+@media (max-width: 520px) { .panels { grid-template-columns: 1fr; } }
+table { border-collapse: collapse; width: 100%; font-size: .95rem; }
+th, td { border-bottom: 1px dashed var(--line); padding: 8px 6px; text-align: left; vertical-align: top; }
+th { font-family: var(--font-mono); font-size: .78rem; letter-spacing: .05em; color: var(--ink-soft); font-weight: 600; }
+ol { margin: 0; padding-left: 1.3em; display: grid; gap: 6px; }
+blockquote { margin: 0; padding: 12px 16px; background: var(--card); border: 2px dashed var(--line); }
+.en { font-family: var(--font-mono); font-size: .9rem; color: var(--ink-soft); }
+details summary{cursor:pointer}
+</style>
+<style>
+/* chapter-note additions on top of the notebook base */
+svg.fig { display: block; min-width: 640px; width: 100%; height: auto; }
+.lvl { font-family: var(--font-mono); font-size: .74rem; padding: 1px 7px; border: 1.5px solid var(--ink); border-radius: 10px; white-space: nowrap; }
+.lvl.high { background: color-mix(in srgb, var(--ok) 28%, transparent); }
+.lvl.med { background: var(--who); }
+.lvl.low { background: var(--may); }
+.lvl.todo { border-style: dashed; color: var(--ink-soft); }
+.meta { display: flex; flex-wrap: wrap; gap: 8px 16px; font-family: var(--font-mono); font-size: .8rem; color: var(--ink-soft); }
+.toc { display: flex; flex-wrap: wrap; gap: 6px 14px; font-family: var(--font-mono); font-size: .82rem; }
+.toc a { color: var(--ink); }
+.trail { display: grid; gap: 12px; }
+.fix { border-left: 4px solid var(--ok); padding: 4px 12px; }
+.two { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 14px; }
+@media (max-width: 560px) { .two { grid-template-columns: 1fr; } }
+details { background: var(--card); border: 2px dashed var(--line); padding: 10px 14px; }
+details[open] { border-style: solid; }
+details > div { display: grid; gap: 8px; margin-top: 10px; }
+.small { font-size: .9rem; }
+a { color: inherit; text-underline-offset: 3px; }
+pre { margin: 0; font-family: var(--font-mono); font-size: .82rem; line-height: 1.5; background: var(--card); border: 1px solid var(--line); padding: 10px 12px; overflow-x: auto; }
+</style>
+<meta name="topic" content="P1 resource/QoS/OOM">
+<main class="page">
+  <header style="display:grid;gap:10px">
+    <p class="sub">k8s 課程 · topic 深入 · P1 · <a href="https://claude.ai/artifact/UrVpfj1woG42r9M5UxMMBn">← P1 章節筆記</a></p>
+    <h1>QoS 與 OOM 機制</h1>
+    <p>章節筆記講了「CPU 變慢、memory 死掉」。這一頁直接讀 kernel 的檔案：limit 變成哪幾個 cgroup 數字、記憶體裡哪些 byte 收得回來、兩種 OOM 誰先動手、被殺的時候整個 container 都死還是只死一個 process。</p>
+    <div class="meta"><span>Mastery：high (s10)</span><span>lab：oom-demo（s5）、cg-demo memory.max（s25，讀數仍欠）</span></div>
+    <nav class="toc"><a href="#l0">L0</a><a href="#l1">L1</a><a href="#l2">L2</a><a href="#l3">L3</a><a href="#l4">L4</a><a href="#l5">L5</a><a href="#l6">L6</a><a href="#l7">L7</a><a href="#trail">錯題</a></nav>
+  </header>
+
+  <section id="l0">
+    <h2>Layer 0 · 一張圖<span class="tag">analogy</span></h2>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 720 200" role="img" aria-label="Water bucket per room with an overflow line; the building manager evicts tenants when the building tank runs low, starting with those without a lease">
+        <rect x="40" y="40" width="120" height="130" fill="none" stroke="var(--ink)" stroke-width="2.5"/>
+        <rect x="42" y="90" width="116" height="78" fill="var(--see)"/>
+        <line x1="30" y1="60" x2="170" y2="60" stroke="var(--wrong)" stroke-dasharray="5 4"/><text x="175" y="64" font-size="11" fill="var(--wrong)">memory.max：滿到這條線，kernel 當場把這間的人趕走</text>
+        <text x="100" y="190" text-anchor="middle" font-size="12" class="hand">每間房一個水桶</text>
+        <rect x="430" y="90" width="260" height="80" fill="var(--who)" stroke="var(--ink)" stroke-width="2"/>
+        <text x="560" y="115" text-anchor="middle" font-size="12" class="hand">整棟樓的水塔快空了</text>
+        <text x="560" y="138" text-anchor="middle" font-size="11">管理員（kubelet）挑人搬走：</text>
+        <text x="560" y="158" text-anchor="middle" font-size="11">沒簽約的先，用超過約定量的先</text>
+      </svg>
+    </div>
+    <p>兩種趕人。一種是你自己的水桶滿了，跟整棟樓還有多少水無關。一種是整棟樓快沒水了，管理員按合約挑人搬走。</p>
+  </section>
+
+  <section id="l1">
+    <h2>Layer 1 · 第一性原理<span class="tag">which bytes come back</span></h2>
+    <p><b>限制：記憶體裡有一部分 byte 收得回來，有一部分收不回來。</b>你 s10 說的「memory 不可壓縮」是對的，但要再精準一層：page cache（讀過的檔案）kernel 可以丟掉再讀一次；程式自己 malloc 的 anonymous memory，沒有 swap 就無處可去。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 720 220" role="img" aria-label="memory.current bar split into anonymous memory (unreclaimable), active file cache, and inactive file cache (reclaimable); working set equals current minus inactive_file; memory.max line">
+        <text x="20" y="25" font-size="12">一個 container 的 <tspan font-family="var(--font-mono)">memory.current</tspan> = 420 MiB</text>
+        <rect x="20" y="40" width="380" height="50" fill="var(--may)" stroke="var(--ink)"/><text x="210" y="70" text-anchor="middle" font-size="11">anon 300 MiB（heap、stack）收不回</text>
+        <rect x="400" y="40" width="100" height="50" fill="var(--who)" stroke="var(--ink)"/><text x="450" y="62" text-anchor="middle" font-size="10">active_file</text><text x="450" y="78" text-anchor="middle" font-size="10">80 MiB</text>
+        <rect x="500" y="40" width="50" height="50" fill="var(--see)" stroke="var(--ink)" stroke-dasharray="4 3"/><text x="525" y="62" text-anchor="middle" font-size="9">inactive</text><text x="525" y="78" text-anchor="middle" font-size="9">40</text>
+        <line x1="600" y1="30" x2="600" y2="100" stroke="var(--wrong)" stroke-width="2" stroke-dasharray="5 4"/><text x="605" y="110" font-size="10" fill="var(--wrong)">memory.max 512 MiB</text>
+        <line x1="20" y1="120" x2="500" y2="120" stroke="var(--ink)" stroke-width="2"/><line x1="20" y1="114" x2="20" y2="126" stroke="var(--ink)"/><line x1="500" y1="114" x2="500" y2="126" stroke="var(--ink)"/>
+        <text x="260" y="142" text-anchor="middle" font-size="11">working set = current − inactive_file = 380 MiB</text>
+        <text x="20" y="175" font-size="11" class="hand">碰到 memory.max 時，kernel 先回收 file cache（變慢但不死）。</text>
+        <text x="20" y="197" font-size="11" class="hand" fill="var(--wrong)">回收到 anon 為止還是超過 → 沒得收了 → OOM kill。</text>
+      </svg>
+    </div>
+    <p class="rule">所以監控要看 <b>working set</b>，不是 <code>memory.current</code>。一個會讀大量檔案的 app，current 常常貼著 limit，但大部分是可以丟掉的 cache，看起來很危險其實很健康。kubelet 的 eviction 和 <code>kubectl top</code> 也都用 working set。</p>
+  </section>
+
+  <section id="l2">
+    <h2>Layer 2 · 機制<span class="tag">read the kernel files</span></h2>
+    <h3 style="margin:0">spec 變成哪幾個檔案（cgroup v2）</h3>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 780 250" role="img" aria-label="Burstable pod with requests 250m and 256Mi and limits 500m and 512Mi maps to a cgroup path under kubepods-burstable; cpu.weight 10, cpu.max 50000 100000, memory.max 536870912, memory.oom.group 1">
+        <rect x="10" y="20" width="230" height="130" fill="var(--card)" stroke="var(--ink)" stroke-width="2"/>
+        <text x="20" y="42" font-size="11">resources:</text>
+        <text x="30" y="62" font-size="10">requests: {cpu: 250m, memory: 256Mi}</text>
+        <text x="30" y="80" font-size="10">limits:   {cpu: 500m, memory: 512Mi}</text>
+        <text x="20" y="108" font-size="10" fill="var(--ink-soft)">→ QoS = Burstable（有設但 ≠）</text>
+        <text x="20" y="128" font-size="10" fill="var(--ink-soft)">寫的人：kubelet → containerd → runc</text>
+        <text x="20" y="144" font-size="10" fill="var(--ink-soft)">什麼時候：建 container 那一刻</text>
+        <rect x="270" y="20" width="500" height="200" fill="var(--who)" stroke="var(--ink)" stroke-width="2"/>
+        <text x="280" y="40" font-size="10">/sys/fs/cgroup/kubepods.slice/kubepods-burstable.slice/</text>
+        <text x="290" y="56" font-size="10">kubepods-burstable-pod&lt;uid&gt;.slice/cri-containerd-&lt;id&gt;.scope/</text>
+        <g font-size="11">
+          <text x="290" y="86">cpu.weight</text><text x="460" y="86">10</text><text x="520" y="86" font-size="10" fill="var(--ink-soft)">← 250m 換成相對權重（搶不到時才有用）</text>
+          <text x="290" y="110">cpu.max</text><text x="460" y="110">50000 100000</text><text x="560" y="110" font-size="10" fill="var(--ink-soft)">← 每 100ms 最多 50ms</text>
+          <text x="290" y="134">memory.max</text><text x="460" y="134">536870912</text><text x="560" y="134" font-size="10" fill="var(--ink-soft)">← 只講 bytes</text>
+          <text x="290" y="158">memory.oom.group</text><text x="460" y="158">1</text><text x="520" y="158" font-size="10" fill="var(--ink-soft)">← 1.28 起：OOM 時整個 container 一起殺</text>
+          <text x="290" y="182">memory.events</text><text x="460" y="182">oom_kill 3</text><text x="560" y="182" font-size="10" fill="var(--ink-soft)">← 被殺過幾次的鐵證</text>
+          <text x="290" y="206">memory.high</text><text x="460" y="206">max</text><text x="520" y="206" font-size="10" fill="var(--ink-soft)">← 預設不設（MemoryQoS 才會用）</text>
+        </g>
+        <line x1="240" y1="85" x2="268" y2="85" stroke="var(--ink)" stroke-width="2"/>
+      </svg>
+    </div>
+    <p class="small"><code>memory.requests</code> 不會變成任何 cgroup 限制。它只在兩個地方生效：scheduler 排程時加總、kubelet eviction 排序時比較。所以「requests 設小一點也沒差」是錯的：它不影響 kernel，但影響誰先被搬走。</p>
+
+    <h3 style="margin:0">兩條 OOM 路徑，誰先動手</h3>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 780 260" role="img" aria-label="Path 1 container OOM: kernel acts instantly when one cgroup hits memory.max. Path 2 node pressure: kubelet checks signals periodically and evicts by ranking; if memory runs out faster than kubelet reacts, the global kernel OOM killer picks by oom_score_adj">
+        <text x="20" y="25" font-size="12" class="hand">路徑 1：container 撞自己的 memory.max</text>
+        <rect x="20" y="35" width="740" height="44" fill="var(--may)" stroke="var(--ink)"/>
+        <text x="30" y="55" font-size="11">kernel 在配置記憶體那一刻就檢查 → 回收 cache → 不夠 → OOM kill（同步、毫秒級）</text>
+        <text x="30" y="72" font-size="10" fill="var(--ink-soft)">Last State: OOMKilled · exit 137 · kubelet 只是事後回報，不是它殺的</text>
+        <text x="20" y="110" font-size="12" class="hand">路徑 2：整台 node 的 memory.available 變少</text>
+        <rect x="20" y="120" width="360" height="60" fill="var(--who)" stroke="var(--ink)"/>
+        <text x="30" y="140" font-size="11">kubelet 定期檢查 → &lt; 100Mi → 標 MemoryPressure</text>
+        <text x="30" y="158" font-size="11">→ 依排序 evict 整個 Pod（Pod 狀態 Failed / Evicted）</text>
+        <text x="30" y="174" font-size="10" fill="var(--ink-soft)">反應有延遲：是輪詢，不是即時</text>
+        <rect x="400" y="120" width="360" height="60" fill="var(--card)" stroke="var(--wrong)" stroke-width="2" stroke-dasharray="5 4"/>
+        <text x="410" y="140" font-size="11" fill="var(--wrong)">記憶體漲得比 kubelet 反應還快</text>
+        <text x="410" y="158" font-size="11" fill="var(--wrong)">→ node 層 kernel OOM killer 自己挑人</text>
+        <text x="410" y="174" font-size="10" fill="var(--wrong)">依 oom_score_adj，不看 k8s 的排序</text>
+        <line x1="380" y1="150" x2="398" y2="150" stroke="var(--wrong)"/>
+        <text x="20" y="215" font-size="11">kubelet 的排序：① 用量是否超過 requests ② Pod priority ③ 超過 requests 多少。</text>
+        <text x="20" y="235" font-size="11">「BestEffort → Burstable → Guaranteed」是這個排序的近似結果：BestEffort 的 requests 是 0，用一點就算超過。</text>
+      </svg>
+    </div>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 760 120" role="img" aria-label="oom_score_adj scale from -1000 to 1000: kubelet -999, Guaranteed -997, Burstable between 2 and 999 depending on request share, BestEffort 1000">
+        <line x1="30" y1="60" x2="730" y2="60" stroke="var(--ink)" stroke-width="2"/>
+        <g font-size="10" text-anchor="middle"><text x="30" y="85">-1000</text><text x="380" y="85">0</text><text x="730" y="85">1000</text></g>
+        <circle cx="31" cy="60" r="6" fill="var(--ok)"/><text x="60" y="40" font-size="10">kubelet -999</text>
+        <circle cx="32" cy="60" r="4" fill="var(--see)" stroke="var(--ink)"/><text x="60" y="25" font-size="10">Guaranteed -997</text>
+        <rect x="381" y="52" width="347" height="16" fill="var(--who)" opacity=".7"/><text x="555" y="45" text-anchor="middle" font-size="10">Burstable：1000 − 1000 × request / node 記憶體（夾在 2–999）</text>
+        <circle cx="730" cy="60" r="6" fill="var(--wrong)"/><text x="700" y="105" font-size="10" fill="var(--wrong)">BestEffort 1000：最先</text>
+        <text x="30" y="110" font-size="10" fill="var(--ink-soft)">分數越高，node 層 OOM 時越先被殺</text>
+      </svg>
+    </div>
+
+    <h3 style="margin:0">真實數字</h3>
+    <div class="scroll"><table>
+      <tr><th>參數</th><th>預設</th><th>意義</th></tr>
+      <tr><td>kubelet <code>evictionHard</code></td><td>memory.available&lt;100Mi、nodefs.available&lt;10%、imagefs.available&lt;15%、nodefs.inodesFree&lt;5%</td><td>磁碟也會觸發 eviction，不只記憶體</td></tr>
+      <tr><td>CFS period</td><td>100ms</td><td>CPU limit 500m = 每 100ms 用滿 50ms 就停，等下一個 period</td></tr>
+      <tr><td>CrashLoopBackOff 退避</td><td>10s 起倍增，上限 5 分鐘</td><td>穩定跑 10 分鐘後重設</td></tr>
+      <tr><td>exit 137</td><td>128 + 9</td><td>SIGKILL。graceful 停止是 143（128 + 15，SIGTERM）</td></tr>
+      <tr><td><code>memory.oom.group</code></td><td>1（cgroup v2，1.28 起）</td><td>1.32 起可用 kubelet <code>singleProcessOOMKill</code> 改回只殺一個 process</td></tr>
+    </table></div>
+  </section>
+
+  <section id="l3">
+    <h2>Layer 3 · 取捨<span class="tag">why this design</span></h2>
+    <div class="scroll"><table>
+      <tr><th>決定</th><th>選 A</th><th>選 B</th><th>判準</th></tr>
+      <tr><td>memory 超過時</td><td>殺（memory.max）</td><td>先節流（memory.high，MemoryQoS）</td><td>殺很乾淨、可預測；節流會讓 app 變很慢卻不死，排障更難</td></tr>
+      <tr><td>OOM 範圍</td><td>整個 container（oom.group=1）</td><td>只殺一個 process</td><td>多數 app 一個 process 死了整體就壞，乾脆重起；PostgreSQL 這類自己管子行程的會被誤傷</td></tr>
+      <tr><td>關鍵服務</td><td>Guaranteed（requests = limits）</td><td>Burstable</td><td>Guaranteed 最後被搬、OOM 分數最低；代價是不能借閒置資源</td></tr>
+      <tr><td>swap</td><td>關（預設）</td><td>開（NodeSwap）</td><td>開了 anon memory 有地方去，不會立刻 OOM，但延遲變不可預測</td></tr>
+      <tr><td>eviction 方式</td><td>hard：立刻搬</td><td>soft：持續 N 秒才搬，有 grace period</td><td>soft 減少誤搬短暫尖峰；代價是反應更慢，更容易被 node OOM 搶先</td></tr>
+    </table></div>
+  </section>
+
+  <section id="l4">
+    <h2>Layer 4 · AWS 怎麼做<span class="tag">EKS numbers</span></h2>
+    <p>因為 Layer 2 的 eviction 看的是 allocatable，EKS 的 AMI 先從 node 記憶體扣掉一塊再給你用。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 760 200" role="img" aria-label="m5.large memory: about 7748 MiB usable, kube-reserved 574 MiB (255 + 11 × 29 pods), eviction 100 MiB, allocatable about 7074 MiB; Fargate adds 256 MB per pod and rounds up">
+        <text x="20" y="25" font-size="12">m5.large（max pods 29）的記憶體帳</text>
+        <rect x="20" y="40" width="600" height="44" fill="var(--see)" stroke="var(--ink)" stroke-width="2"/>
+        <rect x="20" y="40" width="45" height="44" fill="var(--may)" stroke="var(--ink)"/>
+        <rect x="65" y="40" width="8" height="44" fill="var(--wrong)" opacity=".5" stroke="var(--ink)"/>
+        <text x="350" y="67" text-anchor="middle" font-size="11">allocatable ≈ 7074 MiB</text>
+        <text x="20" y="104" font-size="10">kube-reserved = 255 + 11 × 29 = 574 MiB</text>
+        <text x="20" y="120" font-size="10">eviction 100 MiB</text>
+        <text x="640" y="67" font-size="10">≈ 7748 MiB</text>
+        <rect x="20" y="140" width="720" height="44" fill="var(--who)" stroke="var(--ink)"/>
+        <text x="30" y="160" font-size="11">Fargate：Pod 記憶體 request 自動加 256 MB 給 kubelet / kube-proxy / containerd，再往上取整成 Fargate 規格</text>
+        <text x="30" y="176" font-size="10">例：1 vCPU + 8 GB → 加 256 MB → 沒有 1 vCPU / 9 GB 的規格 → 給 2 vCPU / 9 GB（照這個計費）</text>
+      </svg>
+    </div>
+    <div class="scroll"><table>
+      <tr><th>服務 / 設定</th><th>做什麼</th><th>常見陷阱</th></tr>
+      <tr><td>EKS AMI kube-reserved</td><td>依 max pods 預留給 kubelet 等</td><td>開 prefix delegation 把 max pods 拉到 110，kube-reserved 跟著變大，allocatable 反而少了一截</td></tr>
+      <tr><td>AL2023（cgroup v2）</td><td>新的 node OS</td><td>舊 JVM 看不懂 cgroup v2，heap 依整台 node 算；1.28+ 還會整個 container 一起被殺</td></tr>
+      <tr><td>Container Insights</td><td>Pod 記憶體指標</td><td>告警要用 working set 對 limit 的比例，不要用 RSS 或 cache 在內的總量</td></tr>
+      <tr><td>Fargate</td><td>每 Pod 一台 microVM</td><td><code>kubectl get nodes</code> 顯示的大小不等於 Pod 實際能用的；看 Pod annotation <code>CapacityProvisioned</code></td></tr>
+    </table></div>
+  </section>
+
+  <section id="l5">
+    <h2>Layer 5 · 規模化<span class="tag">evolution ladder</span></h2>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 760 220" role="img" aria-label="Ladder: guess limits; dashboards of working set vs limit and OOM counters; VPA recommendations and per-team quotas; automated rightsizing with in-place resize and policy that every pod has requests">
+        <g font-size="11">
+          <rect x="10" y="160" width="170" height="50" fill="var(--card)" stroke="var(--ink)" stroke-width="2"/><text x="20" y="180">① 憑感覺填數字</text><text x="20" y="198" class="hand">OOM 了就加大</text>
+          <rect x="195" y="110" width="170" height="100" fill="var(--see)" stroke="var(--ink)" stroke-width="2"/><text x="205" y="130">② 看資料</text><text x="205" y="150" class="hand">working set / limit</text><text x="205" y="168" class="hand">oom_kill 計數告警</text>
+          <rect x="380" y="60" width="170" height="150" fill="var(--who)" stroke="var(--ink)" stroke-width="2"/><text x="390" y="80">③ 建議 + 護欄</text><text x="390" y="100" class="hand">VPA recommender</text><text x="390" y="118" class="hand">LimitRange 預設值</text><text x="390" y="136" class="hand">Kyverno：沒 requests 不准上</text>
+          <rect x="565" y="10" width="185" height="200" fill="var(--may)" stroke="var(--ink)" stroke-width="2"/><text x="575" y="30">④ 自動 rightsizing</text><text x="575" y="50" class="hand">in-place resize</text><text x="575" y="68" class="hand">（1.33 beta）</text><text x="575" y="86" class="hand">依 p95 回寫 requests</text><text x="575" y="104" class="hand">按團隊算浪費的錢</text>
+        </g>
+      </svg>
+    </div>
+  </section>
+
+  <section id="l6">
+    <h2>Layer 6 · 故障與 on-call<span class="tag">how it breaks</span></h2>
+    <div class="panels">
+      <div class="panel"><h3>OOMKilled 循環</h3><p><code>describe pod</code>：Last State OOMKilled、exit 137。上 node 讀 <code>memory.events</code> 的 <code>oom_kill</code>，dmesg 有 <code>Memory cgroup out of memory: Killed process</code>。再看 7 天 working set 曲線分 leak 或太小。</p></div>
+      <div class="panel"><h3>一次被 evict 一大批</h3><p>Pod 狀態 <code>Evicted</code>，訊息 <code>The node was low on resource: memory</code>。node 有 MemoryPressure。根因常是同 node 某個 BestEffort / 低 requests 的 Pod 吃光記憶體。</p></div>
+      <div class="panel"><h3>不是 OOM，是 node 死了</h3><p>kubelet 反應太慢，node 層 kernel OOM 殺到 containerd 或系統程序，node NotReady。對策：system-reserved / kube-reserved 不能是 0。</p></div>
+      <div class="panel"><h3>升級 node OS 後開始 OOM</h3><p>cgroup v1 → v2：舊 runtime 看錯記憶體上限；多 process 的 app 被整個殺。查 JVM 版本與 <code>memory.oom.group</code>。</p></div>
+    </div>
+    <p>公開案例：<a href="https://2i2c.org/blog/kubernetes-cgroup-changes/">2i2c：Fixing out-of-memory behaviour in recent Kubernetes deployments</a>。他們把 EKS 從 1.32 升到 1.34，同時 node AMI 從 AL2 換成 AL2023。之前 OOM 只殺超量的那個 process，使用者看到的是 kernel 重啟；之後整個使用者 Pod 的 process 一起被殺。他們先去翻 k8s 1.32–1.34 的 changelog，什麼都沒找到。真正的原因是 AMI 換了：cgroup v1 變 v2，<code>memory.oom.group</code> 從 1.28 起預設開啟。最後用 kubelet 的 <code>singleProcessOOMKill</code> 改回舊行為。教訓：node OS 升級也是平台變更，要跟 k8s 升級一樣讀 release notes。</p>
+  </section>
+
+  <section id="l7">
+    <h2>Layer 7 · 面試<span class="tag">interview</span></h2>
+    <blockquote>「Walk me through exactly what happens when a container exceeds its memory limit, versus when the whole node runs low on memory. Who acts, and how do you tell them apart afterwards?」</blockquote>
+    <p class="sub">先自己講一遍，再打開。</p>
+    <details><summary>L4 回答</summary><div>
+      <p>「超過 limit 會 OOMKilled、exit 137。node 記憶體不夠時 kubelet 會依 QoS 驅逐，BestEffort 先。」</p>
+      <p class="small">結論都對。沒講誰在什麼時間點動手，也沒講事後怎麼分辨。</p>
+    </div></details>
+    <details><summary>L6 回答</summary><div>
+      <p>「Container 那條是 kernel 做的，跟 Kubernetes 無關。kubelet 建 container 時把 limit 寫成 cgroup 的 <code>memory.max</code>。process 要記憶體時 kernel 同步檢查，先回收 page cache，回收不夠就 OOM kill。cgroup v2 + 1.28 之後整個 container 一起殺。kubelet 只是事後回報 OOMKilled、exit 137。」</p>
+      <p>「Node 那條是 kubelet 做的。它定期算 memory.available，低於 100Mi（預設 hard threshold）就標 MemoryPressure，依序 evict 整個 Pod：先看用量有沒有超過 requests，再看 priority，再看超多少。BestEffort 先走只是這個排序的結果。這條是輪詢，記憶體漲太快時 node 層 kernel OOM killer 會搶先，用 oom_score_adj 挑人。」</p>
+      <p>「事後分辨：OOMKilled + exit 137 + container 的 <code>memory.events</code> oom_kill 增加，是第一條；Pod phase Failed、reason Evicted、node 有 MemoryPressure event，是第二條；node 本身 NotReady、dmesg 出現系統程序被殺，是 kubelet 沒來得及、kernel 全域 OOM。三種修法不同：調 limit 或修 leak / 調 requests 和 reserved / 加大 system-reserved。」</p>
+      <p class="small">L6 多了：每條路徑的執行者和時機、working set 與 cache 的區別、真實的排序規則（不只是 QoS）、第三種情況、三種證據各對應一種修法。</p>
+    </div></details>
+  </section>
+
+  <section id="trail">
+    <h2>我的錯題軌跡<span class="tag">this topic</span></h2>
+    <div class="trail">
+      <div class="wrong"><b>我錯在這 · s10 WR#1</b>137、OOMKilled、throttle 表面全對，但自己標出「壓縮是啥意思不懂」。</div>
+      <div class="fix">修正：水龍頭流速 vs 水桶存量。本頁 L1 再補一層：水桶裡的 page cache 倒得掉，anon 倒不掉。</div>
+      <div class="wrong"><b>我錯在這 · 08-05</b>「誰把 limit 寫進 cgroup」答 scheduler。</div>
+      <div class="fix">修正：kubelet → containerd → runc，在建 container 那一刻寫。改了 Deployment 的 limit，舊 container 的 memory.max 不會變。</div>
+      <div class="wrong"><b>還欠的 rep · s25 → C-1</b><code>cg-demo</code> 的 <code>memory.max</code> 實際讀數沒讀到（當時 Pod Pending）。</div>
+      <div class="fix">下次 lab：讀 L2 那張圖的五個檔案，對照 spec 換算。這比再看一次表格有用。</div>
+    </div>
+  </section>
+</main>
+
+</body></html>

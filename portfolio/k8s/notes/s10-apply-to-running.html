@@ -1,0 +1,342 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"></head><body>
+<title>apply 到 Running 五棒</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC:wght@400;700&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: one notebook column on graph paper; figures on taped cards, scenarios as 2x2 comic panels */
+:root {
+  --paper: #F6F8FA;
+  --grid: rgba(90,130,170,.16);
+  --ink: #23313E;
+  --ink-soft: #55677A;
+  --card: #FFFFFF;
+  --tape: rgba(240,214,140,.75);
+  --who: #FFE98A;
+  --see: #BDEEF6;
+  --may: #F9CDE0;
+  --wrong: #D2453A;
+  --ok: #2F8F5B;
+  --line: #9DB0C2;
+  --font-hand: "LXGW WenKai TC", "Noto Sans TC", "PingFang TC", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #1A2320; --grid: rgba(200,230,210,.08); --ink: #E6EDE8; --ink-soft: #A9BAB1;
+    --card: #24302C; --tape: rgba(200,180,110,.45); --who: #8A7A2A; --see: #2B6A74; --may: #7A3F57;
+    --wrong: #FF8A7E; --ok: #7FD3A1; --line: #5E7268; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #1A2320; --grid: rgba(200,230,210,.08); --ink: #E6EDE8; --ink-soft: #A9BAB1;
+  --card: #24302C; --tape: rgba(200,180,110,.45); --who: #8A7A2A; --see: #2B6A74; --may: #7A3F57;
+  --wrong: #FF8A7E; --ok: #7FD3A1; --line: #5E7268; color-scheme: dark;
+}
+body {
+  background-color: var(--paper);
+  background-image: linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 22px 22px;
+  color: var(--ink);
+  font-family: var(--font-hand);
+  font-size: 17px;
+  line-height: 1.75;
+}
+.page { max-width: 760px; margin: 0 auto; padding-inline: 18px; padding-block: 32px 64px; display: grid; gap: 34px; }
+h1, h2 { text-wrap: balance; line-height: 1.3; margin: 0; }
+h1 { font-size: 2.1rem; }
+h2 { font-size: 1.45rem; display: flex; align-items: baseline; gap: 10px; }
+h2 .tag { font-family: var(--font-mono); font-size: .72rem; letter-spacing: .08em; color: var(--ink-soft); text-transform: uppercase; }
+p { margin: 0; }
+section { display: grid; gap: 14px; min-width: 0; }
+.sub { color: var(--ink-soft); font-size: .95rem; }
+mark { background: linear-gradient(transparent 52%, var(--who) 52%); color: inherit; padding: 0 2px; }
+mark.see { background: linear-gradient(transparent 52%, var(--see) 52%); }
+mark.may { background: linear-gradient(transparent 52%, var(--may) 52%); }
+code { font-family: var(--font-mono); font-size: .86em; background: color-mix(in srgb, var(--line) 22%, transparent); padding: 1px 5px; border-radius: 3px; }
+.card { position: relative; background: var(--card); padding: 22px 18px 16px; box-shadow: 0 1px 3px rgba(0,0,0,.12); min-width: 0; }
+.card::before { content: ""; position: absolute; top: -9px; left: 50%; width: 92px; height: 20px; transform: translateX(-50%) rotate(-2deg); background: var(--tape); }
+.scroll { overflow-x: auto; }
+svg text { font-family: var(--font-mono); fill: var(--ink); }
+svg .hand { font-family: var(--font-hand); }
+.rule { border-left: 4px solid var(--ok); padding: 6px 12px; font-size: 1.08rem; }
+.wrong { border-left: 4px solid var(--wrong); padding: 4px 12px; display: grid; gap: 2px; }
+.wrong b { color: var(--wrong); font-size: .85rem; letter-spacing: .05em; }
+.panels { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 14px; }
+.panel { border: 2px solid var(--ink); background: var(--card); padding: 10px; display: grid; gap: 6px; min-width: 0; }
+.panel h3 { margin: 0; font-size: 1rem; font-family: var(--font-mono); }
+.panel p { font-size: .92rem; }
+@media (max-width: 520px) { .panels { grid-template-columns: 1fr; } }
+table { border-collapse: collapse; width: 100%; font-size: .95rem; }
+th, td { border-bottom: 1px dashed var(--line); padding: 8px 6px; text-align: left; vertical-align: top; }
+th { font-family: var(--font-mono); font-size: .78rem; letter-spacing: .05em; color: var(--ink-soft); font-weight: 600; }
+ol { margin: 0; padding-left: 1.3em; display: grid; gap: 6px; }
+blockquote { margin: 0; padding: 12px 16px; background: var(--card); border: 2px dashed var(--line); }
+.en { font-family: var(--font-mono); font-size: .9rem; color: var(--ink-soft); }
+details summary{cursor:pointer}
+</style>
+<style>
+/* chapter-note additions on top of the notebook base */
+svg.fig { display: block; min-width: 640px; width: 100%; height: auto; }
+.lvl { font-family: var(--font-mono); font-size: .74rem; padding: 1px 7px; border: 1.5px solid var(--ink); border-radius: 10px; white-space: nowrap; }
+.lvl.high { background: color-mix(in srgb, var(--ok) 28%, transparent); }
+.lvl.med { background: var(--who); }
+.lvl.low { background: var(--may); }
+.lvl.todo { border-style: dashed; color: var(--ink-soft); }
+.meta { display: flex; flex-wrap: wrap; gap: 8px 16px; font-family: var(--font-mono); font-size: .8rem; color: var(--ink-soft); }
+.toc { display: flex; flex-wrap: wrap; gap: 6px 14px; font-family: var(--font-mono); font-size: .82rem; }
+.toc a { color: var(--ink); }
+.trail { display: grid; gap: 12px; }
+.fix { border-left: 4px solid var(--ok); padding: 4px 12px; }
+.two { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 14px; }
+@media (max-width: 560px) { .two { grid-template-columns: 1fr; } }
+details { background: var(--card); border: 2px dashed var(--line); padding: 10px 14px; }
+details[open] { border-style: solid; }
+details > div { display: grid; gap: 8px; margin-top: 10px; }
+.small { font-size: .9rem; }
+a { color: inherit; text-underline-offset: 3px; }
+pre { margin: 0; font-family: var(--font-mono); font-size: .82rem; line-height: 1.5; background: var(--card); border: 1px solid var(--line); padding: 10px 12px; overflow-x: auto; }
+</style>
+<meta name="topic" content="P0 apply→Running control flow">
+<main class="page">
+  <header style="display:grid;gap:10px">
+    <p class="sub">k8s 課程 · topic 深入 · P0 · <a href="https://claude.ai/artifact/BsrozK5kwbKAJrtzK9MukK">← P0 章節筆記</a></p>
+    <h1>apply 到 Running 五棒</h1>
+    <p>章節筆記講了「五棒是誰」。這一頁打開每一棒的引擎蓋：API Server 裡面有幾道關、controller 怎麼「看到」變化、kubelet 起一個 Pod 到底呼叫了哪幾個 CRI 方法，每一步各花多少時間。</p>
+    <div class="meta"><span>Mastery：high (s10)</span><span>gate：P0 2026-06-22</span><span>常漏：第 4 棒 scheduler</span></div>
+    <nav class="toc"><a href="#l0">L0</a><a href="#l1">L1</a><a href="#l2">L2</a><a href="#l3">L3</a><a href="#l4">L4</a><a href="#l5">L5</a><a href="#l6">L6</a><a href="#l7">L7</a><a href="#trail">錯題</a></nav>
+  </header>
+
+  <section id="l0">
+    <h2>Layer 0 · 一張圖<span class="tag">analogy</span></h2>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 720 200" role="img" aria-label="Relay race where nobody hands the baton directly: each runner watches a shared whiteboard and starts when a field on it changes">
+        <rect x="230" y="20" width="260" height="70" fill="var(--who)" stroke="var(--ink)" stroke-width="2.5"/>
+        <text x="360" y="45" text-anchor="middle" font-size="13" class="hand">中央白板（API Server + etcd）</text>
+        <text x="360" y="70" text-anchor="middle" font-size="11">Pod: nodeName="" → "node-2" → phase=Running</text>
+        <g font-size="11" text-anchor="middle">
+          <rect x="10" y="130" width="120" height="50" fill="var(--card)" stroke="var(--ink)"/><text x="70" y="160">① kubectl 寫</text>
+          <rect x="150" y="130" width="130" height="50" fill="var(--see)" stroke="var(--ink)"/><text x="215" y="152">③ controller</text><text x="215" y="170" font-size="9">看到要 3 個</text>
+          <rect x="300" y="130" width="130" height="50" fill="var(--see)" stroke="var(--ink)"/><text x="365" y="152">④ scheduler</text><text x="365" y="170" font-size="9">看到 nodeName 空</text>
+          <rect x="450" y="130" width="130" height="50" fill="var(--may)" stroke="var(--ink)"/><text x="515" y="152">⑤ kubelet</text><text x="515" y="170" font-size="9">看到 nodeName=我</text>
+        </g>
+        <g stroke="var(--ink)" stroke-dasharray="4 3"><line x1="70" y1="130" x2="260" y2="90"/><line x1="215" y1="130" x2="320" y2="90"/><line x1="365" y1="130" x2="365" y2="90"/><line x1="515" y1="130" x2="430" y2="90"/></g>
+        <text x="600" y="150" font-size="11" class="hand">沒有人把棒子</text><text x="600" y="168" font-size="11" class="hand">交到下一個人手上</text>
+      </svg>
+    </div>
+    <p>這不是一般的接力賽。跑者之間從不交棒，大家都盯著同一塊白板，白板上某個欄位一變，該輪到的人就自己起跑。</p>
+  </section>
+
+  <section id="l1">
+    <h2>Layer 1 · 第一性原理<span class="tag">why shared state, not RPC</span></h2>
+    <p><b>限制：任何一棒都可能在任何時刻掛掉、重啟。</b>如果 controller 直接 RPC 呼叫 scheduler，scheduler 剛好在重啟，這個呼叫就掉了，而且沒人記得要重送。重送了又可能做兩次。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 720 210" role="img" aria-label="RPC chain: if scheduler is down the call is lost. Shared state: the unscheduled pod stays on the board; when scheduler restarts it lists and finds it">
+        <text x="170" y="22" text-anchor="middle" font-size="13" class="hand">RPC 鏈（被淘汰的做法）</text>
+        <text x="540" y="22" text-anchor="middle" font-size="13" class="hand">共享狀態（k8s 的做法）</text>
+        <line x1="360" y1="10" x2="360" y2="200" stroke="var(--line)" stroke-dasharray="4 4"/>
+        <g font-size="11" text-anchor="middle">
+          <rect x="20" y="50" width="100" height="40" fill="var(--see)" stroke="var(--ink)"/><text x="70" y="75">controller</text>
+          <rect x="220" y="50" width="110" height="40" fill="var(--card)" stroke="var(--wrong)" stroke-dasharray="5 4"/><text x="275" y="75" fill="var(--wrong)">scheduler 重啟中</text>
+        </g>
+        <line x1="120" y1="70" x2="218" y2="70" stroke="var(--wrong)" stroke-width="2"/><text x="170" y="62" text-anchor="middle" font-size="12" fill="var(--wrong)">✗</text>
+        <text x="20" y="130" font-size="11" fill="var(--wrong)">呼叫掉了。誰負責重送？重送兩次會不會綁兩台 node？</text>
+        <g font-size="11" text-anchor="middle">
+          <rect x="400" y="50" width="130" height="50" fill="var(--who)" stroke="var(--ink)" stroke-width="2"/><text x="465" y="70">etcd 裡</text><text x="465" y="88" font-size="10">Pod nodeName=""</text>
+          <rect x="580" y="50" width="120" height="50" fill="var(--see)" stroke="var(--ink)"/><text x="640" y="70">scheduler</text><text x="640" y="88" font-size="10">重啟後先 LIST</text>
+        </g>
+        <line x1="578" y1="75" x2="532" y2="75" stroke="var(--ok)" stroke-width="2"/>
+        <text x="400" y="130" font-size="11" fill="var(--ok)">Pod 一直躺在帳本上。scheduler 回來先 LIST 全部，</text>
+        <text x="400" y="148" font-size="11" fill="var(--ok)">看到空的 nodeName 就接著做。不會漏，也不會做兩次：</text>
+        <text x="400" y="166" font-size="11" fill="var(--ok)">bind 是寫一個欄位，寫第二次會被 resourceVersion 擋下。</text>
+      </svg>
+    </div>
+    <p class="rule">所以「五棒彼此不對話」不是風格選擇，是 partial failure 逼出來的。代價：整條鏈是 eventually consistent，每一棒之間都有一段延遲。</p>
+  </section>
+
+  <section id="l2">
+    <h2>Layer 2 · 機制<span class="tag">under the hood</span></h2>
+
+    <h3 style="margin:0">② API Server 內部：一個請求過幾道關</h3>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 780 200" role="img" aria-label="API server handler chain: authentication, audit, priority and fairness, authorization, mutating admission, schema validation, validating admission, then etcd write with resourceVersion; each stage has its own failure code">
+        <defs><marker id="ta1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="var(--ink)"/></marker></defs>
+        <g font-size="10" text-anchor="middle">
+          <rect x="10" y="40" width="80" height="50" fill="var(--who)" stroke="var(--ink)"/><text x="50" y="62">authn</text><text x="50" y="78">你是誰</text>
+          <rect x="100" y="40" width="80" height="50" fill="var(--card)" stroke="var(--ink)"/><text x="140" y="62">audit</text><text x="140" y="78">記下來</text>
+          <rect x="190" y="40" width="80" height="50" fill="var(--card)" stroke="var(--ink)"/><text x="230" y="62">APF</text><text x="230" y="78">排隊限流</text>
+          <rect x="280" y="40" width="80" height="50" fill="var(--may)" stroke="var(--ink)"/><text x="320" y="62">authz</text><text x="320" y="78">RBAC</text>
+          <rect x="370" y="40" width="90" height="50" fill="var(--see)" stroke="var(--ink)"/><text x="415" y="62">mutating</text><text x="415" y="78">admission</text>
+          <rect x="470" y="40" width="80" height="50" fill="var(--see)" stroke="var(--ink)"/><text x="510" y="62">schema</text><text x="510" y="78">validation</text>
+          <rect x="560" y="40" width="90" height="50" fill="var(--see)" stroke="var(--ink)"/><text x="605" y="62">validating</text><text x="605" y="78">admission</text>
+          <rect x="660" y="40" width="110" height="50" fill="var(--who)" stroke="var(--ink)" stroke-width="2"/><text x="715" y="62">etcd 寫入</text><text x="715" y="78">rv=48213</text>
+        </g>
+        <g stroke="var(--ink)"><line x1="90" y1="65" x2="98" y2="65" marker-end="url(#ta1)"/><line x1="180" y1="65" x2="188" y2="65" marker-end="url(#ta1)"/><line x1="270" y1="65" x2="278" y2="65" marker-end="url(#ta1)"/><line x1="360" y1="65" x2="368" y2="65" marker-end="url(#ta1)"/><line x1="460" y1="65" x2="468" y2="65" marker-end="url(#ta1)"/><line x1="550" y1="65" x2="558" y2="65" marker-end="url(#ta1)"/><line x1="650" y1="65" x2="658" y2="65" marker-end="url(#ta1)"/></g>
+        <g font-size="10" fill="var(--wrong)" text-anchor="middle"><text x="50" y="112">401</text><text x="230" y="112">429</text><text x="320" y="112">403</text><text x="415" y="112">webhook 拒</text><text x="510" y="112">422 unknown field</text><text x="605" y="112">PSS 拒</text><text x="715" y="112">409 Conflict</text></g>
+        <text x="10" y="150" font-size="11" class="hand">mutating 在 validation 前面：先讓 LimitRanger、sidecar injector 改完，再驗最後的樣子。</text>
+        <text x="10" y="172" font-size="11" class="hand"><tspan font-family="var(--font-mono)">--dry-run=server</tspan> 走完全部關卡，只差最後一格不寫 etcd。你的 <tspan font-family="var(--font-mono)">matchLabels</tspan> 打錯是在 schema validation 被擋。</text>
+      </svg>
+    </div>
+
+    <h3 style="margin:0">③④ controller 和 scheduler 怎麼「看到」：informer</h3>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 780 260" role="img" aria-label="Informer: reflector does LIST then WATCH from resourceVersion, pushes deltas to a FIFO, updates a local indexer cache, calls handlers which enqueue keys into a deduplicating rate-limited workqueue; workers reconcile reading from the local cache and write back to the API server">
+        <defs><marker id="ta2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="var(--ink)"/></marker></defs>
+        <rect x="10" y="20" width="130" height="60" fill="var(--who)" stroke="var(--ink)" stroke-width="2"/><text x="75" y="45" text-anchor="middle" font-size="11">API Server</text><text x="75" y="64" text-anchor="middle" font-size="9">watch cache</text>
+        <rect x="190" y="20" width="130" height="60" fill="var(--see)" stroke="var(--ink)"/><text x="255" y="42" text-anchor="middle" font-size="11">reflector</text><text x="255" y="58" text-anchor="middle" font-size="9">LIST 一次</text><text x="255" y="72" text-anchor="middle" font-size="9">再 WATCH ?rv=…</text>
+        <rect x="370" y="20" width="110" height="60" fill="var(--card)" stroke="var(--ink)"/><text x="425" y="45" text-anchor="middle" font-size="11">DeltaFIFO</text><text x="425" y="64" text-anchor="middle" font-size="9">Added / Updated</text>
+        <rect x="530" y="20" width="120" height="60" fill="var(--may)" stroke="var(--ink)"/><text x="590" y="42" text-anchor="middle" font-size="11">local cache</text><text x="590" y="58" text-anchor="middle" font-size="9">indexer</text><text x="590" y="72" text-anchor="middle" font-size="9" fill="var(--wrong)">可能比 etcd 舊</text>
+        <line x1="140" y1="50" x2="188" y2="50" stroke="var(--ink)" marker-end="url(#ta2)"/><line x1="320" y1="50" x2="368" y2="50" marker-end="url(#ta2)" stroke="var(--ink)"/><line x1="480" y1="50" x2="528" y2="50" stroke="var(--ink)" marker-end="url(#ta2)"/>
+        <rect x="530" y="120" width="120" height="60" fill="var(--card)" stroke="var(--ink)"/><text x="590" y="142" text-anchor="middle" font-size="11">workqueue</text><text x="590" y="158" text-anchor="middle" font-size="9">同一個 key 只排一次</text><text x="590" y="172" text-anchor="middle" font-size="9">失敗 → 退避重排</text>
+        <line x1="590" y1="80" x2="590" y2="118" stroke="var(--ink)" marker-end="url(#ta2)"/><text x="600" y="102" font-size="9">handler 只丟 key</text>
+        <rect x="300" y="120" width="180" height="60" fill="var(--see)" stroke="var(--ink)" stroke-width="2"/><text x="390" y="142" text-anchor="middle" font-size="11">reconcile(key)</text><text x="390" y="160" text-anchor="middle" font-size="9">讀 local cache，比 desired vs actual</text>
+        <line x1="528" y1="150" x2="482" y2="150" stroke="var(--ink)" marker-end="url(#ta2)"/>
+        <path d="M300 150 C 120 150, 75 130, 75 82" fill="none" stroke="var(--ink)" stroke-width="1.6" marker-end="url(#ta2)"/><text x="120" y="140" font-size="9">寫回：CREATE Pod / POST binding</text>
+        <rect x="10" y="205" width="760" height="44" fill="var(--card)" stroke="var(--ok)" stroke-width="2"/>
+        <text x="390" y="223" text-anchor="middle" font-size="11">reconcile 只拿到 key（default/web-7d4b9），不知道「發生了什麼事件」。它每次都從 cache 讀「現在」再算差。</text>
+        <text x="390" y="240" text-anchor="middle" font-size="11">這就是 level-triggered 在程式碼裡的樣子。事件被合併或漏掉都沒關係。</text>
+      </svg>
+    </div>
+    <p class="small">ReplicaSet controller 還多一個 <b>expectations</b> 機制：它剛送出 3 個 CREATE，cache 還沒看到這 3 個 Pod，這時再 reconcile 會以為「還缺 3 個」又建 3 個。expectations 記住「我在等 3 個 Added」，等到了才再算。這是 local cache 會落後的直接代價。</p>
+    <p class="small">scheduler 也一樣：選好 node 後先在自己的 cache 裡 <b>assume</b> 這個 Pod 已經在那台（扣掉資源），然後<b>非同步</b>送 binding，馬上去排下一個 Pod。binding 失敗才把 assume 撤回。</p>
+
+    <h3 style="margin:0">⑤ kubelet：從 watch 到容器起來</h3>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 780 290" role="img" aria-label="Kubelet timeline with typical durations: watch event, admit, RunPodSandbox creates pause and calls CNI ADD for IP, PullImage, CreateContainer, StartContainer, startup and readiness probes, status PATCH; PLEG relists every second">
+        <line x1="20" y1="230" x2="760" y2="230" stroke="var(--ink)"/>
+        <g font-size="9"><text x="20" y="248">0</text><text x="120" y="248">~0.1s</text><text x="250" y="248">~1s</text><text x="470" y="248">image 大小決定：0s（已快取）到數十秒</text><text x="700" y="248">Ready</text></g>
+        <g font-size="10">
+          <rect x="20" y="30" width="90" height="26" fill="var(--may)" stroke="var(--ink)"/><text x="25" y="47">watch 事件</text>
+          <rect x="110" y="62" width="80" height="26" fill="var(--card)" stroke="var(--ink)"/><text x="115" y="79">admit 檢查</text>
+          <rect x="190" y="94" width="140" height="26" fill="var(--see)" stroke="var(--ink)"/><text x="195" y="111">RunPodSandbox</text>
+          <rect x="330" y="126" width="230" height="26" fill="var(--who)" stroke="var(--ink)"/><text x="335" y="143">PullImage（serialize 預設 true）</text>
+          <rect x="560" y="158" width="90" height="26" fill="var(--see)" stroke="var(--ink)"/><text x="565" y="175">Create+Start</text>
+          <rect x="650" y="190" width="110" height="26" fill="var(--card)" stroke="var(--ink)"/><text x="655" y="207">probe → PATCH</text>
+        </g>
+        <g font-size="9" fill="var(--ink-soft)"><text x="340" y="104">pause 起來 + CNI ADD 拿 IP</text><text x="200" y="135">失敗 → FailedCreatePodSandBox</text><text x="570" y="140">失敗 → ImagePullBackOff</text></g>
+        <rect x="20" y="262" width="740" height="24" fill="none" stroke="var(--ink-soft)" stroke-dasharray="4 3"/>
+        <text x="30" y="278" font-size="10" fill="var(--ink-soft)">背景：PLEG 每 1s relist containerd，發現狀態變化 → syncPod → status manager PATCH pods/status</text>
+      </svg>
+    </div>
+    <p class="small">順序的意義：<b>網路（sandbox + CNI）在 image 之前。</b>所以 CNI 壞掉時你會卡在 ContainerCreating，連 image 都還沒開始拉。kubelet 預設一次只拉一個 image（<code>serializeImagePulls: true</code>），一台 node 同時起 30 個不同 image 的 Pod 會排隊。</p>
+
+    <h3 style="margin:0">同一顆 Pod，在每個時刻長什麼樣</h3>
+    <div class="scroll"><table>
+      <tr><th>時刻</th><th>spec.nodeName</th><th>status.phase</th><th>conditions</th><th>kubectl STATUS</th></tr>
+      <tr><td>剛寫入 etcd</td><td><code>""</code>（空）</td><td>Pending</td><td>無</td><td>Pending</td></tr>
+      <tr><td>scheduler bind 後</td><td>node-2</td><td>Pending</td><td>PodScheduled=True</td><td>Pending → kubelet 回報後 ContainerCreating</td></tr>
+      <tr><td>sandbox + init 完成</td><td>node-2</td><td>Pending</td><td>+ Initialized=True</td><td>ContainerCreating</td></tr>
+      <tr><td>容器 Start</td><td>node-2</td><td>Running</td><td>ContainersReady=False</td><td>Running 0/1</td></tr>
+      <tr><td>readiness 過</td><td>node-2</td><td>Running</td><td>+ ContainersReady, Ready=True</td><td>Running 1/1</td></tr>
+    </table></div>
+    <p class="small">注意：<code>kubectl get</code> 的 STATUS 欄不是 <code>status.phase</code>，是 kubectl 綜合 phase、reason、container state 算出來的顯示字串。排障看 <code>describe</code> 的 Conditions 和 Events，不要只看 STATUS。</p>
+  </section>
+
+  <section id="l3">
+    <h2>Layer 3 · 取捨<span class="tag">why this design</span></h2>
+    <div class="scroll"><table>
+      <tr><th>設計</th><th>贏在</th><th>付出的代價</th></tr>
+      <tr><td>讀 local cache，不直接 GET API</td><td>API Server 負載跟 controller 數量脫鉤</td><td>讀到舊資料；要 expectations、assume 這類補丁</td></tr>
+      <tr><td>workqueue 只放 key、會去重</td><td>一千個事件合成一次 reconcile</td><td>無法得知「中間發生過什麼」，只能看現在</td></tr>
+      <tr><td>scheduler 非同步 bind</td><td>排程吞吐量高</td><td>bind 失敗要撤回 assume，邏輯變複雜</td></tr>
+      <tr><td>kubelet 主動 watch（pull）</td><td>control plane 不用知道 node 在哪、連不連得到</td><td>node 斷線時 control plane 只能靠心跳逾時猜</td></tr>
+      <tr><td>resourceVersion 樂觀鎖</td><td>沒有鎖服務、不會死鎖</td><td>熱門物件上大量 409 重試</td></tr>
+    </table></div>
+  </section>
+
+  <section id="l4">
+    <h2>Layer 4 · AWS 怎麼做<span class="tag">EKS specifics</span></h2>
+    <p>因為 Layer 2 的前四棒在 EKS 上都在 AWS 管的控制面裡，你能直接動的只剩第 ⑤ 棒和它依賴的東西：IP、image、node。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 760 210" role="img" aria-label="On EKS, relays 2 to 4 are hidden in the AWS-managed control plane and visible only through control plane logs; relay 5 on your node depends on VPC CNI warm IPs and ECR image pulls">
+        <rect x="10" y="20" width="400" height="80" fill="var(--who)" stroke="var(--ink)" stroke-width="2" stroke-dasharray="8 4"/>
+        <text x="20" y="42" font-size="11">AWS 管：② API Server ③ controller-manager ④ scheduler</text>
+        <text x="20" y="64" font-size="10">看得到的只有 control plane logging：api / audit / authenticator /</text>
+        <text x="20" y="80" font-size="10">controllerManager / scheduler（預設全關，開了進 CloudWatch Logs）</text>
+        <rect x="440" y="20" width="310" height="170" fill="var(--see)" stroke="var(--ink)" stroke-width="2"/>
+        <text x="450" y="42" font-size="11">你管：⑤ node 上的 kubelet</text>
+        <text x="450" y="66" font-size="10">CNI ADD → aws-node 從 warm pool 給 IP</text>
+        <text x="450" y="84" font-size="10">（WARM_ENI_TARGET / WARM_IP_TARGET）</text>
+        <text x="450" y="108" font-size="10">PullImage → ECR（同 Region 走 VPC endpoint）</text>
+        <text x="450" y="132" font-size="10">大 image → SOCI lazy loading 或預先拉</text>
+        <text x="450" y="156" font-size="10">新 node 開機 + join 才輪得到這一棒</text>
+        <rect x="10" y="120" width="400" height="70" fill="var(--card)" stroke="var(--ink-soft)" stroke-dasharray="4 3"/>
+        <text x="20" y="145" font-size="10">Pod Pending 卻沒有 FailedScheduling event？</text>
+        <text x="20" y="165" font-size="10">在 EKS 上第一個懷疑的是 webhook / admission，</text>
+        <text x="20" y="183" font-size="10">不是 scheduler 掛了（scheduler 由 AWS 保持 HA）。</text>
+      </svg>
+    </div>
+    <div class="scroll"><table>
+      <tr><th>服務 / 設定</th><th>影響哪一棒</th><th>常見陷阱</th></tr>
+      <tr><td>VPC CNI warm pool</td><td>⑤ sandbox 拿 IP</td><td>WARM_IP_TARGET 設太小，一次擴 50 個 Pod 時要等 ENI attach，ContainerCreating 多十幾秒</td></tr>
+      <tr><td>ECR</td><td>⑤ PullImage</td><td>image 2 GB、沒有 VPC endpoint → 走 NAT Gateway，又慢又收 NAT 處理費</td></tr>
+      <tr><td>Control plane logging（scheduler）</td><td>④ 排程決策</td><td>沒開就看不到 scheduler 為什麼這樣選；但 FailedScheduling event 已經夠用 90% 的情況</td></tr>
+      <tr><td>Fargate</td><td>④⑤ 換成 AWS 的排程器</td><td>每個 Pod 要開一台 microVM，啟動常是數十秒，不適合秒級擴容</td></tr>
+    </table></div>
+  </section>
+
+  <section id="l5">
+    <h2>Layer 5 · 規模化<span class="tag">evolution ladder</span></h2>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 760 230" role="img" aria-label="Ladder for pod startup throughput: defaults; smaller images and parallel pulls; pre-pulled images, warm IPs, client QPS tuning; batch schedulers and image streaming">
+        <g font-size="11">
+          <rect x="10" y="170" width="170" height="50" fill="var(--card)" stroke="var(--ink)" stroke-width="2"/><text x="20" y="190">① 預設值</text><text x="20" y="208" class="hand">一天部署幾次</text>
+          <rect x="195" y="120" width="170" height="100" fill="var(--see)" stroke="var(--ink)" stroke-width="2"/><text x="205" y="140">② 縮 image</text><text x="205" y="160" class="hand">multi-stage build</text><text x="205" y="178" class="hand">maxParallelImagePulls</text>
+          <rect x="380" y="70" width="170" height="150" fill="var(--who)" stroke="var(--ink)" stroke-width="2"/><text x="390" y="90">③ 預熱</text><text x="390" y="110" class="hand">AMI 內建常用 image</text><text x="390" y="128" class="hand">warm IP、warm node</text><text x="390" y="146" class="hand">調 controller QPS</text>
+          <rect x="565" y="20" width="185" height="200" fill="var(--may)" stroke="var(--ink)" stroke-width="2"/><text x="575" y="40">④ 每分鐘上千 Pod</text><text x="575" y="60" class="hand">batch 排程（Kueue / Volcano）</text><text x="575" y="78" class="hand">image streaming</text><text x="575" y="96" class="hand">拆多叢集</text>
+        </g>
+        <g font-size="10" fill="var(--wrong)"><text x="20" y="160">瓶頸：image 大小</text><text x="205" y="110">瓶頸：冷啟動</text><text x="390" y="60">瓶頸：API QPS、scheduler 吞吐</text></g>
+      </svg>
+    </div>
+    <p class="small">每一級的瓶頸都在五棒的某一棒：①② 卡在第 ⑤ 棒的 PullImage，③ 卡在 ③④ 棒的 client QPS（kube-controller-manager 預設 <code>--kube-api-qps 20</code>、burst 30），④ 卡在 scheduler 一次只排一個 Pod，gang scheduling 這類需求它天生不做。</p>
+  </section>
+
+  <section id="l6">
+    <h2>Layer 6 · 故障與 on-call<span class="tag">find the stalled relay</span></h2>
+    <p class="rule">排障就是找「最後一個有動作的棒次」。<b>沒有 event 也是證據</b>：Pod Pending 卻連 FailedScheduling 都沒有，代表第 ④ 棒根本沒看過它。</p>
+    <div class="scroll"><table>
+      <tr><th>看到</th><th>最後一個動的棒次</th><th>誰寫的訊息</th><th>第一刀</th></tr>
+      <tr><td>apply 報錯</td><td>② 沒過關</td><td>API Server（看錯誤碼對 L2 那張關卡圖）</td><td>讀錯誤訊息的欄位路徑</td></tr>
+      <tr><td>Deployment 有，Pod 0 個</td><td>③ controller 建 Pod 被擋</td><td>RS 的 event：FailedCreate</td><td><code>kubectl describe rs</code></td></tr>
+      <tr><td>Pending、無 event</td><td>④ 沒看到</td><td>沒人寫 = 線索</td><td>scheduler 活著嗎？<code>schedulerName</code> 拼錯？</td></tr>
+      <tr><td>Pending + FailedScheduling</td><td>④ 看到但排不進</td><td>scheduler</td><td>讀 <code>0/N nodes are available: …</code> 逐項</td></tr>
+      <tr><td>ContainerCreating</td><td>⑤ sandbox / volume</td><td>kubelet</td><td>Events：FailedCreatePodSandBox / FailedMount</td></tr>
+      <tr><td>ImagePullBackOff</td><td>⑤ PullImage</td><td>kubelet</td><td>Events：401 / not found / i/o timeout</td></tr>
+      <tr><td>Running 0/1 很久</td><td>⑤ 之後，readiness</td><td>kubelet probe</td><td><code>describe</code> 的 Readiness probe failed</td></tr>
+    </table></div>
+    <p class="small">SLO：upstream SIG Scalability 定義 stateless Pod startup latency（不含 image pull）p99 ≤ 5s。超過時用上面的時間軸分段量，看是哪一棒變慢。</p>
+  </section>
+
+  <section id="l7">
+    <h2>Layer 7 · 面試<span class="tag">interview</span></h2>
+    <blockquote>「<code>kubectl apply</code> returned success, but five minutes later the new pods still aren't serving traffic. Walk me through how you find where it's stuck.」</blockquote>
+    <p class="sub">先自己講一遍，再打開。</p>
+    <details><summary>L4 回答</summary><div>
+      <p>「先 <code>kubectl get pods</code> 看狀態，再 <code>describe pod</code> 看 events，再看 logs。」</p>
+      <p class="small">指令都對，但沒有地圖。如果 Pod 根本沒被建出來，<code>get pods</code> 什麼都看不到，這套流程第一步就斷了。</p>
+    </div></details>
+    <details><summary>L6 回答</summary><div>
+      <p>「apply 成功只代表第 ② 棒過了：物件寫進 etcd。後面每一棒都是非同步的，所以我從下游往上找最後一個有動作的棒次。」</p>
+      <p>「先看 Pod 存不存在。不存在，問題在 controller 建 Pod 那一步：<code>describe rs</code>，常見是 admission（PSS、webhook）或 ResourceQuota 擋下，錯誤只會寫在 RS 的 event。存在但 Pending：有沒有 FailedScheduling。有就逐項讀不合格原因；沒有，表示 scheduler 根本沒處理它，查 schedulerName 或 scheduler 本身。」</p>
+      <p>「已排到 node：ContainerCreating 看 sandbox 和 CNI，EKS 上常是 subnet IP 用完；ImagePullBackOff 分 401、not found、timeout 三類。Running 但 0/1，就是 readiness，而且 Service 的 endpoints 裡不會有它，所以沒流量。」</p>
+      <p>「五分鐘這個數字也是線索：Deployment 預設 <code>progressDeadlineSeconds</code> 600 秒，十分鐘才會標成 ProgressDeadlineExceeded，所以 rollout status 現在還不會報錯。」</p>
+      <p class="small">L6 多了：知道「成功」只覆蓋到第幾棒、從 RS 開始查（Pod 可能根本不存在）、把「沒有 event」當成證據、一個預設逾時的數字。</p>
+    </div></details>
+  </section>
+
+  <section id="trail">
+    <h2>我的錯題軌跡<span class="tag">this topic</span></h2>
+    <div class="trail">
+      <div class="wrong"><b>我錯在這 · s1</b>用「下指令」描述流程，每步「誰做的」省略，漏掉 Pod 怎麼被排到 node。</div>
+      <div class="fix">修正：五棒骨架。本頁 L1 說明為什麼不是「下指令」：沒有人呼叫下一棒。</div>
+      <div class="wrong"><b>我錯在這 · s10 WR#1</b>盲講一口氣漏掉 scheduler。</div>
+      <div class="fix">修正：看 L2 那張狀態表。<code>nodeName</code> 從空變成 node-2 那一格，就是第 ④ 棒存在的證據。</div>
+      <div class="wrong"><b>我錯在這 · s3 → 07-14</b>說 server dry-run「走完 etcd 整個流程」，etcd 角色連滑三次。</div>
+      <div class="fix">修正：L2 關卡圖。dry-run 走完所有關卡，只差最後一格不寫 etcd。</div>
+      <div class="wrong"><b>我錯在這 · 09-29</b>PSS 擋 Pod 時講不出「先查 rs」的機制。</div>
+      <div class="fix">修正：L6 表第二列。Pod 由 RS controller 建，被擋的錯誤只留在送請求的那一方。</div>
+    </div>
+  </section>
+</main>
+
+</body></html>
