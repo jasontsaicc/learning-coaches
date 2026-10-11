@@ -1,0 +1,265 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"></head><body>
+<title>容器是什麼</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC:wght@400;700&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: one notebook column on graph paper; figures on taped cards, scenarios as 2x2 comic panels */
+:root {
+  --paper: #F6F8FA;
+  --grid: rgba(90,130,170,.16);
+  --ink: #23313E;
+  --ink-soft: #55677A;
+  --card: #FFFFFF;
+  --tape: rgba(240,214,140,.75);
+  --who: #FFE98A;
+  --see: #BDEEF6;
+  --may: #F9CDE0;
+  --wrong: #D2453A;
+  --ok: #2F8F5B;
+  --line: #9DB0C2;
+  --font-hand: "LXGW WenKai TC", "Noto Sans TC", "PingFang TC", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #1A2320; --grid: rgba(200,230,210,.08); --ink: #E6EDE8; --ink-soft: #A9BAB1;
+    --card: #24302C; --tape: rgba(200,180,110,.45); --who: #8A7A2A; --see: #2B6A74; --may: #7A3F57;
+    --wrong: #FF8A7E; --ok: #7FD3A1; --line: #5E7268; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #1A2320; --grid: rgba(200,230,210,.08); --ink: #E6EDE8; --ink-soft: #A9BAB1;
+  --card: #24302C; --tape: rgba(200,180,110,.45); --who: #8A7A2A; --see: #2B6A74; --may: #7A3F57;
+  --wrong: #FF8A7E; --ok: #7FD3A1; --line: #5E7268; color-scheme: dark;
+}
+body {
+  background-color: var(--paper);
+  background-image: linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 22px 22px;
+  color: var(--ink);
+  font-family: var(--font-hand);
+  font-size: 17px;
+  line-height: 1.75;
+}
+.page { max-width: 760px; margin: 0 auto; padding-inline: 18px; padding-block: 32px 64px; display: grid; gap: 34px; }
+h1, h2 { text-wrap: balance; line-height: 1.3; margin: 0; }
+h1 { font-size: 2.1rem; }
+h2 { font-size: 1.45rem; display: flex; align-items: baseline; gap: 10px; }
+h2 .tag { font-family: var(--font-mono); font-size: .72rem; letter-spacing: .08em; color: var(--ink-soft); text-transform: uppercase; }
+p { margin: 0; }
+section { display: grid; gap: 14px; min-width: 0; }
+.sub { color: var(--ink-soft); font-size: .95rem; }
+mark { background: linear-gradient(transparent 52%, var(--who) 52%); color: inherit; padding: 0 2px; }
+mark.see { background: linear-gradient(transparent 52%, var(--see) 52%); }
+mark.may { background: linear-gradient(transparent 52%, var(--may) 52%); }
+code { font-family: var(--font-mono); font-size: .86em; background: color-mix(in srgb, var(--line) 22%, transparent); padding: 1px 5px; border-radius: 3px; }
+.card { position: relative; background: var(--card); padding: 22px 18px 16px; box-shadow: 0 1px 3px rgba(0,0,0,.12); min-width: 0; }
+.card::before { content: ""; position: absolute; top: -9px; left: 50%; width: 92px; height: 20px; transform: translateX(-50%) rotate(-2deg); background: var(--tape); }
+.scroll { overflow-x: auto; }
+svg text { font-family: var(--font-mono); fill: var(--ink); }
+svg .hand { font-family: var(--font-hand); }
+.rule { border-left: 4px solid var(--ok); padding: 6px 12px; font-size: 1.08rem; }
+.wrong { border-left: 4px solid var(--wrong); padding: 4px 12px; display: grid; gap: 2px; }
+.wrong b { color: var(--wrong); font-size: .85rem; letter-spacing: .05em; }
+.panels { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 14px; }
+.panel { border: 2px solid var(--ink); background: var(--card); padding: 10px; display: grid; gap: 6px; min-width: 0; }
+.panel h3 { margin: 0; font-size: 1rem; font-family: var(--font-mono); }
+.panel p { font-size: .92rem; }
+@media (max-width: 520px) { .panels { grid-template-columns: 1fr; } }
+table { border-collapse: collapse; width: 100%; font-size: .95rem; }
+th, td { border-bottom: 1px dashed var(--line); padding: 8px 6px; text-align: left; vertical-align: top; }
+th { font-family: var(--font-mono); font-size: .78rem; letter-spacing: .05em; color: var(--ink-soft); font-weight: 600; }
+ol { margin: 0; padding-left: 1.3em; display: grid; gap: 6px; }
+blockquote { margin: 0; padding: 12px 16px; background: var(--card); border: 2px dashed var(--line); }
+.en { font-family: var(--font-mono); font-size: .9rem; color: var(--ink-soft); }
+details summary{cursor:pointer}
+</style>
+<style>
+/* chapter-note additions on top of the notebook base */
+svg.fig { display: block; min-width: 640px; width: 100%; height: auto; }
+.lvl { font-family: var(--font-mono); font-size: .74rem; padding: 1px 7px; border: 1.5px solid var(--ink); border-radius: 10px; white-space: nowrap; }
+.lvl.high { background: color-mix(in srgb, var(--ok) 28%, transparent); }
+.lvl.med { background: var(--who); }
+.lvl.low { background: var(--may); }
+.lvl.todo { border-style: dashed; color: var(--ink-soft); }
+.meta { display: flex; flex-wrap: wrap; gap: 8px 16px; font-family: var(--font-mono); font-size: .8rem; color: var(--ink-soft); }
+.toc { display: flex; flex-wrap: wrap; gap: 6px 14px; font-family: var(--font-mono); font-size: .82rem; }
+.toc a { color: var(--ink); }
+.trail { display: grid; gap: 12px; }
+.fix { border-left: 4px solid var(--ok); padding: 4px 12px; }
+.two { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 14px; }
+@media (max-width: 560px) { .two { grid-template-columns: 1fr; } }
+details { background: var(--card); border: 2px dashed var(--line); padding: 10px 14px; }
+details[open] { border-style: solid; }
+details > div { display: grid; gap: 8px; margin-top: 10px; }
+.small { font-size: .9rem; }
+a { color: inherit; text-underline-offset: 3px; }
+pre { margin: 0; font-family: var(--font-mono); font-size: .82rem; line-height: 1.5; background: var(--card); border: 1px solid var(--line); padding: 10px 12px; overflow-x: auto; }
+</style>
+<meta name="topic" content="P1 container = namespace+cgroup">
+<main class="page">
+  <header style="display:grid;gap:10px">
+    <p class="sub">k8s 課程 · topic 深入 · P1 · <a href="https://claude.ai/artifact/UrVpfj1woG42r9M5UxMMBn">← P1 章節筆記</a></p>
+    <h1>容器是什麼</h1>
+    <p>容器不是小 VM，是一個被 kernel 加了幾種屬性的普通 process。這一頁把那幾種屬性一個一個拆開：namespace 改「看得到什麼」，cgroup 改「能用多少」，UID 決定「你是誰」，而這三件事互相獨立。</p>
+    <div class="meta"><span>Mastery：high (s6)</span><span>延伸：P2b C-6 兩道門（s39）</span></div>
+    <nav class="toc"><a href="#l0">L0</a><a href="#l1">L1</a><a href="#l2">L2</a><a href="#l3">L3</a><a href="#l4">L4</a><a href="#l5">L5</a><a href="#l6">L6</a><a href="#l7">L7</a><a href="#trail">錯題</a></nav>
+  </header>
+
+  <section id="l0">
+    <h2>Layer 0 · 一張圖<span class="tag">analogy</span></h2>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 720 180" role="img" aria-label="Person wearing blinkers (namespace limits view), carrying a metered wallet (cgroup limits spending), still holding the same ID card (UID unchanged)">
+        <g font-size="12" text-anchor="middle">
+          <rect x="20" y="30" width="200" height="90" fill="var(--see)" stroke="var(--ink)" stroke-width="2"/><text x="120" y="60" class="hand">戴眼罩</text><text x="120" y="84" font-size="10">namespace：看得到什麼</text>
+          <rect x="260" y="30" width="200" height="90" fill="var(--who)" stroke="var(--ink)" stroke-width="2"/><text x="360" y="60" class="hand">限額錢包</text><text x="360" y="84" font-size="10">cgroup：能用多少</text>
+          <rect x="500" y="30" width="200" height="90" fill="var(--may)" stroke="var(--ink)" stroke-width="2"/><text x="600" y="60" class="hand">身分證沒換</text><text x="600" y="84" font-size="10">UID：kernel 認的身分</text>
+        </g>
+        <text x="360" y="155" text-anchor="middle" font-size="13" class="hand">還是同一個人，走在同一棟樓（kernel）裡。眼罩拿掉，他的身分證照樣能開那些門。</text>
+      </svg>
+    </div>
+  </section>
+
+  <section id="l1">
+    <h2>Layer 1 · 第一性原理<span class="tag">why not VMs</span></h2>
+    <p><b>限制：每台 VM 要多帶一份 OS kernel 和記憶體，開機是秒到分鐘級。</b>一台 node 想跑 50 個 app，用 VM 就是 50 份 kernel。kernel 本來就會管 process，只要讓它對每個 process 給不同的「視野」和「額度」，就能在一份 kernel 裡隔開它們。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 720 200" role="img" aria-label="VM stack: hardware, hypervisor, a guest kernel per VM. Container stack: hardware, one kernel, processes with namespaces and cgroups">
+        <text x="170" y="20" text-anchor="middle" font-size="13" class="hand">VM</text><text x="540" y="20" text-anchor="middle" font-size="13" class="hand">容器</text>
+        <g font-size="10" text-anchor="middle">
+          <rect x="20" y="160" width="300" height="30" fill="var(--card)" stroke="var(--ink)"/><text x="170" y="180">hardware</text>
+          <rect x="20" y="125" width="300" height="30" fill="var(--who)" stroke="var(--ink)"/><text x="170" y="145">hypervisor</text>
+          <rect x="20" y="85" width="140" height="35" fill="var(--may)" stroke="var(--ink)"/><text x="90" y="107">guest kernel A</text>
+          <rect x="180" y="85" width="140" height="35" fill="var(--may)" stroke="var(--ink)"/><text x="250" y="107">guest kernel B</text>
+          <rect x="20" y="45" width="140" height="35" fill="var(--see)" stroke="var(--ink)"/><text x="90" y="67">app A</text>
+          <rect x="180" y="45" width="140" height="35" fill="var(--see)" stroke="var(--ink)"/><text x="250" y="67">app B</text>
+          <rect x="390" y="160" width="300" height="30" fill="var(--card)" stroke="var(--ink)"/><text x="540" y="180">hardware</text>
+          <rect x="390" y="125" width="300" height="30" fill="var(--may)" stroke="var(--ink)" stroke-width="2"/><text x="540" y="145">一份 kernel（共用）</text>
+          <rect x="390" y="65" width="140" height="55" fill="var(--see)" stroke="var(--ink)"/><text x="460" y="88">process A</text><text x="460" y="106" font-size="9">ns + cgroup</text>
+          <rect x="550" y="65" width="140" height="55" fill="var(--see)" stroke="var(--ink)"/><text x="620" y="88">process B</text><text x="620" y="106" font-size="9">ns + cgroup</text>
+        </g>
+      </svg>
+    </div>
+    <p class="rule">代價寫在圖上：右邊所有 process 共用那一條 kernel。kernel 有漏洞，所有容器一起暴露；container 裡的 root 在 kernel 眼中也是 UID 0。</p>
+  </section>
+
+  <section id="l2">
+    <h2>Layer 2 · 機制<span class="tag">three independent knobs</span></h2>
+    <h3 style="margin:0">8 種 namespace：各自隔開一種「視野」</h3>
+    <div class="scroll"><table>
+      <tr><th>namespace</th><th>隔開什麼</th><th>Pod 裡怎麼用</th></tr>
+      <tr><td>pid</td><td>process 編號</td><td>container 內自己是 PID 1（P1 PID 1 那篇）</td></tr>
+      <tr><td>net</td><td>網卡、IP、路由、iptables</td><td><b>Pod 內 container 共用一個</b>，pause 持有</td></tr>
+      <tr><td>mnt</td><td>檔案系統掛載點</td><td>每個 container 自己的 rootfs（overlayfs）</td></tr>
+      <tr><td>ipc</td><td>共享記憶體、message queue</td><td>Pod 內共用</td></tr>
+      <tr><td>uts</td><td>hostname</td><td>Pod 內共用（hostname = Pod 名）</td></tr>
+      <tr><td>user</td><td>UID 對應</td><td><b>預設不開</b>：container 的 0 就是 node 的 0（<code>hostUsers: false</code> 才開）</td></tr>
+      <tr><td>cgroup</td><td>看到的 cgroup 樹</td><td>container 內看不到別人的 cgroup</td></tr>
+      <tr><td>time</td><td>時鐘偏移</td><td>k8s 基本不用</td></tr>
+    </table></div>
+
+    <h3 style="margin:0">同一個 process，從兩邊看</h3>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 760 220" role="img" aria-label="Inside the container ps shows PID 1 root nginx; on the node the same process is PID 48213 root nginx. PID is renumbered by the pid namespace, UID is not changed. /proc/48213/ns links show which namespaces it belongs to">
+        <rect x="20" y="20" width="300" height="100" fill="var(--see)" stroke="var(--ink)" stroke-width="2"/>
+        <text x="30" y="42" font-size="11">container 內：ps</text>
+        <text x="30" y="68" font-size="11">PID  USER  CMD</text><text x="30" y="88" font-size="11">1    root  nginx</text>
+        <rect x="430" y="20" width="310" height="100" fill="var(--who)" stroke="var(--ink)" stroke-width="2"/>
+        <text x="440" y="42" font-size="11">node 上：ps</text>
+        <text x="440" y="68" font-size="11">PID    USER  CMD</text><text x="440" y="88" font-size="11">48213  root  nginx</text>
+        <line x1="320" y1="80" x2="430" y2="80" stroke="var(--ink)" stroke-width="2"/>
+        <text x="375" y="72" text-anchor="middle" font-size="10">同一個</text>
+        <text x="30" y="110" font-size="10" fill="var(--ink-soft)">↑ PID 被改號（視野）</text><text x="560" y="110" font-size="10" fill="var(--wrong)">↑ UID 沒變（身分）</text>
+        <rect x="20" y="140" width="720" height="70" fill="var(--card)" stroke="var(--ink-soft)" stroke-dasharray="4 3"/>
+        <text x="30" y="162" font-size="10">$ ls -l /proc/48213/ns</text>
+        <text x="30" y="180" font-size="10">net -&gt; net:[4026532301]   pid -&gt; pid:[4026532305]   mnt -&gt; mnt:[4026532303] …</text>
+        <text x="30" y="198" font-size="10">同一個 Pod 的另一個 container：net 那個號碼一樣，mnt 不一樣。<tspan font-family="var(--font-mono)">nsenter -t 48213 -n</tspan> 就能進它的網路視野。</text>
+      </svg>
+    </div>
+
+    <h3 style="margin:0">兩道門：看不看得到 vs 准不准</h3>
+    <div class="panels">
+      <div class="panel"><h3>UID 0 · 沒翻牆</h3><p>讀 node 的 <code>/etc/shadow</code>：<b>讀不到</b>。門 1（mnt ns）根本看不到那個檔案。</p></div>
+      <div class="panel"><h3>UID 0 · 翻牆了</h3><p><b>讀得到</b>。門 1 沒了，門 2 只看 UID，0 什麼都准。這就是 root 的危險。</p></div>
+      <div class="panel"><h3>UID 1000 · 沒翻牆</h3><p>讀不到（門 1）。</p></div>
+      <div class="panel"><h3>UID 1000 · 翻牆了</h3><p>讀不到（門 2：shadow 只有 root 能讀）。<code>runAsNonRoot</code> 只改變這一格。</p></div>
+    </div>
+    <p class="small">container 的檔案系統是 overlayfs：image 的唯讀層（lowerdir）加上一層可寫層（upperdir），upperdir 在 node 的磁碟上，跟著 container 的生命走（P2b C-1）。</p>
+  </section>
+
+  <section id="l3">
+    <h2>Layer 3 · 取捨<span class="tag">isolation strength</span></h2>
+    <div class="scroll"><table>
+      <tr><th>方案</th><th>隔離強度</th><th>代價</th><th>用在哪</th></tr>
+      <tr><td>一般容器（runc）</td><td>共用 kernel</td><td>最快、最省</td><td>自家信任的 workload</td></tr>
+      <tr><td>+ user namespace（hostUsers: false）</td><td>container 的 root 在 node 上是一般 UID</td><td>部分 volume、權限操作要調整</td><td>多租戶、跑不信任的 image</td></tr>
+      <tr><td>+ seccomp / drop capabilities</td><td>限制能呼叫的 syscall</td><td>app 要用到特殊 syscall 就壞</td><td>PSS restricted 的要求</td></tr>
+      <tr><td>gVisor（userspace kernel）</td><td>syscall 先過一層假 kernel</td><td>syscall 密集的 app 變慢</td><td>執行使用者上傳的程式碼</td></tr>
+      <tr><td>microVM（Firecracker、Fargate）</td><td>每個 Pod 自己的 kernel</td><td>啟動較慢、不能用 DaemonSet</td><td>強隔離的多租戶</td></tr>
+    </table></div>
+  </section>
+
+  <section id="l4">
+    <h2>Layer 4 · AWS 怎麼做<span class="tag">EKS isolation choices</span></h2>
+    <div class="scroll"><table>
+      <tr><th>選項</th><th>隔離層級</th><th>常見陷阱</th></tr>
+      <tr><td>EKS on EC2（AL2023 / Bottlerocket）</td><td>共用 node kernel</td><td>Bottlerocket 預設唯讀 root fs、SELinux enforcing，某些需要寫 host 的 DaemonSet 會壞</td></tr>
+      <tr><td>Fargate</td><td>每個 Pod 一個 microVM</td><td>不能 privileged、不能 hostNetwork、不能 DaemonSet；觀測要另外處理</td></tr>
+      <tr><td>node 分租戶（taint + NodePool）</td><td>不同租戶不共用 kernel</td><td>bin packing 變差，成本上升</td></tr>
+      <tr><td>IMDS</td><td>node 的 metadata</td><td>容器打得到 169.254.169.254 就拿得到 node role。hop limit 設 1</td></tr>
+    </table></div>
+    <p class="small">職場真實面：資安稽核寫「容器以 root 執行」，Dev 回「容器已經隔離了」。你要能畫出上面兩道門那四格，說明 Dev 的論點只成立在「沒翻牆」那一欄。</p>
+  </section>
+
+  <section id="l5">
+    <h2>Layer 5 · 規模化<span class="tag">evolution ladder</span></h2>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 740 200" role="img" aria-label="Ladder: default containers as root; non-root images and PSS baseline; PSS restricted with seccomp and dropped capabilities; user namespaces, sandboxed runtimes and dedicated nodes for untrusted tenants">
+        <g font-size="11">
+          <rect x="10" y="150" width="170" height="44" fill="var(--card)" stroke="var(--ink)" stroke-width="2"/><text x="20" y="170">① 預設 root</text><text x="20" y="186" class="hand">什麼都沒設</text>
+          <rect x="195" y="110" width="170" height="84" fill="var(--see)" stroke="var(--ink)" stroke-width="2"/><text x="205" y="130">② non-root image</text><text x="205" y="148" class="hand">PSS baseline</text>
+          <rect x="380" y="70" width="170" height="124" fill="var(--who)" stroke="var(--ink)" stroke-width="2"/><text x="390" y="90">③ PSS restricted</text><text x="390" y="108" class="hand">drop ALL caps</text><text x="390" y="126" class="hand">seccomp RuntimeDefault</text>
+          <rect x="565" y="20" width="170" height="174" fill="var(--may)" stroke="var(--ink)" stroke-width="2"/><text x="575" y="40">④ 強隔離</text><text x="575" y="58" class="hand">user namespace</text><text x="575" y="76" class="hand">gVisor / microVM</text><text x="575" y="94" class="hand">租戶專用 node</text>
+        </g>
+      </svg>
+    </div>
+  </section>
+
+  <section id="l6">
+    <h2>Layer 6 · 故障與 on-call<span class="tag">how it breaks</span></h2>
+    <div class="panels">
+      <div class="panel"><h3>container escape</h3><p>例：runc CVE-2019-5736，container 內的 root 覆寫 node 上的 runc binary。只能等 patch；能做的是 non-root + 少給 capabilities，讓翻牆後拿到的身分沒用。</p></div>
+      <div class="panel"><h3>看得到不該看的</h3><p>Pod 設了 <code>hostPID: true</code> 或 <code>hostNetwork: true</code>，等於把那個 namespace 拿掉。PSS baseline 就會擋。</p></div>
+      <div class="panel"><h3>container 內看到 node 全部 CPU</h3><p><code>/proc/cpuinfo</code>、<code>free</code> 不受 cgroup 影響，app 照 node 規格開 thread pool 或 heap。要讀 cgroup 檔案，不是 /proc。</p></div>
+      <div class="panel"><h3>debug 進不去</h3><p>distroless image 沒 shell。用 <code>kubectl debug</code> 掛 ephemeral container 進同一個 Pod 的 namespace。</p></div>
+    </div>
+  </section>
+
+  <section id="l7">
+    <h2>Layer 7 · 面試<span class="tag">interview</span></h2>
+    <blockquote>「What actually isolates two containers on the same node, and why do security teams still care whether a container runs as root?」</blockquote>
+    <details><summary>L4 回答</summary><div><p>「namespace 和 cgroup。root 比較危險，所以要用 non-root。」</p><p class="small">名詞對，「為什麼危險」沒講出機制。</p></div></details>
+    <details><summary>L6 回答</summary><div>
+      <p>「容器就是 process 加上三件獨立的東西：namespace 決定看得到什麼，cgroup 決定能用多少，UID 決定 kernel 認為你是誰。前兩者是隔離，第三個沒被隔離：預設沒開 user namespace，所以容器裡的 root 在 node kernel 眼中就是 UID 0。」</p>
+      <p>「所以要分兩道門：沒翻牆時，mount namespace 讓它看不到 node 的檔案，root 或不是 root 沒差；翻牆後（kernel 或 runtime 漏洞，例如 runc CVE-2019-5736），只剩 UID 這道門，root 就什麼都能做。non-root 是為了『假設已被攻破』那個情境縮小損害。」</p>
+      <p>「實作：image 用非 root user、PSS restricted、drop ALL capabilities、seccomp RuntimeDefault；不信任的 workload 開 user namespace、或用 gVisor / Fargate 這種有獨立 kernel 的方案。」</p>
+      <p class="small">L6 多了：把 UID 獨立出來講、兩道門的四格、一個真實 CVE、按信任程度分級的對策。</p>
+    </div></details>
+  </section>
+
+  <section id="trail">
+    <h2>我的錯題軌跡<span class="tag">this topic</span></h2>
+    <div class="trail">
+      <div class="wrong"><b>我錯在這 · 09-25</b>「UID 0 沒翻牆，讀得到 node 的 /etc/shadow 嗎」答「可以，因為是 root」。</div>
+      <div class="fix">修正：L2 的四格。只看了 UID 那一欄，漏了 mnt ns 決定看不看得到。</div>
+      <div class="wrong"><b>我錯在這 · 09-26</b>以為 nginx 要 root 是因為會改 kernel 路由表。</div>
+      <div class="fix">修正：一般 app 要 root 是為了綁 &lt;1024 port、寫 root 擁有的目錄。改路由的是 CNI、kube-proxy。</div>
+      <div class="wrong"><b>我錯在這 · 08-04</b>「process 死掉檔案去哪」答存在 memory。</div>
+      <div class="fix">修正：可寫層是 overlayfs 的 upperdir，在 node 磁碟上。</div>
+      <div class="fix"><b>s6 · 正樣本</b>自己釐清「Linux namespace ≠ k8s namespace」：後者只是邏輯分組，不做任何隔離。</div>
+    </div>
+  </section>
+</main>
+
+</body></html>

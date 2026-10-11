@@ -1,0 +1,252 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"></head><body>
+<title>API Server 請求鏈</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC:wght@400;700&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: one notebook column on graph paper; figures on taped cards, scenarios as 2x2 comic panels */
+:root {
+  --paper: #F6F8FA;
+  --grid: rgba(90,130,170,.16);
+  --ink: #23313E;
+  --ink-soft: #55677A;
+  --card: #FFFFFF;
+  --tape: rgba(240,214,140,.75);
+  --who: #FFE98A;
+  --see: #BDEEF6;
+  --may: #F9CDE0;
+  --wrong: #D2453A;
+  --ok: #2F8F5B;
+  --line: #9DB0C2;
+  --font-hand: "LXGW WenKai TC", "Noto Sans TC", "PingFang TC", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #1A2320; --grid: rgba(200,230,210,.08); --ink: #E6EDE8; --ink-soft: #A9BAB1;
+    --card: #24302C; --tape: rgba(200,180,110,.45); --who: #8A7A2A; --see: #2B6A74; --may: #7A3F57;
+    --wrong: #FF8A7E; --ok: #7FD3A1; --line: #5E7268; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #1A2320; --grid: rgba(200,230,210,.08); --ink: #E6EDE8; --ink-soft: #A9BAB1;
+  --card: #24302C; --tape: rgba(200,180,110,.45); --who: #8A7A2A; --see: #2B6A74; --may: #7A3F57;
+  --wrong: #FF8A7E; --ok: #7FD3A1; --line: #5E7268; color-scheme: dark;
+}
+body {
+  background-color: var(--paper);
+  background-image: linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 22px 22px;
+  color: var(--ink);
+  font-family: var(--font-hand);
+  font-size: 17px;
+  line-height: 1.75;
+}
+.page { max-width: 760px; margin: 0 auto; padding-inline: 18px; padding-block: 32px 64px; display: grid; gap: 34px; }
+h1, h2 { text-wrap: balance; line-height: 1.3; margin: 0; }
+h1 { font-size: 2.1rem; }
+h2 { font-size: 1.45rem; display: flex; align-items: baseline; gap: 10px; }
+h2 .tag { font-family: var(--font-mono); font-size: .72rem; letter-spacing: .08em; color: var(--ink-soft); text-transform: uppercase; }
+p { margin: 0; }
+section { display: grid; gap: 14px; min-width: 0; }
+.sub { color: var(--ink-soft); font-size: .95rem; }
+mark { background: linear-gradient(transparent 52%, var(--who) 52%); color: inherit; padding: 0 2px; }
+mark.see { background: linear-gradient(transparent 52%, var(--see) 52%); }
+mark.may { background: linear-gradient(transparent 52%, var(--may) 52%); }
+code { font-family: var(--font-mono); font-size: .86em; background: color-mix(in srgb, var(--line) 22%, transparent); padding: 1px 5px; border-radius: 3px; }
+.card { position: relative; background: var(--card); padding: 22px 18px 16px; box-shadow: 0 1px 3px rgba(0,0,0,.12); min-width: 0; }
+.card::before { content: ""; position: absolute; top: -9px; left: 50%; width: 92px; height: 20px; transform: translateX(-50%) rotate(-2deg); background: var(--tape); }
+.scroll { overflow-x: auto; }
+svg text { font-family: var(--font-mono); fill: var(--ink); }
+svg .hand { font-family: var(--font-hand); }
+.rule { border-left: 4px solid var(--ok); padding: 6px 12px; font-size: 1.08rem; }
+.wrong { border-left: 4px solid var(--wrong); padding: 4px 12px; display: grid; gap: 2px; }
+.wrong b { color: var(--wrong); font-size: .85rem; letter-spacing: .05em; }
+.panels { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 14px; }
+.panel { border: 2px solid var(--ink); background: var(--card); padding: 10px; display: grid; gap: 6px; min-width: 0; }
+.panel h3 { margin: 0; font-size: 1rem; font-family: var(--font-mono); }
+.panel p { font-size: .92rem; }
+@media (max-width: 520px) { .panels { grid-template-columns: 1fr; } }
+table { border-collapse: collapse; width: 100%; font-size: .95rem; }
+th, td { border-bottom: 1px dashed var(--line); padding: 8px 6px; text-align: left; vertical-align: top; }
+th { font-family: var(--font-mono); font-size: .78rem; letter-spacing: .05em; color: var(--ink-soft); font-weight: 600; }
+ol { margin: 0; padding-left: 1.3em; display: grid; gap: 6px; }
+blockquote { margin: 0; padding: 12px 16px; background: var(--card); border: 2px dashed var(--line); }
+.en { font-family: var(--font-mono); font-size: .9rem; color: var(--ink-soft); }
+details summary{cursor:pointer}
+</style>
+<style>
+/* chapter-note additions on top of the notebook base */
+svg.fig { display: block; min-width: 640px; width: 100%; height: auto; }
+.lvl { font-family: var(--font-mono); font-size: .74rem; padding: 1px 7px; border: 1.5px solid var(--ink); border-radius: 10px; white-space: nowrap; }
+.lvl.high { background: color-mix(in srgb, var(--ok) 28%, transparent); }
+.lvl.med { background: var(--who); }
+.lvl.low { background: var(--may); }
+.lvl.todo { border-style: dashed; color: var(--ink-soft); }
+.meta { display: flex; flex-wrap: wrap; gap: 8px 16px; font-family: var(--font-mono); font-size: .8rem; color: var(--ink-soft); }
+.toc { display: flex; flex-wrap: wrap; gap: 6px 14px; font-family: var(--font-mono); font-size: .82rem; }
+.toc a { color: var(--ink); }
+.trail { display: grid; gap: 12px; }
+.fix { border-left: 4px solid var(--ok); padding: 4px 12px; }
+.two { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 14px; }
+@media (max-width: 560px) { .two { grid-template-columns: 1fr; } }
+details { background: var(--card); border: 2px dashed var(--line); padding: 10px 14px; }
+details[open] { border-style: solid; }
+details > div { display: grid; gap: 8px; margin-top: 10px; }
+.small { font-size: .9rem; }
+a { color: inherit; text-underline-offset: 3px; }
+pre { margin: 0; font-family: var(--font-mono); font-size: .82rem; line-height: 1.5; background: var(--card); border: 1px solid var(--line); padding: 10px 12px; overflow-x: auto; }
+</style>
+<main class="page">
+  <header style="display:grid;gap:10px">
+    <p class="sub">k8s 課程 · topic 深入 · P0 · <a href="https://claude.ai/artifact/BsrozK5kwbKAJrtzK9MukK">← P0 章節筆記</a></p>
+    <h1>API Server 請求鏈</h1>
+    <p>API Server 是叢集唯一的前門。這一頁看一個請求穿過它的每一道關：你是誰、能不能做、排不排得進、合不合規、怎麼落帳。每一關都有自己的錯誤碼和自己的故障。</p>
+    <div class="meta"><span>P0 C-3 · P2b 權限篇會再深化</span><span>相關錯題：dry-run 兩層、YAML validation、PSS 擋 RS</span></div>
+    <nav class="toc"><a href="#l0">L0</a><a href="#l1">L1</a><a href="#l2">L2</a><a href="#l3">L3</a><a href="#l4">L4</a><a href="#l5">L5</a><a href="#l6">L6</a><a href="#l7">L7</a><a href="#trail">錯題</a></nav>
+  </header>
+
+  <section id="l0">
+    <h2>Layer 0 · 一張圖<span class="tag">analogy</span></h2>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 720 170" role="img" aria-label="Bank counter: check ID, check account permission, take a queue number, clerk fills in missing fields, compliance review, then write to the ledger">
+        <g font-size="11" text-anchor="middle">
+          <rect x="10" y="40" width="100" height="60" fill="var(--who)" stroke="var(--ink)"/><text x="60" y="66" class="hand">看身分證</text><text x="60" y="86" font-size="9">authn</text>
+          <rect x="125" y="40" width="100" height="60" fill="var(--card)" stroke="var(--ink)"/><text x="175" y="66" class="hand">抽號碼牌</text><text x="175" y="86" font-size="9">APF</text>
+          <rect x="240" y="40" width="100" height="60" fill="var(--may)" stroke="var(--ink)"/><text x="290" y="66" class="hand">查帳戶權限</text><text x="290" y="86" font-size="9">authz</text>
+          <rect x="355" y="40" width="110" height="60" fill="var(--see)" stroke="var(--ink)"/><text x="410" y="66" class="hand">行員幫你補欄位</text><text x="410" y="86" font-size="9">mutating</text>
+          <rect x="480" y="40" width="100" height="60" fill="var(--see)" stroke="var(--ink)"/><text x="530" y="66" class="hand">法遵審查</text><text x="530" y="86" font-size="9">validating</text>
+          <rect x="595" y="40" width="110" height="60" fill="var(--who)" stroke="var(--ink)" stroke-width="2"/><text x="650" y="66" class="hand">寫進總帳</text><text x="650" y="86" font-size="9">etcd</text>
+        </g>
+        <text x="360" y="140" text-anchor="middle" font-size="13" class="hand">任何一關退件，後面的關都不會發生，帳本也不會有這筆。</text>
+      </svg>
+    </div>
+  </section>
+
+  <section id="l1">
+    <h2>Layer 1 · 第一性原理<span class="tag">one door</span></h2>
+    <p><b>限制：狀態只能有一份真相，而且寫入者很多。</b>kubectl、幾十個 controller、上千個 kubelet 都要讀寫。如果每個人都直接連 etcd，驗證、授權、稽核、限流要在每個 client 各做一次，而且只要有一個 client 有 bug 就能寫壞帳本。</p>
+    <p>所以只開一扇門，所有檢查集中在門口做一次。代價是這扇門成為效能瓶頸和攻擊目標，這一頁後半都在處理這個代價。</p>
+  </section>
+
+  <section id="l2">
+    <h2>Layer 2 · 機制<span class="tag">the handler chain</span></h2>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 780 360" role="img" aria-label="Detailed chain with options per stage: authn via x509, bearer token, service account JWT, OIDC, webhook; APF priority levels and flow schemas; authz modes Node, RBAC, Webhook evaluated in order; admission: mutating webhooks, schema and defaulting, validating admission policy CEL and validating webhooks; storage with resourceVersion and watch cache">
+        <defs><marker id="as1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="var(--ink)"/></marker></defs>
+        <g font-size="10">
+          <rect x="10" y="10" width="240" height="90" fill="var(--who)" stroke="var(--ink)" stroke-width="2"/><text x="20" y="28" font-size="11">① authn：你是誰（任一方式成功即可）</text><text x="20" y="46">x509 client cert（kubeadm admin）</text><text x="20" y="62">SA token（JWT，Pod 內）</text><text x="20" y="78">OIDC / webhook token（EKS：IAM）</text><text x="20" y="94" fill="var(--wrong)">全部失敗 → 401</text>
+          <rect x="270" y="10" width="240" height="90" fill="var(--card)" stroke="var(--ink)" stroke-width="2"/><text x="280" y="28" font-size="11">② APF：排隊與限流</text><text x="280" y="46">FlowSchema 把請求分類</text><text x="280" y="62">PriorityLevel 各有座位數</text><text x="280" y="78">system / leader-election 優先</text><text x="280" y="94" fill="var(--wrong)">排不進 → 429 + Retry-After</text>
+          <rect x="530" y="10" width="240" height="90" fill="var(--may)" stroke="var(--ink)" stroke-width="2"/><text x="540" y="28" font-size="11">③ authz：能不能做（依序問）</text><text x="540" y="46">Node：kubelet 只能動自己 node 的 Pod</text><text x="540" y="62">RBAC：verb × resource × ns</text><text x="540" y="78">Webhook（選用）</text><text x="540" y="94" fill="var(--wrong)">沒人說 allow → 403</text>
+          <rect x="10" y="130" width="240" height="100" fill="var(--see)" stroke="var(--ink)" stroke-width="2"/><text x="20" y="148" font-size="11">④ mutating admission</text><text x="20" y="166">內建：ServiceAccount、LimitRanger、</text><text x="20" y="182">DefaultStorageClass …</text><text x="20" y="198">外部：sidecar injector webhook</text><text x="20" y="218" fill="var(--ink-soft)">可以改你的物件</text>
+          <rect x="270" y="130" width="240" height="100" fill="var(--see)" stroke="var(--ink)" stroke-width="2"/><text x="280" y="148" font-size="11">⑤ schema + defaulting</text><text x="280" y="166">strict decoding：unknown field</text><text x="280" y="182">型別、enum、必填欄位</text><text x="280" y="198">填預設值（strategy 25% …）</text><text x="280" y="218" fill="var(--wrong)">不合 → 400 / 422</text>
+          <rect x="530" y="130" width="240" height="100" fill="var(--see)" stroke="var(--ink)" stroke-width="2"/><text x="540" y="148" font-size="11">⑥ validating admission</text><text x="540" y="166">內建：PodSecurity、ResourceQuota</text><text x="540" y="182">ValidatingAdmissionPolicy（CEL）</text><text x="540" y="198">外部：Kyverno / Gatekeeper</text><text x="540" y="218" fill="var(--ink-soft)">只能說 yes / no，不能改</text>
+          <rect x="140" y="260" width="500" height="80" fill="var(--who)" stroke="var(--ink)" stroke-width="2.5"/><text x="150" y="280" font-size="11">⑦ storage</text><text x="150" y="298">寫 etcd：key /registry/pods/default/web-7d4b9，帶 resourceVersion 比對</text><text x="150" y="316">rv 不符 → 409 Conflict（樂觀鎖）；寫成功後推給所有 watcher</text><text x="150" y="332" fill="var(--ink-soft)">讀：多數 LIST/GET 由 watch cache 回答，不直接打 etcd</text>
+        </g>
+        <g stroke="var(--ink)" stroke-width="1.6"><line x1="250" y1="55" x2="268" y2="55" marker-end="url(#as1)"/><line x1="510" y1="55" x2="528" y2="55" marker-end="url(#as1)"/><path d="M650 100 C650 115, 130 112, 130 128" fill="none" marker-end="url(#as1)"/><line x1="250" y1="180" x2="268" y2="180" marker-end="url(#as1)"/><line x1="510" y1="180" x2="528" y2="180" marker-end="url(#as1)"/><path d="M650 230 C650 248, 390 245, 390 258" fill="none" marker-end="url(#as1)"/></g>
+        <text x="10" y="355" font-size="10" fill="var(--ink-soft)">每一步前後都會寫 audit event（level：None / Metadata / Request / RequestResponse）</text>
+      </svg>
+    </div>
+    <p class="small">順序的理由：mutating 在 validating 前面，因為要驗證的是「最後會被存進去的樣子」。authz 在 admission 前面，因為沒權限的人連讓 webhook 看到物件的資格都沒有。</p>
+    <div class="scroll"><table>
+      <tr><th>參數</th><th>預設</th><th>意義</th></tr>
+      <tr><td>webhook <code>timeoutSeconds</code></td><td>10s（上限 30s）</td><td>webhook 慢，所有建立請求跟著慢</td></tr>
+      <tr><td>webhook <code>failurePolicy</code></td><td>Fail</td><td>webhook 連不到 = 拒絕請求</td></tr>
+      <tr><td>單一物件大小</td><td>約 1.5 MiB（etcd 請求上限）</td><td>大 ConfigMap 會被擋</td></tr>
+      <tr><td><code>--dry-run=server</code></td><td>走完 ①–⑥</td><td>只差 ⑦ 不寫入；有副作用的 webhook 要宣告 <code>sideEffects: None</code> 才會被呼叫</td></tr>
+    </table></div>
+  </section>
+
+  <section id="l3">
+    <h2>Layer 3 · 取捨<span class="tag">why this design</span></h2>
+    <div class="scroll"><table>
+      <tr><th>選擇</th><th>贏在</th><th>代價</th></tr>
+      <tr><td>admission webhook（外部 HTTP）</td><td>任何語言都能寫政策</td><td>每個請求多一次網路呼叫；webhook 掛了能擋住整個叢集</td></tr>
+      <tr><td>ValidatingAdmissionPolicy（CEL，1.30 GA）</td><td>在 API Server 內執行，不用跑服務</td><td>表達力比完整程式語言弱</td></tr>
+      <tr><td>APF 取代固定 inflight 上限</td><td>吵的 client 只會擠到自己那一級</td><td>設定複雜；預設分類可能不合你的 controller</td></tr>
+      <tr><td>watch cache</td><td>大量 LIST 不打 etcd</td><td>API Server 記憶體用量跟物件數成正比</td></tr>
+      <tr><td>authn 外包（OIDC / IAM）</td><td>k8s 不存使用者帳號</td><td>身分對應（IAM → k8s user / group）變成另一個要管的東西</td></tr>
+    </table></div>
+  </section>
+
+  <section id="l4">
+    <h2>Layer 4 · AWS 怎麼做<span class="tag">EKS front door</span></h2>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 740 200" role="img" aria-label="EKS authentication: kubectl runs aws eks get-token to produce a presigned STS token; API server's authenticator verifies it with STS and maps the IAM principal through access entries to Kubernetes username and groups; RBAC then authorizes">
+        <defs><marker id="as2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="var(--ink)"/></marker></defs>
+        <g font-size="10">
+          <rect x="10" y="30" width="150" height="70" fill="var(--card)" stroke="var(--ink)" stroke-width="2"/><text x="20" y="50">kubectl</text><text x="20" y="68">exec: aws eks get-token</text><text x="20" y="86">→ 預簽 STS URL 當 token</text>
+          <rect x="200" y="30" width="170" height="70" fill="var(--who)" stroke="var(--ink)" stroke-width="2"/><text x="210" y="50">EKS authenticator</text><text x="210" y="68">拿 token 去問 STS：</text><text x="210" y="86">GetCallerIdentity = 誰</text>
+          <rect x="410" y="30" width="150" height="70" fill="var(--may)" stroke="var(--ink)" stroke-width="2"/><text x="420" y="50">access entry</text><text x="420" y="68">IAM role → k8s</text><text x="420" y="86">username + groups</text>
+          <rect x="600" y="30" width="130" height="70" fill="var(--see)" stroke="var(--ink)" stroke-width="2"/><text x="610" y="50">RBAC</text><text x="610" y="68">或 access policy</text><text x="610" y="86">決定能做什麼</text>
+        </g>
+        <g stroke="var(--ink)" stroke-width="2"><line x1="160" y1="65" x2="198" y2="65" marker-end="url(#as2)"/><line x1="370" y1="65" x2="408" y2="65" marker-end="url(#as2)"/><line x1="560" y1="65" x2="598" y2="65" marker-end="url(#as2)"/></g>
+        <text x="10" y="140" font-size="11" class="hand">IAM 只回答「你是誰」。能不能刪 Pod，仍然是 k8s 的 RBAC 決定。</text>
+        <text x="10" y="162" font-size="11" class="hand">這跟 IRSA 的方向相反：IRSA 是 k8s 身分換 AWS 權限，這裡是 AWS 身分換 k8s 權限。</text>
+      </svg>
+    </div>
+    <div class="scroll"><table>
+      <tr><th>服務 / 設定</th><th>做什麼</th><th>常見陷阱</th></tr>
+      <tr><td>access entries</td><td>IAM principal → k8s 身分（取代 aws-auth ConfigMap）</td><td>還在用 aws-auth：一個 YAML 錯字就把所有人鎖在外面</td></tr>
+      <tr><td>cluster creator admin</td><td>建叢集的 IAM 身分自動有 admin</td><td>那個 role 被刪或人離職，沒有別人有 admin。建叢集時就加第二個 admin entry</td></tr>
+      <tr><td>endpoint public / private</td><td>前門從哪裡進</td><td>public 開著且 CIDR 是 0.0.0.0/0：前門暴露在網路上，只剩 authn 一道防線</td></tr>
+      <tr><td>audit log（control plane logging）</td><td>誰在什麼時間做了什麼</td><td>預設關。資安事件發生後才開，查不到過去</td></tr>
+      <tr><td>webhook 跑在 Fargate / 私有 subnet</td><td>政策引擎</td><td>control plane 要能連到 webhook Service；SG 沒開 → 所有建立請求 timeout</td></tr>
+    </table></div>
+  </section>
+
+  <section id="l5">
+    <h2>Layer 5 · 規模化<span class="tag">evolution ladder</span></h2>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 740 200" role="img" aria-label="Ladder: shared admin kubeconfig; per-person identity via SSO plus RBAC; policy as code with admission and audit logs shipped; APF tuning, per-controller QPS budgets, multiple clusters to split load">
+        <g font-size="11">
+          <rect x="10" y="150" width="170" height="44" fill="var(--card)" stroke="var(--ink)" stroke-width="2"/><text x="20" y="170">① 共用 admin kubeconfig</text><text x="20" y="186" class="hand">不知道誰做的</text>
+          <rect x="195" y="110" width="170" height="84" fill="var(--see)" stroke="var(--ink)" stroke-width="2"/><text x="205" y="130">② 個人身分</text><text x="205" y="148" class="hand">SSO + RBAC</text><text x="205" y="166" class="hand">audit 開啟</text>
+          <rect x="380" y="70" width="170" height="124" fill="var(--who)" stroke="var(--ink)" stroke-width="2"/><text x="390" y="90">③ policy as code</text><text x="390" y="108" class="hand">CEL / Kyverno</text><text x="390" y="126" class="hand">webhook 排除 kube-system</text>
+          <rect x="565" y="20" width="170" height="174" fill="var(--may)" stroke="var(--ink)" stroke-width="2"/><text x="575" y="40">④ 保護前門</text><text x="575" y="58" class="hand">APF 分級</text><text x="575" y="76" class="hand">controller QPS 預算</text><text x="575" y="94" class="hand">拆叢集分流</text>
+        </g>
+      </svg>
+    </div>
+  </section>
+
+  <section id="l6">
+    <h2>Layer 6 · 故障與 on-call<span class="tag">read the status code</span></h2>
+    <div class="scroll"><table>
+      <tr><th>看到</th><th>死在</th><th>第一刀</th></tr>
+      <tr><td>401 Unauthorized</td><td>① authn</td><td>token 過期？EKS 上 <code>aws sts get-caller-identity</code> 看你現在是哪個 IAM 身分</td></tr>
+      <tr><td>429 Too Many Requests</td><td>② APF</td><td><code>apiserver_flowcontrol_rejected_requests_total</code> 依 flow_schema 分；找出是哪個 client</td></tr>
+      <tr><td>403 Forbidden</td><td>③ authz</td><td>訊息會寫 verb 和 resource：<code>cannot list resource "pods"</code>；用 <code>kubectl auth can-i --as</code> 驗</td></tr>
+      <tr><td><code>failed calling webhook</code></td><td>④⑥ webhook</td><td>webhook Service 有 endpoint 嗎？failurePolicy 是 Fail 嗎？</td></tr>
+      <tr><td>400 / 422 <code>unknown field</code></td><td>⑤ schema</td><td>照錯誤訊息的欄位路徑回檔案找</td></tr>
+      <tr><td><code>violates PodSecurity</code></td><td>⑥ PSS</td><td>Pod 被擋時看 RS 的 event</td></tr>
+      <tr><td>409 Conflict</td><td>⑦ storage</td><td>有人同時改了；重讀再改。controller 會自動重試</td></tr>
+    </table></div>
+    <p class="small">一個實用習慣：<code>kubectl -v=6</code> 會印出每個 HTTP 請求和回應碼，一眼看出死在哪一關。</p>
+  </section>
+
+  <section id="l7">
+    <h2>Layer 7 · 面試<span class="tag">interview</span></h2>
+    <blockquote>「After installing a new admission webhook, nobody can create pods in any namespace, including kube-system. What happened, and how do you design webhooks so this can't take the cluster down?」</blockquote>
+    <details><summary>L4 回答</summary><div><p>「webhook 壞了，把 webhook 刪掉就好。」</p><p class="small">能止血，但沒講機制和預防。</p></div></details>
+    <details><summary>L6 回答</summary><div>
+      <p>「每個建立請求在 admission 階段都要呼叫這個 webhook。webhook Pod 沒起來或 control plane 連不到它，而 <code>failurePolicy</code> 預設是 Fail，所以每個請求都被拒。連 webhook 自己的 Pod 也建不出來，因為它也要過這個 webhook，形成死結。」</p>
+      <p>「止血：<code>kubectl get validatingwebhookconfigurations,mutatingwebhookconfigurations</code> 找到它，暫時改 failurePolicy 為 Ignore 或刪掉 configuration。」</p>
+      <p>「設計：namespaceSelector 排除 kube-system 和 webhook 自己的 namespace；timeoutSeconds 設 2–5 秒，不用預設 10；webhook 至少 2 個副本加 PDB；安全類政策用 Fail，非關鍵的用 Ignore；能用 ValidatingAdmissionPolicy（CEL）寫的就不要用外部 webhook，因為它在 API Server 內執行，沒有網路依賴。」</p>
+      <p class="small">L6 多了：雞生蛋的死結、具體的止血指令、四個設計防線、什麼時候換成 CEL。</p>
+    </div></details>
+  </section>
+
+  <section id="trail">
+    <h2>我的錯題軌跡<span class="tag">this topic</span></h2>
+    <div class="trail">
+      <div class="wrong"><b>我錯在這 · 06-18</b><code>matchLabels</code> 打成 <code>metaLabels</code>，沒讀 strict decoding 的錯誤訊息。</div>
+      <div class="fix">修正：那是第 ⑤ 關的 400，訊息帶欄位路徑。s25 第一次自己讀錯誤訊息改對。</div>
+      <div class="wrong"><b>我錯在這 · 07-03 → 07-14</b><code>--dry-run=client</code> 綠燈就以為沒問題；server dry-run 答成「走完 etcd」。</div>
+      <div class="fix">修正：client 只在本機檢查格式；server 走完 ①–⑥，只差 ⑦ 不寫入。</div>
+      <div class="wrong"><b>我錯在這 · 09-08</b>把 kubectl 指令名稱當成 RBAC 動詞（<code>get pods</code> 實際需要 list）。</div>
+      <div class="fix">修正：403 訊息本身會寫出 verb（<code>cannot list</code>）。這張卡已退役，但讀錯誤訊息的習慣要留著。</div>
+    </div>
+  </section>
+</main>
+
+</body></html>

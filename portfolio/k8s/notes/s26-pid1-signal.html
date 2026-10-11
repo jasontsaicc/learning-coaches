@@ -1,0 +1,241 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"></head><body>
+<title>PID 1 與訊號</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC:wght@400;700&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: one notebook column on graph paper; figures on taped cards, scenarios as 2x2 comic panels */
+:root {
+  --paper: #F6F8FA;
+  --grid: rgba(90,130,170,.16);
+  --ink: #23313E;
+  --ink-soft: #55677A;
+  --card: #FFFFFF;
+  --tape: rgba(240,214,140,.75);
+  --who: #FFE98A;
+  --see: #BDEEF6;
+  --may: #F9CDE0;
+  --wrong: #D2453A;
+  --ok: #2F8F5B;
+  --line: #9DB0C2;
+  --font-hand: "LXGW WenKai TC", "Noto Sans TC", "PingFang TC", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #1A2320; --grid: rgba(200,230,210,.08); --ink: #E6EDE8; --ink-soft: #A9BAB1;
+    --card: #24302C; --tape: rgba(200,180,110,.45); --who: #8A7A2A; --see: #2B6A74; --may: #7A3F57;
+    --wrong: #FF8A7E; --ok: #7FD3A1; --line: #5E7268; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #1A2320; --grid: rgba(200,230,210,.08); --ink: #E6EDE8; --ink-soft: #A9BAB1;
+  --card: #24302C; --tape: rgba(200,180,110,.45); --who: #8A7A2A; --see: #2B6A74; --may: #7A3F57;
+  --wrong: #FF8A7E; --ok: #7FD3A1; --line: #5E7268; color-scheme: dark;
+}
+body {
+  background-color: var(--paper);
+  background-image: linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 22px 22px;
+  color: var(--ink);
+  font-family: var(--font-hand);
+  font-size: 17px;
+  line-height: 1.75;
+}
+.page { max-width: 760px; margin: 0 auto; padding-inline: 18px; padding-block: 32px 64px; display: grid; gap: 34px; }
+h1, h2 { text-wrap: balance; line-height: 1.3; margin: 0; }
+h1 { font-size: 2.1rem; }
+h2 { font-size: 1.45rem; display: flex; align-items: baseline; gap: 10px; }
+h2 .tag { font-family: var(--font-mono); font-size: .72rem; letter-spacing: .08em; color: var(--ink-soft); text-transform: uppercase; }
+p { margin: 0; }
+section { display: grid; gap: 14px; min-width: 0; }
+.sub { color: var(--ink-soft); font-size: .95rem; }
+mark { background: linear-gradient(transparent 52%, var(--who) 52%); color: inherit; padding: 0 2px; }
+mark.see { background: linear-gradient(transparent 52%, var(--see) 52%); }
+mark.may { background: linear-gradient(transparent 52%, var(--may) 52%); }
+code { font-family: var(--font-mono); font-size: .86em; background: color-mix(in srgb, var(--line) 22%, transparent); padding: 1px 5px; border-radius: 3px; }
+.card { position: relative; background: var(--card); padding: 22px 18px 16px; box-shadow: 0 1px 3px rgba(0,0,0,.12); min-width: 0; }
+.card::before { content: ""; position: absolute; top: -9px; left: 50%; width: 92px; height: 20px; transform: translateX(-50%) rotate(-2deg); background: var(--tape); }
+.scroll { overflow-x: auto; }
+svg text { font-family: var(--font-mono); fill: var(--ink); }
+svg .hand { font-family: var(--font-hand); }
+.rule { border-left: 4px solid var(--ok); padding: 6px 12px; font-size: 1.08rem; }
+.wrong { border-left: 4px solid var(--wrong); padding: 4px 12px; display: grid; gap: 2px; }
+.wrong b { color: var(--wrong); font-size: .85rem; letter-spacing: .05em; }
+.panels { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 14px; }
+.panel { border: 2px solid var(--ink); background: var(--card); padding: 10px; display: grid; gap: 6px; min-width: 0; }
+.panel h3 { margin: 0; font-size: 1rem; font-family: var(--font-mono); }
+.panel p { font-size: .92rem; }
+@media (max-width: 520px) { .panels { grid-template-columns: 1fr; } }
+table { border-collapse: collapse; width: 100%; font-size: .95rem; }
+th, td { border-bottom: 1px dashed var(--line); padding: 8px 6px; text-align: left; vertical-align: top; }
+th { font-family: var(--font-mono); font-size: .78rem; letter-spacing: .05em; color: var(--ink-soft); font-weight: 600; }
+ol { margin: 0; padding-left: 1.3em; display: grid; gap: 6px; }
+blockquote { margin: 0; padding: 12px 16px; background: var(--card); border: 2px dashed var(--line); }
+.en { font-family: var(--font-mono); font-size: .9rem; color: var(--ink-soft); }
+details summary{cursor:pointer}
+</style>
+<style>
+/* chapter-note additions on top of the notebook base */
+svg.fig { display: block; min-width: 640px; width: 100%; height: auto; }
+.lvl { font-family: var(--font-mono); font-size: .74rem; padding: 1px 7px; border: 1.5px solid var(--ink); border-radius: 10px; white-space: nowrap; }
+.lvl.high { background: color-mix(in srgb, var(--ok) 28%, transparent); }
+.lvl.med { background: var(--who); }
+.lvl.low { background: var(--may); }
+.lvl.todo { border-style: dashed; color: var(--ink-soft); }
+.meta { display: flex; flex-wrap: wrap; gap: 8px 16px; font-family: var(--font-mono); font-size: .8rem; color: var(--ink-soft); }
+.toc { display: flex; flex-wrap: wrap; gap: 6px 14px; font-family: var(--font-mono); font-size: .82rem; }
+.toc a { color: var(--ink); }
+.trail { display: grid; gap: 12px; }
+.fix { border-left: 4px solid var(--ok); padding: 4px 12px; }
+.two { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 14px; }
+@media (max-width: 560px) { .two { grid-template-columns: 1fr; } }
+details { background: var(--card); border: 2px dashed var(--line); padding: 10px 14px; }
+details[open] { border-style: solid; }
+details > div { display: grid; gap: 8px; margin-top: 10px; }
+.small { font-size: .9rem; }
+a { color: inherit; text-underline-offset: 3px; }
+pre { margin: 0; font-family: var(--font-mono); font-size: .82rem; line-height: 1.5; background: var(--card); border: 1px solid var(--line); padding: 10px 12px; overflow-x: auto; }
+</style>
+<meta name="topic" content="PID 1 signal 保護">
+<main class="page">
+  <header style="display:grid;gap:10px">
+    <p class="sub">k8s 課程 · topic 深入 · P1 延伸 · <a href="https://claude.ai/artifact/UrVpfj1woG42r9M5UxMMBn">← P1 章節筆記</a></p>
+    <h1>PID 1 與訊號</h1>
+    <p>你 s26 在 lab 裡意外撞到：<code>kill 1</code> 殺不掉 container。這一頁解釋 kernel 為什麼特別保護 PID 1，以及這件事在 production 變成什麼：刪 Pod 總是等滿 30 秒、每次部署都斷線、殭屍 process 越堆越多。</p>
+    <div class="meta"><span>Mastery：med (s26)</span><span>來源：實驗意外撞出，教練驅動，尚未冷測</span></div>
+    <nav class="toc"><a href="#l0">L0</a><a href="#l1">L1</a><a href="#l2">L2</a><a href="#l3">L3</a><a href="#l4">L4</a><a href="#l5">L5</a><a href="#l6">L6</a><a href="#l7">L7</a><a href="#trail">錯題</a></nav>
+  </header>
+
+  <section id="l0">
+    <h2>Layer 0 · 一張圖<span class="tag">analogy</span></h2>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 720 180" role="img" aria-label="Building manager (PID 1) ignores any notice he has no procedure for, because if he leaves the whole building closes; only the city (parent namespace) can force him out">
+        <rect x="40" y="30" width="280" height="100" fill="var(--who)" stroke="var(--ink)" stroke-width="2"/>
+        <text x="180" y="58" text-anchor="middle" font-size="13" class="hand">大樓管理員（PID 1）</text>
+        <text x="180" y="82" text-anchor="middle" font-size="10">沒有 SOP 的通知一律不理</text>
+        <text x="180" y="100" text-anchor="middle" font-size="10">他一走，整棟樓（PID namespace）就關了</text>
+        <rect x="420" y="30" width="260" height="100" fill="var(--may)" stroke="var(--ink)" stroke-width="2"/>
+        <text x="550" y="58" text-anchor="middle" font-size="13" class="hand">市政府的強制令</text>
+        <text x="550" y="82" text-anchor="middle" font-size="10">從樓外（父 namespace）來的 SIGKILL</text>
+        <text x="550" y="100" text-anchor="middle" font-size="10">他擋不了</text>
+        <text x="360" y="160" text-anchor="middle" font-size="13" class="hand">住戶（container 內）叫他走，他不理；kubelet 從外面叫，30 秒後才強制。</text>
+      </svg>
+    </div>
+  </section>
+
+  <section id="l1">
+    <h2>Layer 1 · 第一性原理<span class="tag">why protect init</span></h2>
+    <p><b>限制：PID 1 死掉，整個 PID namespace 裡的所有 process 都會被 kernel 殺掉。</b>在一般 Linux 上 PID 1 是 init（systemd），它掛了整台機器就掛了。所以 kernel 對 PID 1 有特別規則：</p>
+    <div class="rule">一個 signal 如果 PID 1 <b>沒有安裝 handler</b>，kernel 不套用預設動作（終止），而是直接丟掉。這個保護連 SIGKILL 都算，只要 signal 來自<b>同一個 PID namespace 內部</b>。</div>
+    <p>在容器裡，你的 app 變成了 PID 1，就繼承了這個保護。問題是你的 app 不是 init，它沒有被設計成要處理 init 的工作。</p>
+  </section>
+
+  <section id="l2">
+    <h2>Layer 2 · 機制<span class="tag">signals in a container</span></h2>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 780 260" role="img" aria-label="Signal to PID 1 decision: from inside the namespace with no handler, ignored; with a handler, handler runs; from the parent namespace, SIGKILL always works. Ordinary process without handler: SIGTERM terminates">
+        <rect x="10" y="20" width="360" height="220" fill="none" stroke="var(--ink)" stroke-width="2" stroke-dasharray="6 4"/><text x="20" y="40" font-size="11">container 的 PID namespace</text>
+        <rect x="30" y="55" width="150" height="56" fill="var(--who)" stroke="var(--ink)" stroke-width="2"/><text x="40" y="76" font-size="11">PID 1: sleep 3600</text><text x="40" y="94" font-size="10">沒有 SIGTERM handler</text>
+        <rect x="200" y="55" width="150" height="56" fill="var(--see)" stroke="var(--ink)"/><text x="210" y="76" font-size="11">PID 7: sh（你 exec 進去）</text><text x="210" y="94" font-size="10">kill 1 / kill -9 1</text>
+        <line x1="200" y1="83" x2="182" y2="83" stroke="var(--wrong)" stroke-width="2"/><text x="100" y="135" text-anchor="middle" font-size="11" fill="var(--wrong)">被丟掉，什麼都沒發生</text>
+        <rect x="30" y="160" width="320" height="64" fill="var(--card)" stroke="var(--ink)"/><text x="40" y="180" font-size="10">對照：一般 process 收到 SIGTERM 且沒 handler</text><text x="40" y="198" font-size="10">→ 預設動作 = 終止</text><text x="40" y="214" font-size="10">PID 1 是唯一的例外</text>
+        <rect x="430" y="55" width="330" height="80" fill="var(--may)" stroke="var(--ink)" stroke-width="2"/><text x="440" y="76" font-size="11">node（父 namespace）</text><text x="440" y="96" font-size="10">crictl stop / kubelet 逾時後的 SIGKILL</text><text x="440" y="114" font-size="10" fill="var(--ok)">一定殺得掉：保護只對內部來源有效</text>
+        <line x1="430" y1="95" x2="182" y2="80" stroke="var(--ok)" stroke-width="2" stroke-dasharray="5 4"/>
+        <text x="440" y="170" font-size="11" class="hand">你 s26 的實證：</text>
+        <text x="440" y="190" font-size="10">container 內 kill 1 → 沒反應</text>
+        <text x="440" y="208" font-size="10">docker exec &lt;node&gt; crictl stop … → 死了</text>
+      </svg>
+    </div>
+
+    <h3 style="margin:0">刪一個 Pod 時的時間軸</h3>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 760 170" role="img" aria-label="kubectl delete: preStop hook runs, then SIGTERM to PID 1; if PID 1 ignores it, kubelet waits the full 30 second grace period and sends SIGKILL; exit 137. If the app handles SIGTERM it drains and exits in about 2 seconds with exit 143 or 0">
+        <line x1="20" y1="80" x2="740" y2="80" stroke="var(--ink)"/>
+        <g font-size="10"><text x="20" y="100">0s delete</text><text x="120" y="100">preStop</text><text x="220" y="100">SIGTERM</text><text x="680" y="100">30s SIGKILL</text></g>
+        <rect x="220" y="40" width="460" height="24" fill="var(--wrong)" opacity=".2" stroke="var(--wrong)"/><text x="450" y="57" text-anchor="middle" font-size="10" fill="var(--wrong)">PID 1 忽略 SIGTERM：什麼都沒發生，在途請求沒有被好好收尾</text>
+        <rect x="220" y="115" width="70" height="24" fill="var(--ok)" opacity=".3" stroke="var(--ok)"/><text x="300" y="132" font-size="10" fill="var(--ok)">有 handler：停止收新連線、做完手上的、2 秒內 exit 0</text>
+        <text x="20" y="160" font-size="10" fill="var(--ink-soft)">exit 137 = 128 + 9（被 SIGKILL）· exit 143 = 128 + 15（收到 SIGTERM 後依預設結束）</text>
+      </svg>
+    </div>
+
+    <h3 style="margin:0">你的 app 怎麼變成 PID 1</h3>
+    <div class="scroll"><table>
+      <tr><th>Dockerfile 寫法</th><th>PID 1 是誰</th><th>SIGTERM 會怎樣</th></tr>
+      <tr><td><code>CMD npm start</code>（shell form）</td><td><code>/bin/sh -c</code></td><td>sh 不轉發 signal 給子行程，node 永遠收不到</td></tr>
+      <tr><td><code>CMD ["node","server.js"]</code>（exec form）</td><td>node</td><td>node 收到；app 有寫 handler 才會優雅結束</td></tr>
+      <tr><td><code>ENTRYPOINT ["tini","--"]</code> + exec form</td><td>tini</td><td>tini 轉發 signal、回收殭屍 process</td></tr>
+      <tr><td>Pod 設 <code>shareProcessNamespace: true</code></td><td>pause</td><td>pause 當 init 回收殭屍；app 不再是 PID 1</td></tr>
+    </table></div>
+    <p class="small">PID 1 的另一個工作是回收殭屍（zombie）：子行程結束後要有人 <code>wait()</code> 它。app 當 PID 1 又會 fork 子行程（例如執行 shell 指令），不回收的話 process table 會被殭屍塞滿。</p>
+  </section>
+
+  <section id="l3">
+    <h2>Layer 3 · 取捨<span class="tag">options</span></h2>
+    <div class="scroll"><table>
+      <tr><th>做法</th><th>贏在</th><th>代價</th></tr>
+      <tr><td>app 自己寫 SIGTERM handler</td><td>能做真正的優雅結束（排空、關連線）</td><td>每種語言、每個 app 都要寫對</td></tr>
+      <tr><td>tini / dumb-init</td><td>一行解決轉發與殭屍</td><td>只轉發，app 還是要處理 SIGTERM 才會優雅</td></tr>
+      <tr><td>preStop sleep</td><td>給 endpoint 移除時間（P3 race）</td><td>延長每次終止的時間</td></tr>
+      <tr><td>調低 terminationGracePeriodSeconds</td><td>刪得快</td><td>沒時間排空在途請求</td></tr>
+    </table></div>
+  </section>
+
+  <section id="l4">
+    <h2>Layer 4 · AWS 怎麼做<span class="tag">where it bites on EKS</span></h2>
+    <div class="scroll"><table>
+      <tr><th>情境</th><th>常見陷阱</th></tr>
+      <tr><td>Spot 中斷（2 分鐘通知）</td><td>Karpenter drain node，Pod 收到 SIGTERM。PID 1 忽略 → 每個 Pod 都用滿 grace period，2 分鐘內搬不完</td></tr>
+      <tr><td>ALB 後面的 rollout</td><td>app 沒處理 SIGTERM，被 SIGKILL 時在途請求直接斷 → 502</td></tr>
+      <tr><td>managed node group 升級</td><td>每個 Pod 等 30 秒才死，整個 node 輪替時間被拉長數倍</td></tr>
+      <tr><td>ECS 也一樣</td><td>同一個 PID 1 問題，ECS 用 <code>initProcessEnabled</code> 讓 Docker 塞一個 init</td></tr>
+    </table></div>
+  </section>
+
+  <section id="l5">
+    <h2>Layer 5 · 規模化<span class="tag">evolution ladder</span></h2>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 740 190" role="img" aria-label="Ladder: shell form CMD, every delete takes 30 seconds; exec form plus tini; app handles SIGTERM and drains; platform base images with init built in and a lint rule against shell form">
+        <g font-size="11">
+          <rect x="10" y="140" width="170" height="44" fill="var(--card)" stroke="var(--ink)" stroke-width="2"/><text x="20" y="160">① shell form</text><text x="20" y="176" class="hand">每次都等 30 秒</text>
+          <rect x="195" y="100" width="170" height="84" fill="var(--see)" stroke="var(--ink)" stroke-width="2"/><text x="205" y="120">② exec form + tini</text><text x="205" y="138" class="hand">signal 送得到</text>
+          <rect x="380" y="60" width="170" height="124" fill="var(--who)" stroke="var(--ink)" stroke-width="2"/><text x="390" y="80">③ app 優雅結束</text><text x="390" y="98" class="hand">停收新連線</text><text x="390" y="116" class="hand">排空、關 DB</text>
+          <rect x="565" y="20" width="170" height="164" fill="var(--may)" stroke="var(--ink)" stroke-width="2"/><text x="575" y="40">④ 平台內建</text><text x="575" y="58" class="hand">base image 帶 init</text><text x="575" y="76" class="hand">lint 擋 shell form</text><text x="575" y="94" class="hand">終止時間有 metric</text>
+        </g>
+      </svg>
+    </div>
+  </section>
+
+  <section id="l6">
+    <h2>Layer 6 · 故障與 on-call<span class="tag">how it breaks</span></h2>
+    <div class="panels">
+      <div class="panel"><h3>刪 Pod 永遠等 30 秒</h3><p><code>kubectl delete pod</code> 掛在那裡剛好 30 秒。<code>kubectl exec … -- cat /proc/1/cmdline</code> 看 PID 1 是不是 sh。</p></div>
+      <div class="panel"><h3>每次部署都斷線</h3><p>Last State 是 exit 137 而不是 0 或 143：app 是被 SIGKILL 結束的，沒機會收尾。</p></div>
+      <div class="panel"><h3>process 數一直長</h3><p><code>ps</code> 看到一堆 <code>&lt;defunct&gt;</code>：PID 1 沒有回收殭屍。加 tini。</p></div>
+      <div class="panel"><h3>Spot 中斷時大量 5xx</h3><p>drain 時間不夠：grace period × Pod 數超過 2 分鐘。先讓 app 正確處理 SIGTERM。</p></div>
+    </div>
+  </section>
+
+  <section id="l7">
+    <h2>Layer 7 · 面試<span class="tag">interview</span></h2>
+    <blockquote>「Every time we delete a pod it takes exactly 30 seconds, and we see dropped connections during every deploy. What's likely going on?」</blockquote>
+    <details><summary>L4 回答</summary><div><p>「terminationGracePeriodSeconds 是 30 秒，可以調小。」</p><p class="small">把症狀調短，問題沒解決，斷線會更嚴重。</p></div></details>
+    <details><summary>L6 回答</summary><div>
+      <p>「剛好 30 秒是線索：那是預設 grace period，代表 kubelet 送的 SIGTERM 沒有產生任何效果，等到期才送 SIGKILL。最常見原因是 PID 1 的問題：Dockerfile 用 shell form，PID 1 是 <code>/bin/sh</code>，它不轉發 signal；或者 app 本身是 PID 1 但沒裝 SIGTERM handler，而 kernel 對 PID 1 沒 handler 的 signal 直接丟掉。」</p>
+      <p>「斷線是同一個原因的另一面：app 從來沒收到 SIGTERM，在途請求在 SIGKILL 那一刻被切斷。驗證：看 Last State 的 exit code 是 137，<code>/proc/1/cmdline</code> 是 sh。」</p>
+      <p>「修法：exec form 或 tini 讓 signal 到得了 app；app 收到 SIGTERM 後停收新連線、做完在途請求再退出；加 preStop sleep 擋 endpoint 移除的 race。不要先調低 grace period。」</p>
+      <p class="small">L6 多了：把「剛好 30 秒」當證據、PID 1 的 kernel 規則、exit code 驗證、修法的正確順序。</p>
+    </div></details>
+  </section>
+
+  <section id="trail">
+    <h2>我的錯題軌跡<span class="tag">this topic</span></h2>
+    <div class="trail">
+      <div class="fix"><b>s26 · 意外撞出</b>lab 裡 <code>kill 1</code> 殺不掉 sleep；從 node 用 <code>crictl stop</code> 才殺得掉。s24 net-tool 的 <code>kill 1</code> 有效，是因為那個 image 的 PID 1 不同，不是矛盾。</div>
+      <div class="wrong"><b>還沒驗證</b>這張卡全程是教練帶的，沒有冷測過。</div>
+      <div class="fix">下次抽考：「為什麼你的 Pod 刪除總是要等 30 秒？」加「同一個 container 裡 <code>kill -9 1</code> 殺不殺得掉？為什麼？」</div>
+    </div>
+  </section>
+</main>
+
+</body></html>

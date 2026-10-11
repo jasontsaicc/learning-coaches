@@ -1,0 +1,244 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"></head><body>
+<title>Deployment 與 rollout</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC:wght@400;700&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: one notebook column on graph paper; figures on taped cards, scenarios as 2x2 comic panels */
+:root {
+  --paper: #F6F8FA;
+  --grid: rgba(90,130,170,.16);
+  --ink: #23313E;
+  --ink-soft: #55677A;
+  --card: #FFFFFF;
+  --tape: rgba(240,214,140,.75);
+  --who: #FFE98A;
+  --see: #BDEEF6;
+  --may: #F9CDE0;
+  --wrong: #D2453A;
+  --ok: #2F8F5B;
+  --line: #9DB0C2;
+  --font-hand: "LXGW WenKai TC", "Noto Sans TC", "PingFang TC", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #1A2320; --grid: rgba(200,230,210,.08); --ink: #E6EDE8; --ink-soft: #A9BAB1;
+    --card: #24302C; --tape: rgba(200,180,110,.45); --who: #8A7A2A; --see: #2B6A74; --may: #7A3F57;
+    --wrong: #FF8A7E; --ok: #7FD3A1; --line: #5E7268; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #1A2320; --grid: rgba(200,230,210,.08); --ink: #E6EDE8; --ink-soft: #A9BAB1;
+  --card: #24302C; --tape: rgba(200,180,110,.45); --who: #8A7A2A; --see: #2B6A74; --may: #7A3F57;
+  --wrong: #FF8A7E; --ok: #7FD3A1; --line: #5E7268; color-scheme: dark;
+}
+body {
+  background-color: var(--paper);
+  background-image: linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 22px 22px;
+  color: var(--ink);
+  font-family: var(--font-hand);
+  font-size: 17px;
+  line-height: 1.75;
+}
+.page { max-width: 760px; margin: 0 auto; padding-inline: 18px; padding-block: 32px 64px; display: grid; gap: 34px; }
+h1, h2 { text-wrap: balance; line-height: 1.3; margin: 0; }
+h1 { font-size: 2.1rem; }
+h2 { font-size: 1.45rem; display: flex; align-items: baseline; gap: 10px; }
+h2 .tag { font-family: var(--font-mono); font-size: .72rem; letter-spacing: .08em; color: var(--ink-soft); text-transform: uppercase; }
+p { margin: 0; }
+section { display: grid; gap: 14px; min-width: 0; }
+.sub { color: var(--ink-soft); font-size: .95rem; }
+mark { background: linear-gradient(transparent 52%, var(--who) 52%); color: inherit; padding: 0 2px; }
+mark.see { background: linear-gradient(transparent 52%, var(--see) 52%); }
+mark.may { background: linear-gradient(transparent 52%, var(--may) 52%); }
+code { font-family: var(--font-mono); font-size: .86em; background: color-mix(in srgb, var(--line) 22%, transparent); padding: 1px 5px; border-radius: 3px; }
+.card { position: relative; background: var(--card); padding: 22px 18px 16px; box-shadow: 0 1px 3px rgba(0,0,0,.12); min-width: 0; }
+.card::before { content: ""; position: absolute; top: -9px; left: 50%; width: 92px; height: 20px; transform: translateX(-50%) rotate(-2deg); background: var(--tape); }
+.scroll { overflow-x: auto; }
+svg text { font-family: var(--font-mono); fill: var(--ink); }
+svg .hand { font-family: var(--font-hand); }
+.rule { border-left: 4px solid var(--ok); padding: 6px 12px; font-size: 1.08rem; }
+.wrong { border-left: 4px solid var(--wrong); padding: 4px 12px; display: grid; gap: 2px; }
+.wrong b { color: var(--wrong); font-size: .85rem; letter-spacing: .05em; }
+.panels { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 14px; }
+.panel { border: 2px solid var(--ink); background: var(--card); padding: 10px; display: grid; gap: 6px; min-width: 0; }
+.panel h3 { margin: 0; font-size: 1rem; font-family: var(--font-mono); }
+.panel p { font-size: .92rem; }
+@media (max-width: 520px) { .panels { grid-template-columns: 1fr; } }
+table { border-collapse: collapse; width: 100%; font-size: .95rem; }
+th, td { border-bottom: 1px dashed var(--line); padding: 8px 6px; text-align: left; vertical-align: top; }
+th { font-family: var(--font-mono); font-size: .78rem; letter-spacing: .05em; color: var(--ink-soft); font-weight: 600; }
+ol { margin: 0; padding-left: 1.3em; display: grid; gap: 6px; }
+blockquote { margin: 0; padding: 12px 16px; background: var(--card); border: 2px dashed var(--line); }
+.en { font-family: var(--font-mono); font-size: .9rem; color: var(--ink-soft); }
+details summary{cursor:pointer}
+</style>
+<style>
+/* chapter-note additions on top of the notebook base */
+svg.fig { display: block; min-width: 640px; width: 100%; height: auto; }
+.lvl { font-family: var(--font-mono); font-size: .74rem; padding: 1px 7px; border: 1.5px solid var(--ink); border-radius: 10px; white-space: nowrap; }
+.lvl.high { background: color-mix(in srgb, var(--ok) 28%, transparent); }
+.lvl.med { background: var(--who); }
+.lvl.low { background: var(--may); }
+.lvl.todo { border-style: dashed; color: var(--ink-soft); }
+.meta { display: flex; flex-wrap: wrap; gap: 8px 16px; font-family: var(--font-mono); font-size: .8rem; color: var(--ink-soft); }
+.toc { display: flex; flex-wrap: wrap; gap: 6px 14px; font-family: var(--font-mono); font-size: .82rem; }
+.toc a { color: var(--ink); }
+.trail { display: grid; gap: 12px; }
+.fix { border-left: 4px solid var(--ok); padding: 4px 12px; }
+.two { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 14px; }
+@media (max-width: 560px) { .two { grid-template-columns: 1fr; } }
+details { background: var(--card); border: 2px dashed var(--line); padding: 10px 14px; }
+details[open] { border-style: solid; }
+details > div { display: grid; gap: 8px; margin-top: 10px; }
+.small { font-size: .9rem; }
+a { color: inherit; text-underline-offset: 3px; }
+pre { margin: 0; font-family: var(--font-mono); font-size: .82rem; line-height: 1.5; background: var(--card); border: 1px solid var(--line); padding: 10px 12px; overflow-x: auto; }
+</style>
+<meta name="topic" content="P1 Deployment/rollout">
+<main class="page">
+  <header style="display:grid;gap:10px">
+    <p class="sub">k8s 課程 · topic 深入 · P1 · <a href="https://claude.ai/artifact/UrVpfj1woG42r9M5UxMMBn">← P1 章節筆記</a></p>
+    <h1>Deployment 與 rollout</h1>
+    <p>Deployment 不直接管 Pod，它管 ReplicaSet。這一頁看 rollout 的每一步怎麼算、壞 image 為什麼不會讓服務中斷、rollback 為什麼快，以及 Deployment 不會替你做的事。</p>
+    <div class="meta"><span>Mastery：high (s6)</span><span>lab：rollout-demo（s4，replicas 4、surge 1、unavailable 1）</span></div>
+    <nav class="toc"><a href="#l0">L0</a><a href="#l1">L1</a><a href="#l2">L2</a><a href="#l3">L3</a><a href="#l4">L4</a><a href="#l5">L5</a><a href="#l6">L6</a><a href="#l7">L7</a><a href="#trail">錯題</a></nav>
+  </header>
+
+  <section id="l0">
+    <h2>Layer 0 · 一張圖<span class="tag">analogy</span></h2>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 720 170" role="img" aria-label="Seesaw: old crew steps off one at a time while new crew steps on; the old crew waits on the bench instead of going home, ready to come back">
+        <line x1="120" y1="110" x2="600" y2="70" stroke="var(--ink)" stroke-width="4"/><polygon points="350,92 330,130 370,130" fill="var(--ink-soft)"/>
+        <g fill="var(--see)" stroke="var(--ink)"><circle cx="150" cy="95" r="12"/><circle cx="185" cy="92" r="12"/></g><text x="165" y="70" text-anchor="middle" font-size="11">舊 RS</text>
+        <g fill="var(--who)" stroke="var(--ink)"><circle cx="530" cy="62" r="12"/><circle cx="565" cy="59" r="12"/><circle cx="600" cy="56" r="12"/></g><text x="565" y="35" text-anchor="middle" font-size="11">新 RS</text>
+        <rect x="40" y="135" width="160" height="26" fill="var(--card)" stroke="var(--ink)" stroke-dasharray="4 3"/><text x="120" y="152" text-anchor="middle" font-size="10" class="hand">換下來的人坐板凳，不回家</text>
+      </svg>
+    </div>
+    <p>兩組人在翹翹板兩端，一個一個換。換下來的舊組坐在板凳上（replicas 0），出事時直接叫回來。</p>
+  </section>
+
+  <section id="l1">
+    <h2>Layer 1 · 第一性原理<span class="tag">why two ReplicaSets</span></h2>
+    <p><b>限制：換版本的過程中，服務不能停，而新版本可能是壞的。</b>如果直接改正在跑的 Pod，改到一半新版壞了，你手上就是一堆半新半舊、無法回頭的 Pod。</p>
+    <p>解法是讓「每一個版本」都是一個獨立的、可以整組擴縮的東西：ReplicaSet。rollout 就是兩個 RS 之間調整數量。舊 RS 不刪，只縮到 0，所以回頭只是把數字調回去。</p>
+  </section>
+
+  <section id="l2">
+    <h2>Layer 2 · 機制<span class="tag">the math</span></h2>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 760 210" role="img" aria-label="Ownership: Deployment owns ReplicaSets identified by pod-template-hash; each ReplicaSet owns its Pods. Revision annotations record history; old ReplicaSets are kept up to revisionHistoryLimit 10">
+        <defs><marker id="ro1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="var(--ink)"/></marker></defs>
+        <rect x="10" y="70" width="150" height="60" fill="var(--who)" stroke="var(--ink)" stroke-width="2"/><text x="85" y="94" text-anchor="middle" font-size="11">Deployment web</text><text x="85" y="112" text-anchor="middle" font-size="9">image: nginx:1.26</text>
+        <rect x="230" y="20" width="230" height="56" fill="var(--see)" stroke="var(--ink)" stroke-width="2"/><text x="240" y="40" font-size="10">RS web-7d4b9c (revision 3)</text><text x="240" y="58" font-size="10">template hash 7d4b9c · replicas 4</text>
+        <rect x="230" y="96" width="230" height="44" fill="var(--card)" stroke="var(--ink)"/><text x="240" y="114" font-size="10">RS web-5f8c6a (revision 2)</text><text x="240" y="130" font-size="10">replicas 0（保留）</text>
+        <rect x="230" y="152" width="230" height="44" fill="var(--card)" stroke="var(--ink)" stroke-dasharray="4 3"/><text x="240" y="170" font-size="10">RS web-6c9d1e (revision 1)</text><text x="240" y="186" font-size="10">replicas 0（最多留 10 個）</text>
+        <g stroke="var(--ink)"><line x1="160" y1="95" x2="228" y2="48" marker-end="url(#ro1)"/><line x1="160" y1="100" x2="228" y2="118" marker-end="url(#ro1)"/><line x1="160" y1="105" x2="228" y2="172" marker-end="url(#ro1)"/></g>
+        <g fill="var(--see)" stroke="var(--ink)"><rect x="520" y="25" width="50" height="22"/><rect x="580" y="25" width="50" height="22"/><rect x="640" y="25" width="50" height="22"/><rect x="700" y="25" width="50" height="22"/></g>
+        <line x1="460" y1="40" x2="518" y2="36" stroke="var(--ink)" marker-end="url(#ro1)"/>
+        <text x="520" y="68" font-size="9">Pod 名：web-7d4b9c-xk2lp</text><text x="520" y="82" font-size="9">中間那段就是 RS 的 hash</text>
+      </svg>
+    </div>
+    <h3 style="margin:0">兩個旋鈕的算法</h3>
+    <div class="scroll"><table>
+      <tr><th>旋鈕</th><th>意思</th><th>百分比怎麼取整</th><th>replicas 4、預設 25%</th></tr>
+      <tr><td><code>maxSurge</code></td><td>最多比 desired <b>多</b>幾個</td><td>無條件進位</td><td>1 → 總數上限 5</td></tr>
+      <tr><td><code>maxUnavailable</code></td><td>最多幾個不可用</td><td>無條件捨去</td><td>1 → 可用下限 3</td></tr>
+    </table></div>
+    <p class="small">取整方向是刻意的：surge 進位保證至少能多 1 個（不會卡死），unavailable 捨去保證可用數不會比你以為的少。兩個都是 0 會被 API Server 直接退件。</p>
+
+    <h3 style="margin:0">壞 image 的卡死幾何（你 s4 的 lab）</h3>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 740 190" role="img" aria-label="replicas 4, surge 1, unavailable 1: after deploying a nonexistent image, 3 old pods keep running and 2 new pods are in ImagePullBackOff; total 5 equals the surge ceiling and available 3 equals the unavailable floor, so the rollout freezes with users unaffected">
+        <g fill="var(--see)" stroke="var(--ink)" stroke-width="2"><rect x="30" y="40" width="90" height="50"/><rect x="130" y="40" width="90" height="50"/><rect x="230" y="40" width="90" height="50"/></g>
+        <g font-size="10" text-anchor="middle"><text x="75" y="70">舊 Running</text><text x="175" y="70">舊 Running</text><text x="275" y="70">舊 Running</text></g>
+        <g fill="var(--card)" stroke="var(--wrong)" stroke-width="2" stroke-dasharray="5 4"><rect x="370" y="40" width="110" height="50"/><rect x="490" y="40" width="110" height="50"/></g>
+        <g font-size="10" text-anchor="middle" fill="var(--wrong)"><text x="425" y="62">新</text><text x="425" y="78">ImagePullBackOff</text><text x="545" y="62">新</text><text x="545" y="78">ImagePullBackOff</text></g>
+        <text x="30" y="120" font-size="11">總數 5 = 上限（4 + surge 1）→ 不能再生新的</text>
+        <text x="30" y="140" font-size="11">可用 3 = 下限（4 − unavailable 1）→ 不能再砍舊的</text>
+        <text x="30" y="168" font-size="12" class="hand" fill="var(--ok)">兩個旋鈕同時頂住 → rollout 凍結，舊的 3 個一直在服務，使用者沒感覺。</text>
+      </svg>
+    </div>
+    <div class="scroll"><table>
+      <tr><th>參數</th><th>預設</th><th>意義</th></tr>
+      <tr><td><code>minReadySeconds</code></td><td>0</td><td>新 Pod Ready 後還要穩定幾秒才算 available（s4 lab 設 10，看得到換批節奏）</td></tr>
+      <tr><td><code>progressDeadlineSeconds</code></td><td>600</td><td>10 分鐘沒進展 → condition <code>Progressing=False, ProgressDeadlineExceeded</code>。<b>不會自動 rollback</b></td></tr>
+      <tr><td><code>revisionHistoryLimit</code></td><td>10</td><td>保留幾個舊 RS 當退路</td></tr>
+    </table></div>
+  </section>
+
+  <section id="l3">
+    <h2>Layer 3 · 取捨<span class="tag">strategies</span></h2>
+    <div class="scroll"><table>
+      <tr><th>策略</th><th>贏在</th><th>代價</th></tr>
+      <tr><td>RollingUpdate（surge 1、unavailable 0）</td><td>零停機、只多 1 份資源</td><td>慢；新舊版本同時在線，API 要相容</td></tr>
+      <tr><td>RollingUpdate（大 surge）</td><td>快</td><td>要很多額外資源；等於一次全換，沒有緩衝</td></tr>
+      <tr><td>Recreate</td><td>不會有兩個版本同時存在（DB schema 不相容時）</td><td>有停機</td></tr>
+      <tr><td>blue/green</td><td>瞬間切換、瞬間切回</td><td>2 倍資源</td></tr>
+      <tr><td>canary（Argo Rollouts）</td><td>只讓 5% 流量冒險，自動分析</td><td>多一套工具與 metrics 依賴</td></tr>
+    </table></div>
+    <p class="rule">Deployment 的盲點：它只知道 Pod Ready 了沒，不知道新版本的錯誤率是不是變高。readiness 過了但回 500 的版本，它會很開心地換完全部。</p>
+  </section>
+
+  <section id="l4">
+    <h2>Layer 4 · AWS 怎麼做<span class="tag">rollout on EKS</span></h2>
+    <div class="scroll"><table>
+      <tr><th>情境</th><th>常見陷阱</th><th>對策</th></tr>
+      <tr><td>ALB（IP mode）後面做 rollout</td><td>舊 Pod 被砍時 ALB 還沒 deregister → 502</td><td>preStop sleep + pod readiness gate</td></tr>
+      <tr><td>image 從 ECR 拉</td><td>用 <code>latest</code> tag，Deployment spec 沒變，不會觸發 rollout；或不同 node 拉到不同內容</td><td>用不可變 tag 或 digest，ECR 開 tag immutability</td></tr>
+      <tr><td>rollout 需要額外容量</td><td>surge 的 Pod Pending，等 Karpenter 開 node，rollout 變很慢</td><td>預留 headroom，或接受較慢的 rollout</td></tr>
+      <tr><td>GitOps 管的 Deployment</td><td><code>kubectl rollout undo</code> 改了叢集，Git 還是新版，Argo CD 又改回去</td><td>rollback 用 git revert</td></tr>
+    </table></div>
+  </section>
+
+  <section id="l5">
+    <h2>Layer 5 · 規模化<span class="tag">evolution ladder</span></h2>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 740 200" role="img" aria-label="Ladder: kubectl set image; rolling update with tuned surge and readiness; GitOps with git revert as rollback; progressive delivery with automated analysis and abort">
+        <g font-size="11">
+          <rect x="10" y="150" width="170" height="44" fill="var(--card)" stroke="var(--ink)" stroke-width="2"/><text x="20" y="170">① kubectl set image</text><text x="20" y="186" class="hand">YAML 和叢集 drift</text>
+          <rect x="195" y="110" width="170" height="84" fill="var(--see)" stroke="var(--ink)" stroke-width="2"/><text x="205" y="130">② 調好旋鈕</text><text x="205" y="148" class="hand">surge 1 / unavailable 0</text><text x="205" y="166" class="hand">readiness 正確</text>
+          <rect x="380" y="70" width="170" height="124" fill="var(--who)" stroke="var(--ink)" stroke-width="2"/><text x="390" y="90">③ GitOps</text><text x="390" y="108" class="hand">rollback = git revert</text><text x="390" y="126" class="hand">change-cause 就是</text><text x="390" y="144" class="hand">commit message</text>
+          <rect x="565" y="20" width="170" height="174" fill="var(--may)" stroke="var(--ink)" stroke-width="2"/><text x="575" y="40">④ progressive</text><text x="575" y="58" class="hand">canary 5→20→50%</text><text x="575" y="76" class="hand">查錯誤率自動 abort</text><text x="575" y="94" class="hand">（P5 C-8）</text>
+        </g>
+      </svg>
+    </div>
+  </section>
+
+  <section id="l6">
+    <h2>Layer 6 · 故障與 on-call<span class="tag">how it breaks</span></h2>
+    <div class="panels">
+      <div class="panel"><h3>rollout status 一直 Waiting</h3><p>新 Pod 起不來，看新 RS 的 Pod：ImagePullBackOff、CrashLoop、Pending。舊的還在服務，不用慌。止血：<code>kubectl rollout undo</code>（或 git revert）。</p></div>
+      <div class="panel"><h3>新版本 Ready 但錯誤率變高</h3><p>Deployment 不會發現。要靠 metrics 告警或 canary analysis。發現後 rollback，舊 RS 還在所以很快。</p></div>
+      <div class="panel"><h3>rollback 也很慢</h3><p>舊 RS 被 revisionHistoryLimit 清掉了，或舊 image 已從 node 快取清除需要重拉。</p></div>
+      <div class="panel"><h3>部署期間有 5xx</h3><p>不是 Deployment 的問題，是終止流程：endpoint 移除和 SIGTERM 的 race（P3 C-6），加 preStop。</p></div>
+    </div>
+  </section>
+
+  <section id="l7">
+    <h2>Layer 7 · 面試<span class="tag">interview</span></h2>
+    <blockquote>「Someone deployed an image tag that doesn't exist to a Deployment with 4 replicas. What do users experience, what does the cluster look like, and how do you recover?」</blockquote>
+    <details><summary>L4 回答</summary><div><p>「新 Pod 會 ImagePullBackOff，要 rollout undo 回上一版。」</p><p class="small">恢復方法對，但「使用者有沒有受影響」這個最重要的問題沒答。</p></div></details>
+    <details><summary>L6 回答</summary><div>
+      <p>「API Server 不會擋，tag 存不存在只有 kubelet 拉的時候才知道。rollout 開始後，以預設 25% 來算，maxSurge 1、maxUnavailable 1：先砍 1 個舊的、生 2 個新的。新的拉不到 image，所以停在 3 個舊的 Running 加 2 個新的 ImagePullBackOff，總數 5 是上限、可用 3 是下限，rollout 凍結。」</p>
+      <p>「使用者：容量從 4 掉到 3，流量都打在舊版上，功能正常；如果平常就跑在 80% 以上，可能會感受到延遲。10 分鐘後 Deployment 標 ProgressDeadlineExceeded，但不會自動 rollback。」</p>
+      <p>「恢復：<code>rollout undo</code> 把舊 RS 調回 4，不用重拉 image，秒級完成。如果是 GitOps，要 git revert，不然會被改回去。預防：CI 確認 image 存在再更新 manifest、用 digest、maxUnavailable 設 0。」</p>
+      <p class="small">L6 多了：精確算出卡住的數量、使用者影響的量化、progressDeadline 不會自動 rollback、GitOps 下的正確 rollback、預防。</p>
+    </div></details>
+  </section>
+
+  <section id="trail">
+    <h2>我的錯題軌跡<span class="tag">this topic</span></h2>
+    <div class="trail">
+      <div class="wrong"><b>我錯在這 · 06-23</b><code>ngimx:1.25</code> apply 成功卻卡住。</div>
+      <div class="fix">修正：驗證有邊界。自己讀 Events 抓到 <code>repository does not exist</code>。</div>
+      <div class="fix"><b>s4 · 正樣本</b>F 段 mock 自己抓出「額外 8 → 總數 12」算錯：maxSurge 是額外，不是總數。</div>
+      <div class="wrong"><b>我錯在這 · s4</b>用 <code>set image</code> 改線上，YAML 檔還是舊值。</div>
+      <div class="fix">修正：這叫 drift。真實環境改 Git，讓 GitOps 套用（P5）。</div>
+    </div>
+  </section>
+</main>
+
+</body></html>

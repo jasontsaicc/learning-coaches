@@ -1,0 +1,272 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"></head><body>
+<title>etcd 與 Raft</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC:wght@400;700&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: one notebook column on graph paper; figures on taped cards, scenarios as 2x2 comic panels */
+:root {
+  --paper: #F6F8FA;
+  --grid: rgba(90,130,170,.16);
+  --ink: #23313E;
+  --ink-soft: #55677A;
+  --card: #FFFFFF;
+  --tape: rgba(240,214,140,.75);
+  --who: #FFE98A;
+  --see: #BDEEF6;
+  --may: #F9CDE0;
+  --wrong: #D2453A;
+  --ok: #2F8F5B;
+  --line: #9DB0C2;
+  --font-hand: "LXGW WenKai TC", "Noto Sans TC", "PingFang TC", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #1A2320; --grid: rgba(200,230,210,.08); --ink: #E6EDE8; --ink-soft: #A9BAB1;
+    --card: #24302C; --tape: rgba(200,180,110,.45); --who: #8A7A2A; --see: #2B6A74; --may: #7A3F57;
+    --wrong: #FF8A7E; --ok: #7FD3A1; --line: #5E7268; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #1A2320; --grid: rgba(200,230,210,.08); --ink: #E6EDE8; --ink-soft: #A9BAB1;
+  --card: #24302C; --tape: rgba(200,180,110,.45); --who: #8A7A2A; --see: #2B6A74; --may: #7A3F57;
+  --wrong: #FF8A7E; --ok: #7FD3A1; --line: #5E7268; color-scheme: dark;
+}
+body {
+  background-color: var(--paper);
+  background-image: linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 22px 22px;
+  color: var(--ink);
+  font-family: var(--font-hand);
+  font-size: 17px;
+  line-height: 1.75;
+}
+.page { max-width: 760px; margin: 0 auto; padding-inline: 18px; padding-block: 32px 64px; display: grid; gap: 34px; }
+h1, h2 { text-wrap: balance; line-height: 1.3; margin: 0; }
+h1 { font-size: 2.1rem; }
+h2 { font-size: 1.45rem; display: flex; align-items: baseline; gap: 10px; }
+h2 .tag { font-family: var(--font-mono); font-size: .72rem; letter-spacing: .08em; color: var(--ink-soft); text-transform: uppercase; }
+p { margin: 0; }
+section { display: grid; gap: 14px; min-width: 0; }
+.sub { color: var(--ink-soft); font-size: .95rem; }
+mark { background: linear-gradient(transparent 52%, var(--who) 52%); color: inherit; padding: 0 2px; }
+mark.see { background: linear-gradient(transparent 52%, var(--see) 52%); }
+mark.may { background: linear-gradient(transparent 52%, var(--may) 52%); }
+code { font-family: var(--font-mono); font-size: .86em; background: color-mix(in srgb, var(--line) 22%, transparent); padding: 1px 5px; border-radius: 3px; }
+.card { position: relative; background: var(--card); padding: 22px 18px 16px; box-shadow: 0 1px 3px rgba(0,0,0,.12); min-width: 0; }
+.card::before { content: ""; position: absolute; top: -9px; left: 50%; width: 92px; height: 20px; transform: translateX(-50%) rotate(-2deg); background: var(--tape); }
+.scroll { overflow-x: auto; }
+svg text { font-family: var(--font-mono); fill: var(--ink); }
+svg .hand { font-family: var(--font-hand); }
+.rule { border-left: 4px solid var(--ok); padding: 6px 12px; font-size: 1.08rem; }
+.wrong { border-left: 4px solid var(--wrong); padding: 4px 12px; display: grid; gap: 2px; }
+.wrong b { color: var(--wrong); font-size: .85rem; letter-spacing: .05em; }
+.panels { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 14px; }
+.panel { border: 2px solid var(--ink); background: var(--card); padding: 10px; display: grid; gap: 6px; min-width: 0; }
+.panel h3 { margin: 0; font-size: 1rem; font-family: var(--font-mono); }
+.panel p { font-size: .92rem; }
+@media (max-width: 520px) { .panels { grid-template-columns: 1fr; } }
+table { border-collapse: collapse; width: 100%; font-size: .95rem; }
+th, td { border-bottom: 1px dashed var(--line); padding: 8px 6px; text-align: left; vertical-align: top; }
+th { font-family: var(--font-mono); font-size: .78rem; letter-spacing: .05em; color: var(--ink-soft); font-weight: 600; }
+ol { margin: 0; padding-left: 1.3em; display: grid; gap: 6px; }
+blockquote { margin: 0; padding: 12px 16px; background: var(--card); border: 2px dashed var(--line); }
+.en { font-family: var(--font-mono); font-size: .9rem; color: var(--ink-soft); }
+details summary{cursor:pointer}
+</style>
+<style>
+/* chapter-note additions on top of the notebook base */
+svg.fig { display: block; min-width: 640px; width: 100%; height: auto; }
+.lvl { font-family: var(--font-mono); font-size: .74rem; padding: 1px 7px; border: 1.5px solid var(--ink); border-radius: 10px; white-space: nowrap; }
+.lvl.high { background: color-mix(in srgb, var(--ok) 28%, transparent); }
+.lvl.med { background: var(--who); }
+.lvl.low { background: var(--may); }
+.lvl.todo { border-style: dashed; color: var(--ink-soft); }
+.meta { display: flex; flex-wrap: wrap; gap: 8px 16px; font-family: var(--font-mono); font-size: .8rem; color: var(--ink-soft); }
+.toc { display: flex; flex-wrap: wrap; gap: 6px 14px; font-family: var(--font-mono); font-size: .82rem; }
+.toc a { color: var(--ink); }
+.trail { display: grid; gap: 12px; }
+.fix { border-left: 4px solid var(--ok); padding: 4px 12px; }
+.two { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 14px; }
+@media (max-width: 560px) { .two { grid-template-columns: 1fr; } }
+details { background: var(--card); border: 2px dashed var(--line); padding: 10px 14px; }
+details[open] { border-style: solid; }
+details > div { display: grid; gap: 8px; margin-top: 10px; }
+.small { font-size: .9rem; }
+a { color: inherit; text-underline-offset: 3px; }
+pre { margin: 0; font-family: var(--font-mono); font-size: .82rem; line-height: 1.5; background: var(--card); border: 1px solid var(--line); padding: 10px 12px; overflow-x: auto; }
+</style>
+<main class="page">
+  <header style="display:grid;gap:10px">
+    <p class="sub">k8s 課程 · topic 深入 · P0 · <a href="https://claude.ai/artifact/BsrozK5kwbKAJrtzK9MukK">← P0 章節筆記</a></p>
+    <h1>etcd 與 Raft</h1>
+    <p>整個叢集的真相存在 etcd。這一頁看三件事：Raft 怎麼讓 3 台機器同意同一本帳；etcd 怎麼用 revision 撐起 k8s 的 watch 和樂觀鎖；為什麼它對磁碟延遲這麼敏感。</p>
+    <div class="meta"><span>P0 C-4（直覺）· P5 C-6 會做運維</span><span>Curiosity branch：Raft 深入（06 月 park）</span></div>
+    <nav class="toc"><a href="#l0">L0</a><a href="#l1">L1</a><a href="#l2">L2</a><a href="#l3">L3</a><a href="#l4">L4</a><a href="#l5">L5</a><a href="#l6">L6</a><a href="#l7">L7</a><a href="#trail">錯題</a></nav>
+  </header>
+
+  <section id="l0">
+    <h2>Layer 0 · 一張圖<span class="tag">analogy</span></h2>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 720 170" role="img" aria-label="Three notaries keep copies of one ledger; an entry counts only after two of three have written it in ink">
+        <g font-size="12" text-anchor="middle">
+          <rect x="40" y="30" width="170" height="80" fill="var(--who)" stroke="var(--ink)" stroke-width="2.5"/><text x="125" y="58" class="hand">主公證人</text><text x="125" y="82" font-size="10">leader：只有他收新紀錄</text>
+          <rect x="275" y="30" width="170" height="80" fill="var(--see)" stroke="var(--ink)" stroke-width="2"/><text x="360" y="58" class="hand">公證人 B</text><text x="360" y="82" font-size="10">抄一份，回「寫好了」</text>
+          <rect x="510" y="30" width="170" height="80" fill="var(--card)" stroke="var(--ink)" stroke-width="2" stroke-dasharray="6 4"/><text x="595" y="58" class="hand">公證人 C</text><text x="595" y="82" font-size="10">請假中</text>
+        </g>
+        <text x="360" y="145" text-anchor="middle" font-size="13" class="hand">3 人裡 2 人用墨水寫下了，這筆才算數。C 回來後補抄。</text>
+      </svg>
+    </div>
+  </section>
+
+  <section id="l1">
+    <h2>Layer 1 · 第一性原理<span class="tag">consensus</span></h2>
+    <p><b>限制一：機器會掛，網路會斷，而且你分不出是哪一種。</b>從 A 的角度，B 沒回應可能是 B 死了，也可能是線斷了。如果兩邊都以為自己是主，各自收寫入，就會出現兩本不一樣的帳（split brain）。</p>
+    <p><b>解法：多數決。</b>任何決定都要超過半數同意。兩個「多數」一定有交集，所以不可能有兩個 leader 同時在同一個 term 被選出，也不可能有兩筆衝突的寫入同時被確認。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 720 200" role="img" aria-label="Network partition with 5 members: side with 3 keeps quorum and accepts writes; side with 2 cannot elect a leader and rejects writes">
+        <line x1="360" y1="20" x2="360" y2="180" stroke="var(--wrong)" stroke-width="2" stroke-dasharray="8 5"/><text x="370" y="30" font-size="11" fill="var(--wrong)">網路分區</text>
+        <g fill="var(--see)" stroke="var(--ink)" stroke-width="2"><circle cx="100" cy="90" r="28"/><circle cx="190" cy="60" r="28"/><circle cx="190" cy="130" r="28"/></g>
+        <g fill="var(--card)" stroke="var(--ink)" stroke-width="2"><circle cx="520" cy="70" r="28"/><circle cx="600" cy="120" r="28"/></g>
+        <text x="145" y="185" text-anchor="middle" font-size="11" fill="var(--ok)">3 / 5 ≥ quorum 3 → 能選 leader、能寫</text>
+        <text x="560" y="185" text-anchor="middle" font-size="11" fill="var(--wrong)">2 / 5 &lt; 3 → 只能拒絕寫入</text>
+      </svg>
+    </div>
+    <p class="rule">這就是 CAP 的 C + P：少數派寧可不可用，也不寫出矛盾的帳。代價：quorum 沒了整個叢集唯讀（甚至讀也失敗）。</p>
+  </section>
+
+  <section id="l2">
+    <h2>Layer 2 · 機制<span class="tag">Raft + MVCC</span></h2>
+    <h3 style="margin:0">一筆寫入的旅程</h3>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 760 270" role="img" aria-label="Write path: API server sends Put to leader; leader appends to its WAL with fsync; replicates AppendEntries to followers who fsync and ack; on majority ack the entry is committed, applied to the bbolt store with a new revision, and the leader responds; slow fsync on any step delays everything">
+        <defs><marker id="et1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="var(--ink)"/></marker></defs>
+        <g font-size="11" text-anchor="middle">
+          <rect x="10" y="20" width="120" height="40" fill="var(--card)" stroke="var(--ink)"/><text x="70" y="45">API Server</text>
+          <rect x="200" y="20" width="160" height="40" fill="var(--who)" stroke="var(--ink)" stroke-width="2"/><text x="280" y="45">leader（term 7）</text>
+          <rect x="460" y="20" width="130" height="40" fill="var(--see)" stroke="var(--ink)"/><text x="525" y="45">follower B</text>
+          <rect x="620" y="20" width="130" height="40" fill="var(--see)" stroke="var(--ink)"/><text x="685" y="45">follower C</text>
+        </g>
+        <g stroke="var(--line)" stroke-dasharray="3 4"><line x1="70" y1="60" x2="70" y2="260"/><line x1="280" y1="60" x2="280" y2="260"/><line x1="525" y1="60" x2="525" y2="260"/><line x1="685" y1="60" x2="685" y2="260"/></g>
+        <g stroke="var(--ink)" stroke-width="1.6"><line x1="70" y1="80" x2="278" y2="80" marker-end="url(#et1)"/><line x1="280" y1="125" x2="523" y2="125" marker-end="url(#et1)"/><line x1="280" y1="130" x2="683" y2="130" marker-end="url(#et1)"/><line x1="525" y1="165" x2="282" y2="165" marker-end="url(#et1)"/><line x1="280" y1="235" x2="72" y2="235" marker-end="url(#et1)"/></g>
+        <g font-size="10">
+          <text x="80" y="74">Put /registry/pods/default/web</text>
+          <rect x="290" y="88" width="160" height="26" fill="var(--may)" stroke="var(--ink)"/><text x="296" y="105">① append WAL + fsync</text>
+          <text x="380" y="120">② AppendEntries</text>
+          <rect x="535" y="135" width="140" height="22" fill="var(--may)" stroke="var(--ink)"/><text x="540" y="150">③ fsync，回 ack</text>
+          <text x="300" y="160">2/3 確認（含自己）</text>
+          <rect x="290" y="178" width="200" height="40" fill="var(--who)" stroke="var(--ink)"/><text x="296" y="195">④ commit → apply 到 bbolt</text><text x="296" y="210">revision 48212 → 48213</text>
+          <text x="90" y="229">⑤ OK, rv=48213</text>
+          <text x="560" y="200" fill="var(--wrong)">C 沒回應也沒關係</text>
+          <text x="560" y="216" fill="var(--wrong)">它回來後 leader 補傳</text>
+        </g>
+      </svg>
+    </div>
+    <p class="small">每次寫入至少要兩次 fsync（leader 和一個 follower），所以 etcd 的寫入延遲下限就是磁碟的 fsync 延遲加一次網路來回。這是它要用 SSD、不能跟別的重 IO 服務共用磁碟的原因。</p>
+
+    <h3 style="margin:0">leader 怎麼選出來</h3>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 740 160" role="img" aria-label="Followers wait for heartbeats every 100ms; if none arrives within a randomized election timeout around 1000ms, a follower becomes candidate, increments term, asks for votes, and becomes leader with a majority">
+        <line x1="20" y1="70" x2="720" y2="70" stroke="var(--ink)"/>
+        <g fill="var(--ok)"><circle cx="60" cy="70" r="5"/><circle cx="110" cy="70" r="5"/><circle cx="160" cy="70" r="5"/></g><text x="60" y="55" font-size="10">heartbeat 每 100ms</text>
+        <rect x="200" y="60" width="300" height="20" fill="var(--wrong)" opacity=".15"/><text x="350" y="55" text-anchor="middle" font-size="10" fill="var(--wrong)">沒有心跳（leader 掛了或 fsync 卡住）</text>
+        <line x1="500" y1="40" x2="500" y2="100" stroke="var(--wrong)" stroke-dasharray="4 3"/><text x="505" y="115" font-size="10">election timeout ≈ 1000ms（加隨機量）</text>
+        <rect x="520" y="20" width="200" height="40" fill="var(--may)" stroke="var(--ink)"/><text x="530" y="38" font-size="10">candidate：term 7 → 8</text><text x="530" y="52" font-size="10">RequestVote → 拿到多數 → leader</text>
+        <text x="20" y="145" font-size="11" class="hand">隨機量讓大家不會同時參選、互相分票。選舉期間寫入全部停住。</text>
+      </svg>
+    </div>
+
+    <h3 style="margin:0">MVCC：k8s 用到的那一半</h3>
+    <div class="scroll"><table>
+      <tr><th>etcd 機制</th><th>k8s 拿來做什麼</th></tr>
+      <tr><td>全域遞增的 revision</td><td>物件的 <code>resourceVersion</code></td></tr>
+      <tr><td>Txn：if mod_revision == X then put</td><td>樂觀鎖，不符就 409 Conflict</td></tr>
+      <tr><td>Watch from revision N</td><td>informer 從上次看到的地方接著看，不漏</td></tr>
+      <tr><td>compaction（API Server 每 5 分鐘）</td><td>舊 revision 被清掉 → 太舊的 watch 收到 410 Gone，要重新 LIST</td></tr>
+      <tr><td>Lease（TTL）</td><td>leader election、node 心跳的底層概念</td></tr>
+    </table></div>
+    <div class="scroll"><table>
+      <tr><th>參數</th><th>預設</th><th>意義</th></tr>
+      <tr><td><code>--heartbeat-interval</code></td><td>100ms</td><td>leader 多久送一次心跳</td></tr>
+      <tr><td><code>--election-timeout</code></td><td>1000ms</td><td>多久沒心跳就選舉</td></tr>
+      <tr><td><code>--quota-backend-bytes</code></td><td>2 GiB（建議上限 8 GiB）</td><td>滿了 → NOSPACE alarm，只剩讀和刪</td></tr>
+      <tr><td><code>--max-request-bytes</code></td><td>1.5 MiB</td><td>單一物件上限</td></tr>
+      <tr><td>建議 fsync p99</td><td>&lt; 10ms</td><td><code>etcd_disk_wal_fsync_duration_seconds</code></td></tr>
+    </table></div>
+  </section>
+
+  <section id="l3">
+    <h2>Layer 3 · 取捨<span class="tag">why this design</span></h2>
+    <div class="scroll"><table>
+      <tr><th>選擇</th><th>贏在</th><th>代價</th></tr>
+      <tr><td>強一致（Raft）</td><td>所有元件看到同一個真相；樂觀鎖成立</td><td>每次寫入要多數 fsync，寫入吞吐有上限</td></tr>
+      <tr><td>3 台 vs 5 台</td><td>3 台延遲低；5 台可壞 2 台</td><td>5 台每次寫入要等 3 個 fsync，而且跨 AZ 延遲變大</td></tr>
+      <tr><td>奇數台</td><td>4 台 quorum 3，跟 3 台一樣只能壞 1 台</td><td>偶數只是多花錢、多一個可能慢的成員</td></tr>
+      <tr><td>Raft vs Paxos</td><td>Raft 為了好懂而設計，有明確的 leader</td><td>leader 是寫入瓶頸，無法水平擴展寫入</td></tr>
+      <tr><td>整份資料在每台都有</td><td>任何成員都能接手</td><td>資料量受單機限制（所以有 8 GiB 建議上限）</td></tr>
+    </table></div>
+  </section>
+
+  <section id="l4">
+    <h2>Layer 4 · AWS 怎麼做<span class="tag">EKS etcd</span></h2>
+    <p>EKS 上你看不到也碰不到 etcd：3 個成員分散在 3 個 AZ，AWS 負責備份、升級、磁碟。你剩下的責任是「不要把它塞爆」和「讀懂它出事時從 API 上看到的症狀」。</p>
+    <div class="scroll"><table>
+      <tr><th>項目</th><th>EKS 的情況</th><th>常見陷阱</th></tr>
+      <tr><td>容量</td><td>8 GiB 上限；Provisioned Control Plane 較高級距可到 16 GB</td><td>CRD 物件爆量（每個 CI run 一個 CR）、大量 Events → 唯讀叢集</td></tr>
+      <tr><td>觀測</td><td><code>apiserver_storage_size_bytes</code></td><td>只看 CPU / 記憶體，不看這個 metric，滿了才知道</td></tr>
+      <tr><td>備份</td><td>AWS 內部做，不提供你還原到某個時間點</td><td>以為「EKS 有備份 etcd」就不用備份。你需要的是 Git + PV 快照 + Velero</td></tr>
+      <tr><td>加密</td><td>1.28 起 Secret 預設 envelope encryption</td><td>擋偷備份的人，不擋有 get secrets 權限的人</td></tr>
+      <tr><td>自建（kubeadm）</td><td>stacked etcd 跟 control plane 同台</td><td>EBS gp2 小磁碟 IOPS 不夠 → leader 一直換。至少 gp3 並給足 IOPS，或 io2</td></tr>
+    </table></div>
+  </section>
+
+  <section id="l5">
+    <h2>Layer 5 · 規模化<span class="tag">evolution ladder</span></h2>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 740 200" role="img" aria-label="Ladder: single etcd on the control plane node; three stacked members across AZs; external etcd cluster on dedicated SSD nodes, separate etcd for events; managed control plane or split clusters to cap object count">
+        <g font-size="11">
+          <rect x="10" y="150" width="170" height="44" fill="var(--card)" stroke="var(--ink)" stroke-width="2"/><text x="20" y="170">① 單台 etcd</text><text x="20" y="186" class="hand">kind / 學習用</text>
+          <rect x="195" y="110" width="170" height="84" fill="var(--see)" stroke="var(--ink)" stroke-width="2"/><text x="205" y="130">② 3 台 stacked</text><text x="205" y="148" class="hand">跨 3 AZ</text><text x="205" y="166" class="hand">定期 snapshot</text>
+          <rect x="380" y="70" width="170" height="124" fill="var(--who)" stroke="var(--ink)" stroke-width="2"/><text x="390" y="90">③ 外部 etcd 叢集</text><text x="390" y="108" class="hand">專用 SSD node</text><text x="390" y="126" class="hand">events 分到另一組</text>
+          <rect x="565" y="20" width="170" height="174" fill="var(--may)" stroke="var(--ink)" stroke-width="2"/><text x="575" y="40">④ 託管 / 拆叢集</text><text x="575" y="58" class="hand">EKS 管 etcd</text><text x="575" y="76" class="hand">物件數有上限</text><text x="575" y="94" class="hand">就把叢集切小</text>
+        </g>
+      </svg>
+    </div>
+  </section>
+
+  <section id="l6">
+    <h2>Layer 6 · 故障與 on-call<span class="tag">how it breaks</span></h2>
+    <div class="panels">
+      <div class="panel"><h3>leader 一直換</h3><p><code>etcd_server_leader_changes_seen_total</code> 持續增加，<code>kubectl</code> 偶發 timeout。99% 是磁碟：fsync p99 &gt; 10ms，或同台有別的 IO 大戶。</p></div>
+      <div class="panel"><h3>database space exceeded</h3><p>寫入全部失敗，讀還可以。<code>etcdctl endpoint status</code> 看 DB size；compact 舊 revision → defrag 每個成員 → <code>etcdctl alarm disarm</code>。</p></div>
+      <div class="panel"><h3>失去 quorum</h3><p>3 台掛 2 台。不能「把剩下那台改成單機」硬撐。從 snapshot 重建整個 cluster，所有成員用同一份 snapshot。</p></div>
+      <div class="panel"><h3>大量 410 Gone</h3><p>某個 client 斷線太久，它的 resourceVersion 已被 compact。正常會自動 re-list；一大群同時 re-list 就是 API Server 的負載尖峰。</p></div>
+    </div>
+  </section>
+
+  <section id="l7">
+    <h2>Layer 7 · 面試<span class="tag">interview</span></h2>
+    <blockquote>「Why does etcd need an odd number of members, and what happens to the Kubernetes cluster when it loses quorum?」</blockquote>
+    <details><summary>L4 回答</summary><div><p>「為了多數決，奇數才能過半。沒有 quorum 就不能寫。」</p><p class="small">對，但沒算給對方看，也沒講 k8s 層的影響。</p></div></details>
+    <details><summary>L6 回答</summary><div>
+      <p>「Raft 要多數同意才 commit，quorum = ⌊n/2⌋+1。3 台 quorum 2，可壞 1；4 台 quorum 3，還是只能壞 1，只是多一台機器、多一個可能慢的 fsync。所以偶數沒有好處，常見是 3 或 5。」</p>
+      <p>「失去 quorum 時 etcd 拒絕寫入，所以 API Server 所有寫入失敗：不能部署、不能擴容、controller 不能補 Pod、kubelet 狀態更新寫不進去。已經在跑的 Pod 不受影響，因為資料面在 node kernel 裡。」</p>
+      <p>「恢復不是把剩下一台改成單機那麼簡單，正確做法是從 snapshot 重建整個 cluster。所以自建叢集一定要定期 snapshot 並演練還原。EKS 上這是 AWS 的責任，但 8 GiB 的容量上限仍然是我的責任。」</p>
+      <p class="small">L6 多了：算式、為什麼偶數沒用、k8s 層的具體影響、恢復程序、託管與自建的責任分界。</p>
+    </div></details>
+  </section>
+
+  <section id="trail">
+    <h2>我的錯題軌跡<span class="tag">this topic</span></h2>
+    <div class="trail">
+      <div class="wrong"><b>我錯在這 · s3</b>口誤：沒說清楚「只有 API Server 直接碰 etcd」。</div>
+      <div class="fix">修正：s7 抽考答對。本頁 L2 的寫入圖裡，client 只有 API Server 一個。</div>
+      <div class="wrong"><b>我錯在這 · 07-14</b>規則 / 狀態 / 資料三分類，etcd 沒有自己答出來。</div>
+      <div class="fix">修正：etcd 存的是「資料」（宣告），不是 kernel 的規則或狀態。這也是「關掉 API Server 還在不在」判準的根。</div>
+      <div class="fix"><b>s38 · 正樣本</b>自己用 etcdctl 看到 Secret 在 etcd 裡是明文，修正「base64 只是 JSON 顯示層」。</div>
+    </div>
+  </section>
+</main>
+
+</body></html>

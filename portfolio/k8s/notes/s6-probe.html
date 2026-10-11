@@ -1,0 +1,244 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"></head><body>
+<title>三種 probe</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC:wght@400;700&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: one notebook column on graph paper; figures on taped cards, scenarios as 2x2 comic panels */
+:root {
+  --paper: #F6F8FA;
+  --grid: rgba(90,130,170,.16);
+  --ink: #23313E;
+  --ink-soft: #55677A;
+  --card: #FFFFFF;
+  --tape: rgba(240,214,140,.75);
+  --who: #FFE98A;
+  --see: #BDEEF6;
+  --may: #F9CDE0;
+  --wrong: #D2453A;
+  --ok: #2F8F5B;
+  --line: #9DB0C2;
+  --font-hand: "LXGW WenKai TC", "Noto Sans TC", "PingFang TC", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #1A2320; --grid: rgba(200,230,210,.08); --ink: #E6EDE8; --ink-soft: #A9BAB1;
+    --card: #24302C; --tape: rgba(200,180,110,.45); --who: #8A7A2A; --see: #2B6A74; --may: #7A3F57;
+    --wrong: #FF8A7E; --ok: #7FD3A1; --line: #5E7268; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #1A2320; --grid: rgba(200,230,210,.08); --ink: #E6EDE8; --ink-soft: #A9BAB1;
+  --card: #24302C; --tape: rgba(200,180,110,.45); --who: #8A7A2A; --see: #2B6A74; --may: #7A3F57;
+  --wrong: #FF8A7E; --ok: #7FD3A1; --line: #5E7268; color-scheme: dark;
+}
+body {
+  background-color: var(--paper);
+  background-image: linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 22px 22px;
+  color: var(--ink);
+  font-family: var(--font-hand);
+  font-size: 17px;
+  line-height: 1.75;
+}
+.page { max-width: 760px; margin: 0 auto; padding-inline: 18px; padding-block: 32px 64px; display: grid; gap: 34px; }
+h1, h2 { text-wrap: balance; line-height: 1.3; margin: 0; }
+h1 { font-size: 2.1rem; }
+h2 { font-size: 1.45rem; display: flex; align-items: baseline; gap: 10px; }
+h2 .tag { font-family: var(--font-mono); font-size: .72rem; letter-spacing: .08em; color: var(--ink-soft); text-transform: uppercase; }
+p { margin: 0; }
+section { display: grid; gap: 14px; min-width: 0; }
+.sub { color: var(--ink-soft); font-size: .95rem; }
+mark { background: linear-gradient(transparent 52%, var(--who) 52%); color: inherit; padding: 0 2px; }
+mark.see { background: linear-gradient(transparent 52%, var(--see) 52%); }
+mark.may { background: linear-gradient(transparent 52%, var(--may) 52%); }
+code { font-family: var(--font-mono); font-size: .86em; background: color-mix(in srgb, var(--line) 22%, transparent); padding: 1px 5px; border-radius: 3px; }
+.card { position: relative; background: var(--card); padding: 22px 18px 16px; box-shadow: 0 1px 3px rgba(0,0,0,.12); min-width: 0; }
+.card::before { content: ""; position: absolute; top: -9px; left: 50%; width: 92px; height: 20px; transform: translateX(-50%) rotate(-2deg); background: var(--tape); }
+.scroll { overflow-x: auto; }
+svg text { font-family: var(--font-mono); fill: var(--ink); }
+svg .hand { font-family: var(--font-hand); }
+.rule { border-left: 4px solid var(--ok); padding: 6px 12px; font-size: 1.08rem; }
+.wrong { border-left: 4px solid var(--wrong); padding: 4px 12px; display: grid; gap: 2px; }
+.wrong b { color: var(--wrong); font-size: .85rem; letter-spacing: .05em; }
+.panels { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 14px; }
+.panel { border: 2px solid var(--ink); background: var(--card); padding: 10px; display: grid; gap: 6px; min-width: 0; }
+.panel h3 { margin: 0; font-size: 1rem; font-family: var(--font-mono); }
+.panel p { font-size: .92rem; }
+@media (max-width: 520px) { .panels { grid-template-columns: 1fr; } }
+table { border-collapse: collapse; width: 100%; font-size: .95rem; }
+th, td { border-bottom: 1px dashed var(--line); padding: 8px 6px; text-align: left; vertical-align: top; }
+th { font-family: var(--font-mono); font-size: .78rem; letter-spacing: .05em; color: var(--ink-soft); font-weight: 600; }
+ol { margin: 0; padding-left: 1.3em; display: grid; gap: 6px; }
+blockquote { margin: 0; padding: 12px 16px; background: var(--card); border: 2px dashed var(--line); }
+.en { font-family: var(--font-mono); font-size: .9rem; color: var(--ink-soft); }
+details summary{cursor:pointer}
+</style>
+<style>
+/* chapter-note additions on top of the notebook base */
+svg.fig { display: block; min-width: 640px; width: 100%; height: auto; }
+.lvl { font-family: var(--font-mono); font-size: .74rem; padding: 1px 7px; border: 1.5px solid var(--ink); border-radius: 10px; white-space: nowrap; }
+.lvl.high { background: color-mix(in srgb, var(--ok) 28%, transparent); }
+.lvl.med { background: var(--who); }
+.lvl.low { background: var(--may); }
+.lvl.todo { border-style: dashed; color: var(--ink-soft); }
+.meta { display: flex; flex-wrap: wrap; gap: 8px 16px; font-family: var(--font-mono); font-size: .8rem; color: var(--ink-soft); }
+.toc { display: flex; flex-wrap: wrap; gap: 6px 14px; font-family: var(--font-mono); font-size: .82rem; }
+.toc a { color: var(--ink); }
+.trail { display: grid; gap: 12px; }
+.fix { border-left: 4px solid var(--ok); padding: 4px 12px; }
+.two { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 14px; }
+@media (max-width: 560px) { .two { grid-template-columns: 1fr; } }
+details { background: var(--card); border: 2px dashed var(--line); padding: 10px 14px; }
+details[open] { border-style: solid; }
+details > div { display: grid; gap: 8px; margin-top: 10px; }
+.small { font-size: .9rem; }
+a { color: inherit; text-underline-offset: 3px; }
+pre { margin: 0; font-family: var(--font-mono); font-size: .82rem; line-height: 1.5; background: var(--card); border: 1px solid var(--line); padding: 10px 12px; overflow-x: auto; }
+</style>
+<meta name="topic" content="P1 probe(liveness vs readiness)">
+<main class="page">
+  <header style="display:grid;gap:10px">
+    <p class="sub">k8s 課程 · topic 深入 · P1 · <a href="https://claude.ai/artifact/UrVpfj1woG42r9M5UxMMBn">← P1 章節筆記</a></p>
+    <h1>三種 probe</h1>
+    <p>三種 probe 問三個不同的問題，失敗後的動作也不同。這一頁看 kubelet 怎麼執行它們、失敗的結果怎麼傳到 Service，以及為什麼一個寫錯的 probe 能把整個系統拖垮。</p>
+    <div class="meta"><span>Mastery：high (s6)</span><span>lab：probe-demo（/tmp/ready、/tmp/alive）</span></div>
+    <nav class="toc"><a href="#l0">L0</a><a href="#l1">L1</a><a href="#l2">L2</a><a href="#l3">L3</a><a href="#l4">L4</a><a href="#l5">L5</a><a href="#l6">L6</a><a href="#l7">L7</a><a href="#trail">錯題</a></nav>
+  </header>
+
+  <section id="l0">
+    <h2>Layer 0 · 一張圖<span class="tag">analogy</span></h2>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 720 180" role="img" aria-label="Shop staff: new hire on probation (startup), cashier with closed sign when busy (readiness), employee who fainted gets replaced (liveness)">
+        <g font-size="12" text-anchor="middle">
+          <rect x="20" y="30" width="210" height="90" fill="var(--who)" stroke="var(--ink)" stroke-width="2"/><text x="125" y="58" class="hand">新人試用期</text><text x="125" y="82" font-size="10">startup：還在暖機，先別考核</text>
+          <rect x="255" y="30" width="210" height="90" fill="var(--see)" stroke="var(--ink)" stroke-width="2"/><text x="360" y="58" class="hand">櫃台掛「暫停服務」</text><text x="360" y="82" font-size="10">readiness：人還在，先別排客人</text>
+          <rect x="490" y="30" width="210" height="90" fill="var(--may)" stroke="var(--ink)" stroke-width="2"/><text x="595" y="58" class="hand">店員昏倒了</text><text x="595" y="82" font-size="10">liveness：換一個人</text>
+        </g>
+        <text x="360" y="155" text-anchor="middle" font-size="13" class="hand">問錯問題的代價：只是忙，卻被換掉；或已經昏倒，還一直排客人給他。</text>
+      </svg>
+    </div>
+  </section>
+
+  <section id="l1">
+    <h2>Layer 1 · 第一性原理<span class="tag">two kinds of broken</span></h2>
+    <p><b>限制：「process 還活著」不等於「它能服務」。</b>程式可能死鎖（活著但永遠不回應），也可能只是暫時接不了客（暖機、依賴慢、過載）。這兩種病的解藥相反：</p>
+    <div class="two">
+      <div class="card"><b>卡死</b><p class="small">重啟能救。所以要有人偵測並重啟：liveness。</p></div>
+      <div class="card"><b>暫時不能接客</b><p class="small">重啟沒用，甚至更糟（重啟又要暖機）。正確動作是先別送流量：readiness。</p></div>
+    </div>
+    <p class="rule">判斷句：<b>Would a restart fix this?</b> Yes 才放進 liveness。其他都是 readiness 的事。</p>
+  </section>
+
+  <section id="l2">
+    <h2>Layer 2 · 機制<span class="tag">kubelet to Service</span></h2>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 780 300" role="img" aria-label="kubelet runs a prober per probe on the node. Startup probe gates the others. Liveness failure: kubelet kills the container, RESTARTS plus one, pod stays. Readiness failure: kubelet sets Ready false in pod status, EndpointSlice controller marks the endpoint not ready, kube-proxy on every node removes it from rules">
+        <defs><marker id="pr1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="var(--ink)"/></marker></defs>
+        <rect x="10" y="20" width="200" height="110" fill="var(--may)" stroke="var(--ink)" stroke-width="2"/>
+        <text x="20" y="42" font-size="11">kubelet（container 所在 node）</text>
+        <text x="20" y="64" font-size="10">每個 probe 一個 worker</text><text x="20" y="82" font-size="10">exec：在 container 內執行指令</text><text x="20" y="100" font-size="10">httpGet：200–399 算成功</text><text x="20" y="118" font-size="10">tcpSocket / grpc</text>
+        <rect x="250" y="20" width="170" height="44" fill="var(--who)" stroke="var(--ink)"/><text x="260" y="38" font-size="10">startupProbe</text><text x="260" y="54" font-size="10">成功前，另外兩個不跑</text>
+        <rect x="250" y="80" width="170" height="44" fill="var(--see)" stroke="var(--ink)"/><text x="260" y="98" font-size="10">livenessProbe 失敗 ×3</text><text x="260" y="114" font-size="10" fill="var(--wrong)">→ kill container</text>
+        <rect x="250" y="140" width="170" height="44" fill="var(--see)" stroke="var(--ink)"/><text x="260" y="158" font-size="10">readinessProbe 失敗 ×3</text><text x="260" y="174" font-size="10">→ status Ready=False</text>
+        <line x1="210" y1="75" x2="248" y2="42" stroke="var(--ink)" marker-end="url(#pr1)"/><line x1="210" y1="90" x2="248" y2="102" stroke="var(--ink)" marker-end="url(#pr1)"/><line x1="210" y1="110" x2="248" y2="160" stroke="var(--ink)" marker-end="url(#pr1)"/>
+        <rect x="460" y="80" width="300" height="44" fill="var(--card)" stroke="var(--ink)"/><text x="470" y="98" font-size="10">同一顆 Pod、新的 container：RESTARTS +1</text><text x="470" y="114" font-size="10">IP、UID、node 都不變</text>
+        <line x1="420" y1="102" x2="458" y2="102" stroke="var(--ink)" marker-end="url(#pr1)"/>
+        <rect x="460" y="140" width="300" height="44" fill="var(--card)" stroke="var(--ink)"/><text x="470" y="158" font-size="10">EndpointSlice controller：endpoint ready=false</text><text x="470" y="174" font-size="10">container 照跑，RESTARTS 不變</text>
+        <line x1="420" y1="162" x2="458" y2="162" stroke="var(--ink)" marker-end="url(#pr1)"/>
+        <rect x="460" y="200" width="300" height="44" fill="var(--who)" stroke="var(--ink)"/><text x="470" y="218" font-size="10">每台 node 的 kube-proxy 把它移出 DNAT 規則</text><text x="470" y="234" font-size="10">ingress controller / ALB 也停止送流量</text>
+        <line x1="610" y1="184" x2="610" y2="198" stroke="var(--ink)" marker-end="url(#pr1)"/>
+        <text x="10" y="275" font-size="11" class="hand">readiness 的效果要經過 API Server → controller → 每台 node，有傳播延遲。liveness 只在本機，最直接。</text>
+      </svg>
+    </div>
+    <div class="scroll"><table>
+      <tr><th>參數</th><th>預設</th><th>算式</th></tr>
+      <tr><td><code>periodSeconds</code></td><td>10</td><td rowspan="3">偵測時間 ≈ period × failureThreshold = 30s</td></tr>
+      <tr><td><code>failureThreshold</code></td><td>3</td></tr>
+      <tr><td><code>timeoutSeconds</code></td><td>1</td></tr>
+      <tr><td><code>successThreshold</code></td><td>1</td><td>liveness / startup 只能是 1</td></tr>
+      <tr><td>startup 預算</td><td>自己設</td><td>例：30 × 10s = 最多 300s 讓 app 暖機</td></tr>
+    </table></div>
+    <p class="small">注意 <code>timeoutSeconds: 1</code>：GC 停頓 1.2 秒的 Java app，健康也會被判失敗。</p>
+  </section>
+
+  <section id="l3">
+    <h2>Layer 3 · 取捨<span class="tag">what to check</span></h2>
+    <div class="scroll"><table>
+      <tr><th>決定</th><th>選項</th><th>判準</th></tr>
+      <tr><td>liveness 要不要查 DB</td><td>不要</td><td>DB 慢 → 所有 Pod 同時被重啟 → 重連風暴壓垮 DB。重啟修不好 DB</td></tr>
+      <tr><td>readiness 要不要查 DB</td><td>看情況</td><td>查了：DB 掛時所有 Pod 都 not ready，Service 沒有任何 endpoint，使用者拿到連線失敗而不是好看的錯誤頁。常見做法是只查「自己能不能服務」，依賴失敗在 app 內處理</td></tr>
+      <tr><td>靈敏度</td><td>快偵測 vs 少誤判</td><td>failureThreshold 小 → 抖一下就重啟；大 → 真的死了很久才發現</td></tr>
+      <tr><td>沒設 liveness</td><td>可以</td><td>process crash 時 container 本來就會被重啟。liveness 只為「活著但卡死」存在</td></tr>
+    </table></div>
+  </section>
+
+  <section id="l4">
+    <h2>Layer 4 · AWS 怎麼做<span class="tag">two health checks</span></h2>
+    <p>在 EKS 上用 ALB（IP mode）時，流量其實要過兩套健康檢查：k8s 的 readiness，和 ALB target group 自己的 health check。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 740 180" role="img" aria-label="ALB target group health check and Kubernetes readiness probe are independent; pod readiness gate makes Kubernetes wait for ALB health before marking the pod ready">
+        <rect x="20" y="30" width="200" height="70" fill="var(--who)" stroke="var(--ink)" stroke-width="2"/><text x="30" y="52" font-size="11">ALB target group</text><text x="30" y="70" font-size="10">health check /healthz</text><text x="30" y="86" font-size="10">預設 5 次成功才 healthy</text>
+        <rect x="270" y="30" width="200" height="70" fill="var(--see)" stroke="var(--ink)" stroke-width="2"/><text x="280" y="52" font-size="11">Pod readiness</text><text x="280" y="70" font-size="10">kubelet 打 /ready</text>
+        <rect x="520" y="30" width="200" height="70" fill="var(--may)" stroke="var(--ink)" stroke-width="2"/><text x="530" y="52" font-size="11">pod readiness gate</text><text x="530" y="70" font-size="10">LB Controller 等 ALB 說 healthy</text><text x="530" y="86" font-size="10">才把 Pod 標成 Ready</text>
+        <text x="20" y="140" font-size="11" class="hand">沒開 readiness gate：k8s 覺得新 Pod Ready、開始砍舊 Pod，ALB 還沒把新 Pod 標 healthy → 短暫沒有 healthy target → 502。</text>
+      </svg>
+    </div>
+    <div class="scroll"><table>
+      <tr><th>設定</th><th>常見陷阱</th></tr>
+      <tr><td>ALB health check path</td><td>跟 readiness path 不同，兩邊判斷不一致</td></tr>
+      <tr><td>pod readiness gate</td><td>要在 namespace 加 label 開啟，忘了就沒有</td></tr>
+      <tr><td>NetworkPolicy + probe</td><td>probe 是 kubelet 從 node 發起的；多數 CNI 預設放行，但有些設定會擋，症狀是 probe 全失敗而 app 正常</td></tr>
+    </table></div>
+  </section>
+
+  <section id="l5">
+    <h2>Layer 5 · 規模化<span class="tag">evolution ladder</span></h2>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 740 200" role="img" aria-label="Ladder: no probes; copy-pasted liveness and readiness pointing at the same endpoint; separate endpoints with startup probes and tuned thresholds; platform templates, probe linting, health semantics agreed with load balancers">
+        <g font-size="11">
+          <rect x="10" y="150" width="170" height="44" fill="var(--card)" stroke="var(--ink)" stroke-width="2"/><text x="20" y="170">① 沒有 probe</text><text x="20" y="186" class="hand">Running 就送流量</text>
+          <rect x="195" y="110" width="170" height="84" fill="var(--see)" stroke="var(--ink)" stroke-width="2"/><text x="205" y="130">② 複製貼上</text><text x="205" y="148" class="hand">兩個 probe 打同一路徑</text>
+          <rect x="380" y="70" width="170" height="124" fill="var(--who)" stroke="var(--ink)" stroke-width="2"/><text x="390" y="90">③ 分開語意</text><text x="390" y="108" class="hand">/livez 只看自己</text><text x="390" y="126" class="hand">/readyz 看能否服務</text><text x="390" y="144" class="hand">慢啟動加 startup</text>
+          <rect x="565" y="20" width="170" height="174" fill="var(--may)" stroke="var(--ink)" stroke-width="2"/><text x="575" y="40">④ 平台標準</text><text x="575" y="58" class="hand">範本內建</text><text x="575" y="76" class="hand">policy 擋 liveness</text><text x="575" y="94" class="hand">打外部依賴</text><text x="575" y="112" class="hand">與 LB 檢查對齊</text>
+        </g>
+      </svg>
+    </div>
+  </section>
+
+  <section id="l6">
+    <h2>Layer 6 · 故障與 on-call<span class="tag">how it breaks</span></h2>
+    <div class="panels">
+      <div class="panel"><h3>Running 0/1，沒流量</h3><p>readiness 一直失敗。<code>describe pod</code> 看 <code>Readiness probe failed</code> 的原因；<code>kubectl get endpointslice</code> 確認它不在名單裡。</p></div>
+      <div class="panel"><h3>RESTARTS 一直加，exit 0</h3><p>app 是健康的，是 liveness 殺的。你 P1 gate 的題：probe 打 8080、nginx 聽 80。</p></div>
+      <div class="panel"><h3>全部 Pod 同時重啟</h3><p>liveness 依賴外部服務。看重啟時間是否與 DB / 下游的延遲尖峰對齊。thundering herd。</p></div>
+      <div class="panel"><h3>慢啟動 app 起不來</h3><p>Java 要 90 秒暖機，liveness 30 秒就判死 → 永遠 CrashLoop。加 startupProbe。</p></div>
+    </div>
+  </section>
+
+  <section id="l7">
+    <h2>Layer 7 · 面試<span class="tag">interview</span></h2>
+    <blockquote>「Your service's liveness probe calls the database. During a 2-minute database slowdown, every pod restarted and the outage lasted 20 minutes. Explain what happened and how you'd redesign the probes.」</blockquote>
+    <details><summary>L4 回答</summary><div><p>「liveness 不應該查 DB，改成只查 app 本身。」</p><p class="small">結論對，但「為什麼 2 分鐘變 20 分鐘」沒解釋。</p></div></details>
+    <details><summary>L6 回答</summary><div>
+      <p>「DB 慢 → 每個 Pod 的 liveness 在 30 秒內失敗 3 次 → kubelet 同時重啟所有 container。重啟本身修不好 DB，反而製造兩個新問題：所有 Pod 同時暖機，Service 沒有 ready endpoint，完全停擺；所有 Pod 同時重連 DB，連線風暴把剛恢復的 DB 再壓垮。這是正回饋迴路，2 分鐘的抖動被放大成 20 分鐘。」</p>
+      <p>「重設計：liveness 只回答 process 有沒有卡死，例如 event loop 有沒有在跑，不碰任何外部依賴。readiness 回答這個 Pod 能不能服務，通常也不直接查 DB，避免全部 Pod 同時 not ready；依賴失敗在 app 內用 timeout、circuit breaker 回應錯誤。慢啟動用 startupProbe。重連加 jitter 和 backoff。」</p>
+      <p>「驗證：做一次 DB 延遲注入演練，確認 RESTARTS 不增加、錯誤率可控。」</p>
+      <p class="small">L6 多了：正回饋迴路的完整因果、readiness 也有同樣的陷阱、app 層的對策、用故障注入驗證。</p>
+    </div></details>
+  </section>
+
+  <section id="trail">
+    <h2>我的錯題軌跡<span class="tag">this topic</span></h2>
+    <div class="trail">
+      <div class="wrong"><b>我錯在這 · 06-22</b>把 readiness 的「準備好接流量」塞給 liveness。</div>
+      <div class="fix">修正：自己推出「重啟修不好變慢的 DB」。06-25、07-03 抽考自己講出正回饋迴路和重連風暴（thundering herd）。</div>
+      <div class="wrong"><b>我錯在這 · s30</b>probe 冷測：liveness 一度答成「重啟整個 Pod」。</div>
+      <div class="fix">修正：重啟的是 container。Pod 的 IP、UID、node 都不變，RESTARTS 那欄就是 container 的計數。</div>
+      <div class="fix"><b>s6 · 最佳時刻</b>三隻故障 Pod 盲測，從 exit 0 反推「app 健康、被 probe 殺」。</div>
+    </div>
+  </section>
+</main>
+
+</body></html>

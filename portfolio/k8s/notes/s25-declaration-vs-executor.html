@@ -1,0 +1,232 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"></head><body>
+<title>宣告與執行體</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC:wght@400;700&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: one notebook column on graph paper; figures on taped cards, scenarios as 2x2 comic panels */
+:root {
+  --paper: #F6F8FA;
+  --grid: rgba(90,130,170,.16);
+  --ink: #23313E;
+  --ink-soft: #55677A;
+  --card: #FFFFFF;
+  --tape: rgba(240,214,140,.75);
+  --who: #FFE98A;
+  --see: #BDEEF6;
+  --may: #F9CDE0;
+  --wrong: #D2453A;
+  --ok: #2F8F5B;
+  --line: #9DB0C2;
+  --font-hand: "LXGW WenKai TC", "Noto Sans TC", "PingFang TC", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #1A2320; --grid: rgba(200,230,210,.08); --ink: #E6EDE8; --ink-soft: #A9BAB1;
+    --card: #24302C; --tape: rgba(200,180,110,.45); --who: #8A7A2A; --see: #2B6A74; --may: #7A3F57;
+    --wrong: #FF8A7E; --ok: #7FD3A1; --line: #5E7268; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #1A2320; --grid: rgba(200,230,210,.08); --ink: #E6EDE8; --ink-soft: #A9BAB1;
+  --card: #24302C; --tape: rgba(200,180,110,.45); --who: #8A7A2A; --see: #2B6A74; --may: #7A3F57;
+  --wrong: #FF8A7E; --ok: #7FD3A1; --line: #5E7268; color-scheme: dark;
+}
+body {
+  background-color: var(--paper);
+  background-image: linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 22px 22px;
+  color: var(--ink);
+  font-family: var(--font-hand);
+  font-size: 17px;
+  line-height: 1.75;
+}
+.page { max-width: 760px; margin: 0 auto; padding-inline: 18px; padding-block: 32px 64px; display: grid; gap: 34px; }
+h1, h2 { text-wrap: balance; line-height: 1.3; margin: 0; }
+h1 { font-size: 2.1rem; }
+h2 { font-size: 1.45rem; display: flex; align-items: baseline; gap: 10px; }
+h2 .tag { font-family: var(--font-mono); font-size: .72rem; letter-spacing: .08em; color: var(--ink-soft); text-transform: uppercase; }
+p { margin: 0; }
+section { display: grid; gap: 14px; min-width: 0; }
+.sub { color: var(--ink-soft); font-size: .95rem; }
+mark { background: linear-gradient(transparent 52%, var(--who) 52%); color: inherit; padding: 0 2px; }
+mark.see { background: linear-gradient(transparent 52%, var(--see) 52%); }
+mark.may { background: linear-gradient(transparent 52%, var(--may) 52%); }
+code { font-family: var(--font-mono); font-size: .86em; background: color-mix(in srgb, var(--line) 22%, transparent); padding: 1px 5px; border-radius: 3px; }
+.card { position: relative; background: var(--card); padding: 22px 18px 16px; box-shadow: 0 1px 3px rgba(0,0,0,.12); min-width: 0; }
+.card::before { content: ""; position: absolute; top: -9px; left: 50%; width: 92px; height: 20px; transform: translateX(-50%) rotate(-2deg); background: var(--tape); }
+.scroll { overflow-x: auto; }
+svg text { font-family: var(--font-mono); fill: var(--ink); }
+svg .hand { font-family: var(--font-hand); }
+.rule { border-left: 4px solid var(--ok); padding: 6px 12px; font-size: 1.08rem; }
+.wrong { border-left: 4px solid var(--wrong); padding: 4px 12px; display: grid; gap: 2px; }
+.wrong b { color: var(--wrong); font-size: .85rem; letter-spacing: .05em; }
+.panels { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 14px; }
+.panel { border: 2px solid var(--ink); background: var(--card); padding: 10px; display: grid; gap: 6px; min-width: 0; }
+.panel h3 { margin: 0; font-size: 1rem; font-family: var(--font-mono); }
+.panel p { font-size: .92rem; }
+@media (max-width: 520px) { .panels { grid-template-columns: 1fr; } }
+table { border-collapse: collapse; width: 100%; font-size: .95rem; }
+th, td { border-bottom: 1px dashed var(--line); padding: 8px 6px; text-align: left; vertical-align: top; }
+th { font-family: var(--font-mono); font-size: .78rem; letter-spacing: .05em; color: var(--ink-soft); font-weight: 600; }
+ol { margin: 0; padding-left: 1.3em; display: grid; gap: 6px; }
+blockquote { margin: 0; padding: 12px 16px; background: var(--card); border: 2px dashed var(--line); }
+.en { font-family: var(--font-mono); font-size: .9rem; color: var(--ink-soft); }
+details summary{cursor:pointer}
+</style>
+<style>
+/* chapter-note additions on top of the notebook base */
+svg.fig { display: block; min-width: 640px; width: 100%; height: auto; }
+.lvl { font-family: var(--font-mono); font-size: .74rem; padding: 1px 7px; border: 1.5px solid var(--ink); border-radius: 10px; white-space: nowrap; }
+.lvl.high { background: color-mix(in srgb, var(--ok) 28%, transparent); }
+.lvl.med { background: var(--who); }
+.lvl.low { background: var(--may); }
+.lvl.todo { border-style: dashed; color: var(--ink-soft); }
+.meta { display: flex; flex-wrap: wrap; gap: 8px 16px; font-family: var(--font-mono); font-size: .8rem; color: var(--ink-soft); }
+.toc { display: flex; flex-wrap: wrap; gap: 6px 14px; font-family: var(--font-mono); font-size: .82rem; }
+.toc a { color: var(--ink); }
+.trail { display: grid; gap: 12px; }
+.fix { border-left: 4px solid var(--ok); padding: 4px 12px; }
+.two { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 14px; }
+@media (max-width: 560px) { .two { grid-template-columns: 1fr; } }
+details { background: var(--card); border: 2px dashed var(--line); padding: 10px 14px; }
+details[open] { border-style: solid; }
+details > div { display: grid; gap: 8px; margin-top: 10px; }
+.small { font-size: .9rem; }
+a { color: inherit; text-underline-offset: 3px; }
+pre { margin: 0; font-family: var(--font-mono); font-size: .82rem; line-height: 1.5; background: var(--card); border: 1px solid var(--line); padding: 10px 12px; overflow-x: auto; }
+</style>
+<meta name="topic" content="分層判準「關掉 API Server 還在不在」">
+<main class="page">
+  <header style="display:grid;gap:10px">
+    <p class="sub">k8s 課程 · topic 深入 · 跨章判準 · <a href="https://claude.ai/artifact/BsrozK5kwbKAJrtzK9MukK">← P0 章節筆記</a></p>
+    <h1>宣告與執行體</h1>
+    <p>你在 s24 造出來的工具：「關掉 API Server，它還在不在？」s25 升級成兩步版：每個 k8s 資源都有兩個分身，一個是 etcd 裡的宣告，一個是 node kernel 裡的執行體。這一頁把這個判準用到所有章節。</p>
+    <div class="meta"><span>Mastery：med (s25)</span><span>家族：層級混淆的解藥</span></div>
+    <nav class="toc"><a href="#l0">L0</a><a href="#l1">L1</a><a href="#l2">L2</a><a href="#l3">L3</a><a href="#l4">L4</a><a href="#l5">L5</a><a href="#l6">L6</a><a href="#l7">L7</a><a href="#trail">錯題</a></nav>
+  </header>
+
+  <section id="l0">
+    <h2>Layer 0 · 一張圖<span class="tag">analogy</span></h2>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 720 180" role="img" aria-label="Architect's office holds blueprints; the built house stands on site. If the office burns down, the house still stands, but nothing new can be built or repaired">
+        <rect x="30" y="30" width="250" height="90" fill="var(--who)" stroke="var(--ink)" stroke-width="2"/><text x="155" y="62" text-anchor="middle" font-size="13" class="hand">建築師事務所的藍圖</text><text x="155" y="88" text-anchor="middle" font-size="10">etcd 裡的宣告</text>
+        <rect x="440" y="30" width="250" height="90" fill="var(--see)" stroke="var(--ink)" stroke-width="2"/><text x="565" y="62" text-anchor="middle" font-size="13" class="hand">蓋好的房子</text><text x="565" y="88" text-anchor="middle" font-size="10">kernel 裡的執行體</text>
+        <line x1="280" y1="75" x2="440" y2="75" stroke="var(--ink)" stroke-width="2" stroke-dasharray="6 4"/><text x="360" y="68" text-anchor="middle" font-size="10">工班（kubelet、kube-proxy…）</text>
+        <text x="360" y="155" text-anchor="middle" font-size="13" class="hand">事務所燒掉，房子還站著。只是不能再蓋新的，也沒人來修。</text>
+      </svg>
+    </div>
+  </section>
+
+  <section id="l1">
+    <h2>Layer 1 · 第一性原理<span class="tag">why two copies</span></h2>
+    <p><b>限制：kernel 不認識 Kubernetes。</b>Linux 只懂 iptables 規則、路由、cgroup 檔案、mount、namespace。所以 etcd 裡的每一個物件，最後都要有人把它<b>翻譯</b>成 kernel 懂的東西。翻譯完，兩份就各自存在了。</p>
+    <p class="rule">定調句（你 s25 的版本）：<b>API Server 掛掉 = 沒有新的翻譯了，不是已經翻好的東西消失了。</b></p>
+  </section>
+
+  <section id="l2">
+    <h2>Layer 2 · 機制<span class="tag">the translation table</span></h2>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 780 360" role="img" aria-label="Left column: declarations in etcd (Service, NetworkPolicy, Pod resources.limits, PVC, Pod spec); middle: translators (kube-proxy, CNI agent felix, kubelet with runc, CSI node plugin, kubelet); right: executors in the node kernel (nat rules, filter rules, cgroup memory.max, mount, namespaces and processes). RBAC is an exception living only in the API server">
+        <defs><marker id="ly1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="var(--ink)"/></marker></defs>
+        <text x="110" y="22" text-anchor="middle" font-size="12">宣告（etcd）</text><text x="390" y="22" text-anchor="middle" font-size="12">翻譯者</text><text x="660" y="22" text-anchor="middle" font-size="12">執行體（node kernel）</text>
+        <g font-size="10">
+          <rect x="10" y="35" width="200" height="40" fill="var(--who)" stroke="var(--ink)"/><text x="20" y="59">Service / EndpointSlice</text>
+          <rect x="290" y="35" width="200" height="40" fill="var(--may)" stroke="var(--ink)"/><text x="300" y="52">kube-proxy</text><text x="300" y="68">持續 watch，持續改</text>
+          <rect x="560" y="35" width="210" height="40" fill="var(--see)" stroke="var(--ink)"/><text x="570" y="59">nat 表 DNAT 規則</text>
+          <rect x="10" y="90" width="200" height="40" fill="var(--who)" stroke="var(--ink)"/><text x="20" y="114">NetworkPolicy</text>
+          <rect x="290" y="90" width="200" height="40" fill="var(--may)" stroke="var(--ink)"/><text x="300" y="107">CNI policy agent（felix）</text><text x="300" y="123">沒裝 = 沒人翻譯</text>
+          <rect x="560" y="90" width="210" height="40" fill="var(--see)" stroke="var(--ink)"/><text x="570" y="114">filter 表規則 / eBPF</text>
+          <rect x="10" y="145" width="200" height="40" fill="var(--who)" stroke="var(--ink)"/><text x="20" y="169">resources.limits</text>
+          <rect x="290" y="145" width="200" height="40" fill="var(--may)" stroke="var(--ink)"/><text x="300" y="162">kubelet → runc</text><text x="300" y="178" fill="var(--wrong)">只在建 container 時翻一次</text>
+          <rect x="560" y="145" width="210" height="40" fill="var(--see)" stroke="var(--ink)"/><text x="570" y="169">cgroup memory.max</text>
+          <rect x="10" y="200" width="200" height="40" fill="var(--who)" stroke="var(--ink)"/><text x="20" y="224">PVC / PV</text>
+          <rect x="290" y="200" width="200" height="40" fill="var(--may)" stroke="var(--ink)"/><text x="300" y="217">CSI node plugin + kubelet</text><text x="300" y="233">Pod 啟動時 mount</text>
+          <rect x="560" y="200" width="210" height="40" fill="var(--see)" stroke="var(--ink)"/><text x="570" y="224">/proc/mounts 裡的一行</text>
+          <rect x="10" y="255" width="200" height="40" fill="var(--who)" stroke="var(--ink)"/><text x="20" y="279">Pod spec</text>
+          <rect x="290" y="255" width="200" height="40" fill="var(--may)" stroke="var(--ink)"/><text x="300" y="279">kubelet → containerd</text>
+          <rect x="560" y="255" width="210" height="40" fill="var(--see)" stroke="var(--ink)"/><text x="570" y="279">process + namespaces</text>
+        </g>
+        <g stroke="var(--ink)"><line x1="210" y1="55" x2="288" y2="55" marker-end="url(#ly1)"/><line x1="490" y1="55" x2="558" y2="55" marker-end="url(#ly1)"/><line x1="210" y1="110" x2="288" y2="110" marker-end="url(#ly1)"/><line x1="490" y1="110" x2="558" y2="110" marker-end="url(#ly1)"/><line x1="210" y1="165" x2="288" y2="165" marker-end="url(#ly1)"/><line x1="490" y1="165" x2="558" y2="165" marker-end="url(#ly1)"/><line x1="210" y1="220" x2="288" y2="220" marker-end="url(#ly1)"/><line x1="490" y1="220" x2="558" y2="220" marker-end="url(#ly1)"/><line x1="210" y1="275" x2="288" y2="275" marker-end="url(#ly1)"/><line x1="490" y1="275" x2="558" y2="275" marker-end="url(#ly1)"/></g>
+        <rect x="10" y="310" width="760" height="40" fill="var(--card)" stroke="var(--wrong)" stroke-dasharray="5 4"/>
+        <text x="20" y="335" font-size="11" fill="var(--wrong)">例外：RBAC / ServiceAccount 權限沒有執行體。它全程活在 API Server 的請求路徑上，kernel 一無所知。</text>
+      </svg>
+    </div>
+    <h3 style="margin:0">兩步判準</h3>
+    <ol>
+      <li>你講的這個東西，是<b>宣告</b>還是<b>執行體</b>？</li>
+      <li>宣告在 etcd（用 <code>kubectl</code> 看），執行體在 kernel（上 node 用 <code>iptables-save</code>、<code>ip route</code>、<code>conntrack -L</code>、<code>findmnt</code>、<code>cat /sys/fs/cgroup/…</code> 看）。</li>
+    </ol>
+    <p>第三個隱藏問題：<b>翻譯是什麼時候發生的？</b>kube-proxy 是持續翻譯；cgroup 只在建 container 那一刻翻一次。所以「改了宣告、執行體沒變」是 limit 這類東西的常見故障。</p>
+  </section>
+
+  <section id="l3">
+    <h2>Layer 3 · 取捨<span class="tag">why this design</span></h2>
+    <div class="scroll"><table>
+      <tr><th>設計</th><th>贏在</th><th>代價</th></tr>
+      <tr><td>宣告和執行分開</td><td>控制面掛掉，資料面繼續跑</td><td>兩份可能不一致（drift）；排障要知道看哪一份</td></tr>
+      <tr><td>翻譯者分散在每台 node</td><td>沒有中央瓶頸</td><td>翻譯者自己可能掛（kube-proxy、CNI agent），只有那台 node 壞</td></tr>
+      <tr><td>API Server 不驗證「有沒有翻譯者」</td><td>物件可以先存，引擎後裝</td><td>NetworkPolicy 沒引擎 = 安全假象，而且沒有任何錯誤</td></tr>
+    </table></div>
+  </section>
+
+  <section id="l4">
+    <h2>Layer 4 · AWS 怎麼做<span class="tag">same split on EKS</span></h2>
+    <p>EKS 把宣告那一半（API Server + etcd）整個託管，把執行體那一半留在你的 node 上。所以這個判準在 EKS 上直接決定「這是 AWS 的事還是我的事」。</p>
+    <div class="scroll"><table>
+      <tr><th>症狀</th><th>落在哪一半</th><th>誰處理</th><th>常見陷阱</th></tr>
+      <tr><td><code>kubectl</code> timeout</td><td>宣告</td><td>AWS（但你可能是打爆它的人）</td><td>先查 AWS Health 和 API metric，再查自家 controller</td></tr>
+      <tr><td>NetworkPolicy 不擋</td><td>執行體缺翻譯者</td><td>你</td><td>VPC CNI 沒開 <code>enableNetworkPolicy</code></td></tr>
+      <tr><td>Pod 間不通，Service 物件都正常</td><td>執行體</td><td>你</td><td>SG for Pods、node SG、subnet route，都不是 kubectl 看得到的</td></tr>
+      <tr><td>Pod 讀不到 S3</td><td>兩者都不是：IAM</td><td>你</td><td>又一個「宣告（SA annotation）≠ 執行（STS 驗 trust policy）」</td></tr>
+    </table></div>
+  </section>
+
+  <section id="l5">
+    <h2>Layer 5 · 規模化<span class="tag">where it matters more</span></h2>
+    <p>叢集越大，「宣告和執行體不一致」的機率越高，因為翻譯者越多、更新傳播越久。大規模下的做法：</p>
+    <ol>
+      <li>把執行體也變成可觀測的：node-exporter 收 conntrack、iptables 規則數；CNI 的 metrics。</li>
+      <li>對關鍵路徑做 synthetic probe：直接量「封包有沒有真的通」，不信任物件狀態。</li>
+      <li>換掉翻譯延遲大的資料面：iptables → nftables / eBPF，規則更新從秒級降下來。</li>
+    </ol>
+  </section>
+
+  <section id="l6">
+    <h2>Layer 6 · 故障與 on-call<span class="tag">use the test</span></h2>
+    <div class="panels">
+      <div class="panel"><h3>改了 limit 還是 OOM</h3><p>改的是宣告。<code>get deploy -o yaml</code> 讀回來還是宣告。看的應該是正在跑的 Pod，以及 node 上的 <code>memory.max</code>。舊 container 沒重建，kubelet 沒機會重新翻譯。</p></div>
+      <div class="panel"><h3>control plane 掛了</h3><p>先列出執行體那欄：既有 Pod、Service 轉發、路由都還在。壞的是需要新翻譯的：新 Pod、擴容、endpoint 更新。</p></div>
+      <div class="panel"><h3>同事說「Service 壞了」</h3><p>Service 物件在 etcd，很少壞。壞的通常是執行體（規則沒更新、conntrack 滿）。先上 node 看 kernel。</p></div>
+      <div class="panel"><h3>kubectl 全綠，流量不通</h3><p>你檢查的全是宣告。換到執行體那一欄，換工具。</p></div>
+    </div>
+  </section>
+
+  <section id="l7">
+    <h2>Layer 7 · 面試<span class="tag">interview</span></h2>
+    <blockquote>「A team applied a NetworkPolicy to isolate their database. <code>kubectl get networkpolicy</code> shows it, there were no errors, but pods in other namespaces can still connect. What's going on?」</blockquote>
+    <details><summary>L4 回答</summary><div><p>「可能 policy 寫錯了，selector 沒選到 Pod，檢查一下 YAML。」</p><p class="small">可能性之一，但跳過了最常見、也最危險的那個原因。</p></div></details>
+    <details><summary>L6 回答</summary><div>
+      <p>「<code>kubectl get</code> 證明的只是宣告存在 etcd。API Server 只驗 schema，不驗有沒有人執行它。真正擋封包的是 CNI 的 policy agent，把物件翻譯成 node 上的 filter 規則或 eBPF 程式。如果 CNI 不支援或沒開 policy（例如 EKS 的 VPC CNI 沒開 enableNetworkPolicy），物件永遠只是資料，而且不會有任何錯誤。」</p>
+      <p>「驗證要看執行體：上 node 看有沒有對應的規則，或直接從別的 namespace 打一次。排除這個之後，才查 selector 是否選到 Pod、policyTypes 有沒有寫 Ingress。」</p>
+      <p>「這比 Ingress 沒有 controller 危險。Ingress 沒引擎，使用者馬上抱怨；NetworkPolicy 沒引擎是安全假象，沒人會叫，直到被入侵。所以平台要有一個自動測試，持續驗證 default-deny 真的在擋。」</p>
+      <p class="small">L6 多了：宣告 vs 執行體的判準、怎麼驗證執行體、靜默失效比大聲失效危險、持續驗證的機制。</p>
+    </div></details>
+  </section>
+
+  <section id="trail">
+    <h2>我的錯題軌跡<span class="tag">this topic</span></h2>
+    <div class="trail">
+      <div class="fix"><b>s24 · 正樣本</b>「Calico 上 apply 完的 NetworkPolicy，關掉 API Server 還擋得住嗎」無提示自答「可以，因為直接修改 kernel」。這張卡從這裡誕生。</div>
+      <div class="wrong"><b>我錯在這 · s24 收工</b>回想時答「不知道耶」。</div>
+      <div class="fix">修正：s25 隔天無提示自產判準句，推翻「當堂過不算過」的預期。</div>
+      <div class="wrong"><b>我錯在這 · s25</b>首答用兩套詞（「kernel」和「可以」），答案有兩種相反讀法；cgroup memory limit 放錯欄。</div>
+      <div class="fix">修正：兩步版。先問是宣告還是執行體。<code>resources.limits</code> 是宣告，<code>memory.max</code> 是執行體，名字不同但是同一件事的兩個分身。</div>
+      <div class="wrong"><b>我錯在這 · 09-04</b>跨 ns RoleBinding 題，理由給成 NetworkPolicy。</div>
+      <div class="fix">修正：用這張卡拆：NetworkPolicy 執行體在 kernel，RBAC 沒有執行體、只活在 API Server。兩個軸。</div>
+    </div>
+  </section>
+</main>
+
+</body></html>

@@ -1,0 +1,260 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"></head><body>
+<title>Reconcile 迴圈</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC:wght@400;700&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: one notebook column on graph paper; figures on taped cards, scenarios as 2x2 comic panels */
+:root {
+  --paper: #F6F8FA;
+  --grid: rgba(90,130,170,.16);
+  --ink: #23313E;
+  --ink-soft: #55677A;
+  --card: #FFFFFF;
+  --tape: rgba(240,214,140,.75);
+  --who: #FFE98A;
+  --see: #BDEEF6;
+  --may: #F9CDE0;
+  --wrong: #D2453A;
+  --ok: #2F8F5B;
+  --line: #9DB0C2;
+  --font-hand: "LXGW WenKai TC", "Noto Sans TC", "PingFang TC", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #1A2320; --grid: rgba(200,230,210,.08); --ink: #E6EDE8; --ink-soft: #A9BAB1;
+    --card: #24302C; --tape: rgba(200,180,110,.45); --who: #8A7A2A; --see: #2B6A74; --may: #7A3F57;
+    --wrong: #FF8A7E; --ok: #7FD3A1; --line: #5E7268; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #1A2320; --grid: rgba(200,230,210,.08); --ink: #E6EDE8; --ink-soft: #A9BAB1;
+  --card: #24302C; --tape: rgba(200,180,110,.45); --who: #8A7A2A; --see: #2B6A74; --may: #7A3F57;
+  --wrong: #FF8A7E; --ok: #7FD3A1; --line: #5E7268; color-scheme: dark;
+}
+body {
+  background-color: var(--paper);
+  background-image: linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 22px 22px;
+  color: var(--ink);
+  font-family: var(--font-hand);
+  font-size: 17px;
+  line-height: 1.75;
+}
+.page { max-width: 760px; margin: 0 auto; padding-inline: 18px; padding-block: 32px 64px; display: grid; gap: 34px; }
+h1, h2 { text-wrap: balance; line-height: 1.3; margin: 0; }
+h1 { font-size: 2.1rem; }
+h2 { font-size: 1.45rem; display: flex; align-items: baseline; gap: 10px; }
+h2 .tag { font-family: var(--font-mono); font-size: .72rem; letter-spacing: .08em; color: var(--ink-soft); text-transform: uppercase; }
+p { margin: 0; }
+section { display: grid; gap: 14px; min-width: 0; }
+.sub { color: var(--ink-soft); font-size: .95rem; }
+mark { background: linear-gradient(transparent 52%, var(--who) 52%); color: inherit; padding: 0 2px; }
+mark.see { background: linear-gradient(transparent 52%, var(--see) 52%); }
+mark.may { background: linear-gradient(transparent 52%, var(--may) 52%); }
+code { font-family: var(--font-mono); font-size: .86em; background: color-mix(in srgb, var(--line) 22%, transparent); padding: 1px 5px; border-radius: 3px; }
+.card { position: relative; background: var(--card); padding: 22px 18px 16px; box-shadow: 0 1px 3px rgba(0,0,0,.12); min-width: 0; }
+.card::before { content: ""; position: absolute; top: -9px; left: 50%; width: 92px; height: 20px; transform: translateX(-50%) rotate(-2deg); background: var(--tape); }
+.scroll { overflow-x: auto; }
+svg text { font-family: var(--font-mono); fill: var(--ink); }
+svg .hand { font-family: var(--font-hand); }
+.rule { border-left: 4px solid var(--ok); padding: 6px 12px; font-size: 1.08rem; }
+.wrong { border-left: 4px solid var(--wrong); padding: 4px 12px; display: grid; gap: 2px; }
+.wrong b { color: var(--wrong); font-size: .85rem; letter-spacing: .05em; }
+.panels { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 14px; }
+.panel { border: 2px solid var(--ink); background: var(--card); padding: 10px; display: grid; gap: 6px; min-width: 0; }
+.panel h3 { margin: 0; font-size: 1rem; font-family: var(--font-mono); }
+.panel p { font-size: .92rem; }
+@media (max-width: 520px) { .panels { grid-template-columns: 1fr; } }
+table { border-collapse: collapse; width: 100%; font-size: .95rem; }
+th, td { border-bottom: 1px dashed var(--line); padding: 8px 6px; text-align: left; vertical-align: top; }
+th { font-family: var(--font-mono); font-size: .78rem; letter-spacing: .05em; color: var(--ink-soft); font-weight: 600; }
+ol { margin: 0; padding-left: 1.3em; display: grid; gap: 6px; }
+blockquote { margin: 0; padding: 12px 16px; background: var(--card); border: 2px dashed var(--line); }
+.en { font-family: var(--font-mono); font-size: .9rem; color: var(--ink-soft); }
+details summary{cursor:pointer}
+</style>
+<style>
+/* chapter-note additions on top of the notebook base */
+svg.fig { display: block; min-width: 640px; width: 100%; height: auto; }
+.lvl { font-family: var(--font-mono); font-size: .74rem; padding: 1px 7px; border: 1.5px solid var(--ink); border-radius: 10px; white-space: nowrap; }
+.lvl.high { background: color-mix(in srgb, var(--ok) 28%, transparent); }
+.lvl.med { background: var(--who); }
+.lvl.low { background: var(--may); }
+.lvl.todo { border-style: dashed; color: var(--ink-soft); }
+.meta { display: flex; flex-wrap: wrap; gap: 8px 16px; font-family: var(--font-mono); font-size: .8rem; color: var(--ink-soft); }
+.toc { display: flex; flex-wrap: wrap; gap: 6px 14px; font-family: var(--font-mono); font-size: .82rem; }
+.toc a { color: var(--ink); }
+.trail { display: grid; gap: 12px; }
+.fix { border-left: 4px solid var(--ok); padding: 4px 12px; }
+.two { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 14px; }
+@media (max-width: 560px) { .two { grid-template-columns: 1fr; } }
+details { background: var(--card); border: 2px dashed var(--line); padding: 10px 14px; }
+details[open] { border-style: solid; }
+details > div { display: grid; gap: 8px; margin-top: 10px; }
+.small { font-size: .9rem; }
+a { color: inherit; text-underline-offset: 3px; }
+pre { margin: 0; font-family: var(--font-mono); font-size: .82rem; line-height: 1.5; background: var(--card); border: 1px solid var(--line); padding: 10px 12px; overflow-x: auto; }
+</style>
+<main class="page">
+  <header style="display:grid;gap:10px">
+    <p class="sub">k8s 課程 · topic 深入 · P0 · <a href="https://claude.ai/artifact/BsrozK5kwbKAJrtzK9MukK">← P0 章節筆記</a></p>
+    <h1>Reconcile 迴圈</h1>
+    <p>k8s 裡幾乎每個元件都是同一個迴圈：量現在、比目標、補差距。這一頁把這個迴圈拆到控制理論、程式碼結構和它的時間差，再看它什麼時候會害你。</p>
+    <div class="meta"><span>P0 C-0 / C-1 · gate 2026-06-22</span><span>你的比喻：恆溫器（s2）</span></div>
+    <nav class="toc"><a href="#l0">L0</a><a href="#l1">L1</a><a href="#l2">L2</a><a href="#l3">L3</a><a href="#l4">L4</a><a href="#l5">L5</a><a href="#l6">L6</a><a href="#l7">L7</a><a href="#trail">錯題</a></nav>
+  </header>
+
+  <section id="l0">
+    <h2>Layer 0 · 一張圖<span class="tag">analogy</span></h2>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 720 180" role="img" aria-label="Cruise control: driver sets 100 km/h, the controller reads 92, presses the throttle; it does not remember the hill, only the current gap">
+        <rect x="20" y="40" width="160" height="70" fill="var(--who)" stroke="var(--ink)" stroke-width="2"/><text x="100" y="68" text-anchor="middle" font-size="13" class="hand">定速 100</text><text x="100" y="92" text-anchor="middle" font-size="10">desired</text>
+        <rect x="280" y="40" width="160" height="70" fill="var(--may)" stroke="var(--ink)" stroke-width="2"/><text x="360" y="68" text-anchor="middle" font-size="13" class="hand">現在 92</text><text x="360" y="92" text-anchor="middle" font-size="10">actual</text>
+        <rect x="540" y="40" width="160" height="70" fill="var(--see)" stroke="var(--ink)" stroke-width="2"/><text x="620" y="68" text-anchor="middle" font-size="13" class="hand">踩油門 +8</text><text x="620" y="92" text-anchor="middle" font-size="10">act on diff</text>
+        <text x="360" y="150" text-anchor="middle" font-size="13" class="hand">它不記得「剛剛是上坡」，只看現在差多少。上坡、逆風、載重，處理方法都一樣。</text>
+      </svg>
+    </div>
+  </section>
+
+  <section id="l1">
+    <h2>Layer 1 · 第一性原理<span class="tag">control theory</span></h2>
+    <p><b>限制：你無法預測所有會讓系統偏離的事件。</b>node 掛、Pod 被 OOM、有人手動刪物件、網路分區。列舉事件寫處理器永遠寫不完。控制理論的解法是不處理「事件」，只處理「誤差」：error = desired − actual。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 740 200" role="img" aria-label="Closed loop: setpoint minus measurement gives error, controller acts on the plant, disturbances push the plant, sensor measures again">
+        <defs><marker id="rc1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="var(--ink)"/></marker></defs>
+        <rect x="10" y="60" width="110" height="50" fill="var(--who)" stroke="var(--ink)" stroke-width="2"/><text x="65" y="82" text-anchor="middle" font-size="11">setpoint</text><text x="65" y="98" text-anchor="middle" font-size="10">spec.replicas=3</text>
+        <circle cx="170" cy="85" r="16" fill="var(--card)" stroke="var(--ink)" stroke-width="2"/><text x="170" y="90" text-anchor="middle" font-size="12">−</text>
+        <rect x="230" y="60" width="130" height="50" fill="var(--may)" stroke="var(--ink)" stroke-width="2"/><text x="295" y="82" text-anchor="middle" font-size="11">controller</text><text x="295" y="98" text-anchor="middle" font-size="10">error=1 → create 1</text>
+        <rect x="420" y="60" width="130" height="50" fill="var(--see)" stroke="var(--ink)" stroke-width="2"/><text x="485" y="82" text-anchor="middle" font-size="11">plant</text><text x="485" y="98" text-anchor="middle" font-size="10">叢集裡的 Pod</text>
+        <rect x="600" y="60" width="130" height="50" fill="var(--card)" stroke="var(--ink)"/><text x="665" y="82" text-anchor="middle" font-size="11">sensor</text><text x="665" y="98" text-anchor="middle" font-size="10">watch / status</text>
+        <g stroke="var(--ink)" stroke-width="2"><line x1="120" y1="85" x2="152" y2="85" marker-end="url(#rc1)"/><line x1="186" y1="85" x2="228" y2="85" marker-end="url(#rc1)"/><line x1="360" y1="85" x2="418" y2="85" marker-end="url(#rc1)"/><line x1="550" y1="85" x2="598" y2="85" marker-end="url(#rc1)"/></g>
+        <path d="M665 110 C665 170, 170 170, 170 103" fill="none" stroke="var(--ink)" stroke-width="2" marker-end="url(#rc1)"/><text x="420" y="165" font-size="10">actual=2</text>
+        <text x="460" y="35" font-size="11" fill="var(--wrong)">干擾：OOM、node 掛、手動刪</text><line x1="485" y1="40" x2="485" y2="58" stroke="var(--wrong)" marker-end="url(#rc1)"/>
+      </svg>
+    </div>
+    <p>拿掉它：你要為每一種干擾寫一個 handler，漏一種就留下一個永遠不會修好的狀態。Level-triggered 讓「沒想到的事件」也自動被處理，因為它只看結果。</p>
+  </section>
+
+  <section id="l2">
+    <h2>Layer 2 · 機制<span class="tag">edge vs level, in code</span></h2>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 740 260" role="img" aria-label="Timeline: controller down from t1 to t2 while three pods die. Edge-triggered sees no events after restart and stays at 0 of 3 missing. Level-triggered lists current state at restart, sees 0 of 3, creates 3">
+        <line x1="40" y1="60" x2="700" y2="60" stroke="var(--ink)"/><text x="40" y="40" font-size="11">事件時間軸</text>
+        <rect x="200" y="50" width="260" height="20" fill="var(--wrong)" opacity=".2"/><text x="330" y="45" text-anchor="middle" font-size="10" fill="var(--wrong)">controller 當機 10 分鐘</text>
+        <g fill="var(--wrong)"><circle cx="250" cy="60" r="6"/><circle cx="320" cy="60" r="6"/><circle cx="400" cy="60" r="6"/></g><text x="330" y="88" text-anchor="middle" font-size="10">3 個 Pod 死掉（事件發出時沒人聽）</text>
+        <rect x="40" y="120" width="320" height="110" fill="var(--card)" stroke="var(--wrong)" stroke-width="2"/>
+        <text x="50" y="142" font-size="12">edge-triggered</text>
+        <text x="50" y="164" font-size="10">on PodDeleted(e): create replacement</text>
+        <text x="50" y="186" font-size="10" fill="var(--wrong)">重啟後：沒有新事件 → 什麼都不做</text>
+        <text x="50" y="206" font-size="10" fill="var(--wrong)">叢集停在 0/3，直到下次有人碰它</text>
+        <rect x="380" y="120" width="320" height="110" fill="var(--card)" stroke="var(--ok)" stroke-width="2"/>
+        <text x="390" y="142" font-size="12">level-triggered（k8s）</text>
+        <text x="390" y="164" font-size="10">reconcile(key): want=3, have=len(list())</text>
+        <text x="390" y="186" font-size="10" fill="var(--ok)">重啟後：LIST 全部 → have=0 → 建 3 個</text>
+        <text x="390" y="206" font-size="10" fill="var(--ok)">不需要知道是哪 3 個、何時死的</text>
+      </svg>
+    </div>
+    <p>k8s 其實是混合式：<b>用 watch 事件當「叫醒鈴」，用 level 邏輯做事。</b>事件只告訴 controller「這個 key 可能需要看一下」，reconcile 函式本身每次都重新讀現狀。外加 informer 的週期性 resync，保證就算事件全漏，也會定期再比一次。</p>
+    <div class="scroll"><table>
+      <tr><th>好的 reconcile 函式要滿足</th><th>為什麼</th><th>違反時的症狀</th></tr>
+      <tr><td>idempotent：跑兩次結果一樣</td><td>同一個 key 可能被重排多次</td><td>重複建出資源（兩個 LB、兩顆 EBS）</td></tr>
+      <tr><td>只看現狀，不看事件內容</td><td>事件會被合併、會漏</td><td>重啟後狀態卡住</td></tr>
+      <tr><td>失敗就 return error，交給 workqueue 退避</td><td>不要在函式裡 sleep 重試</td><td>worker 被卡住，其他 key 排不到</td></tr>
+      <tr><td>把觀察到的結果寫回 status</td><td>讓別人（和你自己）知道進度</td><td><code>kubectl get</code> 看不出卡在哪</td></tr>
+    </table></div>
+    <p class="small">真實數字：workqueue 預設 rate limiter 對失敗的 key 指數退避，從 5ms 起倍增到上限約 1000s，另有整體 token bucket（10 qps、burst 100）。ReplicaSet 這類內建 controller 用 <code>--concurrent-replicaset-syncs</code>（預設 5）控制同時處理幾個 key。</p>
+  </section>
+
+  <section id="l3">
+    <h2>Layer 3 · 取捨<span class="tag">why this design</span></h2>
+    <div class="scroll"><table>
+      <tr><th>選擇</th><th>贏在</th><th>代價</th></tr>
+      <tr><td>level-triggered</td><td>自癒、能處理沒想到的事件、重啟安全</td><td>要定期全量比對（CPU、API 流量）；只能收斂，不能保證「多快」</td></tr>
+      <tr><td>每種物件一個 controller</td><td>小、可獨立替換、任何人都能寫（CRD）</td><td>controller 之間可能互相打架（兩個 controller 改同一個欄位）</td></tr>
+      <tr><td>宣告式 API</td><td>diff 可審查、可放進 Git</td><td>「為什麼還沒好」要看 status 和 events，不像命令式一行就知道成敗</td></tr>
+      <tr><td>最終一致</td><td>部分故障下仍能前進</td><td>中間狀態可見：rollout 途中新舊版本同時存在</td></tr>
+    </table></div>
+    <p class="rule">兩個 controller 打架的典型：HPA 改 <code>replicas</code>，GitOps 工具又依 Git 改回去，兩邊每幾分鐘互蓋一次。解法是讓一個欄位只有一個 owner（Server-Side Apply 的 field manager 就是在記錄這件事）。</p>
+  </section>
+
+  <section id="l4">
+    <h2>Layer 4 · AWS 怎麼做<span class="tag">reconcile against AWS</span></h2>
+    <p>因為 Layer 2 的模式可以套在任何外部系統上，AWS 在 EKS 上的元件幾乎都是「watch k8s 物件 → reconcile AWS 資源」的 controller。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 740 210" role="img" aria-label="Controllers that reconcile Kubernetes objects into AWS resources: Load Balancer Controller turns Ingress into ALB, EBS CSI turns PVC into EBS volumes, Karpenter turns pending pods into EC2, ACK turns custom resources into any AWS resource">
+        <g font-size="11">
+          <rect x="10" y="20" width="200" height="40" fill="var(--card)" stroke="var(--ink)"/><text x="20" y="45">Ingress / Service</text>
+          <rect x="10" y="70" width="200" height="40" fill="var(--card)" stroke="var(--ink)"/><text x="20" y="95">PVC</text>
+          <rect x="10" y="120" width="200" height="40" fill="var(--card)" stroke="var(--ink)"/><text x="20" y="145">Pending Pod</text>
+          <rect x="10" y="170" width="200" height="30" fill="var(--card)" stroke="var(--ink)"/><text x="20" y="190">Bucket / DBInstance CR</text>
+          <rect x="260" y="20" width="220" height="40" fill="var(--may)" stroke="var(--ink)"/><text x="270" y="45">AWS Load Balancer Controller</text>
+          <rect x="260" y="70" width="220" height="40" fill="var(--may)" stroke="var(--ink)"/><text x="270" y="95">EBS CSI controller</text>
+          <rect x="260" y="120" width="220" height="40" fill="var(--may)" stroke="var(--ink)"/><text x="270" y="145">Karpenter</text>
+          <rect x="260" y="170" width="220" height="30" fill="var(--may)" stroke="var(--ink)"/><text x="270" y="190">ACK controllers</text>
+          <rect x="530" y="20" width="200" height="40" fill="var(--who)" stroke="var(--ink)"/><text x="540" y="45">ALB / NLB</text>
+          <rect x="530" y="70" width="200" height="40" fill="var(--who)" stroke="var(--ink)"/><text x="540" y="95">EBS volume</text>
+          <rect x="530" y="120" width="200" height="40" fill="var(--who)" stroke="var(--ink)"/><text x="540" y="145">EC2 instance</text>
+          <rect x="530" y="170" width="200" height="30" fill="var(--who)" stroke="var(--ink)"/><text x="540" y="190">S3 / RDS</text>
+        </g>
+      </svg>
+    </div>
+    <div class="scroll"><table>
+      <tr><th>情境</th><th>常見陷阱</th></tr>
+      <tr><td>有人在 AWS console 手動改了 ALB</td><td>LB Controller 下次 reconcile 把它改回來。手動改的人以為「AWS 壞了」</td></tr>
+      <tr><td>controller 的 IAM 權限不夠</td><td>reconcile 一直失敗、指數退避，物件 status 停住；只有 controller log 和 events 看得到</td></tr>
+      <tr><td>刪 Ingress 前先刪了 controller</td><td>finalizer 沒人處理，Ingress 卡在 Terminating；ALB 變孤兒繼續收費</td></tr>
+      <tr><td>AWS API 被 throttle</td><td>大量物件同時 reconcile，AWS 回 <code>Throttling</code>；controller 退避後整體變慢</td></tr>
+    </table></div>
+  </section>
+
+  <section id="l5">
+    <h2>Layer 5 · 規模化<span class="tag">evolution ladder</span></h2>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 740 200" role="img" aria-label="Ladder: shell scripts and cron; built-in controllers; your own operators reconciling AWS and app state; GitOps reconciling the whole platform from Git">
+        <g font-size="11">
+          <rect x="10" y="150" width="170" height="44" fill="var(--card)" stroke="var(--ink)" stroke-width="2"/><text x="20" y="170">① cron + 腳本</text><text x="20" y="186" class="hand">跑一次就忘</text>
+          <rect x="195" y="110" width="170" height="84" fill="var(--see)" stroke="var(--ink)" stroke-width="2"/><text x="205" y="130">② 內建 controller</text><text x="205" y="148" class="hand">Deployment、Job</text>
+          <rect x="380" y="70" width="170" height="124" fill="var(--who)" stroke="var(--ink)" stroke-width="2"/><text x="390" y="90">③ 自己的 operator</text><text x="390" y="108" class="hand">DB、憑證、DNS</text><text x="390" y="126" class="hand">都變成 CR</text>
+          <rect x="565" y="20" width="170" height="174" fill="var(--may)" stroke="var(--ink)" stroke-width="2"/><text x="575" y="40">④ GitOps</text><text x="575" y="58" class="hand">整個平台由 Git</text><text x="575" y="76" class="hand">reconcile</text><text x="575" y="94" class="hand">（P5）</text>
+        </g>
+      </svg>
+    </div>
+    <p class="small">規模變大時的新問題：controller 數量 × 物件數量 × resync 頻率 = API Server 的讀取負載。這就是為什麼 controller 要讀 informer cache，而不是每次都 GET。</p>
+  </section>
+
+  <section id="l6">
+    <h2>Layer 6 · 故障與 on-call<span class="tag">how it breaks</span></h2>
+    <div class="panels">
+      <div class="panel"><h3>永遠收斂不了</h3><p>Deployment 卡在 2/3。reconcile 每次都嘗試，但每次都被擋（quota、admission、image）。看 RS events 的 FailedCreate，不是看 Deployment。</p></div>
+      <div class="panel"><h3>兩個 controller 打架</h3><p>replicas 在 3 和 10 之間來回跳。<code>kubectl get deploy -o yaml --show-managed-fields</code> 看誰在改哪個欄位。</p></div>
+      <div class="panel"><h3>修好了又被改回去</h3><p>你手動 <code>kubectl edit</code>，幾分鐘後被 GitOps 改回。這是設計，不是 bug。改 Git。</p></div>
+      <div class="panel"><h3>controller 自己掛了</h3><p>什麼都不會立刻壞，只是「不再自癒」。Pod 死了沒人補。看 controller-manager 的 leader lease 有沒有在更新。</p></div>
+    </div>
+  </section>
+
+  <section id="l7">
+    <h2>Layer 7 · 面試<span class="tag">interview</span></h2>
+    <blockquote>「Kubernetes controllers are often described as level-triggered. What does that mean, and what problem does it solve that an event-driven design would not?」</blockquote>
+    <details><summary>L4 回答</summary><div><p>「Level-triggered 就是看狀態不看事件。controller 會一直比較 desired 和 actual 然後修正。」</p><p class="small">定義對，沒講它解決了什麼、代價是什麼。</p></div></details>
+    <details><summary>L6 回答</summary><div>
+      <p>「Event-driven 的問題是事件只發一次。controller 重啟、網路斷、事件被合併，那個事件就沒了，系統停在錯的狀態。分散式系統一定會遇到 partial failure，所以這不是邊角案例。」</p>
+      <p>「Level-triggered 的 reconcile 不看事件內容，只看現在：want 3、have 1，補 2。所以 controller 重啟後 LIST 一次就能接著做，不需要事件歷史。k8s 實作上是混合的：watch 事件當叫醒鈴，加上定期 resync 當保險，真正做事的函式是 level 邏輯。」</p>
+      <p>「代價：要 idempotent，因為同一個 key 會被處理很多次；而且只保證最終收斂，不保證多快。兩個 controller 管同一個欄位會互相打架，所以欄位要有唯一 owner，Server-Side Apply 的 managed fields 就是在記這件事。」</p>
+      <p class="small">L6 多了：為什麼 partial failure 讓事件不可靠、k8s 的混合實作、idempotency 要求、controller 打架這個真實故障。</p>
+    </div></details>
+  </section>
+
+  <section id="trail">
+    <h2>我的錯題軌跡<span class="tag">this topic</span></h2>
+    <div class="trail">
+      <div class="wrong"><b>我錯在這 · s1</b>用「下指令」框架描述 k8s。</div>
+      <div class="fix">修正：s2 自己想出恆溫器比喻。本頁 L1 的閉迴路圖就是恆溫器的正式版本。</div>
+      <div class="wrong"><b>我錯在這 · 08-06</b>說 Pod「會重啟或被調節」，講不出誰在什麼條件動手。</div>
+      <div class="fix">修正：ReplicaSet controller 的 reconcile 只做一件事：have &lt; want 就建新的。舊 Pod 不會被「修」，只會被換掉。</div>
+    </div>
+  </section>
+</main>
+
+</body></html>
