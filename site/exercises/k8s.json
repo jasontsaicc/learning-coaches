@@ -1,0 +1,317 @@
+[
+  {
+    "id": "k8s-probes",
+    "coachId": "k8s",
+    "phaseId": "k8s:P1",
+    "title": "Pod 探針",
+    "topicRefs": [
+      {
+        "parent": "k8s:P1",
+        "label": "P1 probe(liveness vs readiness)"
+      }
+    ],
+    "objectives": [
+      {
+        "id": "o1",
+        "label": "分清就緒與重啟的責任"
+      },
+      {
+        "id": "o2",
+        "label": "預測啟動和依賴故障的影響"
+      }
+    ],
+    "sources": [
+      "portfolio/k8s/notes/p1-pod-probe.md"
+    ],
+    "questions": [
+      {
+        "id": "ready",
+        "revision": 1,
+        "type": "choice",
+        "objectiveId": "o1",
+        "prompt": "Pod 只有 readiness probe 失敗達門檻，行程仍正常，Service 未開 publishNotReadyAddresses。最合理的預期？",
+        "hint": "先追蹤每一步的狀態與責任，再看結果。",
+        "explanation": "readiness 失敗改變就緒狀態，不自行重啟行程；更新流量目標需要傳播時間。",
+        "source": {
+          "path": "portfolio/k8s/notes/p1-pod-probe.md",
+          "section": "Pod 探針"
+        },
+        "multiple": false,
+        "options": [
+          {
+            "id": "a",
+            "text": "容器立即重啟",
+            "feedback": "readiness 不負責重啟。"
+          },
+          {
+            "id": "b",
+            "text": "Pod 變成未就緒，停止成為正常 Service 流量的就緒目標",
+            "feedback": "readiness 控制是否適合接流量。"
+          },
+          {
+            "id": "c",
+            "text": "Pod 物件立即刪除",
+            "feedback": "readiness 不會刪除 Pod。"
+          }
+        ],
+        "answer": [
+          "b"
+        ]
+      },
+      {
+        "id": "roles",
+        "revision": 1,
+        "type": "match",
+        "objectiveId": "o1",
+        "prompt": "把目的配對到適合的探針。",
+        "hint": "先追蹤每一步的狀態與責任，再看結果。",
+        "explanation": "依故障後應採取的動作選探針，而不是依健康檢查 URL 名稱。",
+        "source": {
+          "path": "portfolio/k8s/notes/p1-pod-probe.md",
+          "section": "Pod 探針"
+        },
+        "items": [
+          {
+            "id": "i0",
+            "text": "行程卡死，重啟可以恢復",
+            "feedback": "liveness 可觸發重啟。"
+          },
+          {
+            "id": "i1",
+            "text": "暫時無法服務，重啟沒有幫助",
+            "feedback": "readiness 可先退出就緒流量。"
+          },
+          {
+            "id": "i2",
+            "text": "初始化很慢，需要等待啟動成功",
+            "feedback": "startup 成功前抑制其他探針。"
+          }
+        ],
+        "targets": [
+          {
+            "id": "t0",
+            "text": "readiness"
+          },
+          {
+            "id": "t1",
+            "text": "startup"
+          },
+          {
+            "id": "t2",
+            "text": "liveness"
+          }
+        ],
+        "answer": {
+          "i0": "t2",
+          "i1": "t0",
+          "i2": "t1"
+        }
+      },
+      {
+        "id": "restarts",
+        "revision": 1,
+        "type": "fill",
+        "objectiveId": "o1",
+        "prompt": "只有 readiness 從成功變成失敗，沒有其他故障或控制器操作。由這次 readiness 失敗直接造成的容器重啟次數是多少？",
+        "hint": "先追蹤每一步的狀態與責任，再看結果。",
+        "explanation": "readiness 不直接重啟容器。",
+        "source": {
+          "path": "portfolio/k8s/notes/p1-pod-probe.md",
+          "section": "Pod 探針"
+        },
+        "answer": {
+          "kind": "number",
+          "value": 0,
+          "tolerance": 0,
+          "unit": ""
+        }
+      },
+      {
+        "id": "startup",
+        "revision": 1,
+        "type": "order",
+        "objectiveId": "o2",
+        "prompt": "已配置 startup、readiness 與 liveness。排序這條成功啟動的事件線；最後一步表示 readiness 的後續結果。",
+        "hint": "先追蹤每一步的狀態與責任，再看結果。",
+        "explanation": "startup 成功後其他探針才啟用；這是給定的 readiness 事件線，不暗示 readiness 和 liveness 有固定先後。",
+        "source": {
+          "path": "portfolio/k8s/notes/p1-pod-probe.md",
+          "section": "Pod 探針"
+        },
+        "items": [
+          {
+            "id": "s0",
+            "text": "容器開始執行"
+          },
+          {
+            "id": "s1",
+            "text": "startup probe 首次成功"
+          },
+          {
+            "id": "s2",
+            "text": "後續 readiness probe 成功"
+          },
+          {
+            "id": "s3",
+            "text": "Pod 的就緒狀態可供服務流量判斷"
+          }
+        ],
+        "answer": [
+          [
+            "s0",
+            "s1",
+            "s2",
+            "s3"
+          ]
+        ]
+      },
+      {
+        "id": "dependency",
+        "revision": 1,
+        "type": "choice",
+        "objectiveId": "o2",
+        "prompt": "DB 暫時變慢，應用行程正常。哪些判斷成立？",
+        "hint": "先追蹤每一步的狀態與責任，再看結果。",
+        "explanation": "檢查應對準可恢復的故障；是否暫停接流量還需考慮應用的降級能力。",
+        "source": {
+          "path": "portfolio/k8s/notes/p1-pod-probe.md",
+          "section": "Pod 探針"
+        },
+        "multiple": true,
+        "options": [
+          {
+            "id": "a",
+            "text": "把 DB 可達性綁在 liveness 可能引起無效重啟",
+            "feedback": "重啟應用不會修好 DB。"
+          },
+          {
+            "id": "b",
+            "text": "先問重啟是否能解決這個故障",
+            "feedback": "這決定 liveness 是否適合。"
+          },
+          {
+            "id": "c",
+            "text": "增加重啟頻率一定能修好 DB",
+            "feedback": "依賴故障不是靠重啟本機行程就能排除。"
+          }
+        ],
+        "answer": [
+          "a",
+          "b"
+        ]
+      },
+      {
+        "id": "still-starting",
+        "revision": 1,
+        "type": "choice",
+        "objectiveId": "o2",
+        "prompt": "startup probe 尚未成功且未達失敗門檻；liveness 與 readiness 是否已按正常週期判定？",
+        "hint": "先追蹤每一步的狀態與責任，再看結果。",
+        "explanation": "startup 用來保護初始化階段；門檻耗盡仍可能觸發重啟。",
+        "source": {
+          "path": "portfolio/k8s/notes/p1-pod-probe.md",
+          "section": "Pod 探針"
+        },
+        "multiple": false,
+        "options": [
+          {
+            "id": "a",
+            "text": "只有 liveness 已開始",
+            "feedback": "兩者都被 startup 抑制。"
+          },
+          {
+            "id": "b",
+            "text": "只有 readiness 已開始",
+            "feedback": "兩者都被 startup 抑制。"
+          },
+          {
+            "id": "c",
+            "text": "兩者都還未啟用",
+            "feedback": "要等 startup 成功。"
+          }
+        ],
+        "answer": [
+          "c"
+        ]
+      },
+      {
+        "id": "ready-recovered",
+        "revision": 1,
+        "type": "choice",
+        "objectiveId": "o1",
+        "prompt": "承接 readiness 失敗，但行程已自行恢復且探針再度成功。要由誰先重啟容器才能恢復 Ready？",
+        "hint": "先追蹤每一步的狀態與責任，再看結果。",
+        "explanation": "失敗原因若消失，readiness 可再成功；筆記中的特定 lab 需修檔案，不代表所有 readiness 故障都不會自癒。",
+        "source": {
+          "path": "portfolio/k8s/notes/p1-pod-probe.md",
+          "section": "Pod 探針"
+        },
+        "multiple": false,
+        "options": [
+          {
+            "id": "a",
+            "text": "不需要為 readiness 恢復而先重啟",
+            "feedback": "成功的 readiness 結果可使狀態恢復。"
+          },
+          {
+            "id": "b",
+            "text": "必須手動刪除 Pod",
+            "feedback": "這不是必要條件。"
+          },
+          {
+            "id": "c",
+            "text": "readiness 自己執行 restart",
+            "feedback": "readiness 沒有此職責。"
+          }
+        ],
+        "answer": [
+          "a"
+        ],
+        "variantOf": "ready"
+      },
+      {
+        "id": "local-deadlock",
+        "revision": 1,
+        "type": "choice",
+        "objectiveId": "o2",
+        "prompt": "條件改變：DB 正常，應用本地死鎖，已證實重啟能恢復。哪個探針應偵測這個故障？",
+        "hint": "先追蹤每一步的狀態與責任，再看結果。",
+        "explanation": "與 DB 變慢不同，本地死鎖可能適合 liveness 偵測。",
+        "source": {
+          "path": "portfolio/k8s/notes/p1-pod-probe.md",
+          "section": "Pod 探針"
+        },
+        "multiple": false,
+        "options": [
+          {
+            "id": "a",
+            "text": "只用 readiness，永遠不重啟",
+            "feedback": "只能隔離流量，不能恢復死鎖。"
+          },
+          {
+            "id": "b",
+            "text": "liveness",
+            "feedback": "此故障可由重啟修復。"
+          },
+          {
+            "id": "c",
+            "text": "永遠停用健康檢查",
+            "feedback": "會失去自動恢復機制。"
+          }
+        ],
+        "answer": [
+          "b"
+        ],
+        "variantOf": "dependency"
+      }
+    ],
+    "challenge": {
+      "prompt": "不看解答，畫出本章流程，再改變一個條件並解釋結果。",
+      "criteria": [
+        "逐步說明狀態如何改變",
+        "用實作或具體例子支持預測",
+        "交由教練檢查推理，網站不自動授予通過"
+      ]
+    }
+  }
+]

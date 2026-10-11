@@ -1,0 +1,302 @@
+[
+  {
+    "id": "ca-vpc-peering",
+    "coachId": "ca",
+    "phaseId": "ca:P1",
+    "title": "VPC Peering",
+    "topicRefs": [
+      {
+        "parent": "ca",
+        "label": "tgw-vs-peering"
+      }
+    ],
+    "objectives": [
+      {
+        "id": "o1",
+        "label": "判斷直接連線及雙向路由"
+      },
+      {
+        "id": "o2",
+        "label": "辨認非傳遞性與拓撲規模"
+      }
+    ],
+    "sources": [
+      "portfolio/ca/notes/vpc-peering.md"
+    ],
+    "questions": [
+      {
+        "id": "transit",
+        "revision": 1,
+        "type": "choice",
+        "objectiveId": "o2",
+        "prompt": "只有 A–B、B–C peering，沒有其他連線。A 能經 B 的 peering 自動到 C 嗎？",
+        "hint": "先追蹤每一步的狀態與責任，再看結果。",
+        "explanation": "兩條邊不等於一條 A–C 通道。",
+        "source": {
+          "path": "portfolio/ca/notes/vpc-peering.md",
+          "section": "VPC Peering"
+        },
+        "multiple": false,
+        "options": [
+          {
+            "id": "a",
+            "text": "能，只要 B 加路由",
+            "feedback": "peering 不提供這種傳遞路由。"
+          },
+          {
+            "id": "b",
+            "text": "不能，peering 不具傳遞性",
+            "feedback": "A–C 需要其他有效直接或中轉架構。"
+          },
+          {
+            "id": "c",
+            "text": "只要同 region 就能",
+            "feedback": "region 不會改變非傳遞性。"
+          }
+        ],
+        "answer": [
+          "b"
+        ]
+      },
+      {
+        "id": "active",
+        "revision": 1,
+        "type": "choice",
+        "objectiveId": "o1",
+        "prompt": "Peering 已 active，但 A 的連線仍失敗。哪些項目需要檢查？",
+        "hint": "先追蹤每一步的狀態與責任，再看結果。",
+        "explanation": "控制面 active 只是條件之一。",
+        "source": {
+          "path": "portfolio/ca/notes/vpc-peering.md",
+          "section": "VPC Peering"
+        },
+        "multiple": true,
+        "options": [
+          {
+            "id": "a",
+            "text": "A 去程與 B 回程所使用的 route table",
+            "feedback": "回應也需有效路由。"
+          },
+          {
+            "id": "b",
+            "text": "Security Group 與 NACL 是否允許需要的流量",
+            "feedback": "路由不取代安全規則。"
+          },
+          {
+            "id": "c",
+            "text": "active 保證所有應用一定可達",
+            "feedback": "還有路由、安全及應用條件。"
+          }
+        ],
+        "answer": [
+          "a",
+          "b"
+        ]
+      },
+      {
+        "id": "mesh",
+        "revision": 1,
+        "type": "fill",
+        "objectiveId": "o2",
+        "prompt": "4 個 VPC 彼此都要建立一條直接 peering。每對只算一次，需要幾條連線？",
+        "hint": "先追蹤每一步的狀態與責任，再看結果。",
+        "explanation": "4×3÷2=6；這是連線數，不是路由表項目總數。",
+        "source": {
+          "path": "portfolio/ca/notes/vpc-peering.md",
+          "section": "VPC Peering"
+        },
+        "answer": {
+          "kind": "number",
+          "value": 6,
+          "tolerance": 0,
+          "unit": ""
+        }
+      },
+      {
+        "id": "setup",
+        "revision": 1,
+        "type": "order",
+        "objectiveId": "o2",
+        "prompt": "排好此工作清單的依賴順序：路由步驟特別限定在 peering active 之後進行。",
+        "hint": "先追蹤每一步的狀態與責任，再看結果。",
+        "explanation": "每一步驗證不同層次；題目指定此部署順序，並非宣稱所有設定都只能依此操作。",
+        "source": {
+          "path": "portfolio/ca/notes/vpc-peering.md",
+          "section": "VPC Peering"
+        },
+        "items": [
+          {
+            "id": "s0",
+            "text": "確認位址不重疊與通訊需求"
+          },
+          {
+            "id": "s1",
+            "text": "建立並接受 peering"
+          },
+          {
+            "id": "s2",
+            "text": "補齊雙向路由與安全規則"
+          },
+          {
+            "id": "s3",
+            "text": "用指定來源及目的測試流量"
+          }
+        ],
+        "answer": [
+          [
+            "s0",
+            "s1",
+            "s2",
+            "s3"
+          ]
+        ]
+      },
+      {
+        "id": "layers",
+        "revision": 1,
+        "type": "match",
+        "objectiveId": "o1",
+        "prompt": "將觀察配對到首先要檢查的層次。",
+        "hint": "先追蹤每一步的狀態與責任，再看結果。",
+        "explanation": "先辨認失敗層次，避免只反覆改安全群組。",
+        "source": {
+          "path": "portfolio/ca/notes/vpc-peering.md",
+          "section": "VPC Peering"
+        },
+        "items": [
+          {
+            "id": "i0",
+            "text": "Peering 還在 pending-acceptance",
+            "feedback": "先檢查連線接受流程。"
+          },
+          {
+            "id": "i1",
+            "text": "回應的 subnet 沒有到來源的路由",
+            "feedback": "檢查回程路由表。"
+          },
+          {
+            "id": "i2",
+            "text": "SG 沒有允許目的 port",
+            "feedback": "檢查流量允許規則。"
+          }
+        ],
+        "targets": [
+          {
+            "id": "t0",
+            "text": "安全規則"
+          },
+          {
+            "id": "t1",
+            "text": "連線狀態"
+          },
+          {
+            "id": "t2",
+            "text": "路由"
+          }
+        ],
+        "answer": {
+          "i0": "t1",
+          "i1": "t2",
+          "i2": "t0"
+        }
+      },
+      {
+        "id": "overlap",
+        "revision": 1,
+        "type": "choice",
+        "objectiveId": "o2",
+        "prompt": "A 與 B 都使用相同 IPv4 CIDR 10.0.0.0/16。能直接建立這兩個範圍的 VPC peering 嗎？",
+        "hint": "先追蹤每一步的狀態與責任，再看結果。",
+        "explanation": "重疊 CIDR 是 peering 限制，不能靠放行安全規則解決。",
+        "source": {
+          "path": "portfolio/ca/notes/vpc-peering.md",
+          "section": "VPC Peering"
+        },
+        "multiple": false,
+        "options": [
+          {
+            "id": "a",
+            "text": "不能，位址範圍重疊",
+            "feedback": "需要重新檢視位址／架構。"
+          },
+          {
+            "id": "b",
+            "text": "能，port 不同就好",
+            "feedback": "port 不會解決 IP 位址範圍重疊。"
+          },
+          {
+            "id": "c",
+            "text": "能，改 SG 就好",
+            "feedback": "SG 不修改路由位址。"
+          }
+        ],
+        "answer": [
+          "a"
+        ]
+      },
+      {
+        "id": "direct",
+        "revision": 1,
+        "type": "choice",
+        "objectiveId": "o2",
+        "prompt": "在 A–B、B–C 之外新增 A–C peering，並完成 A–C 雙向路由和安全設定。這是否表示 B 開始提供傳遞路由？",
+        "hint": "先追蹤每一步的狀態與責任，再看結果。",
+        "explanation": "可達性來自新增的直接邊，不代表原有非傳遞性被改變。",
+        "source": {
+          "path": "portfolio/ca/notes/vpc-peering.md",
+          "section": "VPC Peering"
+        },
+        "multiple": false,
+        "options": [
+          {
+            "id": "a",
+            "text": "是，B 變中繼站",
+            "feedback": "新增的是 A–C 直接連線。"
+          },
+          {
+            "id": "b",
+            "text": "否，A–C 使用自己的直接 peering",
+            "feedback": "B 不參與這條路徑。"
+          },
+          {
+            "id": "c",
+            "text": "所有 peering 都自動消失",
+            "feedback": "建立直接連線不會刪掉其他連線。"
+          }
+        ],
+        "answer": [
+          "b"
+        ],
+        "variantOf": "transit"
+      },
+      {
+        "id": "mesh-added",
+        "revision": 1,
+        "type": "fill",
+        "objectiveId": "o2",
+        "prompt": "原有 4 個 VPC 已完整 mesh。新增第 5 個並與全部舊 VPC 直接 peering，需要新增幾條？",
+        "hint": "先追蹤每一步的狀態與責任，再看結果。",
+        "explanation": "只新增新 VPC 到 4 個舊 VPC 的邊，不必重建既有 6 條。",
+        "source": {
+          "path": "portfolio/ca/notes/vpc-peering.md",
+          "section": "VPC Peering"
+        },
+        "answer": {
+          "kind": "number",
+          "value": 4,
+          "tolerance": 0,
+          "unit": ""
+        },
+        "variantOf": "mesh"
+      }
+    ],
+    "challenge": {
+      "prompt": "不看解答，畫出本章流程，再改變一個條件並解釋結果。",
+      "criteria": [
+        "逐步說明狀態如何改變",
+        "用實作或具體例子支持預測",
+        "交由教練檢查推理，網站不自動授予通過"
+      ]
+    }
+  }
+]

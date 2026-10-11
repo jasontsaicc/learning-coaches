@@ -167,6 +167,82 @@ def slug(title):
     return re.sub(r"[^a-z0-9]+", "-", title.lower()).strip("-")
 
 
+def validate_chapters(chapters, nodes, allowed_files):
+    """Reject malformed banks before any generated files are replaced."""
+    import math
+    seen = set()
+    by_id = {n['id']: n for n in nodes}
+    def require(ok, message):
+        if not ok:
+            raise ValueError(f'exercises {context}: {message}')
+    def strings(value):
+        return isinstance(value, list) and bool(value) and all(isinstance(x, str) and x.strip() for x in value)
+    def entries(value):
+        return (isinstance(value, list) and bool(value) and all(isinstance(x, dict) and
+                isinstance(x.get('id'), str) and re.fullmatch(r'[a-zA-Z0-9_-]+', x['id']) for x in value)
+                and len({x['id'] for x in value}) == len(value))
+    context = 'bank'
+    require(isinstance(chapters, list), 'expected list')
+    for c in chapters:
+        context = str(c.get('id', '?')) if isinstance(c, dict) else '?'
+        require(isinstance(c, dict), 'chapter must be object')
+        require(isinstance(c.get('id'), str) and re.fullmatch(r'[a-z0-9-]+', c['id']) and c['id'] not in seen, 'unique chapter id required')
+        seen.add(c['id'])
+        require(by_id.get(c.get('coachId'), {}).get('kind') == 'coach', 'unknown coach')
+        require(by_id.get(c.get('phaseId'), {}).get('parent') == c['coachId'], 'unknown phase')
+        require(isinstance(c.get('title'), str) and c['title'].strip(), 'title required')
+        require(entries(c.get('objectives')) and all(isinstance(o.get('label'), str) and o['label'].strip() for o in c['objectives']), 'objectives required')
+        require(strings(c.get('sources')) and set(c['sources']) <= allowed_files, 'source not exported')
+        require(isinstance(c.get('topicRefs'), list), 'topicRefs required')
+        for ref in c['topicRefs']:
+            require(isinstance(ref, dict), 'topic reference must be object')
+            matches = [n for n in nodes if n.get('parent') == ref.get('parent') and n.get('label') == ref.get('label') and n.get('kind') in ('topic', 'problem')]
+            require(len(matches) == 1, 'topic reference missing or ambiguous')
+            ancestor = by_id.get(ref.get('parent'), {})
+            require(ancestor.get('id') == c['coachId'] or ancestor.get('parent') == c['coachId'], 'topic belongs to other coach')
+        challenge = c.get('challenge', {})
+        require(isinstance(challenge, dict) and isinstance(challenge.get('prompt'), str) and strings(challenge.get('criteria')), 'challenge required')
+        require(isinstance(c.get('questions'), list), 'questions must be list')
+        if not c['questions']:
+            continue
+        require(entries(c['questions']), 'unique question IDs required')
+        questions = {q['id']: q for q in c['questions']}
+        for q in c['questions']:
+            context = f"{c['id']}/{q['id']}"
+            require(type(q.get('revision')) is int and q['revision'] > 0, 'positive revision required')
+            require(q.get('objectiveId') in {o['id'] for o in c['objectives']}, 'unknown objective')
+            require(all(isinstance(q.get(k), str) and q[k].strip() for k in ('prompt', 'hint', 'explanation')), 'prompt/hint/explanation required')
+            source = q.get('source', {})
+            require(isinstance(source, dict) and source.get('path') in c['sources'] and isinstance(source.get('section'), str) and source['section'], 'invalid source')
+            if 'variantOf' in q:
+                original = questions.get(q['variantOf'], {})
+                require(original and 'variantOf' not in original and original['objectiveId'] == q['objectiveId'] and original['id'] != q['id'], 'invalid variant')
+            kind, answer = q.get('type'), q.get('answer')
+            if kind == 'choice':
+                require(entries(q.get('options')) and len(q['options']) >= 2, 'options required')
+                ids = {x['id'] for x in q['options']}
+                require(type(q.get('multiple')) is bool and strings(answer) and len(set(answer)) == len(answer) and set(answer) <= ids, 'invalid choices')
+                require(q['multiple'] or len(answer) == 1, 'single choice needs one answer')
+                require(all(isinstance(x.get('text'), str) and x['text'] and isinstance(x.get('feedback'), str) and x['feedback'] for x in q['options']), 'option text/feedback required')
+            elif kind == 'fill':
+                require(isinstance(answer, dict), 'fill answer required')
+                if answer.get('kind') == 'text':
+                    require(strings(answer.get('accepted')) and type(answer.get('caseSensitive')) is bool, 'accepted text required')
+                else:
+                    require(answer.get('kind') == 'number' and all(type(answer.get(k)) in (int, float) and math.isfinite(answer[k]) for k in ('value', 'tolerance')) and answer['tolerance'] >= 0 and isinstance(answer.get('unit'), str), 'finite numeric answer required')
+            elif kind in ('order', 'match'):
+                require(entries(q.get('items')) and all(isinstance(x.get('text'), str) and x['text'] for x in q['items']), 'items required')
+                ids = {x['id'] for x in q['items']}
+                if kind == 'order':
+                    require(isinstance(answer, list) and bool(answer) and all(strings(a) and len(a) == len(ids) and set(a) == ids for a in answer), 'invalid order')
+                else:
+                    require(entries(q.get('targets')) and all(isinstance(x.get('text'), str) and x['text'] for x in q['targets']), 'targets required')
+                    require(isinstance(answer, dict) and set(answer) == ids and all(isinstance(v, str) and v in {t['id'] for t in q['targets']} for v in answer.values()), 'invalid matching')
+                    require(all(isinstance(x.get('feedback'), str) and x['feedback'] for x in q['items']), 'match feedback required')
+            else:
+                require(False, 'unknown question type')
+
+
 def build():
     nodes = [{"id": "me", "label": "me", "kind": "root"}]
 
@@ -225,7 +301,7 @@ def build():
             key = f"{group.name}/{prob.name}"
             label = done[key][0] if key in done else prob.name
             add(f"lc:{key}", label, "problem", f"lc:{group.name}",
-                level="high" if key in done else None, files=files_in(prob))
+                level=None, practiced=key in done, files=files_in(prob))
     have = {re.match(r"#(\d+)", n["label"]).group(1) for n in nodes if re.match(r"#\d+", n["label"])}
     have |= {n["id"].rsplit("/", 1)[-1] for n in nodes if n["id"].startswith("lc:") and "/" in n["id"]}
     for num, title in LC_ROW_RE.findall((ROOT / "skills/leetcode-coach/references/curriculum.md").read_text()):
@@ -243,7 +319,11 @@ def build():
         m = re.search(r"<title>([^<]+)", (ROOT / f).read_text(errors="ignore"))
         if m:
             titles[f] = m.group(1).strip()
-    return {"nodes": nodes, "titles": titles}
+    chapters = []
+    for bank in sorted((ROOT / 'site/exercises').glob('*.json')):
+        chapters.extend(json.loads(bank.read_text()))
+    validate_chapters(chapters, nodes, {f for n in nodes for f in n.get('files', [])})
+    return {"nodes": nodes, "titles": titles, "chapters": chapters}
 
 
 def main():
@@ -260,7 +340,8 @@ def main():
         dst.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(ROOT / f, dst)
     (DIST / "data.json").write_text(json.dumps(data, ensure_ascii=False))
-    shutil.copy2(ROOT / "site" / "index.html", DIST / "index.html")
+    for name in ('index.html', 'styles.css', 'app.js', 'exercises.js', 'review.js', 'map.js'):
+        shutil.copy2(ROOT / 'site' / name, DIST / name)
     shutil.copytree(ROOT / "site" / "img", DIST / "img")
     print(f"wrote {DIST}")
 

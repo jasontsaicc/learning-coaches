@@ -95,3 +95,47 @@ assert split_focus("把 migration 練到能推理,前置:P1") == []
 assert slug("Remove Nth Node From End") == "remove-nth-node-from-end"
 
 print("site/test_build.py OK")
+
+# Question banks reject ambiguous or broken references before publication.
+from build import validate_chapters, build
+from copy import deepcopy
+fixture = [{"id":"demo", "coachId":"k8s", "phaseId":"k8s:P1", "title":"Demo",
+    "topicRefs":[{"parent":"k8s:P1","label":"Probe"}],
+    "objectives":[{"id":"mechanism","label":"Explain"}], "sources":["note.md"],
+    "challenge":{"prompt":"Try it", "criteria":["Show evidence"]},
+    "questions":[{"id":"q1","revision":1,"type":"choice","objectiveId":"mechanism",
+      "prompt":"Why?","hint":"Think","explanation":"Because","source":{"path":"note.md","section":"Probe"},
+      "multiple":False,"options":[{"id":"a","text":"A","feedback":"Yes"},{"id":"b","text":"B","feedback":"No"}],"answer":["a"]}]}]
+nodes = [{"id":"k8s","kind":"coach"},{"id":"k8s:P1","parent":"k8s","kind":"phase"},
+         {"id":"t1","parent":"k8s:P1","label":"Probe","kind":"topic"}]
+validate_chapters(fixture, nodes, {"note.md"})
+for mutate in [
+    lambda c: c.append(deepcopy(c[0])),
+    lambda c: c[0]['questions'][0].update(answer=['missing']),
+    lambda c: c[0]['questions'][0].update(revision=0),
+    lambda c: c[0]['questions'][0]['source'].update(path='../secret'),
+    lambda c: c[0]['topicRefs'][0].update(label='Missing'),
+    lambda c: c[0]['questions'][0].update(type='order',items=[{'id':'a','text':'A'},{'id':'b','text':'B'}],answer=[['a']]),
+    lambda c: c[0]['questions'][0].update(type='fill',answer={'kind':'number','value':1,'tolerance':-1,'unit':'s'}),
+]:
+    bad = deepcopy(fixture)
+    mutate(bad)
+    try:
+        validate_chapters(bad, nodes, {'note.md'})
+    except ValueError:
+        pass
+    else:
+        raise AssertionError(f'Accepted invalid bank: {bad}')
+data = build()
+assert all(n.get('level') is None for n in data['nodes'] if n.get('practiced'))
+assert any(n.get('practiced') for n in data['nodes'])
+print('chapter validation OK')
+
+banks = build()['chapters']
+assert {c['coachId'] for c in banks} == {'k8s','sd','leetcode','ca'}
+for c in banks:
+    primary = [q for q in c['questions'] if 'variantOf' not in q]
+    assert len(primary) == 6 and len(c['questions']) == 8
+    assert len({q['type'] for q in primary}) >= 3
+    assert len({q['objectiveId'] for q in primary}) >= 2
+print('four chapter banks OK')

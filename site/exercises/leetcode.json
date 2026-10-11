@@ -1,0 +1,289 @@
+[
+  {
+    "id": "lc-linked-list-cycle",
+    "coachId": "leetcode",
+    "phaseId": "lc:linked-list",
+    "title": "Linked List Cycle",
+    "topicRefs": [
+      {
+        "parent": "lc:linked-list",
+        "label": "#141 Linked List Cycle"
+      }
+    ],
+    "objectives": [
+      {
+        "id": "o1",
+        "label": "追蹤指標身份與終止條件"
+      },
+      {
+        "id": "o2",
+        "label": "理解快慢指標的空間與相遇機制"
+      }
+    ],
+    "sources": [
+      "workspaces/leetcode/linked-list/linked-list-cycle/notes.md"
+    ],
+    "questions": [
+      {
+        "id": "identity",
+        "revision": 1,
+        "type": "choice",
+        "objectiveId": "o1",
+        "prompt": "兩個不同節點的 val 都是 7。這能證明鏈結串列有環嗎？",
+        "hint": "先追蹤每一步的狀態與責任，再看結果。",
+        "explanation": "比對節點身份；Python 的 is 明確測身份，== 的行為可由類別定義。",
+        "source": {
+          "path": "workspaces/leetcode/linked-list/linked-list-cycle/notes.md",
+          "section": "Linked List Cycle"
+        },
+        "multiple": false,
+        "options": [
+          {
+            "id": "a",
+            "text": "能，重複值就是環",
+            "feedback": "值相同不代表節點相同。"
+          },
+          {
+            "id": "b",
+            "text": "不能，要看是否回到同一節點",
+            "feedback": "環由連結與身份決定。"
+          },
+          {
+            "id": "c",
+            "text": "只能用排序後判斷",
+            "feedback": "排序會丟失原來的連結結構。"
+          }
+        ],
+        "answer": [
+          "b"
+        ]
+      },
+      {
+        "id": "guard",
+        "revision": 1,
+        "type": "fill",
+        "objectiveId": "o1",
+        "prompt": "Python 條件：while fast ___ fast.next:。補一個運算子，要求左側為假時不存取 fast.next。",
+        "hint": "先追蹤每一步的狀態與責任，再看結果。",
+        "explanation": "and 會短路；先檢查 fast 才能安全存取屬性。",
+        "source": {
+          "path": "workspaces/leetcode/linked-list/linked-list-cycle/notes.md",
+          "section": "Linked List Cycle"
+        },
+        "answer": {
+          "kind": "text",
+          "accepted": [
+            "and"
+          ],
+          "caseSensitive": true
+        }
+      },
+      {
+        "id": "loop",
+        "revision": 1,
+        "type": "order",
+        "objectiveId": "o2",
+        "prompt": "slow 與 fast 都從 head 開始；非空串列。將偵測迴圈的單次步驟排好，排除初始化就相等的誤判。",
+        "hint": "先追蹤每一步的狀態與責任，再看結果。",
+        "explanation": "移動後再比較，才能避免把起點相同直接當成環。",
+        "source": {
+          "path": "workspaces/leetcode/linked-list/linked-list-cycle/notes.md",
+          "section": "Linked List Cycle"
+        },
+        "items": [
+          {
+            "id": "s0",
+            "text": "確認 fast 與 fast.next 都存在"
+          },
+          {
+            "id": "s1",
+            "text": "slow 走一步，fast 走兩步"
+          },
+          {
+            "id": "s2",
+            "text": "檢查移動後是否是同一節點"
+          },
+          {
+            "id": "s3",
+            "text": "若未相遇，回到迴圈條件"
+          }
+        ],
+        "answer": [
+          [
+            "s0",
+            "s1",
+            "s2",
+            "s3"
+          ]
+        ]
+      },
+      {
+        "id": "space",
+        "revision": 1,
+        "type": "choice",
+        "objectiveId": "o2",
+        "prompt": "從 visited set 改用標準快慢指標，對 n 個可達節點而言，主要改善是？",
+        "hint": "先追蹤每一步的狀態與責任，再看結果。",
+        "explanation": "兩種方式最壞走訪時間均為 O(n)；快慢指標省下集合空間。",
+        "source": {
+          "path": "workspaces/leetcode/linked-list/linked-list-cycle/notes.md",
+          "section": "Linked List Cycle"
+        },
+        "multiple": false,
+        "options": [
+          {
+            "id": "a",
+            "text": "時間必然從 O(n) 變 O(1)",
+            "feedback": "仍需沿連結走訪。"
+          },
+          {
+            "id": "b",
+            "text": "額外空間從 O(n) 變 O(1)",
+            "feedback": "只保留固定數量指標。"
+          },
+          {
+            "id": "c",
+            "text": "必須修改每個節點",
+            "feedback": "不需要修改節點。"
+          }
+        ],
+        "answer": [
+          "b"
+        ]
+      },
+      {
+        "id": "trace",
+        "revision": 1,
+        "type": "fill",
+        "objectiveId": "o2",
+        "prompt": "A→B→C→D→B。slow、fast 起始都在 A，每輪各走 1、2 步，移動後才比較。第 2 輪結束 slow 在哪個節點？",
+        "hint": "先追蹤每一步的狀態與責任，再看結果。",
+        "explanation": "第一輪 slow=B，第二輪 slow=C；不要拿 fast 的步數套到 slow。",
+        "source": {
+          "path": "workspaces/leetcode/linked-list/linked-list-cycle/notes.md",
+          "section": "Linked List Cycle"
+        },
+        "answer": {
+          "kind": "text",
+          "accepted": [
+            "C"
+          ],
+          "caseSensitive": true
+        }
+      },
+      {
+        "id": "exit",
+        "revision": 1,
+        "type": "match",
+        "objectiveId": "o2",
+        "prompt": "配對觀察與結論。",
+        "hint": "先追蹤每一步的狀態與責任，再看結果。",
+        "explanation": "結論依身份與可達連結決定。",
+        "source": {
+          "path": "workspaces/leetcode/linked-list/linked-list-cycle/notes.md",
+          "section": "Linked List Cycle"
+        },
+        "items": [
+          {
+            "id": "i0",
+            "text": "fast 走到 None",
+            "feedback": "有限無環鏈會到尾端。"
+          },
+          {
+            "id": "i1",
+            "text": "移動後 slow is fast",
+            "feedback": "同一節點再相遇是環的證據。"
+          },
+          {
+            "id": "i2",
+            "text": "slow.val == fast.val 但不是同一節點",
+            "feedback": "僅值相等不足以判環。"
+          }
+        ],
+        "targets": [
+          {
+            "id": "t0",
+            "text": "有環"
+          },
+          {
+            "id": "t1",
+            "text": "無環"
+          },
+          {
+            "id": "t2",
+            "text": "尚無足夠證據"
+          }
+        ],
+        "answer": {
+          "i0": "t1",
+          "i1": "t0",
+          "i2": "t2"
+        }
+      },
+      {
+        "id": "self-loop",
+        "revision": 1,
+        "type": "choice",
+        "objectiveId": "o1",
+        "prompt": "只有一個節點 A，且 A.next 就是 A。slow、fast 移動後會如何？",
+        "hint": "先追蹤每一步的狀態與責任，再看結果。",
+        "explanation": "最小環長是 1；判斷依身份和連結，不依資料值。",
+        "source": {
+          "path": "workspaces/leetcode/linked-list/linked-list-cycle/notes.md",
+          "section": "Linked List Cycle"
+        },
+        "multiple": false,
+        "options": [
+          {
+            "id": "a",
+            "text": "都仍在 A，可判定有環",
+            "feedback": "自環也是環。"
+          },
+          {
+            "id": "b",
+            "text": "fast 變成 None",
+            "feedback": "next 並不是 None。"
+          },
+          {
+            "id": "c",
+            "text": "必須至少兩個節點才有環",
+            "feedback": "自環不需要第二個節點。"
+          }
+        ],
+        "answer": [
+          "a"
+        ],
+        "variantOf": "identity"
+      },
+      {
+        "id": "trace-linear",
+        "revision": 1,
+        "type": "fill",
+        "objectiveId": "o2",
+        "prompt": "改為 A→B→C→D→None。同樣從 A 開始。第 2 輪移動後 fast 是什麼？",
+        "hint": "先追蹤每一步的狀態與責任，再看結果。",
+        "explanation": "第一輪 fast=C，第二輪 fast=None；下一次條件終止。",
+        "source": {
+          "path": "workspaces/leetcode/linked-list/linked-list-cycle/notes.md",
+          "section": "Linked List Cycle"
+        },
+        "answer": {
+          "kind": "text",
+          "accepted": [
+            "None"
+          ],
+          "caseSensitive": true
+        },
+        "variantOf": "trace"
+      }
+    ],
+    "challenge": {
+      "prompt": "不看解答，畫出本章流程，再改變一個條件並解釋結果。",
+      "criteria": [
+        "逐步說明狀態如何改變",
+        "用實作或具體例子支持預測",
+        "交由教練檢查推理，網站不自動授予通過"
+      ]
+    }
+  }
+]

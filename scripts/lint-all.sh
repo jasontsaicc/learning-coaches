@@ -32,4 +32,7 @@ done
 [ "$tmpl_fail" -eq 0 ] && echo "templates OK" || exit 1
 echo "== learning-map site =="
 if (cd site && python3 test_build.py) && python3 site/build.py --check; then echo "site OK"; else echo "site FAIL"; exit 1; fi
+echo "== site interactions =="
+command -v node >/dev/null || { echo "Node.js is required for site interaction tests"; exit 1; }
+node --test site/test_*.mjs
 echo "ALL PASS"
