@@ -5,7 +5,7 @@ Static personal learning site: course paths → chapter exercises → evidence a
 ```
 python3 site/build.py            # → site/dist/ (gitignored)
 python3 site/build.py --check    # parse only; lint-all.sh runs this + test_build.py
-cd site/dist && python3 -m http.server 8123 --bind 100.86.161.122   # tailnet only
+systemctl --user status learning-map   # serves site/dist on 100.86.161.122:8123 (tailnet only)
 ```
 
 ## Files
@@ -54,7 +54,8 @@ HTML buttons show the page `<title>`. To bring in a claude.ai artifact: `Artifac
 - `python -m http.server` sends no Cache-Control: after a rebuild, open with `?v=N` or hard refresh.
 - Verify UI with a screenshot (`/browse`), not just data. If headless Chromium dies with "No usable sandbox", the AppArmor profile `/etc/apparmor.d/playwright-chromium` (userns) is missing or not loaded.
 - Flashcard state is per-browser `localStorage`; it never writes back to progress.md (source of truth).
-- The tailnet server is a foreground process; it stops with the session.
+- Server: user unit `~/.config/systemd/user/learning-map.service` (linger on, survives reboot). Never needs a restart after a rebuild.
+- Rebuild is automatic on commit via local `.git/hooks/post-commit` (not tracked; recreate on a new clone). Uncommitted note drops need a manual `python3 site/build.py`.
 
 
 ## Chapter exercises
