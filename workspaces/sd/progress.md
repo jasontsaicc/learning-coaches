@@ -13,7 +13,7 @@
 
 - session_count: 50
 - last_weekly_review: 50 — WR5 於 S50 收帳(Topic 1 @S42 / Topic 2 @S45 / **Topic 3 @S50 學生選「收」**;過期卡 sweep 以 S50 倒帳形式完成:14 → 7 張 + 7 封存)。⚠️ **artifact audit 未跑**(engine WR flow 第 6 步),掛在下一次 WR
-- last_session_date: 2026-10-10
+- last_session_date: 2026-10-11
 - warm_up_classification: (standalone 時期未記錄;學員已 P3,Step 0 模式預設 Exploration)
 
 ## Current Session breakpoint
@@ -23,11 +23,14 @@
      S50 的 coach 自產假訊息事故與應對規則另遷入 coaching-brief.md「Coach 自檢硬規則」。
      本區段 2026-08-19 之前的完整原文封存於 archive/breakpoint-history.md(冷檔,一字未刪)。 -->
 
+**S52(2026-10-11)進行中:chunk 5(offline delivery)✅**(Recall 被戳一次補主詞;Transfer 換手機 410 → 兩軸 + LINE 對照 SoT 自填全對)。quick-fire CB 卡 fail(OPEN 名字第三次掉,HALF-OPEN 理由自推);Observability 卡併入 chunk 6。**chunk 6 ✅**(首選 M2 DB = 元件重要性 vs 使用者症狀軸摺疊,Redis-down 反證後自修;重選 delivery latency + 不用 CPU 理由對,「網路監控」由 coach 刪;Transfer 離線 3 天 → 誤報 + 只算在線、PUBLISH return 1 自答)。Day 35 chunk 1–6 全過;Real-World Grounding 六格已給。F(教 Yuki,題目已出:行員送出→客戶讀到,在線/背景兩情況)學生未作答即喊「有點累 今天先到這裡」收工。session_count 未加(H 未完成)。
+
 P3 / Chat System(Day 35)/ chunk 3 ✅(2026-10-10 S51 續,scaffold 下過:catch-up 自答 last_msg_id + `> 1042`;範圍條件只到「and bob」,外洩後果與 conversation_id/參與者驗證由 coach 給)→ chunk 4(ordering)✅ S51 續:Recall 自組「atomic increment + 不用時間(NTP 仍不一致)+ DB 欄位 + lock 排隊」,代價 unprompted;範圍格漏掉,鎖粒度答錯(選全表)後教 row-level lock 補上;Transfer(1045 先到)「不連續→catch-up」最小單位過,buffer/逾時/去重由 coach 補。下一步 chunk 5。S51 2026-10-10 學生喊「今天先到這裡」收工,F/G 未跑(保留在 resume),session_count 未加。
 
-下一場(S51 續)resume:
+下一場 resume(S52 後):
 1. ~~catch-up 球~~ ✅ S51 續。Redis pub/sub vs Kafka vs 直接 RPC 路線比較改在 G 抽。
-2. ~~chunk 4~~ ✅ → 5(offline delivery)→ 6(Observability mini)。
+2. ~~chunk 4/5/6~~ ✅(chunk 5/6 於 S52)。
+2b. **F 從頭跑**:教 Yuki 同一題(不看筆記、編號、誰做什麼)→ 2-4 追問。
 3. 收尾 drill:FSI 題 Step 1 起自己走 + 3AM page test + cost 雙問;F/G 補跑。
 4. 冷測債:thundering herd / deregistration delay 兩名詞 S51 冷抽仍失敗(+3 天,2026-10-13);separate 反面代價換場景仍未跑。
 
@@ -68,6 +71,7 @@ Weak-topic flags: 無(至今沒有帶 flag 過 gate 的紀錄)。
 - URL Shortener (Day 27-28): high (s35)— S34 Drill 8/9 + S35 PoC 全綠(50 萬碼 0 碰撞 + -race 零警告)
 - Unique ID Generator (Day 29-30): high (s36)— PoC(bit packing + clock skew 偵測)park
 - Distributed Rate Limiter (Day 31-32): high (s40)— 設計知識到位;S40 Gauntlet 暴露輸出習慣病灶
+- Chat System (Day 35-37): med (s52)— Day 35 1v1 的 chunk 1–6 Feynman Gate 全過(多數有 scaffold/戳一次);F/G 未跑,未驗獨立輸出
 
 ## Scorecard history
 
@@ -103,8 +107,11 @@ Weak-topic flags: 無(至今沒有帶 flag 過 gate 的紀錄)。
      無卡的設 3 天(2026-07-13)。unresolved-session-count = 40 - 建立 session(近似;≥5 依 engine
      Priority Override 置頂,step A 每堂上限內逐步清)。 -->
 
-### Live(unresolved,42 筆)
+### Live(unresolved,45 筆)
 
+- (s52) | Circuit Breaker(術語) | quick-fire:auth 變慢、CB 跳開後的 state 名稱「不知道」;跳開後 call 的去向只答「不會送」,fail fast 未講 | OPEN 名字第三次掉(S28 resolved → S40 重焊 → S52);HALF-OPEN 的理由(「一起動又被打掛」)自推但沒掛上名字 = 機制在、標籤未綁(RP5) | unresolved | 3 | 2026-10-14 | 0
+- (s52) | Chat System(offline delivery) | 「server 為何不能主動連 Bob 手機」理由答「HTTP 是 request/response 單向」;push 答對卻用「但是不是離題了?」收回 | 軸錯:限制是誰能撥給誰(NAT、無 public IP、OS 關背景連線),不是 protocol 方向;反證「換 WebSocket 就能撥?」可破(RP1) | unresolved | 3 | 2026-10-14 | 0
+- (s52) | Observability(alert 選點) | 3AM 只能設一條 page:選 M2 DB commit latency,理由「DB 是最重要的真相來源」;重選時先講「網路監控」 | 軸摺疊:元件重要性 vs 使用者症狀;Redis-down 反證後自修成 end-to-end delivery latency。離線 3 天陷阱自答「只算在線 + PUBLISH return 1」(RP7) | unresolved | 3 | 2026-10-14 | 0
 - (s51) | Database(lock granularity) | `UPDATE conversations ... WHERE id='conv-A'` 會擋誰:選「別的對話 conv-B 的寫入」(以為鎖全表) | 前置知識缺口(未教過,非推理錯):row-level vs table lock;連帶 per-conversation counter 的代價範圍講不出(「這我不確定」)。教後自組「同對話排隊、不同對話不影響」 | unresolved | 3 | 2026-10-13 | 0
 - (s51) | Chat System(pub/sub 語意) | 「pub/sub 掛 10 分鐘,Bob 何時看得到」答「pub/sub 恢復正常」;接著答「DB 記錄最後傳了什麼,redis 重啟才知道補哪些」 | 兩個錯疊在一起:(1) 以為 pub/sub 會緩衝/重送(Redis pub/sub 是 fire-and-forget);(2) **actor 錯置**:把 catch-up 交給 Redis,正解是 client 帶 last_msg_id、server 查 DB 補送(RP1 layer/ownership;Redis 當 truth 強先驗家族再現)。同場儲存 vs 投遞兩軸表**自己填對**(S50 軸摺疊本場拆開) | unresolved | 3 | 2026-10-13 | 0
 - (s50) | 分散式術語(deregistration delay) | 「ALB 摘掉 target 後既有連線還保留多久」的設定名答成「timeout 時間」;提示到「預設 300 秒、你在 billing 調過」仍未撈出正解 | 術語-概念未綁定家族;機制他懂(分批送人走),缺的是**名字**。同場另一個名詞 thundering herd 也是先講機制(「羊群效應 同時打」)才由 coach 補英文。**兩個名詞下場冷抽**;對照:deregistration delay = 分批斷(server 側)/ backoff + jitter = 分散回來(client 側) | unresolved | 3 | 2026-10-13 | 1
@@ -155,7 +162,7 @@ Weak-topic flags: 無(至今沒有帶 flag 過 gate 的紀錄)。
 - (s36) | Interview habit (trade-off) | 給結論不給論證(「Snowflake 最適合」一句帶過) | 頭號主線 | unresolved(原 🟡 Improving:被追問後補得出,首句仍裸) | 3 | 2026-07-11(每場 drill 即測) | 4
 - (s36) | Interview habit (operational) | drill 沒主動提監控(第 4 次) | 監控收尾未成反射 | unresolved | 3 | 2026-07-11(每場 drill 即測) | 4
 - (s36) | Capacity estimation | 算 2^12/秒「直接放棄」 | 被 2^n 寫法嚇退,非真不會(拆 1024×2^(n-10)) | unresolved(原 🟡 Improving:S36 拆次方後跟上;S40 半扶沒凍結) | 3 | 2026-07-11(每場 drill 即測) | 4
-- (s38) | Interview habit (commit) | 「用統一的限流器**嗎**?」問句丟球不敢 commit | 頭號主線(commit 缺席) | unresolved(原 🟡 Improving:S38 收尾 One-Liner 主動綁結論+論證=當場突破;**S49 再現**:知道答案卻用「alert 嗎?」問號確認,當場點名「面試官聽到的是他自己也不確定」,interval 重置) | 3 | 2026-08-14(每場 drill 即測) | 3
+- (s38) | Interview habit (commit) | 「用統一的限流器**嗎**?」問句丟球不敢 commit | 頭號主線(commit 缺席) | unresolved(原 🟡 Improving:S38 收尾 One-Liner 主動綁結論+論證=當場突破;**S49 再現**:知道答案卻用「alert 嗎?」問號確認,當場點名「面試官聽到的是他自己也不確定」,interval 重置;**S52 再現**:push「但是不是離題了?」、「不會放隱私訊息吧」、「收不回來了吧」;同場 payload 模板一題與 chunk 6 Transfer 直述收尾) | 3 | 2026-08-14(每場 drill 即測) | 3
 - (s39) | Interview habit (argument) | 連 3 次「問兩件事只答一件」 | 頭號主線在複習題再現 | unresolved(原 🟡 Improving:逼問後每次補得出) | 3 | 2026-07-11(每場 drill 即測) | 1
 - (s40) | Load Balancer | 該用 Least Connections 選了 latency + 英文名想不起(33 天又掉) | 語音近似+當場🟢≠留得住;命名軸摺疊 | unresolved(原 🟡 Improving:S40 對照表重錨) | 3 | 2026-07-11 | 0
 - (s40) | Interview habit (Step 1) | 跳過 clarify 直接報解法 + LB 亂套進 rate limiter(recency bias) | Step 1 未成硬關卡 | unresolved — 下次 drill 開場自己跑完 clarify 才准進 Step 2 | 3 | 2026-07-11(每場 drill 即測) | 0
@@ -197,8 +204,8 @@ Weak-topic flags: 無(至今沒有帶 flag 過 gate 的紀錄)。
 ### Active(7 張)
 
 - chunk:Load-Balancer | chunk | 3 | 2026-08-19(S50 quick-fire:sticky vs external store 兩策略 + Least Connections 命名;s4 四筆條目未結) | active
-- chunk:Rate-Limiting-&-CB | chunk | 3 | 2026-08-19(S50 quick-fire:CB 三狀態,S28 resolved 後掉、S40 配電箱重焊) | active
-- chunk:Observability | chunk | 3 | 2026-08-22(知識到位、輸出習慣待練;unprompted-ops 主線) | active
+- chunk:Rate-Limiting-&-CB | chunk | 3 | 2026-10-14(S52 quick-fire fail:OPEN 名字掉,見 s52 條目) | active
+- chunk:Observability | chunk | 3 | 2026-10-15(S52 併入 chunk 6:首選 DB 被反證才改 end-to-end,判 fail) | active
 - chunk:Multi-Region-Session-Store(design) | chunk | 3 | 2026-08-26(WR5 盲測不過、S44 殭屍時間線仍需模範答案 = 現存最弱卡) | active
 - chunk:Security-&-Auth | chunk | 3 | 2026-08-26(OAuth/JWT/session 廣度未測;s45 兩筆條目 unresolved) | active
 - chunk:Consistency-Models | chunk | 3 | 2026-08-26(session store / LWW 的地基) | active

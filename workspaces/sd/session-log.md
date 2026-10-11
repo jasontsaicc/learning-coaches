@@ -13,6 +13,16 @@
      - docs/curriculum-roadmap.md、docs/planning-review.md → workspaces/sd/archive/pre-migration/
      - sd-coach skill 本體         → skills/sd-coach/(curriculum 詳文=references/curriculum-detail.md) -->
 
+## S52(2026-10-11,Day 35 chunk 5–6;F 出題後停)
+
+- 間隔 1 天,無 Comeback。開場 quick-fire CB 卡:第一版 timeline 一次挖 6 個洞,學生「看不懂要我幹嘛」= coach 步伐太大,縮成單格後作答。OPEN 名字不知道(第三次掉),「不會送」方向對但 fail fast 沒講;HALF-OPEN 的理由自推。卡判 fail。Observability 卡不另抽,併入 chunk 6。
+- **chunk 5 offline delivery ✅**:「不能主動連」對,理由答成 HTTP 單向(軸錯,coach 改 NAT/誰撥給誰);push 答對卻用「不是離題了?」收回。push payload:「只放通知」方向對 → 模板下一口氣講完 B(owner/audit 非我方)+ C(鎖定畫面)+ 代價,直述句 🌟;「放訊息但挖機敏」被 free-text redaction 反證後收斂到 content-free。Recall 漏最後一段(reconnect + catch-up),戳一次自答並**主動補「是自己的訊息」= participant scope**(S51 是 coach 給的)。Transfer 換手機 410:兩軸 + LINE 對照(LINE 是學生自帶的真實經驗)自填 `last_msg_id=0`、SoT 差異全對。
+- **chunk 6 Observability ✅**:首選 M2 DB commit latency(元件重要性 vs 症狀軸摺疊)→ 用他自己「Redis crash 還能從 DB 找」反證 Redis-down 夜 → 自修;重選 delivery latency + 不用 CPU 理由對,「網路監控」由 coach 刪。Transfer 離線 3 天:誤報 + 只算在線,`PUBLISH return 1` 自答。
+- Real-World Grounding 六格給畢(演化梯 / 自建 vs Amazon Connect Chat / AWS 架構圖 / 工具坑表 / design review / 英文一句)。
+- F:Yuki 題已出(行員送出→客戶讀到,在線/背景兩情況),學生「有點累」收工,未作答。G 未跑。
+- 問句收尾 3 次(不是離題了? / 吧 ×2);直述收尾 2 次(payload 模板、chunk 6 Transfer)。三指標:argument 🟡(payload 模板句完整但有 scaffold)/ ops 🟡(chunk 6 是被問到的,非 unprompted)/ capacity 未測。
+- coach 自省:quick-fire 第一題太大;縮題後節奏正常。chunk 5–6 主菜有完整時間,比 S51 好。
+
 ## S51(2026-10-10,Comeback 隔 51 天;中途停)
 
 - Comeback Protocol:暖身 chunk 2 冷回憶。「忘記了」→ 縮成時間線填空,2 萬條重連數量自答、「1 秒內」自答;哪個框先倒以問句(「其他的server嗎」)丟球 → 畫 A/B/C 三框數字圖後答「A 有多台分散,auth/DB 最可能爆」,被戳「auth 也有多台」只答到「平常撐得住、一次性過重」,400x 與 autoscaling 分鐘級由 coach 補。jitter 自產;backoff 只到「延長一點吧」。thundering herd / deregistration delay 名字冷抽失敗,registry interval 重置。
