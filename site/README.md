@@ -76,8 +76,10 @@ a partial retest does not establish completion or a mastery grade.
 Current-topic detection expects a breakpoint line
 starting with `P3 / Chat System(Day 35)/ ...`; changing that format requires updating the parser.
 
-Initial coverage: Pod probes, Cache-Aside, Linked List Cycle and VPC Peering.
-Each has six primary questions plus two variants. Other chapters explicitly show that
+Coverage: k8s has 8 chapters (P0 apply→Running; P1 container isolation, probes, rollout,
+QoS/OOM; P2a Service, Ingress, DNS triage), each six primary questions plus one variant per
+primary. SD Cache-Aside, LeetCode Linked List Cycle and CA VPC Peering still have six primaries
+plus two variants and a shared generic hint. Other chapters explicitly show that
 exercises have not been written. Types are `choice` (single/multiple), `fill` (text/number),
 `order` and `match` (pairing/classification). Adding another chapter of these types needs
 only a bank entry and an exported source note, not a new page or renderer.

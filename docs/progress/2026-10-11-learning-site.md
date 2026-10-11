@@ -131,3 +131,33 @@
 - 兩份 day40-gauntlet-rate-limiter 筆記的 40 是 session 編號，原本誤掛 News Feed。新增 Markdown topic 註記，明確掛回 Distributed Rate Limiter (Day 31-32)。
 - 新增 `site/AUTHORING.md`：題庫位置、章節欄位、變式範例、revision、筆記歸屬、驗證與發布方式。題庫測試允許增加變式，不再固定只能八題。
 - 驗證：完整 lint 與 13 項 Node 測試通過；開發未修改 `workspaces/`。
+
+## 2026-10-11 續：K8s 題庫精修與擴充
+
+範圍依使用者決定：精修只做 K8s Pod 探針；主線擴充選方案 C（P0、P1 補齊加 P2a 中段）。
+SD、LeetCode、CA 三章維持原狀，仍是共用提示。
+
+| 章節 | 狀態 | 來源 |
+|---|---|---|
+| Pod 探針 | 精修：8 句提示各自對題，新增 4 變式，章末改為 probe-demo 預測實作 | `p1-pod-probe.md` |
+| apply 到 Running | 新增 | `workspaces/k8s/notes/p0-apply-to-running.md`（唯讀引用） |
+| 容器的隔離 | 新增 | `p1-pod-probe.md`、`s6-container-namespace-cgroup.html` |
+| Deployment rollout | 新增 | `p1-deployment-rollout.md` |
+| Resource、QoS 與 OOM | 新增 | `p1-resource-qos-oom.md` |
+| Service 與 kube-proxy | 新增 | `p2a-service-kube-proxy.md`、`p2a-full-packet-chain.md` |
+| Ingress | 新增 | `p2a-ingress.md`、`p2a-full-packet-chain.md` |
+| DNS 排障 | 新增 | `p2a-service-kube-proxy.md`、`p2a-full-packet-chain.md` |
+
+K8s 共 8 章、96 題：每章 6 主題 + 每題 1 變式，章內提示不重複。
+Pod 探針原 6 題的 ID、答案與 revision 不變（browser-check 依賴其答案；只改提示與來源段落名）。
+
+- 發現：弱項重練只取每道主題的第一個變式，所以改為「每題一個變式」，寫進 AUTHORING.md。
+- 修正：解說的「回到教材」原本只認 `.md`，HTML 來源會 404；改為 HTML 另開 `files/`（`exercises.js` 一行）。
+- 超出筆記的事實（已依官方行為撰寫，未逐條對文件）：maxSurge 進位、maxUnavailable 捨去；
+  kubelet 驅逐排序（超出 request → priority → 超出量）；Ingress Prefix 依路徑段比對；
+  Service 的 IPVS 模式會綁 kube-ipvs0，所以題目限定 iptables 模式；Pod `dnsConfig` 調 ndots。
+
+驗證：`./scripts/lint-all.sh` ALL PASS（13 項 Node 測試）；`browser-check.mjs` 通過；
+另以 Playwright 確認課程頁 8 個練習入口、HTML 來源連結回 200、360px 無橫向捲動。
+
+下一步：SD、LeetCode、CA 三章照同一規格精修；或先做練習紀錄備份（原第 2 項）。

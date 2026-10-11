@@ -30,11 +30,11 @@
         "type": "choice",
         "objectiveId": "o1",
         "prompt": "Pod 只有 readiness probe 失敗達門檻，行程仍正常，Service 未開 publishNotReadyAddresses。最合理的預期？",
-        "hint": "先追蹤每一步的狀態與責任，再看結果。",
+        "hint": "分開兩個問題：readiness 失敗改變的是哪個狀態欄位？那個欄位被誰拿去決定流量？",
         "explanation": "readiness 失敗改變就緒狀態，不自行重啟行程；更新流量目標需要傳播時間。",
         "source": {
           "path": "portfolio/k8s/notes/p1-pod-probe.md",
-          "section": "Pod 探針"
+          "section": "3. Probe(本日重點)"
         },
         "multiple": false,
         "options": [
@@ -64,11 +64,11 @@
         "type": "match",
         "objectiveId": "o1",
         "prompt": "把目的配對到適合的探針。",
-        "hint": "先追蹤每一步的狀態與責任，再看結果。",
+        "hint": "對每個情境先問：重啟能修好嗎？不能的話，是要暫停接流量，還是要給它時間啟動？",
         "explanation": "依故障後應採取的動作選探針，而不是依健康檢查 URL 名稱。",
         "source": {
           "path": "portfolio/k8s/notes/p1-pod-probe.md",
-          "section": "Pod 探針"
+          "section": "3. Probe(本日重點)"
         },
         "items": [
           {
@@ -113,11 +113,11 @@
         "type": "fill",
         "objectiveId": "o1",
         "prompt": "只有 readiness 從成功變成失敗，沒有其他故障或控制器操作。由這次 readiness 失敗直接造成的容器重啟次數是多少？",
-        "hint": "先追蹤每一步的狀態與責任，再看結果。",
+        "hint": "這次失敗的是哪一個探針？它被設計成觸發哪一種動作？",
         "explanation": "readiness 不直接重啟容器。",
         "source": {
           "path": "portfolio/k8s/notes/p1-pod-probe.md",
-          "section": "Pod 探針"
+          "section": "Lab 實測"
         },
         "answer": {
           "kind": "number",
@@ -132,11 +132,11 @@
         "type": "order",
         "objectiveId": "o2",
         "prompt": "已配置 startup、readiness 與 liveness。排序這條成功啟動的事件線；最後一步表示 readiness 的後續結果。",
-        "hint": "先追蹤每一步的狀態與責任，再看結果。",
+        "hint": "找出誰在守門：startup 成功之前，其他探針有沒有在跑？",
         "explanation": "startup 成功後其他探針才啟用；這是給定的 readiness 事件線，不暗示 readiness 和 liveness 有固定先後。",
         "source": {
           "path": "portfolio/k8s/notes/p1-pod-probe.md",
-          "section": "Pod 探針"
+          "section": "3. Probe(本日重點)"
         },
         "items": [
           {
@@ -171,11 +171,11 @@
         "type": "choice",
         "objectiveId": "o2",
         "prompt": "DB 暫時變慢，應用行程正常。哪些判斷成立？",
-        "hint": "先追蹤每一步的狀態與責任，再看結果。",
+        "hint": "對每個敘述套同一句判斷：Would a restart fix this?",
         "explanation": "檢查應對準可恢復的故障；是否暫停接流量還需考慮應用的降級能力。",
         "source": {
           "path": "portfolio/k8s/notes/p1-pod-probe.md",
-          "section": "Pod 探針"
+          "section": "3. Probe(本日重點)"
         },
         "multiple": true,
         "options": [
@@ -206,11 +206,11 @@
         "type": "choice",
         "objectiveId": "o2",
         "prompt": "startup probe 尚未成功且未達失敗門檻；liveness 與 readiness 是否已按正常週期判定？",
-        "hint": "先追蹤每一步的狀態與責任，再看結果。",
+        "hint": "startup probe 還沒成功時，它對另外兩個探針的作用是什麼？",
         "explanation": "startup 用來保護初始化階段；門檻耗盡仍可能觸發重啟。",
         "source": {
           "path": "portfolio/k8s/notes/p1-pod-probe.md",
-          "section": "Pod 探針"
+          "section": "3. Probe(本日重點)"
         },
         "multiple": false,
         "options": [
@@ -240,11 +240,11 @@
         "type": "choice",
         "objectiveId": "o1",
         "prompt": "承接 readiness 失敗，但行程已自行恢復且探針再度成功。要由誰先重啟容器才能恢復 Ready？",
-        "hint": "先追蹤每一步的狀態與責任，再看結果。",
+        "hint": "readiness 是持續在跑的檢查。失敗原因消失後，下一次檢查會回報什麼？",
         "explanation": "失敗原因若消失，readiness 可再成功；筆記中的特定 lab 需修檔案，不代表所有 readiness 故障都不會自癒。",
         "source": {
           "path": "portfolio/k8s/notes/p1-pod-probe.md",
-          "section": "Pod 探針"
+          "section": "Lab 實測"
         },
         "multiple": false,
         "options": [
@@ -275,11 +275,11 @@
         "type": "choice",
         "objectiveId": "o2",
         "prompt": "條件改變：DB 正常，應用本地死鎖，已證實重啟能恢復。哪個探針應偵測這個故障？",
-        "hint": "先追蹤每一步的狀態與責任，再看結果。",
+        "hint": "這次故障在誰身上：本機行程還是下游？重啟能不能修好它？",
         "explanation": "與 DB 變慢不同，本地死鎖可能適合 liveness 偵測。",
         "source": {
           "path": "portfolio/k8s/notes/p1-pod-probe.md",
-          "section": "Pod 探針"
+          "section": "3. Probe(本日重點)"
         },
         "multiple": false,
         "options": [
@@ -303,14 +303,3363 @@
           "b"
         ],
         "variantOf": "dependency"
+      },
+      {
+        "id": "roles-shifted",
+        "revision": 1,
+        "objectiveId": "o1",
+        "prompt": "換一組情境：把每個故障配對到適合偵測它的探針。",
+        "hint": "情境換了，問題不變：重啟有沒有用？還是它只需要時間？",
+        "explanation": "判斷依據仍是故障後應採取的動作：需要時間給 startup，暫停接流量給 readiness，重啟能修好給 liveness。",
+        "source": {
+          "path": "portfolio/k8s/notes/p1-pod-probe.md",
+          "section": "3. Probe(本日重點)"
+        },
+        "variantOf": "roles",
+        "type": "match",
+        "items": [
+          {
+            "id": "i0",
+            "text": "JVM 啟動時要先載入 3 分鐘的快取",
+            "feedback": "startup 給初始化寬限，期間不讓 liveness 誤殺。"
+          },
+          {
+            "id": "i1",
+            "text": "下游 API 限流，這個 Pod 暫時無法完成請求",
+            "feedback": "重啟修不好下游，先退出就緒名單。"
+          },
+          {
+            "id": "i2",
+            "text": "HTTP server 的 thread 全部卡住，不再回應任何請求，重啟可恢復",
+            "feedback": "本地卡死、重啟有效，交給 liveness。"
+          }
+        ],
+        "targets": [
+          {
+            "id": "t0",
+            "text": "readiness"
+          },
+          {
+            "id": "t1",
+            "text": "startup"
+          },
+          {
+            "id": "t2",
+            "text": "liveness"
+          }
+        ],
+        "answer": {
+          "i0": "t1",
+          "i1": "t0",
+          "i2": "t2"
+        }
+      },
+      {
+        "id": "liveness-restart",
+        "revision": 1,
+        "objectiveId": "o1",
+        "prompt": "條件改變：只有 liveness 失敗達門檻一次，container 重啟後探針恢復成功，之後沒有再失敗。RESTARTS 會增加多少？",
+        "hint": "這次失敗的探針換成哪一個？它達到門檻時，kubelet 會做什麼動作？",
+        "explanation": "liveness 達門檻時 kubelet 砍掉並重啟 container，RESTARTS 加 1；重啟後恢復成功就不再增加。對照 readiness 失敗是 0。",
+        "source": {
+          "path": "portfolio/k8s/notes/p1-pod-probe.md",
+          "section": "Lab 實測"
+        },
+        "variantOf": "restarts",
+        "type": "fill",
+        "answer": {
+          "kind": "number",
+          "value": 1,
+          "tolerance": 0,
+          "unit": ""
+        }
+      },
+      {
+        "id": "startup-exhausted",
+        "revision": 1,
+        "objectiveId": "o2",
+        "prompt": "已配置 startup probe，但 app 初始化太慢，startup 一直失敗。排序接下來的事件。",
+        "hint": "startup probe 的門檻用完時，結果和 liveness 失敗一樣嗎？",
+        "explanation": "startup probe 失敗達 failureThreshold 時，kubelet 會砍掉 container 並依 restartPolicy 重啟。寬限期太短的慢啟動 app 會因此反覆重啟。",
+        "source": {
+          "path": "portfolio/k8s/notes/p1-pod-probe.md",
+          "section": "3. Probe(本日重點)"
+        },
+        "variantOf": "startup",
+        "type": "order",
+        "items": [
+          {
+            "id": "s0",
+            "text": "容器開始執行"
+          },
+          {
+            "id": "s1",
+            "text": "startup probe 連續失敗"
+          },
+          {
+            "id": "s2",
+            "text": "失敗次數達到 failureThreshold"
+          },
+          {
+            "id": "s3",
+            "text": "kubelet 砍掉容器並依 restartPolicy 重啟，RESTARTS +1"
+          }
+        ],
+        "answer": [
+          [
+            "s0",
+            "s1",
+            "s2",
+            "s3"
+          ]
+        ]
+      },
+      {
+        "id": "startup-budget",
+        "revision": 1,
+        "objectiveId": "o2",
+        "prompt": "startupProbe 設 failureThreshold: 30、periodSeconds: 10。app 最多有多少秒可以完成啟動，才不會被重啟？",
+        "hint": "偵測延遲的公式：門檻次數乘上什麼？",
+        "explanation": "寬限上限 = failureThreshold × periodSeconds = 30 × 10 = 300 秒。這段時間 liveness 與 readiness 都不啟用。",
+        "source": {
+          "path": "portfolio/k8s/notes/p1-pod-probe.md",
+          "section": "3. Probe(本日重點)"
+        },
+        "variantOf": "still-starting",
+        "type": "fill",
+        "answer": {
+          "kind": "number",
+          "value": 300,
+          "tolerance": 0,
+          "unit": "秒"
+        }
       }
     ],
     "challenge": {
-      "prompt": "不看解答，畫出本章流程，再改變一個條件並解釋結果。",
+      "prompt": "在 kind 部署 probe-demo（busybox + exec probe，用 /tmp/ready 與 /tmp/alive 當信號）並建立 Service。每個動作前先寫預測：`rm /tmp/ready`、`touch /tmp/ready`、`rm /tmp/alive`，最後加一個 periodSeconds: 5、failureThreshold: 2 的 startupProbe，讓 container 先 sleep 20 秒才建立信號檔。",
       "criteria": [
-        "逐步說明狀態如何改變",
-        "用實作或具體例子支持預測",
-        "交由教練檢查推理，網站不自動授予通過"
+        "執行前寫好預測表：每個動作後的 READY、STATUS、RESTARTS 與 Endpoint 數",
+        "用 `kubectl get pod -w` 與 `kubectl get endpointslices -l kubernetes.io/service-name=<svc>` 的輸出逐格對照",
+        "startupProbe 那一步：用 failureThreshold × periodSeconds 解釋為什麼會反覆重啟，再改出能啟動成功的設定",
+        "實作前執行 `kubectl config current-context`，確認是 kind 叢集"
+      ]
+    }
+  },
+  {
+    "id": "k8s-apply-to-running",
+    "coachId": "k8s",
+    "phaseId": "k8s:P0",
+    "title": "apply 到 Running",
+    "topicRefs": [
+      {
+        "parent": "k8s:P0",
+        "label": "P0 apply→Running control flow"
+      }
+    ],
+    "objectives": [
+      {
+        "id": "o1",
+        "label": "說出每一棒的負責元件與交接紀錄"
+      },
+      {
+        "id": "o2",
+        "label": "從 Pod 狀態反推壞在哪一棒"
+      }
+    ],
+    "sources": [
+      "workspaces/k8s/notes/p0-apply-to-running.md"
+    ],
+    "questions": [
+      {
+        "id": "relay",
+        "revision": 1,
+        "objectiveId": "o1",
+        "prompt": "`kubectl apply` 一個 replicas=1 的 Deployment。排序到 Pod Running 的事件。",
+        "hint": "每一棒都要先看到上一棒留在 API Server 的紀錄。找出誰的輸入是別人的輸出。",
+        "explanation": "願望先經 API Server 寫入 etcd；controller 依 desired 建 Pod 物件；scheduler 寫入綁定；kubelet 起容器後回報，loop 閉合。",
+        "source": {
+          "path": "workspaces/k8s/notes/p0-apply-to-running.md",
+          "section": "五棒對照表"
+        },
+        "type": "order",
+        "items": [
+          {
+            "id": "s0",
+            "text": "kubectl 送出 desired state"
+          },
+          {
+            "id": "s1",
+            "text": "API Server 驗證並寫入 etcd"
+          },
+          {
+            "id": "s2",
+            "text": "controller 依 desired 建立 Pod 物件（尚無 nodeName）"
+          },
+          {
+            "id": "s3",
+            "text": "scheduler 寫入 Pod 與 node 的綁定"
+          },
+          {
+            "id": "s4",
+            "text": "kubelet 叫 runtime 拉 image、起容器"
+          },
+          {
+            "id": "s5",
+            "text": "kubelet 回報狀態，Pod 變成 Running"
+          }
+        ],
+        "answer": [
+          [
+            "s0",
+            "s1",
+            "s2",
+            "s3",
+            "s4",
+            "s5"
+          ]
+        ]
+      },
+      {
+        "id": "etcd-writers",
+        "revision": 1,
+        "objectiveId": "o1",
+        "prompt": "在 controller、scheduler、kubelet、API Server 四個元件中，有幾個直接連 etcd 讀寫？",
+        "hint": "逐一問：這個元件要更新狀態時，請求送去哪裡？",
+        "explanation": "只有 API Server 直接讀寫 etcd。其他元件都透過 API Server 的 watch 與 update。所以 etcd 掛了，kubectl get 也讀不到。",
+        "source": {
+          "path": "workspaces/k8s/notes/p0-apply-to-running.md",
+          "section": "圖二：Hub 視角"
+        },
+        "type": "fill",
+        "answer": {
+          "kind": "number",
+          "value": 1,
+          "tolerance": 0,
+          "unit": ""
+        }
+      },
+      {
+        "id": "status-to-leg",
+        "revision": 1,
+        "objectiveId": "o2",
+        "prompt": "把 Pod 狀態配對到最可能出問題的那一棒。",
+        "hint": "對每個狀態問：Pod 已經綁到 node 了嗎？容器跑起來過嗎？",
+        "explanation": "Pending 表示還沒綁 node；ContainerCreating 與 ImagePullBackOff 已在 node 上，卡在 kubelet；CrashLoopBackOff 代表容器跑過又死。",
+        "source": {
+          "path": "workspaces/k8s/notes/p0-apply-to-running.md",
+          "section": "排障金鑰：狀態 -> 壞在哪一棒"
+        },
+        "type": "match",
+        "items": [
+          {
+            "id": "i0",
+            "text": "Pending",
+            "feedback": "沒有 nodeName，卡在 scheduler：CPU、taint 或 selector 沒有合格 node。"
+          },
+          {
+            "id": "i1",
+            "text": "ContainerCreating 很久",
+            "feedback": "已綁 node，kubelet 準備網路或 volume 時卡住。"
+          },
+          {
+            "id": "i2",
+            "text": "ImagePullBackOff",
+            "feedback": "kubelet 叫 runtime 拉 image 失敗。"
+          },
+          {
+            "id": "i3",
+            "text": "CrashLoopBackOff",
+            "feedback": "容器起來過，是程式或 probe 讓它一直死。"
+          }
+        ],
+        "targets": [
+          {
+            "id": "t0",
+            "text": "scheduler：找不到合格 node"
+          },
+          {
+            "id": "t1",
+            "text": "kubelet：網路、volume 或 CNI 準備不起來"
+          },
+          {
+            "id": "t2",
+            "text": "kubelet → runtime：image 拉不到"
+          },
+          {
+            "id": "t3",
+            "text": "容器內程式：一起來就退出或 probe 一直失敗"
+          }
+        ],
+        "answer": {
+          "i0": "t0",
+          "i1": "t1",
+          "i2": "t2",
+          "i3": "t3"
+        }
+      },
+      {
+        "id": "scheduler-down",
+        "revision": 1,
+        "objectiveId": "o1",
+        "prompt": "scheduler 的所有副本停擺 10 分鐘。這段期間新建的 Pod 與已在跑的 Pod 各會怎樣？",
+        "hint": "scheduler 只在 Pod 一生中的哪一刻參與？那一刻之後，誰在照顧容器？",
+        "explanation": "scheduler 只負責綁定。新 Pod 會停在 Pending、沒有 nodeName；已綁定的 Pod 由各自 node 的 kubelet 照顧，不受影響。",
+        "source": {
+          "path": "workspaces/k8s/notes/p0-apply-to-running.md",
+          "section": "五棒對照表"
+        },
+        "type": "choice",
+        "multiple": false,
+        "options": [
+          {
+            "id": "a",
+            "text": "新 Pod 停在 Pending、沒有 nodeName；已在跑的 Pod 照常服務",
+            "feedback": "scheduler 停了只影響還沒綁定的 Pod。"
+          },
+          {
+            "id": "b",
+            "text": "所有 Pod 都被驅逐",
+            "feedback": "驅逐不是 scheduler 停擺的結果。"
+          },
+          {
+            "id": "c",
+            "text": "新 Pod 會被隨機放到任一 node",
+            "feedback": "沒有 scheduler，就沒有人寫綁定。"
+          },
+          {
+            "id": "d",
+            "text": "已在跑的 Pod 會被重啟",
+            "feedback": "跑著的容器由 kubelet 管，與 scheduler 無關。"
+          }
+        ],
+        "answer": [
+          "a"
+        ]
+      },
+      {
+        "id": "who-touches-containers",
+        "revision": 1,
+        "objectiveId": "o1",
+        "prompt": "哪些元件會直接叫 container runtime 建立或停止容器？選出全部。",
+        "hint": "control plane 整段在搬什麼？它的手有沒有碰過容器？",
+        "explanation": "只有 kubelet 碰容器。control plane 只讀寫 API 物件，彼此也只透過 API Server 溝通。",
+        "source": {
+          "path": "workspaces/k8s/notes/p0-apply-to-running.md",
+          "section": "三個必記心法"
+        },
+        "type": "choice",
+        "multiple": true,
+        "options": [
+          {
+            "id": "a",
+            "text": "kubelet",
+            "feedback": "唯一叫 runtime 的元件。"
+          },
+          {
+            "id": "b",
+            "text": "scheduler",
+            "feedback": "只寫 Pod 與 node 的綁定。"
+          },
+          {
+            "id": "c",
+            "text": "controller-manager",
+            "feedback": "只建立或刪除 Pod 物件。"
+          },
+          {
+            "id": "d",
+            "text": "API Server",
+            "feedback": "只驗證並存取 etcd 裡的紀錄。"
+          }
+        ],
+        "answer": [
+          "a"
+        ]
+      },
+      {
+        "id": "crashloop-evidence",
+        "revision": 1,
+        "objectiveId": "o2",
+        "prompt": "Pod 是 CrashLoopBackOff，RESTARTS 是 7。哪個做法最能直接找到死因？",
+        "hint": "CrashLoopBackOff 代表容器已經死過好幾次。證據留在哪一個容器上？",
+        "explanation": "先 describe 看 Last State、Exit Code 與 Events，再用 logs --previous 讀上一個死掉容器的輸出。不加 --previous 可能只看到剛啟動的新容器。",
+        "source": {
+          "path": "workspaces/k8s/notes/p0-apply-to-running.md",
+          "section": "排障金鑰：狀態 -> 壞在哪一棒"
+        },
+        "type": "choice",
+        "multiple": false,
+        "options": [
+          {
+            "id": "a",
+            "text": "`kubectl describe pod` 看 Last State 與 Events，再 `kubectl logs --previous`",
+            "feedback": "兩個指令都直接指向上一次死亡。"
+          },
+          {
+            "id": "b",
+            "text": "只跑 `kubectl logs`",
+            "feedback": "這可能是剛啟動的新容器，傷口在上一個。"
+          },
+          {
+            "id": "c",
+            "text": "先刪除 Pod 讓它重建",
+            "feedback": "會毀掉 Last State 等證據。"
+          },
+          {
+            "id": "d",
+            "text": "查 scheduler 的 log",
+            "feedback": "Pod 已綁 node 也跑起來過，scheduler 沒有線索。"
+          }
+        ],
+        "answer": [
+          "a"
+        ]
+      },
+      {
+        "id": "replace-pod",
+        "revision": 1,
+        "objectiveId": "o1",
+        "prompt": "條件改變：沒有人下 kubectl。replicas=3 的 Deployment 有一個 Pod 被刪掉。排序補回 Pod 的事件。",
+        "hint": "這次沒有人送出新願望。先找誰在比較 desired 與 actual。",
+        "explanation": "reconcile loop 自己補：ReplicaSet controller 發現 actual 少於 desired，建立新 Pod 物件，之後 scheduler 與 kubelet 照原本的棒次接手。",
+        "source": {
+          "path": "workspaces/k8s/notes/p0-apply-to-running.md",
+          "section": "三個必記心法"
+        },
+        "variantOf": "relay",
+        "type": "order",
+        "items": [
+          {
+            "id": "s0",
+            "text": "Pod 物件被刪除"
+          },
+          {
+            "id": "s1",
+            "text": "ReplicaSet controller 發現 actual 2 < desired 3"
+          },
+          {
+            "id": "s2",
+            "text": "controller 建立新的 Pod 物件"
+          },
+          {
+            "id": "s3",
+            "text": "scheduler 寫入綁定"
+          },
+          {
+            "id": "s4",
+            "text": "該 node 的 kubelet 起容器並回報 Running"
+          }
+        ],
+        "answer": [
+          [
+            "s0",
+            "s1",
+            "s2",
+            "s3",
+            "s4"
+          ]
+        ]
+      },
+      {
+        "id": "kubelet-target",
+        "revision": 1,
+        "objectiveId": "o1",
+        "prompt": "kubelet 要把 Pod 狀態回報為 Running，請求送給哪個元件？",
+        "hint": "worker node 上的元件往外只有一條線。那條線接到 control plane 的哪個元件？",
+        "explanation": "kubelet 只跟 API Server 講話，由 API Server 寫入 etcd。",
+        "source": {
+          "path": "workspaces/k8s/notes/p0-apply-to-running.md",
+          "section": "圖二：Hub 視角"
+        },
+        "variantOf": "etcd-writers",
+        "type": "fill",
+        "answer": {
+          "kind": "text",
+          "accepted": [
+            "API Server",
+            "apiserver",
+            "kube-apiserver",
+            "api-server"
+          ],
+          "caseSensitive": false
+        }
+      },
+      {
+        "id": "insufficient-cpu",
+        "revision": 1,
+        "objectiveId": "o2",
+        "prompt": "Pod 停在 Pending，describe 的 Events 寫 `0/3 nodes are available: 3 Insufficient cpu`。第一個該查的方向？",
+        "hint": "這則 Event 是哪個元件寫的？它在比較哪兩個數字？",
+        "explanation": "這是 scheduler 的 filter 結果：Pod 的 CPU requests 放不進任何 node 的剩餘可分配量。",
+        "source": {
+          "path": "workspaces/k8s/notes/p0-apply-to-running.md",
+          "section": "排障金鑰：狀態 -> 壞在哪一棒"
+        },
+        "variantOf": "status-to-leg",
+        "type": "choice",
+        "multiple": false,
+        "options": [
+          {
+            "id": "a",
+            "text": "node 上的 kubelet 是否當掉",
+            "feedback": "kubelet 的問題發生在綁定之後，訊息不會是這句。"
+          },
+          {
+            "id": "b",
+            "text": "Pod 的 CPU requests 與各 node 的可分配量",
+            "feedback": "scheduler 用 requests 做 filter。"
+          },
+          {
+            "id": "c",
+            "text": "image 名稱是否正確",
+            "feedback": "還沒走到拉 image 那棒。"
+          },
+          {
+            "id": "d",
+            "text": "重啟 CoreDNS",
+            "feedback": "與排程無關。"
+          }
+        ],
+        "answer": [
+          "b"
+        ]
+      },
+      {
+        "id": "apiserver-down",
+        "revision": 1,
+        "objectiveId": "o1",
+        "prompt": "條件改變：API Server 全部停擺，etcd 正常。已在跑的容器與 `kubectl get pods` 各會怎樣？",
+        "hint": "分開問：容器靠誰活著？kubectl 的請求送去哪？",
+        "explanation": "kubelet 繼續照顧已在跑的容器；kubectl 只連 API Server，所以讀不到。etcd 正常也沒用，因為沒人能直接讀它。",
+        "source": {
+          "path": "workspaces/k8s/notes/p0-apply-to-running.md",
+          "section": "圖二：Hub 視角"
+        },
+        "variantOf": "scheduler-down",
+        "type": "choice",
+        "multiple": false,
+        "options": [
+          {
+            "id": "a",
+            "text": "容器照跑；kubectl 讀不到",
+            "feedback": "資料面與控制面分開壞。"
+          },
+          {
+            "id": "b",
+            "text": "容器全部停止",
+            "feedback": "kubelet 不需要 API Server 才能讓容器繼續跑。"
+          },
+          {
+            "id": "c",
+            "text": "kubectl 會改連 etcd 讀資料",
+            "feedback": "只有 API Server 直接讀寫 etcd。"
+          }
+        ],
+        "answer": [
+          "a"
+        ]
+      },
+      {
+        "id": "kubelet-down",
+        "revision": 1,
+        "objectiveId": "o1",
+        "prompt": "control plane 正常，但某台 worker 的 kubelet 停了。剛被綁到這台 node 的新 Pod 會怎樣？",
+        "hint": "列出這個 Pod 還缺哪一步，再看那一步原本是誰做的。",
+        "explanation": "物件已存在、也已綁定，但只有這台 node 的 kubelet 會把它變成容器。kubelet 停了，容器就不會被建立。",
+        "source": {
+          "path": "workspaces/k8s/notes/p0-apply-to-running.md",
+          "section": "三個必記心法"
+        },
+        "variantOf": "who-touches-containers",
+        "type": "choice",
+        "multiple": false,
+        "options": [
+          {
+            "id": "a",
+            "text": "Pod 物件存在且已綁 node，但容器不會被建立",
+            "feedback": "缺的是第 5 棒。"
+          },
+          {
+            "id": "b",
+            "text": "scheduler 會登入那台 node 起容器",
+            "feedback": "scheduler 只寫綁定。"
+          },
+          {
+            "id": "c",
+            "text": "controller 會直接叫 containerd",
+            "feedback": "control plane 不碰容器。"
+          }
+        ],
+        "answer": [
+          "a"
+        ]
+      },
+      {
+        "id": "imagepull-stage",
+        "revision": 1,
+        "objectiveId": "o2",
+        "prompt": "Pod 狀態是 ImagePullBackOff。哪個判斷正確？",
+        "hint": "這個狀態出現時，Pod 已經走到第幾棒？誰在試著拉 image？",
+        "explanation": "apply 已成功、Pod 已綁 node，是 kubelet 叫 runtime 拉 image 失敗。API Server 只驗證字串語法，不知道 registry 裡有沒有這個 image。",
+        "source": {
+          "path": "workspaces/k8s/notes/p0-apply-to-running.md",
+          "section": "排障金鑰：狀態 -> 壞在哪一棒"
+        },
+        "variantOf": "crashloop-evidence",
+        "type": "choice",
+        "multiple": false,
+        "options": [
+          {
+            "id": "a",
+            "text": "apply 已成功、Pod 已綁 node；kubelet 拉 image 失敗",
+            "feedback": "前四棒都已完成。"
+          },
+          {
+            "id": "b",
+            "text": "API Server 應該在 apply 時擋下",
+            "feedback": "API Server 不會去 registry 查 image。"
+          },
+          {
+            "id": "c",
+            "text": "scheduler 找不到 node",
+            "feedback": "找不到 node 會停在 Pending。"
+          }
+        ],
+        "answer": [
+          "a"
+        ]
+      }
+    ],
+    "challenge": {
+      "prompt": "在 kind 叢集 apply 一個 replicas=2 的 Deployment，另開視窗跑 `kubectl get events -w` 與 `kubectl get pods -o wide -w`。再做兩個破壞：nodeSelector 指向不存在的 label、image 改成不存在的 tag。",
+      "criteria": [
+        "執行前寫好預測表：會出現哪些 Event、各由哪個元件寫入、屬於第幾棒",
+        "用 Events 的 Scheduled、Pulling、Created、Started 對照五棒，指出每一筆的來源元件",
+        "兩個破壞各寫出：Pod 狀態、Events 原文、壞在哪一棒、下一個指令",
+        "實作前執行 `kubectl config current-context`，確認是 kind 叢集"
+      ]
+    }
+  },
+  {
+    "id": "k8s-container-isolation",
+    "coachId": "k8s",
+    "phaseId": "k8s:P1",
+    "title": "容器的隔離",
+    "topicRefs": [
+      {
+        "parent": "k8s:P1",
+        "label": "P1 container = namespace+cgroup"
+      }
+    ],
+    "objectives": [
+      {
+        "id": "o1",
+        "label": "分清 namespace（看得到什麼）與 cgroup（能用多少）"
+      },
+      {
+        "id": "o2",
+        "label": "判斷 Pod 內的共享與 UID 的安全影響"
+      }
+    ],
+    "sources": [
+      "portfolio/k8s/notes/p1-pod-probe.md",
+      "portfolio/k8s/notes/s6-container-namespace-cgroup.html"
+    ],
+    "questions": [
+      {
+        "id": "ns-or-cgroup",
+        "revision": 1,
+        "objectiveId": "o1",
+        "prompt": "把每個現象歸類到造成它的 kernel 機制。",
+        "hint": "對每個現象問：它改變的是「看得到的範圍」，還是「可用的量」？",
+        "explanation": "namespace 隔開視野（行程編號、hostname、檔案），cgroup 限制額度（記憶體、CPU）。",
+        "source": {
+          "path": "portfolio/k8s/notes/p1-pod-probe.md",
+          "section": "1. Container 是什麼"
+        },
+        "type": "match",
+        "items": [
+          {
+            "id": "i0",
+            "text": "container 內 `ps` 只看到自己的行程",
+            "feedback": "pid namespace 改變看得到的行程。"
+          },
+          {
+            "id": "i1",
+            "text": "container 用超過 256Mi 記憶體就被砍",
+            "feedback": "memory cgroup 的硬上限。"
+          },
+          {
+            "id": "i2",
+            "text": "container 有自己的 hostname",
+            "feedback": "uts namespace。"
+          },
+          {
+            "id": "i3",
+            "text": "CPU 用量被壓在 0.5 核",
+            "feedback": "cpu cgroup 的配額。"
+          }
+        ],
+        "targets": [
+          {
+            "id": "t0",
+            "text": "namespace"
+          },
+          {
+            "id": "t1",
+            "text": "cgroup"
+          }
+        ],
+        "answer": {
+          "i0": "t0",
+          "i1": "t1",
+          "i2": "t0",
+          "i3": "t1"
+        }
+      },
+      {
+        "id": "k8s-namespace",
+        "revision": 1,
+        "objectiveId": "o1",
+        "prompt": "兩個 Pod 分別在 k8s namespace `team-a` 與 `team-b`，沒有任何 NetworkPolicy。team-a 的 Pod 能直接連 team-b Pod 的 IP 嗎？",
+        "hint": "分開兩種 namespace：哪一種是 Linux kernel 的機制，哪一種只是 API 物件的分組？",
+        "explanation": "k8s namespace 只是邏輯分組，用來套 RBAC 與 quota，不做隔離。要擋網路得用 NetworkPolicy。",
+        "source": {
+          "path": "portfolio/k8s/notes/p1-pod-probe.md",
+          "section": "1. Container 是什麼"
+        },
+        "type": "choice",
+        "multiple": false,
+        "options": [
+          {
+            "id": "a",
+            "text": "可以，k8s namespace 不隔離網路",
+            "feedback": "它只是 API 物件的分組。"
+          },
+          {
+            "id": "b",
+            "text": "不行，k8s namespace 會隔離網路",
+            "feedback": "這是把 Linux namespace 和 k8s namespace 混在一起。"
+          },
+          {
+            "id": "c",
+            "text": "只有在同一台 node 才行",
+            "feedback": "Pod 網路是跨 node 互通的。"
+          }
+        ],
+        "answer": [
+          "a"
+        ]
+      },
+      {
+        "id": "sidecar-localhost",
+        "revision": 1,
+        "objectiveId": "o2",
+        "prompt": "同一個 Pod 裡，sidecar 要連 app container 監聽的 9090 port。最簡單的目的地主機名是什麼？",
+        "hint": "兩個 container 共用同一組網卡與 IP。",
+        "explanation": "共用 network namespace，所以 localhost:9090 就到 app container。",
+        "source": {
+          "path": "portfolio/k8s/notes/p1-pod-probe.md",
+          "section": "2. Pod 是什麼"
+        },
+        "type": "fill",
+        "answer": {
+          "kind": "text",
+          "accepted": [
+            "localhost",
+            "127.0.0.1"
+          ],
+          "caseSensitive": false
+        }
+      },
+      {
+        "id": "two-doors",
+        "revision": 1,
+        "objectiveId": "o2",
+        "prompt": "預設沒開 user namespace。container 內的行程想讀 node 的 /etc/shadow，把四種情況配對到結果。",
+        "hint": "每一格先過門 1：mount namespace 還在嗎？過了門 1，再看門 2：kernel 眼中的 UID 是多少？",
+        "explanation": "門 1 是 mount namespace（看不看得到），門 2 是 UID（准不准）。runAsNonRoot 只改變「翻牆了」那一欄的結果。",
+        "source": {
+          "path": "portfolio/k8s/notes/s6-container-namespace-cgroup.html",
+          "section": "兩道門：看不看得到 vs 准不准"
+        },
+        "type": "match",
+        "items": [
+          {
+            "id": "i0",
+            "text": "UID 0，沒翻牆",
+            "feedback": "門 1 擋下：mount namespace 裡沒有那個檔案。"
+          },
+          {
+            "id": "i1",
+            "text": "UID 0，翻牆了",
+            "feedback": "門 1 沒了，門 2 只看 UID，0 什麼都准。"
+          },
+          {
+            "id": "i2",
+            "text": "UID 1000，沒翻牆",
+            "feedback": "門 1 擋下。"
+          },
+          {
+            "id": "i3",
+            "text": "UID 1000，翻牆了",
+            "feedback": "看得到檔案，但 shadow 只准 root 讀。"
+          }
+        ],
+        "targets": [
+          {
+            "id": "t0",
+            "text": "讀不到：mount namespace 看不到檔案"
+          },
+          {
+            "id": "t1",
+            "text": "讀不到：看得到，但檔案權限只准 root"
+          },
+          {
+            "id": "t2",
+            "text": "讀得到"
+          }
+        ],
+        "answer": {
+          "i0": "t0",
+          "i1": "t2",
+          "i2": "t0",
+          "i3": "t1"
+        }
+      },
+      {
+        "id": "proc-cpuinfo",
+        "revision": 1,
+        "objectiveId": "o1",
+        "prompt": "Pod 的 CPU limit 是 2 核，node 有 32 核。Java app 讀 /proc/cpuinfo 決定 thread pool 大小，開了 32 條 thread。為什麼？",
+        "hint": "cgroup 限制的是用量。它有沒有改變 /proc 這個檔案的內容？",
+        "explanation": "/proc/cpuinfo 與 free 不受 cgroup 影響，看到的是 node 的規格。要依額度調整，得讀 cgroup 檔案。",
+        "source": {
+          "path": "portfolio/k8s/notes/s6-container-namespace-cgroup.html",
+          "section": "Layer 6 · 故障與 on-call"
+        },
+        "type": "choice",
+        "multiple": false,
+        "options": [
+          {
+            "id": "a",
+            "text": "/proc/cpuinfo 不受 cgroup 限制，顯示 node 全部 CPU",
+            "feedback": "cgroup 管用量，不改這個檔案。"
+          },
+          {
+            "id": "b",
+            "text": "CPU limit 沒有生效",
+            "feedback": "limit 仍會節流，只是 app 看不到它。"
+          },
+          {
+            "id": "c",
+            "text": "namespace 把 node 的 CPU 偽裝成 container 的",
+            "feedback": "沒有 namespace 隔離 CPU 資訊。"
+          }
+        ],
+        "answer": [
+          "a"
+        ]
+      },
+      {
+        "id": "remove-isolation",
+        "revision": 1,
+        "objectiveId": "o2",
+        "prompt": "下列哪些 Pod 設定等於把某一種 Linux namespace 拿掉、與 node 共用？選出全部。",
+        "hint": "逐項問：它改的是「看得到什麼」、「能用多少」，還是「你是誰」？",
+        "explanation": "hostNetwork 與 hostPID 讓 Pod 直接用 node 的 net、pid namespace，PSS baseline 會擋。runAsNonRoot 改 UID，limits 改 cgroup。",
+        "source": {
+          "path": "portfolio/k8s/notes/s6-container-namespace-cgroup.html",
+          "section": "Layer 6 · 故障與 on-call"
+        },
+        "type": "choice",
+        "multiple": true,
+        "options": [
+          {
+            "id": "a",
+            "text": "hostNetwork: true",
+            "feedback": "共用 node 的 network namespace。"
+          },
+          {
+            "id": "b",
+            "text": "hostPID: true",
+            "feedback": "共用 node 的 pid namespace，看得到 node 全部行程。"
+          },
+          {
+            "id": "c",
+            "text": "runAsNonRoot: true",
+            "feedback": "這改的是 UID，不是 namespace。"
+          },
+          {
+            "id": "d",
+            "text": "resources.limits.memory",
+            "feedback": "這是 cgroup 額度。"
+          }
+        ],
+        "answer": [
+          "a",
+          "b"
+        ]
+      },
+      {
+        "id": "ns-or-cgroup-more",
+        "revision": 1,
+        "objectiveId": "o1",
+        "prompt": "換一組現象：歸類到造成它的 kernel 機制。",
+        "hint": "同一個問題：這是視野被切開，還是額度被限制？",
+        "explanation": "mount 與 network namespace 決定看得到的檔案與網卡；pids 上限屬於 cgroup。",
+        "source": {
+          "path": "portfolio/k8s/notes/p1-pod-probe.md",
+          "section": "1. Container 是什麼"
+        },
+        "variantOf": "ns-or-cgroup",
+        "type": "match",
+        "items": [
+          {
+            "id": "i0",
+            "text": "container 看不到 node 的 /etc/shadow",
+            "feedback": "mount namespace。"
+          },
+          {
+            "id": "i1",
+            "text": "同一個 Pod 的兩個 container 用 localhost 互通",
+            "feedback": "共用同一個 network namespace。"
+          },
+          {
+            "id": "i2",
+            "text": "fork 太多行程被拒絕，因為碰到 pids 上限",
+            "feedback": "pids cgroup。"
+          }
+        ],
+        "targets": [
+          {
+            "id": "t0",
+            "text": "namespace"
+          },
+          {
+            "id": "t1",
+            "text": "cgroup"
+          }
+        ],
+        "answer": {
+          "i0": "t0",
+          "i1": "t0",
+          "i2": "t1"
+        }
+      },
+      {
+        "id": "namespace-quota",
+        "revision": 1,
+        "objectiveId": "o1",
+        "prompt": "team-a 想把整個 k8s namespace 的 CPU requests 總和限制在 20 核。最直接的做法？",
+        "hint": "k8s namespace 能掛哪些管理用的東西？筆記提到兩種。",
+        "explanation": "ResourceQuota 套在 k8s namespace 上，限制整組物件的總量。cgroup 是單一 container 或 Pod 的層級。",
+        "source": {
+          "path": "portfolio/k8s/notes/p1-pod-probe.md",
+          "section": "1. Container 是什麼"
+        },
+        "variantOf": "k8s-namespace",
+        "type": "choice",
+        "multiple": false,
+        "options": [
+          {
+            "id": "a",
+            "text": "在 team-a 建立 ResourceQuota",
+            "feedback": "k8s namespace 用來掛 quota 與 RBAC。"
+          },
+          {
+            "id": "b",
+            "text": "建立一個 Linux cgroup namespace",
+            "feedback": "那只改變看得到的 cgroup 樹。"
+          },
+          {
+            "id": "c",
+            "text": "幫每個 Pod 開 hostPID",
+            "feedback": "這會拿掉隔離，與額度無關。"
+          }
+        ],
+        "answer": [
+          "a"
+        ]
+      },
+      {
+        "id": "pod-port-conflict",
+        "revision": 1,
+        "objectiveId": "o2",
+        "prompt": "條件改變：同一個 Pod 裡兩個 container 都設定監聽 0.0.0.0:8080。會發生什麼？",
+        "hint": "兩個 container 在同一個 network namespace 嗎？同一個網路堆疊上，一個 port 能被綁幾次？",
+        "explanation": "Pod 內 container 共用 pause 持有的 network namespace：同一個 IP、同一組 port。後綁的那個會失敗。",
+        "source": {
+          "path": "portfolio/k8s/notes/p1-pod-probe.md",
+          "section": "2. Pod 是什麼"
+        },
+        "variantOf": "sidecar-localhost",
+        "type": "choice",
+        "multiple": false,
+        "options": [
+          {
+            "id": "a",
+            "text": "後啟動的那個綁 port 失敗",
+            "feedback": "共用網路堆疊，port 只能有一個主人。"
+          },
+          {
+            "id": "b",
+            "text": "各自有 IP，不會衝突",
+            "feedback": "同一個 Pod 只有一個 IP。"
+          },
+          {
+            "id": "c",
+            "text": "k8s 會自動改其中一個的 port",
+            "feedback": "k8s 不會改 app 的監聽設定。"
+          }
+        ],
+        "answer": [
+          "a"
+        ]
+      },
+      {
+        "id": "user-namespace",
+        "revision": 1,
+        "objectiveId": "o2",
+        "prompt": "條件改變：Pod 設了 `hostUsers: false`（開 user namespace），然後 runtime 漏洞讓行程翻牆。container 裡的 UID 0 在 node 上是什麼身分？",
+        "hint": "user namespace 把 container 內的 UID 對應到 node 上的另一個 UID。翻牆後，kernel 用哪一邊的 UID 判斷權限？",
+        "explanation": "開了 user namespace，container 的 root 在 node 上是一般 UID，翻牆後門 2 仍然擋得住。代價是部分 volume 與權限操作要調整。",
+        "source": {
+          "path": "portfolio/k8s/notes/s6-container-namespace-cgroup.html",
+          "section": "Layer 3 · 取捨"
+        },
+        "variantOf": "two-doors",
+        "type": "choice",
+        "multiple": false,
+        "options": [
+          {
+            "id": "a",
+            "text": "node 上的一般、沒有特權的 UID",
+            "feedback": "對應關係在 node 這邊生效。"
+          },
+          {
+            "id": "b",
+            "text": "仍然是 UID 0",
+            "feedback": "這是沒開 user namespace 的預設行為。"
+          },
+          {
+            "id": "c",
+            "text": "沒有任何 UID",
+            "feedback": "kernel 一定用某個 UID 判斷權限。"
+          }
+        ],
+        "answer": [
+          "a"
+        ]
+      },
+      {
+        "id": "cgroup-cpu-file",
+        "revision": 1,
+        "objectiveId": "o1",
+        "prompt": "同樣情境，要讓 app 依 container 的 CPU 額度設定 thread pool，應該讀哪裡？",
+        "hint": "限制寫在哪個子系統裡？去讀那個子系統提供的檔案。",
+        "explanation": "CPU 額度在 cgroup 檔案裡，例如 cgroup v2 的 cpu.max。/proc/cpuinfo 與 free 都看不到限制。",
+        "source": {
+          "path": "portfolio/k8s/notes/s6-container-namespace-cgroup.html",
+          "section": "Layer 6 · 故障與 on-call"
+        },
+        "variantOf": "proc-cpuinfo",
+        "type": "choice",
+        "multiple": false,
+        "options": [
+          {
+            "id": "a",
+            "text": "cgroup 檔案，例如 cgroup v2 的 cpu.max",
+            "feedback": "額度就寫在這裡。"
+          },
+          {
+            "id": "b",
+            "text": "/proc/cpuinfo",
+            "feedback": "顯示的是 node 規格。"
+          },
+          {
+            "id": "c",
+            "text": "`free -m`",
+            "feedback": "這是記憶體，而且一樣看到 node 的數字。"
+          }
+        ],
+        "answer": [
+          "a"
+        ]
+      },
+      {
+        "id": "root-audit",
+        "revision": 1,
+        "objectiveId": "o2",
+        "prompt": "資安稽核寫「容器以 root 執行」，Dev 回「容器已經隔離，root 沒關係」。Dev 的論點什麼時候成立？",
+        "hint": "回到兩道門的四格。Dev 說的「隔離」指的是哪一道門？",
+        "explanation": "沒翻牆時 mount namespace 擋住，root 與否沒差；翻牆後只剩 UID 這道門。non-root 是為了「假設已被攻破」縮小損害。",
+        "source": {
+          "path": "portfolio/k8s/notes/s6-container-namespace-cgroup.html",
+          "section": "Layer 4 · AWS 怎麼做"
+        },
+        "variantOf": "remove-isolation",
+        "type": "choice",
+        "multiple": false,
+        "options": [
+          {
+            "id": "a",
+            "text": "只在沒翻牆時成立",
+            "feedback": "翻牆後只剩 UID 這道門。"
+          },
+          {
+            "id": "b",
+            "text": "永遠成立",
+            "feedback": "kernel 或 runtime 漏洞會讓門 1 消失。"
+          },
+          {
+            "id": "c",
+            "text": "永遠不成立",
+            "feedback": "沒翻牆時 mount namespace 確實擋得住。"
+          }
+        ],
+        "answer": [
+          "a"
+        ]
+      }
+    ],
+    "challenge": {
+      "prompt": "在 kind node（`docker exec -it <node> bash`）用 `crictl ps` 與 `crictl inspect <ID>` 找出一個雙 container Pod 的兩個行程 PID。用 `lsns -p <PID>` 比較兩者的 namespace，再用 `cat /proc/<PID>/cgroup` 找到 cgroup 路徑並讀 `memory.max`。",
+      "criteria": [
+        "執行前預測：同 Pod 兩個 container 哪些 namespace 相同、哪些不同",
+        "貼出 lsns 輸出，指出 net 的 inode 相同、mnt 的不同，並說明原因",
+        "memory.max 的數值與 Pod spec 的 limits 換算一致",
+        "用一句話區分：哪個輸出證明「看得到什麼」，哪個證明「能用多少」"
+      ]
+    }
+  },
+  {
+    "id": "k8s-rollout",
+    "coachId": "k8s",
+    "phaseId": "k8s:P1",
+    "title": "Deployment rollout",
+    "topicRefs": [
+      {
+        "parent": "k8s:P1",
+        "label": "P1 Deployment/rollout"
+      }
+    ],
+    "objectives": [
+      {
+        "id": "o1",
+        "label": "說明 Deployment、ReplicaSet、rollback 與驗證邊界"
+      },
+      {
+        "id": "o2",
+        "label": "用 maxSurge 與 maxUnavailable 預測 rollout 的 Pod 數量"
+      }
+    ],
+    "sources": [
+      "portfolio/k8s/notes/p1-deployment-rollout.md"
+    ],
+    "questions": [
+      {
+        "id": "new-rs",
+        "revision": 1,
+        "objectiveId": "o1",
+        "prompt": "對一個 Deployment 做下列哪些變更，會建立新的 ReplicaSet？選出全部。",
+        "hint": "新的 ReplicaSet 代表一份新的 Pod 範本。逐項問：Pod 範本變了嗎？",
+        "explanation": "只有 Pod template 變動才會觸發 rollout、建立新 RS。scale 只改現有 RS 的數量，Deployment 自己的 metadata 不在範本裡。",
+        "source": {
+          "path": "portfolio/k8s/notes/p1-deployment-rollout.md",
+          "section": "核心機制"
+        },
+        "type": "choice",
+        "multiple": true,
+        "options": [
+          {
+            "id": "a",
+            "text": "改 container image",
+            "feedback": "image 在 Pod 範本裡。"
+          },
+          {
+            "id": "b",
+            "text": "改 Pod 範本裡的環境變數",
+            "feedback": "範本變了，就是新的一版。"
+          },
+          {
+            "id": "c",
+            "text": "只把 replicas 從 4 改成 6",
+            "feedback": "這只是 scale 現有 RS。"
+          },
+          {
+            "id": "d",
+            "text": "改 Deployment 自己 metadata 的 annotation",
+            "feedback": "不在 Pod 範本裡。"
+          }
+        ],
+        "answer": [
+          "a",
+          "b"
+        ]
+      },
+      {
+        "id": "max-total",
+        "revision": 1,
+        "objectiveId": "o2",
+        "prompt": "replicas=10，maxSurge 與 maxUnavailable 都用預設 25%。rollout 過程中 Pod 總數最多幾個？（maxSurge 無條件進位）",
+        "hint": "先把 25% 換算成個數，注意 maxSurge 往上取整；再加回 replicas。",
+        "explanation": "10 × 25% = 2.5，maxSurge 進位成 3，總數上限 10 + 3 = 13。maxUnavailable 則捨去成 2。",
+        "source": {
+          "path": "portfolio/k8s/notes/p1-deployment-rollout.md",
+          "section": "兩個旋鈕(面試必考)"
+        },
+        "type": "fill",
+        "answer": {
+          "kind": "number",
+          "value": 13,
+          "tolerance": 0,
+          "unit": ""
+        }
+      },
+      {
+        "id": "stuck-old",
+        "revision": 1,
+        "objectiveId": "o2",
+        "prompt": "replicas=4、maxSurge=1、maxUnavailable=1，新 image 打錯，新 Pod 永遠 ImagePullBackOff。rollout 卡住時，舊版 Ready 的 Pod 剩幾個？",
+        "hint": "可用數下限 = replicas − maxUnavailable。新 Pod 永遠不會算進可用數。",
+        "explanation": "舊 Pod 最多砍到 4 − 1 = 3 個；新 Pod 填滿總數上限 5，所以是 3 好 + 2 壞。舊的 3 個全程照常服務。",
+        "source": {
+          "path": "portfolio/k8s/notes/p1-deployment-rollout.md",
+          "section": "Lab 實測"
+        },
+        "type": "fill",
+        "answer": {
+          "kind": "number",
+          "value": 3,
+          "tolerance": 0,
+          "unit": ""
+        }
+      },
+      {
+        "id": "zero-downtime",
+        "revision": 1,
+        "objectiveId": "o2",
+        "prompt": "replicas=4，要求 rollout 期間 Ready 數永遠不低於 4，而且額外資源最少。哪組設定？",
+        "hint": "「Ready 不低於 4」限制哪個旋鈕？「額外資源最少」又限制哪個？",
+        "explanation": "maxUnavailable: 0 守住可用數，maxSurge: 1 只多開一個，先擴後縮。兩個都設 0 會被 API Server 退件。",
+        "source": {
+          "path": "portfolio/k8s/notes/p1-deployment-rollout.md",
+          "section": "兩個旋鈕(面試必考)"
+        },
+        "type": "choice",
+        "multiple": false,
+        "options": [
+          {
+            "id": "a",
+            "text": "maxUnavailable: 0、maxSurge: 1",
+            "feedback": "先擴後縮，只要一個 Pod 的額外資源。"
+          },
+          {
+            "id": "b",
+            "text": "maxUnavailable: 0、maxSurge: 0",
+            "feedback": "不能多開也不能先砍，apply 直接被退件。"
+          },
+          {
+            "id": "c",
+            "text": "maxUnavailable: 1、maxSurge: 0",
+            "feedback": "先砍再補，Ready 會掉到 3。"
+          },
+          {
+            "id": "d",
+            "text": "maxUnavailable: 0、maxSurge: 4",
+            "feedback": "可行，但一次全開，要兩倍資源。"
+          }
+        ],
+        "answer": [
+          "a"
+        ]
+      },
+      {
+        "id": "undo-fast",
+        "revision": 1,
+        "objectiveId": "o1",
+        "prompt": "為什麼 `kubectl rollout undo` 通常比重新部署舊版快？",
+        "hint": "rollback 時，k8s 需要從零建立什麼？還是已經有現成的東西？",
+        "explanation": "rollout 完成後舊 RS 縮到 0 但不刪除。undo 把它擴回去，舊 image 多半還在 node 上，不必重拉。",
+        "source": {
+          "path": "portfolio/k8s/notes/p1-deployment-rollout.md",
+          "section": "Rollback"
+        },
+        "type": "choice",
+        "multiple": false,
+        "options": [
+          {
+            "id": "a",
+            "text": "把保留的舊 ReplicaSet 擴回去，舊 image 多半還在 node 上",
+            "feedback": "退路一直都在。"
+          },
+          {
+            "id": "b",
+            "text": "undo 會跳過 scheduler",
+            "feedback": "新的 Pod 一樣要排程。"
+          },
+          {
+            "id": "c",
+            "text": "undo 直接修改 etcd",
+            "feedback": "所有變更都經過 API Server。"
+          }
+        ],
+        "answer": [
+          "a"
+        ]
+      },
+      {
+        "id": "fail-where",
+        "revision": 1,
+        "objectiveId": "o1",
+        "prompt": "把錯誤配對到它會在哪裡被發現。",
+        "hint": "對每個錯誤問：只看 YAML 字串就能判斷嗎？還是要真的去 registry 拉、真的跑起來才知道？",
+        "explanation": "API Server 只驗證字串語法與欄位規則；image 存不存在要等 kubelet 拉；app 會不會掛要等容器跑起來。",
+        "source": {
+          "path": "portfolio/k8s/notes/p1-deployment-rollout.md",
+          "section": "驗證有邊界(面試金句)"
+        },
+        "type": "match",
+        "items": [
+          {
+            "id": "i0",
+            "text": "YAML 寫成 `metaData`",
+            "feedback": "未知欄位，API Server 退件。"
+          },
+          {
+            "id": "i1",
+            "text": "image 名稱打成 `ngimx:1.25`",
+            "feedback": "字串合法，kubelet 拉的時候才 ImagePullBackOff。"
+          },
+          {
+            "id": "i2",
+            "text": "maxSurge 與 maxUnavailable 都設 0",
+            "feedback": "驗證規則禁止，apply 當場退件。"
+          },
+          {
+            "id": "i3",
+            "text": "image 存在，但 app 啟動後立刻 exit 1",
+            "feedback": "要跑起來才知道，結果是 CrashLoopBackOff。"
+          }
+        ],
+        "targets": [
+          {
+            "id": "t0",
+            "text": "apply 當下被 API Server 退件"
+          },
+          {
+            "id": "t1",
+            "text": "kubelet 拉 image 時失敗"
+          },
+          {
+            "id": "t2",
+            "text": "容器跑起來之後才失敗"
+          }
+        ],
+        "answer": {
+          "i0": "t0",
+          "i1": "t1",
+          "i2": "t0",
+          "i3": "t2"
+        }
+      },
+      {
+        "id": "old-rs-kept",
+        "revision": 1,
+        "objectiveId": "o1",
+        "prompt": "rollout 完成後 `kubectl get rs` 看到新 RS 4/4，舊 RS 0/0。舊 RS 為什麼還在？",
+        "hint": "如果現在要退回上一版，最快的方式需要什麼東西還存在？",
+        "explanation": "舊 RS 縮到 0 但保留，作為 rollback 的退路。保留幾版由 revisionHistoryLimit 決定。",
+        "source": {
+          "path": "portfolio/k8s/notes/p1-deployment-rollout.md",
+          "section": "核心機制"
+        },
+        "variantOf": "new-rs",
+        "type": "choice",
+        "multiple": false,
+        "options": [
+          {
+            "id": "a",
+            "text": "保留下來當 rollback 的退路",
+            "feedback": "undo 就是把它擴回去。"
+          },
+          {
+            "id": "b",
+            "text": "垃圾回收還沒跑",
+            "feedback": "這是刻意保留。"
+          },
+          {
+            "id": "c",
+            "text": "刪除失敗",
+            "feedback": "沒有錯誤發生。"
+          }
+        ],
+        "answer": [
+          "a"
+        ]
+      },
+      {
+        "id": "min-available",
+        "revision": 1,
+        "objectiveId": "o2",
+        "prompt": "同樣 replicas=10、預設 25%。rollout 期間至少要維持幾個可用 Pod？（maxUnavailable 無條件捨去）",
+        "hint": "maxUnavailable 從 replicas 扣掉。先算它換算後的整數。",
+        "explanation": "10 × 25% = 2.5，maxUnavailable 捨去成 2，可用下限 10 − 2 = 8。",
+        "source": {
+          "path": "portfolio/k8s/notes/p1-deployment-rollout.md",
+          "section": "兩個旋鈕(面試必考)"
+        },
+        "variantOf": "max-total",
+        "type": "fill",
+        "answer": {
+          "kind": "number",
+          "value": 8,
+          "tolerance": 0,
+          "unit": ""
+        }
+      },
+      {
+        "id": "stuck-new-ten",
+        "revision": 1,
+        "objectiveId": "o2",
+        "prompt": "改成 replicas=10、預設 25%，同樣是壞 image。rollout 卡住時，新 RS 有幾個 ImagePullBackOff 的 Pod？",
+        "hint": "先算總數上限與可用下限。舊 Pod 會縮到可用下限，剩下的額度全給新 Pod。",
+        "explanation": "總數上限 13、可用下限 8。舊 Pod 縮到 8 後不能再砍，新 Pod 填到 13 − 8 = 5 個，全部卡在 ImagePullBackOff。",
+        "source": {
+          "path": "portfolio/k8s/notes/p1-deployment-rollout.md",
+          "section": "Lab 實測"
+        },
+        "variantOf": "stuck-old",
+        "type": "fill",
+        "answer": {
+          "kind": "number",
+          "value": 5,
+          "tolerance": 0,
+          "unit": ""
+        }
+      },
+      {
+        "id": "no-spare-capacity",
+        "revision": 1,
+        "objectiveId": "o2",
+        "prompt": "條件改變：叢集沒有多餘資源，任何多出來的 Pod 都會 Pending；可以接受暫時少 1 個 Ready。哪組設定能完成 rollout？",
+        "hint": "沒有空間多開 Pod，那唯一能騰出位置的動作是什麼？",
+        "explanation": "maxSurge: 0 不多開，maxUnavailable: 1 允許先砍一個舊的，空出資源給新的。先擴後縮在這裡會卡住。",
+        "source": {
+          "path": "portfolio/k8s/notes/p1-deployment-rollout.md",
+          "section": "兩個旋鈕(面試必考)"
+        },
+        "variantOf": "zero-downtime",
+        "type": "choice",
+        "multiple": false,
+        "options": [
+          {
+            "id": "a",
+            "text": "maxSurge: 0、maxUnavailable: 1",
+            "feedback": "先縮後擴，用騰出的資源換版。"
+          },
+          {
+            "id": "b",
+            "text": "maxSurge: 1、maxUnavailable: 0",
+            "feedback": "新 Pod Pending，舊的又不能先砍，rollout 卡住。"
+          },
+          {
+            "id": "c",
+            "text": "兩個都設 0",
+            "feedback": "apply 直接被退件。"
+          }
+        ],
+        "answer": [
+          "a"
+        ]
+      },
+      {
+        "id": "undo-sequence",
+        "revision": 1,
+        "objectiveId": "o1",
+        "prompt": "壞部署卡住時執行 `kubectl rollout undo`。排序接下來的事。",
+        "hint": "undo 改的是 desired state。誰會發現範本變了，它手上有沒有現成的 RS？",
+        "explanation": "undo 把 Pod 範本改回上一版；Deployment controller 認出範本相符的舊 RS，把它擴回去，再把壞 RS 縮到 0。",
+        "source": {
+          "path": "portfolio/k8s/notes/p1-deployment-rollout.md",
+          "section": "Rollback"
+        },
+        "variantOf": "undo-fast",
+        "type": "order",
+        "items": [
+          {
+            "id": "s0",
+            "text": "執行 `kubectl rollout undo`"
+          },
+          {
+            "id": "s1",
+            "text": "Deployment 的 Pod 範本改回上一版"
+          },
+          {
+            "id": "s2",
+            "text": "Deployment controller 認出範本相符的舊 RS"
+          },
+          {
+            "id": "s3",
+            "text": "舊 RS 擴回、壞 RS 縮到 0，rollout 完成"
+          }
+        ],
+        "answer": [
+          [
+            "s0",
+            "s1",
+            "s2",
+            "s3"
+          ]
+        ]
+      },
+      {
+        "id": "apply-configured",
+        "revision": 1,
+        "objectiveId": "o1",
+        "prompt": "`kubectl apply` 成功印出 `deployment.apps/web configured`。這代表什麼？",
+        "hint": "這則回應是誰給的？那個元件當下能檢查到哪裡？",
+        "explanation": "API Server 接受並存下新的 desired state。image 能不能拉、app 能不能跑，要看後續的 rollout status。",
+        "source": {
+          "path": "portfolio/k8s/notes/p1-deployment-rollout.md",
+          "section": "驗證有邊界(面試金句)"
+        },
+        "variantOf": "fail-where",
+        "type": "choice",
+        "multiple": false,
+        "options": [
+          {
+            "id": "a",
+            "text": "API Server 接受了新的 desired state；image 能不能拉還不知道",
+            "feedback": "驗證只到字串語法。"
+          },
+          {
+            "id": "b",
+            "text": "新版已經全部 Ready",
+            "feedback": "rollout 才剛開始。"
+          },
+          {
+            "id": "c",
+            "text": "image 已經驗證存在",
+            "feedback": "API Server 不會去 registry 查。"
+          }
+        ],
+        "answer": [
+          "a"
+        ]
+      }
+    ],
+    "challenge": {
+      "prompt": "在 kind 用 replicas=4、maxSurge=1、maxUnavailable=1 的 nginx Deployment，做一次正常升級與一次壞 image 升級，最後用 `kubectl rollout undo` 收回壞部署。再把 maxUnavailable 改成 0，重做一次壞部署。",
+      "criteria": [
+        "執行前畫出預測表：每一步的舊 Ready、新 Ready、總數，並寫出總數上限與可用下限的算式",
+        "用 `kubectl get rs -w` 與 `kubectl get pods -w` 的輸出對照預測，壞部署卡住時寫下實際的 3 好 + 2 壞",
+        "說明 undo 後哪個 RS 擴回、為什麼快",
+        "maxUnavailable: 0 那一輪：先預測卡住時的舊 Ready 與新 Pod 數，再驗證"
+      ]
+    }
+  },
+  {
+    "id": "k8s-resources-qos",
+    "coachId": "k8s",
+    "phaseId": "k8s:P1",
+    "title": "Resource、QoS 與 OOM",
+    "topicRefs": [
+      {
+        "parent": "k8s:P1",
+        "label": "P1 resource/QoS/OOM"
+      }
+    ],
+    "objectives": [
+      {
+        "id": "o1",
+        "label": "分清 requests 與 limits 由誰使用、撞頂後的結果"
+      },
+      {
+        "id": "o2",
+        "label": "依 OOM 類型與 QoS 判斷誰被砍、下一步查什麼"
+      }
+    ],
+    "sources": [
+      "portfolio/k8s/notes/p1-resource-qos-oom.md"
+    ],
+    "questions": [
+      {
+        "id": "pending-by-requests",
+        "revision": 1,
+        "objectiveId": "o1",
+        "prompt": "node allocatable CPU 是 4000m，上面 Pod 的 requests 總和 3500m，但實際用量只有 800m。新 Pod requests 600m。scheduler 會把它放上這台 node 嗎？",
+        "hint": "scheduler 做決定時看的是哪個數字：實際用量，還是預訂量？",
+        "explanation": "scheduler 只加總 requests：3500m + 600m = 4100m 超過 4000m，所以不放。實際用量再低也一樣。",
+        "source": {
+          "path": "portfolio/k8s/notes/p1-resource-qos-oom.md",
+          "section": "requests vs limits"
+        },
+        "type": "choice",
+        "multiple": false,
+        "options": [
+          {
+            "id": "a",
+            "text": "不會，requests 加總會超過 allocatable",
+            "feedback": "排程看預訂量，不看實際用量。"
+          },
+          {
+            "id": "b",
+            "text": "會，實際用量還很低",
+            "feedback": "scheduler 不看實際用量。"
+          },
+          {
+            "id": "c",
+            "text": "會，但上線後被 throttle",
+            "feedback": "throttle 是 limits 的事，與能不能排上無關。"
+          }
+        ],
+        "answer": [
+          "a"
+        ]
+      },
+      {
+        "id": "qos-class",
+        "revision": 1,
+        "objectiveId": "o2",
+        "prompt": "把 Pod 的 resources 設定配對到它的 QoS class（單一 container）。",
+        "hint": "先補齊沒寫的欄位：只寫 limits 時，requests 會變成多少？補完再比對 Guaranteed 的條件。",
+        "explanation": "只設 limits 時 requests 自動等於 limits，所以也是 Guaranteed。有設但不相等是 Burstable，完全沒設是 BestEffort。",
+        "source": {
+          "path": "portfolio/k8s/notes/p1-resource-qos-oom.md",
+          "section": "QoS class + 驅逐順序"
+        },
+        "type": "match",
+        "items": [
+          {
+            "id": "i0",
+            "text": "cpu 與 memory 都設，requests == limits",
+            "feedback": "Guaranteed 的定義。"
+          },
+          {
+            "id": "i1",
+            "text": "只設 memory requests 256Mi",
+            "feedback": "有設但沒達到 Guaranteed。"
+          },
+          {
+            "id": "i2",
+            "text": "完全沒設 resources",
+            "feedback": "BestEffort。"
+          },
+          {
+            "id": "i3",
+            "text": "只設 cpu 與 memory 的 limits，沒寫 requests",
+            "feedback": "requests 自動補成 limits，等於 requests == limits。"
+          }
+        ],
+        "targets": [
+          {
+            "id": "t0",
+            "text": "Guaranteed"
+          },
+          {
+            "id": "t1",
+            "text": "Burstable"
+          },
+          {
+            "id": "t2",
+            "text": "BestEffort"
+          }
+        ],
+        "answer": {
+          "i0": "t0",
+          "i1": "t1",
+          "i2": "t2",
+          "i3": "t0"
+        }
+      },
+      {
+        "id": "exit-137",
+        "revision": 1,
+        "objectiveId": "o2",
+        "prompt": "container 被 kernel OOM killer 用 SIGKILL（信號 9）砍掉。`kubectl describe pod` 的 Exit Code 是多少？",
+        "hint": "被信號終止的行程，exit code = 128 + 信號編號。",
+        "explanation": "128 + 9 = 137。看到 137 加上 Reason: OOMKilled，就是撞到記憶體 limit。",
+        "source": {
+          "path": "portfolio/k8s/notes/p1-resource-qos-oom.md",
+          "section": "可壓縮 vs 不可壓縮 (compressible / incompressible)"
+        },
+        "type": "fill",
+        "answer": {
+          "kind": "number",
+          "value": 137,
+          "tolerance": 0,
+          "unit": ""
+        }
+      },
+      {
+        "id": "node-has-memory",
+        "revision": 1,
+        "objectiveId": "o2",
+        "prompt": "node 還有 6Gi 可用記憶體，Pod 卻 OOMKilled、Exit 137。最可能的原因？",
+        "hint": "兩種 OOM 裡，哪一種跟 node 剩多少無關？",
+        "explanation": "容器級 OOM：撞到自己 cgroup 的 memory limit，由 kernel 動手，與 node 餘量無關。",
+        "source": {
+          "path": "portfolio/k8s/notes/p1-resource-qos-oom.md",
+          "section": "兩種 OOM (面試常挖坑)"
+        },
+        "type": "choice",
+        "multiple": false,
+        "options": [
+          {
+            "id": "a",
+            "text": "撞到自己 container 的 memory limit",
+            "feedback": "容器級 OOM。"
+          },
+          {
+            "id": "b",
+            "text": "node 記憶體不足，kubelet 驅逐",
+            "feedback": "驅逐與 node 餘量有關，結果是 Evicted。"
+          },
+          {
+            "id": "c",
+            "text": "CPU 用量超過 limit",
+            "feedback": "CPU 撞頂是 throttle，不會 OOMKilled。"
+          }
+        ],
+        "answer": [
+          "a"
+        ]
+      },
+      {
+        "id": "crash-triage",
+        "revision": 1,
+        "objectiveId": "o2",
+        "prompt": "Pod 是 CrashLoopBackOff，你還不知道死因。排序排查步驟（後兩步假設查出來是程式錯誤）。",
+        "hint": "CrashLoopBackOff 只是現象。先找哪個欄位寫著死因，再決定往哪邊查？",
+        "explanation": "describe 的 Last State Reason 與 Exit Code 先分流；Error / Exit 1 是程式 crash，用 logs --previous 讀上一個容器的遺言。",
+        "source": {
+          "path": "portfolio/k8s/notes/p1-resource-qos-oom.md",
+          "section": "排障速查表 (CrashLoopBackOff 是現象,不是死因)"
+        },
+        "type": "order",
+        "items": [
+          {
+            "id": "s0",
+            "text": "`kubectl describe pod` 看 Last State Reason 與 Exit Code"
+          },
+          {
+            "id": "s1",
+            "text": "看到 Reason: Error、Exit Code 1，判定是程式 crash"
+          },
+          {
+            "id": "s2",
+            "text": "`kubectl logs <pod> --previous` 讀上一個容器的輸出"
+          },
+          {
+            "id": "s3",
+            "text": "修正後觀察 RESTARTS 不再增加"
+          }
+        ],
+        "answer": [
+          [
+            "s0",
+            "s1",
+            "s2",
+            "s3"
+          ]
+        ]
+      },
+      {
+        "id": "cpu-at-limit",
+        "revision": 1,
+        "objectiveId": "o1",
+        "prompt": "container 的 CPU 用量撞到 limit。接下來會發生什麼？",
+        "hint": "CPU 時間可以晚點給嗎？已經寫進去的記憶體收得回來嗎？",
+        "explanation": "CPU 可壓縮：撞 limit 會被 throttle 變慢，行程不會因此被砍。記憶體不可壓縮，撞頂才是 OOMKilled。",
+        "source": {
+          "path": "portfolio/k8s/notes/p1-resource-qos-oom.md",
+          "section": "可壓縮 vs 不可壓縮 (compressible / incompressible)"
+        },
+        "type": "choice",
+        "multiple": false,
+        "options": [
+          {
+            "id": "a",
+            "text": "被 throttle 變慢，不會因此被砍",
+            "feedback": "CPU 時間可以延後給。"
+          },
+          {
+            "id": "b",
+            "text": "OOMKilled",
+            "feedback": "這是記憶體撞頂的結果。"
+          },
+          {
+            "id": "c",
+            "text": "被 kubelet 驅逐",
+            "feedback": "驅逐看 node 壓力，不是單一 container 的 CPU limit。"
+          }
+        ],
+        "answer": [
+          "a"
+        ]
+      },
+      {
+        "id": "limits-oversell",
+        "revision": 1,
+        "objectiveId": "o1",
+        "prompt": "同一台 node，新 Pod 改成 requests 400m、limits 2000m。scheduler 會放嗎？上線後 CPU 最多能用到多少？",
+        "hint": "把兩個數字分給兩個角色：哪個給 scheduler 算，哪個是 kernel 執行的天花板？",
+        "explanation": "3500m + 400m = 3900m 未超過 4000m，可以放。limits 可以超賣，node 有空閒時最多用到 2000m。",
+        "source": {
+          "path": "portfolio/k8s/notes/p1-resource-qos-oom.md",
+          "section": "requests vs limits"
+        },
+        "variantOf": "pending-by-requests",
+        "type": "choice",
+        "multiple": false,
+        "options": [
+          {
+            "id": "a",
+            "text": "會放；node 有空閒 CPU 時最多用到 2000m",
+            "feedback": "requests 管排程，limits 管上限。"
+          },
+          {
+            "id": "b",
+            "text": "不會，limits 超過剩餘量",
+            "feedback": "scheduler 不看 limits。"
+          },
+          {
+            "id": "c",
+            "text": "會放，但最多只能用 400m",
+            "feedback": "400m 是預訂量，不是上限。"
+          }
+        ],
+        "answer": [
+          "a"
+        ]
+      },
+      {
+        "id": "qos-multi-container",
+        "revision": 1,
+        "objectiveId": "o2",
+        "prompt": "條件改變：Pod 有兩個 container。把設定配對到 Pod 的 QoS class。",
+        "hint": "QoS 是整個 Pod 的等級。Guaranteed 要求的是「每一個」container 都符合。",
+        "explanation": "只要有一個 container 不符合 requests == limits，Pod 就降為 Burstable。",
+        "source": {
+          "path": "portfolio/k8s/notes/p1-resource-qos-oom.md",
+          "section": "QoS class + 驅逐順序"
+        },
+        "variantOf": "qos-class",
+        "type": "match",
+        "items": [
+          {
+            "id": "i0",
+            "text": "app 的 cpu 與 memory 都 requests == limits，sidecar 完全沒設",
+            "feedback": "有一個不符合，整個 Pod 是 Burstable。"
+          },
+          {
+            "id": "i1",
+            "text": "兩個 container 的 cpu 與 memory 都 requests == limits",
+            "feedback": "每個都符合才是 Guaranteed。"
+          },
+          {
+            "id": "i2",
+            "text": "兩個 container 都沒設",
+            "feedback": "全部沒設是 BestEffort。"
+          }
+        ],
+        "targets": [
+          {
+            "id": "t0",
+            "text": "Guaranteed"
+          },
+          {
+            "id": "t1",
+            "text": "Burstable"
+          },
+          {
+            "id": "t2",
+            "text": "BestEffort"
+          }
+        ],
+        "answer": {
+          "i0": "t1",
+          "i1": "t0",
+          "i2": "t2"
+        }
+      },
+      {
+        "id": "exit-143",
+        "revision": 1,
+        "objectiveId": "o2",
+        "prompt": "container 收到 SIGTERM（信號 15）後沒有自己處理就被終止。Exit Code 會是多少？",
+        "hint": "同一個公式，換一個信號編號。",
+        "explanation": "128 + 15 = 143。137 與 143 的差別，能分出是被硬砍還是被要求優雅結束。",
+        "source": {
+          "path": "portfolio/k8s/notes/p1-resource-qos-oom.md",
+          "section": "可壓縮 vs 不可壓縮 (compressible / incompressible)"
+        },
+        "variantOf": "exit-137",
+        "type": "fill",
+        "answer": {
+          "kind": "number",
+          "value": 143,
+          "tolerance": 0,
+          "unit": ""
+        }
+      },
+      {
+        "id": "eviction-order",
+        "revision": 1,
+        "objectiveId": "o2",
+        "prompt": "node 記憶體快用光，kubelet 開始驅逐。三個 Pod 的 priority 相同：A 是 Guaranteed；B 是 Burstable，用量超出自己的 request 200Mi；C 是 BestEffort，用了 1Gi。誰最先被驅逐？",
+        "hint": "這次是 node 級，動手的是 kubelet。它依什麼排序挑人？",
+        "explanation": "kubelet 先挑用量超過 request 的 Pod，再看 priority，最後看超出量。C 的 request 是 0，超出 1Gi，最先被挑；Guaranteed 最後。",
+        "source": {
+          "path": "portfolio/k8s/notes/p1-resource-qos-oom.md",
+          "section": "QoS class + 驅逐順序"
+        },
+        "variantOf": "node-has-memory",
+        "type": "choice",
+        "multiple": false,
+        "options": [
+          {
+            "id": "a",
+            "text": "C",
+            "feedback": "BestEffort，超出量也最大。"
+          },
+          {
+            "id": "b",
+            "text": "B",
+            "feedback": "B 也超出 request，但超出量比 C 小。"
+          },
+          {
+            "id": "c",
+            "text": "A",
+            "feedback": "Guaranteed 最後才被挑。"
+          }
+        ],
+        "answer": [
+          "a"
+        ]
+      },
+      {
+        "id": "leak-or-small",
+        "revision": 1,
+        "objectiveId": "o2",
+        "prompt": "Exit 137 OOMKilled。記憶體曲線呈鋸齒：每次重啟後一路爬升到 limit 才被砍。下一步？",
+        "hint": "如果把 limit 加倍，這條曲線會停住，還是只是爬得更久？",
+        "explanation": "一路爬到頂是 memory leak 的形狀，調大 limit 只會延後 OOM。爬到某個水位就平掉，才是 limit 設太小。",
+        "source": {
+          "path": "portfolio/k8s/notes/p1-resource-qos-oom.md",
+          "section": "OOM 治本 vs 治標"
+        },
+        "variantOf": "crash-triage",
+        "type": "choice",
+        "multiple": false,
+        "options": [
+          {
+            "id": "a",
+            "text": "先查 memory leak，調大 limit 只會延後 OOM",
+            "feedback": "治本要找漏的地方。"
+          },
+          {
+            "id": "b",
+            "text": "直接把 limit 加倍",
+            "feedback": "這是治標。"
+          },
+          {
+            "id": "c",
+            "text": "拿掉 resources 改成 BestEffort",
+            "feedback": "會變成最先被驅逐，問題仍在。"
+          }
+        ],
+        "answer": [
+          "a"
+        ]
+      },
+      {
+        "id": "throttle-latency",
+        "revision": 1,
+        "objectiveId": "o1",
+        "prompt": "API 的 p99 延遲變高，但 RESTARTS 是 0、記憶體正常，CPU 用量曲線被壓平在 limit 附近。最可能的解讀？",
+        "hint": "這個 container 沒死，只是變慢。哪一種資源撞頂的結果是「變慢」？",
+        "explanation": "CPU throttling：用量被 cgroup 壓在 limit，請求排隊變慢。可以從 cgroup 的 cpu.stat（nr_throttled）確認。",
+        "source": {
+          "path": "portfolio/k8s/notes/p1-resource-qos-oom.md",
+          "section": "可壓縮 vs 不可壓縮 (compressible / incompressible)"
+        },
+        "variantOf": "cpu-at-limit",
+        "type": "choice",
+        "multiple": false,
+        "options": [
+          {
+            "id": "a",
+            "text": "CPU throttling",
+            "feedback": "CPU 撞頂的特徵是變慢不死。"
+          },
+          {
+            "id": "b",
+            "text": "OOMKilled",
+            "feedback": "RESTARTS 是 0，沒有死過。"
+          },
+          {
+            "id": "c",
+            "text": "liveness probe 失敗",
+            "feedback": "失敗達門檻會重啟，RESTARTS 不會是 0。"
+          }
+        ],
+        "answer": [
+          "a"
+        ]
+      }
+    ],
+    "challenge": {
+      "prompt": "用 `polinux/stress` 做三個實驗：(1) 配置 150M 記憶體、limit 100Mi；(2) CPU limit 200m，但要求 2 核負載；(3) 把同一個 Pod 改成 requests == limits，用 `kubectl get pod <name> -o jsonpath='{.status.qosClass}'` 看等級。",
+      "criteria": [
+        "每個實驗執行前寫下預測：狀態、RESTARTS、Exit Code、QoS class",
+        "實驗 1 貼出 describe 的 Last State 與 Exit Code 137，並證明 node 仍有記憶體",
+        "實驗 2 讀 node 上該 container cgroup 的 `cpu.stat`，用 nr_throttled 證明是節流不是死亡",
+        "每個結果說出是 kernel 還是 kubelet 動手"
+      ]
+    }
+  },
+  {
+    "id": "k8s-service",
+    "coachId": "k8s",
+    "phaseId": "k8s:P2a",
+    "title": "Service 與 kube-proxy",
+    "topicRefs": [
+      {
+        "parent": "k8s:P2a",
+        "label": "P2a Service/kube-proxy/DNAT/conntrack/CoreDNS 全鏈"
+      }
+    ],
+    "objectives": [
+      {
+        "id": "o1",
+        "label": "追蹤封包從名字到 Pod 的每一站與負責者"
+      },
+      {
+        "id": "o2",
+        "label": "判斷 Endpoints、kube-proxy 與 conntrack 異常的影響"
+      }
+    ],
+    "sources": [
+      "portfolio/k8s/notes/p2a-service-kube-proxy.md",
+      "portfolio/k8s/notes/p2a-full-packet-chain.md"
+    ],
+    "questions": [
+      {
+        "id": "journey",
+        "revision": 1,
+        "objectiveId": "o1",
+        "prompt": "Pod 用名字 `backend` 連 Service。排序這個請求經過的事。",
+        "hint": "先分兩層：名字層先完成，轉發層才開始。轉發層裡，改寫一定發生在封包離開本機之前。",
+        "explanation": "CoreDNS 只負責名字到 ClusterIP；之後在出發 node 的 kernel 由 iptables DNAT 改寫，再經 CNI 送達；回程靠 conntrack 還原。",
+        "source": {
+          "path": "portfolio/k8s/notes/p2a-full-packet-chain.md",
+          "section": "旅程 A:叢集內 Pod → Service(L4)"
+        },
+        "type": "order",
+        "items": [
+          {
+            "id": "s0",
+            "text": "app 依 resolv.conf 向 CoreDNS 查名字"
+          },
+          {
+            "id": "s1",
+            "text": "CoreDNS 回傳 Service 的 ClusterIP"
+          },
+          {
+            "id": "s2",
+            "text": "封包在出發 node 的 kernel 撞上 iptables 規則"
+          },
+          {
+            "id": "s3",
+            "text": "DNAT 把目的地改成某個 Endpoint 的 Pod IP"
+          },
+          {
+            "id": "s4",
+            "text": "封包經 CNI 網路送到目標 Pod"
+          },
+          {
+            "id": "s5",
+            "text": "回程封包靠 conntrack 把來源改回 ClusterIP"
+          }
+        ],
+        "answer": [
+          [
+            "s0",
+            "s1",
+            "s2",
+            "s3",
+            "s4",
+            "s5"
+          ]
+        ]
+      },
+      {
+        "id": "ready-endpoints",
+        "revision": 1,
+        "objectiveId": "o2",
+        "prompt": "backend 有 3 個 Pod，其中一個 readiness 失敗，但仍是 Running。`kubectl get endpoints backend` 會列出幾個 Pod IP？",
+        "hint": "誰在維護這份名單？它用什麼條件當閘門？",
+        "explanation": "Endpoints controller 只放「label 對得上且 readiness 通過」的 Pod。失敗的那個被撤掉，剩 2 個。",
+        "source": {
+          "path": "portfolio/k8s/notes/p2a-service-kube-proxy.md",
+          "section": "謎題 A：Service 怎麼知道後面有哪些健康 Pod"
+        },
+        "type": "fill",
+        "answer": {
+          "kind": "number",
+          "value": 2,
+          "tolerance": 0,
+          "unit": ""
+        }
+      },
+      {
+        "id": "where-clusterip",
+        "revision": 1,
+        "objectiveId": "o1",
+        "prompt": "kube-proxy 用 iptables 模式。ClusterIP 10.96.0.5 綁在哪一張網卡上？",
+        "hint": "如果它真的綁在某台機器上，所有 Service 流量會怎麼走？k8s 為了避免什麼而不這樣做？",
+        "explanation": "iptables 模式下 ClusterIP 沒有綁在任何網卡，只是每台 node 規則裡的比對條件。這樣才沒有中央瓶頸與單點故障。",
+        "source": {
+          "path": "portfolio/k8s/notes/p2a-service-kube-proxy.md",
+          "section": "謎題 B：ClusterIP 是虛擬的,封包怎麼真的到 Pod"
+        },
+        "type": "choice",
+        "multiple": false,
+        "options": [
+          {
+            "id": "a",
+            "text": "沒有綁在任何網卡，只是每台 node iptables 規則裡的比對條件",
+            "feedback": "哪都不在，又每台都有。"
+          },
+          {
+            "id": "b",
+            "text": "綁在 kube-proxy Pod 上",
+            "feedback": "kube-proxy 只寫規則，不收封包。"
+          },
+          {
+            "id": "c",
+            "text": "綁在 control plane node 上",
+            "feedback": "那樣所有流量都要繞過去，會變成瓶頸。"
+          },
+          {
+            "id": "d",
+            "text": "綁在 CoreDNS 上",
+            "feedback": "CoreDNS 只回答名字。"
+          }
+        ],
+        "answer": [
+          "a"
+        ]
+      },
+      {
+        "id": "probability",
+        "revision": 1,
+        "objectiveId": "o1",
+        "prompt": "Service 有 3 個 Endpoint。KUBE-SVC 鏈的第 1 條規則 probability 是 0.333，最後一條無條件接住。要讓三個 Endpoint 均分，第 2 條的 probability 應是多少？（填小數）",
+        "hint": "第 2 條只看得到沒被第 1 條接走的流量。剩下的要在幾個 Endpoint 之間均分？",
+        "explanation": "剩下 2/3 的流量要分給 2 個 Endpoint，所以第 2 條是 1/2 = 0.5。N 個後端依序是 1/N、1/(N−1)……最後一條接住。",
+        "source": {
+          "path": "portfolio/k8s/notes/p2a-service-kube-proxy.md",
+          "section": "動手 lab 實證(kind 3 節點)"
+        },
+        "type": "fill",
+        "answer": {
+          "kind": "number",
+          "value": 0.5,
+          "tolerance": 0.01,
+          "unit": ""
+        }
+      },
+      {
+        "id": "conntrack-full",
+        "revision": 1,
+        "objectiveId": "o2",
+        "prompt": "高 QPS、短連線的服務出現間歇 timeout。node 的 dmesg 有 `nf_conntrack: table full, dropping packet`。哪些連線受影響？",
+        "hint": "table 滿了，缺的是記錄「新」對應的空間。已經記下來的那些條目還在嗎？",
+        "explanation": "沒有空間記新連線，所以新連線被丟棄；已在 table 裡的舊連線照常。症狀是「偶爾連不上」。",
+        "source": {
+          "path": "portfolio/k8s/notes/p2a-service-kube-proxy.md",
+          "section": "謎題 C：conntrack(NAT 的記憶體)"
+        },
+        "type": "choice",
+        "multiple": false,
+        "options": [
+          {
+            "id": "a",
+            "text": "新連線被丟棄，既有連線不受影響",
+            "feedback": "已記下的對應還在。"
+          },
+          {
+            "id": "b",
+            "text": "所有連線立即中斷",
+            "feedback": "既有條目沒有被清掉。"
+          },
+          {
+            "id": "c",
+            "text": "只有 DNS 查詢受影響",
+            "feedback": "所有經 NAT 的新連線都會受影響。"
+          }
+        ],
+        "answer": [
+          "a"
+        ]
+      },
+      {
+        "id": "kube-proxy-crash",
+        "revision": 1,
+        "objectiveId": "o2",
+        "prompt": "某台 node 的 kube-proxy crash 了 5 分鐘（iptables 模式），這段期間 Endpoint 沒有變動。這台 node 上的 Pod 連 ClusterIP 會怎樣？",
+        "hint": "kube-proxy 的工作成果存在哪裡？行程死掉，那份成果會跟著消失嗎？",
+        "explanation": "規則已寫在 kernel，搬封包的是 kernel，所以照常可連。kube-proxy 停掉影響的是「之後的變動寫不進來」。",
+        "source": {
+          "path": "portfolio/k8s/notes/p2a-service-kube-proxy.md",
+          "section": "易混淆"
+        },
+        "type": "choice",
+        "multiple": false,
+        "options": [
+          {
+            "id": "a",
+            "text": "照常可連，既有 iptables 規則還在 kernel 裡",
+            "feedback": "寫規則的人不在，規則還在。"
+          },
+          {
+            "id": "b",
+            "text": "立刻全部失敗",
+            "feedback": "封包從不經過 kube-proxy 行程。"
+          },
+          {
+            "id": "c",
+            "text": "改由 CoreDNS 轉發",
+            "feedback": "CoreDNS 只解析名字。"
+          }
+        ],
+        "answer": [
+          "a"
+        ]
+      },
+      {
+        "id": "iptables-chain",
+        "revision": 1,
+        "objectiveId": "o1",
+        "prompt": "已知 ClusterIP，不經 DNS 直接 `curl 10.96.254.186`。排序封包在出發 node 經過的 iptables 步驟。",
+        "hint": "照 `iptables-save` 看到的鏈名：哪條鏈比對 Service，哪條負責挑後端，哪條真正改寫？",
+        "explanation": "KUBE-SERVICES 比對目的地，KUBE-SVC 依機率挑一條 KUBE-SEP，KUBE-SEP 做 DNAT，之後才交給 CNI 送出。",
+        "source": {
+          "path": "portfolio/k8s/notes/p2a-service-kube-proxy.md",
+          "section": "動手 lab 實證(kind 3 節點)"
+        },
+        "variantOf": "journey",
+        "type": "order",
+        "items": [
+          {
+            "id": "s0",
+            "text": "封包以 ClusterIP 為目的地送出"
+          },
+          {
+            "id": "s1",
+            "text": "KUBE-SERVICES 比對到這個 ClusterIP 與 port"
+          },
+          {
+            "id": "s2",
+            "text": "KUBE-SVC 依機率挑一條 KUBE-SEP"
+          },
+          {
+            "id": "s3",
+            "text": "KUBE-SEP 做 DNAT，目的地改成 Pod IP"
+          },
+          {
+            "id": "s4",
+            "text": "封包經 CNI 送往目標 Pod"
+          }
+        ],
+        "answer": [
+          [
+            "s0",
+            "s1",
+            "s2",
+            "s3",
+            "s4"
+          ]
+        ]
+      },
+      {
+        "id": "selector-typo",
+        "revision": 1,
+        "objectiveId": "o2",
+        "prompt": "條件改變：Pod 全部 Running 且 Ready，但 Service selector 寫 `app: backend`，Pod label 是 `app: back-end`。`kubectl get endpoints` 會看到什麼？",
+        "hint": "進 Endpoints 名單要兩個條件。這次 readiness 沒問題，檢查另一個條件。",
+        "explanation": "selector 對不到任何 Pod，Endpoints 是空的，iptables 也沒有可挑的 KUBE-SEP。",
+        "source": {
+          "path": "portfolio/k8s/notes/p2a-service-kube-proxy.md",
+          "section": "謎題 A：Service 怎麼知道後面有哪些健康 Pod"
+        },
+        "variantOf": "ready-endpoints",
+        "type": "choice",
+        "multiple": false,
+        "options": [
+          {
+            "id": "a",
+            "text": "空的",
+            "feedback": "label 對不上，沒有 Pod 進名單。"
+          },
+          {
+            "id": "b",
+            "text": "3 個 Pod IP",
+            "feedback": "Ready 不夠，label 也要對上。"
+          },
+          {
+            "id": "c",
+            "text": "ClusterIP 本身",
+            "feedback": "Endpoints 只放 Pod IP。"
+          }
+        ],
+        "answer": [
+          "a"
+        ]
+      },
+      {
+        "id": "kube-proxy-cpu",
+        "revision": 1,
+        "objectiveId": "o1",
+        "prompt": "kube-proxy 用 iptables 模式。node 上 kube-proxy 行程的 CPU 用量，會隨 Service 流量的 QPS 線性增加嗎？",
+        "hint": "分開「寫規則的人」與「搬封包的人」。",
+        "explanation": "封包由 kernel 依規則改寫，不經過 kube-proxy 行程。它的負擔來自 Service 與 Endpoint 的變動，不是流量。",
+        "source": {
+          "path": "portfolio/k8s/notes/p2a-service-kube-proxy.md",
+          "section": "易混淆"
+        },
+        "variantOf": "where-clusterip",
+        "type": "choice",
+        "multiple": false,
+        "options": [
+          {
+            "id": "a",
+            "text": "不會，封包由 kernel 改寫，kube-proxy 只寫規則",
+            "feedback": "流量不經過它。"
+          },
+          {
+            "id": "b",
+            "text": "會，每個封包都經過 kube-proxy",
+            "feedback": "這是中央代理的模型。"
+          }
+        ],
+        "answer": [
+          "a"
+        ]
+      },
+      {
+        "id": "probability-four",
+        "revision": 1,
+        "objectiveId": "o1",
+        "prompt": "Endpoint 增加到 4 個。KUBE-SVC 鏈第 1 條規則的 probability 是多少？（填小數）",
+        "hint": "第 1 條看得到全部流量，要分給幾個 Endpoint？",
+        "explanation": "1/4 = 0.25。之後依序是 1/3、1/2，最後一條接住。",
+        "source": {
+          "path": "portfolio/k8s/notes/p2a-service-kube-proxy.md",
+          "section": "動手 lab 實證(kind 3 節點)"
+        },
+        "variantOf": "probability",
+        "type": "fill",
+        "answer": {
+          "kind": "number",
+          "value": 0.25,
+          "tolerance": 0.01,
+          "unit": ""
+        }
+      },
+      {
+        "id": "conntrack-fix",
+        "revision": 1,
+        "objectiveId": "o2",
+        "prompt": "已確認 conntrack table 滿了。哪些是治本方向？選出全部。",
+        "hint": "問題是「條目數超過上限」。從兩邊下手：上限，或條目數。",
+        "explanation": "調大 nf_conntrack_max 提高上限；連線池與減少短連線降低條目數。conntrack 是 node kernel 狀態，重建 k8s 物件碰不到它。",
+        "source": {
+          "path": "portfolio/k8s/notes/p2a-service-kube-proxy.md",
+          "section": "謎題 C：conntrack(NAT 的記憶體)"
+        },
+        "variantOf": "conntrack-full",
+        "type": "choice",
+        "multiple": true,
+        "options": [
+          {
+            "id": "a",
+            "text": "調大 net.netfilter.nf_conntrack_max",
+            "feedback": "提高上限。"
+          },
+          {
+            "id": "b",
+            "text": "改用連線池、減少短連線",
+            "feedback": "降低條目數。"
+          },
+          {
+            "id": "c",
+            "text": "重啟 CoreDNS",
+            "feedback": "與 conntrack table 無關。"
+          },
+          {
+            "id": "d",
+            "text": "刪掉 Service 再重建",
+            "feedback": "conntrack 不是 k8s 物件。"
+          }
+        ],
+        "answer": [
+          "a",
+          "b"
+        ]
+      },
+      {
+        "id": "kube-proxy-stale",
+        "revision": 1,
+        "objectiveId": "o2",
+        "prompt": "條件改變：kube-proxy 仍然停著，這時 backend 滾動更新，舊 Pod 全換成新 IP。這台 node 上的 Pod 連 ClusterIP 會怎樣？",
+        "hint": "這次名單變了。誰負責把新名單寫進這台 node 的 kernel？",
+        "explanation": "規則還指向已消失的舊 Pod IP，新 Endpoint 寫不進來，所以連線失敗。這就是「關掉還在不在」的分層判準：規則在，但會過期。",
+        "source": {
+          "path": "portfolio/k8s/notes/p2a-service-kube-proxy.md",
+          "section": "易混淆"
+        },
+        "variantOf": "kube-proxy-crash",
+        "type": "choice",
+        "multiple": false,
+        "options": [
+          {
+            "id": "a",
+            "text": "連線失敗，規則仍指向已消失的舊 Pod IP",
+            "feedback": "沒人更新規則。"
+          },
+          {
+            "id": "b",
+            "text": "照常可連",
+            "feedback": "名單已經變了，規則沒跟上。"
+          },
+          {
+            "id": "c",
+            "text": "API Server 會直接改這台 node 的 iptables",
+            "feedback": "API Server 不寫 node 的規則。"
+          }
+        ],
+        "answer": [
+          "a"
+        ]
+      }
+    ],
+    "challenge": {
+      "prompt": "在 kind 建 replicas=3 的 backend 與 ClusterIP Service。在兩台 worker 上執行 `iptables-save -t nat | grep <ClusterIP>`，接著把 replicas 改成 4，再讓一個 Pod 的 readiness 失敗，每次都先預測再查 KUBE-SVC 鏈。",
+      "criteria": [
+        "預測並驗證 3 個與 4 個 Endpoint 時每條規則的 probability",
+        "比對兩台 node 的規則，用結果說明去中心化",
+        "readiness 失敗時，對照 `kubectl get endpointslices -l kubernetes.io/service-name=backend` 與 KUBE-SEP 規則是否消失",
+        "最後用一段話講完從名字到 Pod 的全鏈，每一站說出負責者"
+      ]
+    }
+  },
+  {
+    "id": "k8s-ingress",
+    "coachId": "k8s",
+    "phaseId": "k8s:P2a",
+    "title": "Ingress",
+    "topicRefs": [
+      {
+        "parent": "k8s:P2a",
+        "label": "P2a Ingress(規則 vs controller、L7 純字串比對)"
+      }
+    ],
+    "objectives": [
+      {
+        "id": "o1",
+        "label": "分清 Ingress 物件、驗證與 Controller 的責任"
+      },
+      {
+        "id": "o2",
+        "label": "依 Host、path 與 port 判斷請求去向與故障點"
+      }
+    ],
+    "sources": [
+      "portfolio/k8s/notes/p2a-ingress.md",
+      "portfolio/k8s/notes/p2a-full-packet-chain.md"
+    ],
+    "questions": [
+      {
+        "id": "no-controller",
+        "revision": 1,
+        "objectiveId": "o1",
+        "prompt": "新叢集只 apply 一個 Ingress 物件（host shop.com），沒裝任何 Ingress Controller。哪個敘述正確？",
+        "hint": "物件是 desired state。哪個活的程式會讀它並動手？那個程式現在存在嗎？",
+        "explanation": "物件存進 etcd，但沒有 controller 實作規則：ADDRESS 是空的，流量不會分流。",
+        "source": {
+          "path": "portfolio/k8s/notes/p2a-ingress.md",
+          "section": "Lab 親眼證的三件事"
+        },
+        "type": "choice",
+        "multiple": false,
+        "options": [
+          {
+            "id": "a",
+            "text": "物件存進 etcd，但沒有人實作；ADDRESS 空、流量不會分流",
+            "feedback": "紙條釘上去了，沒有接待員。"
+          },
+          {
+            "id": "b",
+            "text": "API Server 會拒絕這個物件",
+            "feedback": "語法正確就會接受。"
+          },
+          {
+            "id": "c",
+            "text": "kube-proxy 會接手做 L7 分流",
+            "feedback": "kube-proxy 只做 L4 的 DNAT。"
+          }
+        ],
+        "answer": [
+          "a"
+        ]
+      },
+      {
+        "id": "route",
+        "revision": 1,
+        "objectiveId": "o2",
+        "prompt": "Ingress 規則：host shop.com，`/` → shop-web，`/api` → shop-api（皆為 Prefix）。把請求配對到結果。",
+        "hint": "controller 先比 Host 字串，再比 path。哪一步沒對上，就停在哪一步。",
+        "explanation": "nginx 純粹拿 Host 與 path 字串比對規則表，不做 DNS 驗證。Host 對不上就沒有規則可用，回 404。",
+        "source": {
+          "path": "portfolio/k8s/notes/p2a-ingress.md",
+          "section": "Lab 親眼證的三件事"
+        },
+        "type": "match",
+        "items": [
+          {
+            "id": "i0",
+            "text": "`Host: shop.com`，path `/api`",
+            "feedback": "Host 對上，/api 最長相符。"
+          },
+          {
+            "id": "i1",
+            "text": "`Host: shop.com`，path `/`",
+            "feedback": "Host 對上，落到 /。"
+          },
+          {
+            "id": "i2",
+            "text": "直接 curl controller 的 IP，Host 是那個 IP",
+            "feedback": "Host 不是 shop.com，沒有規則。"
+          },
+          {
+            "id": "i3",
+            "text": "`Host: nope.com`，path `/api`",
+            "feedback": "Host 對不上，path 再對也沒用。"
+          }
+        ],
+        "targets": [
+          {
+            "id": "t0",
+            "text": "shop-api"
+          },
+          {
+            "id": "t1",
+            "text": "shop-web"
+          },
+          {
+            "id": "t2",
+            "text": "HTTP 404"
+          }
+        ],
+        "answer": {
+          "i0": "t0",
+          "i1": "t1",
+          "i2": "t2",
+          "i3": "t2"
+        }
+      },
+      {
+        "id": "which-hops",
+        "revision": 1,
+        "objectiveId": "o2",
+        "prompt": "外部請求 `shop.com/api` 經 ingress-nginx 到 shop-api Pod。哪些路段會用到 kube-proxy 寫的規則？選出全部。",
+        "hint": "把路線拆成「進得了 nginx」與「nginx 往後送」兩段。各段的目的地是 Service 還是 Pod IP？",
+        "explanation": "進 controller 要經過它自己的 Service，那是 kube-proxy 的 DNAT；nginx 依 EndpointSlice 直連後端 Pod IP，繞過 shop-api 的 Service。",
+        "source": {
+          "path": "portfolio/k8s/notes/p2a-ingress.md",
+          "section": "封包全鏈路(curl -> 後端 Pod)"
+        },
+        "type": "choice",
+        "multiple": true,
+        "options": [
+          {
+            "id": "a",
+            "text": "進入 controller 自己的 Service（NodePort 或 ClusterIP）那段",
+            "feedback": "目的地是 Service，靠 kube-proxy。"
+          },
+          {
+            "id": "b",
+            "text": "nginx 連到 shop-api Pod 那段",
+            "feedback": "nginx 直連 Pod IP，繞過 kube-proxy。"
+          },
+          {
+            "id": "c",
+            "text": "外部 DNS 解析 shop.com",
+            "feedback": "這與 kube-proxy 無關。"
+          }
+        ],
+        "answer": [
+          "a"
+        ]
+      },
+      {
+        "id": "targetport-missing",
+        "revision": 1,
+        "objectiveId": "o2",
+        "prompt": "Service `port: 80`，沒寫 targetPort；後端 http-echo 監聽 5678。apply 成功，curl 卻回 connection refused。原因？",
+        "hint": "封包經 DNAT 後，目的 port 由哪個欄位決定？那個欄位沒寫時預設是什麼？",
+        "explanation": "targetPort 沒寫時預設等於 port（80），封包被送到 container 沒在聽的 80。兩個都是合法數字，schema 不會擋。",
+        "source": {
+          "path": "portfolio/k8s/notes/p2a-ingress.md",
+          "section": "踩過什麼雷?"
+        },
+        "type": "choice",
+        "multiple": false,
+        "options": [
+          {
+            "id": "a",
+            "text": "targetPort 預設等於 port，封包被送到 container 沒在聽的 80",
+            "feedback": "port 是 Service 門牌，targetPort 才是 container port。"
+          },
+          {
+            "id": "b",
+            "text": "Ingress 的 host 寫錯",
+            "feedback": "host 錯會是 404，不是 connection refused。"
+          },
+          {
+            "id": "c",
+            "text": "Service 沒有 ClusterIP",
+            "feedback": "apply 成功的 ClusterIP Service 一定有。"
+          }
+        ],
+        "answer": [
+          "a"
+        ]
+      },
+      {
+        "id": "dry-run-client",
+        "revision": 1,
+        "objectiveId": "o1",
+        "prompt": "手打的 Ingress YAML 有 `pathType: prefix`（小寫）與拼錯的欄位 `numer`。`kubectl apply --dry-run=client` 顯示 created。結論？",
+        "hint": "這兩個錯誤由誰檢查：本機的 kubectl，還是知道完整 schema 的 API Server？",
+        "explanation": "client dry-run 只做本地檢查，不送 API Server。要抓 typo 與列舉值錯誤，用 `--dry-run=server`。",
+        "source": {
+          "path": "portfolio/k8s/notes/p2a-ingress.md",
+          "section": "踩過什麼雷?"
+        },
+        "type": "choice",
+        "multiple": false,
+        "options": [
+          {
+            "id": "a",
+            "text": "client dry-run 只做本地檢查，要用 `--dry-run=server`",
+            "feedback": "完整驗證在 API Server。"
+          },
+          {
+            "id": "b",
+            "text": "YAML 是正確的",
+            "feedback": "實際 apply 會失敗。"
+          },
+          {
+            "id": "c",
+            "text": "錯誤欄位會被 controller 忽略",
+            "feedback": "物件根本進不了 etcd。"
+          }
+        ],
+        "answer": [
+          "a"
+        ]
+      },
+      {
+        "id": "chain",
+        "revision": 1,
+        "objectiveId": "o2",
+        "prompt": "排序 `curl -H 'Host: shop.com' http://<controller-svc-dns>/api` 的路徑。",
+        "hint": "要先「到得了 nginx」，nginx 才讀得到 HTTP 內容。",
+        "explanation": "前兩站是 L4：CoreDNS 解析與 kube-proxy 的 DNAT；到了 nginx 才做 L7 比對，再直連後端 Pod。",
+        "source": {
+          "path": "portfolio/k8s/notes/p2a-ingress.md",
+          "section": "封包全鏈路(curl -> 後端 Pod)"
+        },
+        "type": "order",
+        "items": [
+          {
+            "id": "s0",
+            "text": "CoreDNS 把 controller 的 Service 名稱解析成 ClusterIP"
+          },
+          {
+            "id": "s1",
+            "text": "本機 iptables DNAT 到 controller Pod IP"
+          },
+          {
+            "id": "s2",
+            "text": "nginx 讀 Host 與 path，比對規則表"
+          },
+          {
+            "id": "s3",
+            "text": "nginx 直連 shop-api 的 Pod IP"
+          }
+        ],
+        "answer": [
+          [
+            "s0",
+            "s1",
+            "s2",
+            "s3"
+          ]
+        ]
+      },
+      {
+        "id": "builtin-vs-addon",
+        "revision": 1,
+        "objectiveId": "o1",
+        "prompt": "對照：apply 一個 Deployment 馬上有 Pod 出現，apply Ingress 卻沒有反應。差別在哪？",
+        "hint": "兩個物件都需要 controller。各自的 controller 是誰裝的？",
+        "explanation": "Deployment 的 controller 內建在 kube-controller-manager；Ingress Controller 不內建，要自己裝。物件 = desired state、controller = 引擎，模型相同。",
+        "source": {
+          "path": "portfolio/k8s/notes/p2a-ingress.md",
+          "section": "這是什麼?(一句話)"
+        },
+        "variantOf": "no-controller",
+        "type": "choice",
+        "multiple": false,
+        "options": [
+          {
+            "id": "a",
+            "text": "Deployment 的 controller 內建，Ingress Controller 要另外安裝",
+            "feedback": "同一個模型，差在誰裝引擎。"
+          },
+          {
+            "id": "b",
+            "text": "Deployment 不需要 controller",
+            "feedback": "它的 controller 一直在跑，只是你沒看過它不在。"
+          },
+          {
+            "id": "c",
+            "text": "Ingress 的格式比較新，需要等待",
+            "feedback": "等多久都不會有反應。"
+          }
+        ],
+        "answer": [
+          "a"
+        ]
+      },
+      {
+        "id": "route-prefix",
+        "revision": 1,
+        "objectiveId": "o2",
+        "prompt": "同一份規則（`/` 與 `/api` 都是 Prefix），`Host: shop.com`。把 path 配對到結果。",
+        "hint": "Prefix 比對的單位是什麼：一個一個字元，還是以 `/` 切開的一段？",
+        "explanation": "Prefix 依路徑段比對：`/api/v1/orders` 的第一段是 api，符合 /api；`/apiv2` 的第一段是 apiv2，不符合 /api，落到 / 的 shop-web。",
+        "source": {
+          "path": "portfolio/k8s/notes/p2a-ingress.md",
+          "section": "Lab 親眼證的三件事"
+        },
+        "variantOf": "route",
+        "type": "match",
+        "items": [
+          {
+            "id": "i0",
+            "text": "`/api/v1/orders`",
+            "feedback": "第一段是 api，符合 /api。"
+          },
+          {
+            "id": "i1",
+            "text": "`/apiv2`",
+            "feedback": "第一段是 apiv2，不是 api，落到 /。"
+          },
+          {
+            "id": "i2",
+            "text": "`/about`",
+            "feedback": "只符合 /。"
+          }
+        ],
+        "targets": [
+          {
+            "id": "t0",
+            "text": "shop-api"
+          },
+          {
+            "id": "t1",
+            "text": "shop-web"
+          },
+          {
+            "id": "t2",
+            "text": "HTTP 404"
+          }
+        ],
+        "answer": {
+          "i0": "t0",
+          "i1": "t1",
+          "i2": "t1"
+        }
+      },
+      {
+        "id": "kube-proxy-off",
+        "revision": 1,
+        "objectiveId": "o2",
+        "prompt": "面試官問：「都有 Ingress 了，kube-proxy 關掉沒差吧？」最好的回答？",
+        "hint": "找出這條路上唯一還需要 Service 轉發的那一段。",
+        "explanation": "半真：nginx 到後端那一跳直連 Pod IP；但外部流量要先經過 controller 自己的 Service 才進得來，那段靠 kube-proxy。",
+        "source": {
+          "path": "portfolio/k8s/notes/p2a-ingress.md",
+          "section": "面試怎麼回答?"
+        },
+        "variantOf": "which-hops",
+        "type": "choice",
+        "multiple": false,
+        "options": [
+          {
+            "id": "a",
+            "text": "半真：nginx 到後端繞過 kube-proxy，但進 controller 那段仍靠它",
+            "feedback": "分段回答。"
+          },
+          {
+            "id": "b",
+            "text": "對，完全沒差",
+            "feedback": "漏了進門那段。"
+          },
+          {
+            "id": "c",
+            "text": "不對，nginx 的每一跳都靠 kube-proxy",
+            "feedback": "nginx 到後端是直連 Pod IP。"
+          }
+        ],
+        "answer": [
+          "a"
+        ]
+      },
+      {
+        "id": "backend-port",
+        "revision": 1,
+        "objectiveId": "o2",
+        "prompt": "Service 設 `port: 8080`、`targetPort: 5678`。Ingress backend 寫 `service.port.number: 5678`，請求失敗。Ingress backend 的 port 應該填多少？",
+        "hint": "Ingress backend 指向的是 Service。要填的是 Service 的門牌，還是 container 的 port？",
+        "explanation": "Ingress backend 引用 Service 的 port（8080）。container 的 5678 由 Service 的 targetPort 對應。",
+        "source": {
+          "path": "portfolio/k8s/notes/p2a-ingress.md",
+          "section": "踩過什麼雷?"
+        },
+        "variantOf": "targetport-missing",
+        "type": "fill",
+        "answer": {
+          "kind": "number",
+          "value": 8080,
+          "tolerance": 0,
+          "unit": ""
+        }
+      },
+      {
+        "id": "kind-pending",
+        "revision": 1,
+        "objectiveId": "o1",
+        "prompt": "在 kind 上 Ingress 的 ADDRESS 一直是空的，controller 的 LoadBalancer Service EXTERNAL-IP 是 `<pending>`，但 curl NodePort 能拿到正確後端的回應。判斷？",
+        "hint": "ADDRESS 與 EXTERNAL-IP 由誰填入？kind 裡有沒有那個角色？最後用哪個證據判斷功能？",
+        "explanation": "kind 沒有雲端 LB provisioner，EXTERNAL-IP 永遠 pending。功能對不對看 curl，不看 ADDRESS。",
+        "source": {
+          "path": "portfolio/k8s/notes/p2a-ingress.md",
+          "section": "踩過什麼雷?"
+        },
+        "variantOf": "dry-run-client",
+        "type": "choice",
+        "multiple": false,
+        "options": [
+          {
+            "id": "a",
+            "text": "環境沒有雲端 LB provisioner，功能正常",
+            "feedback": "curl 的結果才是證據。"
+          },
+          {
+            "id": "b",
+            "text": "Ingress 規則沒有生效",
+            "feedback": "curl 拿到正確後端，代表規則有效。"
+          },
+          {
+            "id": "c",
+            "text": "controller 沒有安裝",
+            "feedback": "沒裝的話 curl 不會通。"
+          }
+        ],
+        "answer": [
+          "a"
+        ]
+      },
+      {
+        "id": "external-chain",
+        "revision": 1,
+        "objectiveId": "o2",
+        "prompt": "條件改變：使用者從叢集外打 `https://shop.com/api`。排序這個請求的路徑。",
+        "hint": "這次從叢集外開始。shop.com 第一次被解析時，CoreDNS 有參與嗎？",
+        "explanation": "外部 DNS 把 shop.com 指到雲 LB 或 node IP；進 controller 的 Service 靠 L4；nginx 做 L7 比對後依 EndpointSlice 送到 Pod。",
+        "source": {
+          "path": "portfolio/k8s/notes/p2a-full-packet-chain.md",
+          "section": "旅程 B:外部使用者 → shop.com(L7 疊在 L4 上)"
+        },
+        "variantOf": "chain",
+        "type": "order",
+        "items": [
+          {
+            "id": "s0",
+            "text": "外部 DNS 把 shop.com 解析到雲 LB 或 node IP"
+          },
+          {
+            "id": "s1",
+            "text": "流量進入 controller 的 LoadBalancer 或 NodePort Service"
+          },
+          {
+            "id": "s2",
+            "text": "nginx 依 Host 與 path 比對規則"
+          },
+          {
+            "id": "s3",
+            "text": "nginx 依 EndpointSlice 把請求送到後端 Pod"
+          }
+        ],
+        "answer": [
+          [
+            "s0",
+            "s1",
+            "s2",
+            "s3"
+          ]
+        ]
+      }
+    ],
+    "challenge": {
+      "prompt": "在 kind 部署 shop-web、shop-api 與 Ingress（shop.com：`/` → web、`/api` → api），先不裝 controller。觀察 ADDRESS 與 curl 後，安裝 ingress-nginx，再用五種請求測試：`/`、`/api`、`/api/v1`、`/apiv2`、`Host: nope.com`。",
+      "criteria": [
+        "每個請求先寫下預測的後端或 404，再對照實際回應",
+        "說明安裝 controller 前後的差別，對應「物件是規則、controller 是引擎」",
+        "`/apiv2` 的結果用 Prefix 路徑段比對解釋",
+        "指出哪一段用到 kube-proxy（controller 的 Service），哪一段繞過（nginx 直連 Pod）"
+      ]
+    }
+  },
+  {
+    "id": "k8s-dns-triage",
+    "coachId": "k8s",
+    "phaseId": "k8s:P2a",
+    "title": "DNS 排障",
+    "topicRefs": [
+      {
+        "parent": "k8s",
+        "label": "DNS 排障第一刀(先用 FQDN 二分)"
+      }
+    ],
+    "objectives": [
+      {
+        "id": "o1",
+        "label": "說明 resolv.conf、search list 與 ndots 如何展開名字"
+      },
+      {
+        "id": "o2",
+        "label": "用 FQDN 二分定位 DNS 故障在發問端還是伺服器"
+      }
+    ],
+    "sources": [
+      "portfolio/k8s/notes/p2a-service-kube-proxy.md",
+      "portfolio/k8s/notes/p2a-full-packet-chain.md"
+    ],
+    "questions": [
+      {
+        "id": "who-writes-resolv",
+        "revision": 1,
+        "objectiveId": "o1",
+        "prompt": "Pod 的 /etc/resolv.conf 是誰寫的？",
+        "hint": "這個檔案在容器啟動前就要存在。負責把 Pod 變成真實容器的是哪一棒？",
+        "explanation": "kubelet 建 Pod 時寫入，nameserver 指向 CoreDNS 的 ClusterIP。CoreDNS 只負責回答。",
+        "source": {
+          "path": "portfolio/k8s/notes/p2a-service-kube-proxy.md",
+          "section": "CoreDNS:名字 → ClusterIP"
+        },
+        "type": "choice",
+        "multiple": false,
+        "options": [
+          {
+            "id": "a",
+            "text": "kubelet，在建 Pod 時寫入",
+            "feedback": "建容器的那一棒順便寫好。"
+          },
+          {
+            "id": "b",
+            "text": "CoreDNS",
+            "feedback": "CoreDNS 只回答查詢。"
+          },
+          {
+            "id": "c",
+            "text": "kube-proxy",
+            "feedback": "kube-proxy 只寫 iptables 規則。"
+          },
+          {
+            "id": "d",
+            "text": "image 內建",
+            "feedback": "會被 kubelet 寫入的版本蓋過。"
+          }
+        ],
+        "answer": [
+          "a"
+        ]
+      },
+      {
+        "id": "cross-ns",
+        "revision": 1,
+        "objectiveId": "o1",
+        "prompt": "Pod 在 namespace `default`，要連 namespace `shop` 的 Service `backend`。寫出完整的 FQDN。",
+        "hint": "格式從左到右：Service 名、namespace、固定的 svc、叢集網域。",
+        "explanation": "backend.shop.svc.cluster.local。FQDN 不依賴 search list，在任何 namespace 都能用。",
+        "source": {
+          "path": "portfolio/k8s/notes/p2a-service-kube-proxy.md",
+          "section": "CoreDNS:名字 → ClusterIP"
+        },
+        "type": "fill",
+        "answer": {
+          "kind": "text",
+          "accepted": [
+            "backend.shop.svc.cluster.local",
+            "backend.shop.svc.cluster.local."
+          ],
+          "caseSensitive": false
+        }
+      },
+      {
+        "id": "ndots-count",
+        "revision": 1,
+        "objectiveId": "o1",
+        "prompt": "resolv.conf 是 `search default.svc.cluster.local svc.cluster.local cluster.local` 加上 `options ndots:5`。app 查 `api.example.com`（只算 A 記錄）。最多會送出幾個名字查詢才拿到答案？",
+        "hint": "先數 `api.example.com` 有幾個點，跟 ndots 比較。少於 ndots 時，search list 的每一項都要先試。",
+        "explanation": "2 個點少於 5，先依序試 3 個 search 網域（都是 NXDOMAIN），最後才查原名，共 4 個。實際上 A 與 AAAA 會再加倍，漏進來的主機網域也會再加。",
+        "source": {
+          "path": "portfolio/k8s/notes/p2a-full-packet-chain.md",
+          "section": "旅程 A:叢集內 Pod → Service(L4)"
+        },
+        "type": "fill",
+        "answer": {
+          "kind": "number",
+          "value": 4,
+          "tolerance": 0,
+          "unit": ""
+        }
+      },
+      {
+        "id": "bisect",
+        "revision": 1,
+        "objectiveId": "o2",
+        "prompt": "app 回報 `backend` 連不上。排序 DNS 排障步驟。",
+        "hint": "每一步都要把嫌疑範圍砍半。哪個查詢最便宜，又能分開發問端與伺服器？",
+        "explanation": "先重現，再用 FQDN 二分：FQDN 成功是發問端的 search 處理問題；FQDN 也失敗，再直接問 CoreDNS 並檢查它自己的 Pod 與 Endpoints。",
+        "source": {
+          "path": "portfolio/k8s/notes/p2a-service-kube-proxy.md",
+          "section": "踩過的雷(D 段現場)"
+        },
+        "type": "order",
+        "items": [
+          {
+            "id": "s0",
+            "text": "在同一個 Pod 用短名查詢，重現失敗"
+          },
+          {
+            "id": "s1",
+            "text": "改用 FQDN `backend.default.svc.cluster.local` 查詢"
+          },
+          {
+            "id": "s2",
+            "text": "FQDN 也失敗時，直接對 CoreDNS 的 ClusterIP 查詢"
+          },
+          {
+            "id": "s3",
+            "text": "檢查 CoreDNS 的 Pod 狀態與 kube-dns 的 Endpoints"
+          }
+        ],
+        "answer": [
+          [
+            "s0",
+            "s1",
+            "s2",
+            "s3"
+          ]
+        ]
+      },
+      {
+        "id": "ndots-latency",
+        "revision": 1,
+        "objectiveId": "o1",
+        "prompt": "高 QPS 服務呼叫外部的 `api.partner.com`，DNS 延遲偏高，CoreDNS 的 QPS 是預期的好幾倍。最可能的原因？",
+        "hint": "數一次外部查詢實際觸發幾個 DNS 請求。",
+        "explanation": "ndots:5 讓點數少的外部名字先跑完整個 search list，每次多出好幾個 NXDOMAIN 查詢。",
+        "source": {
+          "path": "portfolio/k8s/notes/p2a-service-kube-proxy.md",
+          "section": "踩過的雷(D 段現場)"
+        },
+        "type": "choice",
+        "multiple": false,
+        "options": [
+          {
+            "id": "a",
+            "text": "ndots:5 讓外部名字先跑完 search list，每次多出數個 NXDOMAIN 查詢",
+            "feedback": "查詢數被放大。"
+          },
+          {
+            "id": "b",
+            "text": "conntrack table 滿了",
+            "feedback": "那會是丟棄新連線，不是 QPS 變高。"
+          },
+          {
+            "id": "c",
+            "text": "CoreDNS 副本太多",
+            "feedback": "副本多不會讓查詢數變多。"
+          }
+        ],
+        "answer": [
+          "a"
+        ]
+      },
+      {
+        "id": "empty-kube-dns",
+        "revision": 1,
+        "objectiveId": "o2",
+        "prompt": "直接對 CoreDNS 的 ClusterIP 查 FQDN 也 timeout，`kubectl get endpoints -n kube-system kube-dns` 是空的。判斷？",
+        "hint": "kube-dns 也是一個普通的 Service。Endpoints 空的時候，回想 Service 那章進名單的兩個條件。",
+        "explanation": "伺服器端問題：CoreDNS Pod 沒有 Ready，或 label 對不上 kube-dns 的 selector。不是發問端的 resolver。",
+        "source": {
+          "path": "portfolio/k8s/notes/p2a-service-kube-proxy.md",
+          "section": "CoreDNS:名字 → ClusterIP"
+        },
+        "type": "choice",
+        "multiple": false,
+        "options": [
+          {
+            "id": "a",
+            "text": "伺服器端：CoreDNS Pod 沒有 Ready，或 selector 對不上",
+            "feedback": "名單空了，ClusterIP 後面沒人。"
+          },
+          {
+            "id": "b",
+            "text": "發問端 resolver 的 bug",
+            "feedback": "FQDN 直接問 CoreDNS 也失敗，已排除發問端。"
+          },
+          {
+            "id": "c",
+            "text": "ndots 設太大",
+            "feedback": "ndots 不會讓 Endpoints 變空。"
+          }
+        ],
+        "answer": [
+          "a"
+        ]
+      },
+      {
+        "id": "coredns-down",
+        "revision": 1,
+        "objectiveId": "o1",
+        "prompt": "條件改變：CoreDNS 的 Pod 全部掛掉。哪個敘述正確？",
+        "hint": "CoreDNS 只負責哪一段翻譯？封包轉發那一段有用到它嗎？",
+        "explanation": "用名字的新請求全部失敗；直接用 IP 的連線不經過名字層，仍然可通。所以 CoreDNS 預設多副本。",
+        "source": {
+          "path": "portfolio/k8s/notes/p2a-service-kube-proxy.md",
+          "section": "CoreDNS:名字 → ClusterIP"
+        },
+        "variantOf": "who-writes-resolv",
+        "type": "choice",
+        "multiple": false,
+        "options": [
+          {
+            "id": "a",
+            "text": "用名字的新請求失敗，直接用 IP 的連線仍可通",
+            "feedback": "名字層與轉發層分開。"
+          },
+          {
+            "id": "b",
+            "text": "所有 Pod 的網路中斷",
+            "feedback": "轉發靠 kernel 規則，不靠 CoreDNS。"
+          },
+          {
+            "id": "c",
+            "text": "每個 Pod 的 resolv.conf 被清空",
+            "feedback": "resolv.conf 是 kubelet 寫的，不會因此改變。"
+          }
+        ],
+        "answer": [
+          "a"
+        ]
+      },
+      {
+        "id": "short-name-cross-ns",
+        "revision": 1,
+        "objectiveId": "o1",
+        "prompt": "同一個 default 的 Pod 只寫短名 `backend`，但 Service 在 namespace `shop`。search list 是 `default.svc.cluster.local svc.cluster.local cluster.local`。結果？",
+        "hint": "把 search list 的每一項接到 `backend` 後面，逐一檢查哪一個是真的存在的 Service 名稱。",
+        "explanation": "先試 backend.default.svc.cluster.local，default 沒有這個 Service；其餘組合也不是合法的 Service 名稱，最後 NXDOMAIN。寫 `backend.shop` 才會透過 svc.cluster.local 那項命中。",
+        "source": {
+          "path": "portfolio/k8s/notes/p2a-service-kube-proxy.md",
+          "section": "CoreDNS:名字 → ClusterIP"
+        },
+        "variantOf": "cross-ns",
+        "type": "choice",
+        "multiple": false,
+        "options": [
+          {
+            "id": "a",
+            "text": "查不到，最後回 NXDOMAIN",
+            "feedback": "沒有一個組合指向 shop 的 backend。"
+          },
+          {
+            "id": "b",
+            "text": "自動找到 shop 的 backend",
+            "feedback": "search list 第一項只會接 default。"
+          },
+          {
+            "id": "c",
+            "text": "解析到 CoreDNS 自己的 IP",
+            "feedback": "CoreDNS 不會回傳自己。"
+          }
+        ],
+        "answer": [
+          "a"
+        ]
+      },
+      {
+        "id": "trailing-dot",
+        "revision": 1,
+        "objectiveId": "o1",
+        "prompt": "同樣的設定，app 改成查 `api.example.com.`（結尾加點）。會送出幾個名字查詢？",
+        "hint": "結尾的點告訴 resolver 什麼？這時 search list 還會用上嗎？",
+        "explanation": "結尾的點代表這已經是 FQDN，resolver 直接查，不套 search list，只送 1 個。",
+        "source": {
+          "path": "portfolio/k8s/notes/p2a-full-packet-chain.md",
+          "section": "旅程 A:叢集內 Pod → Service(L4)"
+        },
+        "variantOf": "ndots-count",
+        "type": "fill",
+        "answer": {
+          "kind": "number",
+          "value": 1,
+          "tolerance": 0,
+          "unit": ""
+        }
+      },
+      {
+        "id": "busybox-fqdn-ok",
+        "revision": 1,
+        "objectiveId": "o2",
+        "prompt": "FQDN 查詢成功，但短名 `backend` 回 NXDOMAIN。測試工具是 busybox 的 nslookup。下一步？",
+        "hint": "FQDN 成功代表伺服器端能回答。剩下的差異在誰身上？",
+        "explanation": "是發問端：busybox（musl）處理 search list 不可靠。改用 netshoot 或真實 app 的 resolver 再測，不要因此重啟 CoreDNS。",
+        "source": {
+          "path": "portfolio/k8s/notes/p2a-service-kube-proxy.md",
+          "section": "踩過的雷(D 段現場)"
+        },
+        "variantOf": "bisect",
+        "type": "choice",
+        "multiple": false,
+        "options": [
+          {
+            "id": "a",
+            "text": "判定是發問端，改用 netshoot 或 app 的 resolver 再測，先不動 CoreDNS",
+            "feedback": "伺服器已證明能回答。"
+          },
+          {
+            "id": "b",
+            "text": "重啟 CoreDNS",
+            "feedback": "FQDN 成功，伺服器沒壞。"
+          },
+          {
+            "id": "c",
+            "text": "刪除 Service 再重建",
+            "feedback": "名字本身能解析。"
+          }
+        ],
+        "answer": [
+          "a"
+        ]
+      },
+      {
+        "id": "ndots-fix",
+        "revision": 1,
+        "objectiveId": "o1",
+        "prompt": "要降低外部名字的多餘 DNS 查詢，哪些做法有效？選出全部。",
+        "hint": "多餘查詢來自「點數少於 ndots，就先試 search list」。從這條規則的兩邊下手。",
+        "explanation": "結尾加點讓名字直接成為 FQDN；用 Pod 的 dnsConfig 把 ndots 調小，讓外部名字先查原名。兩者都減少 NXDOMAIN。",
+        "source": {
+          "path": "portfolio/k8s/notes/p2a-service-kube-proxy.md",
+          "section": "踩過的雷(D 段現場)"
+        },
+        "variantOf": "ndots-latency",
+        "type": "choice",
+        "multiple": true,
+        "options": [
+          {
+            "id": "a",
+            "text": "外部名字結尾加點，寫成 FQDN",
+            "feedback": "直接跳過 search list。"
+          },
+          {
+            "id": "b",
+            "text": "在 Pod 的 dnsConfig 把 ndots 調小",
+            "feedback": "點數夠的名字先查原名。"
+          },
+          {
+            "id": "c",
+            "text": "把測試工具換成 busybox",
+            "feedback": "工具與查詢量無關。"
+          },
+          {
+            "id": "d",
+            "text": "刪掉 kube-dns Service",
+            "feedback": "所有名字解析都會失敗。"
+          }
+        ],
+        "answer": [
+          "a",
+          "b"
+        ]
+      },
+      {
+        "id": "coredns-crashloop",
+        "revision": 1,
+        "objectiveId": "o2",
+        "prompt": "接著查到 CoreDNS 的 Pod 是 CrashLoopBackOff。下一步？",
+        "hint": "這時 CoreDNS 只是一個普通的壞 Pod。CrashLoopBackOff 的證據在哪？",
+        "explanation": "照一般 Pod 排障：describe 看 Last State 與 Events，再用 logs --previous 讀上一個容器的輸出。",
+        "source": {
+          "path": "portfolio/k8s/notes/p2a-service-kube-proxy.md",
+          "section": "CoreDNS:名字 → ClusterIP"
+        },
+        "variantOf": "empty-kube-dns",
+        "type": "choice",
+        "multiple": false,
+        "options": [
+          {
+            "id": "a",
+            "text": "`kubectl describe` 與 `kubectl logs -n kube-system <pod> --previous`",
+            "feedback": "證據在上一個死掉的容器。"
+          },
+          {
+            "id": "b",
+            "text": "改每個 app 的 resolv.conf 指向外部 DNS",
+            "feedback": "繞過問題，叢集內名字也會失效。"
+          },
+          {
+            "id": "c",
+            "text": "重建所有 node",
+            "feedback": "先找死因。"
+          }
+        ],
+        "answer": [
+          "a"
+        ]
+      }
+    ],
+    "challenge": {
+      "prompt": "在 kind 跑一個 `nicolaka/netshoot` Pod，讀它的 /etc/resolv.conf。依序測：短名 `backend`、FQDN、跨 namespace 的 `backend.shop`、外部名 `example.com` 與 `example.com.`，同時用 `tcpdump -i any port 53` 看實際送出的查詢。最後把 CoreDNS scale 到 0。",
+      "criteria": [
+        "每個名字先預測實際送出的查詢數與結果",
+        "用 tcpdump 輸出證明 ndots:5 讓外部名字先跑 search list",
+        "CoreDNS 為 0 時，預測並驗證：用名字連線失敗，用 IP 直連成功",
+        "做完把 CoreDNS scale 回原副本數，確認 `kubectl get endpoints -n kube-system kube-dns` 恢復"
       ]
     }
   }

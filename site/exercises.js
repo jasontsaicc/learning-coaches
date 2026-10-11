@@ -424,7 +424,7 @@ export function mountPractice(container, chapter, { state, onSave, onExit }) {
                 .join("")
             : "";
       container.querySelector("#feedback").innerHTML =
-        `<section class="feedback ${a.correct ? "correct" : "rethink"}"><h2 tabindex="-1">${a.skipped ? "先記下這個觀念" : a.correct ? (a.hintUsed ? "提示後答對" : old ? "練習後答對" : "答對了") : "再想清楚這一步"}</h2><p><strong>參考答案：</strong>${esc(answer)}</p><p>${esc(q.explanation)}</p>${explanations ? `<ul>${explanations}</ul>` : ""}<a href="#/read/${encodeURIComponent(q.source.path)}">回到教材 · ${esc(q.source.section)} ↗</a>${notice ? `<p role="alert">${esc(notice)}</p>` : ""}<p><button class="btn primary" id="next">${st.index + 1 === st.queue.length ? "看看本輪結果" : "下一題 →"}</button></p></section>`;
+        `<section class="feedback ${a.correct ? "correct" : "rethink"}"><h2 tabindex="-1">${a.skipped ? "先記下這個觀念" : a.correct ? (a.hintUsed ? "提示後答對" : old ? "練習後答對" : "答對了") : "再想清楚這一步"}</h2><p><strong>參考答案：</strong>${esc(answer)}</p><p>${esc(q.explanation)}</p>${explanations ? `<ul>${explanations}</ul>` : ""}${q.source.path.endsWith(".md") ? `<a href="#/read/${encodeURIComponent(q.source.path)}">` : `<a href="files/${encodeURI(q.source.path)}" target="_blank" rel="noopener">`}回到教材 · ${esc(q.source.section)} ↗</a>${notice ? `<p role="alert">${esc(notice)}</p>` : ""}<p><button class="btn primary" id="next">${st.index + 1 === st.queue.length ? "看看本輪結果" : "下一題 →"}</button></p></section>`;
       container.querySelector("#feedback h2").focus();
       container.querySelector("#next").onclick = () => {
         st = { ...st, index: st.index + 1, draft: undefined };

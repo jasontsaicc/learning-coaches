@@ -4,7 +4,7 @@
 
 | 課程 | 題庫檔案 | 目前練習章節 |
 |---|---|---|
-| Kubernetes | [exercises/k8s.json](exercises/k8s.json) | Pod probes |
+| Kubernetes | [exercises/k8s.json](exercises/k8s.json) | apply→Running、容器的隔離、Pod 探針、Deployment rollout、Resource/QoS/OOM、Service、Ingress、DNS 排障 |
 | System Design | [exercises/sd.json](exercises/sd.json) | Cache-Aside |
 | LeetCode | [exercises/leetcode.json](exercises/leetcode.json) | Linked List Cycle |
 | Cloud Architect | [exercises/ca.json](exercises/ca.json) | VPC Peering |
@@ -16,9 +16,10 @@
 1. 在對應課程 JSON 陣列中複製一個完整章節物件。更新全站唯一的 `id`、`title`、`coachId`、`phaseId`。
 2. `topicRefs` 填入網站資料中完全一致的 `parent` 與 `label`。例如 Chat System 是 `sd:P3` 與 `Chat System (Day 35-37)`。可執行 `python3 site/build.py` 後查閱 `site/dist/data.json` 的 `nodes`。
 3. 填寫至少兩個 `objectives`；`sources` 指向已匯入網站的教材檔案。開發新增教材放 `portfolio/<課程>/notes/`，不要修改 `workspaces/`。
-4. 編寫六道主題題目，至少三種互動，涵蓋至少兩個目標；再加入至少兩道變式題。每輪目前固定取前六道非變式題，因此擴充練習情境請加變式，或另開一章。
-5. 填寫 `challenge.prompt` 與 `challenge.criteria`，讓學習者能用實作或解釋展示理解。
-6. 執行下方驗證，人工核對答案、干擾選項、提示與來源，再更新網站。
+4. 編寫六道主題題目，至少三種互動，涵蓋至少兩個目標；再替每道主題各寫一道變式（`variantOf`）。每輪固定取前六道非變式題；弱項重練只取每道主題的第一個變式，同一題疊多個變式不會被用到。變式要改條件（數字、故障點、情境），不能只換名稱或選項順序。
+5. 每題的 `hint` 指向下一個推理動作（追哪個狀態、比哪個條件、查哪段設定），不透露答案；同章不要重複同一句。
+6. 填寫 `challenge.prompt` 與 `challenge.criteria`，讓學習者能用實作或解釋展示理解：寫明環境與指令、執行前要寫下的預測，以及可觀察的檢查標準。
+7. 執行下方驗證，人工核對答案、干擾選項、提示與來源，再更新網站。
 
 ## 題目欄位
 
