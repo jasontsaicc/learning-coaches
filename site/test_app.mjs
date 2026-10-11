@@ -54,5 +54,6 @@ test("lesson labels separate activity, materials, plans and assessment", async (
     "已有教材 · 尚未評量",
   );
   assert.equal(level({ planned: true }), "課綱待學");
+  assert.equal(level({ status: "practice-recorded" }), "已練習 · 尚無章節評級");
   assert.equal(level({ level: "high" }), "教練評量 · high");
 });

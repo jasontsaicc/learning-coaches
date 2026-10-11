@@ -159,11 +159,20 @@ def sd_topic_states(topics, progress_text):
     """Derive activity separately from grades; never export the private breakpoint text."""
     breakpoint = re.sub(r'<!--.*?-->', '', section(progress_text, 'Current Session breakpoint'), flags=re.S)
     current = re.search(r'^(P\d+[a-z]?)\s*/[^\n]*?\(\s*Day\s+(\d+)(?:-\d+)?\s*\)', breakpoint, re.M)
+    scorecards = re.sub(r'<!--.*?-->', '', section(progress_text, 'Scorecard history'), flags=re.S)
+    assessments = re.findall(r'^- [^|\n]+\|([^|\n]+)\|', scorecards, re.M)
     for topic in topics:
         days = re.search(r'Day (\d+)(?:-(\d+))?', topic['label'])
+        title = topic['label'].split(' (Day ')[0]
+        practiced = days and any(
+            re.search(r'\bDay\s+' + str(day) + r'\s+' + re.escape(title) + r'(?!\w)', assessment)
+            for day in range(int(days[1]), int(days[2] or days[1]) + 1)
+            for assessment in assessments)
         if (current and days and topic['parent'] == f'sd:{current[1]}'
                 and int(days[1]) <= int(current[2]) <= int(days[2] or days[1])):
             topic.update(status='in-progress', planned=False)
+        elif topic.get('planned') and practiced:
+            topic.update(status='practice-recorded', planned=False)
         elif topic.get('planned') and topic.get('files'):
             # A prepared note is evidence of material, not of completed learning.
             topic['status'] = 'materials-available'

@@ -124,6 +124,8 @@
 
 ## 後續修正：SD 學習狀態與題庫維護
 
+- 補修 Notification System：Scorecard history 已有 Day 33 留存冷測紀錄，不能只當成「已有教材」。以評量標題中明確的 Day 與主題辨識既有練習，顯示「已練習 · 尚無章節評級」；不把局部冷測當成整章通過，也不公開評量原文。
+
 - 原先沒有 Mastery 評量的 SD 章節一律標成「課綱未開」。現在從 Current Session breakpoint 只提取階段與課綱 Day，標記當前章節「進行中」，不匯出私人斷點文字、不虛構評量。
 - 有筆記、尚未評量的課綱節點顯示「已有教材 · 尚未評量」，其餘顯示「課綱待學」。Chat System (Day 35-37) 因而能正確呈現正在學習。
 - 兩份 day40-gauntlet-rate-limiter 筆記的 40 是 session 編號，原本誤掛 News Feed。新增 Markdown topic 註記，明確掛回 Distributed Rate Limiter (Day 31-32)。

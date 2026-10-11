@@ -69,7 +69,11 @@ HTML buttons show the page `<title>`. To bring in a claude.ai artifact: `Artifac
 SD activity and assessment are separate: the current breakpoint chapter shows
 「進行中 · 尚未評量」 without inventing a grade. Unassessed planned chapters with notes
 show 「已有教材 · 尚未評量」; other planned chapters show 「課綱待學」.
-Notes alone do not prove completion. Current-topic detection expects a breakpoint line
+Notes alone do not prove completion.
+SD scorecard entries with an explicit `Day N Topic Title` also establish prior practice:
+ungraded chapters show 「已練習 · 尚無章節評級」. Only the status is exported, not scorecard text;
+a partial retest does not establish completion or a mastery grade.
+Current-topic detection expects a breakpoint line
 starting with `P3 / Chat System(Day 35)/ ...`; changing that format requires updating the parser.
 
 Initial coverage: Pod probes, Cache-Aside, Linked List Cycle and VPC Peering.

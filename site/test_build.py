@@ -176,3 +176,18 @@ unstarted = [{'label':'Chat System (Day 35-37)','parent':'sd:P3','planned':True,
 sd_topic_states(unstarted, '## Current Session breakpoint\n<!-- P3 / Chat (Day 35) -->\n')
 assert unstarted[0]['status'] == 'materials-available' and unstarted[0]['planned']
 print('SD learning status and note placement OK')
+
+# A scorecard is evidence of practice, without inventing a whole-chapter grade.
+recorded = [{'label':'Notification System (Day 33-34)','parent':'sd:P3','planned':True,'files':[]}]
+scorecard = '## Scorecard history\n<!-- - date | cold retest (Day 38 Distributed Cache) | private -->\n- 2026-08-11 | cold retest (s49, Day 33 Notification System 留存冷測) | PRIVATE RESULT\n'
+sd_topic_states(recorded, scorecard)
+assert recorded[0].get('status') == 'practice-recorded' and not recorded[0]['planned']
+assert recorded[0].get('level') is None and 'PRIVATE' not in str(recorded)
+for heading in ['## Mistake Registry', '## Current Session breakpoint']:
+    other = [{'label':'Notification System (Day 33-34)','parent':'sd:P3','planned':True,'files':[]}]
+    sd_topic_states(other, scorecard.replace('## Scorecard history', heading))
+    assert other[0]['planned']
+wrong = [{'label':'Other (Day 33-34)','parent':'sd:P3','planned':True,'files':[]}]
+sd_topic_states(wrong, scorecard)
+assert wrong[0]['planned']
+print('SD recorded practice OK')

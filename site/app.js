@@ -29,19 +29,21 @@ export const esc = (s) =>
   );
 const isLeaf = (n) => ["topic", "problem"].includes(n.kind);
 export const level = (n) =>
-  n.status === "in-progress"
-    ? n.level
-      ? `進行中 · 教練評量 ${n.level}`
-      : "進行中 · 尚未評量"
-    : n.status === "materials-available"
-      ? "已有教材 · 尚未評量"
-      : n.planned
-        ? "課綱待學"
-        : n.level
-          ? `教練評量 · ${n.level}`
-          : n.practiced
-            ? "已練習 · 未評量"
-            : "已接觸 · 未評量";
+  n.status === "practice-recorded"
+    ? "已練習 · 尚無章節評級"
+    : n.status === "in-progress"
+      ? n.level
+        ? `進行中 · 教練評量 ${n.level}`
+        : "進行中 · 尚未評量"
+      : n.status === "materials-available"
+        ? "已有教材 · 尚未評量"
+        : n.planned
+          ? "課綱待學"
+          : n.level
+            ? `教練評量 · ${n.level}`
+            : n.practiced
+              ? "已練習 · 未評量"
+              : "已接觸 · 未評量";
 function coachOf(data, n) {
   const byId = new Map(data.nodes.map((x) => [x.id, x]));
   while (n && n.kind !== "coach") n = byId.get(n.parent);
