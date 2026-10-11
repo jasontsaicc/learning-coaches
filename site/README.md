@@ -6,6 +6,7 @@ Static personal learning site: course paths → chapter exercises → evidence a
 python3 site/build.py            # → site/dist/ (gitignored)
 python3 site/build.py --check    # parse only; lint-all.sh runs this + test_build.py
 systemctl --user status learning-map   # serves site/dist on 100.86.161.122:8123 (tailnet only)
+./scripts/site-refresh.sh               # rebuild + restart + health check
 ```
 
 ## Files
