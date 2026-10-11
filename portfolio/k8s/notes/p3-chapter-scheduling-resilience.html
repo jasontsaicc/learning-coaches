@@ -1,0 +1,352 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"></head><body>
+<title>P3 調度、彈性與排障</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC:wght@400;700&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: one notebook column on graph paper; figures on taped cards, scenarios as 2x2 comic panels */
+:root {
+  --paper: #F6F8FA;
+  --grid: rgba(90,130,170,.16);
+  --ink: #23313E;
+  --ink-soft: #55677A;
+  --card: #FFFFFF;
+  --tape: rgba(240,214,140,.75);
+  --who: #FFE98A;
+  --see: #BDEEF6;
+  --may: #F9CDE0;
+  --wrong: #D2453A;
+  --ok: #2F8F5B;
+  --line: #9DB0C2;
+  --font-hand: "LXGW WenKai TC", "Noto Sans TC", "PingFang TC", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #1A2320; --grid: rgba(200,230,210,.08); --ink: #E6EDE8; --ink-soft: #A9BAB1;
+    --card: #24302C; --tape: rgba(200,180,110,.45); --who: #8A7A2A; --see: #2B6A74; --may: #7A3F57;
+    --wrong: #FF8A7E; --ok: #7FD3A1; --line: #5E7268; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #1A2320; --grid: rgba(200,230,210,.08); --ink: #E6EDE8; --ink-soft: #A9BAB1;
+  --card: #24302C; --tape: rgba(200,180,110,.45); --who: #8A7A2A; --see: #2B6A74; --may: #7A3F57;
+  --wrong: #FF8A7E; --ok: #7FD3A1; --line: #5E7268; color-scheme: dark;
+}
+body {
+  background-color: var(--paper);
+  background-image: linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 22px 22px;
+  color: var(--ink);
+  font-family: var(--font-hand);
+  font-size: 17px;
+  line-height: 1.75;
+}
+.page { max-width: 760px; margin: 0 auto; padding-inline: 18px; padding-block: 32px 64px; display: grid; gap: 34px; }
+h1, h2 { text-wrap: balance; line-height: 1.3; margin: 0; }
+h1 { font-size: 2.1rem; }
+h2 { font-size: 1.45rem; display: flex; align-items: baseline; gap: 10px; }
+h2 .tag { font-family: var(--font-mono); font-size: .72rem; letter-spacing: .08em; color: var(--ink-soft); text-transform: uppercase; }
+p { margin: 0; }
+section { display: grid; gap: 14px; min-width: 0; }
+.sub { color: var(--ink-soft); font-size: .95rem; }
+mark { background: linear-gradient(transparent 52%, var(--who) 52%); color: inherit; padding: 0 2px; }
+mark.see { background: linear-gradient(transparent 52%, var(--see) 52%); }
+mark.may { background: linear-gradient(transparent 52%, var(--may) 52%); }
+code { font-family: var(--font-mono); font-size: .86em; background: color-mix(in srgb, var(--line) 22%, transparent); padding: 1px 5px; border-radius: 3px; }
+.card { position: relative; background: var(--card); padding: 22px 18px 16px; box-shadow: 0 1px 3px rgba(0,0,0,.12); min-width: 0; }
+.card::before { content: ""; position: absolute; top: -9px; left: 50%; width: 92px; height: 20px; transform: translateX(-50%) rotate(-2deg); background: var(--tape); }
+.scroll { overflow-x: auto; }
+svg text { font-family: var(--font-mono); fill: var(--ink); }
+svg .hand { font-family: var(--font-hand); }
+.rule { border-left: 4px solid var(--ok); padding: 6px 12px; font-size: 1.08rem; }
+.wrong { border-left: 4px solid var(--wrong); padding: 4px 12px; display: grid; gap: 2px; }
+.wrong b { color: var(--wrong); font-size: .85rem; letter-spacing: .05em; }
+.panels { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 14px; }
+.panel { border: 2px solid var(--ink); background: var(--card); padding: 10px; display: grid; gap: 6px; min-width: 0; }
+.panel h3 { margin: 0; font-size: 1rem; font-family: var(--font-mono); }
+.panel p { font-size: .92rem; }
+@media (max-width: 520px) { .panels { grid-template-columns: 1fr; } }
+table { border-collapse: collapse; width: 100%; font-size: .95rem; }
+th, td { border-bottom: 1px dashed var(--line); padding: 8px 6px; text-align: left; vertical-align: top; }
+th { font-family: var(--font-mono); font-size: .78rem; letter-spacing: .05em; color: var(--ink-soft); font-weight: 600; }
+ol { margin: 0; padding-left: 1.3em; display: grid; gap: 6px; }
+blockquote { margin: 0; padding: 12px 16px; background: var(--card); border: 2px dashed var(--line); }
+.en { font-family: var(--font-mono); font-size: .9rem; color: var(--ink-soft); }
+details summary{cursor:pointer}
+</style>
+<style>
+/* chapter-note additions on top of the notebook base */
+svg.fig { display: block; min-width: 640px; width: 100%; height: auto; }
+.lvl { font-family: var(--font-mono); font-size: .74rem; padding: 1px 7px; border: 1.5px solid var(--ink); border-radius: 10px; white-space: nowrap; }
+.lvl.high { background: color-mix(in srgb, var(--ok) 28%, transparent); }
+.lvl.med { background: var(--who); }
+.lvl.low { background: var(--may); }
+.lvl.todo { border-style: dashed; color: var(--ink-soft); }
+.meta { display: flex; flex-wrap: wrap; gap: 8px 16px; font-family: var(--font-mono); font-size: .8rem; color: var(--ink-soft); }
+.toc { display: flex; flex-wrap: wrap; gap: 6px 14px; font-family: var(--font-mono); font-size: .82rem; }
+.toc a { color: var(--ink); }
+.trail { display: grid; gap: 12px; }
+.fix { border-left: 4px solid var(--ok); padding: 4px 12px; }
+.two { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 14px; }
+@media (max-width: 560px) { .two { grid-template-columns: 1fr; } }
+details { background: var(--card); border: 2px dashed var(--line); padding: 10px 14px; }
+details[open] { border-style: solid; }
+details > div { display: grid; gap: 8px; margin-top: 10px; }
+.small { font-size: .9rem; }
+a { color: inherit; text-underline-offset: 3px; }
+pre { margin: 0; font-family: var(--font-mono); font-size: .82rem; line-height: 1.5; background: var(--card); border: 1px solid var(--line); padding: 10px 12px; overflow-x: auto; }
+</style>
+<main class="page">
+  <header style="display:grid;gap:10px">
+    <p class="sub">k8s 課程 · 章節筆記 · Phase 3</p>
+    <h1>P3 調度、彈性與排障</h1>
+    <p>一個問題貫穿整章：<b>流量突然 10 倍、一台 node 掛掉、要升級整個叢集，三件事發生時怎麼做到不掉請求？</b></p>
+    <div class="meta"><span>進行中：chunk 0 kubeadm lab（s41–s44）</span><span>C-1 ~ C-7 尚未開講</span><span>本頁大半是預習 <span class="lvl todo">not started</span></span></div>
+    <nav class="toc"><a href="#map">章節地圖</a><a href="#l0">L0 圖</a><a href="#l1">L1 原理</a><a href="#l2">L2 機制</a><a href="#l3">L3 取捨</a><a href="#l4">L4 EKS</a><a href="#l5">L5 規模</a><a href="#l6">L6 on-call</a><a href="#l7">L7 面試</a><a href="#trail">我的錯題</a><a href="#next">topic 深入</a></nav>
+  </header>
+
+  <section id="map">
+    <h2>章節地圖<span class="tag">chunk 0 + 7 units</span></h2>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 720 230" role="img" aria-label="P3 map: chunk 0 kubeadm lab, then scheduler, constraints, HPA, VPA, node autoscaling, PDB and graceful shutdown, capacity planning as the gate">
+        <defs><marker id="p3a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="var(--ink)"/></marker></defs>
+        <rect x="10" y="20" width="160" height="70" fill="var(--who)" stroke="var(--ink)" stroke-width="2.5"/>
+        <text x="90" y="44" text-anchor="middle" font-size="11">chunk 0 kubeadm lab</text><text x="90" y="62" text-anchor="middle" font-size="10" class="hand">Terraform 3 台 EC2</text><text x="90" y="78" text-anchor="middle" font-size="10" class="hand">← 你在這（step 3 init）</text>
+        <g font-size="11" text-anchor="middle">
+          <rect x="200" y="20" width="120" height="50" fill="var(--see)" stroke="var(--ink)"/><text x="260" y="42">C-1 scheduler</text><text x="260" y="60" font-size="10" class="hand">queue / preemption</text>
+          <rect x="335" y="20" width="120" height="50" fill="var(--see)" stroke="var(--ink)"/><text x="395" y="42">C-2 約束工具箱</text><text x="395" y="60" font-size="10" class="hand">affinity / taint / spread</text>
+          <rect x="470" y="20" width="110" height="50" fill="var(--may)" stroke="var(--ink)"/><text x="525" y="42">C-3 HPA</text><text x="525" y="60" font-size="10" class="hand">公式 + 延遲帳單</text>
+          <rect x="595" y="20" width="115" height="50" fill="var(--may)" stroke="var(--ink)"/><text x="652" y="42">C-4 VPA</text><text x="652" y="60" font-size="10" class="hand">另一個縮放軸</text>
+          <rect x="200" y="110" width="160" height="50" fill="var(--may)" stroke="var(--ink)"/><text x="280" y="132">C-5 CA vs Karpenter</text><text x="280" y="150" font-size="10" class="hand">最慢的一層</text>
+          <rect x="380" y="110" width="160" height="50" fill="var(--who)" stroke="var(--ink)"/><text x="460" y="132">C-6 PDB + graceful</text><text x="460" y="150" font-size="10" class="hand">不掉請求三件組</text>
+          <rect x="560" y="110" width="150" height="50" fill="var(--card)" stroke="var(--ink)" stroke-width="2.5"/><text x="635" y="132">C-7 capacity</text><text x="635" y="150" font-size="10" class="hand">gate：10x 白板題</text>
+        </g>
+        <line x1="170" y1="55" x2="198" y2="45" stroke="var(--ink)" stroke-width="2" marker-end="url(#p3a)"/>
+        <text x="20" y="200" font-size="11" class="hand">另外吸收：七站情境排障、incident commander 情境、P2a NetworkPolicy lab Step 5–6（在 kubeadm + Calico 上補）。</text>
+      </svg>
+    </div>
+  </section>
+
+  <section id="l0">
+    <h2>Layer 0 · 一張圖<span class="tag">analogy</span></h2>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 720 200" role="img" aria-label="Restaurant: spare tables absorb the first wave in seconds, calling more waiters takes a minute, opening a new dining room takes minutes, and a rule says never close more than one section at a time">
+        <g font-size="12" text-anchor="middle">
+          <rect x="10" y="30" width="165" height="100" fill="var(--who)" stroke="var(--ink)" stroke-width="2"/><text x="92" y="58" class="hand">空桌</text><text x="92" y="80" font-size="10">headroom</text><text x="92" y="110" font-size="11" fill="var(--ok)">0 秒</text>
+          <rect x="190" y="30" width="165" height="100" fill="var(--see)" stroke="var(--ink)" stroke-width="2"/><text x="272" y="58" class="hand">叫服務生上工</text><text x="272" y="80" font-size="10">HPA 加 Pod</text><text x="272" y="110" font-size="11">~1 分鐘</text>
+          <rect x="370" y="30" width="165" height="100" fill="var(--may)" stroke="var(--ink)" stroke-width="2"/><text x="452" y="58" class="hand">開新的用餐區</text><text x="452" y="80" font-size="10">Karpenter 加 node</text><text x="452" y="110" font-size="11" fill="var(--wrong)">2–5 分鐘</text>
+          <rect x="550" y="30" width="160" height="100" fill="var(--card)" stroke="var(--ink)" stroke-width="2"/><text x="630" y="58" class="hand">一次只關一區打掃</text><text x="630" y="80" font-size="10">PDB</text><text x="630" y="110" font-size="11">計畫性變動</text>
+        </g>
+        <text x="360" y="170" text-anchor="middle" font-size="13" class="hand">客人一湧進來時，只有已經擺好的空桌接得住。其他都是之後補的。</text>
+      </svg>
+    </div>
+  </section>
+
+  <section id="l1">
+    <h2>Layer 1 · 第一性原理<span class="tag">why it must exist</span></h2>
+    <p><b>限制：每一層的反應時間差一個量級，而容量要花錢。</b>開機、bootstrap、拉 image、readiness 都是物理時間，買不掉。秒級的突刺只能靠預先付錢養著的容量。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 740 220" role="img" aria-label="Latency bill from traffic spike to new capacity serving: metrics scrape up to 15s, HPA sync up to 15s, pod start and readiness tens of seconds, node launch 1 to 5 minutes. Requests in the gap are absorbed only by headroom">
+        <line x1="20" y1="120" x2="720" y2="120" stroke="var(--ink)" stroke-width="2"/>
+        <g font-size="10"><text x="20" y="140">0s 尖峰開始</text><text x="120" y="140">15s</text><text x="210" y="140">30s</text><text x="350" y="140">~60–90s</text><text x="620" y="140">2–5 min</text></g>
+        <rect x="20" y="70" width="95" height="30" fill="var(--see)" stroke="var(--ink)"/><text x="67" y="90" text-anchor="middle" font-size="10">metrics 取樣</text>
+        <rect x="115" y="70" width="90" height="30" fill="var(--see)" stroke="var(--ink)"/><text x="160" y="90" text-anchor="middle" font-size="10">HPA 同步</text>
+        <rect x="205" y="70" width="170" height="30" fill="var(--who)" stroke="var(--ink)"/><text x="290" y="90" text-anchor="middle" font-size="10">排程 + 拉 image + readiness</text>
+        <rect x="375" y="70" width="330" height="30" fill="var(--may)" stroke="var(--ink)"/><text x="540" y="90" text-anchor="middle" font-size="10">node 不夠時：開 EC2 + bootstrap + join</text>
+        <rect x="20" y="30" width="355" height="24" fill="none" stroke="var(--wrong)" stroke-dasharray="5 4"/>
+        <text x="197" y="47" text-anchor="middle" font-size="11" fill="var(--wrong)">這段時間湧進來的請求：誰在扛？</text>
+        <text x="20" y="180" font-size="12" class="hand">答案：已經站著的容量（target CPU 50–60% 而不是 90%、低 priority 佔位 Pod）。</text>
+        <text x="20" y="202" font-size="12" class="hand">HPA 管趨勢，headroom 管突刺。</text>
+      </svg>
+    </div>
+    <p>第二個限制：<b>故障有範圍</b>。一台 node、一個 AZ 會整塊消失。副本放在同一塊上，等於只有一份。所以要把副本打散到不同 failure domain。</p>
+  </section>
+
+  <section id="l2">
+    <h2>Layer 2 · 機制<span class="tag">four engines</span></h2>
+    <div class="two">
+      <div class="card"><b>scheduler 三條 queue</b>
+        <svg viewBox="0 0 320 150" width="100%" role="img" aria-label="activeQ pops into scheduling cycle; failures go to backoffQ with exponential backoff 1 to 10 seconds; truly unschedulable pods wait in unschedulableQ until a cluster event">
+          <defs><marker id="p3b" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="var(--ink)"/></marker></defs>
+          <rect x="10" y="10" width="90" height="34" fill="var(--see)" stroke="var(--ink)"/><text x="55" y="31" text-anchor="middle" font-size="10">activeQ</text>
+          <rect x="140" y="10" width="170" height="34" fill="var(--who)" stroke="var(--ink)"/><text x="225" y="25" text-anchor="middle" font-size="9">Filter → Score → Reserve</text><text x="225" y="38" text-anchor="middle" font-size="9">→ Permit → Bind</text>
+          <line x1="100" y1="27" x2="138" y2="27" stroke="var(--ink)" marker-end="url(#p3b)"/>
+          <rect x="10" y="100" width="110" height="34" fill="var(--card)" stroke="var(--ink)"/><text x="65" y="115" text-anchor="middle" font-size="9">backoffQ</text><text x="65" y="128" text-anchor="middle" font-size="8">1s→2s→…10s</text>
+          <rect x="190" y="100" width="120" height="34" fill="var(--card)" stroke="var(--wrong)" stroke-dasharray="4 3"/><text x="250" y="115" text-anchor="middle" font-size="9">unschedulableQ</text><text x="250" y="128" text-anchor="middle" font-size="8">等叢集事件喚醒</text>
+          <path d="M225 44 L250 98" stroke="var(--wrong)" fill="none" marker-end="url(#p3b)"/>
+          <path d="M65 100 L55 46" stroke="var(--ink)" fill="none" marker-end="url(#p3b)"/>
+          <text x="140" y="80" font-size="8" fill="var(--wrong)">全部 node 被刷掉</text>
+        </svg>
+        <p class="small">PostFilter 失敗時才觸發 preemption：只殺 priority 較低的，PDB 只是 best effort。</p>
+      </div>
+      <div class="card"><b>HPA 公式</b>
+        <pre>desired = ceil(current × metric / target)
+3 × 80% / 50% = 4.8 → 5</pre>
+        <p class="small">CPU 百分比的分母是 <b>requests</b>。requests 亂設，HPA 地基就歪。容忍度 ±10% 不動作。sync 每 15s；縮容 stabilization window 預設 300s。擴容快、縮容慢是刻意的：少擴掉請求，少縮只多花錢。</p>
+      </div>
+    </div>
+
+    <h3 style="margin:0">Pod 終止的 race（rolling update 掉請求的真兇）</h3>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 760 230" role="img" aria-label="Two paths start together at pod deletion: path A removes the pod from EndpointSlice and every node's rules over seconds; path B runs preStop, SIGTERM, grace period, SIGKILL. Without preStop sleep, path B finishes first and new requests hit a dead pod">
+        <defs><marker id="p3c" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="var(--ink)"/></marker></defs>
+        <rect x="10" y="90" width="110" height="44" fill="var(--who)" stroke="var(--ink)" stroke-width="2"/><text x="65" y="110" text-anchor="middle" font-size="10">Pod 標記</text><text x="65" y="125" text-anchor="middle" font-size="10">Terminating</text>
+        <line x1="120" y1="100" x2="160" y2="55" stroke="var(--ink)" marker-end="url(#p3c)"/><line x1="120" y1="124" x2="160" y2="170" stroke="var(--ink)" marker-end="url(#p3c)"/>
+        <text x="165" y="40" font-size="11">路徑 A：EndpointSlice 拿掉 → 每台 node kube-proxy 改規則 → ALB deregister</text>
+        <rect x="165" y="48" width="420" height="20" fill="var(--see)" stroke="var(--ink)"/><text x="375" y="63" text-anchor="middle" font-size="10">傳播需要秒級；ALB 更久</text>
+        <text x="165" y="160" font-size="11">路徑 B：preStop → SIGTERM → 等 30s → SIGKILL</text>
+        <rect x="165" y="168" width="60" height="20" fill="var(--wrong)" opacity=".35" stroke="var(--wrong)"/><text x="195" y="183" text-anchor="middle" font-size="9">秒退</text>
+        <rect x="235" y="168" width="110" height="20" fill="var(--ok)" opacity=".3" stroke="var(--ok)"/><text x="290" y="183" text-anchor="middle" font-size="9">preStop sleep 10</text>
+        <line x1="225" y1="80" x2="225" y2="200" stroke="var(--wrong)" stroke-dasharray="4 3"/>
+        <text x="230" y="212" font-size="10" fill="var(--wrong)">沒 preStop：Pod 已死、規則還在 → refused / 502</text>
+        <text x="600" y="110" font-size="10" class="hand">preStop sleep 擋「新請求」</text><text x="600" y="128" font-size="10" class="hand">grace period 給「舊請求」做完</text>
+      </svg>
+    </div>
+
+    <h3 style="margin:0">你正在蓋的 lab：kubeadm 三台（chunk 0）</h3>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 760 240" role="img" aria-label="kubeadm lab: bastion runs terraform and ansible over SSH; cp-1 listens on 6443 apiserver and 2379-2380 etcd; each node listens on 10250 kubelet; Calico needs BGP 179 and IPIP protocol 4 between nodes">
+        <rect x="10" y="20" width="140" height="70" fill="var(--card)" stroke="var(--ink)" stroke-width="2"/><text x="80" y="45" text-anchor="middle" font-size="11">bastion</text><text x="80" y="64" text-anchor="middle" font-size="10">terraform / ansible</text><text x="80" y="80" text-anchor="middle" font-size="9" fill="var(--wrong)">只當控制台，不當 node</text>
+        <rect x="220" y="20" width="200" height="90" fill="var(--who)" stroke="var(--ink)" stroke-width="2"/><text x="320" y="42" text-anchor="middle" font-size="11">cp-1</text><text x="230" y="62" font-size="10">listen 6443 apiserver</text><text x="230" y="78" font-size="10">listen 2379-2380 etcd（本機）</text><text x="230" y="94" font-size="10">listen 10250 kubelet</text>
+        <rect x="490" y="20" width="120" height="70" fill="var(--see)" stroke="var(--ink)" stroke-width="2"/><text x="550" y="45" text-anchor="middle" font-size="11">worker-1</text><text x="550" y="64" text-anchor="middle" font-size="10">listen 10250</text>
+        <rect x="630" y="20" width="120" height="70" fill="var(--see)" stroke="var(--ink)" stroke-width="2"/><text x="690" y="45" text-anchor="middle" font-size="11">worker-2</text><text x="690" y="64" text-anchor="middle" font-size="10">listen 10250</text>
+        <line x1="150" y1="55" x2="218" y2="55" stroke="var(--ink)"/><text x="160" y="50" font-size="9">:22</text>
+        <path d="M550 90 C550 150, 320 150, 320 112" fill="none" stroke="var(--ink)" stroke-width="1.6"/><text x="400" y="150" font-size="10">kubelet → cp-1:6443（Ready 心跳走這條）</text>
+        <line x1="420" y1="95" x2="488" y2="70" stroke="var(--ink-soft)" stroke-dasharray="4 3"/><text x="430" y="118" font-size="9" fill="var(--ink-soft)">apiserver → :10250</text>
+        <rect x="10" y="175" width="740" height="50" fill="var(--card)" stroke="var(--ok)" stroke-width="2"/>
+        <text x="20" y="196" font-size="11">SG inbound 規則開在「listen 的那一方」：冒號後面的 port 在誰身上，就改誰的 SG，source 填發起方的 SG。</text>
+        <text x="20" y="214" font-size="11">Calico 另外要 node 之間互開 TCP 179（BGP）與 IP protocol 4（IPIP）。少了 IPIP：跨 node Pod 不通，但 node 仍 Ready。</text>
+      </svg>
+    </div>
+  </section>
+
+  <section id="l3">
+    <h2>Layer 3 · 取捨<span class="tag">why this design</span></h2>
+    <div class="scroll"><table>
+      <tr><th>決定</th><th>選 A</th><th>選 B</th><th>判準</th></tr>
+      <tr><td>node autoscaler</td><td>Cluster Autoscaler：調 ASG，機型同質</td><td>Karpenter：看 Pending 總需求直接開 EC2，可混 spot、會 consolidation</td><td>機型多樣、要省錢 → Karpenter；要保守可預測 → CA</td></tr>
+      <tr><td>HPA 訊號</td><td>CPU（落後指標）</td><td>RPS / queue depth（KEDA、custom metrics）</td><td>CPU 高的時候傷害已經發生</td></tr>
+      <tr><td>打散副本</td><td>podAntiAffinity</td><td>topologySpreadConstraints</td><td>anti-affinity 是二元的、成本 O(n²)；spread 有 maxSkew 可調</td></tr>
+      <tr><td>硬約束 vs 軟偏好</td><td><code>required…</code> / <code>DoNotSchedule</code></td><td><code>preferred…</code> / <code>ScheduleAnyway</code></td><td>硬約束 + AZ 掛掉 = 全部 Pending</td></tr>
+      <tr><td>PDB 嚴格度</td><td><code>maxUnavailable: 0</code></td><td><code>maxUnavailable: 1</code></td><td>設 0 等於 node 永遠 drain 不掉，升級卡死</td></tr>
+      <tr><td>headroom</td><td>target 50%：多付錢</td><td>target 85%：省錢</td><td>能接受突刺時掉多少請求？這是業務決定</td></tr>
+    </table></div>
+  </section>
+
+  <section id="l4">
+    <h2>Layer 4 · AWS 怎麼做<span class="tag">EKS elasticity</span></h2>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 760 280" role="img" aria-label="EKS: ALB targets pods; HPA scales Deployment; pending pods trigger Karpenter NodePool which calls EC2 Fleet for on-demand and spot across three AZs; spot interruption notices arrive via EventBridge and SQS 2 minutes ahead">
+        <defs><marker id="p3d" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="var(--ink)"/></marker></defs>
+        <rect x="10" y="20" width="130" height="50" fill="var(--who)" stroke="var(--ink)" stroke-width="2"/><text x="75" y="50" text-anchor="middle" font-size="11">ALB</text>
+        <rect x="180" y="20" width="160" height="50" fill="var(--see)" stroke="var(--ink)" stroke-width="2"/><text x="260" y="40" text-anchor="middle" font-size="11">HPA → Deployment</text><text x="260" y="58" text-anchor="middle" font-size="10">PDB / spread / priority</text>
+        <rect x="380" y="20" width="160" height="50" fill="var(--may)" stroke="var(--ink)" stroke-width="2"/><text x="460" y="40" text-anchor="middle" font-size="11">Pending Pods</text><text x="460" y="58" text-anchor="middle" font-size="10">→ Karpenter NodePool</text>
+        <rect x="580" y="20" width="170" height="50" fill="var(--card)" stroke="var(--ink)" stroke-width="2"/><text x="665" y="40" text-anchor="middle" font-size="11">EC2 Fleet</text><text x="665" y="58" text-anchor="middle" font-size="10">on-demand + spot</text>
+        <g stroke="var(--ink)" stroke-width="2"><line x1="140" y1="45" x2="178" y2="45" marker-end="url(#p3d)"/><line x1="340" y1="45" x2="378" y2="45" marker-end="url(#p3d)"/><line x1="540" y1="45" x2="578" y2="45" marker-end="url(#p3d)"/></g>
+        <g font-size="11" text-anchor="middle">
+          <rect x="30" y="110" width="220" height="90" fill="var(--see)" stroke="var(--ink)"/><text x="140" y="135">AZ-a</text><text x="140" y="160" font-size="10">m6i.large (OD) · c6g.xlarge (spot)</text>
+          <rect x="270" y="110" width="220" height="90" fill="var(--see)" stroke="var(--ink)"/><text x="380" y="135">AZ-b</text><text x="380" y="160" font-size="10">maxSkew 1 → 兩邊副本數差 ≤ 1</text>
+          <rect x="510" y="110" width="220" height="90" fill="var(--see)" stroke="var(--ink)"/><text x="620" y="135">AZ-c</text><text x="620" y="160" font-size="10">spot 中斷前 2 分鐘通知</text>
+        </g>
+        <rect x="30" y="220" width="700" height="44" fill="var(--card)" stroke="var(--ink-soft)" stroke-dasharray="5 4"/>
+        <text x="380" y="247" text-anchor="middle" font-size="11">EventBridge → SQS → Karpenter：收到中斷通知就 cordon + drain，PDB 決定能多快搬走</text>
+      </svg>
+    </div>
+    <div class="scroll"><table>
+      <tr><th>服務 / 設定</th><th>做什麼</th><th>常見陷阱</th></tr>
+      <tr><td>Karpenter NodePool / EC2NodeClass</td><td>依 Pending Pod 需求挑機型開機</td><td>consolidation 一直搬 Pod，沒設 PDB 的服務被反覆打斷；用 <code>disruption.budgets</code> 和 do-not-disrupt 標註控制</td></tr>
+      <tr><td>EC2 Spot</td><td>便宜 60–90%，可被收回</td><td>單一機型 spot → 同時收回。至少開 10 種以上機型分散</td></tr>
+      <tr><td>Insufficient capacity（ICE）</td><td>某 AZ 某機型沒貨</td><td>Pod 卡 Pending 而 Karpenter log 一直重試；NodePool 機型限制太窄是主因</td></tr>
+      <tr><td>ALB deregistration delay</td><td>target 拿掉後等多久才斷連線，預設 300s</td><td>preStop 太短 → 502；deregistration 太長 → rollout 很慢</td></tr>
+      <tr><td>EKS managed node group 升級</td><td>依 PDB 輪替 node</td><td>PDB <code>maxUnavailable: 0</code> → 升級 timeout 失敗</td></tr>
+      <tr><td>EKS Auto Mode</td><td>AWS 代管 Karpenter、CNI、儲存等</td><td>省事但可調的旋鈕少；排障看不到某些元件</td></tr>
+    </table></div>
+    <p class="small">職場真實面：FinOps 要 target CPU 拉到 80%，SRE 要 50%。拿 C-7 的延遲帳單和「尖峰時掉多少請求」的數字去談，不要拿感覺。design review 被問：「如果 AZ-b 整個掉了，剩下兩個 AZ 撐得住 150% 的量嗎？」</p>
+  </section>
+
+  <section id="l5">
+    <h2>Layer 5 · 規模化<span class="tag">evolution ladder</span></h2>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 760 240" role="img" aria-label="Ladder: fixed replicas; HPA on CPU with fixed node group; HPA on RPS plus Karpenter plus PDB and spread; predictive and scheduled scaling, load shedding, cell architecture">
+        <g font-size="11">
+          <rect x="10" y="180" width="170" height="50" fill="var(--card)" stroke="var(--ink)" stroke-width="2"/><text x="20" y="200">① 固定 replicas</text><text x="20" y="218" class="hand">尖峰前人工加</text>
+          <rect x="195" y="130" width="170" height="100" fill="var(--see)" stroke="var(--ink)" stroke-width="2"/><text x="205" y="150">② HPA (CPU)</text><text x="205" y="170" class="hand">固定 node group</text>
+          <rect x="380" y="80" width="170" height="150" fill="var(--who)" stroke="var(--ink)" stroke-width="2"/><text x="390" y="100">③ RPS 訊號 + Karpenter</text><text x="390" y="120" class="hand">PDB、spread 跨 AZ</text><text x="390" y="138" class="hand">priorityClass、佔位 Pod</text>
+          <rect x="565" y="30" width="185" height="200" fill="var(--may)" stroke="var(--ink)" stroke-width="2"/><text x="575" y="50">④ 預測 + 降級</text><text x="575" y="70" class="hand">排程式 / 預測式擴容</text><text x="575" y="88" class="hand">load shedding、限流</text><text x="575" y="106" class="hand">cell 架構限制爆炸半徑</text>
+        </g>
+        <g font-size="10" fill="var(--wrong)"><text x="20" y="170">換掉：人盯</text><text x="205" y="120">換掉：落後指標</text><text x="390" y="70">換掉：被動反應</text></g>
+      </svg>
+    </div>
+    <div class="two">
+      <div class="card"><b>路線 A：多養 headroom</b><p class="small">簡單、可預測，突刺直接吃掉。代價是每個月固定多付 30–50% 運算費。</p></div>
+      <div class="card"><b>路線 B：少養 + 降級</b><p class="small">平時省錢，尖峰時對非核心功能 load shed（回 429、關推薦）。代價是要在 app 層設計降級路徑，而且要演練。</p></div>
+    </div>
+  </section>
+
+  <section id="l6">
+    <h2>Layer 6 · 故障與 on-call<span class="tag">how it breaks</span></h2>
+    <p class="rule">排障兩步：<b>先鎖 fault domain，再查內部。</b>先問「這條路徑上有幾個東西、哪一段有好有壞」，再進到單一成員。restart 一定排在採證後面。</p>
+    <div class="panels">
+      <div class="panel"><h3>Pending 一大片</h3><p><code>kubectl describe pod</code> 讀 <code>0/12 nodes are available: 4 Insufficient cpu, 8 node(s) had untolerated taint</code>。逐項對 C-2 的約束。Karpenter log 看是不是 ICE。</p></div>
+      <div class="panel"><h3>drain 卡住</h3><p><code>Cannot evict pod as it would violate the pod's disruption budget</code>（429）。先看 <code>kubectl get pdb</code> 的 ALLOWED DISRUPTIONS 是不是 0。</p></div>
+      <div class="panel"><h3>每次部署都有 502</h3><p>上面那張 race 圖。加 preStop sleep、ALB 開 pod readiness gate、app 收 SIGTERM 時先停收新連線。</p></div>
+      <div class="panel"><h3>HPA 不動</h3><p><code>kubectl get hpa</code> TARGETS 顯示 <code>&lt;unknown&gt;</code> = metrics-server 沒裝或沒 requests。kubeadm / kind 上 metrics-server 常要 <code>--kubelet-insecure-tls</code>。</p></div>
+    </div>
+    <p class="small">這一章的公開事故先不引用：我沒有一篇確定對得上「autoscaling 來不及」的官方 postmortem。可以去 <a href="https://k8s.af">k8s.af</a> 找 autoscaling 與 PDB 分類的案例。</p>
+    <div class="scroll"><table>
+      <tr><th>SLI</th><th>SLO 例</th><th>為什麼</th></tr>
+      <tr><td>尖峰期間成功率</td><td>99.9%（含突刺 10 分鐘內）</td><td>逼你把 headroom 寫成數字</td></tr>
+      <tr><td>部署期間 5xx</td><td>&lt; 0.1%</td><td>逼你把 preStop、PDB、readiness 設對</td></tr>
+      <tr><td>Pending Pod 最長等待</td><td>&lt; 3 分鐘</td><td>量 node autoscaler 健康度</td></tr>
+    </table></div>
+  </section>
+
+  <section id="l7">
+    <h2>Layer 7 · 面試<span class="tag">interview</span></h2>
+    <blockquote>「Design a deployment on EKS that survives a sudden 10x traffic spike without dropping requests.」</blockquote>
+    <p class="sub">先自己講一遍，再打開。</p>
+    <details><summary>L4 回答</summary><div>
+      <p>「設 HPA 根據 CPU 自動擴，再加 Cluster Autoscaler 或 Karpenter 擴 node，副本放多個 AZ。」</p>
+      <p class="small">元件都對，但「突刺當下那 2 分鐘誰在扛」沒回答。這正是題目要考的。</p>
+    </div></details>
+    <details><summary>L6 回答</summary><div>
+      <p>「先算延遲帳單：metrics 15s + HPA 15s + Pod 起來與 readiness 30–60s；node 不夠再加 2–5 分鐘。所以 10 倍突刺的頭幾分鐘，自動化一個都還沒生效。」</p>
+      <p>「分層：0 秒靠 headroom，target CPU 定 50–60%，再放一組低 priority 的佔位 Pod，尖峰時被 preempt 讓出現成 node。1 分鐘靠 HPA，訊號用 RPS 不用 CPU。分鐘級靠 Karpenter，多機型、跨 3 AZ。」</p>
+      <p>「護欄：topologySpread maxSkew 1 跨 AZ；PDB 保證 consolidation 時不會一次搬太多；priorityClass 寫好犧牲順序；preStop + SIGTERM 處理避免縮容時掉請求。最後有 load shedding：超過容量的部分回 429，保住核心交易。」</p>
+      <p>「驗證：每季做一次 load test 到 10 倍，量的是 SLO 而不是有沒有擴。」</p>
+      <p class="small">L6 多了：延遲帳單（數字）、按時間尺度分層、headroom 的成本取捨、降級路徑、驗證方法。</p>
+    </div></details>
+  </section>
+
+  <section id="trail">
+    <h2>我的錯題軌跡<span class="tag">from session logs</span></h2>
+    <p>P3 正式內容還沒開講。下面是 chunk 0 lab 和跨章排障題撞出來的錯。</p>
+    <div class="trail">
+      <div class="wrong"><b>我錯在這 · 10-06</b>6443 答「三台都開，因為要互相溝通」；10250 選「只開 cp-1」。</div>
+      <div class="fix">修正：inbound 開在 listen 的那一方。apiserver 只在 cp-1，kubelet 在每一台。看冒號後面的 port 在誰身上。</div>
+      <div class="wrong"><b>我錯在這 · 09-30</b>SG 缺 IPIP 預測 nodes NotReady，理由是 etcd 和 calico 沒開。</div>
+      <div class="fix">修正：Ready 是 kubelet 經 6443 的心跳。缺 IPIP 只會讓跨 node Pod 不通，node 照樣 Ready。</div>
+      <div class="wrong"><b>我錯在這 · s41</b>VPC CIDR 三選一選了 10.96.0.0/16。</div>
+      <div class="fix">修正：那是 kubeadm 預設的 Service CIDR。VPC、Pod CIDR、Service CIDR 三段不能重疊。</div>
+      <div class="wrong"><b>我錯在這 · s43</b>init 前 node 必備答「kubelet、kubeadm」。</div>
+      <div class="fix">修正：kubeadm 是一次性工具。必備的是 container runtime（CRI socket）和 kubelet。沒 runtime → kubelet 回報 NotReady，join preflight 也會擋。</div>
+      <div class="wrong"><b>我錯在這 · 08-06 / 08-28</b>三台 NotReady 直接選 restart；排障同堂兩次先跳進單一成員內部。</div>
+      <div class="fix">修正：能重現的晚點修，不能重現的當場採證。先問路徑上有幾個東西、哪段有好有壞。</div>
+    </div>
+  </section>
+
+  <section id="next">
+    <h2>本章 topic 深入筆記<span class="tag">next</span></h2>
+    <div class="scroll"><table>
+      <tr><th>topic</th><th>我的程度</th><th>深入筆記</th></tr>
+      <tr><td>kubeadm 叢集解剖（SG、CIDR、version skew）</td><td><span class="lvl med">lab 進行中</span></td><td><span class="lvl todo">待寫</span></td></tr>
+      <tr><td>scheduler 內部（queue、framework、preemption）</td><td><span class="lvl todo">未開講</span></td><td><span class="lvl todo">待寫</span></td></tr>
+      <tr><td>HPA 延遲帳單與 headroom</td><td><span class="lvl todo">未開講</span></td><td><span class="lvl todo">待寫</span></td></tr>
+      <tr><td>PDB + graceful shutdown race</td><td><span class="lvl todo">未開講</span></td><td><span class="lvl todo">待寫</span></td></tr>
+      <tr><td>Karpenter vs Cluster Autoscaler</td><td><span class="lvl todo">未開講</span></td><td><span class="lvl todo">待寫</span></td></tr>
+    </table></div>
+  </section>
+</main>
+
+</body></html>

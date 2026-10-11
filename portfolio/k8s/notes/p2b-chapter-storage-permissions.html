@@ -1,0 +1,366 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"></head><body>
+<title>P2b 儲存與權限</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC:wght@400;700&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: one notebook column on graph paper; figures on taped cards, scenarios as 2x2 comic panels */
+:root {
+  --paper: #F6F8FA;
+  --grid: rgba(90,130,170,.16);
+  --ink: #23313E;
+  --ink-soft: #55677A;
+  --card: #FFFFFF;
+  --tape: rgba(240,214,140,.75);
+  --who: #FFE98A;
+  --see: #BDEEF6;
+  --may: #F9CDE0;
+  --wrong: #D2453A;
+  --ok: #2F8F5B;
+  --line: #9DB0C2;
+  --font-hand: "LXGW WenKai TC", "Noto Sans TC", "PingFang TC", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #1A2320; --grid: rgba(200,230,210,.08); --ink: #E6EDE8; --ink-soft: #A9BAB1;
+    --card: #24302C; --tape: rgba(200,180,110,.45); --who: #8A7A2A; --see: #2B6A74; --may: #7A3F57;
+    --wrong: #FF8A7E; --ok: #7FD3A1; --line: #5E7268; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #1A2320; --grid: rgba(200,230,210,.08); --ink: #E6EDE8; --ink-soft: #A9BAB1;
+  --card: #24302C; --tape: rgba(200,180,110,.45); --who: #8A7A2A; --see: #2B6A74; --may: #7A3F57;
+  --wrong: #FF8A7E; --ok: #7FD3A1; --line: #5E7268; color-scheme: dark;
+}
+body {
+  background-color: var(--paper);
+  background-image: linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 22px 22px;
+  color: var(--ink);
+  font-family: var(--font-hand);
+  font-size: 17px;
+  line-height: 1.75;
+}
+.page { max-width: 760px; margin: 0 auto; padding-inline: 18px; padding-block: 32px 64px; display: grid; gap: 34px; }
+h1, h2 { text-wrap: balance; line-height: 1.3; margin: 0; }
+h1 { font-size: 2.1rem; }
+h2 { font-size: 1.45rem; display: flex; align-items: baseline; gap: 10px; }
+h2 .tag { font-family: var(--font-mono); font-size: .72rem; letter-spacing: .08em; color: var(--ink-soft); text-transform: uppercase; }
+p { margin: 0; }
+section { display: grid; gap: 14px; min-width: 0; }
+.sub { color: var(--ink-soft); font-size: .95rem; }
+mark { background: linear-gradient(transparent 52%, var(--who) 52%); color: inherit; padding: 0 2px; }
+mark.see { background: linear-gradient(transparent 52%, var(--see) 52%); }
+mark.may { background: linear-gradient(transparent 52%, var(--may) 52%); }
+code { font-family: var(--font-mono); font-size: .86em; background: color-mix(in srgb, var(--line) 22%, transparent); padding: 1px 5px; border-radius: 3px; }
+.card { position: relative; background: var(--card); padding: 22px 18px 16px; box-shadow: 0 1px 3px rgba(0,0,0,.12); min-width: 0; }
+.card::before { content: ""; position: absolute; top: -9px; left: 50%; width: 92px; height: 20px; transform: translateX(-50%) rotate(-2deg); background: var(--tape); }
+.scroll { overflow-x: auto; }
+svg text { font-family: var(--font-mono); fill: var(--ink); }
+svg .hand { font-family: var(--font-hand); }
+.rule { border-left: 4px solid var(--ok); padding: 6px 12px; font-size: 1.08rem; }
+.wrong { border-left: 4px solid var(--wrong); padding: 4px 12px; display: grid; gap: 2px; }
+.wrong b { color: var(--wrong); font-size: .85rem; letter-spacing: .05em; }
+.panels { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 14px; }
+.panel { border: 2px solid var(--ink); background: var(--card); padding: 10px; display: grid; gap: 6px; min-width: 0; }
+.panel h3 { margin: 0; font-size: 1rem; font-family: var(--font-mono); }
+.panel p { font-size: .92rem; }
+@media (max-width: 520px) { .panels { grid-template-columns: 1fr; } }
+table { border-collapse: collapse; width: 100%; font-size: .95rem; }
+th, td { border-bottom: 1px dashed var(--line); padding: 8px 6px; text-align: left; vertical-align: top; }
+th { font-family: var(--font-mono); font-size: .78rem; letter-spacing: .05em; color: var(--ink-soft); font-weight: 600; }
+ol { margin: 0; padding-left: 1.3em; display: grid; gap: 6px; }
+blockquote { margin: 0; padding: 12px 16px; background: var(--card); border: 2px dashed var(--line); }
+.en { font-family: var(--font-mono); font-size: .9rem; color: var(--ink-soft); }
+details summary{cursor:pointer}
+</style>
+<style>
+/* chapter-note additions on top of the notebook base */
+svg.fig { display: block; min-width: 640px; width: 100%; height: auto; }
+.lvl { font-family: var(--font-mono); font-size: .74rem; padding: 1px 7px; border: 1.5px solid var(--ink); border-radius: 10px; white-space: nowrap; }
+.lvl.high { background: color-mix(in srgb, var(--ok) 28%, transparent); }
+.lvl.med { background: var(--who); }
+.lvl.low { background: var(--may); }
+.lvl.todo { border-style: dashed; color: var(--ink-soft); }
+.meta { display: flex; flex-wrap: wrap; gap: 8px 16px; font-family: var(--font-mono); font-size: .8rem; color: var(--ink-soft); }
+.toc { display: flex; flex-wrap: wrap; gap: 6px 14px; font-family: var(--font-mono); font-size: .82rem; }
+.toc a { color: var(--ink); }
+.trail { display: grid; gap: 12px; }
+.fix { border-left: 4px solid var(--ok); padding: 4px 12px; }
+.two { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 14px; }
+@media (max-width: 560px) { .two { grid-template-columns: 1fr; } }
+details { background: var(--card); border: 2px dashed var(--line); padding: 10px 14px; }
+details[open] { border-style: solid; }
+details > div { display: grid; gap: 8px; margin-top: 10px; }
+.small { font-size: .9rem; }
+a { color: inherit; text-underline-offset: 3px; }
+pre { margin: 0; font-family: var(--font-mono); font-size: .82rem; line-height: 1.5; background: var(--card); border: 1px solid var(--line); padding: 10px 12px; overflow-x: auto; }
+</style>
+<main class="page">
+  <header style="display:grid;gap:10px">
+    <p class="sub">k8s 課程 · 章節筆記 · Phase 2b</p>
+    <h1>P2b 儲存與權限</h1>
+    <p>一個問題貫穿整章：<b>這份資料、這把鑰匙，綁在誰身上？活多久？外洩了能走多遠？</b></p>
+    <div class="meta"><span>in-progress（C-1 ~ C-6 內容完成，gate 未考）</span><span>sessions s24–s40, s44</span><span>儲存 <span class="lvl med">med</span> · 權限 <span class="lvl low">low ~ med</span></span></div>
+    <nav class="toc"><a href="#map">章節地圖</a><a href="#l0">L0 圖</a><a href="#l1">L1 原理</a><a href="#l2">L2 機制</a><a href="#l3">L3 取捨</a><a href="#l4">L4 EKS</a><a href="#l5">L5 規模</a><a href="#l6">L6 on-call</a><a href="#l7">L7 面試</a><a href="#trail">我的錯題</a><a href="#next">topic 深入</a></nav>
+  </header>
+
+  <section id="map">
+    <h2>章節地圖<span class="tag">6 chunks</span></h2>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 720 220" role="img" aria-label="P2b: storage half C-1 lifetimes, C-2 dynamic provisioning, C-3 StatefulSet; permission half C-4 RBAC, C-5 IRSA, C-6 Secrets and Pod Security">
+        <text x="20" y="22" font-size="12" class="hand">儲存：資料活多久、在哪裡</text>
+        <text x="20" y="128" font-size="12" class="hand">權限：誰能做什麼、外洩走多遠</text>
+        <g font-size="11" text-anchor="middle">
+          <rect x="20" y="32" width="210" height="60" fill="var(--see)" stroke="var(--ink)" stroke-width="2"/><text x="125" y="56">C-1 三階梯壽命</text><text x="125" y="76" class="hand">可寫層 / emptyDir / PVC</text>
+          <rect x="255" y="32" width="210" height="60" fill="var(--see)" stroke="var(--ink)" stroke-width="2"/><text x="360" y="56">C-2 StorageClass / CSI</text><text x="360" y="76" class="hand">WaitForFirstConsumer</text>
+          <rect x="490" y="32" width="210" height="60" fill="var(--see)" stroke="var(--ink)" stroke-width="2"/><text x="595" y="56">C-3 StatefulSet</text><text x="595" y="76" class="hand">ordinal / 每人一份 PVC / DNS</text>
+          <rect x="20" y="140" width="210" height="60" fill="var(--may)" stroke="var(--ink)" stroke-width="2"/><text x="125" y="164">C-4 RBAC</text><text x="125" y="184" class="hand">四象限 / 爆炸半徑</text>
+          <rect x="255" y="140" width="210" height="60" fill="var(--may)" stroke="var(--ink)" stroke-width="2"/><text x="360" y="164">C-5 IRSA</text><text x="360" y="184" class="hand">trust vs permission</text>
+          <rect x="490" y="140" width="210" height="60" fill="var(--may)" stroke="var(--ink)" stroke-width="2"/><text x="595" y="164">C-6 Secrets + PSS</text><text x="595" y="184" class="hand">分層 / 輪替 / 兩個檢查點</text>
+        </g>
+      </svg>
+    </div>
+  </section>
+
+  <section id="l0">
+    <h2>Layer 0 · 一張圖<span class="tag">analogy</span></h2>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 720 200" role="img" aria-label="Hotel analogy: pocket is writable layer, room safe is emptyDir, bank deposit box is PVC; key card is ServiceAccount, permission list is Role, vault is Secret">
+        <g font-size="12" text-anchor="middle">
+          <rect x="10" y="20" width="220" height="70" fill="var(--see)" stroke="var(--ink)" stroke-width="2"/><text x="120" y="45" class="hand">口袋</text><text x="120" y="66" font-size="10">container 可寫層：人換掉就沒了</text>
+          <rect x="250" y="20" width="220" height="70" fill="var(--see)" stroke="var(--ink)" stroke-width="2"/><text x="360" y="45" class="hand">房間保險箱</text><text x="360" y="66" font-size="10">emptyDir：退房（Pod 消失）才清</text>
+          <rect x="490" y="20" width="220" height="70" fill="var(--who)" stroke="var(--ink)" stroke-width="2"/><text x="600" y="45" class="hand">銀行保管箱</text><text x="600" y="66" font-size="10">PVC：不跟著人走，但在某一間分行（AZ）</text>
+          <rect x="10" y="110" width="220" height="70" fill="var(--may)" stroke="var(--ink)" stroke-width="2"/><text x="120" y="135" class="hand">員工識別證</text><text x="120" y="156" font-size="10">ServiceAccount：你是誰</text>
+          <rect x="250" y="110" width="220" height="70" fill="var(--may)" stroke="var(--ink)" stroke-width="2"/><text x="360" y="135" class="hand">門禁清單</text><text x="360" y="156" font-size="10">Role + RoleBinding：能開哪些門</text>
+          <rect x="490" y="110" width="220" height="70" fill="var(--card)" stroke="var(--ink)" stroke-width="2"/><text x="600" y="135" class="hand">金庫 + 櫃員</text><text x="600" y="156" font-size="10">etcd + API Server：櫃員替有權的人解密</text>
+        </g>
+      </svg>
+    </div>
+  </section>
+
+  <section id="l1">
+    <h2>Layer 1 · 第一性原理<span class="tag">why it must exist</span></h2>
+    <div class="two">
+      <div class="card"><b>儲存有位置，計算沒有。</b><p class="small">CPU 哪台都一樣，但一顆 EBS 是 AZ-a 機房裡的一塊磁碟，只能接到 AZ-a 的機器。Pod 可以隨時被丟掉重建（P1），資料不行。所以「資料的壽命」要跟「process 的壽命」脫鉤，而且資料的位置要寫進 API，scheduler 才知道。</p></div>
+      <div class="card"><b>每一把鑰匙遲早會外洩。</b><p class="small">設計時不能問「會不會洩」，要問「洩了攻擊者碰得到什麼」。權限 = 事故的上限（blast radius）。而容器共用 kernel：container 裡的 root 在 node 上 UID 也是 0。</p></div>
+    </div>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 720 200" role="img" aria-label="Three lifetimes: writable layer dies with container, emptyDir dies with Pod, PVC survives Pod deletion; the gap between is where data is lost">
+        <text x="20" y="22" font-size="12" class="hand">三階梯壽命（你 s26 親手實證）</text>
+        <g font-size="11">
+          <text x="20" y="60">可寫層 (overlayfs upperdir)</text><rect x="230" y="46" width="120" height="20" fill="var(--see)" stroke="var(--ink)"/><text x="360" y="61" fill="var(--wrong)">✗ container 重啟</text>
+          <text x="20" y="100">emptyDir</text><rect x="230" y="86" width="260" height="20" fill="var(--see)" stroke="var(--ink)"/><text x="500" y="101" fill="var(--wrong)">✗ Pod 被刪 / evict / drain</text>
+          <text x="20" y="140">PVC → PV</text><rect x="230" y="126" width="470" height="20" fill="var(--who)" stroke="var(--ink)"/><text x="600" y="141" text-anchor="middle">Pod 換了幾代都在</text>
+        </g>
+        <line x1="350" y1="36" x2="350" y2="180" stroke="var(--line)" stroke-dasharray="4 3"/><line x1="490" y1="36" x2="490" y2="180" stroke="var(--line)" stroke-dasharray="4 3"/>
+        <text x="350" y="190" text-anchor="middle" font-size="10">kill 1</text><text x="490" y="190" text-anchor="middle" font-size="10">kubectl delete pod</text>
+      </svg>
+    </div>
+  </section>
+
+  <section id="l2">
+    <h2>Layer 2 · 機制<span class="tag">two pipelines</span></h2>
+    <p>因為 Layer 1 要求「位置寫進 API」，儲存走一條先排程、再建碟的管線。因為「鑰匙會洩」，權限每一步都只問一件事：你是誰、能做什麼、合不合規。</p>
+    <h3 style="margin:0">儲存：PVC 到 Pod 看到檔案</h3>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 760 250" role="img" aria-label="WaitForFirstConsumer: PVC pending, Pod created, scheduler picks node in AZ-b, CSI controller creates EBS in AZ-b, PV gets nodeAffinity zone b, controller attaches, node plugin mounts, container sees files">
+        <defs><marker id="p2ba" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="var(--ink)"/></marker></defs>
+        <g font-size="11" text-anchor="middle">
+          <rect x="10" y="30" width="120" height="56" fill="var(--card)" stroke="var(--ink)" stroke-width="2"/><text x="70" y="52">PVC Pending</text><text x="70" y="72" font-size="10" fill="var(--ink-soft)">等第一個 consumer</text>
+          <rect x="155" y="30" width="120" height="56" fill="var(--see)" stroke="var(--ink)" stroke-width="2"/><text x="215" y="52">scheduler</text><text x="215" y="72" font-size="10">選 node（AZ-b）</text>
+          <rect x="300" y="30" width="140" height="56" fill="var(--who)" stroke="var(--ink)" stroke-width="2"/><text x="370" y="52">CSI controller</text><text x="370" y="72" font-size="10">CreateVolume in AZ-b</text>
+          <rect x="465" y="30" width="130" height="56" fill="var(--card)" stroke="var(--ink)" stroke-width="2"/><text x="530" y="52">PV + Bound</text><text x="530" y="72" font-size="10">nodeAffinity: zone=b</text>
+          <rect x="620" y="30" width="130" height="56" fill="var(--may)" stroke="var(--ink)" stroke-width="2"/><text x="685" y="52">attach</text><text x="685" y="72" font-size="10">node 看到 /dev/nvme1n1</text>
+          <rect x="620" y="140" width="130" height="56" fill="var(--may)" stroke="var(--ink)" stroke-width="2"/><text x="685" y="162">mount（kubelet +</text><text x="685" y="180">CSI node plugin）</text>
+          <rect x="430" y="140" width="160" height="56" fill="var(--see)" stroke="var(--ink)" stroke-width="2"/><text x="510" y="162">container 看到</text><text x="510" y="180">/var/lib/data</text>
+        </g>
+        <g stroke="var(--ink)" stroke-width="2"><line x1="130" y1="58" x2="153" y2="58" marker-end="url(#p2ba)"/><line x1="275" y1="58" x2="298" y2="58" marker-end="url(#p2ba)"/><line x1="440" y1="58" x2="463" y2="58" marker-end="url(#p2ba)"/><line x1="595" y1="58" x2="618" y2="58" marker-end="url(#p2ba)"/><line x1="685" y1="86" x2="685" y2="138" marker-end="url(#p2ba)"/><line x1="620" y1="168" x2="592" y2="168" marker-end="url(#p2ba)"/></g>
+        <text x="20" y="225" font-size="11" class="hand" fill="var(--wrong)">Immediate 模式把前兩格順序倒過來：碟先建在 AZ-a，Pod 卻只能去 AZ-b → volume node affinity conflict，永遠 Pending。</text>
+        <text x="20" y="244" font-size="11" class="hand">PVC Bound 只證明帳本綁好了；attach / mount 失敗要看 Pod 的 FailedAttachVolume / FailedMount。</text>
+      </svg>
+    </div>
+    <p class="small">StatefulSet 在這條管線上多做三件事：固定名字 <code>db-0</code>、<code>volumeClaimTemplates</code> 給每個 ordinal 一份 PVC（<code>data-db-0</code>）、headless Service（<code>clusterIP: None</code>）給每個 Pod 一個 DNS 名 <code>db-0.db-hl</code>。它不做 replication、failover、backup。</p>
+
+    <h3 style="margin:0">權限：一個請求的三道關 + IRSA 的兩道門</h3>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 760 330" role="img" aria-label="Request to API server passes authn (SA token), authz (RBAC), admission (PSS), then etcd where Secrets are encrypted with KMS. IRSA: pod's projected token goes to STS, which checks the sub against the trust policy (gate 1), then the permission policy decides S3 access (gate 2)">
+        <defs><marker id="p2bb" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="var(--ink)"/></marker></defs>
+        <text x="10" y="20" font-size="12" class="hand">k8s API 內部</text>
+        <g font-size="11" text-anchor="middle">
+          <rect x="10" y="30" width="110" height="56" fill="var(--card)" stroke="var(--ink)" stroke-width="2"/><text x="65" y="52">Pod / CI</text><text x="65" y="72" font-size="10">帶 SA token (JWT)</text>
+          <rect x="145" y="30" width="120" height="56" fill="var(--who)" stroke="var(--ink)" stroke-width="2"/><text x="205" y="52">authn</text><text x="205" y="72" font-size="10">你是誰</text>
+          <rect x="285" y="30" width="140" height="56" fill="var(--may)" stroke="var(--ink)" stroke-width="2"/><text x="355" y="52">authz (RBAC)</text><text x="355" y="72" font-size="10">純 allow，沒有 deny</text>
+          <rect x="445" y="30" width="140" height="56" fill="var(--see)" stroke="var(--ink)" stroke-width="2"/><text x="515" y="52">admission (PSS)</text><text x="515" y="72" font-size="10">只看 Pod YAML</text>
+          <rect x="605" y="30" width="145" height="56" fill="var(--card)" stroke="var(--ink)" stroke-width="2"/><text x="677" y="52">etcd</text><text x="677" y="72" font-size="10">Secret 經 KMS 加密</text>
+        </g>
+        <g stroke="var(--ink)" stroke-width="2"><line x1="120" y1="58" x2="143" y2="58" marker-end="url(#p2bb)"/><line x1="265" y1="58" x2="283" y2="58" marker-end="url(#p2bb)"/><line x1="425" y1="58" x2="443" y2="58" marker-end="url(#p2bb)"/><line x1="585" y1="58" x2="603" y2="58" marker-end="url(#p2bb)"/></g>
+        <text x="355" y="105" text-anchor="middle" font-size="10" fill="var(--wrong)">403 停在這</text><text x="515" y="105" text-anchor="middle" font-size="10" fill="var(--wrong)">被擋時錯誤留在送請求的 RS event</text>
+        <text x="10" y="150" font-size="12" class="hand">IRSA：Pod 拿 AWS 權限</text>
+        <g font-size="11" text-anchor="middle">
+          <rect x="10" y="165" width="150" height="70" fill="var(--card)" stroke="var(--ink)" stroke-width="2"/><text x="85" y="187">projected token</text><text x="85" y="205" font-size="10">sub: system:serviceaccount:</text><text x="85" y="220" font-size="10">reporting:s3-reader</text>
+          <rect x="190" y="165" width="160" height="70" fill="var(--who)" stroke="var(--ink)" stroke-width="2"/><text x="270" y="187">STS</text><text x="270" y="205" font-size="10">AssumeRoleWithWebIdentity</text><text x="270" y="220" font-size="10">驗 OIDC 簽章</text>
+          <rect x="380" y="165" width="170" height="70" fill="var(--may)" stroke="var(--ink)" stroke-width="2"/><text x="465" y="187">門 1：trust policy</text><text x="465" y="205" font-size="10">sub 對得上嗎？</text><text x="465" y="220" font-size="10" fill="var(--wrong)">不對 → 到不了門 2</text>
+          <rect x="580" y="165" width="170" height="70" fill="var(--see)" stroke="var(--ink)" stroke-width="2"/><text x="665" y="187">門 2：permission policy</text><text x="665" y="205" font-size="10">s3:GetObject on</text><text x="665" y="220" font-size="10">arn:...:reports/*</text>
+        </g>
+        <g stroke="var(--ink)" stroke-width="2"><line x1="160" y1="200" x2="188" y2="200" marker-end="url(#p2bb)"/><line x1="350" y1="200" x2="378" y2="200" marker-end="url(#p2bb)"/><line x1="550" y1="200" x2="578" y2="200" marker-end="url(#p2bb)"/></g>
+        <rect x="10" y="260" width="740" height="56" fill="var(--card)" stroke="var(--ink-soft)" stroke-dasharray="5 4"/>
+        <text x="20" y="282" font-size="11">SA annotation <tspan font-family="var(--font-mono)">eks.amazonaws.com/role-arn</tspan> 只是申請單：告訴 SDK 去申請哪個 role。</text>
+        <text x="20" y="302" font-size="11">證明身分的是 k8s 簽名的 sub，Pod 改不了。改 annotation 指向別人的 role，門 1 照樣擋。</text>
+      </svg>
+    </div>
+    <div class="scroll"><table>
+      <tr><th>參數</th><th>預設 / 數字</th><th>意義</th></tr>
+      <tr><td>projected SA token</td><td>kubelet 在 80% 壽命時更新</td><td>不再是永不過期的 Secret token</td></tr>
+      <tr><td>STS 臨時憑證</td><td>1 小時</td><td>SDK 自動續；外洩也只活一小時</td></tr>
+      <tr><td>Secret 大小</td><td>1 MiB</td><td>etcd 單一請求上限的推論</td></tr>
+      <tr><td>Secret volume 更新</td><td>約 1 分鐘內（kubelet sync）</td><td>env 永遠是啟動快照；<code>subPath</code> 掛的檔案不會更新</td></tr>
+      <tr><td>RWO</td><td>單一 <b>node</b></td><td>同 node 兩個 Pod 仍可共掛；限單一 Pod 要 RWOP（1.29 GA）</td></tr>
+    </table></div>
+  </section>
+
+  <section id="l3">
+    <h2>Layer 3 · 取捨<span class="tag">why this design</span></h2>
+    <div class="scroll"><table>
+      <tr><th>決定</th><th>選 A</th><th>選 B</th><th>判準</th></tr>
+      <tr><td>block vs file</td><td>EBS：RWO、單 AZ、低延遲</td><td>EFS：RWX、跨 AZ、延遲高、按用量貴</td><td>檔案系統假設獨佔 → 塊裝置不能多機寫</td></tr>
+      <tr><td>reclaimPolicy</td><td>Delete：PVC 刪掉碟就刪</td><td>Retain：留著等人處理</td><td>prod 資料用 Retain，代價是孤兒碟要有人清</td></tr>
+      <tr><td>有狀態服務</td><td>StatefulSet + operator</td><td>托管（RDS / MSK）</td><td>HA 靠 app 層複製；團隊沒 DBA 就選托管</td></tr>
+      <tr><td>RBAC 模型</td><td>純 allow、加總</td><td>有 deny（AWS IAM）</td><td>簡單好推理；代價是要拿掉權限只能改 Role，不能疊 deny</td></tr>
+      <tr><td>Pod 拿雲端權限</td><td>instance profile（粒度 = node）</td><td>IRSA / Pod Identity（粒度 = SA）</td><td>同 node 所有 Pod 共用一把 vs 每個 SA 一把</td></tr>
+      <tr><td>Secret 放哪</td><td>k8s Secret（etcd）</td><td>Secrets Manager + External Secrets / CSI driver</td><td>外部的有輪替、稽核；代價是多一個依賴、API 呼叫收費</td></tr>
+      <tr><td>Pod 安全</td><td>PSS（內建 3 級）</td><td>Kyverno / OPA Gatekeeper</td><td>PSS 零安裝但不能客製；policy engine 能寫「不准指定高權 SA」</td></tr>
+    </table></div>
+    <p class="rule">爆炸半徑三軸：<b>ns 廣度 × resource 深度 × verb</b>，再問一題：拿到的東西能不能<b>離開 RBAC 管轄</b>（secret 裡的 DB 密碼就能）。<code>create pods</code> = 借用同 ns 任何 SA 的權限，k8s 沒有 PassRole 這道閘。</p>
+  </section>
+
+  <section id="l4">
+    <h2>Layer 4 · AWS 怎麼做<span class="tag">EKS storage + identity</span></h2>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 760 290" role="img" aria-label="EKS: EBS volume pinned to AZ-b node; EFS mount targets in each AZ; Pod uses IRSA or Pod Identity to reach STS, then S3 and Secrets Manager; KMS encrypts Secrets in managed etcd">
+        <rect x="10" y="10" width="480" height="270" fill="none" stroke="var(--ink)" stroke-width="2"/><text x="20" y="30" font-size="12">你的 VPC</text>
+        <g font-size="11">
+          <rect x="30" y="45" width="210" height="110" fill="var(--see)" stroke="var(--ink)" stroke-width="2"/><text x="40" y="65">AZ-a node</text><text x="40" y="87" fill="var(--ink-soft)">（EBS 過不來）</text><text x="40" y="130">EFS mount target</text>
+          <rect x="260" y="45" width="210" height="110" fill="var(--see)" stroke="var(--ink)" stroke-width="2"/><text x="270" y="65">AZ-b node</text><text x="270" y="87">db-0 ← EBS gp3 (AZ-b)</text><text x="270" y="130">EFS mount target</text>
+          <rect x="30" y="180" width="440" height="40" fill="var(--who)" stroke="var(--ink)"/><text x="250" y="205" text-anchor="middle">EFS（跨 AZ、RWX）</text>
+          <rect x="30" y="232" width="440" height="36" fill="var(--card)" stroke="var(--ink)"/><text x="250" y="255" text-anchor="middle">EBS CSI driver / EFS CSI driver（各自要 IAM 權限）</text>
+        </g>
+        <g font-size="11" text-anchor="middle">
+          <rect x="520" y="20" width="230" height="44" fill="var(--may)" stroke="var(--ink)" stroke-width="2"/><text x="635" y="47">STS ← IRSA / Pod Identity</text>
+          <rect x="520" y="80" width="110" height="44" fill="var(--card)" stroke="var(--ink)"/><text x="575" y="107">S3</text>
+          <rect x="640" y="80" width="110" height="44" fill="var(--card)" stroke="var(--ink)"/><text x="695" y="100">Secrets</text><text x="695" y="116">Manager</text>
+          <rect x="520" y="150" width="230" height="56" fill="var(--who)" stroke="var(--ink)" stroke-width="2"/><text x="635" y="172">EKS control plane etcd</text><text x="635" y="192" font-size="10">Secret 用 KMS envelope 加密</text>
+          <rect x="520" y="222" width="230" height="44" fill="var(--card)" stroke="var(--ink)"/><text x="635" y="249">EKS access entries（取代 aws-auth）</text>
+        </g>
+      </svg>
+    </div>
+    <div class="scroll"><table>
+      <tr><th>服務 / 設定</th><th>做什麼</th><th>常見陷阱</th></tr>
+      <tr><td>EBS CSI driver（EKS add-on）</td><td>動態建 EBS</td><td>沒給 IAM 權限 → PVC 一直 Pending，events 寫 <code>UnauthorizedOperation</code>；StorageClass 沒設 WaitForFirstConsumer → AZ 衝突</td></tr>
+      <tr><td>EBS gp3</td><td>預設 3000 IOPS / 125 MB/s</td><td>Nitro 機型的 attachment 上限與 ENI 共用，Pod 數多的 node 可能掛不上碟（依機型確認）</td></tr>
+      <tr><td>node 掛掉後的 EBS</td><td>要先 detach 才能接到新 node</td><td>Pod 在新 node 卡 <code>Multi-Attach error</code>，等到舊 attachment 被強制拆掉才恢復</td></tr>
+      <tr><td>IRSA</td><td>SA ↔ IAM role，trust policy 比 <code>sub</code></td><td>trust policy 的 ns / SA 名字打錯一個字 → <code>AccessDenied</code>，SDK 默默 fallback 用 node role</td></tr>
+      <tr><td>EKS Pod Identity</td><td>不用 OIDC provider，用 association</td><td>要先裝 Pod Identity Agent add-on；身分比對改由 EKS 做，不再是 trust policy 的 sub</td></tr>
+      <tr><td>IMDS</td><td>node 的 instance profile</td><td>hop limit 2 時 Pod 拿得到 node role。設 <code>HttpPutResponseHopLimit=1</code></td></tr>
+      <tr><td>access entries / aws-auth</td><td>IAM → k8s 身分對應</td><td>手改 aws-auth ConfigMap 打錯 YAML，全隊被鎖在叢集外。改用 access entries</td></tr>
+      <tr><td>Secrets 加密</td><td>EKS 1.28 起預設 envelope encryption</td><td>擋的是偷 etcd 備份的人，不擋有 <code>get secrets</code> 的人</td></tr>
+    </table></div>
+    <p class="small">職場真實面：資安要收 CI 的 cluster-admin，Dev 說「收了 pipeline 會壞」。你要拿出 <code>auth can-i --list --as=system:serviceaccount:ci:deployer</code> 的實際用量，和一張「收之前 vs 收之後外洩能走多遠」的對照表。</p>
+  </section>
+
+  <section id="l5">
+    <h2>Layer 5 · 規模化<span class="tag">evolution ladder</span></h2>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 760 270" role="img" aria-label="Two ladders. Storage: hostPath, default StorageClass PVC, StatefulSet with snapshots and backup, managed databases and operators. Identity: cluster-admin everywhere, namespaced roles, IRSA plus policy-as-code plus external secrets, short-lived just-in-time access">
+        <text x="10" y="20" font-size="12" class="hand">儲存</text>
+        <g font-size="10">
+          <rect x="10" y="30" width="175" height="60" fill="var(--card)" stroke="var(--ink)" stroke-width="2"/><text x="18" y="50">① hostPath</text><text x="18" y="68" class="hand">位置沒寫，資料會「不見」</text>
+          <rect x="195" y="30" width="175" height="60" fill="var(--see)" stroke="var(--ink)" stroke-width="2"/><text x="203" y="50">② PVC + 預設 SC</text><text x="203" y="68" class="hand">WFFC、Retain</text>
+          <rect x="380" y="30" width="175" height="60" fill="var(--who)" stroke="var(--ink)" stroke-width="2"/><text x="388" y="50">③ StatefulSet + 備份</text><text x="388" y="68" class="hand">VolumeSnapshot / Velero / AWS Backup</text>
+          <rect x="565" y="30" width="185" height="60" fill="var(--may)" stroke="var(--ink)" stroke-width="2"/><text x="573" y="50">④ 托管 / operator</text><text x="573" y="68" class="hand">RDS、CloudNativePG；k8s 只跑無狀態</text>
+        </g>
+        <text x="10" y="135" font-size="12" class="hand">權限</text>
+        <g font-size="10">
+          <rect x="10" y="145" width="175" height="80" fill="var(--card)" stroke="var(--ink)" stroke-width="2"/><text x="18" y="165">① 全員 cluster-admin</text><text x="18" y="183" class="hand">node role 給所有 Pod</text>
+          <rect x="195" y="145" width="175" height="80" fill="var(--see)" stroke="var(--ink)" stroke-width="2"/><text x="203" y="165">② 每團隊一個 ns</text><text x="203" y="183" class="hand">Role 收斂、PSS baseline</text>
+          <rect x="380" y="145" width="175" height="80" fill="var(--who)" stroke="var(--ink)" stroke-width="2"/><text x="388" y="165">③ IRSA / Pod Identity</text><text x="388" y="183" class="hand">Kyverno 擋高權 SA</text><text x="388" y="201" class="hand">External Secrets 輪替</text>
+          <rect x="565" y="145" width="185" height="80" fill="var(--may)" stroke="var(--ink)" stroke-width="2"/><text x="573" y="165">④ 零常駐權限</text><text x="573" y="183" class="hand">JIT 申請、短效憑證</text><text x="573" y="201" class="hand">audit log 驅動收權</text>
+        </g>
+        <text x="10" y="255" font-size="11" class="hand">每一級換掉的東西相同：把「隱含、永久、共用」換成「寫在 API 上、會過期、一人一把」。</text>
+      </svg>
+    </div>
+  </section>
+
+  <section id="l6">
+    <h2>Layer 6 · 故障與 on-call<span class="tag">how it breaks</span></h2>
+    <div class="panels">
+      <div class="panel"><h3>PVC Pending</h3><p><code>kubectl describe pvc</code>。<code>waiting for first consumer</code> 是正常的；<code>no persistent volumes available</code> = 沒有 provisioner（規則有、引擎沒有）；<code>UnauthorizedOperation</code> = CSI 沒 IAM。</p></div>
+      <div class="panel"><h3>node 掛了，DB Pod 起不來</h3><p>新 node 上 <code>Multi-Attach error</code> 或 <code>volume node affinity conflict</code>。EBS 被釘在舊 AZ。這是刻意接受的設計：HA 交給 app 層跨 AZ 複製。</p></div>
+      <div class="panel"><h3>apply 成功，Pod 不出現</h3><p>你 s40 G 題。PSS 擋的是 RS controller 建 Pod 的請求，錯誤寫在 RS 的 event：<code>kubectl describe rs</code> 找 <code>FailedCreate ... violates PodSecurity</code>。</p></div>
+      <div class="panel"><h3>AccessDenied from S3</h3><p>先分門：<code>aws sts get-caller-identity</code>（在 Pod 裡）看拿到的是哪個 role。是 node role = 門 1 沒過（trust policy 或 token 沒掛）；是對的 role = 門 2 的 permission policy 不夠。</p></div>
+    </div>
+    <p>公開事故：<a href="https://cyberscoop.com/tesla-cryptomining-redlock-cloud-breach/">Tesla 2018（RedLock 揭露）</a>。Kubernetes 管理介面沒有密碼保護，裡面看得到 AWS 憑證，攻擊者拿去讀 S3 並在叢集裡挖礦。對應本章兩條：憑證外洩後能走多遠（爆炸半徑），以及長效憑證放在叢集裡等於放在攻擊者手上（換成 IRSA 的短效憑證）。</p>
+    <div class="scroll"><table>
+      <tr><th>SLI / 控制項</th><th>怎麼量</th><th>目標例</th></tr>
+      <tr><td>PVC 綁定到 Pod Ready 的時間</td><td>events 時間差</td><td>p95 &lt; 2 分鐘</td></tr>
+      <tr><td>備份可還原率</td><td>每月實際還原演練</td><td>100%（沒演練過的備份不算備份）</td></tr>
+      <tr><td>高權 SA 數量</td><td>綁 cluster-admin 的 subjects</td><td>只減不增，每季檢視</td></tr>
+    </table></div>
+  </section>
+
+  <section id="l7">
+    <h2>Layer 7 · 面試<span class="tag">interview</span></h2>
+    <blockquote>「A pod in namespace <code>reporting</code> needs to read one S3 bucket. Design the access, and tell me what an attacker gets if that pod is compromised.」</blockquote>
+    <p class="sub">先自己講一遍，再打開。</p>
+    <details><summary>L4 回答</summary><div>
+      <p>「用 IRSA，建一個 IAM role 給 S3 read 權限，把 role ARN 寫在 ServiceAccount 的 annotation。」</p>
+      <p class="small">方向對，但沒講身分怎麼被驗證，也沒回答「被攻破之後」那半題。</p>
+    </div></details>
+    <details><summary>L6 回答</summary><div>
+      <p>「專用 SA <code>reporting/s3-reader</code>，用 IRSA 或 Pod Identity 綁一個 role。兩道門分開設計：trust policy 只允許 <code>sub = system:serviceaccount:reporting:s3-reader</code>（門 1，驗身分）；permission policy 只給 <code>s3:GetObject</code> 到 <code>arn:aws:s3:::reports-bucket/prefix/*</code>（門 2，授權）。annotation 只是申請單，偽造不了 sub。」</p>
+      <p>「被攻破時攻擊者拿到：這個 SA 的 token，和最多 1 小時的 STS 憑證，範圍是那個 prefix 的讀取。拿不到：別的 SA 的 role，因為門 1 比的是 sub。」</p>
+      <p>「要補的洞：IMDS hop limit 設 1，不然 Pod 可以拿 node role；同 ns 有 <code>create pods</code> 權限的人可以借這個 SA，所以要嘛不給，要嘛用 Kyverno 擋；default SA 不綁任何 role。偵測：CloudTrail 看這個 role 的呼叫來源與 API 是否異常。」</p>
+      <p class="small">L6 多了：把驗身分和授權拆成兩道門、量化外洩後的範圍（資源、時間）、三個旁路（IMDS、create pods、default SA）、偵測。</p>
+    </div></details>
+  </section>
+
+  <section id="trail">
+    <h2>我的錯題軌跡<span class="tag">from session logs</span></h2>
+    <p>儲存那半的錯，多是把東西貼錯層（Pod 層 vs node 層、一份 vs 每人一份）。權限那半的錯，多是把兩道獨立的檢查混成一步。</p>
+    <div class="trail">
+      <div class="wrong"><b>我錯在這 · 08-04</b>「process 死掉檔案去哪」答存在 memory；「emptyDir 撐不撐得過 kill 1」答不在。</div>
+      <div class="fix">修正：可寫層在 node 磁碟的 overlayfs upperdir；emptyDir 綁 Pod 不綁 container。</div>
+      <div class="wrong"><b>我錯在這 · 08-05 / 09-03</b>以為 PV 可以 1 對多；說 RWO 的 Once 是 Pod。</div>
+      <div class="fix">修正：PV ↔ PVC 1:1 獨佔。RWO 數的是 node，單一 Pod 要 RWOP。</div>
+      <div class="wrong"><b>我錯在這 · 08-28</b>StatefulSet 從 3 開到 5，答「still 3 data」。</div>
+      <div class="fix">修正：每個 ordinal 一份獨立 PVC，5 個 replica 就是 5 份資料。</div>
+      <div class="wrong"><b>我錯在這 · 09-13</b>評 SA 外洩痛不痛只看 ns 廣度；評 secret 危險度跑到 base64 軸。</div>
+      <div class="fix">修正：ns × resource × verb，再加「能否離開 RBAC 管轄」。</div>
+      <div class="wrong"><b>我錯在這 · 09-18</b>IRSA 首答「擋在 permission policy」；同意「改 SA annotation 就能讀別人的 S3」。</div>
+      <div class="fix">修正：門 1 trust policy 比 JWT 的 sub，annotation 只是申請單。s44 GitHub OIDC 換皮無提示答對。</div>
+      <div class="wrong"><b>我錯在這 · 09-21</b>開 KMS 後以為「kubectl 自己解密」、開發者就看不到 secret。</div>
+      <div class="fix">修正：API Server 替 RBAC 允許的人解密。KMS 擋偷備份的人，RBAC 擋 API 讀者。</div>
+      <div class="wrong"><b>我錯在這 · 09-25</b>「UID 0 沒翻牆，讀得到 node 的 /etc/shadow 嗎」答可以。</div>
+      <div class="fix">修正：兩道門。門 1 mount ns 決定看不看得到，門 2 UID 決定准不准。沒翻牆就過不了門 1。</div>
+      <div class="wrong"><b>我錯在這 · 09-29</b>Deployment apply 成功但新 Pod 不出現，講不出 PSS 擋的是誰。</div>
+      <div class="fix">修正：PSS 只看 Pod。被擋的是 RS controller 送的建 Pod 請求，錯誤在 RS 的 event。</div>
+    </div>
+  </section>
+
+  <section id="next">
+    <h2>本章 topic 深入筆記<span class="tag">next</span></h2>
+    <div class="scroll"><table>
+      <tr><th>topic</th><th>我的程度</th><th>深入筆記</th></tr>
+      <tr><td>C-1 三階梯壽命 / overlayfs / PV-PVC 解耦</td><td><span class="lvl med">med ~ med-high (s24–s26)</span></td><td><span class="lvl todo">待寫</span></td></tr>
+      <tr><td>EKS 儲存拓撲（EBS AZ / WFFC / CSI）</td><td><span class="lvl med">med (s26, s29)</span></td><td><span class="lvl todo">待寫</span></td></tr>
+      <tr><td>C-3 StatefulSet identity</td><td><span class="lvl med">med-high (s32)</span></td><td>已有 <code>s32-statefulset-keeps.html</code></td></tr>
+      <tr><td>C-4 RBAC 四象限 + 爆炸半徑</td><td><span class="lvl low">low (s33)</span></td><td>已有 <code>s33-rbac-verb-traps.html</code>；七層版 <span class="lvl todo">待寫</span></td></tr>
+      <tr><td>C-5 IRSA 鏈（trust vs permission）</td><td><span class="lvl low">low → med (s37, s44)</span></td><td><span class="lvl todo">待寫</span></td></tr>
+      <tr><td>C-6 Secret 分層 + 輪替</td><td><span class="lvl low">low ~ med (s38)</span></td><td><span class="lvl todo">待寫</span></td></tr>
+      <tr><td>C-6 PSS 兩個檢查點</td><td><span class="lvl low">low (s40)</span></td><td>已有 <code>s40-pss-layers.html</code></td></tr>
+    </table></div>
+  </section>
+</main>
+
+</body></html>

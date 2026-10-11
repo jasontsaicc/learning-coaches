@@ -1,0 +1,327 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"></head><body>
+<title>P5 平台工程與 GitOps</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC:wght@400;700&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: one notebook column on graph paper; figures on taped cards, scenarios as 2x2 comic panels */
+:root {
+  --paper: #F6F8FA;
+  --grid: rgba(90,130,170,.16);
+  --ink: #23313E;
+  --ink-soft: #55677A;
+  --card: #FFFFFF;
+  --tape: rgba(240,214,140,.75);
+  --who: #FFE98A;
+  --see: #BDEEF6;
+  --may: #F9CDE0;
+  --wrong: #D2453A;
+  --ok: #2F8F5B;
+  --line: #9DB0C2;
+  --font-hand: "LXGW WenKai TC", "Noto Sans TC", "PingFang TC", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #1A2320; --grid: rgba(200,230,210,.08); --ink: #E6EDE8; --ink-soft: #A9BAB1;
+    --card: #24302C; --tape: rgba(200,180,110,.45); --who: #8A7A2A; --see: #2B6A74; --may: #7A3F57;
+    --wrong: #FF8A7E; --ok: #7FD3A1; --line: #5E7268; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #1A2320; --grid: rgba(200,230,210,.08); --ink: #E6EDE8; --ink-soft: #A9BAB1;
+  --card: #24302C; --tape: rgba(200,180,110,.45); --who: #8A7A2A; --see: #2B6A74; --may: #7A3F57;
+  --wrong: #FF8A7E; --ok: #7FD3A1; --line: #5E7268; color-scheme: dark;
+}
+body {
+  background-color: var(--paper);
+  background-image: linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 22px 22px;
+  color: var(--ink);
+  font-family: var(--font-hand);
+  font-size: 17px;
+  line-height: 1.75;
+}
+.page { max-width: 760px; margin: 0 auto; padding-inline: 18px; padding-block: 32px 64px; display: grid; gap: 34px; }
+h1, h2 { text-wrap: balance; line-height: 1.3; margin: 0; }
+h1 { font-size: 2.1rem; }
+h2 { font-size: 1.45rem; display: flex; align-items: baseline; gap: 10px; }
+h2 .tag { font-family: var(--font-mono); font-size: .72rem; letter-spacing: .08em; color: var(--ink-soft); text-transform: uppercase; }
+p { margin: 0; }
+section { display: grid; gap: 14px; min-width: 0; }
+.sub { color: var(--ink-soft); font-size: .95rem; }
+mark { background: linear-gradient(transparent 52%, var(--who) 52%); color: inherit; padding: 0 2px; }
+mark.see { background: linear-gradient(transparent 52%, var(--see) 52%); }
+mark.may { background: linear-gradient(transparent 52%, var(--may) 52%); }
+code { font-family: var(--font-mono); font-size: .86em; background: color-mix(in srgb, var(--line) 22%, transparent); padding: 1px 5px; border-radius: 3px; }
+.card { position: relative; background: var(--card); padding: 22px 18px 16px; box-shadow: 0 1px 3px rgba(0,0,0,.12); min-width: 0; }
+.card::before { content: ""; position: absolute; top: -9px; left: 50%; width: 92px; height: 20px; transform: translateX(-50%) rotate(-2deg); background: var(--tape); }
+.scroll { overflow-x: auto; }
+svg text { font-family: var(--font-mono); fill: var(--ink); }
+svg .hand { font-family: var(--font-hand); }
+.rule { border-left: 4px solid var(--ok); padding: 6px 12px; font-size: 1.08rem; }
+.wrong { border-left: 4px solid var(--wrong); padding: 4px 12px; display: grid; gap: 2px; }
+.wrong b { color: var(--wrong); font-size: .85rem; letter-spacing: .05em; }
+.panels { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 14px; }
+.panel { border: 2px solid var(--ink); background: var(--card); padding: 10px; display: grid; gap: 6px; min-width: 0; }
+.panel h3 { margin: 0; font-size: 1rem; font-family: var(--font-mono); }
+.panel p { font-size: .92rem; }
+@media (max-width: 520px) { .panels { grid-template-columns: 1fr; } }
+table { border-collapse: collapse; width: 100%; font-size: .95rem; }
+th, td { border-bottom: 1px dashed var(--line); padding: 8px 6px; text-align: left; vertical-align: top; }
+th { font-family: var(--font-mono); font-size: .78rem; letter-spacing: .05em; color: var(--ink-soft); font-weight: 600; }
+ol { margin: 0; padding-left: 1.3em; display: grid; gap: 6px; }
+blockquote { margin: 0; padding: 12px 16px; background: var(--card); border: 2px dashed var(--line); }
+.en { font-family: var(--font-mono); font-size: .9rem; color: var(--ink-soft); }
+details summary{cursor:pointer}
+</style>
+<style>
+/* chapter-note additions on top of the notebook base */
+svg.fig { display: block; min-width: 640px; width: 100%; height: auto; }
+.lvl { font-family: var(--font-mono); font-size: .74rem; padding: 1px 7px; border: 1.5px solid var(--ink); border-radius: 10px; white-space: nowrap; }
+.lvl.high { background: color-mix(in srgb, var(--ok) 28%, transparent); }
+.lvl.med { background: var(--who); }
+.lvl.low { background: var(--may); }
+.lvl.todo { border-style: dashed; color: var(--ink-soft); }
+.meta { display: flex; flex-wrap: wrap; gap: 8px 16px; font-family: var(--font-mono); font-size: .8rem; color: var(--ink-soft); }
+.toc { display: flex; flex-wrap: wrap; gap: 6px 14px; font-family: var(--font-mono); font-size: .82rem; }
+.toc a { color: var(--ink); }
+.trail { display: grid; gap: 12px; }
+.fix { border-left: 4px solid var(--ok); padding: 4px 12px; }
+.two { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 14px; }
+@media (max-width: 560px) { .two { grid-template-columns: 1fr; } }
+details { background: var(--card); border: 2px dashed var(--line); padding: 10px 14px; }
+details[open] { border-style: solid; }
+details > div { display: grid; gap: 8px; margin-top: 10px; }
+.small { font-size: .9rem; }
+a { color: inherit; text-underline-offset: 3px; }
+pre { margin: 0; font-family: var(--font-mono); font-size: .82rem; line-height: 1.5; background: var(--card); border: 1px solid var(--line); padding: 10px 12px; overflow-x: auto; }
+</style>
+<main class="page">
+  <header style="display:grid;gap:10px">
+    <p class="sub">k8s 課程 · 章節筆記 · Phase 5</p>
+    <h1>P5 平台工程與 GitOps</h1>
+    <p>一個問題貫穿整章：<b>整個叢集和上面的一切，能不能只靠 Git 重生？一個變更怎麼安全地走進 production？</b></p>
+    <div class="meta"><span>not started（預習頁）</span><span>P0 埋的債在這裡還：etcd Raft、admission webhook</span></div>
+    <nav class="toc"><a href="#map">章節地圖</a><a href="#l0">L0 圖</a><a href="#l1">L1 原理</a><a href="#l2">L2 機制</a><a href="#l3">L3 取捨</a><a href="#l4">L4 AWS</a><a href="#l5">L5 規模</a><a href="#l6">L6 on-call</a><a href="#l7">L7 面試</a><a href="#trail">伏筆</a><a href="#next">topic 深入</a></nav>
+  </header>
+
+  <section id="map">
+    <h2>章節地圖<span class="tag">8 units</span></h2>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 720 220" role="img" aria-label="P5 map: Helm and GitOps deliver changes; CRD operator and admission webhook extend the API; cluster upgrade, etcd ops and EKS Terraform keep the cluster itself reproducible; progressive delivery ties it together">
+        <text x="20" y="22" font-size="12" class="hand">變更怎麼送進去</text>
+        <text x="20" y="102" font-size="12" class="hand">怎麼擴充 API</text>
+        <text x="20" y="182" font-size="12" class="hand">叢集本身怎麼活</text>
+        <g font-size="11" text-anchor="middle">
+          <rect x="160" y="8" width="150" height="40" fill="var(--see)" stroke="var(--ink)"/><text x="235" y="33">C-1 Helm</text>
+          <rect x="320" y="8" width="170" height="40" fill="var(--who)" stroke="var(--ink)" stroke-width="2"/><text x="405" y="33">C-2 GitOps / Argo CD</text>
+          <rect x="500" y="8" width="210" height="40" fill="var(--may)" stroke="var(--ink)" stroke-width="2"/><text x="605" y="33">C-8 progressive delivery</text>
+          <rect x="160" y="88" width="210" height="40" fill="var(--who)" stroke="var(--ink)" stroke-width="2"/><text x="265" y="113">C-3 CRD + operator</text>
+          <rect x="380" y="88" width="210" height="40" fill="var(--see)" stroke="var(--ink)"/><text x="485" y="113">C-4 admission webhook</text>
+          <rect x="160" y="168" width="170" height="40" fill="var(--see)" stroke="var(--ink)"/><text x="245" y="193">C-5 cluster upgrade</text>
+          <rect x="340" y="168" width="170" height="40" fill="var(--who)" stroke="var(--ink)" stroke-width="2"/><text x="425" y="193">C-6 etcd ops</text>
+          <rect x="520" y="168" width="190" height="40" fill="var(--see)" stroke="var(--ink)"/><text x="615" y="193">C-7 EKS Terraform</text>
+        </g>
+      </svg>
+    </div>
+  </section>
+
+  <section id="l0">
+    <h2>Layer 0 · 一張圖<span class="tag">analogy</span></h2>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 720 190" role="img" aria-label="Architect's blueprint in a vault is Git; a site foreman compares the building to the blueprint and fixes drift is Argo CD; nobody is allowed to change the building directly">
+        <defs><marker id="p5a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="var(--ink)"/></marker></defs>
+        <rect x="20" y="30" width="190" height="90" fill="var(--who)" stroke="var(--ink)" stroke-width="2"/><text x="115" y="60" text-anchor="middle" font-size="13" class="hand">保險箱裡的藍圖</text><text x="115" y="84" text-anchor="middle" font-size="10">Git（有簽核、有歷史）</text>
+        <rect x="270" y="30" width="190" height="90" fill="var(--may)" stroke="var(--ink)" stroke-width="2"/><text x="365" y="60" text-anchor="middle" font-size="13" class="hand">工地主任</text><text x="365" y="84" text-anchor="middle" font-size="10">Argo CD：照藍圖比對、修正</text>
+        <rect x="520" y="30" width="180" height="90" fill="var(--see)" stroke="var(--ink)" stroke-width="2"/><text x="610" y="60" text-anchor="middle" font-size="13" class="hand">建築本體</text><text x="610" y="84" text-anchor="middle" font-size="10">叢集</text>
+        <line x1="210" y1="75" x2="268" y2="75" stroke="var(--ink)" stroke-width="2" marker-end="url(#p5a)"/><line x1="460" y1="75" x2="518" y2="75" stroke="var(--ink)" stroke-width="2" marker-end="url(#p5a)"/>
+        <text x="360" y="160" text-anchor="middle" font-size="13" class="hand">有人偷偷改了牆（kubectl edit），主任下次巡視就把它改回藍圖。</text>
+      </svg>
+    </div>
+    <p>這就是 P0 的恆溫器，只是把 desired state 從 etcd 往上搬到 Git。</p>
+  </section>
+
+  <section id="l1">
+    <h2>Layer 1 · 第一性原理<span class="tag">why it must exist</span></h2>
+    <ol>
+      <li><b>人會改東西，改了會忘。</b>手動 <code>kubectl apply</code> 一年後，沒人說得出 prod 為什麼長這樣（drift）。要有一份可以審查、可以回溯的唯一真相。</li>
+      <li><b>叢集本身也是會壞的東西。</b>etcd 資料損毀、整個 Region 掛掉、升級失敗不能 downgrade。如果叢集不能從程式碼重建，備份就只是心理安慰。</li>
+      <li><b>每個變更都是一次賭博。</b>大部分事故是變更造成的。不能不變，只能讓每次賭注變小：一次只影響一小部分流量，壞了自動退。</li>
+    </ol>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 720 200" role="img" aria-label="Push CI with cluster-admin credentials versus pull GitOps agent inside the cluster; in push mode the CI system holds keys to production">
+        <text x="170" y="22" text-anchor="middle" font-size="13" class="hand">push：CI 拿著 prod 鑰匙</text>
+        <text x="540" y="22" text-anchor="middle" font-size="13" class="hand">pull：叢集自己去拿藍圖</text>
+        <line x1="360" y1="10" x2="360" y2="190" stroke="var(--line)" stroke-dasharray="4 4"/>
+        <g font-size="11" text-anchor="middle">
+          <rect x="20" y="50" width="110" height="50" fill="var(--card)" stroke="var(--ink)"/><text x="75" y="80">CI runner</text>
+          <rect x="220" y="50" width="120" height="50" fill="var(--see)" stroke="var(--ink)"/><text x="280" y="80">prod 叢集</text>
+          <rect x="390" y="50" width="110" height="50" fill="var(--who)" stroke="var(--ink)"/><text x="445" y="80">Git</text>
+          <rect x="580" y="50" width="120" height="50" fill="var(--see)" stroke="var(--ink)"/><text x="640" y="72">prod 叢集</text><text x="640" y="88" font-size="10">Argo CD 在裡面</text>
+        </g>
+        <line x1="130" y1="75" x2="218" y2="75" stroke="var(--wrong)" stroke-width="2"/><text x="175" y="68" text-anchor="middle" font-size="9" fill="var(--wrong)">cluster-admin</text>
+        <line x1="578" y1="75" x2="502" y2="75" stroke="var(--ok)" stroke-width="2"/><text x="540" y="68" text-anchor="middle" font-size="9" fill="var(--ok)">只讀 Git</text>
+        <text x="20" y="140" font-size="11" fill="var(--wrong)">CI 被攻破 = prod 被攻破（你 C-4 的爆炸半徑題）</text>
+        <text x="390" y="140" font-size="11" fill="var(--ok)">prod 憑證不離開叢集；Git 才是要守的那扇門</text>
+        <text x="390" y="160" font-size="11" fill="var(--ink-soft)">代價：Git 的 merge 權限 = prod 的寫權限</text>
+      </svg>
+    </div>
+  </section>
+
+  <section id="l2">
+    <h2>Layer 2 · 機制<span class="tag">three loops</span></h2>
+    <p>因為 Layer 1 要「唯一真相 + 自動修正」，這一章所有工具都是 P0 reconcile loop 的變形，只是 desired state 放的地方不同。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 760 300" role="img" aria-label="Three nested reconcile loops: Git to Argo CD to API server (sync every 3 minutes or webhook); custom resource to operator to child objects; Deployment to ReplicaSet to Pods. Argo Rollouts adds analysis that queries Prometheus and aborts">
+        <defs><marker id="p5b" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="var(--ink)"/></marker></defs>
+        <rect x="10" y="20" width="140" height="60" fill="var(--who)" stroke="var(--ink)" stroke-width="2"/><text x="80" y="45" text-anchor="middle" font-size="11">Git repo</text><text x="80" y="64" text-anchor="middle" font-size="10">manifests / Helm values</text>
+        <rect x="200" y="20" width="160" height="60" fill="var(--may)" stroke="var(--ink)" stroke-width="2"/><text x="280" y="42" text-anchor="middle" font-size="11">Argo CD</text><text x="280" y="58" text-anchor="middle" font-size="10">diff Git vs live</text><text x="280" y="72" text-anchor="middle" font-size="10">每 3 分鐘 / webhook</text>
+        <rect x="410" y="20" width="140" height="60" fill="var(--who)" stroke="var(--ink)" stroke-width="2"/><text x="480" y="55" text-anchor="middle" font-size="11">API Server</text>
+        <line x1="150" y1="50" x2="198" y2="50" stroke="var(--ink)" marker-end="url(#p5b)"/><line x1="360" y1="50" x2="408" y2="50" stroke="var(--ink)" marker-end="url(#p5b)"/>
+        <path d="M480 80 C480 110, 280 110, 280 82" fill="none" stroke="var(--ink-soft)" stroke-dasharray="4 3" marker-end="url(#p5b)"/><text x="330" y="118" font-size="9" fill="var(--ink-soft)">selfHeal：live 被改就改回</text>
+        <rect x="200" y="150" width="160" height="60" fill="var(--see)" stroke="var(--ink)" stroke-width="2"/><text x="280" y="172" text-anchor="middle" font-size="11">operator</text><text x="280" y="190" text-anchor="middle" font-size="10">watch CR: PostgresCluster</text>
+        <rect x="410" y="150" width="160" height="60" fill="var(--card)" stroke="var(--ink)"/><text x="490" y="172" text-anchor="middle" font-size="10">建 StatefulSet、Service、</text><text x="490" y="188" text-anchor="middle" font-size="10">Secret、備份 CronJob</text>
+        <line x1="360" y1="180" x2="408" y2="180" stroke="var(--ink)" marker-end="url(#p5b)"/>
+        <text x="20" y="175" font-size="11" class="hand">CRD 讓 API 認得新種類；</text><text x="20" y="193" font-size="11" class="hand">operator 是那個種類的引擎</text>
+        <rect x="600" y="20" width="150" height="190" fill="none" stroke="var(--ink)" stroke-dasharray="5 4"/>
+        <text x="675" y="42" text-anchor="middle" font-size="11">Argo Rollouts</text>
+        <g font-size="10"><text x="612" y="66">canary 5% → 20% → 50%</text><text x="612" y="88">每步跑 AnalysisRun：</text><text x="612" y="106">查 Prometheus 錯誤率</text><text x="612" y="128" fill="var(--ok)">過 → 下一步</text><text x="612" y="148" fill="var(--wrong)">不過 → 自動 abort</text><text x="612" y="168">流量切回 stable</text></g>
+        <rect x="10" y="240" width="740" height="46" fill="var(--card)" stroke="var(--ok)" stroke-width="2"/>
+        <text x="380" y="261" text-anchor="middle" font-size="11">同一個模式第 N 次出現：規則（Git / CR / Deployment）+ 引擎（Argo CD / operator / controller）。</text>
+        <text x="380" y="279" text-anchor="middle" font-size="11">P2a 的 Ingress 物件 vs controller、NetworkPolicy vs CNI 引擎，就是同一句話。</text>
+      </svg>
+    </div>
+
+    <h3 style="margin:0">升級順序與 etcd</h3>
+    <div class="two">
+      <div class="card"><b>升級順序（kubeadm）</b><ol class="small"><li>讀 release notes：找被移除的 API（<code>kubent</code> / <code>pluto</code> 掃）</li><li>備份 etcd</li><li>control plane 先升，一次一個 minor</li><li>add-on（CNI、CoreDNS、kube-proxy）</li><li>node 逐台 drain → 升 kubelet → uncordon</li></ol><p class="small">為什麼 control plane 先：kubelet 可以比 apiserver 舊（1.28 起最多 3 個 minor），不能比它新。新版 apiserver 認得舊 kubelet，反過來不行。</p></div>
+      <div class="card"><b>etcd quorum</b><pre>members  quorum  可壞
+   1       1      0
+   3       2      1
+   5       3      2</pre><p class="small">偶數台沒好處：4 台 quorum 3，一樣只能壞 1 台。<code>etcdctl snapshot save</code> 存快照；restore 會建一個新的資料目錄和新的 cluster，所有 member 都要從同一份快照還原。kubeadm 的憑證預設 1 年過期，升級時會自動更新。</p></div>
+    </div>
+  </section>
+
+  <section id="l3">
+    <h2>Layer 3 · 取捨<span class="tag">why this design</span></h2>
+    <div class="scroll"><table>
+      <tr><th>決定</th><th>選 A</th><th>選 B</th><th>判準</th></tr>
+      <tr><td>部署模型</td><td>push（CI 直接 apply）</td><td>pull（Argo CD / Flux）</td><td>pull 讓 prod 憑證不出叢集，自動修 drift；代價是緊急 hotfix 也要走 Git</td></tr>
+      <tr><td>打包</td><td>Helm（模板）</td><td>Kustomize（疊層 patch）</td><td>Helm 適合發給別人裝的套件；Kustomize 適合自家環境差異。很多團隊兩個都用</td></tr>
+      <tr><td>擴充 API</td><td>CRD + operator</td><td>外部腳本 / CronJob</td><td>operator 有 reconcile、自癒；代價是你自己寫的 controller 要有人維護、會打 API Server</td></tr>
+      <tr><td>政策執行</td><td>admission webhook（Kyverno / Gatekeeper）</td><td>CI 階段掃描</td><td>admission 擋得住繞過 CI 的人；代價是它在每個請求的路上，掛了會擋全部（failurePolicy）</td></tr>
+      <tr><td>叢集升級</td><td>in-place 升級</td><td>blue/green 叢集（建新叢集搬流量）</td><td>in-place 便宜但不能 downgrade；blue/green 可退但要雙倍成本與搬遷流程</td></tr>
+      <tr><td>發布</td><td>rolling update</td><td>canary + 自動分析</td><td>rolling 一旦開始就影響所有人；canary 把賭注限制在 5%</td></tr>
+    </table></div>
+  </section>
+
+  <section id="l4">
+    <h2>Layer 4 · AWS 怎麼做<span class="tag">EKS platform</span></h2>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 760 270" role="img" aria-label="Terraform with S3 state builds VPC and EKS with managed add-ons and access entries; Argo CD in a management cluster syncs app repos to dev, staging, prod clusters; ECR holds images; AWS Backup or Velero backs up workloads">
+        <defs><marker id="p5c" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="var(--ink)"/></marker></defs>
+        <rect x="10" y="20" width="200" height="90" fill="var(--who)" stroke="var(--ink)" stroke-width="2"/><text x="110" y="42" text-anchor="middle" font-size="11">Terraform</text><text x="20" y="62" font-size="10">state: S3 + lock</text><text x="20" y="80" font-size="10">VPC、EKS、add-ons</text><text x="20" y="98" font-size="10">access entries、IRSA</text>
+        <rect x="260" y="20" width="220" height="90" fill="var(--may)" stroke="var(--ink)" stroke-width="2"/><text x="370" y="42" text-anchor="middle" font-size="11">管理叢集</text><text x="270" y="62" font-size="10">Argo CD + ApplicationSet</text><text x="270" y="80" font-size="10">一份 app 定義 → 多個叢集</text>
+        <rect x="530" y="20" width="220" height="90" fill="var(--card)" stroke="var(--ink)"/><text x="640" y="45" text-anchor="middle" font-size="11">GitHub / CodeCommit</text><text x="640" y="65" text-anchor="middle" font-size="10">infra repo / app repo</text><text x="640" y="85" text-anchor="middle" font-size="10">CI 只 build + push 到 ECR</text>
+        <line x1="528" y1="65" x2="482" y2="65" stroke="var(--ink)" marker-end="url(#p5c)"/>
+        <g font-size="11" text-anchor="middle">
+          <rect x="60" y="160" width="190" height="70" fill="var(--see)" stroke="var(--ink)"/><text x="155" y="190">EKS dev</text><text x="155" y="210" font-size="10">auto-sync</text>
+          <rect x="285" y="160" width="190" height="70" fill="var(--see)" stroke="var(--ink)"/><text x="380" y="190">EKS staging</text><text x="380" y="210" font-size="10">auto-sync</text>
+          <rect x="510" y="160" width="190" height="70" fill="var(--see)" stroke="var(--ink)" stroke-width="2"/><text x="605" y="190">EKS prod</text><text x="605" y="210" font-size="10">PR 核准 + canary</text>
+        </g>
+        <g stroke="var(--ink)"><line x1="330" y1="110" x2="160" y2="158" marker-end="url(#p5c)"/><line x1="370" y1="110" x2="380" y2="158" marker-end="url(#p5c)"/><line x1="410" y1="110" x2="600" y2="158" marker-end="url(#p5c)"/></g>
+        <line x1="110" y1="110" x2="110" y2="158" stroke="var(--ink-soft)" stroke-dasharray="4 3" marker-end="url(#p5c)"/>
+      </svg>
+    </div>
+    <div class="scroll"><table>
+      <tr><th>服務 / 設定</th><th>做什麼</th><th>常見陷阱</th></tr>
+      <tr><td>EKS 版本升級</td><td>control plane 一次一個 minor，不能 downgrade</td><td>先跑 EKS upgrade insights 看被移除的 API；add-on 版本沒跟上，CoreDNS / VPC CNI 先壞</td></tr>
+      <tr><td>EKS managed add-ons</td><td>AWS 管 VPC CNI、CoreDNS、kube-proxy 版本</td><td>你用 Helm 改過設定，add-on 升級時被 overwrite（conflict resolution 要選對）</td></tr>
+      <tr><td>Terraform state（S3）</td><td>記錄 AWS 上有什麼</td><td>兩個人同時 apply 沒鎖 → state 損毀。開 locking；prod state 開 versioning</td></tr>
+      <tr><td>terraform destroy EKS</td><td>拆掉叢集</td><td>LB Controller 建的 ALB、ENI 不在 state 裡，VPC 刪不掉。先刪 Ingress / Service 再 destroy</td></tr>
+      <tr><td>ECR</td><td>image registry</td><td>用 <code>latest</code> tag → Git 沒變但內容變了，GitOps 失去意義。用 digest 或不可變 tag</td></tr>
+      <tr><td>AWS Backup / Velero</td><td>備份 workload 與 PV</td><td>EKS 的 etcd 你碰不到，所以「備份」等於備份 Git + PV 快照。沒演練過還原就不算有備份</td></tr>
+    </table></div>
+    <p class="small">職場真實面：Dev 想要「緊急時能直接 kubectl edit」，平台組要所有變更走 Git。折衷是 break-glass 流程：有稽核的臨時權限，事後一定要回寫 Git，否則 Argo CD 會把你的修正改回去。</p>
+  </section>
+
+  <section id="l5">
+    <h2>Layer 5 · 規模化<span class="tag">evolution ladder</span></h2>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 760 240" role="img" aria-label="Ladder: kubectl apply from laptops; CI pipeline with Helm; GitOps with Argo CD and Terraform-built clusters; internal developer platform with golden paths, fleet-wide ApplicationSets, policy as code and progressive delivery by default">
+        <g font-size="11">
+          <rect x="10" y="180" width="170" height="50" fill="var(--card)" stroke="var(--ink)" stroke-width="2"/><text x="20" y="200">① 筆電 kubectl apply</text><text x="20" y="218" class="hand">沒人知道 prod 現況</text>
+          <rect x="195" y="130" width="170" height="100" fill="var(--see)" stroke="var(--ink)" stroke-width="2"/><text x="205" y="150">② CI + Helm</text><text x="205" y="170" class="hand">push 模型</text><text x="205" y="188" class="hand">CI 有 prod 權限</text>
+          <rect x="380" y="80" width="170" height="150" fill="var(--who)" stroke="var(--ink)" stroke-width="2"/><text x="390" y="100">③ GitOps</text><text x="390" y="120" class="hand">Argo CD pull</text><text x="390" y="138" class="hand">Terraform 建叢集</text><text x="390" y="156" class="hand">canary 選用</text>
+          <rect x="565" y="30" width="185" height="200" fill="var(--may)" stroke="var(--ink)" stroke-width="2"/><text x="575" y="50">④ 內部平台</text><text x="575" y="70" class="hand">golden path 範本</text><text x="575" y="88" class="hand">fleet 級 ApplicationSet</text><text x="575" y="106" class="hand">policy as code</text><text x="575" y="124" class="hand">canary 是預設</text><text x="575" y="142" class="hand">叢集可拋棄、定期重建</text>
+        </g>
+        <g font-size="10" fill="var(--wrong)"><text x="20" y="170">換掉：手動</text><text x="205" y="120">換掉：CI 拿鑰匙</text><text x="390" y="70">換掉：每團隊自己搞</text></g>
+      </svg>
+    </div>
+    <div class="two">
+      <div class="card"><b>路線 A：一個管理叢集管全部（hub-spoke）</b><p class="small">一處看全局、ApplicationSet 一次推全 fleet。代價：管理叢集是新的單點，壞了全部不能部署。</p></div>
+      <div class="card"><b>路線 B：每個叢集自己跑 Argo CD</b><p class="small">爆炸半徑小、互不影響。代價：N 套要升級，跨叢集視角要另外做。</p></div>
+    </div>
+  </section>
+
+  <section id="l6">
+    <h2>Layer 6 · 故障與 on-call<span class="tag">how it breaks</span></h2>
+    <div class="panels">
+      <div class="panel"><h3>Argo CD 一直 OutOfSync</h3><p>有 controller 會改欄位（HPA 改 replicas、webhook 注入 sidecar）。用 <code>ignoreDifferences</code>，不然 selfHeal 和 HPA 互相打架。</p></div>
+      <div class="panel"><h3>升級後 Pod 全部建不出來</h3><p>webhook 的 Service 在升級中沒起來，<code>failurePolicy: Fail</code> 擋下所有建立。第一刀 <code>kubectl get validatingwebhookconfigurations</code>。webhook 要排除 kube-system，timeout 設短。</p></div>
+      <div class="panel"><h3>etcd 失去 quorum</h3><p>3 台掛 2 台：API Server 只能讀不能寫（或全掛）。從同一份 snapshot 重建整個 etcd cluster。沒有 snapshot 就沒有 plan B。</p></div>
+      <div class="panel"><h3>升級後網路斷</h3><p>某個元件用的 label、API 在新版被移除。升級前跑 deprecated API 掃描，先在 canary 叢集升。</p></div>
+    </div>
+    <p>公開 postmortem：<a href="https://www.reddit.com/r/RedditEng/comments/11xx5o0/you_broke_reddit_the_piday_outage/">Reddit Pi-Day outage（2023-03）</a>。從 1.23 升 1.24，<code>node-role.kubernetes.io/master</code> label 被移除；Calico route reflector 的 nodeSelector / peerSelector 指著這個 label，路由消失，停機約 314 分鐘。教訓都在這一章：升級前要讀 changelog、Kubernetes 沒有官方 downgrade、還原流程很久沒演練、當初設定的人已經離開而且沒寫文件。</p>
+    <div class="scroll"><table>
+      <tr><th>DORA 指標</th><th>意義</th><th>這章的哪個工具在推它</th></tr>
+      <tr><td>deployment frequency</td><td>多常發布</td><td>GitOps 讓發布變成 merge</td></tr>
+      <tr><td>lead time for changes</td><td>commit 到上線多久</td><td>自動 sync + canary</td></tr>
+      <tr><td>change failure rate</td><td>多少發布造成事故</td><td>canary analysis 自動 abort</td></tr>
+      <tr><td>time to restore</td><td>壞了多久恢復</td><td>git revert = rollback；叢集可重建</td></tr>
+    </table></div>
+  </section>
+
+  <section id="l7">
+    <h2>Layer 7 · 面試<span class="tag">interview</span></h2>
+    <blockquote>「Walk me through how you would upgrade a production EKS cluster from 1.29 to 1.31 with zero downtime.」</blockquote>
+    <p class="sub">先自己講一遍，再打開。</p>
+    <details><summary>L4 回答</summary><div>
+      <p>「在 console 先升 control plane 到 1.30，再升 node group，然後重複一次到 1.31。」</p>
+      <p class="small">順序對，但沒有升級前的檢查、沒有驗證、沒有失敗時怎麼辦。</p>
+    </div></details>
+    <details><summary>L6 回答</summary><div>
+      <p>「EKS 一次只能升一個 minor，而且不能 downgrade，所以重點在升級前。第一，掃被移除的 API（upgrade insights、<code>kubent</code>），改完 manifest 先合進 Git。第二，確認 add-on 和自裝 controller（LB Controller、Karpenter、CNI）支援目標版本。第三，確認每個服務都有 PDB、副本 ≥ 2，否則 node 輪替會停機。」</p>
+      <p>「執行：先在 staging 走一次，再 prod。control plane 先升，因為 kubelet 可以落後 apiserver，反過來不行。接著 managed add-ons，最後 node：Karpenter 透過 drift 輪替，或 managed node group 依 PDB 逐台換。每一步看 SLO dashboard，不是看指令有沒有成功。」</p>
+      <p>「退路：control plane 退不回去，所以真正的退路是 blue/green 叢集，或至少確定叢集能從 Terraform + Git 重建。Reddit 2023 Pi-Day 就是升級後一個被移除的 label 弄斷了路由，又沒有可用的 downgrade 路徑。」</p>
+      <p class="small">L6 多了：不能 downgrade 這個限制推出的「重點在升級前」、元件順序的原因、PDB 前置條件、用 SLO 驗證、真實的退路設計。</p>
+    </div></details>
+  </section>
+
+  <section id="trail">
+    <h2>前面章節埋的伏筆<span class="tag">connections</span></h2>
+    <div class="trail">
+      <div class="wrong"><b>我錯在這 · 09-30 → 10-06</b>terraform 假 AMI 答 plan 發現；data 查 subnet 答 apply 才打。</div>
+      <div class="fix">修正：plan 會 refresh 既有資源、執行 data 查詢；新 resource 的參數要 apply 才送 AWS 驗。（C-7 EKS Terraform 會一直用到）</div>
+      <div class="fix"><b>s44 · version skew</b>你答「先升 control plane，新版認得舊版」，方向對。C-5 會補完整升級鏈與 add-on 順序。</div>
+      <div class="fix"><b>P2b C-4 · CI 綁 cluster-admin</b>爆炸半徑題的答案之一就是 pull-based GitOps：CI 不再拿 prod 權限。</div>
+      <div class="fix"><b>P0 L6 · webhook 掛掉擋全部</b>C-4 會正式打開 admission chain 和 failurePolicy。</div>
+      <div class="fix"><b>Curiosity · etcd Raft</b>06 月 park 的問題，C-6 回收：leader election、log replication、為什麼要奇數台。</div>
+    </div>
+  </section>
+
+  <section id="next">
+    <h2>本章 topic 深入筆記<span class="tag">next</span></h2>
+    <div class="scroll"><table>
+      <tr><th>topic</th><th>我的程度</th><th>深入筆記</th></tr>
+      <tr><td>GitOps / Argo CD（pull、drift、selfHeal）</td><td><span class="lvl todo">未開講</span></td><td><span class="lvl todo">待寫</span></td></tr>
+      <tr><td>CRD + operator pattern</td><td><span class="lvl todo">未開講</span></td><td><span class="lvl todo">待寫</span></td></tr>
+      <tr><td>cluster upgrade（kubeadm vs EKS）</td><td><span class="lvl low">s44 version skew supported</span></td><td><span class="lvl todo">待寫</span></td></tr>
+      <tr><td>etcd ops：Raft、snapshot、quorum loss</td><td><span class="lvl todo">P0 直覺</span></td><td><span class="lvl todo">待寫</span></td></tr>
+      <tr><td>progressive delivery（canary + analysis）</td><td><span class="lvl todo">未開講</span></td><td><span class="lvl todo">待寫</span></td></tr>
+    </table></div>
+  </section>
+</main>
+
+</body></html>

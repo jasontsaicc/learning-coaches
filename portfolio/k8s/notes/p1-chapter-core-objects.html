@@ -1,0 +1,366 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"></head><body>
+<title>P1 核心物件與容器底層</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC:wght@400;700&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: one notebook column on graph paper; figures on taped cards, scenarios as 2x2 comic panels */
+:root {
+  --paper: #F6F8FA;
+  --grid: rgba(90,130,170,.16);
+  --ink: #23313E;
+  --ink-soft: #55677A;
+  --card: #FFFFFF;
+  --tape: rgba(240,214,140,.75);
+  --who: #FFE98A;
+  --see: #BDEEF6;
+  --may: #F9CDE0;
+  --wrong: #D2453A;
+  --ok: #2F8F5B;
+  --line: #9DB0C2;
+  --font-hand: "LXGW WenKai TC", "Noto Sans TC", "PingFang TC", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #1A2320; --grid: rgba(200,230,210,.08); --ink: #E6EDE8; --ink-soft: #A9BAB1;
+    --card: #24302C; --tape: rgba(200,180,110,.45); --who: #8A7A2A; --see: #2B6A74; --may: #7A3F57;
+    --wrong: #FF8A7E; --ok: #7FD3A1; --line: #5E7268; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #1A2320; --grid: rgba(200,230,210,.08); --ink: #E6EDE8; --ink-soft: #A9BAB1;
+  --card: #24302C; --tape: rgba(200,180,110,.45); --who: #8A7A2A; --see: #2B6A74; --may: #7A3F57;
+  --wrong: #FF8A7E; --ok: #7FD3A1; --line: #5E7268; color-scheme: dark;
+}
+body {
+  background-color: var(--paper);
+  background-image: linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 22px 22px;
+  color: var(--ink);
+  font-family: var(--font-hand);
+  font-size: 17px;
+  line-height: 1.75;
+}
+.page { max-width: 760px; margin: 0 auto; padding-inline: 18px; padding-block: 32px 64px; display: grid; gap: 34px; }
+h1, h2 { text-wrap: balance; line-height: 1.3; margin: 0; }
+h1 { font-size: 2.1rem; }
+h2 { font-size: 1.45rem; display: flex; align-items: baseline; gap: 10px; }
+h2 .tag { font-family: var(--font-mono); font-size: .72rem; letter-spacing: .08em; color: var(--ink-soft); text-transform: uppercase; }
+p { margin: 0; }
+section { display: grid; gap: 14px; min-width: 0; }
+.sub { color: var(--ink-soft); font-size: .95rem; }
+mark { background: linear-gradient(transparent 52%, var(--who) 52%); color: inherit; padding: 0 2px; }
+mark.see { background: linear-gradient(transparent 52%, var(--see) 52%); }
+mark.may { background: linear-gradient(transparent 52%, var(--may) 52%); }
+code { font-family: var(--font-mono); font-size: .86em; background: color-mix(in srgb, var(--line) 22%, transparent); padding: 1px 5px; border-radius: 3px; }
+.card { position: relative; background: var(--card); padding: 22px 18px 16px; box-shadow: 0 1px 3px rgba(0,0,0,.12); min-width: 0; }
+.card::before { content: ""; position: absolute; top: -9px; left: 50%; width: 92px; height: 20px; transform: translateX(-50%) rotate(-2deg); background: var(--tape); }
+.scroll { overflow-x: auto; }
+svg text { font-family: var(--font-mono); fill: var(--ink); }
+svg .hand { font-family: var(--font-hand); }
+.rule { border-left: 4px solid var(--ok); padding: 6px 12px; font-size: 1.08rem; }
+.wrong { border-left: 4px solid var(--wrong); padding: 4px 12px; display: grid; gap: 2px; }
+.wrong b { color: var(--wrong); font-size: .85rem; letter-spacing: .05em; }
+.panels { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 14px; }
+.panel { border: 2px solid var(--ink); background: var(--card); padding: 10px; display: grid; gap: 6px; min-width: 0; }
+.panel h3 { margin: 0; font-size: 1rem; font-family: var(--font-mono); }
+.panel p { font-size: .92rem; }
+@media (max-width: 520px) { .panels { grid-template-columns: 1fr; } }
+table { border-collapse: collapse; width: 100%; font-size: .95rem; }
+th, td { border-bottom: 1px dashed var(--line); padding: 8px 6px; text-align: left; vertical-align: top; }
+th { font-family: var(--font-mono); font-size: .78rem; letter-spacing: .05em; color: var(--ink-soft); font-weight: 600; }
+ol { margin: 0; padding-left: 1.3em; display: grid; gap: 6px; }
+blockquote { margin: 0; padding: 12px 16px; background: var(--card); border: 2px dashed var(--line); }
+.en { font-family: var(--font-mono); font-size: .9rem; color: var(--ink-soft); }
+details summary{cursor:pointer}
+</style>
+<style>
+/* chapter-note additions on top of the notebook base */
+svg.fig { display: block; min-width: 640px; width: 100%; height: auto; }
+.lvl { font-family: var(--font-mono); font-size: .74rem; padding: 1px 7px; border: 1.5px solid var(--ink); border-radius: 10px; white-space: nowrap; }
+.lvl.high { background: color-mix(in srgb, var(--ok) 28%, transparent); }
+.lvl.med { background: var(--who); }
+.lvl.low { background: var(--may); }
+.lvl.todo { border-style: dashed; color: var(--ink-soft); }
+.meta { display: flex; flex-wrap: wrap; gap: 8px 16px; font-family: var(--font-mono); font-size: .8rem; color: var(--ink-soft); }
+.toc { display: flex; flex-wrap: wrap; gap: 6px 14px; font-family: var(--font-mono); font-size: .82rem; }
+.toc a { color: var(--ink); }
+.trail { display: grid; gap: 12px; }
+.fix { border-left: 4px solid var(--ok); padding: 4px 12px; }
+.two { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 14px; }
+@media (max-width: 560px) { .two { grid-template-columns: 1fr; } }
+details { background: var(--card); border: 2px dashed var(--line); padding: 10px 14px; }
+details[open] { border-style: solid; }
+details > div { display: grid; gap: 8px; margin-top: 10px; }
+.small { font-size: .9rem; }
+a { color: inherit; text-underline-offset: 3px; }
+pre { margin: 0; font-family: var(--font-mono); font-size: .82rem; line-height: 1.5; background: var(--card); border: 1px solid var(--line); padding: 10px 12px; overflow-x: auto; }
+</style>
+<main class="page">
+  <header style="display:grid;gap:10px">
+    <p class="sub">k8s 課程 · 章節筆記 · Phase 1</p>
+    <h1>P1 核心物件與容器底層</h1>
+    <p>一個問題貫穿整章：<b>k8s 物件上的每個欄位，最後在 node 的 kernel 裡變成了什麼？</b></p>
+    <div class="meta"><span>gate-passed 2026-06-25</span><span>sessions s3–s6，s26 補 PID 1</span><span>4 個 topic 全 <span class="lvl high">high</span></span></div>
+    <nav class="toc"><a href="#map">章節地圖</a><a href="#l0">L0 圖</a><a href="#l1">L1 原理</a><a href="#l2">L2 機制</a><a href="#l3">L3 取捨</a><a href="#l4">L4 EKS</a><a href="#l5">L5 規模</a><a href="#l6">L6 on-call</a><a href="#l7">L7 面試</a><a href="#trail">我的錯題</a><a href="#next">topic 深入</a></nav>
+  </header>
+
+  <section id="map">
+    <h2>章節地圖<span class="tag">5 chunks</span></h2>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 720 200" role="img" aria-label="P1 chunk map: container as namespaced process, Pod, probes, Deployment rollout, resources and OOM, all mapped to kernel">
+        <defs><marker id="p1a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="var(--ink)"/></marker></defs>
+        <g font-size="11" text-anchor="middle">
+          <rect x="10" y="20" width="130" height="56" fill="var(--who)" stroke="var(--ink)" stroke-width="2"/><text x="75" y="43">[1] container</text><text x="75" y="62" class="hand">= ns + cgroup 行程</text>
+          <rect x="155" y="20" width="130" height="56" fill="var(--who)" stroke="var(--ink)" stroke-width="2"/><text x="220" y="43">[2] Pod</text><text x="220" y="62" class="hand">共用 net ns</text>
+          <rect x="300" y="20" width="130" height="56" fill="var(--see)" stroke="var(--ink)" stroke-width="2"/><text x="365" y="43">[3] probe</text><text x="365" y="62" class="hand">重啟 vs 切流量</text>
+          <rect x="445" y="20" width="130" height="56" fill="var(--see)" stroke="var(--ink)" stroke-width="2"/><text x="510" y="43">[4] Deployment</text><text x="510" y="62" class="hand">兩個 RS 翹翹板</text>
+          <rect x="590" y="20" width="120" height="56" fill="var(--may)" stroke="var(--ink)" stroke-width="2"/><text x="650" y="43">[5] resource</text><text x="650" y="62" class="hand">QoS / OOM</text>
+        </g>
+        <g stroke="var(--ink)" stroke-width="2"><line x1="140" y1="48" x2="153" y2="48" marker-end="url(#p1a)"/><line x1="285" y1="48" x2="298" y2="48" marker-end="url(#p1a)"/><line x1="430" y1="48" x2="443" y2="48" marker-end="url(#p1a)"/><line x1="575" y1="48" x2="588" y2="48" marker-end="url(#p1a)"/></g>
+        <rect x="10" y="130" width="700" height="44" fill="var(--card)" stroke="var(--ink)" stroke-width="2"/>
+        <text x="360" y="157" text-anchor="middle" font-size="12">node Linux kernel：namespaces · cgroup v2 files · signals · OOM killer</text>
+        <g stroke="var(--ink-soft)" stroke-dasharray="4 3"><line x1="75" y1="76" x2="75" y2="128"/><line x1="220" y1="76" x2="220" y2="128"/><line x1="650" y1="76" x2="650" y2="128"/></g>
+        <text x="365" y="108" text-anchor="middle" font-size="11" class="hand">每一格最後都落到這一層</text>
+      </svg>
+    </div>
+  </section>
+
+  <section id="l0">
+    <h2>Layer 0 · 一張圖<span class="tag">analogy</span></h2>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 720 220" role="img" aria-label="Shared apartment: rooms are containers with curtains (namespaces) and breakers (cgroups); the apartment door is the shared network namespace held by pause">
+        <rect x="20" y="20" width="420" height="180" fill="none" stroke="var(--ink)" stroke-width="2.5"/>
+        <text x="30" y="40" font-size="13" class="hand">一間分租公寓 = Pod</text>
+        <rect x="40" y="60" width="170" height="110" fill="var(--see)" stroke="var(--ink)" stroke-width="2"/>
+        <text x="125" y="85" text-anchor="middle" font-size="12" class="hand">房間 A：app</text><text x="125" y="108" text-anchor="middle" font-size="11">窗簾 = namespace</text><text x="125" y="128" text-anchor="middle" font-size="11">電表斷路器 = cgroup</text>
+        <rect x="250" y="60" width="170" height="110" fill="var(--see)" stroke="var(--ink)" stroke-width="2"/>
+        <text x="335" y="85" text-anchor="middle" font-size="12" class="hand">房間 B：sidecar</text><text x="335" y="108" text-anchor="middle" font-size="11">自己的窗簾、電表</text>
+        <rect x="200" y="182" width="60" height="18" fill="var(--who)" stroke="var(--ink)" stroke-width="2"/>
+        <text x="230" y="196" text-anchor="middle" font-size="10">大門</text>
+        <text x="270" y="196" font-size="11" class="hand">共用一個門牌 = 一個 Pod IP（pause 拿著鑰匙）</text>
+        <rect x="480" y="20" width="220" height="180" fill="var(--who)" stroke="var(--ink)" stroke-width="2"/>
+        <text x="590" y="45" text-anchor="middle" font-size="13" class="hand">整棟樓的地基 = kernel</text>
+        <text x="500" y="80" font-size="11" class="hand">所有房間共用同一套水電管線</text>
+        <text x="500" y="105" font-size="11" class="hand">電（CPU）不夠：大家變暗</text>
+        <text x="500" y="130" font-size="11" class="hand" fill="var(--wrong)">水桶（memory）滿了：</text>
+        <text x="500" y="150" font-size="11" class="hand" fill="var(--wrong)">管理員直接把人請出去</text>
+      </svg>
+    </div>
+    <p>container 不是小 VM，是一個拉上窗簾、裝了電表的房間。Pod 是共用大門的分租公寓。整棟樓只有一個地基。</p>
+  </section>
+
+  <section id="l1">
+    <h2>Layer 1 · 第一性原理<span class="tag">why it must exist</span></h2>
+    <p><b>限制一：一台機器只有一顆 kernel，但要跑幾十個互不信任的 app。</b>每個 app 開一台 VM 太貴（每台多帶一份 OS、開機分鐘級）。所以要在同一顆 kernel 內切出「看得到什麼」（namespace）和「能用多少」（cgroup）。</p>
+    <p><b>限制二：兩種資源的物理性質不同。</b>這個不對稱是你 s5 自己推出來的。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 720 230" role="img" aria-label="CPU over limit is throttled: work is delayed but finishes. Memory over limit cannot be reclaimed: kernel kills the process, exit 137">
+        <text x="20" y="24" font-size="13" class="hand">CPU：可壓縮（時間可以晚點給）</text>
+        <line x1="20" y1="100" x2="340" y2="100" stroke="var(--ink)"/>
+        <rect x="20" y="40" width="320" height="60" fill="none" stroke="var(--line)"/>
+        <line x1="20" y1="60" x2="340" y2="60" stroke="var(--wrong)" stroke-dasharray="5 4"/><text x="300" y="56" font-size="10" fill="var(--wrong)">limit</text>
+        <g fill="var(--see)" stroke="var(--ink)"><rect x="30" y="60" width="40" height="40"/><rect x="80" y="60" width="40" height="40"/><rect x="130" y="60" width="40" height="40"/><rect x="180" y="60" width="40" height="40"/><rect x="230" y="60" width="40" height="40"/></g>
+        <text x="20" y="125" font-size="11">原本 100ms 做完的事，被切成 5 個 period 做完</text>
+        <text x="20" y="145" font-size="11" fill="var(--ink-soft)">結果：變慢（p99 latency ↑），不會死</text>
+        <text x="390" y="24" font-size="13" class="hand">Memory：不可壓縮（寫進去的 byte 收不回）</text>
+        <rect x="390" y="40" width="300" height="60" fill="none" stroke="var(--line)"/>
+        <line x1="390" y1="60" x2="690" y2="60" stroke="var(--wrong)" stroke-dasharray="5 4"/><text x="650" y="56" font-size="10" fill="var(--wrong)">memory.max</text>
+        <polyline points="390,98 440,90 490,80 540,70 590,62 610,58" fill="none" stroke="var(--ink)" stroke-width="2"/>
+        <text x="612" y="62" font-size="16" fill="var(--wrong)">✗</text>
+        <text x="390" y="125" font-size="11">kernel 唯一回收手段：殺掉整個 process</text>
+        <text x="390" y="145" font-size="11" fill="var(--wrong)">OOMKilled · exit 137 = 128 + 9 (SIGKILL)</text>
+        <rect x="20" y="170" width="680" height="44" fill="var(--card)" stroke="var(--ok)" stroke-width="2"/>
+        <text x="360" y="197" text-anchor="middle" font-size="12" class="hand">所以 k8s 對 CPU 和 memory 的 limit 後果完全不同：一個變慢，一個死掉。</text>
+      </svg>
+    </div>
+    <p><b>限制三：程式會壞，壞法有兩種。</b>卡死（重啟能救）和暫時接不了客（重啟沒用）。混在一起處理就會出事，所以有兩種 probe。</p>
+    <p>拿掉這一章的東西：多個 app 擠在同一台機器上沒有邊界，一個 memory leak 就把整台 node 拖垮，連 kubelet 都可能被 OOM killer 挑中。</p>
+  </section>
+
+  <section id="l2">
+    <h2>Layer 2 · 機制<span class="tag">spec → kernel</span></h2>
+    <p>因為 Layer 1 的隔離只能靠 kernel 做，所以 Pod spec 的每個欄位都要由 kubelet 翻譯成 kernel 設定。翻譯只發生在<b>建立 container 那一刻</b>。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 760 330" role="img" aria-label="Pod spec fields translated by kubelet via containerd and runc into cgroup v2 files and namespaces; pause container holds the network namespace">
+        <defs><marker id="p1b" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="var(--ink)"/></marker></defs>
+        <rect x="10" y="10" width="230" height="160" fill="var(--card)" stroke="var(--ink)" stroke-width="2"/>
+        <text x="20" y="30" font-size="12">Pod spec (etcd 裡的宣告)</text>
+        <g font-size="11"><text x="20" y="55">requests.cpu: 250m</text><text x="20" y="75">limits.cpu: 500m</text><text x="20" y="95">limits.memory: 256Mi</text><text x="20" y="115">livenessProbe / readinessProbe</text><text x="20" y="135">securityContext.runAsUser</text><text x="20" y="155">terminationGracePeriodSeconds: 30</text></g>
+        <rect x="280" y="60" width="120" height="60" fill="var(--may)" stroke="var(--ink)" stroke-width="2"/>
+        <text x="340" y="85" text-anchor="middle" font-size="12">kubelet</text><text x="340" y="104" text-anchor="middle" font-size="10">→ containerd → runc</text>
+        <line x1="240" y1="90" x2="278" y2="90" stroke="var(--ink)" stroke-width="2" marker-end="url(#p1b)"/>
+        <rect x="440" y="10" width="310" height="160" fill="var(--who)" stroke="var(--ink)" stroke-width="2"/>
+        <text x="450" y="30" font-size="12">node kernel (執行體)</text>
+        <g font-size="11"><text x="450" y="55">cpu.weight ← 由 requests 換算 (相對權重)</text><text x="450" y="75">cpu.max = "50000 100000" (50ms / 100ms)</text><text x="450" y="95">memory.max = 268435456 (只講 bytes)</text><text x="450" y="115">probe：kubelet 自己每 10s 打一次</text><text x="450" y="135">process UID = 1000</text><text x="450" y="155">SIGTERM → 等 30s → SIGKILL</text></g>
+        <line x1="400" y1="90" x2="438" y2="90" stroke="var(--ink)" stroke-width="2" marker-end="url(#p1b)"/>
+        <text x="20" y="200" font-size="12" class="hand">Pod 內部：pause 先拿住 net ns，其他 container 加入它</text>
+        <rect x="20" y="215" width="720" height="100" fill="none" stroke="var(--ink)" stroke-width="2" stroke-dasharray="6 4"/>
+        <rect x="40" y="235" width="140" height="60" fill="var(--card)" stroke="var(--ink)"/><text x="110" y="260" text-anchor="middle" font-size="11">pause</text><text x="110" y="280" text-anchor="middle" font-size="10">持有 net ns (IP 10.244.1.7)</text>
+        <rect x="230" y="235" width="140" height="60" fill="var(--see)" stroke="var(--ink)"/><text x="300" y="260" text-anchor="middle" font-size="11">app</text><text x="300" y="280" text-anchor="middle" font-size="10">自己的 mnt / pid / cgroup</text>
+        <rect x="420" y="235" width="140" height="60" fill="var(--see)" stroke="var(--ink)"/><text x="490" y="260" text-anchor="middle" font-size="11">sidecar</text><text x="490" y="280" text-anchor="middle" font-size="10">localhost:15000 可互打</text>
+        <text x="600" y="262" font-size="10" class="hand">同生共死、</text><text x="600" y="280" font-size="10" class="hand">一起排到同一台 node</text>
+        <g stroke="var(--ink-soft)"><line x1="180" y1="265" x2="228" y2="265"/><line x1="370" y1="265" x2="418" y2="265"/></g>
+      </svg>
+    </div>
+
+    <h3 style="margin:0">probe：兩種失敗，兩種後果</h3>
+    <div class="panels">
+      <div class="panel"><h3>readiness 失敗</h3><p>Pod IP 從 EndpointSlice 拿掉 → 不收流量。RESTARTS 不變。<b>不會自己好</b>，要修根因。</p></div>
+      <div class="panel"><h3>liveness 失敗</h3><p>kubelet 殺 container 重建 → RESTARTS +1。判斷句：<b>Would a restart fix this?</b></p></div>
+    </div>
+    <p class="small">預設：<code>periodSeconds: 10</code>、<code>timeoutSeconds: 1</code>、<code>failureThreshold: 3</code> → 偵測延遲 ≈ 30s。startupProbe 成功前 liveness 不跑，給慢啟動 app 緩刑。</p>
+
+    <h3 style="margin:0">rolling update：兩個 ReplicaSet 翹翹板（replicas 4，maxSurge 1，maxUnavailable 0）</h3>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 720 170" role="img" aria-label="Timeline: old RS 4 to 0, new RS 0 to 4, total never below 4 and never above 5; old RS kept at 0 for rollback">
+        <g font-size="11"><text x="10" y="40">舊 RS</text><text x="10" y="90">新 RS</text><text x="10" y="140">可用數</text></g>
+        <g font-size="12" text-anchor="middle">
+          <text x="110" y="40">4</text><text x="210" y="40">4</text><text x="310" y="40">3</text><text x="410" y="40">2</text><text x="510" y="40">1</text><text x="610" y="40" fill="var(--ink-soft)">0（保留）</text>
+          <text x="110" y="90">0</text><text x="210" y="90">1</text><text x="310" y="90">2</text><text x="410" y="90">3</text><text x="510" y="90">4</text><text x="610" y="90">4</text>
+          <text x="110" y="140">4</text><text x="210" y="140" fill="var(--ink-soft)">4 (+1 not ready)</text><text x="310" y="140">5→4</text><text x="410" y="140">5→4</text><text x="510" y="140">5→4</text><text x="610" y="140">4</text>
+        </g>
+        <line x1="60" y1="110" x2="700" y2="110" stroke="var(--line)" stroke-dasharray="3 3"/>
+        <text x="610" y="160" text-anchor="middle" font-size="10" class="hand">rollback = 把這個 RS scale 回 4，不用重拉 image</text>
+      </svg>
+    </div>
+    <p class="small">預設 maxSurge / maxUnavailable 各 25%、<code>revisionHistoryLimit: 10</code>、<code>progressDeadlineSeconds: 600</code>。兩個都設 0 會被 API Server 直接退件。</p>
+
+    <h3 style="margin:0">QoS class 與兩種 OOM</h3>
+    <div class="scroll"><table>
+      <tr><th></th><th>容器級 OOM</th><th>node 級 eviction</th></tr>
+      <tr><td>觸發</td><td>撞自己的 <code>memory.max</code></td><td>node <code>memory.available</code> &lt; 100Mi（kubelet hard eviction 預設）</td></tr>
+      <tr><td>誰動手</td><td>kernel OOM killer</td><td>kubelet</td></tr>
+      <tr><td>跟 node 剩多少有關</td><td>無關</td><td>直接相關</td></tr>
+      <tr><td>砍誰</td><td>超標那個 container</td><td>BestEffort → Burstable（超出 request 越多越先）→ Guaranteed</td></tr>
+    </table></div>
+  </section>
+
+  <section id="l3">
+    <h2>Layer 3 · 取捨<span class="tag">why this design</span></h2>
+    <div class="scroll"><table>
+      <tr><th>選擇</th><th>贏在</th><th>付出的代價</th><th>被比下去的方案</th></tr>
+      <tr><td>container（共用 kernel）</td><td>毫秒級啟動、密度高</td><td>kernel 漏洞 = 隔離失效；root 在 container 裡 UID 仍是 0</td><td>VM per app：隔離強但每台多一份 OS</td></tr>
+      <tr><td>Pod 是排程單位</td><td>sidecar 走 localhost、同生共死的東西綁一起</td><td>放錯東西進同一 Pod 就無法各自 scale</td><td>單一 container 為單位（Docker Swarm / ECS 早期）</td></tr>
+      <tr><td>requests 排程、limits 執法</td><td>可超賣，利用率高</td><td>所有人同時衝頂時 node 會 evict</td><td>只用 limits 排程：安全但浪費</td></tr>
+      <tr><td>Pod 不重啟，只被丟掉重建</td><td>任何 node 都能接手（cattle）</td><td>本機資料隨 Pod 消失，IP 會變</td><td>寵物式長壽 VM</td></tr>
+      <tr><td>rolling update 預設</td><td>零額外架構、內建 rollback</td><td>新舊版本同時在線，API 要向後相容</td><td>Recreate（有停機）、blue/green（2 倍資源）</td></tr>
+    </table></div>
+  </section>
+
+  <section id="l4">
+    <h2>Layer 4 · AWS 怎麼做<span class="tag">EKS data plane</span></h2>
+    <p>因為 Layer 2 的翻譯發生在 node 上，EKS 的 node 長什麼樣、能放幾個 Pod，直接決定這一章的數字。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 760 270" role="img" aria-label="EC2 node memory capacity split into system-reserved, kube-reserved, eviction threshold, and allocatable; max pods limited by ENI IPs; Fargate gives each pod its own microVM">
+        <text x="20" y="25" font-size="12">EC2 node (m5.large: 2 vCPU / 8 GiB)</text>
+        <rect x="20" y="40" width="480" height="40" fill="var(--see)" stroke="var(--ink)" stroke-width="2"/>
+        <rect x="20" y="40" width="40" height="40" fill="var(--may)" stroke="var(--ink)"/>
+        <rect x="60" y="40" width="60" height="40" fill="var(--may)" stroke="var(--ink)"/>
+        <rect x="120" y="40" width="16" height="40" fill="var(--wrong)" opacity=".5" stroke="var(--ink)"/>
+        <g font-size="10"><text x="22" y="98">system-</text><text x="22" y="110">reserved</text><text x="62" y="98">kube-reserved</text><text x="62" y="110">(依 max pods 算)</text><text x="122" y="128">eviction 100Mi</text></g>
+        <text x="320" y="65" text-anchor="middle" font-size="12">allocatable（scheduler 只看這個）</text>
+        <text x="20" y="160" font-size="12">max pods（VPC CNI，預設每個 Pod 一個 VPC IP）</text>
+        <text x="20" y="182" font-size="11">= ENI 數 × (每 ENI IP 數 − 1) + 2 → m5.large = 3 × (10 − 1) + 2 = 29</text>
+        <text x="20" y="204" font-size="11" fill="var(--ink-soft)">開 prefix delegation 可以大很多，但 kube-reserved 也要跟著調</text>
+        <rect x="560" y="40" width="190" height="200" fill="var(--who)" stroke="var(--ink)" stroke-width="2"/>
+        <text x="655" y="62" text-anchor="middle" font-size="12">Fargate</text>
+        <rect x="580" y="80" width="150" height="60" fill="var(--card)" stroke="var(--ink)"/><text x="655" y="106" text-anchor="middle" font-size="11">1 Pod = 1 microVM</text><text x="655" y="124" text-anchor="middle" font-size="10">自己的 kernel</text>
+        <text x="575" y="165" font-size="10" class="hand">隔離回到 VM 等級</text>
+        <text x="575" y="185" font-size="10" class="hand">不能跑 DaemonSet</text>
+        <text x="575" y="205" font-size="10" class="hand">requests 會被往上取整</text>
+        <text x="575" y="225" font-size="10" class="hand">成新的計費規格</text>
+      </svg>
+    </div>
+    <div class="scroll"><table>
+      <tr><th>服務 / 設定</th><th>做什麼</th><th>常見陷阱</th></tr>
+      <tr><td>EKS AMI（AL2023）</td><td>node OS，cgroup v2</td><td>從 AL2 換過去，舊版 JVM（JDK 8u372 以前）讀不懂 cgroup v2，heap 依整台 node 記憶體算 → 一直 OOMKilled</td></tr>
+      <tr><td>VPC CNI max pods</td><td>每 Pod 一個 VPC IP</td><td>小 instance 很快到 Pod 上限，Pod Pending 寫 <code>Too many pods</code>，CPU 其實還很空</td></tr>
+      <tr><td>AWS Load Balancer Controller（IP mode）</td><td>ALB 直接打 Pod IP</td><td>rolling update 時舊 Pod 已被拿掉但 ALB 還沒 deregister 完 → 502。要開 pod readiness gate + preStop sleep</td></tr>
+      <tr><td>ALB health check</td><td>LB 自己的健康檢查</td><td>跟 readiness probe 是兩套，路徑和門檻要對齊，不然 k8s 覺得 Ready、ALB 覺得 unhealthy</td></tr>
+      <tr><td>Fargate</td><td>每 Pod 一個 microVM</td><td>不支援 DaemonSet / privileged / hostNetwork；log 要用內建 Fluent Bit 設定</td></tr>
+      <tr><td>CloudWatch Container Insights</td><td>Pod 層記憶體、CPU 指標</td><td>看 working set 而不是 RSS；開了按 metric 數量計費</td></tr>
+    </table></div>
+    <p class="small">職場真實面：Dev 想把 limit 拉高「保平安」，FinOps 看 requests 加總算錢，SRE 要的是 requests 貼近 p95 實際用量。PR review 會被問：「這個 limit 的數字從哪來？有看過 7 天的 memory 曲線嗎？」</p>
+  </section>
+
+  <section id="l5">
+    <h2>Layer 5 · 規模化<span class="tag">evolution ladder</span></h2>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 760 240" role="img" aria-label="Ladder: no requests, hand-set requests and limits, LimitRange plus quota plus VPA recommendations, automated rightsizing with Karpenter bin packing">
+        <g font-size="11">
+          <rect x="10" y="180" width="170" height="50" fill="var(--card)" stroke="var(--ink)" stroke-width="2"/><text x="20" y="200">① 不設 requests</text><text x="20" y="218" class="hand">BestEffort，先被殺</text>
+          <rect x="195" y="130" width="170" height="100" fill="var(--see)" stroke="var(--ink)" stroke-width="2"/><text x="205" y="150">② 手填 requests/limits</text><text x="205" y="170" class="hand">憑感覺，常 2–5 倍高估</text>
+          <rect x="380" y="80" width="170" height="150" fill="var(--who)" stroke="var(--ink)" stroke-width="2"/><text x="390" y="100">③ 平台護欄</text><text x="390" y="120" class="hand">LimitRange 給預設</text><text x="390" y="138" class="hand">ResourceQuota 給 ns 上限</text><text x="390" y="156" class="hand">VPA 只出建議</text>
+          <rect x="565" y="30" width="185" height="200" fill="var(--may)" stroke="var(--ink)" stroke-width="2"/><text x="575" y="50">④ 自動 rightsizing</text><text x="575" y="70" class="hand">依 p95 用量回寫 requests</text><text x="575" y="88" class="hand">in-place resize（1.33 beta）</text><text x="575" y="106" class="hand">Karpenter 依 requests 挑機型</text>
+        </g>
+        <g font-size="10" fill="var(--wrong)"><text x="20" y="170">換掉：沒人負責</text><text x="205" y="120">換掉：憑感覺</text><text x="390" y="70">換掉：人工調</text></g>
+      </svg>
+    </div>
+    <div class="two">
+      <div class="card"><b>路線 A：CPU 也設 limit</b><p class="small">行為可預測，吵鬧鄰居影響小。代價：CFS throttling 讓 latency 敏感服務 p99 飆高，即使 node CPU 很空。</p></div>
+      <div class="card"><b>路線 B：CPU 只設 requests，不設 limit</b><p class="small">閒置 CPU 可借用，throttling 消失。代價：requests 一定要準，否則鄰居搶不到；QoS 不再是 Guaranteed。memory limit 兩條路線都保留。</p></div>
+    </div>
+  </section>
+
+  <section id="l6">
+    <h2>Layer 6 · 故障與 on-call<span class="tag">how it breaks</span></h2>
+    <p class="rule">CrashLoopBackOff 是現象，不是死因。第一刀永遠是 <code>kubectl describe pod</code> 讀 <code>Last State</code> 的 Reason 和 Exit Code，再 <code>kubectl logs --previous</code> 看上一個死掉的 container。</p>
+    <div class="panels">
+      <div class="panel"><h3>exit 137 · OOMKilled</h3><p>撞自己的 memory.max。看 7 天記憶體曲線：鋸齒爬到頂 = leak，調大 limit 只是延後；平台水位 = 真的設太小。</p></div>
+      <div class="panel"><h3>沒死，只是慢</h3><p>p99 latency 上升、CPU 使用率看起來不高。查 <code>container_cpu_cfs_throttled_periods_total</code> 比例。止血：拉高 CPU limit 或拿掉。</p></div>
+      <div class="panel"><h3>liveness 查 DB → 雪崩</h3><p>DB 慢 2 秒 → 所有 Pod liveness 同時失敗 → 集體重啟 → 重連風暴壓垮 DB（thundering herd）。止血：liveness 只查自己的 process。</p></div>
+      <div class="panel"><h3>exit 0，卻 CrashLoop</h3><p>你 s6 gate 的題：liveness 打 8080，nginx 聽 80。app 健康，是 probe 殺的。Events 有 <code>Liveness probe failed</code> + <code>Killing</code>。</p></div>
+    </div>
+    <p>每次刪 Pod 都要等滿 30 秒：PID 1 沒裝 SIGTERM handler，kernel 對 PID 1 直接忽略 signal，kubelet 只好等 grace period 到期送 SIGKILL。Dockerfile 用 shell form 時 PID 1 是 <code>/bin/sh</code>，它不轉發 signal。解法：exec form 或 <code>tini</code>。</p>
+    <p class="small">公開事故合集：<a href="https://k8s.af">k8s.af（Kubernetes Failure Stories）</a>，裡面 CPU throttling、OOM、liveness 雪崩都有多篇真實 postmortem。SLO 例子：「部署期間 5xx 比例 &lt; 0.1%」，它直接逼你把 readiness、preStop、maxUnavailable 設對。</p>
+  </section>
+
+  <section id="l7">
+    <h2>Layer 7 · 面試<span class="tag">interview</span></h2>
+    <blockquote>「A Java service on EKS gets OOMKilled every few hours, but the node still has plenty of free memory. Walk me through it.」</blockquote>
+    <p class="sub">先自己講一遍，再打開。</p>
+    <details><summary>L4 回答</summary><div>
+      <p>「記憶體不夠，把 memory limit 調大就好。」</p>
+      <p class="small">治標。而且沒解釋為什麼 node 還有記憶體卻被殺。</p>
+    </div></details>
+    <details><summary>L6 回答</summary><div>
+      <p>「node 還有記憶體卻被殺，代表是容器級 OOM：撞的是這個 container 自己的 cgroup <code>memory.max</code>，跟 node 餘量無關。node 級的會是 kubelet eviction，訊息不同。」</p>
+      <p>「先確認：<code>describe</code> 看到 <code>OOMKilled</code>、exit 137。再看 7 天的 working set 曲線分兩種：鋸齒一路爬到頂是 leak，調大 limit 只是延後；穩定在某水位是 limit 真的太小。」</p>
+      <p>「Java 特有：JVM heap 預設依它看到的記憶體算。舊 JDK 在 cgroup v2（AL2023）上看到的是整台 node，heap 開太大。改用 <code>-XX:MaxRAMPercentage=75</code>，留空間給 metaspace、thread stack、direct buffer。」</p>
+      <p>「長期：requests 貼近 p95、limit 留 headroom；加 alert 在 working set 達 limit 90% 時通知，不要等 OOM。」</p>
+      <p class="small">L6 多了：區分兩種 OOM 的判準、leak vs undersized 的證據、cgroup v2 的平台變更、可預防的告警。</p>
+    </div></details>
+  </section>
+
+  <section id="trail">
+    <h2>我的錯題軌跡<span class="tag">from session logs</span></h2>
+    <div class="trail">
+      <div class="wrong"><b>我錯在這 · 06-22</b>把 readiness 的「準備好接流量」塞給 liveness。</div>
+      <div class="fix">修正：兩者失敗後的動作不同，一個重啟、一個切流量。06-25、07-03 抽考自己講出 thundering herd。</div>
+      <div class="wrong"><b>我錯在這 · 06-23</b><code>ngimx:1.25</code> apply 成功卻卡住，以為 apply 過了就沒事。</div>
+      <div class="fix">修正：驗證有邊界。schema 錯 API Server 當場擋；image 存不存在只有 kubelet 去拉才知道。Events 三類：<code>i/o timeout</code> / <code>401</code> / <code>not found</code>，各找不同的人。</div>
+      <div class="wrong"><b>我錯在這 · 08-06</b>說「Pod 會重啟或被調節」，講不出誰在什麼條件動手。</div>
+      <div class="fix">修正：Pod 不重啟，只會被丟掉重建（新 UID）。RESTARTS 數的是 container。不刪它也會消失：node 掛、eviction、drain、preemption、rollout。</div>
+      <div class="wrong"><b>我錯在這 · 09-29</b>nginx + <code>runAsUser: 1000</code> 預測 <code>CreateContainerConfigError</code>。</div>
+      <div class="fix">修正：kubelet 已放行 = container 已啟動；綁 port 80 失敗是程序自己退出 → CrashLoopBackOff。用 STATUS 定位死在「啟動前」還是「啟動後」。</div>
+      <div class="wrong"><b>我錯在這 · 09-26</b>以為 nginx 要 root 是因為會改 kernel 路由表。</div>
+      <div class="fix">修正：一般 app 要 root 的原因很普通：綁 &lt;1024 port、寫 root 擁有的目錄。要 NET_ADMIN 的是 CNI、kube-proxy 這類 node 元件。</div>
+    </div>
+  </section>
+
+  <section id="next">
+    <h2>本章 topic 深入筆記<span class="tag">next</span></h2>
+    <div class="scroll"><table>
+      <tr><th>topic</th><th>我的程度</th><th>深入筆記</th></tr>
+      <tr><td>container = namespace + cgroup</td><td><span class="lvl high">high (s6)</span></td><td><span class="lvl todo">待寫</span></td></tr>
+      <tr><td>probe（liveness vs readiness vs startup）</td><td><span class="lvl high">high (s6)</span></td><td><span class="lvl todo">待寫</span></td></tr>
+      <tr><td>Deployment / rollout / rollback</td><td><span class="lvl high">high (s6)</span></td><td><span class="lvl todo">待寫</span></td></tr>
+      <tr><td>resource / QoS / OOM</td><td><span class="lvl high">high (s10)</span></td><td><span class="lvl todo">待寫</span></td></tr>
+      <tr><td>PID 1 signal 保護與 graceful shutdown</td><td><span class="lvl med">med (s26)</span></td><td><span class="lvl todo">待寫</span></td></tr>
+    </table></div>
+  </section>
+</main>
+
+</body></html>

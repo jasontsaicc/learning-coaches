@@ -1,0 +1,280 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"></head><body>
+<title>P6 面試衝刺</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC:wght@400;700&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: one notebook column on graph paper; figures on taped cards, scenarios as 2x2 comic panels */
+:root {
+  --paper: #F6F8FA;
+  --grid: rgba(90,130,170,.16);
+  --ink: #23313E;
+  --ink-soft: #55677A;
+  --card: #FFFFFF;
+  --tape: rgba(240,214,140,.75);
+  --who: #FFE98A;
+  --see: #BDEEF6;
+  --may: #F9CDE0;
+  --wrong: #D2453A;
+  --ok: #2F8F5B;
+  --line: #9DB0C2;
+  --font-hand: "LXGW WenKai TC", "Noto Sans TC", "PingFang TC", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #1A2320; --grid: rgba(200,230,210,.08); --ink: #E6EDE8; --ink-soft: #A9BAB1;
+    --card: #24302C; --tape: rgba(200,180,110,.45); --who: #8A7A2A; --see: #2B6A74; --may: #7A3F57;
+    --wrong: #FF8A7E; --ok: #7FD3A1; --line: #5E7268; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #1A2320; --grid: rgba(200,230,210,.08); --ink: #E6EDE8; --ink-soft: #A9BAB1;
+  --card: #24302C; --tape: rgba(200,180,110,.45); --who: #8A7A2A; --see: #2B6A74; --may: #7A3F57;
+  --wrong: #FF8A7E; --ok: #7FD3A1; --line: #5E7268; color-scheme: dark;
+}
+body {
+  background-color: var(--paper);
+  background-image: linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 22px 22px;
+  color: var(--ink);
+  font-family: var(--font-hand);
+  font-size: 17px;
+  line-height: 1.75;
+}
+.page { max-width: 760px; margin: 0 auto; padding-inline: 18px; padding-block: 32px 64px; display: grid; gap: 34px; }
+h1, h2 { text-wrap: balance; line-height: 1.3; margin: 0; }
+h1 { font-size: 2.1rem; }
+h2 { font-size: 1.45rem; display: flex; align-items: baseline; gap: 10px; }
+h2 .tag { font-family: var(--font-mono); font-size: .72rem; letter-spacing: .08em; color: var(--ink-soft); text-transform: uppercase; }
+p { margin: 0; }
+section { display: grid; gap: 14px; min-width: 0; }
+.sub { color: var(--ink-soft); font-size: .95rem; }
+mark { background: linear-gradient(transparent 52%, var(--who) 52%); color: inherit; padding: 0 2px; }
+mark.see { background: linear-gradient(transparent 52%, var(--see) 52%); }
+mark.may { background: linear-gradient(transparent 52%, var(--may) 52%); }
+code { font-family: var(--font-mono); font-size: .86em; background: color-mix(in srgb, var(--line) 22%, transparent); padding: 1px 5px; border-radius: 3px; }
+.card { position: relative; background: var(--card); padding: 22px 18px 16px; box-shadow: 0 1px 3px rgba(0,0,0,.12); min-width: 0; }
+.card::before { content: ""; position: absolute; top: -9px; left: 50%; width: 92px; height: 20px; transform: translateX(-50%) rotate(-2deg); background: var(--tape); }
+.scroll { overflow-x: auto; }
+svg text { font-family: var(--font-mono); fill: var(--ink); }
+svg .hand { font-family: var(--font-hand); }
+.rule { border-left: 4px solid var(--ok); padding: 6px 12px; font-size: 1.08rem; }
+.wrong { border-left: 4px solid var(--wrong); padding: 4px 12px; display: grid; gap: 2px; }
+.wrong b { color: var(--wrong); font-size: .85rem; letter-spacing: .05em; }
+.panels { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 14px; }
+.panel { border: 2px solid var(--ink); background: var(--card); padding: 10px; display: grid; gap: 6px; min-width: 0; }
+.panel h3 { margin: 0; font-size: 1rem; font-family: var(--font-mono); }
+.panel p { font-size: .92rem; }
+@media (max-width: 520px) { .panels { grid-template-columns: 1fr; } }
+table { border-collapse: collapse; width: 100%; font-size: .95rem; }
+th, td { border-bottom: 1px dashed var(--line); padding: 8px 6px; text-align: left; vertical-align: top; }
+th { font-family: var(--font-mono); font-size: .78rem; letter-spacing: .05em; color: var(--ink-soft); font-weight: 600; }
+ol { margin: 0; padding-left: 1.3em; display: grid; gap: 6px; }
+blockquote { margin: 0; padding: 12px 16px; background: var(--card); border: 2px dashed var(--line); }
+.en { font-family: var(--font-mono); font-size: .9rem; color: var(--ink-soft); }
+details summary{cursor:pointer}
+</style>
+<style>
+/* chapter-note additions on top of the notebook base */
+svg.fig { display: block; min-width: 640px; width: 100%; height: auto; }
+.lvl { font-family: var(--font-mono); font-size: .74rem; padding: 1px 7px; border: 1.5px solid var(--ink); border-radius: 10px; white-space: nowrap; }
+.lvl.high { background: color-mix(in srgb, var(--ok) 28%, transparent); }
+.lvl.med { background: var(--who); }
+.lvl.low { background: var(--may); }
+.lvl.todo { border-style: dashed; color: var(--ink-soft); }
+.meta { display: flex; flex-wrap: wrap; gap: 8px 16px; font-family: var(--font-mono); font-size: .8rem; color: var(--ink-soft); }
+.toc { display: flex; flex-wrap: wrap; gap: 6px 14px; font-family: var(--font-mono); font-size: .82rem; }
+.toc a { color: var(--ink); }
+.trail { display: grid; gap: 12px; }
+.fix { border-left: 4px solid var(--ok); padding: 4px 12px; }
+.two { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 14px; }
+@media (max-width: 560px) { .two { grid-template-columns: 1fr; } }
+details { background: var(--card); border: 2px dashed var(--line); padding: 10px 14px; }
+details[open] { border-style: solid; }
+details > div { display: grid; gap: 8px; margin-top: 10px; }
+.small { font-size: .9rem; }
+a { color: inherit; text-underline-offset: 3px; }
+pre { margin: 0; font-family: var(--font-mono); font-size: .82rem; line-height: 1.5; background: var(--card); border: 1px solid var(--line); padding: 10px 12px; overflow-x: auto; }
+</style>
+<main class="page">
+  <header style="display:grid;gap:10px">
+    <p class="sub">k8s 課程 · 章節筆記 · Phase 6</p>
+    <h1>P6 面試衝刺</h1>
+    <p>一個問題貫穿整章：<b>面試官只有 45 分鐘、只聽得到你說的話。怎麼讓他分得出你是「懂」還是「猜對」？</b></p>
+    <div class="meta"><span>not started（預習頁）</span><span>素材：P0–P5 全部 + 你自己的 pattern 卡</span></div>
+    <nav class="toc"><a href="#map">章節地圖</a><a href="#l0">L0 圖</a><a href="#l1">L1 原理</a><a href="#l2">L2 機制</a><a href="#l3">L3 取捨</a><a href="#l4">L4 題型</a><a href="#l5">L5 等級</a><a href="#l6">L6 現場失誤</a><a href="#l7">L7 模擬題</a><a href="#trail">我的 pattern</a></nav>
+  </header>
+
+  <section id="map">
+    <h2>章節地圖<span class="tag">6 units</span></h2>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 720 200" role="img" aria-label="P6 map: sprint schedule, incident mock run sheets, k8s by system design, behavioral story bank, CKA speed track, English polish">
+        <g font-size="11" text-anchor="middle">
+          <rect x="10" y="20" width="220" height="56" fill="var(--card)" stroke="var(--ink)"/><text x="120" y="44">C-1 衝刺編排</text><text x="120" y="62" font-size="10" class="hand">倒數 4–6 週</text>
+          <rect x="250" y="20" width="220" height="56" fill="var(--may)" stroke="var(--ink)" stroke-width="2.5"/><text x="360" y="44">C-2 incident mock</text><text x="360" y="62" font-size="10" class="hand">troubleshooting round</text>
+          <rect x="490" y="20" width="220" height="56" fill="var(--who)" stroke="var(--ink)" stroke-width="2"/><text x="600" y="44">C-3 k8s × system design</text><text x="600" y="62" font-size="10" class="hand">多租戶、有狀態、多 Region</text>
+          <rect x="10" y="100" width="220" height="56" fill="var(--who)" stroke="var(--ink)" stroke-width="2"/><text x="120" y="124">C-4 behavioral</text><text x="120" y="142" font-size="10" class="hand">STAR 提煉</text>
+          <rect x="250" y="100" width="220" height="56" fill="var(--see)" stroke="var(--ink)"/><text x="360" y="124">C-5 CKA / CKAD</text><text x="360" y="142" font-size="10" class="hand">限時手速（副線）</text>
+          <rect x="490" y="100" width="220" height="56" fill="var(--see)" stroke="var(--ink)"/><text x="600" y="124">C-6 English polish</text><text x="600" y="142" font-size="10" class="hand">把肌肉記憶講成英文</text>
+        </g>
+        <text x="360" y="185" text-anchor="middle" font-size="12" class="hand">P6 不教新東西：把 P0–P5 已經會的，翻譯成面試官聽得到的訊號。</text>
+      </svg>
+    </div>
+  </section>
+
+  <section id="l0">
+    <h2>Layer 0 · 一張圖<span class="tag">analogy</span></h2>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 720 190" role="img" aria-label="Pilot check ride: examiner in the simulator only sees callouts; a pilot who silently does the right thing and one who guesses look the same unless the pilot calls out what and why">
+        <rect x="20" y="30" width="300" height="100" fill="var(--see)" stroke="var(--ink)" stroke-width="2"/>
+        <text x="170" y="58" text-anchor="middle" font-size="13" class="hand">機長默默做對</text>
+        <text x="170" y="82" text-anchor="middle" font-size="11">考官：看起來對，但他知道為什麼嗎？</text>
+        <text x="170" y="110" text-anchor="middle" font-size="11" fill="var(--wrong)">分不出「懂」和「運氣好」</text>
+        <rect x="400" y="30" width="300" height="100" fill="var(--who)" stroke="var(--ink)" stroke-width="2"/>
+        <text x="550" y="58" text-anchor="middle" font-size="13" class="hand">機長喊出 callout</text>
+        <text x="550" y="82" text-anchor="middle" font-size="11">「引擎 2 失效，因為 EGT 飆高，我先關它」</text>
+        <text x="550" y="110" text-anchor="middle" font-size="11" fill="var(--ok)">每個動作都附理由，考官可以打分</text>
+        <text x="360" y="170" text-anchor="middle" font-size="13" class="hand">面試是模擬機考照。考官看不到你腦子，只聽得到 callout。</text>
+      </svg>
+    </div>
+  </section>
+
+  <section id="l1">
+    <h2>Layer 1 · 第一性原理<span class="tag">why it must exist</span></h2>
+    <p><b>限制：資訊頻寬。</b>45 分鐘、只有語音，面試官要從這裡推斷你在 production 凌晨三點會怎麼做。他能用的證據只有你說出口的東西。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 720 220" role="img" aria-label="Same correct conclusion, two outputs: conclusion only carries no new fact; conclusion plus criterion carries who and which step, which lets the interviewer score">
+        <text x="20" y="25" font-size="12" class="hand">同一個正確答案，兩種說法</text>
+        <rect x="20" y="40" width="320" height="70" fill="var(--card)" stroke="var(--wrong)" stroke-width="2"/>
+        <text x="30" y="65" font-size="11">「是 conntrack 滿了。」</text>
+        <text x="30" y="90" font-size="10" fill="var(--wrong)">面試官拿到的新事實：0 個</text>
+        <rect x="380" y="40" width="320" height="70" fill="var(--card)" stroke="var(--ok)" stroke-width="2"/>
+        <text x="390" y="62" font-size="11">「只有新連線失敗、舊連線正常，</text><text x="390" y="80" font-size="11">這是 conntrack table full 的簽名。」</text>
+        <text x="390" y="100" font-size="10" fill="var(--ok)">新事實：判準 + 機制 + 可驗證</text>
+        <rect x="20" y="140" width="680" height="60" fill="var(--who)" stroke="var(--ink)" stroke-width="2"/>
+        <text x="360" y="165" text-anchor="middle" font-size="12">句型：「我看的是 X，因為 [判準]。」</text>
+        <text x="360" y="187" text-anchor="middle" font-size="11">檢驗法：「因為」後半句有沒有給對方一個新事實？「因為它不會去查」= 同義反覆，不算。</text>
+      </svg>
+    </div>
+    <p>這條限制直接打在你最久的 pattern 卡上（見最後一節）。P6 的主要工作不是補知識，是補「把知識說出口」這一步。</p>
+  </section>
+
+  <section id="l2">
+    <h2>Layer 2 · 機制<span class="tag">three answer engines</span></h2>
+    <h3 style="margin:0">incident round：expected behavior loop</h3>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 760 200" role="img" aria-label="Loop: clarify blast radius, hypothesize ranked by cost, verify cheapest check, mitigate to stop bleeding, root cause at mechanism level, prevent with metric and threshold; a planted wrong lead appears at hypothesize">
+        <defs><marker id="p6a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="var(--ink)"/></marker></defs>
+        <g font-size="11" text-anchor="middle">
+          <rect x="10" y="30" width="110" height="60" fill="var(--see)" stroke="var(--ink)" stroke-width="2"/><text x="65" y="55">clarify</text><text x="65" y="74" font-size="9">影響誰、多大、何時</text>
+          <rect x="135" y="30" width="110" height="60" fill="var(--see)" stroke="var(--ink)" stroke-width="2"/><text x="190" y="55">hypothesize</text><text x="190" y="74" font-size="9">按層列出、排序</text>
+          <rect x="260" y="30" width="110" height="60" fill="var(--see)" stroke="var(--ink)" stroke-width="2"/><text x="315" y="55">verify</text><text x="315" y="74" font-size="9">最便宜的對照組</text>
+          <rect x="385" y="30" width="110" height="60" fill="var(--may)" stroke="var(--ink)" stroke-width="2"/><text x="440" y="55">mitigate</text><text x="440" y="74" font-size="9">先止血（先採證）</text>
+          <rect x="510" y="30" width="110" height="60" fill="var(--who)" stroke="var(--ink)" stroke-width="2"/><text x="565" y="55">root cause</text><text x="565" y="74" font-size="9">講到機制層</text>
+          <rect x="635" y="30" width="115" height="60" fill="var(--who)" stroke="var(--ink)" stroke-width="2"/><text x="692" y="55">prevent</text><text x="692" y="74" font-size="9">metric + 門檻</text>
+        </g>
+        <g stroke="var(--ink)" stroke-width="2"><line x1="120" y1="60" x2="133" y2="60" marker-end="url(#p6a)"/><line x1="245" y1="60" x2="258" y2="60" marker-end="url(#p6a)"/><line x1="370" y1="60" x2="383" y2="60" marker-end="url(#p6a)"/><line x1="495" y1="60" x2="508" y2="60" marker-end="url(#p6a)"/><line x1="620" y1="60" x2="633" y2="60" marker-end="url(#p6a)"/></g>
+        <rect x="135" y="115" width="235" height="56" fill="var(--card)" stroke="var(--wrong)" stroke-dasharray="5 4"/>
+        <text x="145" y="137" font-size="10" fill="var(--wrong)">誘答：「應該是 DNS，重啟 CoreDNS 吧」</text>
+        <text x="145" y="157" font-size="10">senior：「先用 FQDN nslookup 驗，通了就不是這層」</text>
+        <text x="400" y="140" font-size="11" class="hand">最常見的扣分：聽完症狀直接報修法，跳過前兩格。</text>
+        <text x="400" y="160" font-size="11" class="hand">面試官會問：Before we fix anything, what do you want to know?</text>
+      </svg>
+    </div>
+    <div class="two">
+      <div class="card"><b>system design round（k8s 交集題）</b><ol class="small"><li>需求與規模：用數字問（QPS、資料量、租戶數）</li><li>估算：一頁紙算 node 數、儲存量</li><li>架構圖：先畫最簡單能跑的</li><li>深入一個瓶頸：選你最懂的（網路、權限、有狀態）</li><li>故障模式：AZ 掛、控制面掛、升級</li></ol></div>
+      <div class="card"><b>behavioral round（STAR）</b><ol class="small"><li>Situation：一句話，有數字</li><li>Task：你負責什麼（不是團隊）</li><li>Action：佔一半時間，講判斷和取捨，回注 P0–P5 的機制</li><li>Result：量化；加一句學到什麼</li></ol><p class="small">提煉門檻：衝突壓力 / 自己的判斷 / 可量化結果，三項佔兩項。</p></div>
+    </div>
+  </section>
+
+  <section id="l3">
+    <h2>Layer 3 · 取捨<span class="tag">answer choices</span></h2>
+    <div class="scroll"><table>
+      <tr><th>當下的選擇</th><th>選 A</th><th>選 B</th><th>判準</th></tr>
+      <tr><td>先止血還是先找根因</td><td>先止血</td><td>先找根因</td><td>使用者在痛就先止血；但止血前花 1 分鐘採證（log、describe），不然根因永遠找不到</td></tr>
+      <tr><td>廣度 vs 深度</td><td>每層都提</td><td>選一層講到底</td><td>先 30 秒列全部層，再說「我先挖 X，因為它最便宜驗證」</td></tr>
+      <tr><td>不知道答案</td><td>猜一個</td><td>說出怎麼驗</td><td>「我不確定，我會用 Y 指令確認，預期看到 Z」比猜對更有分</td></tr>
+      <tr><td>證照</td><td>CKA 衝刺</td><td>原理深度</td><td>CKA 幫你過履歷篩選；面試考的是深度。P5 後邊際成本低才排</td></tr>
+      <tr><td>英文</td><td>背稿</td><td>講自己的機制圖</td><td>背稿一被追問就斷；用自己畫過的圖講，追問接得住</td></tr>
+    </table></div>
+  </section>
+
+  <section id="l4">
+    <h2>Layer 4 · 大廠怎麼考<span class="tag">question map</span></h2>
+    <p>這一章不是 AWS 服務，改成「題型 → 對應章節 → 常見陷阱」。</p>
+    <div class="scroll"><table>
+      <tr><th>題型</th><th>母題章節</th><th>常見陷阱</th></tr>
+      <tr><td>Intermittent timeouts between services</td><td>P2a conntrack / DNS / 跨 node 路由</td><td>第一刀就 restart；忘了新舊連線的差別</td></tr>
+      <tr><td>OOM cascade during peak</td><td>P1 QoS/OOM + P3 autoscaling</td><td>只說調大 limit；分不清容器級和 node 級</td></tr>
+      <tr><td>Zero-downtime deployment</td><td>P1 rollout + P3 PDB / preStop</td><td>漏掉 endpoint 移除和 SIGTERM 的 race</td></tr>
+      <tr><td>Pod can't reach AWS service</td><td>P2b IRSA 兩道門</td><td>把 trust policy 和 permission policy 混成一步</td></tr>
+      <tr><td>Design a multi-tenant platform</td><td>P2b RBAC / NetworkPolicy + P5 GitOps</td><td>把 namespace 當成網路隔離</td></tr>
+      <tr><td>Stateful workloads on k8s</td><td>P2b StatefulSet / EBS AZ</td><td>以為 StatefulSet 自帶 HA 和 failover</td></tr>
+      <tr><td>Define SLOs for this service</td><td>P4</td><td>拿 CPU 當 SLI；說不出 error budget 怎麼用</td></tr>
+      <tr><td>Upgrade a prod cluster</td><td>P5</td><td>沒提 deprecated API、PDB、不能 downgrade</td></tr>
+    </table></div>
+  </section>
+
+  <section id="l5">
+    <h2>Layer 5 · 等級階梯<span class="tag">L3 → L6</span></h2>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 760 240" role="img" aria-label="Level ladder: L3 knows commands; L4 knows mechanism when asked; L5 states criteria and tradeoffs unprompted; L6 adds numbers, failure modes, organizational impact and prevention">
+        <g font-size="11">
+          <rect x="10" y="180" width="170" height="50" fill="var(--card)" stroke="var(--ink)" stroke-width="2"/><text x="20" y="200">L3：會指令</text><text x="20" y="218" class="hand">kubectl 背得很熟</text>
+          <rect x="195" y="130" width="170" height="100" fill="var(--see)" stroke="var(--ink)" stroke-width="2"/><text x="205" y="150">L4：問了會講機制</text><text x="205" y="170" class="hand">結論對，要追問才補</text>
+          <rect x="380" y="80" width="170" height="150" fill="var(--who)" stroke="var(--ink)" stroke-width="2"/><text x="390" y="100">L5：主動給判準</text><text x="390" y="120" class="hand">每個結論帶「因為」</text><text x="390" y="138" class="hand">會講取捨</text>
+          <rect x="565" y="30" width="185" height="200" fill="var(--may)" stroke="var(--ink)" stroke-width="2"/><text x="575" y="50">L6：系統與組織</text><text x="575" y="70" class="hand">真實數字</text><text x="575" y="88" class="hand">故障模式與爆炸半徑</text><text x="575" y="106" class="hand">怎麼預防、怎麼量</text><text x="575" y="124" class="hand">誰會吵架、怎麼談</text>
+        </g>
+        <g font-size="10" fill="var(--wrong)"><text x="20" y="170">缺：為什麼</text><text x="205" y="120">缺：主動</text><text x="390" y="70">缺：規模與組織</text></g>
+      </svg>
+    </div>
+    <p>你目前的位置：機制大多到 L4–L5，卡在「主動」那一格。P0–P5 每章 Layer 7 的 L4 / L6 對照，就是這張圖的練習題。</p>
+  </section>
+
+  <section id="l6">
+    <h2>Layer 6 · 面試現場的失誤<span class="tag">how it breaks</span></h2>
+    <div class="panels">
+      <div class="panel"><h3>空白頁凍住</h3><p>先說出 loop 的第一格：「Let me first clarify the blast radius.」說出框架本身就是訊號，也給自己時間。</p></div>
+      <div class="panel"><h3>只給結論</h3><p>面試官連問兩次「why」就是警訊。每個答案強制套句型：「我看的是 X，因為 Y」。</p></div>
+      <div class="panel"><h3>跳層</h3><p>答 RBAC 題卻講 NetworkPolicy；問跨 node 卻查 iptables。先問自己：這題的執行體在哪一層？</p></div>
+      <div class="panel"><h3>被同事誘答牽著走</h3><p>run sheet 一定埋一個「重啟 X 吧」。用一個便宜的驗證擋下，不是用「我覺得不是」。</p></div>
+    </div>
+  </section>
+
+  <section id="l7">
+    <h2>Layer 7 · 模擬題<span class="tag">run sheet A</span></h2>
+    <blockquote>「14:20 on a weekday. Calls from <code>checkout-api</code> to <code>payment-svc</code> (ClusterIP, 6 pods) fail intermittently, roughly 1 in 10 new requests time out. Started 30 minutes ago. No deploys today. Where do you start?」</blockquote>
+    <p class="sub">先自己講一遍，再打開。</p>
+    <details><summary>L4 回答</summary><div>
+      <p>「先 <code>kubectl get pods</code> 看 Pod 健康嗎，再看 logs。可能是 DNS，可以重啟 CoreDNS 試試。」</p>
+      <p class="small">跳過 clarify；接受了誘答；沒有層的概念。</p>
+    </div></details>
+    <details><summary>L6 回答</summary><div>
+      <p>「Before touching anything: is it only payment-svc or other services too? Is it new connections only, or existing ones as well? Timeout or connection refused? And what changed in the last hour besides deploys, like cron jobs or traffic?」</p>
+      <p>「Hypotheses by layer, cheapest first: endpoints and probes, DNS, kube-proxy rules, then the node kernel. I'd check endpoints and run an FQDN nslookup from an affected pod. If both are clean, the Kubernetes object layer is healthy, and I need to go below what kubectl can see.」</p>
+      <p>「On the node: <code>dmesg</code> for <code>nf_conntrack: table full</code>, and compare <code>nf_conntrack_count</code> to <code>nf_conntrack_max</code>. New connections failing while established ones keep working is exactly the conntrack-full signature.」</p>
+      <p>「Mitigate: throttle the batch job that started 40 minutes ago. Raising the max is a stopgap. Prevent: alert on count/max above 80% from node-exporter, and give batch jobs a connection budget or dedicated nodes.」</p>
+      <p class="small">這題的每一步都是你 P2a 親手做過的：謎題 C（conntrack）、DNS 排障第一刀（FQDN 二分）、s9 的 <code>kubectl get conntrack</code> 坑。</p>
+    </div></details>
+  </section>
+
+  <section id="trail">
+    <h2>我的 pattern 卡<span class="tag">what P6 must fix</span></h2>
+    <p>這些不是知識洞，是輸出習慣。在面試裡它們比任何一個知識洞都貴。</p>
+    <div class="trail">
+      <div class="wrong"><b>只給結論不給判準 · 07-23 起，未結案 7 堂</b>同堂三次裸結論；「因為是 get」只是複述觀察；「B 因為」後面空白。</div>
+      <div class="fix">修正：句型「我看的是 X，因為 [判準]」。s22 站 7、s24 kernel 題、s26 upperdir 句是無提示的正樣本，證明做得到。</div>
+      <div class="wrong"><b>同義反覆 · s26</b>「server dry-run 為什麼攔不到 image 錯」答「因為它不會去查」。</div>
+      <div class="fix">修正：檢驗「對方有沒有拿到新事實」。正確版本帶「誰、第幾棒」：image 存不存在只有第 5 棒 kubelet 去拉才知道。</div>
+      <div class="wrong"><b>判準給完當場套用不上 · 08-20</b>同堂兩次，判準給完 30 秒內就用不出來。</div>
+      <div class="fix">修正：每個判準當場接一題換皮應用題，答對才算給完。</div>
+      <div class="wrong"><b>restart 排在採證前面 · 08-06</b>三台 NotReady 選「先重啟試試」。</div>
+      <div class="fix">修正：能重現的晚點修，不能重現的當場採證。面試官聽到「先 restart」會直接扣 MTTR 分。</div>
+      <div class="wrong"><b>成功訊息不保證生效 · 09-08</b><code>-n ALL</code>、空變數 <code>--as=$SA</code>、<code>patched (no change)</code>，同堂三次。</div>
+      <div class="fix">修正：每個指令後問「它真的做了我以為的事嗎？」面試裡就是說出你會怎麼驗證。</div>
+    </div>
+  </section>
+</main>
+
+</body></html>

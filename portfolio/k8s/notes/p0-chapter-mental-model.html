@@ -1,0 +1,452 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"></head><body>
+<title>P0 心智模型</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC:wght@400;700&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: one notebook column on graph paper; figures on taped cards, scenarios as 2x2 comic panels */
+:root {
+  --paper: #F6F8FA;
+  --grid: rgba(90,130,170,.16);
+  --ink: #23313E;
+  --ink-soft: #55677A;
+  --card: #FFFFFF;
+  --tape: rgba(240,214,140,.75);
+  --who: #FFE98A;
+  --see: #BDEEF6;
+  --may: #F9CDE0;
+  --wrong: #D2453A;
+  --ok: #2F8F5B;
+  --line: #9DB0C2;
+  --font-hand: "LXGW WenKai TC", "Noto Sans TC", "PingFang TC", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #1A2320; --grid: rgba(200,230,210,.08); --ink: #E6EDE8; --ink-soft: #A9BAB1;
+    --card: #24302C; --tape: rgba(200,180,110,.45); --who: #8A7A2A; --see: #2B6A74; --may: #7A3F57;
+    --wrong: #FF8A7E; --ok: #7FD3A1; --line: #5E7268; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #1A2320; --grid: rgba(200,230,210,.08); --ink: #E6EDE8; --ink-soft: #A9BAB1;
+  --card: #24302C; --tape: rgba(200,180,110,.45); --who: #8A7A2A; --see: #2B6A74; --may: #7A3F57;
+  --wrong: #FF8A7E; --ok: #7FD3A1; --line: #5E7268; color-scheme: dark;
+}
+body {
+  background-color: var(--paper);
+  background-image: linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 22px 22px;
+  color: var(--ink);
+  font-family: var(--font-hand);
+  font-size: 17px;
+  line-height: 1.75;
+}
+.page { max-width: 760px; margin: 0 auto; padding-inline: 18px; padding-block: 32px 64px; display: grid; gap: 34px; }
+h1, h2 { text-wrap: balance; line-height: 1.3; margin: 0; }
+h1 { font-size: 2.1rem; }
+h2 { font-size: 1.45rem; display: flex; align-items: baseline; gap: 10px; }
+h2 .tag { font-family: var(--font-mono); font-size: .72rem; letter-spacing: .08em; color: var(--ink-soft); text-transform: uppercase; }
+p { margin: 0; }
+section { display: grid; gap: 14px; min-width: 0; }
+.sub { color: var(--ink-soft); font-size: .95rem; }
+mark { background: linear-gradient(transparent 52%, var(--who) 52%); color: inherit; padding: 0 2px; }
+mark.see { background: linear-gradient(transparent 52%, var(--see) 52%); }
+mark.may { background: linear-gradient(transparent 52%, var(--may) 52%); }
+code { font-family: var(--font-mono); font-size: .86em; background: color-mix(in srgb, var(--line) 22%, transparent); padding: 1px 5px; border-radius: 3px; }
+.card { position: relative; background: var(--card); padding: 22px 18px 16px; box-shadow: 0 1px 3px rgba(0,0,0,.12); min-width: 0; }
+.card::before { content: ""; position: absolute; top: -9px; left: 50%; width: 92px; height: 20px; transform: translateX(-50%) rotate(-2deg); background: var(--tape); }
+.scroll { overflow-x: auto; }
+svg text { font-family: var(--font-mono); fill: var(--ink); }
+svg .hand { font-family: var(--font-hand); }
+.rule { border-left: 4px solid var(--ok); padding: 6px 12px; font-size: 1.08rem; }
+.wrong { border-left: 4px solid var(--wrong); padding: 4px 12px; display: grid; gap: 2px; }
+.wrong b { color: var(--wrong); font-size: .85rem; letter-spacing: .05em; }
+.panels { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 14px; }
+.panel { border: 2px solid var(--ink); background: var(--card); padding: 10px; display: grid; gap: 6px; min-width: 0; }
+.panel h3 { margin: 0; font-size: 1rem; font-family: var(--font-mono); }
+.panel p { font-size: .92rem; }
+@media (max-width: 520px) { .panels { grid-template-columns: 1fr; } }
+table { border-collapse: collapse; width: 100%; font-size: .95rem; }
+th, td { border-bottom: 1px dashed var(--line); padding: 8px 6px; text-align: left; vertical-align: top; }
+th { font-family: var(--font-mono); font-size: .78rem; letter-spacing: .05em; color: var(--ink-soft); font-weight: 600; }
+ol { margin: 0; padding-left: 1.3em; display: grid; gap: 6px; }
+blockquote { margin: 0; padding: 12px 16px; background: var(--card); border: 2px dashed var(--line); }
+.en { font-family: var(--font-mono); font-size: .9rem; color: var(--ink-soft); }
+details summary{cursor:pointer}
+</style>
+<style>
+/* chapter-note additions on top of the notebook base */
+svg.fig { display: block; min-width: 640px; width: 100%; height: auto; }
+.lvl { font-family: var(--font-mono); font-size: .74rem; padding: 1px 7px; border: 1.5px solid var(--ink); border-radius: 10px; white-space: nowrap; }
+.lvl.high { background: color-mix(in srgb, var(--ok) 28%, transparent); }
+.lvl.med { background: var(--who); }
+.lvl.low { background: var(--may); }
+.lvl.todo { border-style: dashed; color: var(--ink-soft); }
+.meta { display: flex; flex-wrap: wrap; gap: 8px 16px; font-family: var(--font-mono); font-size: .8rem; color: var(--ink-soft); }
+.toc { display: flex; flex-wrap: wrap; gap: 6px 14px; font-family: var(--font-mono); font-size: .82rem; }
+.toc a { color: var(--ink); }
+.trail { display: grid; gap: 12px; }
+.fix { border-left: 4px solid var(--ok); padding: 4px 12px; }
+.two { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 14px; }
+@media (max-width: 560px) { .two { grid-template-columns: 1fr; } }
+details { background: var(--card); border: 2px dashed var(--line); padding: 10px 14px; }
+details[open] { border-style: solid; }
+details > div { display: grid; gap: 8px; margin-top: 10px; }
+.small { font-size: .9rem; }
+a { color: inherit; text-underline-offset: 3px; }
+pre { margin: 0; font-family: var(--font-mono); font-size: .82rem; line-height: 1.5; background: var(--card); border: 1px solid var(--line); padding: 10px 12px; overflow-x: auto; }
+</style>
+<main class="page">
+  <header style="display:grid;gap:10px">
+    <p class="sub">k8s 課程 · 章節筆記 · Phase 0</p>
+    <h1>P0 心智模型</h1>
+    <p>一個問題貫穿整章：<b>你打完 <code>kubectl apply</code>，到 Pod 變成 <code>Running</code>，中間到底是誰在做事？</b></p>
+    <div class="meta"><span>gate-passed 2026-06-22</span><span>sessions s1–s3, s10 (WR#1)</span><span>apply→Running 控制流 <span class="lvl high">high</span></span></div>
+    <nav class="toc"><a href="#map">章節地圖</a><a href="#l0">L0 圖</a><a href="#l1">L1 原理</a><a href="#l2">L2 機制</a><a href="#l3">L3 取捨</a><a href="#l4">L4 EKS</a><a href="#l5">L5 規模</a><a href="#l6">L6 on-call</a><a href="#l7">L7 面試</a><a href="#trail">我的錯題</a><a href="#next">topic 深入</a></nav>
+  </header>
+
+  <section id="map">
+    <h2>章節地圖<span class="tag">6 units</span></h2>
+    <p>P0 有六個單元。前四個是「控制面怎麼做決定」，C-3 把它們串成一條線，C-5 是通往 P1 的橋。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 720 230" role="img" aria-label="P0 unit map: declarative and reconcile feed control plane and etcd, which feed the apply-to-running flow, which bridges to container internals">
+        <defs><marker id="m-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="var(--ink)"/></marker></defs>
+        <rect x="14" y="20" width="150" height="54" fill="var(--see)" stroke="var(--ink)" stroke-width="2"/>
+        <text x="89" y="43" text-anchor="middle" font-size="12">C-0 declarative</text><text x="89" y="62" text-anchor="middle" font-size="11" class="hand">說要什麼，不說怎麼做</text>
+        <rect x="14" y="100" width="150" height="54" fill="var(--see)" stroke="var(--ink)" stroke-width="2"/>
+        <text x="89" y="123" text-anchor="middle" font-size="12">C-1 reconcile loop</text><text x="89" y="142" text-anchor="middle" font-size="11" class="hand">量 → 比 → 修</text>
+        <rect x="214" y="20" width="150" height="54" fill="var(--who)" stroke="var(--ink)" stroke-width="2"/>
+        <text x="289" y="43" text-anchor="middle" font-size="12">C-2 control plane</text><text x="289" y="62" text-anchor="middle" font-size="11" class="hand">誰是演員</text>
+        <rect x="214" y="100" width="150" height="54" fill="var(--who)" stroke="var(--ink)" stroke-width="2"/>
+        <text x="289" y="123" text-anchor="middle" font-size="12">C-4 etcd + Raft</text><text x="289" y="142" text-anchor="middle" font-size="11" class="hand">帳本為什麼可信</text>
+        <rect x="420" y="56" width="160" height="62" fill="var(--may)" stroke="var(--ink)" stroke-width="2.5"/>
+        <text x="500" y="82" text-anchor="middle" font-size="13">C-3 apply→Running</text><text x="500" y="102" text-anchor="middle" font-size="11" class="hand">五棒接力（gate 題）</text>
+        <rect x="420" y="162" width="160" height="50" fill="var(--card)" stroke="var(--ink)" stroke-width="2" stroke-dasharray="6 4"/>
+        <text x="500" y="184" text-anchor="middle" font-size="12">C-5 ns + cgroup</text><text x="500" y="202" text-anchor="middle" font-size="11" class="hand">只建直覺，P1 深入</text>
+        <line x1="164" y1="47" x2="212" y2="47" stroke="var(--ink)" stroke-width="2" marker-end="url(#m-a)"/>
+        <line x1="164" y1="127" x2="212" y2="127" stroke="var(--ink)" stroke-width="2" marker-end="url(#m-a)"/>
+        <line x1="364" y1="47" x2="418" y2="78" stroke="var(--ink)" stroke-width="2" marker-end="url(#m-a)"/>
+        <line x1="364" y1="127" x2="418" y2="98" stroke="var(--ink)" stroke-width="2" marker-end="url(#m-a)"/>
+        <line x1="500" y1="118" x2="500" y2="160" stroke="var(--ink)" stroke-width="2" marker-end="url(#m-a)"/>
+        <text x="610" y="190" font-size="12" class="hand">→ P1 容器底層</text>
+      </svg>
+    </div>
+  </section>
+
+  <section id="l0">
+    <h2>Layer 0 · 一張圖<span class="tag">analogy</span></h2>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 720 210" role="img" aria-label="Thermostat loop: setpoint 24 degrees is desired state, thermometer reads 21 is actual, thermostat compares and turns heater on, loop repeats">
+        <defs><marker id="m-b" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="var(--ink)"/></marker></defs>
+        <rect x="20" y="30" width="150" height="60" fill="var(--who)" stroke="var(--ink)" stroke-width="2"/>
+        <text x="95" y="55" text-anchor="middle" font-size="13" class="hand">設定 24°C</text><text x="95" y="76" text-anchor="middle" font-size="11">spec (desired)</text>
+        <rect x="285" y="30" width="150" height="60" fill="var(--may)" stroke="var(--ink)" stroke-width="2"/>
+        <text x="360" y="55" text-anchor="middle" font-size="13" class="hand">恆溫器比較</text><text x="360" y="76" text-anchor="middle" font-size="11">controller</text>
+        <rect x="550" y="30" width="150" height="60" fill="var(--see)" stroke="var(--ink)" stroke-width="2"/>
+        <text x="625" y="55" text-anchor="middle" font-size="13" class="hand">開暖氣</text><text x="625" y="76" text-anchor="middle" font-size="11">act (kubelet)</text>
+        <rect x="285" y="135" width="150" height="60" fill="var(--card)" stroke="var(--ink)" stroke-width="2"/>
+        <text x="360" y="160" text-anchor="middle" font-size="13" class="hand">溫度計讀 21°C</text><text x="360" y="181" text-anchor="middle" font-size="11">status (actual)</text>
+        <line x1="170" y1="60" x2="283" y2="60" stroke="var(--ink)" stroke-width="2" marker-end="url(#m-b)"/>
+        <line x1="435" y1="60" x2="548" y2="60" stroke="var(--ink)" stroke-width="2" marker-end="url(#m-b)"/>
+        <path d="M625 90 C625 165, 470 165, 437 165" fill="none" stroke="var(--ink)" stroke-width="2" marker-end="url(#m-b)"/>
+        <line x1="360" y1="135" x2="360" y2="92" stroke="var(--ink)" stroke-width="2" marker-end="url(#m-b)"/>
+        <text x="520" y="190" font-size="12" class="hand">一直重複，永遠不「做完」</text>
+      </svg>
+    </div>
+    <p>這是你 s2 自己想出來的比喻。你只設定溫度，不告訴暖氣「開 7 分鐘」。恆溫器反覆比較設定值和讀數，差多少就補多少。k8s 的每個元件都是一台恆溫器。</p>
+  </section>
+
+  <section id="l1">
+    <h2>Layer 1 · 第一性原理<span class="tag">why it must exist</span></h2>
+    <p><b>無法迴避的限制：partial failure。</b>N 台機器組成的系統裡，任何時刻都可能有一台在重開機、一條網路在掉封包。你沒辦法保證一串指令「全部做完」。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 720 250" role="img" aria-label="Left: imperative script dies at step 2 leaving node 3 on old version. Right: reconcile loop retries until node 3 converges">
+        <text x="170" y="22" text-anchor="middle" font-size="14" class="hand">命令式腳本 (ssh for loop)</text>
+        <text x="540" y="22" text-anchor="middle" font-size="14" class="hand">聲明式 + reconcile</text>
+        <line x1="360" y1="10" x2="360" y2="240" stroke="var(--line)" stroke-dasharray="4 4"/>
+        <rect x="30" y="45" width="80" height="40" fill="var(--see)" stroke="var(--ink)" stroke-width="2"/><text x="70" y="70" text-anchor="middle" font-size="12">node1 v2</text>
+        <rect x="130" y="45" width="80" height="40" fill="var(--see)" stroke="var(--ink)" stroke-width="2"/><text x="170" y="70" text-anchor="middle" font-size="12">node2 v2</text>
+        <rect x="230" y="45" width="80" height="40" fill="var(--card)" stroke="var(--wrong)" stroke-width="2" stroke-dasharray="5 4"/><text x="270" y="70" text-anchor="middle" font-size="12" fill="var(--wrong)">node3 v1</text>
+        <text x="270" y="105" text-anchor="middle" font-size="12" fill="var(--wrong)" class="hand">步驟 3 時 node3 在重開機</text>
+        <text x="40" y="140" font-size="12">$ for n in 1 2 3; do ssh $n deploy v2; done</text>
+        <text x="40" y="162" font-size="12" fill="var(--wrong)">ssh: connect to node3: timed out</text>
+        <text x="40" y="196" font-size="13" class="hand">腳本結束了。誰記得 node3 還欠一次？</text>
+        <text x="40" y="218" font-size="13" class="hand" fill="var(--wrong)">沒有人。這叫 drift。</text>
+        <rect x="390" y="45" width="140" height="40" fill="var(--who)" stroke="var(--ink)" stroke-width="2"/><text x="460" y="62" text-anchor="middle" font-size="12">etcd: want v2 ×3</text><text x="460" y="78" text-anchor="middle" font-size="11">願望被存下來</text>
+        <rect x="560" y="45" width="140" height="40" fill="var(--may)" stroke="var(--ink)" stroke-width="2"/><text x="630" y="70" text-anchor="middle" font-size="12">loop: diff = 1</text>
+        <text x="400" y="125" font-size="12">t=0s   node3 down → diff 1, retry</text>
+        <text x="400" y="147" font-size="12">t=30s  node3 down → diff 1, retry</text>
+        <text x="400" y="169" font-size="12" fill="var(--ok)">t=90s  node3 back → deploy → diff 0</text>
+        <text x="400" y="205" font-size="13" class="hand">願望還在帳本上，迴圈不會忘記。</text>
+      </svg>
+    </div>
+    <ol>
+      <li><b>願望要存在比任何一台機器都長壽的地方</b>。所以有 etcd，而且要 3 或 5 台用 quorum 投票，掛一台帳本還在。</li>
+      <li><b>執行者要能重試到成功，而且重做不出事</b>。所以每個元件都是 level-triggered 的迴圈：每次都看「現在差多少」，不看「剛剛發生什麼事件」。</li>
+      <li>拿掉這套會怎樣：回到 Ansible / ssh 腳本時代。腳本跑完那一刻正確，下一秒 node 掛掉就沒人知道。</li>
+    </ol>
+    <p class="rule">CAP 的位置：etcd 選 C + P。網路分區時少數派那邊<b>寧可拒絕寫入</b>，也不要寫出兩本互相矛盾的帳。代價是可用性：quorum 沒了，整個叢集變唯讀。</p>
+  </section>
+
+  <section id="l2">
+    <h2>Layer 2 · 機制<span class="tag">five relays</span></h2>
+    <p>五棒接力。所有元件<b>只跟 API Server 講話</b>，彼此不直接對話。每一棒都是 watch 到「帳本上某欄位的變化」才開始動。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 760 470" role="img" aria-label="Sequence: kubectl to API server, authn authz admission, etcd write pod with empty nodeName, scheduler watches and binds, kubelet watches, calls containerd and runc, reports status">
+        <defs><marker id="m-c" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="var(--ink)"/></marker></defs>
+        <g font-size="12" text-anchor="middle">
+          <rect x="10" y="10" width="90" height="34" fill="var(--card)" stroke="var(--ink)" stroke-width="2"/><text x="55" y="32">kubectl</text>
+          <rect x="130" y="10" width="110" height="34" fill="var(--who)" stroke="var(--ink)" stroke-width="2"/><text x="185" y="32">API Server</text>
+          <rect x="270" y="10" width="90" height="34" fill="var(--who)" stroke="var(--ink)" stroke-width="2"/><text x="315" y="32">etcd</text>
+          <rect x="390" y="10" width="110" height="34" fill="var(--see)" stroke="var(--ink)" stroke-width="2"/><text x="445" y="32">scheduler</text>
+          <rect x="530" y="10" width="100" height="34" fill="var(--may)" stroke="var(--ink)" stroke-width="2"/><text x="580" y="32">kubelet</text>
+          <rect x="655" y="10" width="95" height="34" fill="var(--card)" stroke="var(--ink)" stroke-width="2"/><text x="702" y="32">containerd</text>
+        </g>
+        <g stroke="var(--line)" stroke-dasharray="3 4"><line x1="55" y1="44" x2="55" y2="460"/><line x1="185" y1="44" x2="185" y2="460"/><line x1="315" y1="44" x2="315" y2="460"/><line x1="445" y1="44" x2="445" y2="460"/><line x1="580" y1="44" x2="580" y2="460"/><line x1="702" y1="44" x2="702" y2="460"/></g>
+        <g stroke="var(--ink)" stroke-width="1.8" fill="none">
+          <line x1="55" y1="70" x2="183" y2="70" marker-end="url(#m-c)"/>
+          <line x1="185" y1="128" x2="313" y2="128" marker-end="url(#m-c)"/>
+          <line x1="315" y1="165" x2="443" y2="165" marker-end="url(#m-c)" stroke-dasharray="6 4"/>
+          <line x1="445" y1="215" x2="187" y2="215" marker-end="url(#m-c)"/>
+          <line x1="185" y1="232" x2="313" y2="232" marker-end="url(#m-c)"/>
+          <line x1="315" y1="270" x2="578" y2="270" marker-end="url(#m-c)" stroke-dasharray="6 4"/>
+          <line x1="580" y1="310" x2="700" y2="310" marker-end="url(#m-c)"/>
+          <line x1="580" y1="390" x2="187" y2="390" marker-end="url(#m-c)"/>
+          <line x1="185" y1="410" x2="313" y2="410" marker-end="url(#m-c)"/>
+        </g>
+        <g font-size="11">
+          <text x="62" y="64">① POST/PATCH (JSON over HTTPS)</text>
+          <rect x="140" y="80" width="90" height="38" fill="var(--card)" stroke="var(--ink)"/><text x="185" y="96" text-anchor="middle">authn → authz</text><text x="185" y="111" text-anchor="middle">→ admission</text>
+          <text x="192" y="122" font-size="10">②</text>
+          <text x="200" y="146">寫入 #1：Pod 物件</text>
+          <text x="322" y="158">③ watch 推送 (長連線，不是 polling)</text>
+          <text x="196" y="208">④ filter → score → POST binding</text>
+          <text x="200" y="250">寫入 #2：spec.nodeName = node-2</text>
+          <text x="330" y="263">⑤ watch：nodeName == 我</text>
+          <text x="588" y="302">⑥ CRI gRPC</text>
+          <text x="590" y="330">unix:///run/containerd/containerd.sock</text>
+          <text x="590" y="348">pull image → runc create → start</text>
+          <text x="200" y="384">⑦ PATCH status (phase=Running, podIP)</text>
+          <text x="200" y="428">寫入 #3：status</text>
+        </g>
+        <rect x="330" y="176" width="100" height="44" fill="var(--card)" stroke="var(--wrong)" stroke-width="1.5" stroke-dasharray="5 3"/>
+        <text x="380" y="192" text-anchor="middle" font-size="10">Pod</text><text x="380" y="208" text-anchor="middle" font-size="10" fill="var(--wrong)">nodeName: ""</text>
+        <text x="380" y="235" text-anchor="middle" font-size="10" class="hand" fill="var(--wrong)">這個空值就是 scheduler 的工作清單</text>
+      </svg>
+    </div>
+    <p class="small">Gate 說「etcd 寫兩次」指的是 spec 層：建立 Pod、綁 node。kubelet 回報 status 是第三種寫入，走 <code>pods/status</code> subresource。全程只有 API Server 直接碰 etcd。</p>
+
+    <h3 style="margin:0">真實數字（upstream 預設）</h3>
+    <div class="scroll"><table>
+      <tr><th>參數</th><th>預設</th><th>意義</th></tr>
+      <tr><td>kubelet node Lease 續約</td><td>每 10s（lease 40s 的 25%）</td><td>心跳寫進 <code>kube-node-lease</code> ns 的 Lease 物件</td></tr>
+      <tr><td><code>--node-monitor-grace-period</code></td><td>40s</td><td>超過沒心跳 → controller-manager 把 Ready 改成 <code>Unknown</code></td></tr>
+      <tr><td>not-ready / unreachable toleration</td><td>300s</td><td>node 失聯 5 分鐘後，上面的 Pod 才被 evict</td></tr>
+      <tr><td>scheduler / controller-manager leader lease</td><td>15s，renew deadline 10s，retry 2s</td><td>HA 時只有一個 leader 在做事</td></tr>
+      <tr><td>etcd heartbeat / election timeout</td><td>100ms / 1000ms</td><td>disk fsync 太慢會讓 leader 錯過心跳 → 重選</td></tr>
+      <tr><td>etcd 單一請求上限</td><td>1.5 MiB</td><td>所以一個 ConfigMap / Secret 不能超過 ~1 MiB</td></tr>
+      <tr><td>etcd <code>--quota-backend-bytes</code></td><td>2 GiB（建議上限 8 GiB）</td><td>滿了 → <code>mvcc: database space exceeded</code>，叢集唯讀</td></tr>
+      <tr><td>API Server etcd compaction</td><td>每 5 分鐘</td><td>太舊的 resourceVersion 被壓掉 → watch 收到 <code>410 Gone</code>，client 重新 list</td></tr>
+    </table></div>
+
+    <h3 style="margin:0">排障金鑰：STATUS → 死在第幾棒</h3>
+    <div class="scroll"><table>
+      <tr><th>你看到</th><th>停在</th><th>產生這個訊息的人</th><th>第一刀</th></tr>
+      <tr><td><code>apply</code> 就報錯</td><td>② API Server</td><td>API Server（schema / admission / RBAC）</td><td>讀錯誤訊息的欄位路徑</td></tr>
+      <tr><td><code>Pending</code>，沒有 NODE</td><td>④ scheduler</td><td>scheduler event <code>FailedScheduling</code></td><td><code>kubectl describe pod</code> 看 <code>0/3 nodes are available</code></td></tr>
+      <tr><td><code>ContainerCreating</code> 很久</td><td>⑥ kubelet</td><td>kubelet（CNI、volume mount）</td><td>describe 的 Events</td></tr>
+      <tr><td><code>ImagePullBackOff</code></td><td>⑥ kubelet → registry</td><td>kubelet / containerd</td><td>Events：401 / i/o timeout / not found</td></tr>
+      <tr><td><code>CreateContainerConfigError</code></td><td>⑥ 啟動前</td><td>kubelet（缺 Secret、runAsNonRoot 檢查）</td><td>describe Events</td></tr>
+      <tr><td><code>CrashLoopBackOff</code></td><td>⑦ 之後，你的程式</td><td>程式自己退出 / liveness 殺</td><td><code>kubectl logs --previous</code></td></tr>
+    </table></div>
+  </section>
+
+  <section id="l3">
+    <h2>Layer 3 · 取捨<span class="tag">why this design</span></h2>
+    <p>因為 Layer 1 的限制是 partial failure，所以 k8s 的每個設計都在回答「元件掛掉又回來時，會不會出錯」。</p>
+    <div class="panels">
+      <div class="panel">
+        <h3>level vs edge triggered</h3>
+        <svg viewBox="0 0 300 120" width="100%" role="img" aria-label="Edge triggered misses an event while the controller is down; level triggered reads current state after restart">
+          <text x="8" y="18" font-size="11">edge：只聽事件</text>
+          <line x1="8" y1="40" x2="290" y2="40" stroke="var(--ink)"/>
+          <circle cx="60" cy="40" r="6" fill="var(--ok)"/><circle cx="150" cy="40" r="6" fill="var(--wrong)"/><circle cx="230" cy="40" r="6" fill="var(--ok)"/>
+          <rect x="120" y="28" width="60" height="24" fill="none" stroke="var(--wrong)" stroke-dasharray="4 3"/>
+          <text x="150" y="68" text-anchor="middle" font-size="10" fill="var(--wrong)">controller 重啟中，這個事件永遠漏掉</text>
+          <text x="8" y="94" font-size="11">level：醒來就讀「現在」</text>
+          <text x="8" y="112" font-size="10" fill="var(--ok)">want 3, have 2 → 補 1。漏掉事件也算得出來</text>
+        </svg>
+        <p>代價：要定期全量比對（resync），比純事件貴。</p>
+      </div>
+      <div class="panel">
+        <h3>hub-and-spoke vs 元件互打</h3>
+        <svg viewBox="0 0 300 120" width="100%" role="img" aria-label="Hub: all components talk only to API server. Mesh: n squared connections">
+          <circle cx="75" cy="60" r="18" fill="var(--who)" stroke="var(--ink)"/><text x="75" y="64" text-anchor="middle" font-size="9">API</text>
+          <g stroke="var(--ink)"><line x1="75" y1="42" x2="75" y2="12"/><line x1="93" y1="60" x2="130" y2="60"/><line x1="57" y1="60" x2="20" y2="60"/><line x1="75" y1="78" x2="75" y2="108"/></g>
+          <g fill="var(--card)" stroke="var(--ink)"><circle cx="75" cy="12" r="7"/><circle cx="130" cy="60" r="7"/><circle cx="20" cy="60" r="7"/><circle cx="75" cy="108" r="7"/></g>
+          <g stroke="var(--wrong)" opacity=".7"><line x1="190" y1="20" x2="280" y2="20"/><line x1="190" y1="20" x2="190" y2="100"/><line x1="190" y1="20" x2="280" y2="100"/><line x1="280" y1="20" x2="190" y2="100"/><line x1="280" y1="20" x2="280" y2="100"/><line x1="190" y1="100" x2="280" y2="100"/></g>
+          <g fill="var(--card)" stroke="var(--ink)"><circle cx="190" cy="20" r="7"/><circle cx="280" cy="20" r="7"/><circle cx="190" cy="100" r="7"/><circle cx="280" cy="100" r="7"/></g>
+          <text x="235" y="64" text-anchor="middle" font-size="9" fill="var(--wrong)">n²</text>
+        </svg>
+        <p>好處：authn/authz/audit 只做一次；元件互相不知道對方。代價：API Server 是所有流量的瓶頸（L6 第一個故障）。</p>
+      </div>
+      <div class="panel">
+        <h3>watch vs polling</h3>
+        <p>1000 個 kubelet 每秒 poll 一次 = 1000 QPS 的空轉。watch 是一條長連線，有變化才推。代價：API Server 要為每條 watch 維持記憶體與 cache（watch cache），而 client 斷線太久會拿到 <code>410 Gone</code>，必須重新 LIST 全量。大叢集裡「一群 client 同時重新 LIST」就是雪崩的起點。</p>
+      </div>
+      <div class="panel">
+        <h3>樂觀鎖 vs 分散式鎖</h3>
+        <p>每個物件有 <code>resourceVersion</code>。兩個 controller 同時改，後到的拿到 <code>409 Conflict</code>，重讀再改。不用鎖服務，也不會死鎖。代價：熱門物件上 controller 會一直重試。</p>
+      </div>
+    </div>
+    <p class="small">被淘汰的路線：Mesos 的 two-level scheduling（framework 自己挑資源，排程知識分散，難做全域 bin-packing）；Docker Swarm 把 Raft 塞進 manager 自己（簡單但擴展性和生態都輸）。k8s 贏在「一個 API、一本帳、任何人都能寫 controller」，這也是 CRD / operator 生態的根。</p>
+  </section>
+
+  <section id="l4">
+    <h2>Layer 4 · AWS 怎麼做<span class="tag">EKS control plane</span></h2>
+    <p>因為 Layer 3 讓 API Server + etcd 成為整個叢集的大腦和瓶頸，EKS 把這一層整個拿走自己管。你看到的只有一個 HTTPS endpoint。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 760 360" role="img" aria-label="EKS: AWS-managed VPC hosts at least two API servers and three etcd across three AZs behind a load balancer. Customer VPC has worker nodes in three AZs and EKS-owned cross-account ENIs. Control plane logs go to CloudWatch">
+        <defs><marker id="m-d" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="var(--ink)"/></marker></defs>
+        <rect x="10" y="10" width="740" height="130" fill="none" stroke="var(--ink)" stroke-width="2" stroke-dasharray="8 4"/>
+        <text x="20" y="30" font-size="12">AWS-managed account / VPC（你看不到、不能 SSH）</text>
+        <g font-size="11" text-anchor="middle">
+          <rect x="40" y="45" width="200" height="80" fill="var(--who)" stroke="var(--ink)"/><text x="140" y="65">AZ-a</text><text x="140" y="88">kube-apiserver</text><text x="140" y="108">etcd member</text>
+          <rect x="280" y="45" width="200" height="80" fill="var(--who)" stroke="var(--ink)"/><text x="380" y="65">AZ-b</text><text x="380" y="88">kube-apiserver</text><text x="380" y="108">etcd member</text>
+          <rect x="520" y="45" width="200" height="80" fill="var(--who)" stroke="var(--ink)"/><text x="620" y="65">AZ-c</text><text x="620" y="88">(apiserver ≥2 台)</text><text x="620" y="108">etcd member</text>
+        </g>
+        <rect x="290" y="160" width="180" height="34" fill="var(--card)" stroke="var(--ink)" stroke-width="2"/>
+        <text x="380" y="182" text-anchor="middle" font-size="11">cluster endpoint (public / private)</text>
+        <rect x="10" y="215" width="740" height="135" fill="none" stroke="var(--ink)" stroke-width="2"/>
+        <text x="20" y="235" font-size="12">你的 VPC</text>
+        <g font-size="11" text-anchor="middle">
+          <rect x="40" y="250" width="200" height="80" fill="var(--see)" stroke="var(--ink)"/><text x="140" y="272">node (kubelet)</text><text x="140" y="292">containerd</text><text x="140" y="315" fill="var(--ink-soft)">EKS-owned ENI</text>
+          <rect x="280" y="250" width="200" height="80" fill="var(--see)" stroke="var(--ink)"/><text x="380" y="272">node (kubelet)</text><text x="380" y="292">containerd</text><text x="380" y="315" fill="var(--ink-soft)">EKS-owned ENI</text>
+          <rect x="520" y="250" width="200" height="80" fill="var(--see)" stroke="var(--ink)"/><text x="620" y="272">node (kubelet)</text><text x="620" y="292">containerd</text>
+        </g>
+        <line x1="140" y1="250" x2="300" y2="196" stroke="var(--ink)" stroke-width="1.6" marker-end="url(#m-d)"/>
+        <text x="150" y="208" font-size="10">kubelet → 443（心跳、watch）</text>
+        <line x1="380" y1="140" x2="380" y2="158" stroke="var(--ink)" stroke-width="1.6"/>
+        <path d="M600 140 C640 190, 640 220, 560 300" fill="none" stroke="var(--ink-soft)" stroke-width="1.6" stroke-dasharray="5 3" marker-end="url(#m-d)"/>
+        <text x="600" y="205" font-size="10" fill="var(--ink-soft)">apiserver → kubelet :10250</text>
+        <text x="600" y="219" font-size="10" fill="var(--ink-soft)">(logs / exec 走 ENI)</text>
+        <rect x="560" y="160" width="0" height="0"/>
+      </svg>
+    </div>
+    <p class="small">EKS 文件：每個叢集至少 2 個 API Server instance、3 個 etcd instance，分散在 3 個 AZ。計費 USD 0.10 / cluster-hour（standard support），版本進入 extended support 後 USD 0.60 / cluster-hour。</p>
+    <div class="scroll"><table>
+      <tr><th>服務 / 設定</th><th>它在做什麼</th><th>常見陷阱</th></tr>
+      <tr><td>Cluster endpoint access</td><td>API Server 的入口，public / private 可各自開關</td><td>只開 private 時，VPC 要開 DNS hostnames + resolution，否則 node 解析不到 endpoint，全部 NotReady</td></tr>
+      <tr><td>Control plane logging（api / audit / authenticator / controllerManager / scheduler）</td><td>把控制面 log 送 CloudWatch Logs</td><td>預設全關。出事才想到要開已經太晚；audit 全開在大叢集一個月可以是一筆可觀的 CloudWatch 帳單</td></tr>
+      <tr><td>etcd 容量</td><td>EKS 遵循 upstream：上限 8 GiB</td><td>CRD 物件、Events、大量 ConfigMap 灌爆 → 叢集唯讀。監控 <code>apiserver_storage_size_bytes</code></td></tr>
+      <tr><td>API Priority and Fairness</td><td>API Server 依 flow 排隊與限流</td><td>自寫 controller 每次全叢集 LIST pods → 自己被 429，連帶擠壓同 priority level 的人</td></tr>
+      <tr><td>EKS Provisioned Control Plane（XL / 2XL / 4XL）</td><td>付費買更大的控制面容量</td><td>是用錢換容量，不修 client 端的濫用 LIST；先查是誰在打 API</td></tr>
+      <tr><td>版本支援</td><td>standard 14 個月，之後 extended</td><td>沒升級的叢集自動進 extended support，控制面費用變 6 倍</td></tr>
+    </table></div>
+    <p class="small">職場真實面：平台組想延後升級（怕壞），財務看到 extended support 帳單來吵，SRE 夾在中間。design review 一定被問：「這個 controller 會對 API Server 打多少 QPS？有沒有用 informer cache？」</p>
+  </section>
+
+  <section id="l5">
+    <h2>Layer 5 · 規模化<span class="tag">evolution ladder</span></h2>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 760 260" role="img" aria-label="Evolution ladder from kind to single EKS to multi-cluster to fleet with cells">
+        <g font-size="11">
+          <rect x="10" y="200" width="170" height="50" fill="var(--card)" stroke="var(--ink)" stroke-width="2"/><text x="20" y="220">① kind / kubeadm</text><text x="20" y="238" class="hand">學習、CI。控制面自己養</text>
+          <rect x="195" y="145" width="170" height="105" fill="var(--see)" stroke="var(--ink)" stroke-width="2"/><text x="205" y="165">② 一個 EKS 叢集</text><text x="205" y="185" class="hand">控制面交給 AWS</text><text x="205" y="203" class="hand">ns 分團隊</text>
+          <rect x="380" y="90" width="170" height="160" fill="var(--who)" stroke="var(--ink)" stroke-width="2"/><text x="390" y="110">③ 多叢集</text><text x="390" y="130" class="hand">per env / per region</text><text x="390" y="148" class="hand">Terraform + GitOps 管</text>
+          <rect x="565" y="30" width="185" height="220" fill="var(--may)" stroke="var(--ink)" stroke-width="2"/><text x="575" y="50">④ fleet / cell</text><text x="575" y="70" class="hand">數十到數百叢集</text><text x="575" y="88" class="hand">每個 cell 爆炸半徑有限</text><text x="575" y="106" class="hand">Cluster API / fleet 管理</text>
+        </g>
+        <g font-size="10" fill="var(--wrong)">
+          <text x="20" y="190">換掉：自己養 etcd</text>
+          <text x="205" y="135">換掉：一個叢集扛全部</text>
+          <text x="390" y="80">換掉：手動開叢集</text>
+        </g>
+      </svg>
+    </div>
+    <div class="two">
+      <div class="card"><b>路線 A：少數大叢集</b><p class="small">利用率高、管理面少。代價：一個 API Server 事故影響所有服務；etcd 和 API QPS 先碰天花板（upstream 測試上限 5000 nodes / 150000 pods）。</p></div>
+      <div class="card"><b>路線 B：很多小叢集</b><p class="small">爆炸半徑小、升級可分批（canary cluster）。代價：要有 fleet 工具（GitOps、policy 同步、跨叢集觀測），每個叢集都有一份控制面費用。</p></div>
+    </div>
+    <p>大廠多半走 B，因為 Layer 6 的教訓：控制面是共用的單點，切小就是限制事故的上限。</p>
+  </section>
+
+  <section id="l6">
+    <h2>Layer 6 · 故障與 on-call<span class="tag">how it breaks</span></h2>
+    <p class="rule">先問「API Server 關掉，還在不在」。正在跑的 Pod、iptables、路由、cgroup 都在 node kernel 裡，<b>控制面掛了它們繼續跑</b>。壞掉的是「改變」：新 Pod、擴容、自癒、DNS 端點更新。</p>
+    <div class="panels">
+      <div class="panel">
+        <h3>API Server 過載</h3>
+        <svg viewBox="0 0 300 70" width="100%" role="img" aria-label="Many clients flood API server, kubectl times out"><g fill="var(--card)" stroke="var(--ink)"><rect x="5" y="5" width="40" height="16"/><rect x="5" y="27" width="40" height="16"/><rect x="5" y="49" width="40" height="16"/></g><g stroke="var(--wrong)"><line x1="45" y1="13" x2="150" y2="35"/><line x1="45" y1="35" x2="150" y2="35"/><line x1="45" y1="57" x2="150" y2="35"/></g><rect x="150" y="20" width="70" height="30" fill="var(--who)" stroke="var(--wrong)" stroke-width="2"/><text x="185" y="40" text-anchor="middle" font-size="10">API</text><text x="230" y="40" font-size="10" fill="var(--wrong)">429 / timeout</text></svg>
+        <p>看到：<code>kubectl</code> 卡住、<code>apiserver_flowcontrol_rejected_requests_total</code> 上升、<code>apiserver_request_duration_seconds</code> p99 飆高。第一刀：audit log 找 top userAgent。止血：停掉新部署的那個 DaemonSet / controller。</p>
+      </div>
+      <div class="panel">
+        <h3>etcd disk 慢</h3>
+        <svg viewBox="0 0 300 70" width="100%" role="img" aria-label="etcd leader misses heartbeat due to slow fsync, leader election loops"><rect x="10" y="20" width="80" height="30" fill="var(--who)" stroke="var(--ink)"/><text x="50" y="40" text-anchor="middle" font-size="10">leader</text><text x="100" y="30" font-size="10" fill="var(--wrong)">fsync 200ms</text><text x="100" y="48" font-size="10" fill="var(--wrong)">&gt; heartbeat 100ms → 重選</text></svg>
+        <p>看到：<code>etcd_disk_wal_fsync_duration_seconds</code> p99 &gt; 10ms、<code>etcd_server_leader_changes_seen_total</code> 一直加。自建時第一刀 <code>etcdctl endpoint status</code>；EKS 上這是 AWS 的事，你看的是 API latency。</p>
+      </div>
+      <div class="panel">
+        <h3>webhook 掛了 + failurePolicy: Fail</h3>
+        <svg viewBox="0 0 300 70" width="100%" role="img" aria-label="Every create request passes through a dead webhook and is rejected"><rect x="10" y="20" width="60" height="30" fill="var(--card)" stroke="var(--ink)"/><text x="40" y="40" text-anchor="middle" font-size="10">create</text><line x1="70" y1="35" x2="140" y2="35" stroke="var(--ink)"/><rect x="140" y="20" width="70" height="30" fill="var(--card)" stroke="var(--wrong)" stroke-dasharray="4 3"/><text x="175" y="40" text-anchor="middle" font-size="10" fill="var(--wrong)">webhook ✗</text><text x="220" y="40" font-size="10" fill="var(--wrong)">全部拒絕</text></svg>
+        <p>看到：任何 Pod 都建不出來，RS events 寫 <code>failed calling webhook</code>。第一刀 <code>kubectl get validatingwebhookconfigurations,mutatingwebhookconfigurations</code>。止血：暫時改 <code>failurePolicy: Ignore</code> 或縮小 <code>namespaceSelector</code>。</p>
+      </div>
+      <div class="panel">
+        <h3>node NotReady</h3>
+        <svg viewBox="0 0 300 70" width="100%" role="img" aria-label="Ready False is kubelet reporting itself; Ready Unknown is controller-manager writing on kubelet's behalf after 40s silence"><text x="10" y="22" font-size="10">Ready=False → kubelet 活著，自己報病因</text><text x="10" y="44" font-size="10" fill="var(--wrong)">Ready=Unknown → 40s 沒心跳</text><text x="10" y="60" font-size="10" fill="var(--wrong)">controller-manager 代筆</text></svg>
+        <p>第一刀：<code>kubectl describe node</code> 看 Conditions 的 <code>reason</code>，分出是誰寫的。然後上 node：<code>journalctl -u kubelet</code>、<code>crictl info</code>。<b>先採證再 restart。</b></p>
+      </div>
+    </div>
+    <p>公開 postmortem：<a href="https://status.openai.com/incidents/ctrsv3lwd797/write-up">OpenAI 2024-12-11</a>。新的 telemetry 服務在每台 node 上對 API Server 發昂貴的請求，成本跟叢集大小成正比，大叢集的控制面全倒。資料面 Pod 本來還能跑，但服務發現靠 DNS，DNS cache 過期後就跟著倒。工程師要修，卻因為 API Server 倒了連 <code>kubectl</code> 都進不去。三個教訓剛好對應本章：hub 是瓶頸（L3）、「關掉 API Server 還在不在」（L6 判準）、break-glass 存取要先準備好。</p>
+    <div class="scroll"><table>
+      <tr><th>SLO（upstream SIG Scalability 定義）</th><th>目標</th></tr>
+      <tr><td>mutating API call latency（單一物件）</td><td>p99 ≤ 1s</td></tr>
+      <tr><td>non-streaming read-only（單一物件 / namespace 範圍 list）</td><td>p99 ≤ 1s / ≤ 5s</td></tr>
+      <tr><td>Pod startup latency（stateless，不含 image pull）</td><td>p99 ≤ 5s</td></tr>
+    </table></div>
+  </section>
+
+  <section id="l7">
+    <h2>Layer 7 · 面試<span class="tag">interview</span></h2>
+    <blockquote>「Your EKS control plane is unavailable for 15 minutes. What happens to production traffic, and what stops working?」</blockquote>
+    <p class="sub">先自己講一遍，再打開。</p>
+    <details><summary>L4 回答</summary><div>
+      <p>「API Server 掛了就不能 kubectl，也不能部署新東西。正在跑的 Pod 應該還在。」</p>
+      <p class="small">對，但只有結論。沒講為什麼還在、哪些東西會慢慢壞、你會怎麼做。</p>
+    </div></details>
+    <details><summary>L6 回答</summary><div>
+      <p>「先分兩欄：<b>已經翻譯進 kernel 的東西</b>（容器 process、cgroup、iptables / IPVS 規則、路由）繼續跑，所以現有流量大致正常。<b>需要 API Server 才會發生的東西</b>全停：新 Pod 排程、HPA 擴容、Deployment 自癒、Endpoints 更新。」</p>
+      <p>「時間一長會慢慢惡化：Pod 掛掉不會被替換；掛掉的 Pod IP 還留在 Service 規則裡，部分請求打到死端點；controller-manager 一樣連不上 API Server，期間不會做 evict 決定；恢復那一刻若整個 zone 看起來都 NotReady，node lifecycle controller 的 zone 全倒保護會停止 evict。」</p>
+      <p>「行動：先確認範圍（AWS Health、API latency metric），凍結部署，避免 15 分鐘後恢復時所有 controller 同時 re-list 打爆它。長期：多叢集切爆炸半徑、break-glass 存取、對自家 controller 設 QPS 上限並用 informer cache。參考 OpenAI 2024-12 的 postmortem。」</p>
+      <p class="small">L6 多了：判準（宣告 vs 執行體）、時間軸上的惡化順序、恢復時的雪崩風險、一個公開事故當證據。</p>
+    </div></details>
+  </section>
+
+  <section id="trail">
+    <h2>我的錯題軌跡<span class="tag">from session logs</span></h2>
+    <p>這章 gate 一次過，但下面這幾條在後面的 phase 一再回來。它們是同一個家族：<b>搞不清「誰」在做這件事、在哪一棒。</b></p>
+    <div class="trail">
+      <div class="wrong"><b>我錯在這 · s1</b>用「下指令」描述 k8s（imperative 思維），每一步「誰做的」全省略，漏掉 Pod 怎麼被排到 node。</div>
+      <div class="fix">修正：五棒骨架默數到 5。s10 盲講又漏 scheduler，一問「哪台 kubelet、誰決定 node」秒抓回。</div>
+      <div class="wrong"><b>我錯在這 · s3 → 07-06</b>說 server dry-run「走完 etcd 整個流程」；etcd 角色連滑三次。</div>
+      <div class="fix">修正：<code>--dry-run=server</code> = 審完不落帳。只有 API Server 直接碰 etcd。image 存不存在只有第 5 棒 kubelet（圖中第 ⑥ 步）去拉時才知道。</div>
+      <div class="wrong"><b>我錯在這 · s25, s27</b>「誰把 limit 寫進 cgroup」答 scheduler；「node NotReady 看哪個」又答 scheduler。</div>
+      <div class="fix">修正：scheduler 只填 <code>spec.nodeName</code>，從沒進過 node 的門。不在 node 上的元件碰不到 kernel。</div>
+      <div class="wrong"><b>我錯在這 · 09-30</b>SG 缺 IPIP，預測 NotReady，理由是「etcd 和 calico 沒開」，再改答 metrics-server。</div>
+      <div class="fix">修正：Ready = kubelet 經 6443 寫 Lease 心跳。跟 etcd（在 cp 本機）、CNI 資料面、metrics-server 都無關。</div>
+    </div>
+  </section>
+
+  <section id="next">
+    <h2>本章 topic 深入筆記<span class="tag">next</span></h2>
+    <div class="scroll"><table>
+      <tr><th>topic</th><th>我的程度</th><th>深入筆記</th></tr>
+      <tr><td>apply→Running 控制流（五棒）</td><td><span class="lvl high">high (s10)</span></td><td><span class="lvl todo">待寫</span></td></tr>
+      <tr><td>reconcile loop / level-triggered</td><td><span class="lvl high">gate</span></td><td><span class="lvl todo">待寫</span></td></tr>
+      <tr><td>API Server 請求鏈（authn → authz → admission）</td><td><span class="lvl med">gate，P2b 再深化</span></td><td><span class="lvl todo">待寫</span></td></tr>
+      <tr><td>etcd + Raft quorum</td><td><span class="lvl med">直覺</span></td><td><span class="lvl todo">待寫</span></td></tr>
+      <tr><td>分層判準「關掉 API Server 還在不在」</td><td><span class="lvl med">med (s25)</span></td><td><span class="lvl todo">待寫</span></td></tr>
+    </table></div>
+  </section>
+</main>
+
+</body></html>

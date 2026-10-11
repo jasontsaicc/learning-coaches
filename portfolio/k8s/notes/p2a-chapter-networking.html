@@ -1,0 +1,353 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"></head><body>
+<title>P2a 網路深水區</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC:wght@400;700&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: one notebook column on graph paper; figures on taped cards, scenarios as 2x2 comic panels */
+:root {
+  --paper: #F6F8FA;
+  --grid: rgba(90,130,170,.16);
+  --ink: #23313E;
+  --ink-soft: #55677A;
+  --card: #FFFFFF;
+  --tape: rgba(240,214,140,.75);
+  --who: #FFE98A;
+  --see: #BDEEF6;
+  --may: #F9CDE0;
+  --wrong: #D2453A;
+  --ok: #2F8F5B;
+  --line: #9DB0C2;
+  --font-hand: "LXGW WenKai TC", "Noto Sans TC", "PingFang TC", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #1A2320; --grid: rgba(200,230,210,.08); --ink: #E6EDE8; --ink-soft: #A9BAB1;
+    --card: #24302C; --tape: rgba(200,180,110,.45); --who: #8A7A2A; --see: #2B6A74; --may: #7A3F57;
+    --wrong: #FF8A7E; --ok: #7FD3A1; --line: #5E7268; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #1A2320; --grid: rgba(200,230,210,.08); --ink: #E6EDE8; --ink-soft: #A9BAB1;
+  --card: #24302C; --tape: rgba(200,180,110,.45); --who: #8A7A2A; --see: #2B6A74; --may: #7A3F57;
+  --wrong: #FF8A7E; --ok: #7FD3A1; --line: #5E7268; color-scheme: dark;
+}
+body {
+  background-color: var(--paper);
+  background-image: linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 22px 22px;
+  color: var(--ink);
+  font-family: var(--font-hand);
+  font-size: 17px;
+  line-height: 1.75;
+}
+.page { max-width: 760px; margin: 0 auto; padding-inline: 18px; padding-block: 32px 64px; display: grid; gap: 34px; }
+h1, h2 { text-wrap: balance; line-height: 1.3; margin: 0; }
+h1 { font-size: 2.1rem; }
+h2 { font-size: 1.45rem; display: flex; align-items: baseline; gap: 10px; }
+h2 .tag { font-family: var(--font-mono); font-size: .72rem; letter-spacing: .08em; color: var(--ink-soft); text-transform: uppercase; }
+p { margin: 0; }
+section { display: grid; gap: 14px; min-width: 0; }
+.sub { color: var(--ink-soft); font-size: .95rem; }
+mark { background: linear-gradient(transparent 52%, var(--who) 52%); color: inherit; padding: 0 2px; }
+mark.see { background: linear-gradient(transparent 52%, var(--see) 52%); }
+mark.may { background: linear-gradient(transparent 52%, var(--may) 52%); }
+code { font-family: var(--font-mono); font-size: .86em; background: color-mix(in srgb, var(--line) 22%, transparent); padding: 1px 5px; border-radius: 3px; }
+.card { position: relative; background: var(--card); padding: 22px 18px 16px; box-shadow: 0 1px 3px rgba(0,0,0,.12); min-width: 0; }
+.card::before { content: ""; position: absolute; top: -9px; left: 50%; width: 92px; height: 20px; transform: translateX(-50%) rotate(-2deg); background: var(--tape); }
+.scroll { overflow-x: auto; }
+svg text { font-family: var(--font-mono); fill: var(--ink); }
+svg .hand { font-family: var(--font-hand); }
+.rule { border-left: 4px solid var(--ok); padding: 6px 12px; font-size: 1.08rem; }
+.wrong { border-left: 4px solid var(--wrong); padding: 4px 12px; display: grid; gap: 2px; }
+.wrong b { color: var(--wrong); font-size: .85rem; letter-spacing: .05em; }
+.panels { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 14px; }
+.panel { border: 2px solid var(--ink); background: var(--card); padding: 10px; display: grid; gap: 6px; min-width: 0; }
+.panel h3 { margin: 0; font-size: 1rem; font-family: var(--font-mono); }
+.panel p { font-size: .92rem; }
+@media (max-width: 520px) { .panels { grid-template-columns: 1fr; } }
+table { border-collapse: collapse; width: 100%; font-size: .95rem; }
+th, td { border-bottom: 1px dashed var(--line); padding: 8px 6px; text-align: left; vertical-align: top; }
+th { font-family: var(--font-mono); font-size: .78rem; letter-spacing: .05em; color: var(--ink-soft); font-weight: 600; }
+ol { margin: 0; padding-left: 1.3em; display: grid; gap: 6px; }
+blockquote { margin: 0; padding: 12px 16px; background: var(--card); border: 2px dashed var(--line); }
+.en { font-family: var(--font-mono); font-size: .9rem; color: var(--ink-soft); }
+details summary{cursor:pointer}
+</style>
+<style>
+/* chapter-note additions on top of the notebook base */
+svg.fig { display: block; min-width: 640px; width: 100%; height: auto; }
+.lvl { font-family: var(--font-mono); font-size: .74rem; padding: 1px 7px; border: 1.5px solid var(--ink); border-radius: 10px; white-space: nowrap; }
+.lvl.high { background: color-mix(in srgb, var(--ok) 28%, transparent); }
+.lvl.med { background: var(--who); }
+.lvl.low { background: var(--may); }
+.lvl.todo { border-style: dashed; color: var(--ink-soft); }
+.meta { display: flex; flex-wrap: wrap; gap: 8px 16px; font-family: var(--font-mono); font-size: .8rem; color: var(--ink-soft); }
+.toc { display: flex; flex-wrap: wrap; gap: 6px 14px; font-family: var(--font-mono); font-size: .82rem; }
+.toc a { color: var(--ink); }
+.trail { display: grid; gap: 12px; }
+.fix { border-left: 4px solid var(--ok); padding: 4px 12px; }
+.two { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 14px; }
+@media (max-width: 560px) { .two { grid-template-columns: 1fr; } }
+details { background: var(--card); border: 2px dashed var(--line); padding: 10px 14px; }
+details[open] { border-style: solid; }
+details > div { display: grid; gap: 8px; margin-top: 10px; }
+.small { font-size: .9rem; }
+a { color: inherit; text-underline-offset: 3px; }
+pre { margin: 0; font-family: var(--font-mono); font-size: .82rem; line-height: 1.5; background: var(--card); border: 1px solid var(--line); padding: 10px 12px; overflow-x: auto; }
+</style>
+<main class="page">
+  <header style="display:grid;gap:10px">
+    <p class="sub">k8s 課程 · 章節筆記 · Phase 2a</p>
+    <h1>P2a 網路深水區</h1>
+    <p>一個問題貫穿整章：<b>Pod A 打 <code>http://shop-api</code>，這個封包一路經過了誰、在哪裡被改寫、在哪裡可能死掉？</b></p>
+    <div class="meta"><span>in-progress（帶 weak-topic flag 前進）</span><span>sessions s7–s25</span><span>全鏈 <span class="lvl high">high</span> · NetworkPolicy / CNI <span class="lvl low">low-med</span></span></div>
+    <nav class="toc"><a href="#map">章節地圖</a><a href="#l0">L0 圖</a><a href="#l1">L1 原理</a><a href="#l2">L2 機制</a><a href="#l3">L3 取捨</a><a href="#l4">L4 EKS</a><a href="#l5">L5 規模</a><a href="#l6">L6 on-call</a><a href="#l7">L7 面試</a><a href="#trail">我的錯題</a><a href="#next">topic 深入</a></nav>
+  </header>
+
+  <section id="map">
+    <h2>章節地圖<span class="tag">4 chunks</span></h2>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 720 210" role="img" aria-label="P2a chunks: Service and DNS, Ingress, NetworkPolicy, CNI and the seven-station journey; status of each">
+        <g font-size="11" text-anchor="middle">
+          <rect x="10" y="20" width="165" height="70" fill="var(--who)" stroke="var(--ink)" stroke-width="2"/><text x="92" y="44">[1] Service / kube-proxy</text><text x="92" y="62">CoreDNS / conntrack</text><text x="92" y="80" class="hand">✅ high</text>
+          <rect x="190" y="20" width="165" height="70" fill="var(--see)" stroke="var(--ink)" stroke-width="2"/><text x="272" y="44">[2] Ingress</text><text x="272" y="62">規則 vs controller</text><text x="272" y="80" class="hand">✅ med</text>
+          <rect x="370" y="20" width="165" height="70" fill="var(--may)" stroke="var(--ink)" stroke-width="2"/><text x="452" y="44">[3] NetworkPolicy</text><text x="452" y="62">白名單 + 翻轉</text><text x="452" y="80" class="hand" fill="var(--wrong)">lab Step 5/6 未收</text>
+          <rect x="550" y="20" width="160" height="70" fill="var(--may)" stroke="var(--ink)" stroke-width="2"/><text x="630" y="44">[4] CNI 資料面</text><text x="630" y="62">veth / 路由 / overlay</text><text x="630" y="80" class="hand">4-1~4-4 ✅</text>
+        </g>
+        <rect x="10" y="120" width="700" height="70" fill="var(--card)" stroke="var(--ink)" stroke-width="2"/>
+        <text x="360" y="145" text-anchor="middle" font-size="12">貫穿：四動詞口訣「問名 → 改寫 → 放行 → 送達」</text>
+        <text x="360" y="170" text-anchor="middle" font-size="11" class="hand">DNS（[1]） → DNAT（[1]） → filter（[3]） → route + veth（[4]）。Ingress 是外面多疊一層 L7。</text>
+      </svg>
+    </div>
+  </section>
+
+  <section id="l0">
+    <h2>Layer 0 · 一張圖<span class="tag">analogy</span></h2>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 720 190" role="img" aria-label="Phone company analogy: phonebook is CoreDNS, company main number is ClusterIP, transfer table is kube-proxy rules, call log is conntrack">
+        <g font-size="12" text-anchor="middle">
+          <rect x="10" y="30" width="160" height="80" fill="var(--see)" stroke="var(--ink)" stroke-width="2"/><text x="90" y="58" class="hand">查電話簿</text><text x="90" y="80">CoreDNS</text><text x="90" y="98" font-size="10">名字 → 代表號</text>
+          <rect x="190" y="30" width="160" height="80" fill="var(--who)" stroke="var(--ink)" stroke-width="2" stroke-dasharray="6 4"/><text x="270" y="58" class="hand">撥公司代表號</text><text x="270" y="80">ClusterIP</text><text x="270" y="98" font-size="10">沒有任何一支話機是它</text>
+          <rect x="370" y="30" width="160" height="80" fill="var(--may)" stroke="var(--ink)" stroke-width="2"/><text x="450" y="58" class="hand">話機底下自動轉接</text><text x="450" y="80">DNAT (kernel)</text><text x="450" y="98" font-size="10">轉接表是 kube-proxy 貼的</text>
+          <rect x="550" y="30" width="160" height="80" fill="var(--card)" stroke="var(--ink)" stroke-width="2"/><text x="630" y="58" class="hand">通話紀錄</text><text x="630" y="80">conntrack</text><text x="630" y="98" font-size="10">回電顯示代表號</text>
+        </g>
+        <text x="360" y="150" text-anchor="middle" font-size="13" class="hand">轉接在你自己的話機上完成，不經過總機。每台 node 都有一份一樣的轉接表。</text>
+      </svg>
+    </div>
+  </section>
+
+  <section id="l1">
+    <h2>Layer 1 · 第一性原理<span class="tag">why it must exist</span></h2>
+    <ol>
+      <li><b>Pod IP 會變。</b>Pod 被丟掉重建就換 IP（P1）。寫死 IP 必爆，所以需要一個穩定的名字和穩定的虛擬 IP。</li>
+      <li><b>一對多要負載平衡，但中央 LB 是瓶頸也是單點。</b>如果 ClusterIP 真的綁在 node-1 一張網卡上，全叢集流量都要繞過 node-1。這是你 s7 自己推出來的。</li>
+      <li><b>k8s 網路模型的合約：每個 Pod 能直接用 Pod IP 互打，中間不做 NAT。</b>誰來保證這件事？k8s 不做，交給 CNI。</li>
+    </ol>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 720 220" role="img" aria-label="Left: centralized load balancer on node-1, all traffic detours through it. Right: every node rewrites destination locally, no detour">
+        <text x="170" y="22" text-anchor="middle" font-size="13" class="hand">如果 ClusterIP 綁在 node-1</text>
+        <text x="540" y="22" text-anchor="middle" font-size="13" class="hand">實際：出發地本機改寫</text>
+        <line x1="360" y1="10" x2="360" y2="210" stroke="var(--line)" stroke-dasharray="4 4"/>
+        <g font-size="11" text-anchor="middle">
+          <rect x="130" y="40" width="80" height="40" fill="var(--wrong)" opacity=".25" stroke="var(--wrong)"/><text x="170" y="64">node-1 LB</text>
+          <rect x="20" y="150" width="70" height="36" fill="var(--card)" stroke="var(--ink)"/><text x="55" y="172">node-2</text>
+          <rect x="135" y="150" width="70" height="36" fill="var(--card)" stroke="var(--ink)"/><text x="170" y="172">node-3</text>
+          <rect x="250" y="150" width="70" height="36" fill="var(--card)" stroke="var(--ink)"/><text x="285" y="172">node-4</text>
+        </g>
+        <g stroke="var(--wrong)" stroke-width="2"><line x1="55" y1="150" x2="150" y2="80"/><line x1="170" y1="150" x2="170" y2="80"/><line x1="285" y1="150" x2="190" y2="80"/></g>
+        <text x="170" y="210" text-anchor="middle" font-size="11" fill="var(--wrong)">瓶頸 + 單點 + 多繞一跳</text>
+        <g font-size="11" text-anchor="middle">
+          <rect x="390" y="60" width="90" height="46" fill="var(--see)" stroke="var(--ink)"/><text x="435" y="80">node-2</text><text x="435" y="97" font-size="10">DNAT 在這</text>
+          <rect x="495" y="60" width="90" height="46" fill="var(--see)" stroke="var(--ink)"/><text x="540" y="80">node-3</text><text x="540" y="97" font-size="10">DNAT 在這</text>
+          <rect x="600" y="60" width="90" height="46" fill="var(--see)" stroke="var(--ink)"/><text x="645" y="80">node-4</text><text x="645" y="97" font-size="10">DNAT 在這</text>
+        </g>
+        <path d="M435 106 C435 160, 645 160, 645 108" fill="none" stroke="var(--ok)" stroke-width="2"/>
+        <text x="540" y="185" text-anchor="middle" font-size="11" fill="var(--ok)">直接打到後端 Pod，沒有中間人</text>
+      </svg>
+    </div>
+    <p class="rule">代價：每台 node 都要有一份完整的轉接表。Service 和 endpoint 越多，表越大，更新越慢。這就是 Layer 5 換 IPVS / nftables / eBPF 的原因。</p>
+  </section>
+
+  <section id="l2">
+    <h2>Layer 2 · 機制<span class="tag">seven stations</span></h2>
+    <p>因為 Layer 1 決定「在出發地改寫」，所以封包的一生幾乎都在 kernel 裡。k8s 元件只負責事先把規則寫好。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 780 470" role="img" aria-label="Packet journey across two nodes: DNS lookup, veth out, nat table DNAT, filter table NetworkPolicy, routing table via tunl0, wire, node B veth into pod B; return path conntrack rewrites source back to ClusterIP">
+        <defs><marker id="p2a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="var(--ink)"/></marker></defs>
+        <rect x="10" y="10" width="420" height="440" fill="none" stroke="var(--ink)" stroke-width="2"/><text x="20" y="30" font-size="12">node A (root netns)</text>
+        <rect x="470" y="10" width="300" height="440" fill="none" stroke="var(--ink)" stroke-width="2"/><text x="480" y="30" font-size="12">node B (root netns)</text>
+        <rect x="30" y="45" width="170" height="70" fill="var(--see)" stroke="var(--ink)" stroke-width="2"/><text x="40" y="65" font-size="11">Pod A netns  10.244.1.5</text><text x="40" y="85" font-size="10">/etc/resolv.conf</text><text x="40" y="101" font-size="10">nameserver 10.96.0.10 · ndots:5</text>
+        <rect x="240" y="45" width="170" height="50" fill="var(--card)" stroke="var(--ink)"/><text x="325" y="66" text-anchor="middle" font-size="11">① 問名：CoreDNS</text><text x="325" y="84" text-anchor="middle" font-size="10">shop-api → 10.96.8.20</text>
+        <line x1="200" y1="70" x2="238" y2="70" stroke="var(--ink)" marker-end="url(#p2a)"/>
+        <text x="40" y="140" font-size="11">② eth0 ⇄ veth（Pod 自家車道）</text>
+        <line x1="115" y1="115" x2="115" y2="165" stroke="var(--ink)" stroke-width="2" marker-end="url(#p2a)"/>
+        <rect x="30" y="168" width="380" height="74" fill="var(--who)" stroke="var(--ink)" stroke-width="2"/>
+        <text x="40" y="188" font-size="11">③ 改寫：nat 表 PREROUTING → KUBE-SERVICES → KUBE-SVC → KUBE-SEP</text>
+        <text x="40" y="208" font-size="11">dst 10.96.8.20:80  →  10.244.2.9:5678</text>
+        <text x="40" y="228" font-size="10" fill="var(--ink-soft)">規則是 kube-proxy 寫的；它自己不碰封包</text>
+        <rect x="250" y="250" width="160" height="56" fill="var(--card)" stroke="var(--ink-soft)" stroke-dasharray="4 3"/>
+        <text x="260" y="268" font-size="10">conntrack entry</text><text x="260" y="284" font-size="9">orig: .1.5 → 10.96.8.20:80</text><text x="260" y="298" font-size="9">reply: .2.9:5678 → .1.5</text>
+        <line x1="115" y1="242" x2="115" y2="262" stroke="var(--ink)" stroke-width="2" marker-end="url(#p2a)"/>
+        <rect x="30" y="265" width="200" height="50" fill="var(--may)" stroke="var(--ink)" stroke-width="2"/><text x="40" y="285" font-size="11">④ 放行：filter 表</text><text x="40" y="303" font-size="10">NetworkPolicy（felix 編譯）</text>
+        <line x1="115" y1="315" x2="115" y2="335" stroke="var(--ink)" stroke-width="2" marker-end="url(#p2a)"/>
+        <rect x="30" y="338" width="380" height="56" fill="var(--see)" stroke="var(--ink)" stroke-width="2"/><text x="40" y="358" font-size="11">⑤ 問路：路由表（不是 iptables）</text><text x="40" y="378" font-size="10">10.244.2.0/24 via 172.21.0.3 dev tunl0 proto bird</text>
+        <line x1="410" y1="366" x2="520" y2="366" stroke="var(--ink)" stroke-width="2.5" marker-end="url(#p2a)"/><text x="435" y="358" font-size="10">IPIP / wire</text>
+        <rect x="520" y="338" width="230" height="56" fill="var(--see)" stroke="var(--ink)" stroke-width="2"/><text x="530" y="358" font-size="11">⑥ 解封裝 → 路由到 veth</text><text x="530" y="378" font-size="10">10.244.2.9 dev cali1a2b scope link</text>
+        <line x1="635" y1="338" x2="635" y2="122" stroke="var(--ink)" stroke-width="2" marker-end="url(#p2a)"/>
+        <rect x="540" y="45" width="190" height="75" fill="var(--see)" stroke="var(--ink)" stroke-width="2"/><text x="550" y="65" font-size="11">⑦ Pod B netns 10.244.2.9</text><text x="550" y="85" font-size="10">listen :5678 (targetPort)</text><text x="550" y="103" font-size="10">看到 src = 10.244.1.5</text>
+        <rect x="160" y="405" width="250" height="38" fill="var(--card)" stroke="var(--ok)" stroke-width="1.5"/>
+        <text x="170" y="420" font-size="10" fill="var(--ok)">回程：src .2.9:5678 被 conntrack</text><text x="170" y="435" font-size="10" fill="var(--ok)">改回 10.96.8.20:80，Pod A 才認得</text>
+        <rect x="240" y="120" width="170" height="36" fill="none" stroke="var(--wrong)" stroke-dasharray="5 4"/><text x="325" y="143" text-anchor="middle" font-size="10" fill="var(--wrong)">ClusterIP 從沒上過網路線</text>
+      </svg>
+    </div>
+    <div class="scroll"><table>
+      <tr><th>站</th><th>誰寫規則 / 誰做事</th><th>看的指令</th><th>真實數字</th></tr>
+      <tr><td>① 問名</td><td>kubelet 寫 resolv.conf；CoreDNS 回答</td><td><code>nslookup shop-api.prod.svc.cluster.local</code></td><td><code>ndots:5</code>：短名先試 3–4 個 search domain，A + AAAA 各一次</td></tr>
+      <tr><td>③ 改寫</td><td>kube-proxy 寫；kernel nat 表做</td><td><code>iptables-save -t nat | grep shop-api</code></td><td>iptables 模式每個 Service 好幾條 rule，比對是線性的</td></tr>
+      <tr><td>conntrack</td><td>kernel 自動記</td><td><code>conntrack -L</code>、<code>/proc/sys/net/netfilter/nf_conntrack_count</code></td><td>kube-proxy 預設 max = 32768 × CPU 核數（下限 131072）；ESTABLISHED 逾時 24h</td></tr>
+      <tr><td>④ 放行</td><td>CNI 的 policy agent（Calico felix）寫；kernel filter 表做</td><td><code>iptables-save -t filter | grep cali</code></td><td>沒有 policy 選中 = 全通；選中後該方向翻成 default-deny</td></tr>
+      <tr><td>⑤ 問路</td><td>CNI 路由 daemon（BIRD / VPC CNI）寫；kernel 路由</td><td><code>ip route get 10.244.2.9</code></td><td>IPIP 多 20 bytes header，MTU 1500 → Pod 1480</td></tr>
+    </table></div>
+    <p class="small">Ingress 是在這條路前面多疊一層：外部流量先到 ingress controller Pod（靠上面的 L4 路進門），controller 讀 Host + path 字串，再直接打後端 Pod IP。Ingress 物件只是規則，沒裝 controller 時 ADDRESS 是空的。</p>
+  </section>
+
+  <section id="l3">
+    <h2>Layer 3 · 取捨<span class="tag">why this design</span></h2>
+    <div class="scroll"><table>
+      <tr><th>決定</th><th>選項</th><th>贏在</th><th>輸在</th></tr>
+      <tr><td rowspan="3">Service 怎麼實作</td><td>iptables（預設）</td><td>到處都有、好查</td><td>規則線性比對；上萬 Service 時同步一次要秒級</td></tr>
+      <tr><td>IPVS / nftables（nftables 1.33 GA）</td><td>hash 查找、更新快</td><td>排障工具要換一套</td></tr>
+      <tr><td>eBPF（Cilium 取代 kube-proxy）</td><td>最快、可觀測性強</td><td>kernel 版本要求、團隊要懂 eBPF</td></tr>
+      <tr><td rowspan="3">Pod 網路</td><td>overlay（IPIP / VXLAN）</td><td>不用動底層網路</td><td>封裝開銷、MTU 陷阱、底層看不到 Pod IP</td></tr>
+      <tr><td>native routing（BGP）</td><td>無封裝</td><td>要能跟底層網路講 BGP</td></tr>
+      <tr><td>雲端 IP（AWS VPC CNI）</td><td>Pod IP 就是 VPC IP，SG / flow log 都看得到</td><td>吃 VPC IP；instance 有 Pod 數上限</td></tr>
+      <tr><td>L7 入口</td><td>Ingress → Gateway API</td><td>Gateway API 分角色（infra / app）、支援 header 與權重路由</td><td>Ingress 只有 host + path，其他靠 annotation 各家方言</td></tr>
+      <tr><td>NetworkPolicy</td><td>L3/L4 白名單</td><td>簡單、kernel 執行</td><td>擋不了 <code>/admin</code> 這種 L7 條件；沒有引擎時靜默無效</td></tr>
+    </table></div>
+    <p class="rule">L4 vs L7 的唯一判準：<b>轉發決定需不需要拆開信讀內容？</b>要拆信，還要「懂那個協定」：nginx 只懂 HTTP，pgpool 懂 postgres，所以讀寫分流只有後者做得到。</p>
+  </section>
+
+  <section id="l4">
+    <h2>Layer 4 · AWS 怎麼做<span class="tag">EKS networking</span></h2>
+    <p>因為 Layer 3 的「雲端 IP」路線讓 Pod IP 就是 VPC IP，EKS 上第 ⑤ 站沒有 overlay，路由交給 VPC。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 760 330" role="img" aria-label="Internet to ALB (L7, Ingress) or NLB (L4, Service LoadBalancer) in public subnets, targeting Pod IPs directly in private subnets across AZs; CoreDNS forwards to Route 53 Resolver at VPC plus two">
+        <defs><marker id="p2b" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="var(--ink)"/></marker></defs>
+        <rect x="10" y="10" width="740" height="310" fill="none" stroke="var(--ink)" stroke-width="2"/><text x="20" y="30" font-size="12">VPC 10.0.0.0/16</text>
+        <rect x="30" y="45" width="330" height="70" fill="var(--who)" stroke="var(--ink)" stroke-width="2"/><text x="195" y="70" text-anchor="middle" font-size="12">ALB（L7）← Ingress / Gateway</text><text x="195" y="92" text-anchor="middle" font-size="10">AWS Load Balancer Controller 建的</text>
+        <rect x="400" y="45" width="330" height="70" fill="var(--who)" stroke="var(--ink)" stroke-width="2"/><text x="565" y="70" text-anchor="middle" font-size="12">NLB（L4）← Service type=LoadBalancer</text><text x="565" y="92" text-anchor="middle" font-size="10">target type: ip</text>
+        <rect x="30" y="160" width="330" height="110" fill="var(--see)" stroke="var(--ink)" stroke-width="2"/><text x="40" y="180" font-size="11">AZ-a private subnet · node</text><text x="40" y="202" font-size="10">Pod 10.0.12.34（VPC IP，在 ENI 上）</text><text x="40" y="222" font-size="10">CoreDNS → forward 10.0.0.2</text><text x="40" y="242" font-size="10">aws-node（VPC CNI）+ kube-proxy</text>
+        <rect x="400" y="160" width="330" height="110" fill="var(--see)" stroke="var(--ink)" stroke-width="2"/><text x="410" y="180" font-size="11">AZ-b private subnet · node</text><text x="410" y="202" font-size="10">Pod 10.0.45.6</text><text x="410" y="222" font-size="10">SG for Pods（選用）</text>
+        <line x1="195" y1="115" x2="195" y2="158" stroke="var(--ink)" stroke-width="2" marker-end="url(#p2b)"/>
+        <line x1="300" y1="115" x2="480" y2="158" stroke="var(--ink)" stroke-width="1.6" stroke-dasharray="5 3" marker-end="url(#p2b)"/>
+        <text x="330" y="148" font-size="10" fill="var(--wrong)">跨 AZ：USD 0.01/GB 每方向</text>
+        <line x1="565" y1="115" x2="565" y2="158" stroke="var(--ink)" stroke-width="2" marker-end="url(#p2b)"/>
+        <text x="380" y="300" text-anchor="middle" font-size="11" class="hand">沒有 tunl0、沒有 IPIP：AZ-a → AZ-b 的 Pod 流量直接走 VPC route table</text>
+      </svg>
+    </div>
+    <div class="scroll"><table>
+      <tr><th>服務 / 設定</th><th>做什麼</th><th>常見陷阱</th></tr>
+      <tr><td>Amazon VPC CNI</td><td>Pod 拿 VPC IP</td><td>subnet IP 用光 → Pod 卡 ContainerCreating（<code>failed to assign an IP address</code>）。大叢集要先規劃 subnet 或開 prefix delegation</td></tr>
+      <tr><td>VPC CNI network policy</td><td>用 eBPF 執行 NetworkPolicy</td><td>預設沒開（<code>enableNetworkPolicy</code>）。沒開時 policy 照樣 apply 成功，什麼都不擋</td></tr>
+      <tr><td>AWS Load Balancer Controller</td><td>Ingress → ALB、Service → NLB</td><td>controller 的 IRSA 權限沒給好，Ingress ADDRESS 永遠空白，events 寫 AccessDenied</td></tr>
+      <tr><td>CoreDNS → Route 53 Resolver</td><td>外部名字轉送 VPC+2</td><td>每個 ENI 對 link-local 服務限 1024 PPS，超過靜默丟包：看 <code>ethtool -S eth0</code> 的 <code>linklocal_allowance_exceeded</code></td></tr>
+      <tr><td>Security Groups</td><td>node / Pod 層防火牆</td><td>EC2 也有 conntrack 上限：<code>conntrack_allowance_exceeded</code>，跟 Linux 的 nf_conntrack 是兩張表</td></tr>
+      <tr><td>跨 AZ 流量</td><td>Pod 打到別的 AZ 的後端</td><td>每 GB 兩方向各收費；用 topology-aware routing 讓流量優先留在同 AZ</td></tr>
+    </table></div>
+    <p class="small">職場真實面：網路組管 VPC 和 SG，平台組管 CNI，App 組只看到 timeout。誰都說「我這邊是綠的」。design review 被問：「subnet 規劃夠撐 3 倍 Pod 嗎？跨 AZ 流量一個月多少錢？」</p>
+  </section>
+
+  <section id="l5">
+    <h2>Layer 5 · 規模化<span class="tag">evolution ladder</span></h2>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 760 250" role="img" aria-label="Ladder: kube-proxy iptables and simple CNI; NetworkPolicy default deny plus ingress controller; IPVS or eBPF plus Gateway API plus NodeLocal DNS; service mesh and multi-cluster networking">
+        <g font-size="11">
+          <rect x="10" y="190" width="170" height="50" fill="var(--card)" stroke="var(--ink)" stroke-width="2"/><text x="20" y="210">① iptables + 預設 CNI</text><text x="20" y="228" class="hand">全通、一個 ingress</text>
+          <rect x="195" y="140" width="170" height="100" fill="var(--see)" stroke="var(--ink)" stroke-width="2"/><text x="205" y="160">② default-deny</text><text x="205" y="180" class="hand">每個 ns 先關再開洞</text><text x="205" y="198" class="hand">ALB / NLB 分流</text>
+          <rect x="380" y="90" width="170" height="150" fill="var(--who)" stroke="var(--ink)" stroke-width="2"/><text x="390" y="110">③ 換資料面</text><text x="390" y="130" class="hand">eBPF / nftables</text><text x="390" y="148" class="hand">NodeLocal DNSCache</text><text x="390" y="166" class="hand">Gateway API</text>
+          <rect x="565" y="30" width="185" height="210" fill="var(--may)" stroke="var(--ink)" stroke-width="2"/><text x="575" y="50">④ mesh / 多叢集</text><text x="575" y="70" class="hand">mTLS、L7 授權</text><text x="575" y="88" class="hand">跨叢集服務發現</text><text x="575" y="106" class="hand">（Istio / Cilium /</text><text x="575" y="124" class="hand">VPC Lattice）</text>
+        </g>
+        <g font-size="10" fill="var(--wrong)"><text x="20" y="180">換掉：出廠全通</text><text x="205" y="130">換掉：線性規則、DNS 爆量</text><text x="390" y="80">換掉：IP 層身分</text></g>
+      </svg>
+    </div>
+    <div class="two">
+      <div class="card"><b>路線 A：Cilium 一套包辦</b><p class="small">kube-proxy replacement、NetworkPolicy（含 L7）、Hubble 可觀測性全用 eBPF。代價：團隊要能讀 eBPF 的排障工具，<code>iptables-save</code> 不再是真相。</p></div>
+      <div class="card"><b>路線 B：AWS 原生</b><p class="small">VPC CNI + ALB/NLB + VPC Lattice，用 SG 和 IAM 管。代價：功能跟著 AWS 節奏走，多雲搬遷成本高。</p></div>
+    </div>
+    <p class="small">注意：<a href="https://kubernetes.io/blog/2025/11/11/ingress-nginx-retirement/">k8s 官方部落格 2025-11</a> 宣布 ingress-nginx 退役（只做 best-effort 維護到 2026-03）。新專案入口直接選 Gateway API 的實作，舊的要排遷移。</p>
+  </section>
+
+  <section id="l6">
+    <h2>Layer 6 · 故障與 on-call<span class="tag">how it breaks</span></h2>
+    <p class="rule">排障先分層：<b>錯誤訊息本身就是證據。</b><code>Resolving timed out</code> 死在 ①；<code>Connection timed out</code> 死在 ③–⑥；<code>Connection refused</code> 是到了但沒人聽（targetPort）。然後用 direct-to-Pod-IP 繞過 ③，同 node vs 跨 node 當對照組。</p>
+    <div class="panels">
+      <div class="panel"><h3>conntrack table full</h3><p>dmesg：<code>nf_conntrack: table full, dropping packet</code>。<b>舊連線照常，新連線失敗。</b>kubectl 看不到，要上 node 比 count / max。</p></div>
+      <div class="panel"><h3>DNS 偶發 5 秒</h3><p>UDP 查詢經 DNAT 時 conntrack 有 race，A 和 AAAA 同時送掉一個要等 5s 重試。<code>ndots:5</code> 把查詢量放大。解法：NodeLocal DNSCache、FQDN 結尾加點。</p></div>
+      <div class="panel"><h3>只有跨 node 不通</h3><p>同 node 通、跨 node timeout = 死在 ⑤⑥。<code>ip route get &lt;podIP&gt;</code>；看路由還在不在、SG 有沒有放 IPIP（protocol 4）、MTU。</p></div>
+      <div class="panel"><h3>上了 default-deny，app 說 DNS 壞</h3><p>CoreDNS 好好的。是 egress 把 53 也鎖了，死在 ①。同事說要重啟 CoreDNS：先別動，先看 policy。</p></div>
+    </div>
+    <p>公開 postmortem：<a href="https://www.reddit.com/r/RedditEng/comments/11xx5o0/you_broke_reddit_the_piday_outage/">Reddit Pi-Day outage（2023-03）</a>。k8s 從 1.23 升 1.24，node label <code>node-role.kubernetes.io/master</code> 被移除；Calico route reflector 的設定靠這個 label 選 node，route reflector 消失 → BGP 路由沒人發 → 跨 node Pod 網路全斷，停機約 314 分鐘。這正是第 ⑤ 站：路由表不是 iptables，路由是某個 daemon 寫的，而那個 daemon 的設定依賴一個你沒注意的 label。</p>
+    <div class="scroll"><table>
+      <tr><th>SLI</th><th>怎麼量</th><th>SLO 例</th></tr>
+      <tr><td>Service 內部呼叫成功率</td><td>client 端 / mesh 的 5xx + connect error</td><td>99.9% / 30 天</td></tr>
+      <tr><td>DNS 解析延遲</td><td><code>coredns_dns_request_duration_seconds</code></td><td>p99 &lt; 50ms</td></tr>
+      <tr><td>conntrack 使用率</td><td>count / max（node exporter）</td><td>告警門檻 80%，不是 SLO，是預警</td></tr>
+    </table></div>
+  </section>
+
+  <section id="l7">
+    <h2>Layer 7 · 面試<span class="tag">interview</span></h2>
+    <blockquote>「Some requests from service A to service B time out, but only when the B pod lands on a different node. Walk me through how you debug it.」</blockquote>
+    <p class="sub">先自己講一遍，再打開。</p>
+    <details><summary>L4 回答</summary><div>
+      <p>「先看 Service 和 Endpoints 對不對，再看 kube-proxy 和 iptables，可能要重啟 kube-proxy。」</p>
+      <p class="small">第一刀砍錯層。題目已經給了對照組：同 node 正常，所以 DNS、Service、DNAT 都是好的。</p>
+    </div></details>
+    <details><summary>L6 回答</summary><div>
+      <p>「題目自帶對照組：同 node 通，代表 DNS、Service 規則、DNAT 都沒問題，因為這些在兩種情況下走的是同一條路。差別只在封包有沒有離開 node，所以範圍縮到路由、底層網路、封裝。」</p>
+      <p>「第一刀在來源 node：<code>ip route get &lt;B 的 Pod IP&gt;</code>，看有沒有路、via 誰、走哪個 dev。路由在的話，下一刀看底層：SG 有沒有放 IPIP（protocol 4）或 VXLAN（UDP 4789），MTU 有沒有因為封裝變小（小封包通、大封包卡就是 MTU）。」</p>
+      <p>「EKS 上用 VPC CNI 沒有 overlay，就看 Pod 的 SG（SG for Pods）、subnet route table、NACL。」</p>
+      <p>「止血：可以先用 node affinity 讓 A、B 同 node，或 cordon 有問題的 node。長期：加跨 node 的 synthetic probe，Reddit 2023 Pi-Day 就是路由 daemon 靜默消失，沒人第一時間發現。」</p>
+      <p class="small">L6 多了：用題目給的對照組排除一半的層、知道「改寫」和「問路」是兩件事、MTU 這個隱藏故障、一個公開事故。</p>
+    </div></details>
+  </section>
+
+  <section id="trail">
+    <h2>我的錯題軌跡<span class="tag">from session logs</span></h2>
+    <p>這章錯最多，幾乎都是同一個家族：<b>層級混淆</b>。把改寫當成問路、把規則當成引擎、把 Service 物件當成封包會去的地方。</p>
+    <div class="trail">
+      <div class="wrong"><b>我錯在這 · 06-27 謎題 B</b>「封包先去 ClusterIP 拿 IP」。</div>
+      <div class="fix">修正：ClusterIP 不是一個地方。改寫在出發地本機 kernel 完成。s10 冷測封印。</div>
+      <div class="wrong"><b>我錯在這 · s9</b>想用 <code>kubectl get conntrack</code> 查 conntrack。</div>
+      <div class="fix">修正：conntrack / iptables 是 node kernel netfilter，不是 k8s 物件，kubectl 永遠看不到。</div>
+      <div class="wrong"><b>我錯在這 · 07-17</b>ALB / NLB 功能對了，L4 / L7 標籤貼反。</div>
+      <div class="fix">修正：<b>A</b>LB = Application = L7；<b>N</b>LB = Network = L4。判準是「要不要拆信」。</div>
+      <div class="wrong"><b>我錯在這 · 07-23 → s22</b>跨 node 第一個指令答 iptables，再答 resolv.conf，再答「查 svc」。</div>
+      <div class="fix">修正：<code>ip route</code>。iptables 管改寫成什麼，路由表管往哪裡送。改寫完之後，封包還是得問路。WR9 五抽首過。</div>
+      <div class="wrong"><b>我錯在這 · 07-28</b>說 veth 是「跨 node 的網卡連線」；把 iptables 當一站。</div>
+      <div class="fix">修正：veth 只管 Pod netns 到 root netns 那段。iptables 是一棟樓：nat 表改寫、filter 表查驗。</div>
+      <div class="wrong"><b>我錯在這 · 07-17 / 07-19</b>預測陌生 Pod 連不到 db（其實出廠全通）；只開 backend ingress 以為 frontend 就通。</div>
+      <div class="fix">修正：沒 policy 選中就全通；選中後該方向翻成 default-deny。A → B 要過兩關：A egress、B ingress。</div>
+      <div class="wrong"><b>我錯在這 · 07-23</b>把 kube-proxy 列為 Pod 啟動三件事之一。</div>
+      <div class="fix">修正：Pod 啟動全程 0 次用到 ClusterIP。kube-proxy 管 Pod 出生之後拿 Service 名字互打那條路。</div>
+    </div>
+  </section>
+
+  <section id="next">
+    <h2>本章 topic 深入筆記<span class="tag">next</span></h2>
+    <div class="scroll"><table>
+      <tr><th>topic</th><th>我的程度</th><th>深入筆記</th></tr>
+      <tr><td>Service / kube-proxy / DNAT / conntrack / CoreDNS 全鏈</td><td><span class="lvl high">high (s10)</span></td><td>已有 <code>p2a-kube-proxy.html</code>；七層版 <span class="lvl todo">待寫</span></td></tr>
+      <tr><td>conntrack 精度（table full 新舊連線）</td><td><span class="lvl med">med (s18)</span></td><td><span class="lvl todo">待寫</span></td></tr>
+      <tr><td>DNS 排障（ndots、FQDN 二分）</td><td><span class="lvl med">med (s13)</span></td><td><span class="lvl todo">待寫</span></td></tr>
+      <tr><td>Ingress（規則 vs controller）→ Gateway API</td><td><span class="lvl med">med (s14)</span></td><td><span class="lvl todo">待寫</span></td></tr>
+      <tr><td>L4 vs L7 判準</td><td><span class="lvl low">low-med (s18)</span></td><td><span class="lvl todo">待寫</span></td></tr>
+      <tr><td>NetworkPolicy（白名單、翻轉、靜默無效）</td><td><span class="lvl low">low-med (s23)</span></td><td><span class="lvl todo">待寫</span></td></tr>
+      <tr><td>CNI 資料面（veth / 路由 / MASQUERADE）</td><td><span class="lvl low">low-med (s23)</span></td><td><span class="lvl todo">待寫</span></td></tr>
+    </table></div>
+  </section>
+</main>
+
+</body></html>

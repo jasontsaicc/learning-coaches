@@ -1,0 +1,333 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"></head><body>
+<title>P4 可觀測性工程</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC:wght@400;700&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: one notebook column on graph paper; figures on taped cards, scenarios as 2x2 comic panels */
+:root {
+  --paper: #F6F8FA;
+  --grid: rgba(90,130,170,.16);
+  --ink: #23313E;
+  --ink-soft: #55677A;
+  --card: #FFFFFF;
+  --tape: rgba(240,214,140,.75);
+  --who: #FFE98A;
+  --see: #BDEEF6;
+  --may: #F9CDE0;
+  --wrong: #D2453A;
+  --ok: #2F8F5B;
+  --line: #9DB0C2;
+  --font-hand: "LXGW WenKai TC", "Noto Sans TC", "PingFang TC", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #1A2320; --grid: rgba(200,230,210,.08); --ink: #E6EDE8; --ink-soft: #A9BAB1;
+    --card: #24302C; --tape: rgba(200,180,110,.45); --who: #8A7A2A; --see: #2B6A74; --may: #7A3F57;
+    --wrong: #FF8A7E; --ok: #7FD3A1; --line: #5E7268; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #1A2320; --grid: rgba(200,230,210,.08); --ink: #E6EDE8; --ink-soft: #A9BAB1;
+  --card: #24302C; --tape: rgba(200,180,110,.45); --who: #8A7A2A; --see: #2B6A74; --may: #7A3F57;
+  --wrong: #FF8A7E; --ok: #7FD3A1; --line: #5E7268; color-scheme: dark;
+}
+body {
+  background-color: var(--paper);
+  background-image: linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 22px 22px;
+  color: var(--ink);
+  font-family: var(--font-hand);
+  font-size: 17px;
+  line-height: 1.75;
+}
+.page { max-width: 760px; margin: 0 auto; padding-inline: 18px; padding-block: 32px 64px; display: grid; gap: 34px; }
+h1, h2 { text-wrap: balance; line-height: 1.3; margin: 0; }
+h1 { font-size: 2.1rem; }
+h2 { font-size: 1.45rem; display: flex; align-items: baseline; gap: 10px; }
+h2 .tag { font-family: var(--font-mono); font-size: .72rem; letter-spacing: .08em; color: var(--ink-soft); text-transform: uppercase; }
+p { margin: 0; }
+section { display: grid; gap: 14px; min-width: 0; }
+.sub { color: var(--ink-soft); font-size: .95rem; }
+mark { background: linear-gradient(transparent 52%, var(--who) 52%); color: inherit; padding: 0 2px; }
+mark.see { background: linear-gradient(transparent 52%, var(--see) 52%); }
+mark.may { background: linear-gradient(transparent 52%, var(--may) 52%); }
+code { font-family: var(--font-mono); font-size: .86em; background: color-mix(in srgb, var(--line) 22%, transparent); padding: 1px 5px; border-radius: 3px; }
+.card { position: relative; background: var(--card); padding: 22px 18px 16px; box-shadow: 0 1px 3px rgba(0,0,0,.12); min-width: 0; }
+.card::before { content: ""; position: absolute; top: -9px; left: 50%; width: 92px; height: 20px; transform: translateX(-50%) rotate(-2deg); background: var(--tape); }
+.scroll { overflow-x: auto; }
+svg text { font-family: var(--font-mono); fill: var(--ink); }
+svg .hand { font-family: var(--font-hand); }
+.rule { border-left: 4px solid var(--ok); padding: 6px 12px; font-size: 1.08rem; }
+.wrong { border-left: 4px solid var(--wrong); padding: 4px 12px; display: grid; gap: 2px; }
+.wrong b { color: var(--wrong); font-size: .85rem; letter-spacing: .05em; }
+.panels { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 14px; }
+.panel { border: 2px solid var(--ink); background: var(--card); padding: 10px; display: grid; gap: 6px; min-width: 0; }
+.panel h3 { margin: 0; font-size: 1rem; font-family: var(--font-mono); }
+.panel p { font-size: .92rem; }
+@media (max-width: 520px) { .panels { grid-template-columns: 1fr; } }
+table { border-collapse: collapse; width: 100%; font-size: .95rem; }
+th, td { border-bottom: 1px dashed var(--line); padding: 8px 6px; text-align: left; vertical-align: top; }
+th { font-family: var(--font-mono); font-size: .78rem; letter-spacing: .05em; color: var(--ink-soft); font-weight: 600; }
+ol { margin: 0; padding-left: 1.3em; display: grid; gap: 6px; }
+blockquote { margin: 0; padding: 12px 16px; background: var(--card); border: 2px dashed var(--line); }
+.en { font-family: var(--font-mono); font-size: .9rem; color: var(--ink-soft); }
+details summary{cursor:pointer}
+</style>
+<style>
+/* chapter-note additions on top of the notebook base */
+svg.fig { display: block; min-width: 640px; width: 100%; height: auto; }
+.lvl { font-family: var(--font-mono); font-size: .74rem; padding: 1px 7px; border: 1.5px solid var(--ink); border-radius: 10px; white-space: nowrap; }
+.lvl.high { background: color-mix(in srgb, var(--ok) 28%, transparent); }
+.lvl.med { background: var(--who); }
+.lvl.low { background: var(--may); }
+.lvl.todo { border-style: dashed; color: var(--ink-soft); }
+.meta { display: flex; flex-wrap: wrap; gap: 8px 16px; font-family: var(--font-mono); font-size: .8rem; color: var(--ink-soft); }
+.toc { display: flex; flex-wrap: wrap; gap: 6px 14px; font-family: var(--font-mono); font-size: .82rem; }
+.toc a { color: var(--ink); }
+.trail { display: grid; gap: 12px; }
+.fix { border-left: 4px solid var(--ok); padding: 4px 12px; }
+.two { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 14px; }
+@media (max-width: 560px) { .two { grid-template-columns: 1fr; } }
+details { background: var(--card); border: 2px dashed var(--line); padding: 10px 14px; }
+details[open] { border-style: solid; }
+details > div { display: grid; gap: 8px; margin-top: 10px; }
+.small { font-size: .9rem; }
+a { color: inherit; text-underline-offset: 3px; }
+pre { margin: 0; font-family: var(--font-mono); font-size: .82rem; line-height: 1.5; background: var(--card); border: 1px solid var(--line); padding: 10px 12px; overflow-x: auto; }
+</style>
+<main class="page">
+  <header style="display:grid;gap:10px">
+    <p class="sub">k8s 課程 · 章節筆記 · Phase 4</p>
+    <h1>P4 可觀測性工程</h1>
+    <p>一個問題貫穿整章：<b>系統出事時，你怎麼在 5 分鐘內知道哪裡壞、多嚴重、影響誰？</b></p>
+    <div class="meta"><span>not started（預習頁）</span><span>前面章節已埋的伏筆：conntrack count/max、OOM 鋸齒曲線、健康檢查三層</span></div>
+    <nav class="toc"><a href="#map">章節地圖</a><a href="#l0">L0 圖</a><a href="#l1">L1 原理</a><a href="#l2">L2 機制</a><a href="#l3">L3 取捨</a><a href="#l4">L4 AWS</a><a href="#l5">L5 規模</a><a href="#l6">L6 on-call</a><a href="#l7">L7 面試</a><a href="#trail">伏筆</a><a href="#next">topic 深入</a></nav>
+  </header>
+
+  <section id="map">
+    <h2>章節地圖<span class="tag">6 units</span></h2>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 720 200" role="img" aria-label="P4 map: three signals, Prometheus, PromQL, SLO and error budget, OpenTelemetry tracing, alerting; mapped to where, how bad, who is affected">
+        <g font-size="11" text-anchor="middle">
+          <rect x="10" y="20" width="110" height="56" fill="var(--see)" stroke="var(--ink)"/><text x="65" y="44">C-1 三種訊號</text><text x="65" y="62" font-size="10" class="hand">成本模型</text>
+          <rect x="130" y="20" width="110" height="56" fill="var(--who)" stroke="var(--ink)" stroke-width="2"/><text x="185" y="44">C-2 Prometheus</text><text x="185" y="62" font-size="10" class="hand">pull + SD</text>
+          <rect x="250" y="20" width="110" height="56" fill="var(--who)" stroke="var(--ink)" stroke-width="2"/><text x="305" y="44">C-3 PromQL</text><text x="305" y="62" font-size="10" class="hand">rate / quantile</text>
+          <rect x="370" y="20" width="110" height="56" fill="var(--may)" stroke="var(--ink)" stroke-width="2.5"/><text x="425" y="44">C-4 SLO</text><text x="425" y="62" font-size="10" class="hand">error budget</text>
+          <rect x="490" y="20" width="110" height="56" fill="var(--see)" stroke="var(--ink)"/><text x="545" y="44">C-5 tracing</text><text x="545" y="62" font-size="10" class="hand">OTel / context</text>
+          <rect x="610" y="20" width="100" height="56" fill="var(--see)" stroke="var(--ink)"/><text x="660" y="44">C-6 告警</text><text x="660" y="62" font-size="10" class="hand">symptom-based</text>
+        </g>
+        <g font-size="12" class="hand">
+          <text x="120" y="130">哪裡壞 → metrics 縮小範圍，trace 定位到 span</text>
+          <text x="120" y="155">多嚴重 → error budget 燒多快</text>
+          <text x="120" y="180">影響誰 → user-facing SLI，不是 CPU 使用率</text>
+        </g>
+      </svg>
+    </div>
+  </section>
+
+  <section id="l0">
+    <h2>Layer 0 · 一張圖<span class="tag">analogy</span></h2>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 720 190" role="img" aria-label="Hospital: vital signs monitor is metrics, the patient chart is logs, the path through departments is a trace; the treatment budget is the error budget">
+        <g font-size="12" text-anchor="middle">
+          <rect x="10" y="20" width="220" height="90" fill="var(--who)" stroke="var(--ink)" stroke-width="2"/><text x="120" y="48" class="hand">生命徵象監視器</text><text x="120" y="70" font-size="10">metrics：便宜、連續、只有數字</text><text x="120" y="90" font-size="10">告訴你「心跳變快了」</text>
+          <rect x="250" y="20" width="220" height="90" fill="var(--see)" stroke="var(--ink)" stroke-width="2"/><text x="360" y="48" class="hand">病歷逐筆紀錄</text><text x="360" y="70" font-size="10">logs：每件事都記，貴</text><text x="360" y="90" font-size="10">告訴你「幾點吃了什麼藥」</text>
+          <rect x="490" y="20" width="220" height="90" fill="var(--may)" stroke="var(--ink)" stroke-width="2"/><text x="600" y="48" class="hand">掛號單上的科別路線</text><text x="600" y="70" font-size="10">traces：一個人走過哪些科</text><text x="600" y="90" font-size="10">告訴你「卡在放射科 40 分鐘」</text>
+        </g>
+        <text x="360" y="150" text-anchor="middle" font-size="13" class="hand">監視器先叫，路線告訴你在哪一科，病歷告訴你為什麼。</text>
+      </svg>
+    </div>
+  </section>
+
+  <section id="l1">
+    <h2>Layer 1 · 第一性原理<span class="tag">why it must exist</span></h2>
+    <p><b>限制一：你看不到 production，只能看到它留下的訊號，而訊號要錢。</b>每多一個 label 值、每多一行 log，就多一份儲存和查詢成本。所以三種訊號的分工由成本決定。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 720 210" role="img" aria-label="Cost per request: metrics aggregate, cost does not grow with traffic, only with label cardinality; logs grow linearly with requests; traces grow with requests unless sampled">
+        <line x1="60" y1="170" x2="680" y2="170" stroke="var(--ink)"/><line x1="60" y1="170" x2="60" y2="20" stroke="var(--ink)"/>
+        <text x="370" y="200" text-anchor="middle" font-size="11">流量（每秒請求數）</text><text x="20" y="95" font-size="11" transform="rotate(-90 20 95)">儲存成本</text>
+        <line x1="60" y1="140" x2="680" y2="138" stroke="var(--ok)" stroke-width="2.5"/><text x="600" y="130" font-size="11" fill="var(--ok)">metrics（看 label 數）</text>
+        <line x1="60" y1="168" x2="640" y2="30" stroke="var(--wrong)" stroke-width="2.5"/><text x="480" y="60" font-size="11" fill="var(--wrong)">logs（每請求一行）</text>
+        <polyline points="60,168 300,110 680,100" fill="none" stroke="var(--ink-soft)" stroke-width="2.5" stroke-dasharray="6 4"/><text x="430" y="95" font-size="11" fill="var(--ink-soft)">traces（取樣後變平）</text>
+      </svg>
+    </div>
+    <p><b>限制二：100% 可靠不存在，而且越接近越貴。</b>使用者的手機網路本身就只有 99% 左右。從 99.9% 到 99.99%，你付出的代價是 10 倍，使用者大多感覺不到。所以要選一個目標，把剩下的失敗額度當成可以花的錢（error budget）。</p>
+    <div class="scroll"><table>
+      <tr><th>SLO（30 天）</th><th>容許停機</th><th>意味著</th></tr>
+      <tr><td>99%</td><td>7.2 小時</td><td>內部工具</td></tr>
+      <tr><td>99.9%</td><td>43.2 分鐘</td><td>一般線上服務；一次沒處理好的事故就花光</td></tr>
+      <tr><td>99.95%</td><td>21.6 分鐘</td><td>付費 API</td></tr>
+      <tr><td>99.99%</td><td>4.32 分鐘</td><td>人來不及反應，只能靠自動化</td></tr>
+    </table></div>
+  </section>
+
+  <section id="l2">
+    <h2>Layer 2 · 機制<span class="tag">pull, query, burn</span></h2>
+    <p>因為 Layer 1 說 metrics 最便宜，第一層偵測用 metrics。Prometheus 用 pull：它自己知道該抓誰，target 掛了就是一個訊號（<code>up == 0</code>）。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 760 290" role="img" aria-label="Prometheus watches the API server for pods and endpoints (service discovery), scrapes /metrics every 30s, stores in TSDB with 2h blocks; Alertmanager routes; Grafana queries with PromQL; exporters translate kernel and app state">
+        <defs><marker id="p4a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="var(--ink)"/></marker></defs>
+        <rect x="10" y="20" width="150" height="60" fill="var(--who)" stroke="var(--ink)" stroke-width="2"/><text x="85" y="45" text-anchor="middle" font-size="11">API Server</text><text x="85" y="64" text-anchor="middle" font-size="10">Pod / Endpoint 清單</text>
+        <rect x="260" y="20" width="200" height="110" fill="var(--may)" stroke="var(--ink)" stroke-width="2.5"/><text x="360" y="45" text-anchor="middle" font-size="12">Prometheus</text><text x="270" y="68" font-size="10">service discovery (watch)</text><text x="270" y="86" font-size="10">scrape 每 30s（常見設定）</text><text x="270" y="104" font-size="10">TSDB：WAL + 2h block</text><text x="270" y="122" font-size="10">rules：record + alert</text>
+        <line x1="160" y1="50" x2="258" y2="50" stroke="var(--ink)" marker-end="url(#p4a)"/><text x="168" y="44" font-size="9">watch（P0 的老朋友）</text>
+        <g font-size="10" text-anchor="middle">
+          <rect x="10" y="170" width="150" height="50" fill="var(--see)" stroke="var(--ink)"/><text x="85" y="190">app /metrics</text><text x="85" y="206">http_requests_total</text>
+          <rect x="180" y="170" width="150" height="50" fill="var(--see)" stroke="var(--ink)"/><text x="255" y="190">node-exporter</text><text x="255" y="206">kernel：conntrack、disk</text>
+          <rect x="350" y="170" width="150" height="50" fill="var(--see)" stroke="var(--ink)"/><text x="425" y="190">kube-state-metrics</text><text x="425" y="206">API 物件狀態</text>
+          <rect x="520" y="170" width="150" height="50" fill="var(--see)" stroke="var(--ink)"/><text x="595" y="190">kubelet / cAdvisor</text><text x="595" y="206">container cgroup</text>
+        </g>
+        <g stroke="var(--ink)" stroke-dasharray="4 3"><line x1="300" y1="130" x2="100" y2="168"/><line x1="320" y1="130" x2="255" y2="168"/><line x1="380" y1="130" x2="425" y2="168"/><line x1="420" y1="130" x2="590" y2="168"/></g>
+        <text x="460" y="155" font-size="9">pull</text>
+        <rect x="520" y="20" width="110" height="44" fill="var(--card)" stroke="var(--ink)"/><text x="575" y="46" text-anchor="middle" font-size="10">Alertmanager</text>
+        <rect x="645" y="20" width="105" height="44" fill="var(--card)" stroke="var(--ink)"/><text x="697" y="46" text-anchor="middle" font-size="10">PagerDuty</text>
+        <rect x="520" y="86" width="110" height="40" fill="var(--card)" stroke="var(--ink)"/><text x="575" y="110" text-anchor="middle" font-size="10">Grafana</text>
+        <line x1="460" y1="42" x2="518" y2="42" stroke="var(--ink)" marker-end="url(#p4a)"/><line x1="630" y1="42" x2="643" y2="42" stroke="var(--ink)" marker-end="url(#p4a)"/><line x1="518" y1="106" x2="462" y2="106" stroke="var(--ink)" marker-end="url(#p4a)"/>
+        <rect x="10" y="240" width="740" height="40" fill="var(--card)" stroke="var(--wrong)" stroke-dasharray="5 4"/>
+        <text x="380" y="265" text-anchor="middle" font-size="11" fill="var(--wrong)">cardinality：series 數 = 每個 label 值數相乘。把 user_id 放進 label = 一個使用者一條 series = TSDB 爆掉</text>
+      </svg>
+    </div>
+
+    <h3 style="margin:0">p99 是怎麼「算」出來的</h3>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 720 190" role="img" aria-label="Histogram buckets are cumulative counters; histogram_quantile finds the bucket containing the 99th percentile and linearly interpolates inside it, so the answer is only as precise as bucket boundaries">
+        <g font-size="10" text-anchor="middle">
+          <rect x="40" y="110" width="100" height="40" fill="var(--see)" stroke="var(--ink)"/><text x="90" y="134">le=0.1 : 9200</text>
+          <rect x="150" y="80" width="100" height="70" fill="var(--see)" stroke="var(--ink)"/><text x="200" y="120">le=0.25 : 9800</text>
+          <rect x="260" y="55" width="100" height="95" fill="var(--who)" stroke="var(--ink)" stroke-width="2"/><text x="310" y="105">le=0.5 : 9950</text>
+          <rect x="370" y="45" width="100" height="105" fill="var(--see)" stroke="var(--ink)"/><text x="420" y="100">le=1 : 9990</text>
+          <rect x="480" y="40" width="100" height="110" fill="var(--see)" stroke="var(--ink)"/><text x="530" y="98">le=+Inf : 10000</text>
+        </g>
+        <text x="40" y="175" font-size="11">第 9900 名落在 0.25–0.5 這格 → 在格子裡線性內插 ≈ 0.42s。bucket 切太粗，p99 就是猜的。</text>
+        <text x="40" y="25" font-size="11"><tspan font-family="var(--font-mono)">histogram_quantile(0.99, sum by (le) (rate(http_request_duration_seconds_bucket[5m])))</tspan></text>
+      </svg>
+    </div>
+    <p class="small"><code>rate()</code> 自動處理 counter 歸零（Pod 重啟），所以 counter 永遠用 <code>rate</code>，不要直接相減。<code>rate</code> 的時間窗至少要 4 倍 scrape interval。</p>
+
+    <h3 style="margin:0">burn rate：告警該多快叫</h3>
+    <div class="scroll"><table>
+      <tr><th>燒的速度</th><th>長窗 / 短窗</th><th>這段時間燒掉的 budget</th><th>動作</th></tr>
+      <tr><td>14.4×</td><td>1h / 5m</td><td>2%</td><td>page</td></tr>
+      <tr><td>6×</td><td>6h / 30m</td><td>5%</td><td>page</td></tr>
+      <tr><td>1×</td><td>3d / 6h</td><td>10%</td><td>開 ticket</td></tr>
+    </table></div>
+    <p class="small">兩個窗口都超標才叫：長窗避免抖一下就叫，短窗讓問題修好後告警很快停。數字出自 Google SRE Workbook 的 Alerting on SLOs 章。</p>
+  </section>
+
+  <section id="l3">
+    <h2>Layer 3 · 取捨<span class="tag">why this design</span></h2>
+    <div class="scroll"><table>
+      <tr><th>決定</th><th>選 A</th><th>選 B</th><th>判準</th></tr>
+      <tr><td>收集方式</td><td>pull（Prometheus）</td><td>push（StatsD、OTLP push）</td><td>pull 能偵測 target 消失；短命 job 抓不到要 Pushgateway 或 push</td></tr>
+      <tr><td>告警依據</td><td>symptom（錯誤率、latency）</td><td>cause（CPU 90%、磁碟 80%）</td><td>cause 告警多半沒人要處理 → alert fatigue。cause 留在 dashboard</td></tr>
+      <tr><td>trace 取樣</td><td>head sampling（入口決定）</td><td>tail sampling（看完整個 trace 再決定）</td><td>tail 才能「只留慢的和錯的」，代價是 collector 要暫存全部</td></tr>
+      <tr><td>log</td><td>全部收</td><td>結構化 + 取樣 + 短保存</td><td>log 成本跟流量線性；能從 metrics 回答的問題不要靠 log</td></tr>
+      <tr><td>SLI 位置</td><td>server 端</td><td>LB 或 client 端</td><td>server 掛了就量不到自己掛了；越靠近使用者越真實</td></tr>
+    </table></div>
+  </section>
+
+  <section id="l4">
+    <h2>Layer 4 · AWS 怎麼做<span class="tag">managed observability</span></h2>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 760 260" role="img" aria-label="EKS cluster with ADOT collector or Prometheus agent remote-writing to Amazon Managed Service for Prometheus; Fluent Bit to CloudWatch Logs; traces to X-Ray; Amazon Managed Grafana reads AMP, CloudWatch, X-Ray">
+        <defs><marker id="p4b" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="var(--ink)"/></marker></defs>
+        <rect x="10" y="20" width="260" height="220" fill="none" stroke="var(--ink)" stroke-width="2"/><text x="20" y="40" font-size="12">EKS 叢集</text>
+        <g font-size="10" text-anchor="middle">
+          <rect x="30" y="55" width="220" height="44" fill="var(--may)" stroke="var(--ink)"/><text x="140" y="73">ADOT collector / Prometheus agent</text><text x="140" y="89">scrape → remote_write</text>
+          <rect x="30" y="115" width="220" height="44" fill="var(--see)" stroke="var(--ink)"/><text x="140" y="141">Fluent Bit DaemonSet</text>
+          <rect x="30" y="175" width="220" height="44" fill="var(--see)" stroke="var(--ink)"/><text x="140" y="193">app OTel SDK</text><text x="140" y="209">traceparent header</text>
+          <rect x="340" y="55" width="200" height="44" fill="var(--who)" stroke="var(--ink)" stroke-width="2"/><text x="440" y="73">Amazon Managed</text><text x="440" y="89">Service for Prometheus</text>
+          <rect x="340" y="115" width="200" height="44" fill="var(--who)" stroke="var(--ink)" stroke-width="2"/><text x="440" y="141">CloudWatch Logs</text>
+          <rect x="340" y="175" width="200" height="44" fill="var(--who)" stroke="var(--ink)" stroke-width="2"/><text x="440" y="201">AWS X-Ray</text>
+          <rect x="600" y="100" width="150" height="70" fill="var(--card)" stroke="var(--ink)" stroke-width="2"/><text x="675" y="128">Amazon Managed</text><text x="675" y="146">Grafana</text>
+        </g>
+        <g stroke="var(--ink)"><line x1="250" y1="77" x2="338" y2="77" marker-end="url(#p4b)"/><line x1="250" y1="137" x2="338" y2="137" marker-end="url(#p4b)"/><line x1="250" y1="197" x2="338" y2="197" marker-end="url(#p4b)"/><line x1="540" y1="77" x2="598" y2="120" marker-end="url(#p4b)"/><line x1="540" y1="137" x2="598" y2="137" marker-end="url(#p4b)"/><line x1="540" y1="197" x2="598" y2="155" marker-end="url(#p4b)"/></g>
+      </svg>
+    </div>
+    <div class="scroll"><table>
+      <tr><th>服務</th><th>做什麼</th><th>常見陷阱</th></tr>
+      <tr><td>Amazon Managed Service for Prometheus</td><td>託管 Prometheus 儲存與查詢</td><td>按寫入 sample 數計費。cardinality 爆炸直接變帳單爆炸；先用 relabel 丟掉不用的 metric</td></tr>
+      <tr><td>CloudWatch Logs</td><td>log 收集與查詢</td><td>log group 預設保存「永不過期」。沒設 retention，一年後 storage 帳單比 ingestion 還大</td></tr>
+      <tr><td>Container Insights</td><td>Pod / node 指標一鍵開</td><td>開了就按 metric / observation 計費；大叢集要先估算</td></tr>
+      <tr><td>X-Ray / ADOT</td><td>分散式追蹤</td><td>預設取樣只留一小部分；你要找的那條慢請求可能根本沒被取樣</td></tr>
+      <tr><td>Amazon Managed Grafana</td><td>dashboard</td><td>按使用者計費；權限走 IAM Identity Center，第一次設定常卡在 SSO</td></tr>
+      <tr><td>監控本身的位置</td><td>放哪個帳號 / Region</td><td>監控跟被監控的系統共用同一條網路路徑，出事時一起看不到（見 L6 Slack 事故）</td></tr>
+    </table></div>
+    <p class="small">職場真實面：每個團隊都想多加 label、多留 log，觀測平台組要付帳單。PR review 會被問：「這個 metric 的 label 有幾種值？會不會隨使用者數長大？」</p>
+  </section>
+
+  <section id="l5">
+    <h2>Layer 5 · 規模化<span class="tag">evolution ladder</span></h2>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 760 240" role="img" aria-label="Ladder: kubectl logs and top; single Prometheus plus Grafana; SLOs with burn-rate alerts and long-term storage; platform with OTel everywhere, tail sampling, cost governance">
+        <g font-size="11">
+          <rect x="10" y="180" width="170" height="50" fill="var(--card)" stroke="var(--ink)" stroke-width="2"/><text x="20" y="200">① kubectl logs / top</text><text x="20" y="218" class="hand">出事才看，看抽樣</text>
+          <rect x="195" y="130" width="170" height="100" fill="var(--see)" stroke="var(--ink)" stroke-width="2"/><text x="205" y="150">② 單一 Prometheus</text><text x="205" y="170" class="hand">+ Grafana、cause 告警</text>
+          <rect x="380" y="80" width="170" height="150" fill="var(--who)" stroke="var(--ink)" stroke-width="2"/><text x="390" y="100">③ SLO 驅動</text><text x="390" y="120" class="hand">burn-rate 告警</text><text x="390" y="138" class="hand">Thanos / Mimir / AMP</text><text x="390" y="156" class="hand">長期儲存、跨叢集查詢</text>
+          <rect x="565" y="30" width="185" height="200" fill="var(--may)" stroke="var(--ink)" stroke-width="2"/><text x="575" y="50">④ 觀測平台</text><text x="575" y="70" class="hand">OTel 統一收集</text><text x="575" y="88" class="hand">tail sampling</text><text x="575" y="106" class="hand">cardinality 配額</text><text x="575" y="124" class="hand">按團隊分帳</text>
+        </g>
+        <g font-size="10" fill="var(--wrong)"><text x="20" y="170">換掉：手動查</text><text x="205" y="120">換掉：單機 TSDB</text><text x="390" y="70">換掉：各自為政</text></g>
+      </svg>
+    </div>
+    <div class="two">
+      <div class="card"><b>路線 A：自建開源（Prometheus + Mimir/Thanos + Loki + Tempo）</b><p class="small">成本可控、不綁廠商。代價：要有人養儲存叢集，它本身也會壞。</p></div>
+      <div class="card"><b>路線 B：SaaS / 託管（Datadog、AMP + CloudWatch）</b><p class="small">上手快、少維運。代價：按量計費在大規模時很貴，cardinality 管不住就是帳單事故。</p></div>
+    </div>
+  </section>
+
+  <section id="l6">
+    <h2>Layer 6 · 故障與 on-call<span class="tag">how it breaks</span></h2>
+    <p class="rule">好的告警三條件：<b>使用者感覺得到、需要人立刻做事、附 runbook。</b>少一條就降級成 ticket 或 dashboard。</p>
+    <div class="panels">
+      <div class="panel"><h3>Prometheus OOM</h3><p>新部署帶了一個高 cardinality label，series 數暴增。看 <code>prometheus_tsdb_head_series</code>。止血：relabel drop 那個 label，或暫停 scrape 那個 target。</p></div>
+      <div class="panel"><h3>告警沒叫，使用者先發現</h3><p>告警掛在 cause（CPU）上，而這次是依賴 timeout。補一條 symptom 告警：錯誤率 burn rate。</p></div>
+      <div class="panel"><h3>告警太多沒人看</h3><p>每週數告警數和「需要動作」的比例。低於一半就是 alert fatigue，真的事故會被淹掉。</p></div>
+      <div class="panel"><h3>dashboard 一片綠，服務卻壞了</h3><p>健康檢查只量「process 活著」。你 s28 的卡：systemd active ≠ socket 在聽 ≠ 真的會回話。SLI 要量真實請求。</p></div>
+    </div>
+    <p>公開 postmortem：<a href="https://slack.engineering/slacks-outage-on-january-4th-2021/">Slack 2021-01-04</a>。年假後第一個上班日流量暴衝，AWS Transit Gateway 擴容跟不上，網路嚴重劣化。工程師開始查的時候，dashboard 和告警服務也掛了：它們跟自己的後端資料庫放在不同 VPC，中間要經過同一組 Transit Gateway。metrics 後端其實還連得到，但沒有預先寫好的查詢，排查慢很多。教訓：監控要能在它監控的東西壞掉時活下來。</p>
+  </section>
+
+  <section id="l7">
+    <h2>Layer 7 · 面試<span class="tag">interview</span></h2>
+    <blockquote>「Your team gets paged 30 times a week and most pages need no action. Meanwhile customers reported the last outage before any alert fired. How do you fix the alerting?」</blockquote>
+    <p class="sub">先自己講一遍，再打開。</p>
+    <details><summary>L4 回答</summary><div>
+      <p>「調高告警門檻，把沒用的告警刪掉，再加一些新的告警。」</p>
+      <p class="small">減少噪音的方向對，但「加什麼」沒有原則，下一個事故還是漏。</p>
+    </div></details>
+    <details><summary>L6 回答</summary><div>
+      <p>「兩個問題同一個根：告警掛在 cause 上，不是掛在使用者體驗上。先跟產品定 SLI：例如 checkout API 的成功率和 p99 latency，SLO 99.9% / 30 天，等於 43 分鐘的 error budget。」</p>
+      <p>「page 只留 multi-window burn rate：1h/5m 燒 14.4 倍、6h/30m 燒 6 倍才叫；慢慢燒的開 ticket。CPU、磁碟這類 cause 告警降級到 dashboard，除非它會在使用者感覺到之前不可逆（例如磁碟 4 小時內會滿）。」</p>
+      <p>「每條 page 必須附 runbook，每週 review 告警：沒有動作的 page 就刪或降級。指標：每週 page 數、需要動作的比例、MTTD。」</p>
+      <p>「error budget 也是決策工具：燒完就凍結功能發布、先做可靠性。這讓 Dev 和 SRE 的爭論變成看數字。」</p>
+      <p class="small">L6 多了：從症狀定 SLI、具體 burn rate 數字、告警治理的指標、error budget 當作組織決策。</p>
+    </div></details>
+  </section>
+
+  <section id="trail">
+    <h2>前面章節埋的伏筆<span class="tag">connections</span></h2>
+    <p>P4 還沒開講，但你已經碰過這一章要解決的問題：</p>
+    <div class="trail">
+      <div class="fix"><b>P1 · OOM 鋸齒</b>leak vs undersized 要看 7 天記憶體曲線。沒有 metrics 系統，這個判斷做不出來。</div>
+      <div class="fix"><b>P2a · conntrack</b>table full 時 kubectl 看不到，要比 count / max。這正是 node-exporter 該收的 kernel 指標。</div>
+      <div class="wrong"><b>我錯在這 · s28 / s30</b>containerd <code>active</code> 首答成「程序正常」。</div>
+      <div class="fix">修正：健康檢查三層：systemd unit active / socket 在聽 / CRI 真的回話。SLI 要量第三層。</div>
+      <div class="wrong"><b>我錯在這 · s34</b>用 <code>kubectl logs deploy/x</code> 查 33% 的錯誤率。</div>
+      <div class="fix">修正：那是隨機挑一顆 Pod 的抽樣。2/3 機率看到健康那顆。比率問題用 metrics 回答。</div>
+    </div>
+  </section>
+
+  <section id="next">
+    <h2>本章 topic 深入筆記<span class="tag">next</span></h2>
+    <div class="scroll"><table>
+      <tr><th>topic</th><th>我的程度</th><th>深入筆記</th></tr>
+      <tr><td>Prometheus pull + service discovery + cardinality</td><td><span class="lvl todo">未開講</span></td><td><span class="lvl todo">待寫</span></td></tr>
+      <tr><td>PromQL：rate、histogram_quantile</td><td><span class="lvl todo">未開講</span></td><td><span class="lvl todo">待寫</span></td></tr>
+      <tr><td>SLI / SLO / error budget / burn rate</td><td><span class="lvl todo">未開講</span></td><td><span class="lvl todo">待寫</span></td></tr>
+      <tr><td>OTel tracing 與取樣</td><td><span class="lvl todo">未開講</span></td><td><span class="lvl todo">待寫</span></td></tr>
+    </table></div>
+  </section>
+</main>
+
+</body></html>
