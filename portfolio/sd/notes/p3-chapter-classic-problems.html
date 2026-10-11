@@ -1,0 +1,453 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"></head><body>
+<title>P3 經典設計題</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Noto+Sans+TC:wght@400;500;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: an engineering drawing set. Navy blueprint ground with a 24px grid, each layer is a framed "sheet"
+   with a title tab; figures are white line-art; dashed = invisible or missing; amber = hot path; red = failure. */
+:root {
+  --bg: #0E2A47; --grid: rgba(140,200,255,.08); --grid-major: rgba(140,200,255,.16);
+  --ink: #E6F0FA; --ink-soft: #9CB5CE; --line: #D4E6F7; --frame: rgba(190,220,250,.55); --frame-soft: rgba(190,220,250,.22);
+  --panel: rgba(255,255,255,.035); --cyan: #6FD3F7; --amber: #FFC66B; --red: #FF7B6B; --green: #7BE0A6;
+  --cyan-fill: rgba(111,211,247,.14); --amber-fill: rgba(255,198,107,.16); --red-fill: rgba(255,123,107,.15); --green-fill: rgba(123,224,166,.14);
+  --f-display: "Barlow Condensed", "Noto Sans TC", "Arial Narrow", sans-serif;
+  --f-body: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
+  --f-mono: "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
+  color-scheme: dark;
+}
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    --bg: #E8F0F8; --grid: rgba(30,90,150,.07); --grid-major: rgba(30,90,150,.15);
+    --ink: #0F2A44; --ink-soft: #4B6784; --line: #17497A; --frame: rgba(23,73,122,.6); --frame-soft: rgba(23,73,122,.22);
+    --panel: rgba(255,255,255,.55); --cyan: #0A6E9C; --amber: #9A5B00; --red: #BF3B2B; --green: #1D7A4C;
+    --cyan-fill: rgba(10,110,156,.10); --amber-fill: rgba(222,150,30,.16); --red-fill: rgba(191,59,43,.10); --green-fill: rgba(29,122,76,.10);
+    color-scheme: light;
+  }
+}
+:root[data-theme="light"] {
+  --bg: #E8F0F8; --grid: rgba(30,90,150,.07); --grid-major: rgba(30,90,150,.15);
+  --ink: #0F2A44; --ink-soft: #4B6784; --line: #17497A; --frame: rgba(23,73,122,.6); --frame-soft: rgba(23,73,122,.22);
+  --panel: rgba(255,255,255,.55); --cyan: #0A6E9C; --amber: #9A5B00; --red: #BF3B2B; --green: #1D7A4C;
+  --cyan-fill: rgba(10,110,156,.10); --amber-fill: rgba(222,150,30,.16); --red-fill: rgba(191,59,43,.10); --green-fill: rgba(29,122,76,.10);
+  color-scheme: light;
+}
+body {
+  background-color: var(--bg); color: var(--ink); font-family: var(--f-body); font-size: 16.5px; line-height: 1.75;
+  background-image:
+    linear-gradient(var(--grid-major) 1px, transparent 1px), linear-gradient(90deg, var(--grid-major) 1px, transparent 1px),
+    linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 120px 120px, 120px 120px, 24px 24px, 24px 24px;
+}
+.page { max-width: 820px; margin: 0 auto; padding-inline: 16px; padding-block: 36px 72px; display: grid; gap: 40px; }
+h1, h2, h3 { margin: 0; text-wrap: balance; line-height: 1.3; }
+h1 { font-size: 2.05rem; font-weight: 700; }
+h2 { font-size: 1.4rem; font-weight: 700; }
+h3 { font-size: 1.05rem; font-weight: 700; color: var(--cyan); }
+p { margin: 0; max-width: 68ch; }
+a { color: var(--cyan); text-underline-offset: 3px; }
+a:focus-visible, summary:focus-visible { outline: 2px solid var(--amber); outline-offset: 3px; }
+code { font-family: var(--f-mono); font-size: .84em; background: var(--cyan-fill); padding: 1px 5px; border-radius: 2px; }
+b { color: var(--ink); }
+mark { background: none; color: var(--amber); font-weight: 600; border-bottom: 1px dashed var(--amber); }
+.sub { color: var(--ink-soft); font-size: .93rem; }
+.small { font-size: .9rem; color: var(--ink-soft); }
+.scroll { overflow-x: auto; min-width: 0; }
+
+/* title block */
+.titleblock { border: 1.5px solid var(--frame); outline: 1px solid var(--frame-soft); outline-offset: 5px; display: grid; grid-template-columns: minmax(0,1fr) 230px; background: var(--panel); }
+.tb-main { padding: 20px 20px 18px; display: grid; gap: 10px; min-width: 0; }
+.eyebrow { font-family: var(--f-display); font-weight: 600; font-size: .86rem; letter-spacing: .2em; text-transform: uppercase; color: var(--cyan); }
+.thesis { font-size: 1.04rem; }
+.tb-grid { margin: 0; border-left: 1.5px solid var(--frame); display: grid; grid-template-rows: repeat(4, auto); }
+.tb-grid div { padding: 8px 12px; border-bottom: 1px solid var(--frame-soft); display: grid; gap: 1px; }
+.tb-grid div:last-child { border-bottom: 0; }
+.tb-grid dt { font-family: var(--f-display); font-size: .72rem; letter-spacing: .18em; color: var(--ink-soft); }
+.tb-grid dd { margin: 0; font-family: var(--f-mono); font-size: .82rem; font-variant-numeric: tabular-nums; }
+@media (max-width: 600px) { .titleblock { grid-template-columns: 1fr; } .tb-grid { border-left: 0; border-top: 1.5px solid var(--frame); grid-template-columns: 1fr 1fr; } .tb-grid div:nth-child(odd) { border-right: 1px solid var(--frame-soft); } }
+.toc { display: flex; flex-wrap: wrap; gap: 6px; }
+.toc a { font-family: var(--f-display); font-weight: 600; font-size: .86rem; letter-spacing: .1em; text-decoration: none; color: var(--ink); border: 1px solid var(--frame-soft); padding: 2px 9px; }
+.toc a:hover { border-color: var(--cyan); color: var(--cyan); }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 18px; font-family: var(--f-mono); font-size: .76rem; color: var(--ink-soft); }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.legend i { display: inline-block; width: 26px; border-top: 2px solid var(--line); }
+.legend i.dash { border-top-style: dashed; border-top-color: var(--ink-soft); }
+.legend i.hot { border-top-color: var(--amber); }
+.legend i.bad { border-top-color: var(--red); }
+
+/* sheet = one layer */
+.sheet { position: relative; border: 1.5px solid var(--frame); background: var(--panel); padding: 30px 18px 20px; display: grid; gap: 14px; min-width: 0; }
+.sheet::before, .sheet::after { content: ""; position: absolute; width: 12px; height: 12px; border-color: var(--cyan); border-style: solid; }
+.sheet::before { top: -1.5px; right: -1.5px; border-width: 3px 3px 0 0; }
+.sheet::after { bottom: -1.5px; left: -1.5px; border-width: 0 0 3px 3px; }
+.tab { position: absolute; top: -12px; left: 14px; background: var(--bg); padding: 0 8px; font-family: var(--f-display); font-weight: 600; font-size: .84rem; letter-spacing: .18em; text-transform: uppercase; color: var(--cyan); white-space: nowrap; }
+.link-back { border-left: 2px solid var(--cyan); padding: 2px 12px; color: var(--ink-soft); font-size: .95rem; }
+.fig { border: 1px dashed var(--frame-soft); padding: 10px; display: grid; gap: 6px; min-width: 0; }
+.fig figcaption { font-family: var(--f-mono); font-size: .74rem; color: var(--ink-soft); letter-spacing: .04em; }
+.fig svg { display: block; width: 100%; min-width: 640px; height: auto; }
+svg text { font-family: var(--f-mono); fill: var(--ink); }
+svg .cjk { font-family: var(--f-body); }
+svg .soft { fill: var(--ink-soft); }
+svg .hot { fill: var(--amber); }
+svg .bad { fill: var(--red); }
+svg .ok { fill: var(--green); }
+svg .acc { fill: var(--cyan); }
+.callout { border: 1.5px solid var(--amber); padding: 10px 14px; background: var(--amber-fill); }
+.two { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 14px; }
+.two > div { border: 1px solid var(--frame-soft); padding: 12px 14px; display: grid; gap: 6px; align-content: start; min-width: 0; }
+@media (max-width: 600px) { .two { grid-template-columns: 1fr; } }
+table { border-collapse: collapse; width: 100%; font-size: .92rem; }
+th, td { border: 1px solid var(--frame-soft); padding: 7px 9px; text-align: left; vertical-align: top; }
+th { font-family: var(--f-display); font-weight: 600; letter-spacing: .12em; text-transform: uppercase; font-size: .8rem; color: var(--cyan); background: var(--cyan-fill); }
+td.num { font-family: var(--f-mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+ol, ul { margin: 0; padding-left: 1.3em; display: grid; gap: 4px; }
+blockquote { margin: 0; border: 1.5px solid var(--frame); padding: 14px 16px; font-size: 1.02rem; }
+blockquote .en { display: block; font-family: var(--f-mono); font-size: .84rem; color: var(--ink-soft); margin-top: 4px; }
+details { border: 1px dashed var(--frame); padding: 10px 14px; }
+details[open] { border-style: solid; }
+summary { cursor: pointer; font-family: var(--f-display); font-weight: 600; letter-spacing: .12em; font-size: .95rem; }
+details > div { display: grid; gap: 8px; margin-top: 10px; }
+pre { margin: 0; font-family: var(--f-mono); font-size: .8rem; line-height: 1.55; border: 1px solid var(--frame-soft); padding: 10px 12px; overflow-x: auto; background: var(--panel); }
+
+/* status stamps */
+.stamp { font-family: var(--f-display); font-weight: 700; font-size: .78rem; letter-spacing: .14em; text-transform: uppercase; padding: 0 7px; border: 2px double currentColor; white-space: nowrap; display: inline-block; }
+.stamp.high { color: var(--green); } .stamp.med { color: var(--amber); } .stamp.todo { color: var(--ink-soft); border-style: dashed; border-width: 1.5px; }
+
+/* redline = my mistakes, rev = the fix */
+.trail { display: grid; gap: 12px; }
+.redline { border: 1.5px dashed var(--red); background: var(--red-fill); padding: 8px 12px; display: grid; gap: 2px; }
+.redline b { font-family: var(--f-display); letter-spacing: .14em; color: var(--red); font-size: .8rem; }
+.rev { border-left: 3px solid var(--green); padding: 2px 12px; margin-top: -6px; }
+.rev b { font-family: var(--f-display); letter-spacing: .14em; color: var(--green); font-size: .8rem; }
+@media (prefers-reduced-motion: no-preference) { .toc a { transition: color .15s, border-color .15s; } }
+</style>
+<main class="page">
+  <header class="titleblock">
+    <div class="tb-main">
+      <p class="eyebrow">System Design · Chapter Drawing · Phase 3</p>
+      <h1>P3 經典設計題</h1>
+      <p class="thesis">一個問題貫穿整章：<b>每一題都有一個讓它變難的限制。找到那個限制，剩下的是 P1、P2 零件的組裝。</b></p>
+      <nav class="toc"><a href="#map">MAP</a><a href="#l0">L0</a><a href="#l1">L1</a><a href="#l2">L2</a><a href="#l3">L3</a><a href="#l4">L4</a><a href="#l5">L5</a><a href="#l6">L6</a><a href="#l7">L7</a><a href="#trail">REDLINE</a><a href="#next">TOPICS</a></nav>
+    </div>
+    <dl class="tb-grid">
+      <div><dt>SHEET</dt><dd>4 / 5 · Day 27–59</dd></div>
+      <div><dt>STATUS</dt><dd>in-progress · Chat Day 35</dd></div>
+      <div><dt>TOPICS</dt><dd>3 high · 1 med · 1 練習中</dd></div>
+      <div><dt>REV</dt><dd>2026-10-11</dd></div>
+    </dl>
+  </header>
+
+  <div class="legend"><span><i></i>資料路徑</span><span><i class="dash"></i>看不見的 / 還沒學的</span><span><i class="hot"></i>本頁重點</span><span><i class="bad"></i>故障</span></div>
+
+  <section id="map" class="sheet">
+    <span class="tab">Map · problems × patterns</span>
+    <h2>章節地圖</h2>
+    <figure class="fig scroll">
+      <svg viewBox="0 0 740 300" role="img" aria-label="Matrix of Tier 1 problems against patterns; filled cells mark which pattern each problem uses; done, in progress and not started rows are distinguished">
+        <g font-size="10" text-anchor="middle" class="acc">
+          <text x="235" y="30">Read-heavy</text><text x="235" y="43">+ cache</text>
+          <text x="315" y="30">Unique</text><text x="315" y="43">ID</text>
+          <text x="395" y="30">Rate</text><text x="395" y="43">limit</text>
+          <text x="475" y="30">Async</text><text x="475" y="43">pipeline</text>
+          <text x="555" y="30">Real-time</text><text x="555" y="43">msg</text>
+          <text x="635" y="30">Fan-out</text><text x="635" y="43">feed</text>
+          <text x="705" y="30">Ledger</text><text x="705" y="43">exactly-1</text>
+        </g>
+        <g font-size="11">
+          <text x="10" y="75">URL Shortener</text><text x="10" y="105">Unique ID</text><text x="10" y="135">Rate Limiter</text><text x="10" y="165">Notification</text>
+          <text x="10" y="195" class="hot">Chat ◀ 現在</text><text x="10" y="225" class="soft">Distributed Cache</text><text x="10" y="255" class="soft">News Feed</text><text x="10" y="285" class="soft">Payment</text>
+        </g>
+        <g font-size="9" text-anchor="end" class="soft"><text x="190" y="75">done</text><text x="190" y="105">done</text><text x="190" y="135">done</text><text x="190" y="165">練習中</text><text x="190" y="195" class="hot">Day 35</text><text x="190" y="225">gate 題</text><text x="190" y="255">待學</text><text x="190" y="285">待學</text></g>
+        <g stroke="var(--line)" stroke-width="1">
+          <rect x="215" y="62" width="40" height="18" fill="var(--green-fill)" stroke="var(--green)"/><rect x="295" y="62" width="40" height="18" fill="var(--green-fill)" stroke="var(--green)"/>
+          <rect x="295" y="92" width="40" height="18" fill="var(--green-fill)" stroke="var(--green)"/>
+          <rect x="375" y="122" width="40" height="18" fill="var(--green-fill)" stroke="var(--green)"/>
+          <rect x="455" y="152" width="40" height="18" fill="var(--cyan-fill)"/><rect x="375" y="152" width="40" height="18" fill="var(--cyan-fill)"/>
+          <rect x="535" y="182" width="40" height="18" fill="var(--amber-fill)" stroke="var(--amber)"/><rect x="615" y="182" width="40" height="18" fill="var(--amber-fill)" stroke="var(--amber)"/><rect x="295" y="182" width="40" height="18" fill="var(--amber-fill)" stroke="var(--amber)"/>
+          <rect x="215" y="212" width="40" height="18" fill="none" stroke-dasharray="3 2"/>
+          <rect x="615" y="242" width="40" height="18" fill="none" stroke-dasharray="3 2"/><rect x="215" y="242" width="40" height="18" fill="none" stroke-dasharray="3 2"/>
+          <rect x="685" y="272" width="40" height="18" fill="none" stroke-dasharray="3 2"/><rect x="455" y="272" width="40" height="18" fill="none" stroke-dasharray="3 2"/>
+        </g>
+      </svg>
+      <figcaption>FIG 0-A · Tier 1 八題 × pattern。綠 = 已過、橘 = 進行中、虛線 = 還沒學。Chat 用到 3 個 pattern（ordering 要 ID、群組要 fan-out），所以是 ★★★★。</figcaption>
+    </figure>
+  </section>
+
+  <section id="l0" class="sheet">
+    <span class="tab">Sheet L0 · analogy</span>
+    <h2>Layer 0 · 一張圖</h2>
+    <figure class="fig scroll">
+      <svg viewBox="0 0 720 190" role="img" aria-label="One box of parts, many models: the same cache, queue, ID generator and partitioner pieces assemble into URL shortener, chat and payment">
+        <rect x="20" y="40" width="200" height="120" fill="var(--cyan-fill)" stroke="var(--line)" stroke-width="1.5"/>
+        <text x="120" y="32" text-anchor="middle" font-size="11" class="cjk">同一盒零件（P1 + P2）</text>
+        <g font-size="10" text-anchor="middle"><text x="70" y="70">cache</text><text x="170" y="70">queue</text><text x="70" y="100">ID gen</text><text x="170" y="100">shard</text><text x="70" y="130">limiter</text><text x="170" y="130">idempotency</text></g>
+        <defs><marker id="d0" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="var(--line)"/></marker></defs>
+        <g stroke="var(--line)" stroke-width="1.5"><line x1="220" y1="70" x2="398" y2="50" marker-end="url(#d0)"/><line x1="220" y1="100" x2="398" y2="100" marker-end="url(#d0)"/><line x1="220" y1="130" x2="398" y2="150" marker-end="url(#d0)"/></g>
+        <g stroke="var(--line)" stroke-width="1.5"><rect x="400" y="30" width="300" height="38" fill="var(--panel)"/><rect x="400" y="81" width="300" height="38" fill="var(--amber-fill)" stroke="var(--amber)"/><rect x="400" y="132" width="300" height="38" fill="var(--panel)"/></g>
+        <g font-size="11" class="cjk"><text x="412" y="54">URL shortener = cache + ID gen</text><text x="412" y="105" class="hot">Chat = 長連線 + ID(順序) + fan-out</text><text x="412" y="156">Payment = idempotency + queue + 對帳</text></g>
+      </svg>
+      <figcaption>FIG 0-B · 經典題是同一盒積木組出來的不同模型。背模型沒用，面試會換一個你沒看過的。</figcaption>
+    </figure>
+  </section>
+
+  <section id="l1" class="sheet">
+    <span class="tab">Sheet L1 · first principles</span>
+    <h2>Layer 1 · 第一性原理</h2>
+    <p>每一題都有一個「主導限制」。開口第一句講它，面試官就知道你抓到了重點。</p>
+    <div class="scroll"><table>
+      <tr><th>題目</th><th>主導限制</th><th>那個關鍵數字</th></tr>
+      <tr><td>URL Shortener</td><td>讀遠多於寫；短碼空間有限</td><td class="num">62⁷ ≈ 3.5 兆個碼</td></tr>
+      <tr><td>Unique ID</td><td>多台各自發號、不協調，還要大致按時間排序</td><td class="num">每台每 ms 4,096 個</td></tr>
+      <tr><td>Rate Limiter</td><td>N 台 API server 共用一個計數器，併發會 race</td><td class="num">check + incr 要 atomic</td></tr>
+      <tr><td>Notification</td><td>第三方通道（APNs、FCM、SMS）有自己的速率，你控制不了</td><td class="num">300 萬則 ÷ 1,000/s = 50 分鐘</td></tr>
+      <tr><td>Chat</td><td>server 撥不到使用者的手機</td><td class="num">每則一個 per-conversation seq</td></tr>
+      <tr><td>News Feed</td><td>發文寫入放大：粉絲多的人一篇文要寫進百萬個 timeline</td><td class="num">1 篇 × 1M 粉絲</td></tr>
+      <tr><td>Payment</td><td>timeout 時你不知道對方有沒有扣款</td><td class="num">結果未知 ≠ 失敗</td></tr>
+    </table></div>
+    <h3>Chat 的主導限制：誰能撥給誰</h3>
+    <figure class="fig scroll">
+      <svg viewBox="0 0 740 250" role="img" aria-label="Server cannot dial the phone: the phone sits behind carrier NAT with no public IP and the OS suspends background connections; only outbound connections from the phone work; when offline only the OS vendor push channel reaches it">
+        <defs><marker id="d1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="var(--line)"/></marker><marker id="d1r" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="var(--red)"/></marker></defs>
+        <rect x="20" y="40" width="130" height="150" fill="var(--cyan-fill)" stroke="var(--line)" stroke-width="1.5"/>
+        <text x="85" y="62" text-anchor="middle" font-size="11" class="cjk">Bob 的手機</text><text x="85" y="82" text-anchor="middle" font-size="10" class="soft">10.x.x.x（私有）</text><text x="85" y="170" text-anchor="middle" font-size="10" class="soft cjk">App 在背景：</text><text x="85" y="184" text-anchor="middle" font-size="10" class="soft cjk">OS 關掉連線</text>
+        <rect x="200" y="40" width="110" height="150" fill="none" stroke="var(--ink-soft)" stroke-dasharray="6 4"/>
+        <text x="255" y="62" text-anchor="middle" font-size="10" class="cjk">電信商 NAT</text><text x="255" y="78" text-anchor="middle" font-size="10" class="soft cjk">只放行「裡面先撥出去」</text>
+        <rect x="560" y="40" width="160" height="70" fill="var(--amber-fill)" stroke="var(--amber)" stroke-width="1.5"/><text x="640" y="70" text-anchor="middle" font-size="11" class="hot">Chat server</text><text x="640" y="88" text-anchor="middle" font-size="10" class="soft cjk">知道 Bob 的帳號，不知道怎麼找到他</text>
+        <rect x="560" y="140" width="160" height="50" fill="var(--cyan-fill)" stroke="var(--line)" stroke-width="1.5"/><text x="640" y="162" text-anchor="middle" font-size="11">APNs / FCM</text><text x="640" y="178" text-anchor="middle" font-size="10" class="soft cjk">OS 自己維持的一條線</text>
+        <path d="M558,75 L312,105" stroke="var(--red)" stroke-width="1.5" marker-end="url(#d1r)" fill="none"/><text x="380" y="80" font-size="10" class="bad cjk">server 主動連 → 被 NAT 擋</text>
+        <path d="M150,120 L558,92" stroke="var(--green)" stroke-width="1.5" marker-end="url(#d1)" fill="none"/><text x="330" y="128" font-size="10" class="ok cjk">App 開著：手機先連出去（WebSocket），之後雙向都走這條</text>
+        <path d="M558,165 L152,165" stroke="var(--line)" stroke-dasharray="5 3" stroke-width="1.5" marker-end="url(#d1)" fill="none"/><text x="330" y="158" font-size="10" class="soft cjk">App 關著：只能請 OS 廠商代送推播</text>
+        <text x="20" y="230" font-size="10" class="soft cjk">限制是「誰能撥給誰」，不是 HTTP 單向。換成 WebSocket，server 一樣不能先撥；能用是因為手機先撥進來了。</text>
+      </svg>
+      <figcaption>FIG 1-A · 在線靠手機先建立的長連線，離線靠 OS 廠商的推播通道。兩條路一起用，是 chat 架構的骨架。</figcaption>
+    </figure>
+  </section>
+
+  <section id="l2" class="sheet">
+    <span class="tab">Sheet L2 · mechanism</span>
+    <h2>Layer 2 · 機制</h2>
+    <p class="link-back">L1 的主導限制決定每一題的核心機制。這裡畫三個：chat 的送達鏈、Snowflake 的位元配置、feed 的 fan-out。</p>
+    <h3>2-1 Chat 1:1：送出 → 儲存 → 投遞 → 補送</h3>
+    <details><summary>先自己畫一次（S52 F 題：行員送出到客戶讀到，在線 / 背景兩種情況），再打開</summary><div>
+    <figure class="fig scroll">
+      <svg viewBox="0 0 740 320" role="img" aria-label="Chat sequence: Alice sends over WebSocket to gateway A; chat service assigns seq 1043 with an atomic increment and stores it; publishes to Bob's gateway via pub/sub; if Bob is online gateway B pushes over his socket; if offline, push notification; on reconnect Bob sends last_msg_id 1042 and the server returns messages with seq greater than 1042">
+        <g font-size="11" text-anchor="middle"><text x="50" y="20">Alice</text><text x="170" y="20">Gateway A</text><text x="320" y="20">Chat svc</text><text x="450" y="20">DB</text><text x="560" y="20">Pub/Sub</text><text x="680" y="20">Gateway B / Bob</text></g>
+        <g stroke="var(--frame-soft)" stroke-dasharray="3 4"><line x1="50" y1="28" x2="50" y2="310"/><line x1="170" y1="28" x2="170" y2="310"/><line x1="320" y1="28" x2="320" y2="310"/><line x1="450" y1="28" x2="450" y2="310"/><line x1="560" y1="28" x2="560" y2="310"/><line x1="680" y1="28" x2="680" y2="310"/></g>
+        <defs><marker id="d2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="var(--line)"/></marker></defs>
+        <g stroke="var(--line)" stroke-width="1.5">
+          <line x1="50" y1="50" x2="168" y2="50" marker-end="url(#d2)"/><line x1="170" y1="70" x2="318" y2="70" marker-end="url(#d2)"/><line x1="320" y1="95" x2="448" y2="95" marker-end="url(#d2)"/><line x1="450" y1="115" x2="322" y2="115" marker-end="url(#d2)"/>
+          <line x1="320" y1="140" x2="168" y2="140" marker-end="url(#d2)"/><line x1="320" y1="160" x2="558" y2="160" marker-end="url(#d2)"/><line x1="560" y1="180" x2="678" y2="180" marker-end="url(#d2)"/>
+        </g>
+        <g font-size="10"><text x="58" y="45">WS send</text><text x="180" y="65">conv_id, client_msg_id</text><text x="330" y="90">seq = incr(conv-A) → 1043</text><text x="350" y="128">committed</text><text x="180" y="135" class="ok">ack: 已送出 ✓</text><text x="330" y="155">PUBLISH user:bob</text><text x="570" y="175">在線：推給 Bob 的 socket</text></g>
+        <rect x="330" y="200" width="400" height="40" fill="var(--red-fill)" stroke="var(--red)" stroke-dasharray="5 3"/>
+        <text x="340" y="217" font-size="10" class="bad cjk">Bob 離線：PUBLISH 回 0，pub/sub 不保存訊息（fire-and-forget）</text>
+        <text x="340" y="232" font-size="10" class="soft cjk">→ 改發 APNs/FCM 推播；真相只在 DB</text>
+        <rect x="330" y="252" width="400" height="56" fill="var(--amber-fill)" stroke="var(--amber)"/>
+        <text x="340" y="270" font-size="10" class="hot cjk">Bob 重連：client 帶 last_msg_id = 1042</text>
+        <text x="340" y="286" font-size="10">SELECT ... WHERE conv_id=? AND seq &gt; 1042</text>
+        <text x="340" y="301" font-size="10" class="soft cjk">補送誰做？client 問、server 查 DB。不是 Redis。</text>
+      </svg>
+      <figcaption>FIG 2-A · 儲存和投遞是兩個軸：DB 負責「有沒有」，pub/sub 只負責「在線的人現在收到」。seq 用 atomic increment 而不是時間，因為各台時鐘不一致。</figcaption>
+    </figure>
+    </div></details>
+    <h3>2-2 Snowflake：64 bit 裡分三段，誰都不用問誰</h3>
+    <figure class="fig scroll">
+      <svg viewBox="0 0 740 170" role="img" aria-label="Snowflake 64-bit layout: 1 sign bit, 41 bits millisecond timestamp, 10 bits machine id, 12 bits sequence">
+        <g stroke="var(--line)" stroke-width="1.5">
+          <rect x="20" y="40" width="12" height="44" fill="var(--panel)"/><rect x="32" y="40" width="451" height="44" fill="var(--cyan-fill)"/><rect x="483" y="40" width="110" height="44" fill="var(--amber-fill)" stroke="var(--amber)"/><rect x="593" y="40" width="132" height="44" fill="var(--cyan-fill)"/>
+        </g>
+        <g font-size="11" text-anchor="middle"><text x="26" y="104" class="soft">1</text><text x="257" y="67">41 bit timestamp (ms)</text><text x="538" y="67" class="hot">10 bit machine</text><text x="659" y="67">12 bit seq</text></g>
+        <g font-size="10" text-anchor="middle" class="soft cjk"><text x="257" y="104">2⁴¹ ms ≈ 69 年</text><text x="538" y="104">1,024 台</text><text x="659" y="104">4,096 / ms / 台</text></g>
+        <text x="20" y="140" font-size="10" class="soft cjk">時間在最高位 → 數字大小 ≈ 時間先後。時鐘往回撥時，同一台可能發出重複的號：要偵測並等待或拒絕。</text>
+        <text x="20" y="158" font-size="10" class="soft cjk">machine ID 要從題目給的台數推（100 台 → 7 bit 就夠），不是背 10。</text>
+      </svg>
+      <figcaption>FIG 2-B · 位元配置是一個容量分配問題：時間要撐幾年、要幾台、每台每毫秒要幾個號，三者共用 63 bit。</figcaption>
+    </figure>
+    <h3>2-3 Feed fan-out（預習，Day 40-42 未學）</h3>
+    <figure class="fig scroll">
+      <svg viewBox="0 0 740 200" role="img" aria-label="Fan-out on write pushes a post into every follower timeline; fan-out on read pulls from followed accounts at read time; hybrid pushes for normal users and pulls for celebrities">
+        <g stroke="var(--line)" stroke-width="1.5">
+          <rect x="20" y="30" width="210" height="140" fill="var(--panel)"/><rect x="265" y="30" width="210" height="140" fill="var(--panel)"/><rect x="510" y="30" width="210" height="140" fill="var(--amber-fill)" stroke="var(--amber)"/>
+        </g>
+        <g font-size="11" text-anchor="middle"><text x="125" y="52">push (on write)</text><text x="370" y="52">pull (on read)</text><text x="615" y="52" class="hot">hybrid</text></g>
+        <g font-size="10" class="cjk"><text x="32" y="80">發文時寫進每個粉絲的 timeline</text><text x="32" y="100" class="ok">讀很快：直接拿</text><text x="32" y="120" class="bad">1M 粉絲 = 1M 次寫入</text><text x="32" y="150" class="soft">適合一般使用者</text>
+          <text x="277" y="80">讀的時候去每個追蹤對象拿</text><text x="277" y="100" class="ok">寫很便宜</text><text x="277" y="120" class="bad">追蹤 500 人 = 讀 500 次</text><text x="277" y="150" class="soft">適合名人</text>
+          <text x="522" y="80">一般人 push、名人 pull</text><text x="522" y="100">讀時把兩邊合併</text><text x="522" y="120" class="soft">門檻例：粉絲 &gt; 10 萬</text><text x="522" y="150" class="soft">代價：兩條路徑都要維護</text></g>
+      </svg>
+      <figcaption>FIG 2-C · 寫入放大和讀取放大的取捨。這張先放著，到 Day 40 再補上 ranking 和 cache warming。</figcaption>
+    </figure>
+  </section>
+
+  <section id="l3" class="sheet">
+    <span class="tab">Sheet L3 · trade-offs</span>
+    <h2>Layer 3 · 取捨</h2>
+    <p class="link-back">L2 的每個機制都有被淘汰的對手。檢查理由的方法：把工具名換掉，理由還成立嗎？成立就不是理由。</p>
+    <div class="scroll"><table>
+      <tr><th>題目 · 決策</th><th>選擇</th><th>對手輸在哪</th><th>代價</th></tr>
+      <tr><td>URL · 短碼怎麼來</td><td>counter / KGS 預先發號 + base62</td><td>hash 截斷會碰撞，每次寫都要查重</td><td>KGS 一次領一批號，crash 會丟掉一批（號碼空間夠大，丟得起）</td></tr>
+      <tr><td>ID · 發號方式</td><td>Snowflake</td><td>UUID 128 bit、無序，B-tree 索引會到處插；DB auto-increment 是單點</td><td>依賴時鐘；machine ID 要分配；遞增 ID 洩漏業務量</td></tr>
+      <tr><td>Rate limiter · 計數放哪</td><td>Redis + Lua（一次原子執行）</td><td>各台本地計數：總量放大 N 倍；GET 再 SET：race</td><td>每個請求多一跳 Redis；Redis 掛了要決定 fail-open 或 fail-close</td></tr>
+      <tr><td>Notification · 優先級</td><td>不同優先級分開的 queue + worker pool（bulkhead）</td><td>單一 queue 加 priority tag：低優先已佔住 worker 時，高優先還是要等</td><td>管理面 ×N（alert、scaling、dashboard 各一套）+ idle 資源</td></tr>
+      <tr><td>Chat · 在線通道</td><td>WebSocket</td><td>short polling：10 萬人每秒一次 = 10 萬 QPS 空打；SSE 只有 server → client</td><td>長連線讓 gateway 有狀態，deploy 要排空連線</td></tr>
+      <tr><td>Chat · 投遞路由</td><td>Redis pub/sub（低延遲，丟了靠 DB 補）</td><td>Kafka：可重放但延遲和維運重；直接 RPC：要自己維護 user → gateway 對照</td><td>pub/sub 不保證送達，一定要有 catch-up 路徑</td></tr>
+      <tr><td>Payment · 跨服務交易</td><td>Saga（每步有補償動作）</td><td>2PC：協調者掛掉全部參與者卡在鎖上</td><td>中間狀態看得到；補償動作也可能失敗，要對帳兜底</td></tr>
+    </table></div>
+  </section>
+
+  <section id="l4" class="sheet">
+    <span class="tab">Sheet L4 · on AWS</span>
+    <h2>Layer 4 · AWS 怎麼做</h2>
+    <p class="link-back">以目前在學的 chat 為例。L3 選了 WebSocket + pub/sub + DB 為真相，在 AWS 上有 managed 和自建兩條路。</p>
+    <figure class="fig scroll">
+      <svg viewBox="0 0 750 300" role="img" aria-label="Chat on AWS: clients connect through NLB or ALB to a WebSocket gateway fleet on EKS; chat service writes messages to DynamoDB keyed by conversation and seq; ElastiCache sharded pub/sub routes to the gateway holding the recipient; offline recipients get push via SNS or End User Messaging to APNs and FCM; managed alternative API Gateway WebSocket shown dashed">
+        <defs><marker id="d4" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="var(--line)"/></marker></defs>
+        <g stroke="var(--line)" stroke-width="1.5">
+          <rect x="10" y="110" width="80" height="44" fill="var(--cyan-fill)"/>
+          <rect x="120" y="110" width="80" height="44" fill="var(--cyan-fill)"/>
+          <rect x="230" y="90" width="130" height="84" fill="var(--amber-fill)" stroke="var(--amber)"/>
+          <rect x="400" y="50" width="130" height="50" fill="var(--cyan-fill)"/>
+          <rect x="400" y="180" width="130" height="50" fill="var(--cyan-fill)"/>
+          <rect x="580" y="50" width="160" height="50" fill="var(--cyan-fill)"/>
+          <rect x="580" y="180" width="160" height="50" fill="var(--cyan-fill)"/>
+          <rect x="120" y="230" width="200" height="44" fill="none" stroke-dasharray="6 4"/>
+          <line x1="90" y1="132" x2="118" y2="132" marker-end="url(#d4)"/><line x1="200" y1="132" x2="228" y2="132" marker-end="url(#d4)"/>
+          <line x1="360" y1="110" x2="398" y2="80" marker-end="url(#d4)"/><line x1="530" y1="75" x2="578" y2="75" marker-end="url(#d4)"/>
+          <line x1="400" y1="200" x2="362" y2="160" marker-end="url(#d4)"/><line x1="360" y1="150" x2="398" y2="195" marker-end="url(#d4)" stroke-dasharray="4 3"/>
+          <line x1="530" y1="205" x2="578" y2="205" marker-end="url(#d4)" stroke-dasharray="5 3"/>
+          <line x1="50" y1="154" x2="118" y2="245" marker-end="url(#d4)" stroke-dasharray="6 4"/>
+        </g>
+        <g font-size="10" text-anchor="middle">
+          <text x="50" y="136">client</text><text x="160" y="128">NLB / ALB</text><text x="160" y="144" class="soft">idle 60 s</text>
+          <text x="295" y="115" class="hot">WS gateway</text><text x="295" y="131" class="soft">EKS · 有狀態</text><text x="295" y="147" class="soft">user → conn 表</text>
+          <text x="465" y="72">chat service</text><text x="465" y="88" class="soft">seq = ADD 1</text>
+          <text x="465" y="202">ElastiCache</text><text x="465" y="218" class="soft">sharded pub/sub</text>
+          <text x="660" y="72">DynamoDB</text><text x="660" y="88" class="soft">PK conv · SK seq</text>
+          <text x="660" y="202">SNS / End User Msg</text><text x="660" y="218" class="soft">→ APNs / FCM</text>
+          <text x="220" y="250" class="soft">API Gateway WebSocket</text><text x="220" y="265" class="soft">managed 替代（2 h / 10 min）</text>
+        </g>
+      </svg>
+      <figcaption>FIG 4-A · Chat 的 AWS 版。gateway 是整個架構唯一有狀態的層，deploy 和擴縮容的痛都在這裡。</figcaption>
+    </figure>
+    <div class="scroll"><table>
+      <tr><th>服務</th><th>用在</th><th>常見陷阱</th></tr>
+      <tr><td>API Gateway WebSocket</td><td>Chat 在線通道（managed）</td><td>連線最長 2 小時、閒置 10 分鐘就斷，都不能調；訊息上限 128 KB、frame 32 KB；新連線 500/s（可提額）。client 要做重連 + heartbeat。</td></tr>
+      <tr><td>ALB / NLB + 自建 gateway</td><td>Chat 在線通道（自建）</td><td>ALB idle timeout 預設 60 s，沒有 ping 的連線會被切。deploy 時 deregistration delay 要長到連線能自然轉移。</td></tr>
+      <tr><td>ElastiCache pub/sub</td><td>Chat 投遞路由</td><td>fire-and-forget：沒人訂閱就丟。cluster mode 下一般 PUBLISH 會廣播到所有 shard，量大要用 sharded pub/sub（<code>SPUBLISH</code>）。</td></tr>
+      <tr><td>DynamoDB</td><td>訊息、URL 對照表</td><td>大群組所有訊息同一個 partition key，熱 partition；atomic counter（<code>UpdateItem ADD</code>）在同一個 item 上也是熱點。</td></tr>
+      <tr><td>Amazon Pinpoint</td><td>推播、通知</td><td>2026-10-30 end of support。推播和 SMS API 改名為 AWS End User Messaging 繼續提供；新設計不要再畫 Pinpoint。</td></tr>
+      <tr><td>SQS</td><td>Notification 分級佇列</td><td>每個優先級一條 queue + 一組 consumer。FIFO 有吞吐上限；通知通常用 Standard + 冪等。</td></tr>
+      <tr><td>Step Functions</td><td>Payment saga</td><td>Standard workflow 可跑到 1 年、適合長流程；Express 最長 5 分鐘，非同步呼叫是 at-least-once，步驟要冪等。</td></tr>
+    </table></div>
+    <p class="small">職場真實面：mobile team 要「訊息一定即時」，SRE 擔心 gateway deploy 時幾十萬條連線一起重連，Finance 看推播和 SMS 的單價。Design review 會被問：「gateway 滾動更新時，連線怎麼搬？重連的流量多大？」</p>
+  </section>
+
+  <section id="l5" class="sheet">
+    <span class="tab">Sheet L5 · scale</span>
+    <h2>Layer 5 · 規模化</h2>
+    <p class="link-back">L4 指出 gateway 是唯一有狀態的層。chat 的 evolution ladder 基本上就是 gateway 和路由怎麼長大。</p>
+    <figure class="fig scroll">
+      <svg viewBox="0 0 740 260" role="img" aria-label="Chat evolution ladder: single server, multiple gateways with pub/sub, durable log with Kafka and sharded gateways, multi-region with home region per conversation">
+        <g stroke="var(--line)" stroke-width="1.5">
+          <rect x="10" y="190" width="160" height="56" fill="var(--cyan-fill)"/><rect x="190" y="140" width="170" height="106" fill="var(--cyan-fill)"/>
+          <rect x="380" y="90" width="170" height="156" fill="var(--amber-fill)" stroke="var(--amber)"/><rect x="570" y="40" width="160" height="206" fill="var(--cyan-fill)"/>
+        </g>
+        <g font-size="10" text-anchor="middle">
+          <text x="90" y="208">1 單台 server</text><text x="90" y="224" class="soft">連線都在同一台</text><text x="90" y="240" class="soft">記憶體裡直接轉</text>
+          <text x="275" y="158">2 多 gateway</text><text x="275" y="174" class="soft">+ Redis pub/sub</text><text x="275" y="190" class="soft">+ connection 表</text>
+          <text x="465" y="108" class="hot">3 durable log</text><text x="465" y="124" class="soft">Kafka / Kinesis 分 partition</text><text x="465" y="140" class="soft">群組 fan-out 非同步</text>
+          <text x="650" y="58">4 multi-region</text><text x="650" y="74" class="soft">每個對話一個 home region</text><text x="650" y="90" class="soft">跨區轉送</text>
+        </g>
+        <g font-size="10" class="cjk soft" text-anchor="middle"><text x="275" y="236">觸發：一台裝不下連線</text><text x="465" y="236">觸發：大群組、要重放</text><text x="650" y="236">觸發：跨國延遲、法規</text></g>
+      </svg>
+      <figcaption>FIG 5-A · Chat evolution ladder。第 3 級把 pub/sub 換成可重放的 log，是因為群組 fan-out 量大到「丟了靠 DB 補」太貴。</figcaption>
+    </figure>
+    <div class="scroll"><table>
+      <tr><th>路線</th><th>代表</th><th>贏在</th><th>輸在</th></tr>
+      <tr><td>Pub/sub + DB 為真相</td><td>Redis pub/sub、catch-up 查 DB</td><td>延遲最低、元件少、好懂</td><td>不能重放；大群組每次都要補，DB 讀壓力大</td></tr>
+      <tr><td>Durable log 為主幹</td><td>Kafka / Kinesis，gateway 當 consumer</td><td>可重放、可多個下游（推播、搜尋索引、稽核）共用同一份</td><td>partition 數決定並行度；維運重；端到端延遲多幾十 ms</td></tr>
+    </table></div>
+  </section>
+
+  <section id="l6" class="sheet">
+    <span class="tab">Sheet L6 · on-call</span>
+    <h2>Layer 6 · 故障與 on-call</h2>
+    <p class="link-back">L4 的有狀態 gateway 帶來 chat 最典型的事故：一次 deploy 讓所有連線同時重連。</p>
+    <figure class="fig scroll">
+      <svg viewBox="0 0 740 230" role="img" aria-label="Reconnect storm: a gateway deploy drops 20000 connections at once; all reconnect within a second and hit auth and DB together; with deregistration delay and jittered backoff the reconnects spread over minutes">
+        <line x1="60" y1="190" x2="720" y2="190" stroke="var(--frame)"/><line x1="60" y1="20" x2="60" y2="190" stroke="var(--frame)"/>
+        <text x="10" y="30" font-size="10" class="soft">reconnect/s</text><text x="680" y="208" font-size="10" class="soft">time</text>
+        <rect x="150" y="30" width="16" height="160" fill="var(--red-fill)" stroke="var(--red)"/>
+        <text x="175" y="45" font-size="10" class="bad cjk">2 萬條 1 秒內一起回來</text><text x="175" y="60" font-size="10" class="bad cjk">auth、DB 先倒（thundering herd）</text>
+        <polyline points="360,190 380,150 420,140 480,145 540,142 600,148 640,190" fill="var(--green-fill)" stroke="var(--green)" stroke-width="1.5"/>
+        <text x="380" y="130" font-size="10" class="ok cjk">同樣 2 萬條，分散在幾分鐘</text>
+        <text x="70" y="212" font-size="10" class="soft cjk">server 側：deregistration delay 分批送人走</text><text x="70" y="226" font-size="10" class="soft cjk">client 側：exponential backoff + jitter 分散回來</text>
+      </svg>
+      <figcaption>FIG 6-A · 曲線下面積一樣，差別在峰值。兩側各有一個工具，兩個名字一起記。</figcaption>
+    </figure>
+    <p>公開案例：Discord 的工程文章 <a href="https://discord.com/blog/how-discord-stores-trillions-of-messages">How Discord Stores Trillions of Messages</a>（2023）。訊息依 channel 分 partition，大伺服器的熱 partition 讓 Cassandra 叢集延遲連鎖上升，on-call 常要手動介入。他們換到 ScyllaDB，並在前面加一層 data service 做 request coalescing。這是工程部落格，不是單一事故的 postmortem。</p>
+    <div class="scroll"><table>
+      <tr><th>SLI</th><th>怎麼量</th><th>陷阱</th></tr>
+      <tr><td>delivery latency p99</td><td>送出時間戳到對方 gateway 寫進 socket 的時間</td><td>只算在線收件人。離線 3 天的人算進來，p99 永遠是 3 天，alert 天天響。</td></tr>
+      <tr><td>送達率</td><td><code>PUBLISH</code> 回傳值 = 0 但收件人標記在線</td><td>connection 表和實際連線不同步，是「在線卻收不到」的頭號原因</td></tr>
+      <tr><td>重連率</td><td>每分鐘新建連線數 ÷ 在線連線數</td><td>deploy 時會跳，要用 deploy 事件做 annotation，不然 on-call 會白跑</td></tr>
+    </table></div>
+  </section>
+
+  <section id="l7" class="sheet">
+    <span class="tab">Sheet L7 · interview</span>
+    <h2>Layer 7 · 面試</h2>
+    <blockquote>「通知系統每天早上 9 點要發 300 萬則行銷推播。同一套系統也送 2FA 驗證碼，要在 10 秒內送達。現在行銷一發，驗證碼就延遲好幾分鐘。怎麼設計？」<span class="en">"Marketing blasts 3M pushes at 9 AM and our 2FA codes get delayed by minutes. Fix the design."</span></blockquote>
+    <p class="sub">先自己講一遍，再打開。</p>
+    <details><summary>L4 ANSWER</summary><div>
+      <p>「用 priority queue，2FA 設高優先，就會先送。」</p>
+      <p class="small">priority tag 管的是排隊順序，管不到 worker 已經被佔住的問題。沒有數字、沒有代價。</p>
+    </div></details>
+    <details><summary>L6 ANSWER</summary><div>
+      <p>「先算為什麼會慢：300 萬 ÷ 下游 1,000/s = 3,000 s，約 50 分鐘。2FA 的 SLO 是 10 s，超標幾百倍。」</p>
+      <p>「priority tag 不夠：2FA 進來時，worker 可能全部正在處理行銷，每則還要等第三方回應。排在第一也要等有 worker 空出來。這是容量問題，不是順序問題。」</p>
+      <p>「所以拆開：2FA 一條 queue 和自己的 worker pool，行銷一條。行銷那池怎麼塞都碰不到 2FA。行銷那邊再加 rate limit，避免把第三方通道的配額吃光。」</p>
+      <p>「代價兩條：一、管理面變兩套，alert、scaling policy、dashboard 都各一份。二、2FA 那池平常大多閒著，是保險費。」</p>
+      <p>「監控：2FA 的 end-to-end latency p99 做 page；行銷看完成時間，開 ticket 就好。」</p>
+      <p class="small">L6 多了：先算出 50 分鐘、分清順序和容量兩個軸、講出 bulkhead 的兩條具體代價、兩種流量用不同的告警等級。</p>
+    </div></details>
+  </section>
+
+  <section id="trail" class="sheet">
+    <span class="tab">Redline · my mistakes</span>
+    <h2>我的錯題軌跡</h2>
+    <div class="trail">
+      <div class="redline"><b>REDLINE · s35</b>KGS crash 丟掉 1 萬個空號，當成 bug 要修。</div>
+      <div class="rev"><b>REV</b> 號碼空間 3.5 兆，丟得起。真正的代價在另一邊：不批次領號，每個短碼都要多一次 round-trip，KGS 變瓶頸。</div>
+      <div class="redline"><b>REDLINE · s36</b>「Snowflake 最適合」一句帶過，沒有論證。</div>
+      <div class="rev"><b>REV</b> 結論 + 理由 + 代價一口氣：免協調、時間有序、64 bit 進 B-tree 友善；代價是依賴時鐘。</div>
+      <div class="redline"><b>REDLINE · s46 → s47</b>一條 queue 塞滿時高優先通知會延遲多久，量化不出來；「排第一還是卡」三輪都往排隊位置找原因。</div>
+      <div class="rev"><b>REV · s48</b> 新場景一次過：「等有櫃員空出來」。順序（priority）和容量（worker 被佔）是兩個軸。</div>
+      <div class="redline"><b>REDLINE · s49</b>separate pools 自己付什麼代價，三輪都是換皮的「維運費用」；idle 成本整條軸沒碰到。</div>
+      <div class="rev"><b>REV</b> 隔離決策的代價固定兩條：管理面 ×N + idle 資源。下次換場景（shard、cell、region）測。</div>
+      <div class="redline"><b>REDLINE · s49</b>「A 用 WebSocket 因為 WebSocket 適合即時傳輸」，結論當理由；SSE 講成推播。</div>
+      <div class="rev"><b>REV</b> 換名測試：理由換成另一個工具還成立，就不是理由。SSE / WebSocket = App 開著的通道；push = App 關著時 OS 廠商代送。</div>
+      <div class="redline"><b>REDLINE · s51</b>以為 pub/sub 會緩衝重送；把 catch-up 交給 Redis。</div>
+      <div class="rev"><b>REV</b> FIG 2-A：pub/sub 是 fire-and-forget。補送是 client 帶 last_msg_id、server 查 DB。同場「儲存 vs 投遞」兩軸表自己填對。</div>
+      <div class="redline"><b>REDLINE · s52</b>server 為什麼不能主動連 Bob 的手機，答「HTTP 是單向的」；push 答對了卻用「是不是離題了？」收回。</div>
+      <div class="rev"><b>REV</b> FIG 1-A：限制是誰能撥給誰（NAT、無公開 IP、OS 關背景連線）。答對就直述，不要用問號收尾。</div>
+      <div class="rev"><b>反向紀錄 · s34 / s36</b> 被質疑「Redis 當 DB」時自己想起重啟掉資料；零提示看出遞增 ID 會洩漏營業額。</div>
+    </div>
+  </section>
+
+  <section id="next" class="sheet">
+    <span class="tab">Topics · deeper notes</span>
+    <h2>本章 topic 筆記</h2>
+    <div class="scroll"><table>
+      <tr><th>topic</th><th>程度</th><th>筆記</th></tr>
+      <tr><td>URL Shortener (Day 27-28)</td><td><span class="stamp high">high · s35</span></td><td><a href="day27-url-shortener.html">HTML 圖解</a> · <a href="../../../../#/read/portfolio%2Fsd%2Fnotes%2Fday27-url-shortener.md">筆記</a> · <a href="../../../../#/read/portfolio%2Fsd%2Fnotes%2Fday28-url-shortener-poc.md">PoC</a></td></tr>
+      <tr><td>Unique ID Generator (Day 29-30)</td><td><span class="stamp high">high · s36</span></td><td><a href="../../../../#/read/portfolio%2Fsd%2Fnotes%2Fday29-unique-id-generator.md">day29 筆記</a></td></tr>
+      <tr><td>Distributed Rate Limiter (Day 31-32)</td><td><span class="stamp high">high · s40</span></td><td><a href="../../../../#/read/portfolio%2Fsd%2Fnotes%2Fday31-distributed-rate-limiter.md">day31 筆記</a> · <a href="../../../../#/read/portfolio%2Fsd%2Fnotes%2Fday40-gauntlet-rate-limiter.md">gauntlet</a></td></tr>
+      <tr><td>Notification System (Day 33-34)</td><td><span class="stamp todo">練習中 · 未評級</span></td><td><a href="../../../../#/read/portfolio%2Fsd%2Fnotes%2Fday33-notification-system.md">day33 筆記</a></td></tr>
+      <tr><td>Chat System (Day 35-37)</td><td><span class="stamp med">med · s52</span></td><td><a href="day35-chat-system-layers.html">七層 HTML</a> · <a href="day35-chat-offline-push-slo.html">離線與 SLO</a> · <a href="../../../../#/read/portfolio%2Fsd%2Fnotes%2Fday35-chat-system.md">筆記</a></td></tr>
+      <tr><td>Distributed Cache (Day 38-39)</td><td><span class="stamp high">P1 gate 題 · s24</span></td><td><span class="small">設計已在 P1 gate 做過；PoC 待做</span></td></tr>
+      <tr><td>News Feed (Day 40-42)</td><td><span class="stamp todo">待學</span></td><td><span class="small">FIG 2-C 是預習</span></td></tr>
+      <tr><td>Payment System (Day 43-45)</td><td><span class="stamp todo">待學</span></td><td><span class="small">L3 saga 一列是預習</span></td></tr>
+    </table></div>
+    <p class="small">Chat 的 F（教 Yuki）和 G（收尾 drill）還沒跑，所以是 med。Tier 2 依 2026-08-11 的 re-plan 不逐題教。</p>
+  </section>
+</main>

@@ -1,0 +1,475 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"></head><body>
+<title>P0 思考框架</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Noto+Sans+TC:wght@400;500;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: an engineering drawing set. Navy blueprint ground with a 24px grid, each layer is a framed "sheet"
+   with a title tab; figures are white line-art; dashed = invisible or missing; amber = hot path; red = failure. */
+:root {
+  --bg: #0E2A47; --grid: rgba(140,200,255,.08); --grid-major: rgba(140,200,255,.16);
+  --ink: #E6F0FA; --ink-soft: #9CB5CE; --line: #D4E6F7; --frame: rgba(190,220,250,.55); --frame-soft: rgba(190,220,250,.22);
+  --panel: rgba(255,255,255,.035); --cyan: #6FD3F7; --amber: #FFC66B; --red: #FF7B6B; --green: #7BE0A6;
+  --cyan-fill: rgba(111,211,247,.14); --amber-fill: rgba(255,198,107,.16); --red-fill: rgba(255,123,107,.15); --green-fill: rgba(123,224,166,.14);
+  --f-display: "Barlow Condensed", "Noto Sans TC", "Arial Narrow", sans-serif;
+  --f-body: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
+  --f-mono: "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
+  color-scheme: dark;
+}
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    --bg: #E8F0F8; --grid: rgba(30,90,150,.07); --grid-major: rgba(30,90,150,.15);
+    --ink: #0F2A44; --ink-soft: #4B6784; --line: #17497A; --frame: rgba(23,73,122,.6); --frame-soft: rgba(23,73,122,.22);
+    --panel: rgba(255,255,255,.55); --cyan: #0A6E9C; --amber: #9A5B00; --red: #BF3B2B; --green: #1D7A4C;
+    --cyan-fill: rgba(10,110,156,.10); --amber-fill: rgba(222,150,30,.16); --red-fill: rgba(191,59,43,.10); --green-fill: rgba(29,122,76,.10);
+    color-scheme: light;
+  }
+}
+:root[data-theme="light"] {
+  --bg: #E8F0F8; --grid: rgba(30,90,150,.07); --grid-major: rgba(30,90,150,.15);
+  --ink: #0F2A44; --ink-soft: #4B6784; --line: #17497A; --frame: rgba(23,73,122,.6); --frame-soft: rgba(23,73,122,.22);
+  --panel: rgba(255,255,255,.55); --cyan: #0A6E9C; --amber: #9A5B00; --red: #BF3B2B; --green: #1D7A4C;
+  --cyan-fill: rgba(10,110,156,.10); --amber-fill: rgba(222,150,30,.16); --red-fill: rgba(191,59,43,.10); --green-fill: rgba(29,122,76,.10);
+  color-scheme: light;
+}
+body {
+  background-color: var(--bg); color: var(--ink); font-family: var(--f-body); font-size: 16.5px; line-height: 1.75;
+  background-image:
+    linear-gradient(var(--grid-major) 1px, transparent 1px), linear-gradient(90deg, var(--grid-major) 1px, transparent 1px),
+    linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 120px 120px, 120px 120px, 24px 24px, 24px 24px;
+}
+.page { max-width: 820px; margin: 0 auto; padding-inline: 16px; padding-block: 36px 72px; display: grid; gap: 40px; }
+h1, h2, h3 { margin: 0; text-wrap: balance; line-height: 1.3; }
+h1 { font-size: 2.05rem; font-weight: 700; }
+h2 { font-size: 1.4rem; font-weight: 700; }
+h3 { font-size: 1.05rem; font-weight: 700; color: var(--cyan); }
+p { margin: 0; max-width: 68ch; }
+a { color: var(--cyan); text-underline-offset: 3px; }
+a:focus-visible, summary:focus-visible { outline: 2px solid var(--amber); outline-offset: 3px; }
+code { font-family: var(--f-mono); font-size: .84em; background: var(--cyan-fill); padding: 1px 5px; border-radius: 2px; }
+b { color: var(--ink); }
+mark { background: none; color: var(--amber); font-weight: 600; border-bottom: 1px dashed var(--amber); }
+.sub { color: var(--ink-soft); font-size: .93rem; }
+.small { font-size: .9rem; color: var(--ink-soft); }
+.scroll { overflow-x: auto; min-width: 0; }
+
+/* title block */
+.titleblock { border: 1.5px solid var(--frame); outline: 1px solid var(--frame-soft); outline-offset: 5px; display: grid; grid-template-columns: minmax(0,1fr) 230px; background: var(--panel); }
+.tb-main { padding: 20px 20px 18px; display: grid; gap: 10px; min-width: 0; }
+.eyebrow { font-family: var(--f-display); font-weight: 600; font-size: .86rem; letter-spacing: .2em; text-transform: uppercase; color: var(--cyan); }
+.thesis { font-size: 1.04rem; }
+.tb-grid { margin: 0; border-left: 1.5px solid var(--frame); display: grid; grid-template-rows: repeat(4, auto); }
+.tb-grid div { padding: 8px 12px; border-bottom: 1px solid var(--frame-soft); display: grid; gap: 1px; }
+.tb-grid div:last-child { border-bottom: 0; }
+.tb-grid dt { font-family: var(--f-display); font-size: .72rem; letter-spacing: .18em; color: var(--ink-soft); }
+.tb-grid dd { margin: 0; font-family: var(--f-mono); font-size: .82rem; font-variant-numeric: tabular-nums; }
+@media (max-width: 600px) { .titleblock { grid-template-columns: 1fr; } .tb-grid { border-left: 0; border-top: 1.5px solid var(--frame); grid-template-columns: 1fr 1fr; } .tb-grid div:nth-child(odd) { border-right: 1px solid var(--frame-soft); } }
+.toc { display: flex; flex-wrap: wrap; gap: 6px; }
+.toc a { font-family: var(--f-display); font-weight: 600; font-size: .86rem; letter-spacing: .1em; text-decoration: none; color: var(--ink); border: 1px solid var(--frame-soft); padding: 2px 9px; }
+.toc a:hover { border-color: var(--cyan); color: var(--cyan); }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 18px; font-family: var(--f-mono); font-size: .76rem; color: var(--ink-soft); }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.legend i { display: inline-block; width: 26px; border-top: 2px solid var(--line); }
+.legend i.dash { border-top-style: dashed; border-top-color: var(--ink-soft); }
+.legend i.hot { border-top-color: var(--amber); }
+.legend i.bad { border-top-color: var(--red); }
+
+/* sheet = one layer */
+.sheet { position: relative; border: 1.5px solid var(--frame); background: var(--panel); padding: 30px 18px 20px; display: grid; gap: 14px; min-width: 0; }
+.sheet::before, .sheet::after { content: ""; position: absolute; width: 12px; height: 12px; border-color: var(--cyan); border-style: solid; }
+.sheet::before { top: -1.5px; right: -1.5px; border-width: 3px 3px 0 0; }
+.sheet::after { bottom: -1.5px; left: -1.5px; border-width: 0 0 3px 3px; }
+.tab { position: absolute; top: -12px; left: 14px; background: var(--bg); padding: 0 8px; font-family: var(--f-display); font-weight: 600; font-size: .84rem; letter-spacing: .18em; text-transform: uppercase; color: var(--cyan); white-space: nowrap; }
+.link-back { border-left: 2px solid var(--cyan); padding: 2px 12px; color: var(--ink-soft); font-size: .95rem; }
+.fig { border: 1px dashed var(--frame-soft); padding: 10px; display: grid; gap: 6px; min-width: 0; }
+.fig figcaption { font-family: var(--f-mono); font-size: .74rem; color: var(--ink-soft); letter-spacing: .04em; }
+.fig svg { display: block; width: 100%; min-width: 640px; height: auto; }
+svg text { font-family: var(--f-mono); fill: var(--ink); }
+svg .cjk { font-family: var(--f-body); }
+svg .soft { fill: var(--ink-soft); }
+svg .hot { fill: var(--amber); }
+svg .bad { fill: var(--red); }
+svg .ok { fill: var(--green); }
+svg .acc { fill: var(--cyan); }
+.callout { border: 1.5px solid var(--amber); padding: 10px 14px; background: var(--amber-fill); }
+.two { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 14px; }
+.two > div { border: 1px solid var(--frame-soft); padding: 12px 14px; display: grid; gap: 6px; align-content: start; min-width: 0; }
+@media (max-width: 600px) { .two { grid-template-columns: 1fr; } }
+table { border-collapse: collapse; width: 100%; font-size: .92rem; }
+th, td { border: 1px solid var(--frame-soft); padding: 7px 9px; text-align: left; vertical-align: top; }
+th { font-family: var(--f-display); font-weight: 600; letter-spacing: .12em; text-transform: uppercase; font-size: .8rem; color: var(--cyan); background: var(--cyan-fill); }
+td.num { font-family: var(--f-mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+ol, ul { margin: 0; padding-left: 1.3em; display: grid; gap: 4px; }
+blockquote { margin: 0; border: 1.5px solid var(--frame); padding: 14px 16px; font-size: 1.02rem; }
+blockquote .en { display: block; font-family: var(--f-mono); font-size: .84rem; color: var(--ink-soft); margin-top: 4px; }
+details { border: 1px dashed var(--frame); padding: 10px 14px; }
+details[open] { border-style: solid; }
+summary { cursor: pointer; font-family: var(--f-display); font-weight: 600; letter-spacing: .12em; font-size: .95rem; }
+details > div { display: grid; gap: 8px; margin-top: 10px; }
+pre { margin: 0; font-family: var(--f-mono); font-size: .8rem; line-height: 1.55; border: 1px solid var(--frame-soft); padding: 10px 12px; overflow-x: auto; background: var(--panel); }
+
+/* status stamps */
+.stamp { font-family: var(--f-display); font-weight: 700; font-size: .78rem; letter-spacing: .14em; text-transform: uppercase; padding: 0 7px; border: 2px double currentColor; white-space: nowrap; display: inline-block; }
+.stamp.high { color: var(--green); } .stamp.med { color: var(--amber); } .stamp.todo { color: var(--ink-soft); border-style: dashed; border-width: 1.5px; }
+
+/* redline = my mistakes, rev = the fix */
+.trail { display: grid; gap: 12px; }
+.redline { border: 1.5px dashed var(--red); background: var(--red-fill); padding: 8px 12px; display: grid; gap: 2px; }
+.redline b { font-family: var(--f-display); letter-spacing: .14em; color: var(--red); font-size: .8rem; }
+.rev { border-left: 3px solid var(--green); padding: 2px 12px; margin-top: -6px; }
+.rev b { font-family: var(--f-display); letter-spacing: .14em; color: var(--green); font-size: .8rem; }
+@media (prefers-reduced-motion: no-preference) { .toc a { transition: color .15s, border-color .15s; } }
+</style>
+<main class="page">
+  <header class="titleblock">
+    <div class="tb-main">
+      <p class="eyebrow">System Design · Chapter Drawing · Phase 0</p>
+      <h1>P0 思考框架</h1>
+      <p class="thesis">一個問題貫穿整章：<b>題目只給一句話，45 分鐘內你怎麼把它收斂成數字，再用數字選架構？</b></p>
+      <nav class="toc"><a href="#map">MAP</a><a href="#l0">L0</a><a href="#l1">L1</a><a href="#l2">L2</a><a href="#l3">L3</a><a href="#l4">L4</a><a href="#l5">L5</a><a href="#l6">L6</a><a href="#l7">L7</a><a href="#trail">REDLINE</a><a href="#next">TOPICS</a></nav>
+    </div>
+    <dl class="tb-grid">
+      <div><dt>SHEET</dt><dd>1 / 5 · Day 1–3</dd></div>
+      <div><dt>STATUS</dt><dd>gate-passed (legacy)</dd></div>
+      <div><dt>TOPICS</dt><dd>3 × high (s1–s3)</dd></div>
+      <div><dt>REV</dt><dd>2026-10-11</dd></div>
+    </dl>
+  </header>
+
+  <div class="legend"><span><i></i>資料路徑</span><span><i class="dash"></i>看不見的 / 缺的</span><span><i class="hot"></i>本頁重點</span><span><i class="bad"></i>故障</span></div>
+
+  <section id="map" class="sheet">
+    <span class="tab">Map · 3 chunks</span>
+    <h2>章節地圖</h2>
+    <figure class="fig scroll">
+      <svg viewBox="0 0 720 210" role="img" aria-label="P0 chunk map: rubric four dimensions, estimation, four-step framework with the 8-block skeleton, all feeding every later phase">
+        <defs><marker id="a0" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="var(--line)"/></marker></defs>
+        <g stroke="var(--line)" stroke-width="1.5">
+          <rect x="10" y="20" width="200" height="80" fill="var(--cyan-fill)"/>
+          <rect x="260" y="20" width="200" height="80" fill="var(--amber-fill)" stroke="var(--amber)"/>
+          <rect x="510" y="20" width="200" height="80" fill="var(--cyan-fill)"/>
+          <line x1="210" y1="60" x2="258" y2="60" marker-end="url(#a0)"/>
+          <line x1="460" y1="60" x2="508" y2="60" marker-end="url(#a0)"/>
+        </g>
+        <g font-size="12" text-anchor="middle">
+          <text x="110" y="45">[1] Day 1 rubric</text><text x="110" y="70" class="cjk soft" font-size="11">面試官手上的 4 格評分表</text>
+          <text x="360" y="45" class="hot">[2] Day 2 estimation</text><text x="360" y="70" class="cjk soft" font-size="11">一句話 → QPS / storage / 台數</text>
+          <text x="610" y="45">[3] Day 3 4-step</text><text x="610" y="70" class="cjk soft" font-size="11">時間預算 + 8-block 骨架</text>
+        </g>
+        <rect x="10" y="150" width="700" height="44" fill="none" stroke="var(--frame)" stroke-dasharray="6 4"/>
+        <text x="360" y="177" text-anchor="middle" font-size="12" class="cjk">P1 元件 · P2 分散式 · P3 經典題 · P4 mock：每一題都從這條管線進</text>
+        <g stroke="var(--ink-soft)" stroke-dasharray="3 3"><line x1="110" y1="100" x2="110" y2="148"/><line x1="360" y1="100" x2="360" y2="148"/><line x1="610" y1="100" x2="610" y2="148"/></g>
+      </svg>
+      <figcaption>FIG 0-A · 中間那格是本章的重心：沒有數字，後面每個「要不要 cache / shard / queue」都只是口號</figcaption>
+    </figure>
+  </section>
+
+  <section id="l0" class="sheet">
+    <span class="tab">Sheet L0 · analogy</span>
+    <h2>Layer 0 · 一張圖</h2>
+    <figure class="fig scroll">
+      <svg viewBox="0 0 720 200" role="img" aria-label="An architect taking a job: ask who lives there, compute loads, draw floor plan, detail one beam, plan the extension">
+        <defs><marker id="a1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="var(--line)"/></marker></defs>
+        <g stroke="var(--line)" stroke-width="1.5" fill="none">
+          <rect x="10" y="40" width="120" height="100"/><rect x="155" y="40" width="120" height="100"/><rect x="300" y="40" width="120" height="100"/><rect x="445" y="40" width="120" height="100" stroke="var(--amber)"/><rect x="590" y="40" width="120" height="100"/>
+          <line x1="130" y1="90" x2="153" y2="90" marker-end="url(#a1)"/><line x1="275" y1="90" x2="298" y2="90" marker-end="url(#a1)"/><line x1="420" y1="90" x2="443" y2="90" marker-end="url(#a1)"/><line x1="565" y1="90" x2="588" y2="90" marker-end="url(#a1)"/>
+        </g>
+        <g font-size="11" text-anchor="middle" class="cjk">
+          <text x="70" y="30" class="soft">業主：「蓋一棟房子」</text>
+          <text x="70" y="75">住幾個人？</text><text x="70" y="95">要停車嗎？</text><text x="70" y="125" class="acc">Clarify</text>
+          <text x="215" y="75">樓板承重</text><text x="215" y="95">用水用電量</text><text x="215" y="125" class="acc">Estimate</text>
+          <text x="360" y="75">平面圖</text><text x="360" y="95">房間怎麼連</text><text x="360" y="125" class="acc">Design</text>
+          <text x="505" y="75">挑一根樑</text><text x="505" y="95">畫到螺絲</text><text x="505" y="125" class="hot">Deep dive</text>
+          <text x="650" y="75">以後加蓋</text><text x="650" y="95">哪面牆要留</text><text x="650" y="125" class="acc">Scale</text>
+        </g>
+        <text x="360" y="180" text-anchor="middle" font-size="11" class="cjk soft">跳過前兩格直接畫平面圖 = 幫三口之家蓋了一棟 40 層大樓</text>
+      </svg>
+      <figcaption>FIG 0-B · SD 面試 = 建築師接案。面試官看的是你怎麼把一句話變成圖，而不是圖有多華麗。</figcaption>
+    </figure>
+  </section>
+
+  <section id="l1" class="sheet">
+    <span class="tab">Sheet L1 · first principles</span>
+    <h2>Layer 1 · 第一性原理</h2>
+    <p><b>限制一：時間只有 45 分鐘，面試官只能「取樣」。</b>他無法看完你會的全部，所以只看 4 個維度：Problem Navigation、Design、Technical Depth、Trade-offs。你每一分鐘說的話，都要能落到其中一格。</p>
+    <p><b>限制二：需求模糊是故意的。</b>「Design a chat app」在 1 萬 DAU 和 1 億 DAU 是兩個不同的系統。拿掉 clarify，你就是在解一道自己編的題。</p>
+    <p><b>限制三：物理數字決定架構的分界線。</b>記憶體和跨洲網路差了 6 個數量級。要不要加 cache、要不要拆 region，答案都藏在這張階梯裡。</p>
+    <figure class="fig scroll">
+      <svg viewBox="0 0 720 300" role="img" aria-label="Latency ladder on a log scale from L1 cache 0.5 ns to cross-continent round trip 150 ms">
+        <line x1="150" y1="20" x2="150" y2="270" stroke="var(--frame)" stroke-width="1"/>
+        <g font-size="10" class="soft" text-anchor="middle">
+          <text x="150" y="288">1 ns</text><text x="270" y="288">1 µs</text><text x="390" y="288">1 ms</text><text x="510" y="288">1 s</text>
+        </g>
+        <g stroke="var(--frame-soft)" stroke-dasharray="2 4"><line x1="270" y1="20" x2="270" y2="275"/><line x1="390" y1="20" x2="390" y2="275"/><line x1="510" y1="20" x2="510" y2="275"/></g>
+        <!-- x = 150 + 40*log10(ns) -->
+        <g stroke="var(--line)" stroke-width="1.5">
+          <rect x="150" y="30" width="1" height="16" fill="var(--line)"/>
+          <rect x="150" y="58" width="80" height="16" fill="var(--cyan-fill)"/>
+          <rect x="150" y="86" width="207" height="16" fill="var(--cyan-fill)"/>
+          <rect x="150" y="114" width="228" height="16" fill="var(--cyan-fill)"/>
+          <rect x="150" y="142" width="240" height="16" fill="var(--cyan-fill)"/>
+          <rect x="150" y="170" width="280" height="16" fill="var(--amber-fill)" stroke="var(--amber)"/>
+          <rect x="150" y="198" width="327" height="16" fill="var(--red-fill)" stroke="var(--red)"/>
+        </g>
+        <g font-size="11">
+          <text x="10" y="43">L1 cache</text><text x="160" y="43" class="soft">0.5 ns</text>
+          <text x="10" y="71">main memory</text><text x="238" y="71" class="soft">100 ns</text>
+          <text x="10" y="99">SSD random read</text><text x="365" y="99" class="soft">150 µs</text>
+          <text x="10" y="127">same-DC RTT</text><text x="386" y="127" class="soft">500 µs</text>
+          <text x="10" y="155">1 MB from SSD</text><text x="398" y="155" class="soft">1 ms</text>
+          <text x="10" y="183">disk seek</text><text x="438" y="183" class="hot">10 ms</text>
+          <text x="10" y="211">CA→NL→CA</text><text x="485" y="211" class="bad">150 ms</text>
+        </g>
+        <text x="160" y="248" font-size="11" class="cjk soft">記憶體 100 ns 對跨洲 150 ms：差 150 萬倍。光速決定，換再貴的硬體也一樣。</text>
+      </svg>
+      <figcaption>FIG 1-A · 對數刻度，每格 ×1000。數字取自 Jeff Dean 2012 版，硬體進步後絕對值會變小，數量級的排序不會變。</figcaption>
+    </figure>
+    <div class="callout">拿掉估算會怎樣：你無法判斷 10 QPS 和 10 萬 QPS 的差別，於是要嘛幫小系統上 Kafka（過度設計），要嘛用單台 DB 去接 10 萬 QPS（當場被戳破）。</div>
+  </section>
+
+  <section id="l2" class="sheet">
+    <span class="tab">Sheet L2 · mechanism</span>
+    <h2>Layer 2 · 機制</h2>
+    <p class="link-back">因為 L1 的限制三，估算要先於設計；因為限制一，時間要切成固定預算。</p>
+    <h3>2-1 估算管線：先寫單位式，再代數字</h3>
+    <figure class="fig scroll">
+      <svg viewBox="0 0 720 250" role="img" aria-label="Estimation pipeline: DAU times requests per user divided by 86400 gives average QPS, times peak factor gives peak QPS, Little's law gives concurrency and server count">
+        <defs><marker id="a2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="var(--line)"/></marker></defs>
+        <g stroke="var(--line)" stroke-width="1.5">
+          <rect x="10" y="20" width="150" height="70" fill="var(--cyan-fill)"/>
+          <rect x="195" y="20" width="150" height="70" fill="var(--cyan-fill)"/>
+          <rect x="380" y="20" width="150" height="70" fill="var(--amber-fill)" stroke="var(--amber)"/>
+          <rect x="565" y="20" width="145" height="70" fill="var(--cyan-fill)"/>
+          <line x1="160" y1="55" x2="193" y2="55" marker-end="url(#a2)"/><line x1="345" y1="55" x2="378" y2="55" marker-end="url(#a2)"/><line x1="530" y1="55" x2="563" y2="55" marker-end="url(#a2)"/>
+        </g>
+        <g font-size="11" text-anchor="middle">
+          <text x="85" y="45">10M DAU</text><text x="85" y="65">× 10 req/day</text><text x="85" y="82" class="soft">= 100M req/day</text>
+          <text x="270" y="45">÷ 86,400 s/day</text><text x="270" y="65">≈ ÷ 10⁵</text><text x="270" y="82" class="soft">≈ 1,160 QPS avg</text>
+          <text x="455" y="45" class="hot">× peak 3</text><text x="455" y="65">≈ 3,500 QPS</text><text x="455" y="82" class="soft">設計用這個</text>
+          <text x="637" y="45">× 0.2 s latency</text><text x="637" y="65">= 700 in-flight</text><text x="637" y="82" class="soft">Little's Law</text>
+        </g>
+        <rect x="10" y="120" width="700" height="110" fill="none" stroke="var(--frame-soft)"/>
+        <g font-size="11">
+          <text x="24" y="145" class="acc">單位式（s48 學到的那一步）</text>
+          <text x="24" y="168">QPS          = requests/day ÷ seconds/day</text>
+          <text x="24" y="188">in-flight    = arrival rate (req/s) × time in system (s)</text>
+          <text x="24" y="208">servers      = in-flight ÷ per-server concurrency ÷ target utilization (0.5)</text>
+          <text x="470" y="168" class="cjk soft">一台每 W 秒放手一次</text>
+          <text x="470" y="188" class="cjk soft">= 每秒空出 1/W 台</text>
+          <text x="470" y="208" class="cjk soft">乘除只是同一條式子的兩面</text>
+        </g>
+      </svg>
+      <figcaption>FIG 2-A · 先寫「X per second 是什麼除什麼」，數字最後才代。2¹⁰ ≈ 10³，2¹² = 4 × 1024 ≈ 4,000。</figcaption>
+    </figure>
+    <h3>2-2 為什麼目標 utilization 是 50%，而不是 100%</h3>
+    <figure class="fig scroll">
+      <svg viewBox="0 0 720 220" role="img" aria-label="Backlog after a burst: at 100 percent utilization backlog never drains; at 50 percent spare capacity drains it">
+        <line x1="60" y1="180" x2="700" y2="180" stroke="var(--frame)"/><line x1="60" y1="20" x2="60" y2="180" stroke="var(--frame)"/>
+        <text x="20" y="30" font-size="10" class="soft">backlog</text><text x="660" y="198" font-size="10" class="soft">time</text>
+        <rect x="160" y="20" width="60" height="160" fill="var(--red-fill)" stroke="none"/>
+        <text x="190" y="38" text-anchor="middle" font-size="10" class="bad">burst</text>
+        <polyline points="60,178 160,178 220,110 700,110" fill="none" stroke="var(--red)" stroke-width="2"/>
+        <polyline points="60,178 160,178 220,110 330,178 700,178" fill="none" stroke="var(--green)" stroke-width="2"/>
+        <text x="230" y="102" font-size="11" class="bad cjk">ρ = 100%：每秒進 = 每秒出，backlog 永遠消不掉（再一次 burst 就往上疊）</text>
+        <text x="340" y="170" font-size="11" class="ok cjk">ρ = 50%：多一倍產能吃 backlog，幾秒歸零</text>
+      </svg>
+      <figcaption>FIG 2-B · 安全係數不是保守，是排隊機制：retry、jitter、burst 都會留下 backlog，空出來的產能才是清 backlog 的人。</figcaption>
+    </figure>
+    <h3>2-3 4-step 時間預算 + 8-block 骨架</h3>
+    <figure class="fig scroll">
+      <svg viewBox="0 0 720 230" role="img" aria-label="45-minute budget: clarify 0-5, estimate 5-10, design 10-20, deep dive 20-35, scale 35-45; 8-block skeleton client DNS LB API cache DB queue worker">
+        <g stroke="var(--line)" stroke-width="1.5">
+          <rect x="10" y="20" width="78" height="40" fill="var(--cyan-fill)"/><rect x="88" y="20" width="78" height="40" fill="var(--cyan-fill)"/>
+          <rect x="166" y="20" width="155" height="40" fill="var(--cyan-fill)"/><rect x="321" y="20" width="233" height="40" fill="var(--amber-fill)" stroke="var(--amber)"/><rect x="554" y="20" width="156" height="40" fill="var(--cyan-fill)"/>
+        </g>
+        <g font-size="11" text-anchor="middle"><text x="49" y="45">Clarify</text><text x="127" y="45">Estimate</text><text x="243" y="45">High-level</text><text x="437" y="45" class="hot">Deep dive (15 min)</text><text x="632" y="45">Scale + ops</text></g>
+        <g font-size="10" class="soft"><text x="10" y="76">0</text><text x="84" y="76">5</text><text x="160" y="76">10</text><text x="313" y="76">20</text><text x="546" y="76">35</text><text x="696" y="76">45</text></g>
+        <defs><marker id="a3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="var(--line)"/></marker></defs>
+        <g stroke="var(--line)" stroke-width="1.5" fill="none">
+          <rect x="10" y="120" width="70" height="34"/><rect x="100" y="120" width="70" height="34"/><rect x="190" y="120" width="70" height="34"/><rect x="280" y="120" width="90" height="34"/><rect x="390" y="120" width="70" height="34"/><rect x="480" y="120" width="70" height="34"/>
+          <rect x="390" y="180" width="70" height="34" stroke-dasharray="5 3"/><rect x="480" y="180" width="70" height="34" stroke-dasharray="5 3"/>
+          <line x1="80" y1="137" x2="98" y2="137" marker-end="url(#a3)"/><line x1="170" y1="137" x2="188" y2="137" marker-end="url(#a3)"/><line x1="260" y1="137" x2="278" y2="137" marker-end="url(#a3)"/><line x1="370" y1="137" x2="388" y2="137" marker-end="url(#a3)"/><line x1="460" y1="137" x2="478" y2="137" marker-end="url(#a3)"/>
+          <line x1="325" y1="154" x2="388" y2="196" marker-end="url(#a3)" stroke-dasharray="4 3"/><line x1="460" y1="197" x2="478" y2="197" marker-end="url(#a3)"/>
+        </g>
+        <g font-size="11" text-anchor="middle"><text x="45" y="141">Client</text><text x="135" y="141">DNS</text><text x="225" y="141">LB</text><text x="325" y="141">API server</text><text x="425" y="141">Cache</text><text x="515" y="141">DB</text><text x="425" y="201">Queue</text><text x="515" y="201">Worker</text></g>
+        <text x="570" y="141" font-size="11" class="cjk soft">每條箭頭標協定</text><text x="570" y="160" font-size="11" class="cjk soft">HTTP / gRPC / async</text><text x="570" y="201" font-size="11" class="cjk soft">虛線 = 非同步路徑</text>
+      </svg>
+      <figcaption>FIG 2-C · 骨架只加不減。題目特有的那塊（例：chat 的 WebSocket gateway）加在骨架上，並標成本題重點。</figcaption>
+    </figure>
+  </section>
+
+  <section id="l3" class="sheet">
+    <span class="tab">Sheet L3 · trade-offs</span>
+    <h2>Layer 3 · 取捨</h2>
+    <p class="link-back">L2 的流程每一步都有「做太少」和「做太多」兩種死法。</p>
+    <div class="scroll"><table>
+      <tr><th>決策點</th><th>選擇</th><th>被淘汰的做法</th><th>你付的代價</th></tr>
+      <tr><td>Clarify 怎麼問</td><td>主動斷言：「I'll assume 10M DAU, read-heavy. Correct me if not.」</td><td>開放式反問「請問 DAU 多少？」連問 5 分鐘</td><td>可能猜錯，被糾正一次。比把球丟回去好太多。</td></tr>
+      <tr><td>估算精度</td><td>數量級（10³ / 10⁶）</td><td>算到小數點</td><td>邊界附近會判錯，所以要報「peak × 3、utilization 50%」這些假設</td></tr>
+      <tr><td>先估還是先畫</td><td>先估（5 分鐘內）</td><td>直接畫大架構</td><td>佔掉設計時間；換來每個元件都有「為什麼需要」</td></tr>
+      <tr><td>Deep dive 選哪塊</td><td>本題最難那塊（URL shortener 的 ID 產生；chat 的投遞）</td><td>平均講每一塊</td><td>其他塊只停在方塊圖；面試官要的就是深度取樣</td></tr>
+      <tr><td>結論怎麼講</td><td>結論 + 一個數字 + 代價，一口氣</td><td>只報結論（「用 Snowflake」）</td><td>句子變長；換來面試官不用追問</td></tr>
+    </table></div>
+    <div class="two">
+      <div><h3>L4 聽起來像</h3><p>「我覺得可以用 Redis。」</p><p class="small">結論裸奔，沒數字，沒代價。</p></div>
+      <div><h3>L6 聽起來像</h3><p>「讀 3,500 QPS、95% 是熱門 key，所以前面放 Redis。代價是失效時要處理 stampede。」</p><p class="small">理由裡沒有出現「Redis 適合」這種循環論證。</p></div>
+    </div>
+  </section>
+
+  <section id="l4" class="sheet">
+    <span class="tab">Sheet L4 · on AWS</span>
+    <h2>Layer 4 · AWS 怎麼做</h2>
+    <p class="link-back">因為 L2 算出了 QPS 和 in-flight，在 AWS 上這兩個數字會直接撞上 service quota。估算的終點是「哪個 quota 先爆」。</p>
+    <figure class="fig scroll">
+      <svg viewBox="0 0 740 260" role="img" aria-label="8-block skeleton mapped to AWS: Route 53, CloudFront, ALB, ECS or EKS, ElastiCache, Aurora, SQS and workers, with the quota to check under each">
+        <defs><marker id="a4" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="var(--line)"/></marker></defs>
+        <g stroke="var(--line)" stroke-width="1.5">
+          <rect x="10" y="40" width="88" height="44" fill="var(--cyan-fill)"/><rect x="118" y="40" width="98" height="44" fill="var(--cyan-fill)"/><rect x="236" y="40" width="78" height="44" fill="var(--cyan-fill)"/>
+          <rect x="334" y="40" width="108" height="44" fill="var(--amber-fill)" stroke="var(--amber)"/><rect x="462" y="40" width="118" height="44" fill="var(--cyan-fill)"/><rect x="600" y="40" width="130" height="44" fill="var(--cyan-fill)"/>
+          <rect x="462" y="150" width="118" height="44" fill="var(--cyan-fill)"/><rect x="600" y="150" width="130" height="44" fill="var(--cyan-fill)"/>
+          <line x1="98" y1="62" x2="116" y2="62" marker-end="url(#a4)"/><line x1="216" y1="62" x2="234" y2="62" marker-end="url(#a4)"/><line x1="314" y1="62" x2="332" y2="62" marker-end="url(#a4)"/><line x1="442" y1="62" x2="460" y2="62" marker-end="url(#a4)"/><line x1="580" y1="62" x2="598" y2="62" marker-end="url(#a4)"/>
+          <line x1="388" y1="84" x2="460" y2="170" marker-end="url(#a4)" stroke-dasharray="5 3"/><line x1="580" y1="172" x2="598" y2="172" marker-end="url(#a4)"/>
+        </g>
+        <g font-size="11" text-anchor="middle"><text x="54" y="66">Route 53</text><text x="167" y="66">CloudFront</text><text x="275" y="66">ALB</text><text x="388" y="66">ECS / EKS</text><text x="521" y="66">ElastiCache</text><text x="665" y="66">Aurora</text><text x="521" y="176">SQS</text><text x="665" y="176">worker</text></g>
+        <g font-size="10" class="soft" text-anchor="middle">
+          <text x="275" y="104">LCU 計費</text><text x="388" y="104" class="hot">in-flight ÷ 每 task 併發</text><text x="521" y="104">記憶體 = 熱集合 × 1.33</text><text x="665" y="104">writer 只有 1 台</text>
+          <text x="521" y="214">FIFO 300 msg/s/API</text><text x="665" y="214">visibility timeout</text>
+        </g>
+        <text x="10" y="236" font-size="11" class="cjk soft">serverless 路線：API Gateway（10,000 RPS 帳號共用）→ Lambda（並發 1,000/region）</text><text x="10" y="254" font-size="11" class="cjk soft">→ DynamoDB（每 partition 3,000 RCU / 1,000 WCU）</text>
+      </svg>
+      <figcaption>FIG 4-A · 8-block 骨架的 AWS 版。每個方塊下面那行是「你估出來的數字要拿去對的 quota」。</figcaption>
+    </figure>
+    <div class="scroll"><table>
+      <tr><th>服務</th><th>要對的數字</th><th>常見陷阱</th></tr>
+      <tr><td>API Gateway</td><td class="num">10,000 RPS / burst 5,000</td><td>帳號 + region 層級，所有 API 共用。一支 API 暴衝，隔壁團隊的 API 一起被 429。</td></tr>
+      <tr><td>Lambda</td><td class="num">1,000 concurrency / region</td><td>並發 = RPS × duration（Little's Law）。3,500 RPS × 0.3 s = 1,050，超過預設就被 throttle。看 <code>Throttles</code> metric。</td></tr>
+      <tr><td>DynamoDB</td><td class="num">3,000 RCU · 1,000 WCU / partition</td><td>表的總 capacity 夠，熱門 key 還是會打爆單一 partition。item 上限 400 KB。</td></tr>
+      <tr><td>SQS</td><td class="num">FIFO 300/s/API（batch 3,000）</td><td>Standard 幾乎無上限，FIFO 有。訊息上限 2025-08 起從 256 KiB 提高到 1 MiB，舊文件和面試題還寫 256 KB。</td></tr>
+      <tr><td>Aurora</td><td class="num">1 writer + ≤15 readers</td><td>讀可以加 replica，寫只能 scale-up 或 shard。估算時把讀寫 QPS 分開算。</td></tr>
+      <tr><td>跨 AZ 流量</td><td class="num">$0.01/GB 每個方向</td><td>估成本時最常漏掉的一行：微服務在不同 AZ 之間來回呼叫，帳單上是 data transfer。</td></tr>
+    </table></div>
+    <p class="small">職場真實面：Finance 問「每月多少錢」，SRE 問「哪個 quota 先爆、要不要先開 ticket 提額」。Design review 一定被問：「peak 是 avg 的幾倍？這個倍數從哪來？」提額 ticket 要幾天，所以要在上線前估，不是撞到才開。</p>
+  </section>
+
+  <section id="l5" class="sheet">
+    <span class="tab">Sheet L5 · scale</span>
+    <h2>Layer 5 · 規模化</h2>
+    <p class="link-back">因為 L2 的估算告訴你現在在哪個量級，這張梯子告訴你下一級要換掉什麼。整個 P1 就是在教每一級新增的元件。</p>
+    <figure class="fig scroll">
+      <svg viewBox="0 0 720 300" role="img" aria-label="Evolution ladder from single server to multi-region cells, with the trigger for each step">
+        <g stroke="var(--line)" stroke-width="1.5">
+          <rect x="10" y="240" width="110" height="46" fill="var(--cyan-fill)"/>
+          <rect x="128" y="200" width="110" height="86" fill="var(--cyan-fill)"/>
+          <rect x="246" y="160" width="110" height="126" fill="var(--cyan-fill)"/>
+          <rect x="364" y="120" width="110" height="166" fill="var(--cyan-fill)"/>
+          <rect x="482" y="80" width="110" height="206" fill="var(--amber-fill)" stroke="var(--amber)"/>
+          <rect x="600" y="40" width="110" height="246" fill="var(--cyan-fill)"/>
+        </g>
+        <g font-size="11" text-anchor="middle">
+          <text x="65" y="258">1 單機</text><text x="65" y="276" class="soft">app+DB 同台</text>
+          <text x="183" y="218">2 拆 DB</text><text x="183" y="236" class="soft">vertical scale</text>
+          <text x="301" y="178">3 LB + N app</text><text x="301" y="196" class="soft">session 外移</text>
+          <text x="419" y="138">4 cache/CDN</text><text x="419" y="156" class="soft">+ read replica</text>
+          <text x="537" y="98" class="hot">5 queue + shard</text><text x="537" y="116" class="soft">寫入拆開</text>
+          <text x="655" y="58">6 multi-region</text><text x="655" y="76" class="soft">cell-based</text>
+        </g>
+        <g font-size="10" class="cjk soft" text-anchor="middle">
+          <text x="183" y="270">CPU 跟 DB 搶</text><text x="301" y="270">單台 CPU 滿</text><text x="419" y="270">DB 讀 QPS 滿</text><text x="537" y="270">writer 寫滿</text><text x="655" y="270">region 掛 = 全掛</text>
+        </g>
+        <text x="10" y="24" font-size="11" class="cjk soft">每一級的觸發條件寫在柱子底部：是「量到了」才換，不是「大廠都這樣」</text>
+      </svg>
+      <figcaption>FIG 5-A · Evolution ladder。面試的 Scale 階段就是把你的設計從目前這級往上推一級，講清楚換掉什麼。</figcaption>
+    </figure>
+    <div class="scroll"><table>
+      <tr><th>路線</th><th>典型組合</th><th>贏在</th><th>輸在</th></tr>
+      <tr><td>Serverless managed</td><td>API Gateway + Lambda + DynamoDB</td><td>零台機器可管、按請求付費，流量低時幾乎免費</td><td>quota 多且分散；高穩定流量時單價比 container 貴；cold start</td></tr>
+      <tr><td>Container + RDBMS</td><td>ALB + EKS/ECS + Aurora + ElastiCache</td><td>穩定高流量便宜、SQL 彈性、團隊熟</td><td>要管 node、capacity、升級；寫入擴展最後還是要 shard</td></tr>
+    </table></div>
+  </section>
+
+  <section id="l6" class="sheet">
+    <span class="tab">Sheet L6 · on-call</span>
+    <h2>Layer 6 · 故障與 on-call</h2>
+    <p class="link-back">估算錯在生產環境的樣子就是 capacity 事故。最難抓的是「估錯了擴展維度」：你算了 QPS，沒算每台機器要跟幾台機器講話。</p>
+    <figure class="fig scroll">
+      <svg viewBox="0 0 720 220" role="img" aria-label="Kinesis 2020: each front-end server holds one thread per other front-end server; adding servers pushes every server past the OS thread limit">
+        <g stroke="var(--line)" stroke-width="1.5">
+          <circle cx="90" cy="70" r="16" fill="var(--cyan-fill)"/><circle cx="160" cy="40" r="16" fill="var(--cyan-fill)"/><circle cx="160" cy="110" r="16" fill="var(--cyan-fill)"/><circle cx="230" cy="70" r="16" fill="var(--cyan-fill)"/>
+        </g>
+        <g stroke="var(--ink-soft)" stroke-width="1"><line x1="90" y1="70" x2="160" y2="40"/><line x1="90" y1="70" x2="160" y2="110"/><line x1="90" y1="70" x2="230" y2="70"/><line x1="160" y1="40" x2="160" y2="110"/><line x1="160" y1="40" x2="230" y2="70"/><line x1="160" y1="110" x2="230" y2="70"/></g>
+        <text x="160" y="160" text-anchor="middle" font-size="11" class="cjk">每台對其他每台各開一條 thread</text>
+        <text x="160" y="180" text-anchor="middle" font-size="11">threads/server ∝ N</text>
+        <line x1="380" y1="180" x2="700" y2="180" stroke="var(--frame)"/><line x1="380" y1="30" x2="380" y2="180" stroke="var(--frame)"/>
+        <line x1="380" y1="70" x2="700" y2="70" stroke="var(--red)" stroke-dasharray="6 4"/><text x="600" y="62" font-size="10" class="bad">OS thread limit</text>
+        <polyline points="380,170 620,80" fill="none" stroke="var(--line)" stroke-width="2"/>
+        <polyline points="620,80 660,62" fill="none" stroke="var(--red)" stroke-width="2"/>
+        <text x="640" y="100" font-size="10" class="bad cjk">加一點容量</text><text x="640" y="114" font-size="10" class="bad cjk">全部一起越線</text>
+        <text x="390" y="200" font-size="10" class="soft">fleet size N →</text>
+      </svg>
+      <figcaption>FIG 6-A · AWS Kinesis 2020-11-25（us-east-1）：一次小的擴容讓 front-end fleet 每台都超過 OS thread 上限，連帶影響依賴 Kinesis 的 Cognito、CloudWatch 等服務。</figcaption>
+    </figure>
+    <p class="small">來源：<a href="https://aws.amazon.com/message/11201/">Summary of the Amazon Kinesis Event in the Northern Virginia (US-EAST-1) Region</a>。重點是 AWS 寫的：擴容是 trigger，不是 root cause。</p>
+    <div class="scroll"><table>
+      <tr><th>症狀</th><th>你會看到</th><th>第一個查</th><th>止血</th></tr>
+      <tr><td>Lambda 被 throttle</td><td>API 回 429/502；<code>Throttles</code> &gt; 0；<code>ConcurrentExecutions</code> 貼頂</td><td><code>aws service-quotas list-service-quotas --service-code lambda</code></td><td>reserved concurrency 保護關鍵函式；提額 ticket</td></tr>
+      <tr><td>DynamoDB 熱 partition</td><td><code>ThrottledRequests</code> 上升，但表的 consumed capacity 遠低於上限</td><td>CloudWatch Contributor Insights 看 top key</td><td>key 加 suffix 打散；熱 key 前面加 cache</td></tr>
+      <tr><td>queue 積壓</td><td><code>ApproximateAgeOfOldestMessage</code> 一路上升</td><td>consumer 數量與每則處理時間</td><td>加 consumer；但先確認下游 DB 撐得住</td></tr>
+    </table></div>
+    <div class="two">
+      <div><h3>SLO 換算（30 天）</h3><p><code>99.9%</code> → 43.2 分鐘 error budget</p><p><code>99.95%</code> → 21.6 分鐘</p><p><code>99.99%</code> → 4.32 分鐘</p></div>
+      <div><h3>3AM page test</h3><p>凌晨三點只能留一條 page：選使用者看得到的症狀（成功率、end-to-end latency），不是元件指標（CPU、DB 狀態）。元件指標進 dashboard 和 ticket。</p></div>
+    </div>
+  </section>
+
+  <section id="l7" class="sheet">
+    <span class="tab">Sheet L7 · interview</span>
+    <h2>Layer 7 · 面試</h2>
+    <blockquote>「設計一個圖片分享 App 的後端。開始吧。」<span class="en">"Design the backend for a photo-sharing app. Go ahead."</span></blockquote>
+    <p class="sub">先自己講 3 分鐘（只講前 10 分鐘的內容），再打開。</p>
+    <details><summary>L4 ANSWER</summary><div>
+      <p>「我會用 S3 存圖片，前面放 CloudFront，API 用 Lambda，資料存 DynamoDB，再加一個 Redis cache。」</p>
+      <p class="small">直接跳到 Design。沒問 DAU、沒問讀寫比，每個元件都說不出為什麼需要。面試官接下來只能一直追問。</p>
+    </div></details>
+    <details><summary>L6 ANSWER</summary><div>
+      <p>「先圈範圍：上傳、看 feed、按讚。我先假設 10M DAU，每人每天看 50 張、上傳 1 張，讀寫比 50:1。有不對請打斷我。」</p>
+      <p>「讀：500M/day ÷ 10⁵ ≈ 5,000 QPS，peak ×3 ≈ 15,000。寫：10M/day ≈ 115 QPS。儲存：每張 2 MB 原圖加縮圖約 2.5 MB，一天 25 TB，一年約 9 PB。」</p>
+      <p>「數字告訴我兩件事。一、圖片本體絕對不能進 DB，放 object storage 加 CDN，讀流量大部分在 edge 結束。二、metadata 寫入才 115 QPS，單一 writer 的 RDBMS 撐得住，先不 shard。」</p>
+      <p>「deep dive 我想挑上傳路徑：client 拿 presigned URL 直傳 S3，縮圖走 queue 非同步做。等等再講 feed。」</p>
+      <p class="small">L6 多了：主動斷言的假設、寫成單位式的估算、從數字推出兩個架構決定、主動選 deep dive。</p>
+    </div></details>
+  </section>
+
+  <section id="trail" class="sheet">
+    <span class="tab">Redline · my mistakes</span>
+    <h2>我的錯題軌跡</h2>
+    <div class="trail">
+      <div class="redline"><b>REDLINE · s9</b>Database 的 drill 忘了跑 Scope Negotiation，直接開始選 DB。</div>
+      <div class="rev"><b>REV</b> Step 1 改成硬關卡：沒圈完範圍不准進 Step 2。</div>
+      <div class="redline"><b>REDLINE · s40</b>Rate limiter gauntlet 跳過 clarify 直接報解法，還把 LB 硬套進 rate limiter（剛學完 LB 的 recency bias）。</div>
+      <div class="rev"><b>REV</b> 開場先自己講完 clarify。題目是 rate limiter，不是「我最近學了什麼」。</div>
+      <div class="redline"><b>REDLINE · s36</b>看到 2¹² /秒 直接放棄。</div>
+      <div class="rev"><b>REV</b> 拆次方：2¹² = 2² × 2¹⁰ = 4 × 1024 ≈ 4,000。被寫法嚇到，不是不會算。</div>
+      <div class="redline"><b>REDLINE · s46</b><code>300 萬 ÷ 1000/s</code> 喊「不會算」。同一個除法 6 天前才在面前算過。</div>
+      <div class="rev"><b>REV · s49</b> 冷起手自算 3,000 s，換算成 50 分鐘，再對撞 P99 60 s 得出超標 50 倍。三步零提示。</div>
+      <div class="redline"><b>REDLINE · s48</b><code>130 台 × 每台佔 36 s</code>，問每秒空出幾台，寫不出式子。</div>
+      <div class="rev"><b>REV · s49</b> 單位式：一台每 W 秒放手一次 = 每秒 1/W 台。Little's Law <code>300/s × 0.2 s = 60</code> 冷測自算，還自補「這是最少」。</div>
+      <div class="redline"><b>REDLINE · s48</b>只算排第一那則等 36 s 就說 SLO 沒破。</div>
+      <div class="rev"><b>REV</b> P99 看的是最慢的 1%。每次算完都問自己：我算的是第幾則？</div>
+      <div class="redline"><b>REDLINE · s49</b>「為什麼不開 60 台跑 100%？」第一句只給數字 120，不給 why。</div>
+      <div class="rev"><b>REV</b> FIG 2-B：100% 時 burst 留下的 backlog 追平速度是 0。</div>
+    </div>
+  </section>
+
+  <section id="next" class="sheet">
+    <span class="tab">Topics · deeper notes</span>
+    <h2>本章 topic 筆記</h2>
+    <div class="scroll"><table>
+      <tr><th>topic</th><th>程度</th><th>筆記</th></tr>
+      <tr><td>SD Interview Rubric (Day 1)</td><td><span class="stamp high">high · s1</span></td><td><a href="../../../../#/read/portfolio%2Fsd%2Fnotes%2Fday01-interview-rubric.md">day01 筆記</a></td></tr>
+      <tr><td>Back-of-Envelope Estimation (Day 2)</td><td><span class="stamp high">high · s2</span></td><td><a href="../../../../#/read/portfolio%2Fsd%2Fnotes%2Fday02-estimation.md">day02 筆記</a></td></tr>
+      <tr><td>4-Step Framework (Day 3)</td><td><span class="stamp high">high · s3</span></td><td><a href="../../../../#/read/portfolio%2Fsd%2Fnotes%2Fday03-framework.md">day03 筆記</a></td></tr>
+    </table></div>
+    <p class="small">連結在學習地圖網站上可用；在 claude.ai artifact 裡不會動。</p>
+  </section>
+</main>

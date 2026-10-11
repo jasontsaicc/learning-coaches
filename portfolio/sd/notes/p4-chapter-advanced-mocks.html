@@ -1,0 +1,426 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"></head><body>
+<title>P4 進階與模擬面試</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Noto+Sans+TC:wght@400;500;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: an engineering drawing set. Navy blueprint ground with a 24px grid, each layer is a framed "sheet"
+   with a title tab; figures are white line-art; dashed = invisible or missing; amber = hot path; red = failure. */
+:root {
+  --bg: #0E2A47; --grid: rgba(140,200,255,.08); --grid-major: rgba(140,200,255,.16);
+  --ink: #E6F0FA; --ink-soft: #9CB5CE; --line: #D4E6F7; --frame: rgba(190,220,250,.55); --frame-soft: rgba(190,220,250,.22);
+  --panel: rgba(255,255,255,.035); --cyan: #6FD3F7; --amber: #FFC66B; --red: #FF7B6B; --green: #7BE0A6;
+  --cyan-fill: rgba(111,211,247,.14); --amber-fill: rgba(255,198,107,.16); --red-fill: rgba(255,123,107,.15); --green-fill: rgba(123,224,166,.14);
+  --f-display: "Barlow Condensed", "Noto Sans TC", "Arial Narrow", sans-serif;
+  --f-body: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
+  --f-mono: "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
+  color-scheme: dark;
+}
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    --bg: #E8F0F8; --grid: rgba(30,90,150,.07); --grid-major: rgba(30,90,150,.15);
+    --ink: #0F2A44; --ink-soft: #4B6784; --line: #17497A; --frame: rgba(23,73,122,.6); --frame-soft: rgba(23,73,122,.22);
+    --panel: rgba(255,255,255,.55); --cyan: #0A6E9C; --amber: #9A5B00; --red: #BF3B2B; --green: #1D7A4C;
+    --cyan-fill: rgba(10,110,156,.10); --amber-fill: rgba(222,150,30,.16); --red-fill: rgba(191,59,43,.10); --green-fill: rgba(29,122,76,.10);
+    color-scheme: light;
+  }
+}
+:root[data-theme="light"] {
+  --bg: #E8F0F8; --grid: rgba(30,90,150,.07); --grid-major: rgba(30,90,150,.15);
+  --ink: #0F2A44; --ink-soft: #4B6784; --line: #17497A; --frame: rgba(23,73,122,.6); --frame-soft: rgba(23,73,122,.22);
+  --panel: rgba(255,255,255,.55); --cyan: #0A6E9C; --amber: #9A5B00; --red: #BF3B2B; --green: #1D7A4C;
+  --cyan-fill: rgba(10,110,156,.10); --amber-fill: rgba(222,150,30,.16); --red-fill: rgba(191,59,43,.10); --green-fill: rgba(29,122,76,.10);
+  color-scheme: light;
+}
+body {
+  background-color: var(--bg); color: var(--ink); font-family: var(--f-body); font-size: 16.5px; line-height: 1.75;
+  background-image:
+    linear-gradient(var(--grid-major) 1px, transparent 1px), linear-gradient(90deg, var(--grid-major) 1px, transparent 1px),
+    linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 120px 120px, 120px 120px, 24px 24px, 24px 24px;
+}
+.page { max-width: 820px; margin: 0 auto; padding-inline: 16px; padding-block: 36px 72px; display: grid; gap: 40px; }
+h1, h2, h3 { margin: 0; text-wrap: balance; line-height: 1.3; }
+h1 { font-size: 2.05rem; font-weight: 700; }
+h2 { font-size: 1.4rem; font-weight: 700; }
+h3 { font-size: 1.05rem; font-weight: 700; color: var(--cyan); }
+p { margin: 0; max-width: 68ch; }
+a { color: var(--cyan); text-underline-offset: 3px; }
+a:focus-visible, summary:focus-visible { outline: 2px solid var(--amber); outline-offset: 3px; }
+code { font-family: var(--f-mono); font-size: .84em; background: var(--cyan-fill); padding: 1px 5px; border-radius: 2px; }
+b { color: var(--ink); }
+mark { background: none; color: var(--amber); font-weight: 600; border-bottom: 1px dashed var(--amber); }
+.sub { color: var(--ink-soft); font-size: .93rem; }
+.small { font-size: .9rem; color: var(--ink-soft); }
+.scroll { overflow-x: auto; min-width: 0; }
+
+/* title block */
+.titleblock { border: 1.5px solid var(--frame); outline: 1px solid var(--frame-soft); outline-offset: 5px; display: grid; grid-template-columns: minmax(0,1fr) 230px; background: var(--panel); }
+.tb-main { padding: 20px 20px 18px; display: grid; gap: 10px; min-width: 0; }
+.eyebrow { font-family: var(--f-display); font-weight: 600; font-size: .86rem; letter-spacing: .2em; text-transform: uppercase; color: var(--cyan); }
+.thesis { font-size: 1.04rem; }
+.tb-grid { margin: 0; border-left: 1.5px solid var(--frame); display: grid; grid-template-rows: repeat(4, auto); }
+.tb-grid div { padding: 8px 12px; border-bottom: 1px solid var(--frame-soft); display: grid; gap: 1px; }
+.tb-grid div:last-child { border-bottom: 0; }
+.tb-grid dt { font-family: var(--f-display); font-size: .72rem; letter-spacing: .18em; color: var(--ink-soft); }
+.tb-grid dd { margin: 0; font-family: var(--f-mono); font-size: .82rem; font-variant-numeric: tabular-nums; }
+@media (max-width: 600px) { .titleblock { grid-template-columns: 1fr; } .tb-grid { border-left: 0; border-top: 1.5px solid var(--frame); grid-template-columns: 1fr 1fr; } .tb-grid div:nth-child(odd) { border-right: 1px solid var(--frame-soft); } }
+.toc { display: flex; flex-wrap: wrap; gap: 6px; }
+.toc a { font-family: var(--f-display); font-weight: 600; font-size: .86rem; letter-spacing: .1em; text-decoration: none; color: var(--ink); border: 1px solid var(--frame-soft); padding: 2px 9px; }
+.toc a:hover { border-color: var(--cyan); color: var(--cyan); }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 18px; font-family: var(--f-mono); font-size: .76rem; color: var(--ink-soft); }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.legend i { display: inline-block; width: 26px; border-top: 2px solid var(--line); }
+.legend i.dash { border-top-style: dashed; border-top-color: var(--ink-soft); }
+.legend i.hot { border-top-color: var(--amber); }
+.legend i.bad { border-top-color: var(--red); }
+
+/* sheet = one layer */
+.sheet { position: relative; border: 1.5px solid var(--frame); background: var(--panel); padding: 30px 18px 20px; display: grid; gap: 14px; min-width: 0; }
+.sheet::before, .sheet::after { content: ""; position: absolute; width: 12px; height: 12px; border-color: var(--cyan); border-style: solid; }
+.sheet::before { top: -1.5px; right: -1.5px; border-width: 3px 3px 0 0; }
+.sheet::after { bottom: -1.5px; left: -1.5px; border-width: 0 0 3px 3px; }
+.tab { position: absolute; top: -12px; left: 14px; background: var(--bg); padding: 0 8px; font-family: var(--f-display); font-weight: 600; font-size: .84rem; letter-spacing: .18em; text-transform: uppercase; color: var(--cyan); white-space: nowrap; }
+.link-back { border-left: 2px solid var(--cyan); padding: 2px 12px; color: var(--ink-soft); font-size: .95rem; }
+.fig { border: 1px dashed var(--frame-soft); padding: 10px; display: grid; gap: 6px; min-width: 0; }
+.fig figcaption { font-family: var(--f-mono); font-size: .74rem; color: var(--ink-soft); letter-spacing: .04em; }
+.fig svg { display: block; width: 100%; min-width: 640px; height: auto; }
+svg text { font-family: var(--f-mono); fill: var(--ink); }
+svg .cjk { font-family: var(--f-body); }
+svg .soft { fill: var(--ink-soft); }
+svg .hot { fill: var(--amber); }
+svg .bad { fill: var(--red); }
+svg .ok { fill: var(--green); }
+svg .acc { fill: var(--cyan); }
+.callout { border: 1.5px solid var(--amber); padding: 10px 14px; background: var(--amber-fill); }
+.two { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 14px; }
+.two > div { border: 1px solid var(--frame-soft); padding: 12px 14px; display: grid; gap: 6px; align-content: start; min-width: 0; }
+@media (max-width: 600px) { .two { grid-template-columns: 1fr; } }
+table { border-collapse: collapse; width: 100%; font-size: .92rem; }
+th, td { border: 1px solid var(--frame-soft); padding: 7px 9px; text-align: left; vertical-align: top; }
+th { font-family: var(--f-display); font-weight: 600; letter-spacing: .12em; text-transform: uppercase; font-size: .8rem; color: var(--cyan); background: var(--cyan-fill); }
+td.num { font-family: var(--f-mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+ol, ul { margin: 0; padding-left: 1.3em; display: grid; gap: 4px; }
+blockquote { margin: 0; border: 1.5px solid var(--frame); padding: 14px 16px; font-size: 1.02rem; }
+blockquote .en { display: block; font-family: var(--f-mono); font-size: .84rem; color: var(--ink-soft); margin-top: 4px; }
+details { border: 1px dashed var(--frame); padding: 10px 14px; }
+details[open] { border-style: solid; }
+summary { cursor: pointer; font-family: var(--f-display); font-weight: 600; letter-spacing: .12em; font-size: .95rem; }
+details > div { display: grid; gap: 8px; margin-top: 10px; }
+pre { margin: 0; font-family: var(--f-mono); font-size: .8rem; line-height: 1.55; border: 1px solid var(--frame-soft); padding: 10px 12px; overflow-x: auto; background: var(--panel); }
+
+/* status stamps */
+.stamp { font-family: var(--f-display); font-weight: 700; font-size: .78rem; letter-spacing: .14em; text-transform: uppercase; padding: 0 7px; border: 2px double currentColor; white-space: nowrap; display: inline-block; }
+.stamp.high { color: var(--green); } .stamp.med { color: var(--amber); } .stamp.todo { color: var(--ink-soft); border-style: dashed; border-width: 1.5px; }
+
+/* redline = my mistakes, rev = the fix */
+.trail { display: grid; gap: 12px; }
+.redline { border: 1.5px dashed var(--red); background: var(--red-fill); padding: 8px 12px; display: grid; gap: 2px; }
+.redline b { font-family: var(--f-display); letter-spacing: .14em; color: var(--red); font-size: .8rem; }
+.rev { border-left: 3px solid var(--green); padding: 2px 12px; margin-top: -6px; }
+.rev b { font-family: var(--f-display); letter-spacing: .14em; color: var(--green); font-size: .8rem; }
+@media (prefers-reduced-motion: no-preference) { .toc a { transition: color .15s, border-color .15s; } }
+</style>
+<main class="page">
+  <header class="titleblock">
+    <div class="tb-main">
+      <p class="eyebrow">System Design · Chapter Drawing · Phase 4 · Preview</p>
+      <h1>P4 進階與模擬面試</h1>
+      <p class="thesis">一個問題貫穿整章：<b>系統不能停、需求會被改、面試官不給提示。你能不能在變動中把會的東西組出來？</b></p>
+      <nav class="toc"><a href="#map">MAP</a><a href="#l0">L0</a><a href="#l1">L1</a><a href="#l2">L2</a><a href="#l3">L3</a><a href="#l4">L4</a><a href="#l5">L5</a><a href="#l6">L6</a><a href="#l7">L7</a><a href="#trail">REDLINE</a><a href="#next">TOPICS</a></nav>
+    </div>
+    <dl class="tb-grid">
+      <div><dt>SHEET</dt><dd>5 / 5 · Day 60–69</dd></div>
+      <div><dt>STATUS</dt><dd>not-started · 預習頁</dd></div>
+      <div><dt>GATE</dt><dd>兩場 final mock ≥ 6/9</dd></div>
+      <div><dt>REV</dt><dd>2026-10-11</dd></div>
+    </dl>
+  </header>
+
+  <div class="legend"><span><i></i>資料路徑</span><span><i class="dash"></i>看不見的 / 舊系統</span><span><i class="hot"></i>本頁重點</span><span><i class="bad"></i>故障</span></div>
+
+  <section id="map" class="sheet">
+    <span class="tab">Map · 5 units</span>
+    <h2>章節地圖</h2>
+    <figure class="fig scroll">
+      <svg viewBox="0 0 740 200" role="img" aria-label="P4 units: trade-off drills, brownfield migration, mock 1, weak spot reinforcement, final brutal mock; first two are content, last three are performance">
+        <defs><marker id="e0" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="var(--line)"/></marker></defs>
+        <g stroke="var(--line)" stroke-width="1.5">
+          <rect x="10" y="40" width="128" height="70" fill="var(--cyan-fill)"/><rect x="158" y="40" width="128" height="70" fill="var(--amber-fill)" stroke="var(--amber)"/>
+          <rect x="306" y="40" width="128" height="70" fill="var(--cyan-fill)"/><rect x="454" y="40" width="128" height="70" fill="var(--cyan-fill)"/><rect x="602" y="40" width="128" height="70" fill="var(--red-fill)" stroke="var(--red)"/>
+          <line x1="138" y1="75" x2="156" y2="75" marker-end="url(#e0)"/><line x1="286" y1="75" x2="304" y2="75" marker-end="url(#e0)"/><line x1="434" y1="75" x2="452" y2="75" marker-end="url(#e0)"/><line x1="582" y1="75" x2="600" y2="75" marker-end="url(#e0)"/>
+        </g>
+        <g font-size="11" text-anchor="middle"><text x="74" y="66">Day 60-61</text><text x="74" y="86" class="cjk">trade-off 快問</text>
+          <text x="222" y="66" class="hot">Day 62-63</text><text x="222" y="86" class="cjk hot">brownfield 遷移</text>
+          <text x="370" y="66">Day 64-65</text><text x="370" y="86" class="cjk">mock 1</text>
+          <text x="518" y="66">Day 66-67</text><text x="518" y="86" class="cjk">弱點補強</text>
+          <text x="666" y="66" class="bad">Day 68-69</text><text x="666" y="86" class="cjk bad">brutal mock</text></g>
+        <line x1="10" y1="140" x2="286" y2="140" stroke="var(--cyan)" stroke-width="2"/><text x="148" y="160" text-anchor="middle" font-size="11" class="acc cjk">新內容：遷移與取捨（本頁 L1–L6）</text>
+        <line x1="306" y1="140" x2="730" y2="140" stroke="var(--amber)" stroke-width="2"/><text x="518" y="160" text-anchor="middle" font-size="11" class="hot cjk">輸出練習：你的面試習慣債（本頁 L7 + REDLINE）</text>
+      </svg>
+      <figcaption>FIG 0-A · P4 前半是最後一塊新知識（改造既有系統），後半是把 P0–P3 在壓力下輸出。還沒開始，本頁是預習。</figcaption>
+    </figure>
+  </section>
+
+  <section id="l0" class="sheet">
+    <span class="tab">Sheet L0 · analogy</span>
+    <h2>Layer 0 · 一張圖</h2>
+    <figure class="fig scroll">
+      <svg viewBox="0 0 720 190" role="img" aria-label="Changing the engine in flight: the plane keeps flying on the old engine while the new engine is mounted beside it and gradually takes thrust">
+        <path d="M60,95 L560,95 L640,80 L660,95 L640,110 L560,95" fill="var(--panel)" stroke="var(--line)" stroke-width="1.5"/>
+        <path d="M300,95 L250,30 L290,30 L360,95" fill="var(--panel)" stroke="var(--line)" stroke-width="1.5"/>
+        <path d="M300,95 L250,160 L290,160 L360,95" fill="var(--panel)" stroke="var(--line)" stroke-width="1.5"/>
+        <rect x="255" y="40" width="50" height="20" fill="none" stroke="var(--ink-soft)" stroke-dasharray="4 3"/><text x="230" y="36" font-size="10" class="soft cjk">舊引擎（還在出力）</text>
+        <rect x="255" y="130" width="50" height="20" fill="var(--amber-fill)" stroke="var(--amber)"/><text x="230" y="176" font-size="10" class="hot cjk">新引擎：推力 1% → 10% → 100%</text>
+        <text x="420" y="60" font-size="11" class="cjk">乘客（流量）一直在機上</text>
+        <text x="420" y="130" font-size="11" class="cjk soft">每一步都要能把推力切回舊引擎</text>
+      </svg>
+      <figcaption>FIG 0-B · Brownfield 遷移 = 飛行中換引擎。不能降落（停機），舊引擎拆掉之前都要能退回。</figcaption>
+    </figure>
+  </section>
+
+  <section id="l1" class="sheet">
+    <span class="tab">Sheet L1 · first principles</span>
+    <h2>Layer 1 · 第一性原理</h2>
+    <p><b>限制一：不能停。</b>停機一小時的營收損失和客訴，通常比多花三個月慢慢遷還貴。所以新舊系統一定要並存一段時間。</p>
+    <p><b>限制二：資料在遷移中一直在變。</b>你複製到一半，舊系統又寫進新的值。「copy 過去」只對靜止的資料成立。</p>
+    <p><b>限制三：你不知道誰在依賴舊行為。</b>使用者夠多時，介面上每個看得到的行為都會有人依賴（Hyrum's Law）。所以要用真實流量驗證，不能只靠規格。</p>
+    <p><b>限制四：回滾的能力會隨時間消失。</b>新系統一旦開始收新寫入、舊系統沒有，回滾就要搬資料回去。決定「什麼時候不能回頭」是遷移計畫的核心。</p>
+    <h3>限制二的樣子：backfill 用舊值蓋掉新值</h3>
+    <figure class="fig scroll">
+      <svg viewBox="0 0 740 240" role="img" aria-label="Backfill race: backfill reads row 42 status pending at t1; live dual-write sets status shipped in the new DB at t2; backfill writes its stale pending copy at t3, overwriting shipped">
+        <line x1="130" y1="60" x2="720" y2="60" stroke="var(--line)" stroke-width="1.5"/><line x1="130" y1="130" x2="720" y2="130" stroke="var(--line)" stroke-width="1.5"/><line x1="130" y1="200" x2="720" y2="200" stroke="var(--line)" stroke-width="1.5"/>
+        <g font-size="11"><text x="10" y="64">舊 DB</text><text x="10" y="134">backfill job</text><text x="10" y="204">新 DB</text></g>
+        <g font-size="10" class="soft" text-anchor="middle"><text x="220" y="228">t1</text><text x="380" y="228">t2</text><text x="560" y="228">t3</text></g>
+        <circle cx="220" cy="60" r="6" fill="var(--cyan-fill)" stroke="var(--line)"/><text x="220" y="45" text-anchor="middle" font-size="10">row 42: pending</text>
+        <path d="M220,66 L220,124" stroke="var(--ink-soft)" stroke-dasharray="4 3" fill="none"/><text x="228" y="100" font-size="10" class="soft cjk">讀到 pending（記在記憶體）</text>
+        <circle cx="380" cy="60" r="6" fill="var(--amber-fill)" stroke="var(--amber)"/><text x="380" y="45" text-anchor="middle" font-size="10" class="hot">UPDATE → shipped</text>
+        <path d="M380,66 L380,194" stroke="var(--amber)" fill="none" stroke-width="1.5"/><text x="388" y="185" font-size="10" class="hot cjk">dual-write：新 DB 也寫 shipped</text>
+        <rect x="390" y="140" width="160" height="22" fill="none" stroke="var(--ink-soft)" stroke-dasharray="4 3"/><text x="396" y="155" font-size="10" class="soft cjk">新 DB 此刻是對的：shipped</text>
+        <path d="M560,130 L560,194" stroke="var(--red)" fill="none" stroke-width="1.5"/>
+        <rect x="570" y="180" width="150" height="40" fill="var(--red-fill)" stroke="var(--red)"/><text x="645" y="196" text-anchor="middle" font-size="10" class="bad">寫入 pending</text><text x="645" y="212" text-anchor="middle" font-size="10" class="bad cjk">shipped 被蓋掉</text>
+      </svg>
+      <figcaption>FIG 1-A · 經典的遷移 race。修法：backfill 只在目標列不存在或版本較舊時寫（conditional write / updated_at 比較），或改用 CDC 依 commit 順序重播。</figcaption>
+    </figure>
+  </section>
+
+  <section id="l2" class="sheet">
+    <span class="tab">Sheet L2 · mechanism</span>
+    <h2>Layer 2 · 機制</h2>
+    <p class="link-back">L1 四條限制對應 strangler fig 的六個階段：並存（限制一）、同步資料（限制二）、真實流量驗證（限制三）、明確的不可回頭點（限制四）。</p>
+    <figure class="fig scroll">
+      <svg viewBox="0 0 740 300" role="img" aria-label="Strangler fig phases: proxy in front, dual-write or CDC, backfill, shadow traffic with diff, canary cutover by percentage, decommission; rollback arrows exist until the point of no return">
+        <defs><marker id="e2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="var(--line)"/></marker><marker id="e2g" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="var(--green)"/></marker></defs>
+        <g stroke="var(--line)" stroke-width="1.5">
+          <rect x="10" y="40" width="105" height="80" fill="var(--cyan-fill)"/><rect x="132" y="40" width="105" height="80" fill="var(--cyan-fill)"/><rect x="254" y="40" width="105" height="80" fill="var(--cyan-fill)"/>
+          <rect x="376" y="40" width="105" height="80" fill="var(--cyan-fill)"/><rect x="498" y="40" width="105" height="80" fill="var(--amber-fill)" stroke="var(--amber)"/><rect x="620" y="40" width="110" height="80" fill="var(--panel)" stroke-dasharray="5 3"/>
+          <line x1="115" y1="80" x2="130" y2="80" marker-end="url(#e2)"/><line x1="237" y1="80" x2="252" y2="80" marker-end="url(#e2)"/><line x1="359" y1="80" x2="374" y2="80" marker-end="url(#e2)"/><line x1="481" y1="80" x2="496" y2="80" marker-end="url(#e2)"/><line x1="603" y1="80" x2="618" y2="80" marker-end="url(#e2)"/>
+        </g>
+        <g font-size="11" text-anchor="middle">
+          <text x="62" y="62">1 proxy</text><text x="184" y="62">2 同步寫</text><text x="306" y="62">3 backfill</text><text x="428" y="62">4 shadow</text><text x="550" y="62" class="hot">5 canary</text><text x="675" y="62">6 拆舊</text>
+        </g>
+        <g font-size="10" text-anchor="middle" class="soft cjk">
+          <text x="62" y="84">前面放 router</text><text x="62" y="100">100% 走舊</text>
+          <text x="184" y="84">dual-write</text><text x="184" y="100">或 CDC</text>
+          <text x="306" y="84">補歷史資料</text><text x="306" y="100">+ 對帳</text>
+          <text x="428" y="84">複製流量</text><text x="428" y="100">比對回應</text>
+          <text x="550" y="84">1→10→50→100%</text><text x="550" y="100">讀先切、寫後切</text>
+          <text x="675" y="84">停同步</text><text x="675" y="100">關舊系統</text>
+        </g>
+        <g stroke="var(--green)" stroke-width="1.5" fill="none"><path d="M550,120 C550,170 62,170 62,122" marker-end="url(#e2g)"/></g>
+        <text x="306" y="186" text-anchor="middle" font-size="10" class="ok cjk">回滾 = router 把比例調回 0%，因為舊系統資料一直是完整的</text>
+        <line x1="612" y1="30" x2="612" y2="230" stroke="var(--red)" stroke-width="2" stroke-dasharray="6 3"/>
+        <text x="618" y="215" font-size="10" class="bad cjk">不可回頭點：</text><text x="618" y="230" font-size="10" class="bad cjk">舊系統不再收寫入</text>
+        <text x="10" y="270" font-size="10" class="soft cjk">每一階段都有兩份監控：新舊系統的錯誤率、latency，以及兩者回應的差異率（diff rate）。</text>
+        <text x="10" y="288" font-size="10" class="soft cjk">shadow 階段新系統的副作用要關掉：寄信、扣款、發推播不能做兩次。</text>
+      </svg>
+      <figcaption>FIG 2-A · Strangler fig。名字來自絞殺榕：新樹沿著舊樹長，等舊樹被包住才枯掉。關鍵是第 6 階段之前，舊系統都還是完整的退路。</figcaption>
+    </figure>
+    <h3>Trade-off 快問的回答骨架（Day 60-61）</h3>
+    <pre>選擇   ：我選 X
+數字   ：因為 [這題的關鍵數字]，X 在這個量級 ...
+代價   ：我付出的是 [會咬人的具體東西，不是「成本高」]
+反悔點 ：如果 [條件] 變了，我會換成 Y</pre>
+    <p class="small">四行講完，2–3 句話。這就是 Day 66-67 說的「trade-off 不能只講優缺點，要量化」。</p>
+  </section>
+
+  <section id="l3" class="sheet">
+    <span class="tab">Sheet L3 · trade-offs</span>
+    <h2>Layer 3 · 取捨</h2>
+    <p class="link-back">L2 的每一階段都有更快但更危險的替代做法。</p>
+    <div class="scroll"><table>
+      <tr><th>決策</th><th>選擇</th><th>對手輸在哪</th><th>代價</th></tr>
+      <tr><td>遷移策略</td><td>Strangler fig 漸進切</td><td>Big-bang 一次切：週末停機，出事只能整批退</td><td>新舊並存好幾個月，兩套都要 on-call</td></tr>
+      <tr><td>資料同步</td><td>CDC（讀舊 DB 的 binlog / WAL）</td><td>app 層 dual-write：兩個寫入不在同一個交易，一邊成功一邊失敗就分岔</td><td>多一個要監控的 pipeline；CDC lag 就是新系統的資料延遲</td></tr>
+      <tr><td>驗證方式</td><td>shadow traffic + 自動比對</td><td>只靠測試環境：測不到真實的怪資料和依賴</td><td>運算成本約 2 倍；副作用要全部關掉</td></tr>
+      <tr><td>切流量工具</td><td>feature flag / LB 權重</td><td>DNS 權重：client 快取 DNS，調回來不會立刻生效</td><td>要有一個集中的 flag 服務，它自己也要高可用</td></tr>
+      <tr><td>切換順序</td><td>讀先切、寫後切</td><td>讀寫一起切：出問題時分不清是哪一邊</td><td>拉長並存期</td></tr>
+    </table></div>
+  </section>
+
+  <section id="l4" class="sheet">
+    <span class="tab">Sheet L4 · on AWS</span>
+    <h2>Layer 4 · AWS 怎麼做</h2>
+    <p class="link-back">L3 選了 CDC + LB 權重 + feature flag。AWS 上對應 DMS、ALB weighted target groups、AppConfig。</p>
+    <figure class="fig scroll">
+      <svg viewBox="0 0 750 290" role="img" aria-label="Migration on AWS: ALB listener rule sends /orders to two weighted target groups, legacy monolith 90 percent and new order service 10 percent; DMS full load plus CDC copies legacy RDS to the new Aurora; a reconciliation job compares both; AppConfig serves flags">
+        <defs><marker id="e4" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="var(--line)"/></marker></defs>
+        <g stroke="var(--line)" stroke-width="1.5">
+          <rect x="10" y="110" width="80" height="44" fill="var(--cyan-fill)"/>
+          <rect x="120" y="100" width="130" height="64" fill="var(--amber-fill)" stroke="var(--amber)"/>
+          <rect x="300" y="40" width="150" height="50" fill="var(--panel)" stroke-dasharray="5 3"/><rect x="300" y="180" width="150" height="50" fill="var(--cyan-fill)"/>
+          <rect x="510" y="40" width="130" height="50" fill="var(--panel)" stroke-dasharray="5 3"/><rect x="510" y="180" width="130" height="50" fill="var(--cyan-fill)"/>
+          <rect x="530" y="110" width="90" height="40" fill="var(--cyan-fill)"/>
+          <rect x="660" y="110" width="80" height="40" fill="var(--cyan-fill)"/>
+          <rect x="120" y="230" width="130" height="40" fill="var(--cyan-fill)"/>
+          <line x1="90" y1="132" x2="118" y2="132" marker-end="url(#e4)"/><line x1="250" y1="120" x2="298" y2="70" marker-end="url(#e4)"/><line x1="250" y1="145" x2="298" y2="200" marker-end="url(#e4)"/>
+          <line x1="450" y1="65" x2="508" y2="65" marker-end="url(#e4)"/><line x1="450" y1="205" x2="508" y2="205" marker-end="url(#e4)"/>
+          <line x1="575" y1="90" x2="575" y2="108" marker-end="url(#e4)"/><line x1="575" y1="150" x2="575" y2="178" marker-end="url(#e4)"/>
+          <line x1="640" y1="65" x2="698" y2="108" marker-end="url(#e4)" stroke-dasharray="4 3"/><line x1="640" y1="205" x2="698" y2="152" marker-end="url(#e4)" stroke-dasharray="4 3"/>
+          <line x1="250" y1="250" x2="375" y2="232" marker-end="url(#e4)" stroke-dasharray="4 3"/>
+        </g>
+        <g font-size="10" text-anchor="middle">
+          <text x="50" y="136">client</text>
+          <text x="185" y="124" class="hot">ALB rule /orders</text><text x="185" y="140" class="soft">weighted TG</text><text x="185" y="154" class="soft">90 / 10</text>
+          <text x="375" y="62">legacy monolith</text><text x="375" y="78" class="soft">90%</text>
+          <text x="375" y="202">order service</text><text x="375" y="218" class="soft">10% · EKS</text>
+          <text x="575" y="62">legacy RDS</text><text x="575" y="78" class="soft">真相（至今）</text>
+          <text x="575" y="134">DMS</text><text x="575" y="146" class="soft">full + CDC</text>
+          <text x="575" y="202">Aurora (new)</text><text x="575" y="218" class="soft">CDC 寫入</text>
+          <text x="700" y="128">對帳 job</text><text x="700" y="142" class="soft">diff rate</text>
+          <text x="185" y="248">AppConfig flag</text><text x="185" y="262" class="soft">讀/寫各一個開關</text>
+        </g>
+      </svg>
+      <figcaption>FIG 4-A · 寫入仍以舊 RDS 為準，DMS 用 CDC 把變更送到新 Aurora；ALB 權重控制讀流量比例；對帳 job 持續算兩邊差異。</figcaption>
+    </figure>
+    <div class="scroll"><table>
+      <tr><th>服務</th><th>用在</th><th>常見陷阱</th></tr>
+      <tr><td>AWS DMS</td><td>full load + CDC</td><td>limited LOB mode 會把超過上限的 LOB 截斷，而且不報錯；要開 data validation 或自己對帳。來源 DB 要先開 binlog / logical replication，保留期要夠長。</td></tr>
+      <tr><td>DMS CloudWatch metrics</td><td>CDC 健康度</td><td><code>CDCLatencySource</code> 和 <code>CDCLatencyTarget</code> 分開看：前者高是讀不到變更，後者高是寫不進新 DB。</td></tr>
+      <tr><td>ALB weighted target groups</td><td>canary 比例</td><td>開了 target group stickiness，使用者會黏在某一邊，比例不是你設的 10%。調權重前確認 stickiness 設定。</td></tr>
+      <tr><td>Route 53 weighted</td><td>跨 region 或整站切換</td><td>client 和中間 resolver 快取 DNS，調回 0 之後還會有流量持續進來一段時間。</td></tr>
+      <tr><td>AppConfig feature flags</td><td>讀寫切換開關</td><td>CloudWatch Evidently 已於 2025-10 停止支援，舊文件還在推它。AppConfig 有部署策略和自動回滾，但沒有 A/B 統計分析。</td></tr>
+    </table></div>
+    <p class="small">職場真實面：PM 要「下個 sprint 切完」，DBA 擔心 binlog 保留和 CDC 對來源 DB 的負載，SRE 要求每個階段寫好回滾條件才准往下走。Design review 一定被問：「你的不可回頭點在哪？過了之後出事怎麼辦？」</p>
+  </section>
+
+  <section id="l5" class="sheet">
+    <span class="tab">Sheet L5 · scale</span>
+    <h2>Layer 5 · 規模化</h2>
+    <p class="link-back">L4 是一次遷移。公司做多了之後，遷移本身會變成一條平台化的流程。</p>
+    <figure class="fig scroll">
+      <svg viewBox="0 0 740 260" role="img" aria-label="Release maturity ladder: maintenance window, blue-green, canary with flags, shadow plus automated diff, progressive delivery with automated analysis">
+        <g stroke="var(--line)" stroke-width="1.5">
+          <rect x="10" y="200" width="130" height="48" fill="var(--cyan-fill)"/><rect x="155" y="160" width="130" height="88" fill="var(--cyan-fill)"/><rect x="300" y="120" width="130" height="128" fill="var(--cyan-fill)"/>
+          <rect x="445" y="80" width="130" height="168" fill="var(--amber-fill)" stroke="var(--amber)"/><rect x="590" y="40" width="140" height="208" fill="var(--cyan-fill)"/>
+        </g>
+        <g font-size="10" text-anchor="middle">
+          <text x="75" y="218">1 維護時段</text><text x="75" y="234" class="soft">停機 + 一次切</text>
+          <text x="220" y="178">2 blue/green</text><text x="220" y="194" class="soft">兩套環境整批切</text>
+          <text x="365" y="138">3 canary + flag</text><text x="365" y="154" class="soft">比例漸進、人工看圖</text>
+          <text x="510" y="98" class="hot">4 shadow + 自動 diff</text><text x="510" y="114" class="soft">真實流量驗證</text>
+          <text x="660" y="58">5 progressive delivery</text><text x="660" y="74" class="soft">metric 自動判斷</text><text x="660" y="90" class="soft">自動 promote / 回滾</text>
+        </g>
+        <g font-size="10" class="cjk soft" text-anchor="middle"><text x="220" y="240">資源 ×2</text><text x="365" y="240">要有 flag 平台</text><text x="510" y="240">副作用要隔離</text><text x="660" y="240">SLO 要先定義好</text></g>
+      </svg>
+      <figcaption>FIG 5-A · 發佈與遷移的成熟度梯子。第 5 級的工具例：Argo Rollouts analysis、Flagger。前提是 SLO 已經定義清楚，機器才知道什麼叫「壞了」。</figcaption>
+    </figure>
+    <div class="scroll"><table>
+      <tr><th>路線</th><th>做法</th><th>贏在</th><th>輸在</th></tr>
+      <tr><td>CDC 驅動</td><td>舊 DB 是真相，CDC 單向流到新 DB，最後反轉方向</td><td>舊系統不用改 code；回滾簡單</td><td>新系統在切寫入前只能讀；CDC pipeline 成為關鍵元件</td></tr>
+      <tr><td>事件驅動</td><td>舊系統先改成發 domain event，新服務消費事件建自己的資料</td><td>新服務的資料模型可以重新設計；之後其他服務也能訂閱</td><td>要先改舊系統；事件和資料庫寫入要用 outbox 保證一致</td></tr>
+    </table></div>
+  </section>
+
+  <section id="l6" class="sheet">
+    <span class="tab">Sheet L6 · on-call</span>
+    <h2>Layer 6 · 故障與 on-call</h2>
+    <p class="link-back">L2 的切換靠 flag 和部署。最貴的遷移事故通常不是新程式有 bug，是新舊程式的狀態不一致。</p>
+    <figure class="fig scroll">
+      <svg viewBox="0 0 740 210" role="img" aria-label="Knight Capital 2012: new code deployed to 7 of 8 servers; a repurposed flag turned on old dead code on the 8th server; 45 minutes of erroneous orders">
+        <g stroke="var(--line)" stroke-width="1.5">
+          <rect x="20" y="40" width="60" height="44" fill="var(--green-fill)" stroke="var(--green)"/><rect x="90" y="40" width="60" height="44" fill="var(--green-fill)" stroke="var(--green)"/><rect x="160" y="40" width="60" height="44" fill="var(--green-fill)" stroke="var(--green)"/><rect x="230" y="40" width="60" height="44" fill="var(--green-fill)" stroke="var(--green)"/>
+          <rect x="300" y="40" width="60" height="44" fill="var(--green-fill)" stroke="var(--green)"/><rect x="370" y="40" width="60" height="44" fill="var(--green-fill)" stroke="var(--green)"/><rect x="440" y="40" width="60" height="44" fill="var(--green-fill)" stroke="var(--green)"/>
+          <rect x="510" y="40" width="60" height="44" fill="var(--red-fill)" stroke="var(--red)"/>
+        </g>
+        <g font-size="10" text-anchor="middle"><text x="50" y="66">新</text><text x="120" y="66">新</text><text x="190" y="66">新</text><text x="260" y="66">新</text><text x="330" y="66">新</text><text x="400" y="66">新</text><text x="470" y="66">新</text><text x="540" y="66" class="bad">舊</text></g>
+        <text x="20" y="110" font-size="11" class="cjk">flag 開啟：7 台跑新功能</text>
+        <text x="440" y="110" font-size="11" class="bad cjk">第 8 台沒部署到：同一個 flag 喚醒多年前的舊程式</text>
+        <rect x="20" y="130" width="700" height="34" fill="var(--red-fill)" stroke="var(--red)"/>
+        <text x="30" y="152" font-size="11" class="bad cjk">約 45 分鐘內送出大量錯誤訂單，損失超過 4.6 億美元</text>
+        <text x="20" y="195" font-size="10" class="soft cjk">兩個教訓：flag 不要重複利用舊名字；部署完要驗證「每一台」的版本一致，不能假設。</text>
+      </svg>
+      <figcaption>FIG 6-A · Knight Capital 2012-08-01。部署漏了一台，加上重複使用的 flag，新舊程式在同一個系統裡同時運作。</figcaption>
+    </figure>
+    <p class="small">來源：<a href="https://www.sec.gov/news/press-release/2013-222">SEC press release 2013-222 · Knight Capital</a></p>
+    <div class="scroll"><table>
+      <tr><th>遷移中的訊號</th><th>怎麼量</th><th>預先寫好的回滾條件（例）</th></tr>
+      <tr><td>diff rate</td><td>shadow / 對帳 job 比對新舊回應或資料列</td><td>&gt; 0.1% 停止往下一階段；&gt; 1% 回滾</td></tr>
+      <tr><td>CDC lag</td><td>DMS <code>CDCLatencyTarget</code></td><td>超過 60 s 不准切讀流量</td></tr>
+      <tr><td>新路徑 error budget</td><td>新系統的 5xx、p99，跟舊系統同一條 SLO</td><td>新路徑 burn rate 比舊路徑快 2 倍以上，權重調回 0</td></tr>
+      <tr><td>版本一致</td><td>每台 / 每個 Pod 回報版本</td><td>有任何一台版本不符，暫停 flag 變更</td></tr>
+    </table></div>
+  </section>
+
+  <section id="l7" class="sheet">
+    <span class="tab">Sheet L7 · interview</span>
+    <h2>Layer 7 · 面試</h2>
+    <blockquote>「訂單模組在一個 monolith 裡，跟其他模組共用一個 MySQL。請在零停機的前提下把它拆成獨立的 Order Service。」<span class="en">"Carve the orders module out of the monolith into its own service. Zero downtime."</span></blockquote>
+    <p class="sub">先自己講一遍，再打開。</p>
+    <details><summary>L4 ANSWER</summary><div>
+      <p>「新建 Order Service 和自己的 DB，把資料 copy 過去，測試沒問題後把流量切過去。」</p>
+      <p class="small">沒處理 copy 期間的寫入、沒有驗證方法、沒有回滾、沒有不可回頭點。</p>
+    </div></details>
+    <details><summary>L6 ANSWER</summary><div>
+      <p>「先畫依賴：誰讀寫 orders 表？有沒有其他模組直接 JOIN 它？那些 JOIN 要先改成呼叫 API，這是拆分的前置工作。」</p>
+      <p>「資料用 CDC：舊 MySQL 仍是真相，binlog 單向同步到新 DB。backfill 用 conditional write，避免舊值蓋掉新值。」</p>
+      <p>「流量用 strangler：前面加 router。先 shadow 讀流量比對，diff rate 低於 0.1% 再 canary 1% → 10% → 50% → 100%。讀先切，寫最後切。」</p>
+      <p>「切寫入是不可回頭點。之前回滾只是把權重調回 0。切之後我會把 CDC 反轉，新 DB 同步回舊 DB 一段時間，保留退路。」</p>
+      <p>「監控：新舊兩條路徑同一條 SLO、diff rate、CDC lag。每一階段的回滾條件事前寫在 runbook 裡。」</p>
+      <p class="small">L6 多了：先處理依賴、CDC 和 backfill race、量化的推進門檻、明確的不可回頭點和反向同步。</p>
+    </div></details>
+    <h3>Mock 輸出卡：開口前對一次</h3>
+    <ol>
+      <li>Step 1 自己跑完 clarify，用斷言句圈範圍。</li>
+      <li>每個結論同一句帶數字和代價。cost 那格不准寫「low / high」。</li>
+      <li>問兩件事就答兩件事。</li>
+      <li>答案用句號結尾，不用問號。</li>
+      <li>收尾主動講監控：3AM 那一條 page 是什麼症狀。</li>
+    </ol>
+  </section>
+
+  <section id="trail" class="sheet">
+    <span class="tab">Redline · habits to clear</span>
+    <h2>我的錯題軌跡：帶進 P4 的輸出習慣債</h2>
+    <p class="small">P4 的 Day 66-67「弱點補強」就是清這一頁。內容都會，問題在壓力下的輸出。</p>
+    <div class="trail">
+      <div class="redline"><b>REDLINE · s29 → s36 → s41</b>答案太精簡、只報結論，被追問才展開。</div>
+      <div class="rev"><b>REV · s38</b> 收尾 one-liner 主動綁結論 + 論證，當場突破過一次。輸出卡第 2 條。</div>
+      <div class="redline"><b>REDLINE · s38 → s49 → s52</b>知道答案卻用問號收尾：「用統一的限流器嗎？」「alert 嗎？」「是不是離題了？」</div>
+      <div class="rev"><b>REV</b> 面試官聽到問號，聽到的是你自己也不確定。同場直述的那幾句都是對的。</div>
+      <div class="redline"><b>REDLINE · s26 / s30 / s34 / s36 / s40</b>drill 收尾沒主動提監控，前後五次。</div>
+      <div class="rev"><b>REV</b> 3AM page test 焊進框架當第 5 步硬關卡。輸出卡第 5 條。</div>
+      <div class="redline"><b>REDLINE · s40</b>trade-off 的 cost 格填「low」。</div>
+      <div class="rev"><b>REV</b> cost 要寫會咬人的東西：多一跳延遲、要多維運一套、哪種故障會發生。</div>
+      <div class="redline"><b>REDLINE · s36 → s42 → s44 → s46 → s48</b>卡住時「直接說吧」，五次；s46 一場三連。</div>
+      <div class="rev"><b>REV · s44 / s48</b> 兩種原因要分開：腦中沒圖就被逼組句子（先畫圖），和缺建模步驟（先寫單位式）。縮到一小步就都做得出來。</div>
+      <div class="redline"><b>REDLINE · s42 / s50</b>卡住時質疑題目：「面試不會考吧」「完整怎麼切應該不重要」。</div>
+      <div class="rev"><b>REV</b> s50 那次精確 bit 數確實不是考點，但答案漏掉了題目給的 100 台。先用完題目給的數字，再討論重不重要。</div>
+      <div class="redline"><b>REDLINE · s39 / s49</b>問兩件事只答一件；同一題連問三次直接跳過不答。</div>
+      <div class="rev"><b>REV</b> 輸出卡第 3 條。跳過的球下一場開頭第一顆重投。</div>
+    </div>
+  </section>
+
+  <section id="next" class="sheet">
+    <span class="tab">Topics · deeper notes</span>
+    <h2>本章 topic 筆記</h2>
+    <div class="scroll"><table>
+      <tr><th>topic</th><th>程度</th><th>筆記</th></tr>
+      <tr><td>Trade-off Analysis Deep Dive (Day 60-61)</td><td><span class="stamp todo">待學</span></td><td><span class="small">L2 回答骨架是預習</span></td></tr>
+      <tr><td>Brownfield / Legacy Migration (Day 62-63)</td><td><span class="stamp todo">待學</span></td><td><span class="small">本頁 L1–L6 是預習</span></td></tr>
+      <tr><td>Mock Interview Round 1 (Day 64-65)</td><td><span class="stamp todo">待學</span></td><td>–</td></tr>
+      <tr><td>Weak Spot Reinforcement (Day 66-67)</td><td><span class="stamp todo">待學</span></td><td><span class="small">REDLINE 就是清單</span></td></tr>
+      <tr><td>Final Mock (Day 68-69)</td><td><span class="stamp todo">待學</span></td><td>–</td></tr>
+    </table></div>
+  </section>
+</main>
