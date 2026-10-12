@@ -23,14 +23,17 @@
      S50 的 coach 自產假訊息事故與應對規則另遷入 coaching-brief.md「Coach 自檢硬規則」。
      本區段 2026-08-19 之前的完整原文封存於 archive/breakpoint-history.md(冷檔,一字未刪)。 -->
 
+**S52 續(2026-10-13)F ✅(supported)**:quick-fire 卡 1 lock granularity ✅、卡 2 thundering herd ✅ / deregistration delay ❌(講成 CB/slow start,上線端 vs 下線端軸錯)。F teach-back:B 路徑自講完整;A 最後一段三錯(走推播 / WS=request-response / 從 DB 送)→ 連錯三次後 coach 給答 + senior 英文範例,之後三句自講(supported)。Yuki Q1「全走推播」:經兩步縮題後直述結論過。學生喊「今天先到這裡」,G 未跑(保留)。學生自報 ADHD → 每輪一圖一問(coaching-brief 已記)。
+
 **S52(2026-10-11)進行中:chunk 5(offline delivery)✅**(Recall 被戳一次補主詞;Transfer 換手機 410 → 兩軸 + LINE 對照 SoT 自填全對)。quick-fire CB 卡 fail(OPEN 名字第三次掉,HALF-OPEN 理由自推);Observability 卡併入 chunk 6。**chunk 6 ✅**(首選 M2 DB = 元件重要性 vs 使用者症狀軸摺疊,Redis-down 反證後自修;重選 delivery latency + 不用 CPU 理由對,「網路監控」由 coach 刪;Transfer 離線 3 天 → 誤報 + 只算在線、PUBLISH return 1 自答)。Day 35 chunk 1–6 全過;Real-World Grounding 六格已給。F(教 Yuki,題目已出:行員送出→客戶讀到,在線/背景兩情況)學生未作答即喊「有點累 今天先到這裡」收工。session_count 未加(H 未完成)。
 
 P3 / Chat System(Day 35)/ chunk 3 ✅(2026-10-10 S51 續,scaffold 下過:catch-up 自答 last_msg_id + `> 1042`;範圍條件只到「and bob」,外洩後果與 conversation_id/參與者驗證由 coach 給)→ chunk 4(ordering)✅ S51 續:Recall 自組「atomic increment + 不用時間(NTP 仍不一致)+ DB 欄位 + lock 排隊」,代價 unprompted;範圍格漏掉,鎖粒度答錯(選全表)後教 row-level lock 補上;Transfer(1045 先到)「不連續→catch-up」最小單位過,buffer/逾時/去重由 coach 補。下一步 chunk 5。S51 2026-10-10 學生喊「今天先到這裡」收工,F/G 未跑(保留在 resume),session_count 未加。
 
-下一場 resume(S52 後):
+下一場 resume(S52 續 2026-10-13 後):
+0. **開場短 G**(Chat System 1v1,L3,只考 online vs background 兩條路 + 3AM page + cost;換情境重測 A/B 路徑摺疊)→ 過了就進 Day 36 Group Chat + Presence + Read Receipts。
 1. ~~catch-up 球~~ ✅ S51 續。Redis pub/sub vs Kafka vs 直接 RPC 路線比較改在 G 抽。
 2. ~~chunk 4/5/6~~ ✅(chunk 5/6 於 S52)。
-2b. **F 從頭跑**:教 Yuki 同一題(不看筆記、編號、誰做什麼)→ 2-4 追問。
+2b. ~~F 從頭跑~~ ✅ S52 續(supported)。原文:教 Yuki 同一題(不看筆記、編號、誰做什麼)→ 2-4 追問。
 3. 收尾 drill:FSI 題 Step 1 起自己走 + 3AM page test + cost 雙問;F/G 補跑。
 4. 冷測債:thundering herd / deregistration delay 兩名詞 S51 冷抽仍失敗(+3 天,2026-10-13);separate 反面代價換場景仍未跑。
 
@@ -71,7 +74,7 @@ Weak-topic flags: 無(至今沒有帶 flag 過 gate 的紀錄)。
 - URL Shortener (Day 27-28): high (s35)— S34 Drill 8/9 + S35 PoC 全綠(50 萬碼 0 碰撞 + -race 零警告)
 - Unique ID Generator (Day 29-30): high (s36)— PoC(bit packing + clock skew 偵測)park
 - Distributed Rate Limiter (Day 31-32): high (s40)— 設計知識到位;S40 Gauntlet 暴露輸出習慣病灶
-- Chat System (Day 35-37): med (s52)— Day 35 1v1 的 chunk 1–6 Feynman Gate 全過(多數有 scaffold/戳一次);F/G 未跑,未驗獨立輸出
+- Chat System (Day 35-37): med (s52)— Day 35 1v1 的 chunk 1–6 Feynman Gate 全過(多數有 scaffold/戳一次);F ✅ S52 續(supported,A 路徑三錯後給答);G 未跑,未驗獨立輸出
 
 ## Scorecard history
 
@@ -107,14 +110,16 @@ Weak-topic flags: 無(至今沒有帶 flag 過 gate 的紀錄)。
      無卡的設 3 天(2026-07-13)。unresolved-session-count = 40 - 建立 session(近似;≥5 依 engine
      Priority Override 置頂,step A 每堂上限內逐步清)。 -->
 
-### Live(unresolved,45 筆)
+### Live(unresolved,46 筆)
 
 - (s52) | Circuit Breaker(術語) | quick-fire:auth 變慢、CB 跳開後的 state 名稱「不知道」;跳開後 call 的去向只答「不會送」,fail fast 未講 | OPEN 名字第三次掉(S28 resolved → S40 重焊 → S52);HALF-OPEN 的理由(「一起動又被打掛」)自推但沒掛上名字 = 機制在、標籤未綁(RP5) | unresolved | 3 | 2026-10-14 | 0
-- (s52) | Chat System(offline delivery) | 「server 為何不能主動連 Bob 手機」理由答「HTTP 是 request/response 單向」;push 答對卻用「但是不是離題了?」收回 | 軸錯:限制是誰能撥給誰(NAT、無 public IP、OS 關背景連線),不是 protocol 方向;反證「換 WebSocket 就能撥?」可破(RP1) | unresolved | 3 | 2026-10-14 | 0
+- (s52) | Chat System(offline delivery) | 「server 為何不能主動連 Bob 手機」理由答「HTTP 是 request/response 單向」;push 答對卻用「但是不是離題了?」收回 | 軸錯:限制是誰能撥給誰(NAT、無 public IP、OS 關背景連線),不是 protocol 方向;反證「換 WebSocket 就能撥?」可破(RP1) | unresolved | 3 | 2026-10-16 | 1 S52 續 F 再現:「WebSocket 是 request and response,所以 server 不能主動撥號」= protocol 方向 vs 誰撥號軸仍摺疊;又說「推播 server 不能主動發起」(反了)。
 - (s52) | Observability(alert 選點) | 3AM 只能設一條 page:選 M2 DB commit latency,理由「DB 是最重要的真相來源」;重選時先講「網路監控」 | 軸摺疊:元件重要性 vs 使用者症狀;Redis-down 反證後自修成 end-to-end delivery latency。離線 3 天陷阱自答「只算在線 + PUBLISH return 1」(RP7) | unresolved | 3 | 2026-10-14 | 0
-- (s51) | Database(lock granularity) | `UPDATE conversations ... WHERE id='conv-A'` 會擋誰:選「別的對話 conv-B 的寫入」(以為鎖全表) | 前置知識缺口(未教過,非推理錯):row-level vs table lock;連帶 per-conversation counter 的代價範圍講不出(「這我不確定」)。教後自組「同對話排隊、不同對話不影響」 | unresolved | 3 | 2026-10-13 | 0
-- (s51) | Chat System(pub/sub 語意) | 「pub/sub 掛 10 分鐘,Bob 何時看得到」答「pub/sub 恢復正常」;接著答「DB 記錄最後傳了什麼,redis 重啟才知道補哪些」 | 兩個錯疊在一起:(1) 以為 pub/sub 會緩衝/重送(Redis pub/sub 是 fire-and-forget);(2) **actor 錯置**:把 catch-up 交給 Redis,正解是 client 帶 last_msg_id、server 查 DB 補送(RP1 layer/ownership;Redis 當 truth 強先驗家族再現)。同場儲存 vs 投遞兩軸表**自己填對**(S50 軸摺疊本場拆開) | unresolved | 3 | 2026-10-13 | 0
-- (s50) | 分散式術語(deregistration delay) | 「ALB 摘掉 target 後既有連線還保留多久」的設定名答成「timeout 時間」;提示到「預設 300 秒、你在 billing 調過」仍未撈出正解 | 術語-概念未綁定家族;機制他懂(分批送人走),缺的是**名字**。同場另一個名詞 thundering herd 也是先講機制(「羊群效應 同時打」)才由 coach 補英文。**兩個名詞下場冷抽**;對照:deregistration delay = 分批斷(server 側)/ backoff + jitter = 分散回來(client 側) | unresolved | 3 | 2026-10-13 | 1
+- (s52 續) | Chat System(online last hop) | F teach-back 教 Yuki:A(app 開著)最後一段答成「走 iPhone/Android 內建通道(推播)」;理由用的是 B 的(不放機密);被問誰撥 WS 答「chat-3」;填空「chat-3 從 DB 把訊息送下去」 | 線上 vs 背景兩條路摺疊 + storage vs delivery 軸回退(S51 兩軸表曾自填對):把 chunk 5「server 不能撥號」過度推廣成「server 不能送」。連錯三次後 coach 給答 + 三步圖,之後三句自講 = supported,非獨立(RP1) | unresolved | 3 | 2026-10-16 | 0
+- (s51) | Database(lock granularity) | `UPDATE conversations ... WHERE id='conv-A'` 會擋誰:選「別的對話 conv-B 的寫入」(以為鎖全表) | 前置知識缺口(未教過,非推理錯):row-level vs table lock;連帶 per-conversation counter 的代價範圍講不出(「這我不確定」)。教後自組「同對話排隊、不同對話不影響」 | unresolved | 7 | 2026-10-20 | 1 S52 續 quick-fire ✅:T2 等(同列)、T3 不等「WHERE 只限制住 A」直述自答;名詞 row-level lock 未自產、「會員 ID」口誤由 coach 修。
+- (s51) | Chat System(pub/sub 語意) | 「pub/sub 掛 10 分鐘,Bob 何時看得到」答「pub/sub 恢復正常」;接著答「DB 記錄最後傳了什麼,redis 重啟才知道補哪些」 | 兩個錯疊在一起:(1) 以為 pub/sub 會緩衝/重送(Redis pub/sub 是 fire-and-forget);(2) **actor 錯置**:把 catch-up 交給 Redis,正解是 client 帶 last_msg_id、server 查 DB 補送(RP1 layer/ownership;Redis 當 truth 強先驗家族再現)。同場儲存 vs 投遞兩軸表**自己填對**(S50 軸摺疊本場拆開) | unresolved | 3 | 2026-10-16 | 1 S52 續 F:B 路徑 catch-up actor 自講對(重連 → SELECT 上次之後、限定使用者);fire-and-forget 未測,部分證據不升 interval。
+- (s50) | 分散式術語(deregistration delay) | 「ALB 摘掉 target 後既有連線還保留多久」的設定名答成「timeout 時間」;提示到「預設 300 秒、你在 billing 調過」仍未撈出正解 | 術語-概念未綁定家族;機制他懂(分批送人走),缺的是**名字**。同場另一個名詞 thundering herd 也是先講機制(「羊群效應 同時打」)才由 coach 補英文。**兩個名詞下場冷抽**;對照:deregistration delay = 分批斷(server 側)/ backoff + jitter = 分散回來(client 側) | unresolved | 3 | 2026-10-16 | 2
+  - **S52 續 quick-fire**(2026-10-13):thundering herd 名字 ✅ 冷答出;deregistration delay ❌,講成「類似 CB、啟動時先 test、不讓系統一啟動就被打掛」= 上線端(slow start / HALF-OPEN)劫持下線端(draining),強先驗劫持家族。生命週期圖(上線端 vs 下線端)教後,Transfer「draining 300s 後砍掉 2 萬條 WS」自答 auth/DB 被打爆 ✅。interval 重置 3
   - **S51 冷抽 fail**(2026-10-10,隔 51 天):兩個名字都「忘記了」;機制在縮題後自推回(2 萬條 1 秒內、共用的 auth/DB 先倒),jitter 自產、backoff 只到「延長一點吧」,名字與 deregistration delay 由 coach 給。interval 重置 3
 - (s50) | Interview habit(質疑題目正當性) | 盲測球 1 首答「完整怎麼切應該不重要」把題目降級,且該答案漏掉題目明寫的 100 台(machine ID 那格) | 逃避家族第 3 次面具(S42 兩次 →S50);⚠️ **coach 自我修正**:精確 bit 數確實不是考點,學生這半邊有道理,**下次不要拿「面試會考」硬撐,直接指出他的答案漏了題目給的數字**,那才是有效施壓點 | unresolved | 3 | 每場 drill 即測 | 0
 - (s48) | Capacity(modeling) | `130 台 worker × 每台佔 36s → 每秒空出幾台` 講不出算式:縮到單一除法後仍問「要怎麼算啊」,給 rate 模型骨架(一台 36s 放手一次 = 1/36 台/秒)後即答 3.6 | ⚠️ **與棄權家族分家的新根因**:算術沒問題(同場 `(10+2)×3=36` unprompted 算對),缺的是**把場景翻成算式**的 modeling 步驟;治法=每場塞一題「先寫出單位式(X per second 是什麼除什麼)」再算數字 | unresolved | 7 | 2026-08-18 | 0

@@ -13,6 +13,15 @@
      - docs/curriculum-roadmap.md、docs/planning-review.md → workspaces/sd/archive/pre-migration/
      - sd-coach skill 本體         → skills/sd-coach/(curriculum 詳文=references/curriculum-detail.md) -->
 
+## S52 續(2026-10-13,quick-fire 兩卡 + F;G 前停)
+
+- 間隔 2 天,無 Comeback。開場第一則塞了回顧 + 路線 + 題目,學生回「我有 ADHD」→ 改每輪一圖一問(memory + coaching-brief 已記)。
+- quick-fire 卡 1 lock granularity ✅(T3 不等:「WHERE 只限制住 A」)。卡 2 thundering herd ✅ / deregistration delay ❌:講成 CB 式「啟動先 test」= 上線端劫持下線端;生命週期圖教後 Transfer(draining 到期砍 2 萬 WS → auth/DB 爆)自答 ✅。
+- F 教 Yuki:開頭監管 → 先存 DB、WS vs polling 理由自發 🌟;B 路徑(content-free push → 重連 → SELECT 上次之後、限定使用者)自講完整。A 最後一段三錯:走推播、「WS 是 request/response」、「chat-3 從 DB 送下去」;中途學生說圖資訊量太大、要中文提示 → 圖縮成三步 + 圖下中文。連錯三次後 coach 給答,學生要求 senior 版本 → 英文 shadowing 範例給畢;之後三句自講(supported)。
+- Yuki Q1「全走推播」:先答「推播單向」→ 反問 POST 回去 → 答「server 不能發起」(反了)→ 縮成「app 收到通知後要做什麼」→ 自答回撈 → 結論先用兩個「嗎」→ 要求直述後完整重講(多一趟、延遲/限流、所以用 WS)✅。
+- 問句收尾 4 次(應該是 B 吧 / 是這樣子嗎 / 嗎 ×2);直述 2 次(A 撥給 chat server、Yuki 結論重講)。三指標:argument 🟡(Yuki 結論要求後才直述)/ ops 未測 / capacity 未測。
+- coach 自省:F 的 `???` 框圖兩次畫太滿(chat server 框出現兩次),學生「不知道在問什麼」是圖的錯;ADHD 揭露前的開場太長。
+
 ## S52(2026-10-11,Day 35 chunk 5–6;F 出題後停)
 
 - 間隔 1 天,無 Comeback。開場 quick-fire CB 卡:第一版 timeline 一次挖 6 個洞,學生「看不懂要我幹嘛」= coach 步伐太大,縮成單格後作答。OPEN 名字不知道(第三次掉),「不會送」方向對但 fail fast 沒講;HALF-OPEN 的理由自推。卡判 fail。Observability 卡不另抽,併入 chunk 6。
