@@ -1,6 +1,35 @@
 const KEY = "learning-map.practice.v1";
 const object = (x) => !!x && typeof x === "object" && !Array.isArray(x);
 export const attemptKey = (q) => `${q.id}@${q.revision}`;
+export function answerText(q, answer) {
+  if (answer == null || answer === "" || (Array.isArray(answer) && !answer.length))
+    return "未作答";
+  if (
+    (q.type === "fill" && !["string", "number"].includes(typeof answer)) ||
+    (q.type === "match" && !object(answer)) ||
+    (["choice", "order"].includes(q.type) &&
+      (!Array.isArray(answer) || !answer.every((id) => typeof id === "string")))
+  )
+    return "無法顯示此答案";
+  if (q.type === "fill")
+    return `${answer}${q.answer.unit ? " " + q.answer.unit : ""}`;
+  if (q.type === "match")
+    return q.items.map((item) =>
+      `${item.text} → ${q.targets.find((target) => target.id === answer[item.id])?.text ?? "未選擇"}`,
+    ).join("；");
+  return answer.map((id) =>
+    (q.options ?? q.items).find((item) => item.id === id)?.text ?? id,
+  ).join(q.type === "order" ? " → " : "；");
+}
+function referenceAnswer(q) {
+  if (q.type === "fill")
+    return q.answer.kind === "text"
+      ? q.answer.accepted.join(" / ")
+      : answerText(q, q.answer.value);
+  if (q.type === "order")
+    return q.answer.map((order) => answerText(q, order)).join("；或：");
+  return answerText(q, q.answer);
+}
 export function gradeQuestion(q, a) {
   let correct = false,
     details = [];
@@ -178,6 +207,18 @@ const TYPE = {
   order: "排序題",
   match: "配對與分類",
 };
+function explanation(q) {
+  const items = q.type === "choice" ? q.options : q.type === "match" ? q.items : [];
+  const source = q.source.path.endsWith(".md")
+    ? `<a href="#/read/${encodeURIComponent(q.source.path)}">`
+    : `<a href="files/${esc(encodeURI(q.source.path))}" target="_blank" rel="noopener">`;
+  return `<p><strong>參考答案：</strong>${esc(referenceAnswer(q))}</p><p><strong>解說：</strong>${esc(q.explanation)}</p>${items.length ? `<ul>${items.map((item) => `<li><strong>${esc(item.text)}</strong>：${esc(item.feedback)}</li>`).join("")}</ul>` : ""}${source}回到教材 · ${esc(q.source.section)} ↗</a>`;
+}
+function attemptStatus(a) {
+  if (!a) return "尚未作答";
+  if (a.skipped) return "已略過";
+  return a.correct ? (a.hintUsed ? "提示後答對" : "無提示答對") : "答錯";
+}
 export function mountPractice(container, chapter, { state, onSave, onExit }) {
   let st = state ?? { queue: makeRound(chapter), index: 0, attempts: {} };
   const byId = new Map(chapter.questions.map((q) => [q.id, q]));
@@ -236,6 +277,13 @@ export function mountPractice(container, chapter, { state, onSave, onExit }) {
         .join("")}</div>
       <p class="muted">目前 ${weak.length} 個主題目需要再練。重做答對不會改寫首次結果。</p>
       <div class="actions">${weak.length ? '<button class="btn primary" id="retry">練習弱項變式 →</button>' : ""}<button class="btn" id="again">再練本章</button></div>
+      <section id="question-review" aria-labelledby="question-review-title"><h2 id="question-review-title">逐題回顧</h2><p class="muted">展開查看首次與最新作答，以及每題的解說。只顯示目前題目版本的紀錄。</p>${chapter.questions
+        .filter((q) => !q.variantOf || st.attempts[attemptKey(q)])
+        .map((q, i) => {
+          const evidence = st.attempts[attemptKey(q)];
+          const attempts = [["首次作答", evidence?.firstAttempt], ["最新作答", evidence?.latestAttempt]];
+          return `<details class="question-review" data-review-question="${esc(q.id)}"><summary><span>${q.variantOf ? "變式" : `第 ${i + 1} 題`} · ${esc(q.prompt)}</span><span class="badge">${attemptStatus(evidence?.latestAttempt)}</span></summary><div class="review-content">${attempts.map(([label, a]) => `<p><strong>${label}：</strong>${esc(a?.skipped ? "已略過" : answerText(q, a?.answer))}<br><span class="muted">${attemptStatus(a)}${a && !a.skipped ? ` · ${a.hintUsed ? "使用提示" : "未用提示"} · ${a.confidence === "sure" ? "確定" : "不確定"}` : ""}</span></p>`).join("")}${explanation(q)}</div></details>`;
+        }).join("")}</section>
       <section class="challenge"><span class="eyebrow">把理解帶到實作</span><h2>下一步，親手驗證</h2><p>${esc(chapter.challenge.prompt)}</p><ul>${chapter.challenge.criteria.map((x) => `<li>${esc(x)}</li>`).join("")}</ul><span class="badge">待實作／教練驗證</span></section>`;
     container.querySelector("#exit").onclick = onExit;
     container.querySelector("#again").onclick = () => {
@@ -390,41 +438,8 @@ export function mountPractice(container, chapter, { state, onSave, onExit }) {
         .querySelectorAll("input,select,button")
         .forEach((x) => (x.disabled = true));
       const a = st.attempts[attemptKey(q)].latestAttempt;
-      const answer =
-        q.type === "choice"
-          ? q.options
-              .filter((o) => q.answer.includes(o.id))
-              .map((o) => o.text)
-              .join("；")
-          : q.type === "fill"
-            ? q.answer.kind === "number"
-              ? q.answer.value
-              : q.answer.accepted.join(" / ")
-            : q.type === "order"
-              ? q.answer[0]
-                  .map((id) => q.items.find((i) => i.id === id).text)
-                  .join(" → ")
-              : q.items
-                  .map(
-                    (i) =>
-                      `${i.text} → ${q.targets.find((t) => t.id === q.answer[i.id]).text}`,
-                  )
-                  .join("；");
-      const explanations =
-        q.type === "choice"
-          ? q.options
-              .map(
-                (o) =>
-                  `<li><strong>${esc(o.text)}</strong>：${esc(o.feedback)}</li>`,
-              )
-              .join("")
-          : q.type === "match"
-            ? q.items
-                .map((i) => `<li>${esc(i.text)}：${esc(i.feedback)}</li>`)
-                .join("")
-            : "";
       container.querySelector("#feedback").innerHTML =
-        `<section class="feedback ${a.correct ? "correct" : "rethink"}"><h2 tabindex="-1">${a.skipped ? "先記下這個觀念" : a.correct ? (a.hintUsed ? "提示後答對" : old ? "練習後答對" : "答對了") : "再想清楚這一步"}</h2><p><strong>參考答案：</strong>${esc(answer)}</p><p>${esc(q.explanation)}</p>${explanations ? `<ul>${explanations}</ul>` : ""}${q.source.path.endsWith(".md") ? `<a href="#/read/${encodeURIComponent(q.source.path)}">` : `<a href="files/${encodeURI(q.source.path)}" target="_blank" rel="noopener">`}回到教材 · ${esc(q.source.section)} ↗</a>${notice ? `<p role="alert">${esc(notice)}</p>` : ""}<p><button class="btn primary" id="next">${st.index + 1 === st.queue.length ? "看看本輪結果" : "下一題 →"}</button></p></section>`;
+        `<section class="feedback ${a.correct ? "correct" : "rethink"}"><h2 tabindex="-1">${a.skipped ? "先記下這個觀念" : a.correct ? (a.hintUsed ? "提示後答對" : old ? "練習後答對" : "答對了") : "再想清楚這一步"}</h2>${explanation(q)}${notice ? `<p role="alert">${esc(notice)}</p>` : ""}<p><button class="btn primary" id="next">${st.index + 1 === st.queue.length ? "看看本輪結果" : "下一題 →"}</button></p></section>`;
       container.querySelector("#feedback h2").focus();
       container.querySelector("#next").onclick = () => {
         st = { ...st, index: st.index + 1, draft: undefined };

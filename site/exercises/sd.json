@@ -30,7 +30,7 @@
         "type": "order",
         "objectiveId": "o1",
         "prompt": "單一讀取發生 cache miss，沒有併發更新。把典型 cache-aside 的讀取流程排好。",
-        "hint": "先追蹤每一步的狀態與責任，再看結果。",
+        "hint": "先標出應用在哪一步才拿到可回填的值，再檢查前後依賴。",
         "explanation": "這條流程由應用負責讀取和回填；不是 Redis 自動知道資料庫位置。",
         "source": {
           "path": "portfolio/sd/notes/day06-07-caching.md",
@@ -69,7 +69,7 @@
         "type": "choice",
         "objectiveId": "o1",
         "prompt": "一般 cache-aside miss 後，由誰負責載入資料？",
-        "hint": "先追蹤每一步的狀態與責任，再看結果。",
+        "hint": "畫出 miss 之後通往 DB 的箭頭，思考哪一層持有查詢邏輯。",
         "explanation": "區分模式責任，不能把 cache-aside 和 read-through 混為一談。",
         "source": {
           "path": "portfolio/sd/notes/day06-07-caching.md",
@@ -103,7 +103,7 @@
         "type": "fill",
         "objectiveId": "o1",
         "prompt": "100 次讀取中有 80 次 cache hit，其餘每次 miss 各查 DB 一次。沒有重試、合併請求或背景更新，DB 讀取次數？",
-        "hint": "先追蹤每一步的狀態與責任，再看結果。",
+        "hint": "把讀取分成 hit 與 miss 兩組，只替會回源的那組計數。",
         "explanation": "100 − 80 = 20；必須依題目假設排除重試與請求合併。",
         "source": {
           "path": "portfolio/sd/notes/day06-07-caching.md",
@@ -122,7 +122,7 @@
         "type": "choice",
         "objectiveId": "o2",
         "prompt": "寫者先刪快取，尚未更新 DB；讀者此時 miss。哪個交錯會留下舊快取？",
-        "hint": "先追蹤每一步的狀態與責任，再看結果。",
+        "hint": "為讀者標出「取值」與「回填」兩個時點，逐一寫下當時的 DB 版本。",
         "explanation": "刪除和更新之間存在競態窗口；先寫 DB 再刪快取可避免這個特定交錯，但不能保證所有競態消失。",
         "source": {
           "path": "portfolio/sd/notes/day06-07-caching.md",
@@ -156,7 +156,7 @@
         "type": "match",
         "objectiveId": "o2",
         "prompt": "把觀察配對到直接風險。",
-        "hint": "先追蹤每一步的狀態與責任，再看結果。",
+        "hint": "逐項檢查：壓力增加在哪裡、更新有沒有落盤、讀者拿到哪個版本？",
         "explanation": "快取失效不只是效能問題，也可能影響資料可靠性。",
         "source": {
           "path": "portfolio/sd/notes/day06-07-caching.md",
@@ -205,7 +205,7 @@
         "type": "choice",
         "objectiveId": "o2",
         "prompt": "同一熱門 key 同時 miss，想降低重建時的 DB 併發量。哪些策略直接處理這個問題？",
-        "hint": "先追蹤每一步的狀態與責任，再看結果。",
+        "hint": "固定只看同一個 key，追蹤每個策略讓多少個 loader 同時查 DB。",
         "explanation": "TTL jitter 和單 key 請求合併解的是不同範圍的問題。",
         "source": {
           "path": "portfolio/sd/notes/day06-07-caching.md",
@@ -240,7 +240,7 @@
         "type": "fill",
         "objectiveId": "o1",
         "prompt": "10 個同時發生的 miss 被合併成一個 DB 載入，其餘等待共享結果。沒有重試，DB 讀取幾次？",
-        "hint": "先追蹤每一步的狀態與責任，再看結果。",
+        "hint": "把等待共享結果的請求與真正執行載入的工作分開計數。",
         "explanation": "這次加入請求合併，不能沿用一個 miss 等於一次 DB 讀取的假設。",
         "source": {
           "path": "portfolio/sd/notes/day06-07-caching.md",
@@ -260,7 +260,7 @@
         "type": "choice",
         "objectiveId": "o2",
         "prompt": "改成先更新 DB 再刪快取。讀者在更新前已讀到舊 DB，卻在刪除之後才回填。結果？",
-        "hint": "先追蹤每一步的狀態與責任，再看結果。",
+        "hint": "保留讀者手上已讀到的值，按題目時序追蹤刪除後最後一次回填。",
         "explanation": "操作順序能減少特定窗口，但還要考慮已在途的讀取。",
         "source": {
           "path": "portfolio/sd/notes/day06-07-caching.md",
@@ -288,14 +288,154 @@
           "a"
         ],
         "variantOf": "race"
+      },
+      {
+        "id": "hit-path",
+        "revision": 1,
+        "type": "choice",
+        "objectiveId": "o1",
+        "variantOf": "miss",
+        "prompt": "相同 key 的第二次讀取已命中快取，值未過期，也沒有背景刷新。典型 cache-aside 這次如何取得回應？",
+        "hint": "從 hit 分支出發，檢查是否還有取得資料所必需的回源步驟。",
+        "explanation": "命中時應用可直接使用快取值；題目排除了背景刷新，不需再查 DB。",
+        "source": {
+          "path": "portfolio/sd/notes/day06-07-caching.md",
+          "section": "Cache-Aside（Lazy Loading）— 最常用"
+        },
+        "multiple": false,
+        "options": [
+          {
+            "id": "a",
+            "text": "仍需查 DB，再回填一次",
+            "feedback": "這把 miss 的流程套到了 hit。"
+          },
+          {
+            "id": "b",
+            "text": "應用使用快取值回應",
+            "feedback": "快取已提供這次讀取需要的值。"
+          },
+          {
+            "id": "c",
+            "text": "Redis 必須先請 DNS 驗證資料版本",
+            "feedback": "DNS 不負責資料新鮮度驗證。"
+          }
+        ],
+        "answer": [
+          "b"
+        ]
+      },
+      {
+        "id": "expired-owner",
+        "revision": 1,
+        "type": "choice",
+        "objectiveId": "o1",
+        "variantOf": "owner",
+        "prompt": "應用使用 cache-aside，某 key 已因 TTL 到期而不存在；此時沒有讀者或背景工作。誰會主動把該值載回快取？",
+        "hint": "把「快取刪除過期值」與「觸發資料載入」當成兩件事，找出載入的觸發事件。",
+        "explanation": "Cache-aside 是按需載入；TTL 到期不會憑空觸發應用的 DB 查詢。",
+        "source": {
+          "path": "portfolio/sd/notes/day06-07-caching.md",
+          "section": "Cache-Aside（Lazy Loading）— 最常用"
+        },
+        "multiple": false,
+        "options": [
+          {
+            "id": "a",
+            "text": "Redis 自動查 DB 回填",
+            "feedback": "TTL 不會替 Redis 配好業務查詢。"
+          },
+          {
+            "id": "b",
+            "text": "DB 偵測到 TTL 並推送資料",
+            "feedback": "題目沒有設定事件推送。"
+          },
+          {
+            "id": "c",
+            "text": "目前沒有人；要等讀取或另行配置的載入工作",
+            "feedback": "沒有載入觸發事件，key 可以持續不存在。"
+          }
+        ],
+        "answer": [
+          "c"
+        ]
+      },
+      {
+        "id": "cache-loss-durable",
+        "revision": 1,
+        "type": "choice",
+        "objectiveId": "o2",
+        "variantOf": "failure",
+        "prompt": "這次使用 cache-aside，所有已確認成功的寫入都已持久化到 DB。快取全失，下一波大量讀者各自 miss 且沒有請求合併。直接風險是？",
+        "hint": "先確認成功寫入目前還存在哪裡，再追蹤讀取會轉向哪個元件。",
+        "explanation": "DB 保有已持久化資料，丟失快取會讓讀者回源，造成 DB 負載上升；不同於失去尚未落盤的唯一 write-behind 副本。",
+        "source": {
+          "path": "portfolio/sd/notes/day06-07-caching.md",
+          "section": "Cache-Aside（Lazy Loading）— 最常用"
+        },
+        "multiple": false,
+        "options": [
+          {
+            "id": "a",
+            "text": "所有已確認的更新必然永久遺失",
+            "feedback": "資料仍在持久化 DB。"
+          },
+          {
+            "id": "b",
+            "text": "DB 讀取負載突然上升",
+            "feedback": "每個 miss 都會各自回源。"
+          },
+          {
+            "id": "c",
+            "text": "讀者不需查任何儲存層就能得到資料",
+            "feedback": "資料必須重新取得。"
+          }
+        ],
+        "answer": [
+          "b"
+        ]
+      },
+      {
+        "id": "stampede-scope",
+        "revision": 1,
+        "type": "choice",
+        "objectiveId": "o2",
+        "variantOf": "stampede",
+        "prompt": "兩個應用程序各自有「程序內同 key 請求合併」。它們同時 miss 同一 key，各有多個讀者等待；兩邊 loader 都在任何回填前啟動。沒有跨程序協調或重試，共會執行幾次 DB 載入？",
+        "hint": "替每個合併器畫出邊界，檢查等待者究竟能共享哪一個 loader。",
+        "explanation": "每個程序內只會啟動一個 loader，但兩個程序之間未共享這個工作，所以共有兩次載入。",
+        "source": {
+          "path": "portfolio/sd/notes/day06-07-caching.md",
+          "section": "請求合併的範圍"
+        },
+        "multiple": false,
+        "options": [
+          {
+            "id": "a",
+            "text": "1 次",
+            "feedback": "這需要兩個程序也共享同一次載入。"
+          },
+          {
+            "id": "b",
+            "text": "2 次",
+            "feedback": "每個程序各有一次載入。"
+          },
+          {
+            "id": "c",
+            "text": "等於全部讀者數",
+            "feedback": "程序內的等待者已經合併。"
+          }
+        ],
+        "answer": [
+          "b"
+        ]
       }
     ],
     "challenge": {
-      "prompt": "不看解答，畫出本章流程，再改變一個條件並解釋結果。",
+      "prompt": "在本機 Python 3 用兩個 dict 模擬 DB 與 cache，存成 /tmp/cache_aside_demo.py。先寫下預測，再用 python3 /tmp/cache_aside_demo.py 執行：DB[k]=v1、cache 為空時連讀兩次，記錄每次回應及 DB 查詢次數；接著手動排程「讀者 miss 並讀 v1 → 寫者更新 DB 為 v2 並刪快取 → 讀者回填 v1」。每步輸出 DB、cache 與讀者手中的值。",
       "criteria": [
-        "逐步說明狀態如何改變",
-        "用實作或具體例子支持預測",
-        "交由教練檢查推理，網站不自動授予通過"
+        "初次連讀的預測與 log 對照，區分 miss 回填及 hit 的 DB 查詢次數",
+        "以逐步狀態證據解釋最後 DB 與 cache 是否一致，而非只說先寫 DB 就安全",
+        "再把讀者的 DB 讀取移到寫者更新之後，重跑並說明哪個觀察改變；交由教練檢查"
       ]
     }
   }

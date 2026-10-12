@@ -143,6 +143,11 @@ assert {c['coachId'] for c in banks} == {'k8s','sd','leetcode','ca'}
 for c in banks:
     primary = [q for q in c['questions'] if 'variantOf' not in q]
     assert len(primary) == 6 and len(c['questions']) >= 8
+    if c['coachId'] in {'sd', 'leetcode', 'ca'}:
+        variants = [q for q in c['questions'] if 'variantOf' in q]
+        assert len(c['questions']) == 12, c['id']
+        assert sorted(q['variantOf'] for q in variants) == sorted(q['id'] for q in primary), c['id']
+        assert len({q['hint'] for q in c['questions']}) == 12, c['id']
     assert len({q['type'] for q in primary}) >= 3
     assert len({q['objectiveId'] for q in primary}) >= 2
 print('four chapter banks OK')

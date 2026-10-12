@@ -178,6 +178,10 @@ Hot key TTL 到期 → 1000 個 request 同時 cache miss → 全部打 DB → D
 2. **隨機 TTL**：`TTL = 300s + random(0-60s)` 分散過期
 3. **Stale-while-revalidate**：先回舊資料，背景更新
 
+#### 請求合併的範圍
+
+合併同 key 請求時，要確認等待者共用哪一個 loader。若只有程序內合併，兩個程序同時 miss 並各自啟動 loader，仍會有兩次 DB 載入；共用 Redis 不代表自動共用進行中的載入工作。例如 [Microsoft HybridCache](https://learn.microsoft.com/en-us/aspnet/core/performance/caching/hybrid) 只在同一個 HybridCache instance 內協調，跨 instance 不會自動合併，即使它們共用分散式快取。
+
 ### CDN Deep Dive
 
 CDN 把 static content 放到全球 edge server，user 從最近節點拿資料。

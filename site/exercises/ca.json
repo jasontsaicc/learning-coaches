@@ -30,7 +30,7 @@
         "type": "choice",
         "objectiveId": "o2",
         "prompt": "只有 A–B、B–C peering，沒有其他連線。A 能經 B 的 peering 自動到 C 嗎？",
-        "hint": "先追蹤每一步的狀態與責任，再看結果。",
+        "hint": "把 A 到 C 的每一段標上 peering 名稱，檢查是否需要 B 轉送兩條 peering 間的流量。",
         "explanation": "兩條邊不等於一條 A–C 通道。",
         "source": {
           "path": "portfolio/ca/notes/vpc-peering.md",
@@ -64,7 +64,7 @@
         "type": "choice",
         "objectiveId": "o1",
         "prompt": "Peering 已 active，但 A 的連線仍失敗。哪些項目需要檢查？",
-        "hint": "先追蹤每一步的狀態與責任，再看結果。",
+        "hint": "從來源送出封包，再從目的送回回應，逐段列出各自要通過的設定。",
         "explanation": "控制面 active 只是條件之一。",
         "source": {
           "path": "portfolio/ca/notes/vpc-peering.md",
@@ -99,7 +99,7 @@
         "type": "fill",
         "objectiveId": "o2",
         "prompt": "4 個 VPC 彼此都要建立一條直接 peering。每對只算一次，需要幾條連線？",
-        "hint": "先追蹤每一步的狀態與責任，再看結果。",
+        "hint": "列出不重複的 VPC 配對，避免把 A–B 與 B–A 算成兩條。",
         "explanation": "4×3÷2=6；這是連線數，不是路由表項目總數。",
         "source": {
           "path": "portfolio/ca/notes/vpc-peering.md",
@@ -118,7 +118,7 @@
         "type": "order",
         "objectiveId": "o2",
         "prompt": "排好此工作清單的依賴順序：路由步驟特別限定在 peering active 之後進行。",
-        "hint": "先追蹤每一步的狀態與責任，再看結果。",
+        "hint": "標出題目指定的 active 時點，再看各步需要哪些前置結果。",
         "explanation": "每一步驗證不同層次；題目指定此部署順序，並非宣稱所有設定都只能依此操作。",
         "source": {
           "path": "portfolio/ca/notes/vpc-peering.md",
@@ -157,7 +157,7 @@
         "type": "match",
         "objectiveId": "o1",
         "prompt": "將觀察配對到首先要檢查的層次。",
-        "hint": "先追蹤每一步的狀態與責任，再看結果。",
+        "hint": "先判斷觀察描述的是連線生命週期、下一跳選擇，還是允許流量的條件。",
         "explanation": "先辨認失敗層次，避免只反覆改安全群組。",
         "source": {
           "path": "portfolio/ca/notes/vpc-peering.md",
@@ -206,7 +206,7 @@
         "type": "choice",
         "objectiveId": "o2",
         "prompt": "A 與 B 都使用相同 IPv4 CIDR 10.0.0.0/16。能直接建立這兩個範圍的 VPC peering 嗎？",
-        "hint": "先追蹤每一步的狀態與責任，再看結果。",
+        "hint": "把兩個 CIDR 展開成位址範圍，檢查建立連線的位址前提。",
         "explanation": "重疊 CIDR 是 peering 限制，不能靠放行安全規則解決。",
         "source": {
           "path": "portfolio/ca/notes/vpc-peering.md",
@@ -240,7 +240,7 @@
         "type": "choice",
         "objectiveId": "o2",
         "prompt": "在 A–B、B–C 之外新增 A–C peering，並完成 A–C 雙向路由和安全設定。這是否表示 B 開始提供傳遞路由？",
-        "hint": "先追蹤每一步的狀態與責任，再看結果。",
+        "hint": "畫出新增連線後 A 到 C 實際經過的邊，確認路徑有沒有通過 B。",
         "explanation": "可達性來自新增的直接邊，不代表原有非傳遞性被改變。",
         "source": {
           "path": "portfolio/ca/notes/vpc-peering.md",
@@ -275,7 +275,7 @@
         "type": "fill",
         "objectiveId": "o2",
         "prompt": "原有 4 個 VPC 已完整 mesh。新增第 5 個並與全部舊 VPC 直接 peering，需要新增幾條？",
-        "hint": "先追蹤每一步的狀態與責任，再看結果。",
+        "hint": "保留原圖的全部邊，只計算新加入的節點還缺哪些直接鄰居。",
         "explanation": "只新增新 VPC 到 4 個舊 VPC 的邊，不必重建既有 6 條。",
         "source": {
           "path": "portfolio/ca/notes/vpc-peering.md",
@@ -288,14 +288,154 @@
           "unit": ""
         },
         "variantOf": "mesh"
+      },
+      {
+        "id": "active-return",
+        "revision": 1,
+        "type": "choice",
+        "objectiveId": "o1",
+        "variantOf": "active",
+        "prompt": "A、B peering 已 active。A 所在 subnet 有到 B 的路由；B 所在 subnet 的路由表只有 local。安全規則與應用皆允許流量，也沒有其他網路路徑。A 發出請求後，哪個條件仍缺少？",
+        "hint": "將回應封包的目的 IP 換成 A，查 B 所使用路由表會選到哪個下一跳。",
+        "explanation": "B 的 local 路由不涵蓋另一 VPC 的 A；B 需要指向 peering 的回程路由。",
+        "source": {
+          "path": "portfolio/ca/notes/vpc-peering.md",
+          "section": "直接連線與路由"
+        },
+        "multiple": false,
+        "options": [
+          {
+            "id": "a",
+            "text": "重新接受同一個 peering",
+            "feedback": "連線已 active，接受流程已完成。"
+          },
+          {
+            "id": "b",
+            "text": "B 到 A 的回程路由",
+            "feedback": "雙向通訊需要回應也有有效路徑。"
+          },
+          {
+            "id": "c",
+            "text": "只要 A 開放更多 SG port 就能補足",
+            "feedback": "安全規則不會創造缺少的路由。"
+          }
+        ],
+        "answer": [
+          "b"
+        ]
+      },
+      {
+        "id": "setup-pending-route",
+        "revision": 1,
+        "type": "choice",
+        "objectiveId": "o2",
+        "variantOf": "setup",
+        "prompt": "部署流程改為先在 pending-acceptance 的 peering 上新增路由。AWS 接受這筆設定後，連線尚未 active 時，此路由能轉送流量嗎？",
+        "hint": "分開檢查「API 可儲存設定」與「下一跳已可使用」這兩個狀態。",
+        "explanation": "AWS 允許先建立這筆路由，但在 peering active 前它是 blackhole，不會轉送流量。",
+        "source": {
+          "path": "portfolio/ca/notes/vpc-peering.md",
+          "section": "檢查順序"
+        },
+        "multiple": false,
+        "options": [
+          {
+            "id": "a",
+            "text": "能，路由存在就代表連線已完成",
+            "feedback": "儲存路由不等於接受 peering。"
+          },
+          {
+            "id": "b",
+            "text": "不能；active 前這筆路由是 blackhole",
+            "feedback": "待連線 active 後才有可用的 peering 下一跳。"
+          },
+          {
+            "id": "c",
+            "text": "能，會自動改走 Internet Gateway",
+            "feedback": "路由不會自動替換 target。"
+          }
+        ],
+        "answer": [
+          "b"
+        ]
+      },
+      {
+        "id": "layers-subnet",
+        "revision": 1,
+        "type": "choice",
+        "objectiveId": "o1",
+        "variantOf": "layers",
+        "prompt": "同一個 A VPC 中，subnet-1 可透過 peering 存取 B，subnet-2 不行。兩者安全規則及應用條件相同；查到只有 subnet-1 所用的 route table 有到 B 的 peering 路由。首先應檢查哪個設定？",
+        "hint": "不要只查看 VPC 名稱；把失敗實例所在 subnet 連到它實際使用的 route table。",
+        "explanation": "不同 subnet 可使用不同路由表；應核對 subnet-2 的路由表關聯與到 B 的路由。",
+        "source": {
+          "path": "portfolio/ca/notes/vpc-peering.md",
+          "section": "直接連線與路由"
+        },
+        "multiple": false,
+        "options": [
+          {
+            "id": "a",
+            "text": "subnet-2 實際使用的 route table 與到 B 的路由",
+            "feedback": "故障差異就在 subnet 所用的路由設定。"
+          },
+          {
+            "id": "b",
+            "text": "再次建立 A–B peering",
+            "feedback": "subnet-1 已能使用既有 peering。"
+          },
+          {
+            "id": "c",
+            "text": "把 B 改成與 A 相同 CIDR",
+            "feedback": "重疊位址會違反 peering 前提。"
+          }
+        ],
+        "answer": [
+          "a"
+        ]
+      },
+      {
+        "id": "overlap-secondary",
+        "revision": 1,
+        "type": "choice",
+        "objectiveId": "o2",
+        "variantOf": "overlap",
+        "prompt": "A 有 10.0.0.0/16 與次要 CIDR 172.16.0.0/16；B 有 10.1.0.0/16 與 172.16.1.0/24。只打算使用 10.x 位址通訊，能建立 peering 嗎？",
+        "hint": "把所有 CIDR 兩兩比對，檢查限制是套用到計畫使用的 subnet，還是整個 VPC 的位址集合。",
+        "explanation": "A 的次要 CIDR 包含 B 的 172.16.1.0/24；任一 IPv4 CIDR 重疊都阻止 peering，即使只想使用其他不重疊的範圍。",
+        "source": {
+          "path": "portfolio/ca/notes/vpc-peering.md",
+          "section": "位址與規模"
+        },
+        "multiple": false,
+        "options": [
+          {
+            "id": "a",
+            "text": "能，主要 CIDR 不同就足夠",
+            "feedback": "次要 CIDR 也必須納入重疊檢查。"
+          },
+          {
+            "id": "b",
+            "text": "能，只要不替 172.16.x 新增路由",
+            "feedback": "省略路由不會解除建立連線的限制。"
+          },
+          {
+            "id": "c",
+            "text": "不能，次要 CIDR 仍有重疊",
+            "feedback": "/24 位址範圍包含在對方的 /16 中。"
+          }
+        ],
+        "answer": [
+          "c"
+        ]
       }
     ],
     "challenge": {
-      "prompt": "不看解答，畫出本章流程，再改變一個條件並解釋結果。",
+      "prompt": "以紙筆或文字表格模擬，無需 AWS 帳號：A=10.0.0.0/16、B=10.1.0.0/16、C=10.2.0.0/16，A–B 與 B–C 已 active，三者都只有 local 路由。假設安全規則及應用允許 TCP 443。先預測 A→B 的請求和回應是否可達，再列出應新增到兩端 subnet 路由表的 destination/target 並逐跳推演。最後預測僅有 A–B、B–C 時 A→C 是否可達，再加入 A–C 直接 peering 與雙向路由重畫封包路徑。",
       "criteria": [
-        "逐步說明狀態如何改變",
-        "用實作或具體例子支持預測",
-        "交由教練檢查推理，網站不自動授予通過"
+        "表格明列 A→B 與 B→A 各自使用的 destination、peering target 和 subnet 路由表",
+        "逐跳記錄新增路由前後停在哪一步，區分 active 狀態與有效雙向路徑",
+        "用路徑證明 A–C 直接連線前後的差異，並解釋 B 是否充當中繼；交由教練檢查"
       ]
     }
   }

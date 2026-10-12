@@ -141,9 +141,12 @@ async function failures(browser) {
   await page.unroute("**/data.json");
   await page.locator("#reload").click();
   await page.locator("#chapters").waitFor();
+  const staleRequested = Promise.withResolvers(),
+    releaseStale = Promise.withResolvers();
   await page.route("**/files/**", async (r) => {
     if (r.request().url().includes("day06")) {
-      await new Promise((resolve) => setTimeout(resolve, 300));
+      staleRequested.resolve();
+      await releaseStale.promise;
       await r.fulfill({ body: "# STALE RESPONSE" });
     } else await r.continue();
   });
@@ -152,13 +155,15 @@ async function failures(browser) {
       "#/read/" +
       encodeURIComponent("portfolio/sd/notes/day06-07-caching.md"),
   );
+  await staleRequested.promise;
   await page.goto(
     url + "#/read/" + encodeURIComponent("portfolio/k8s/notes/p1-pod-probe.md"),
   );
   await page.locator("#reader h1").waitFor();
+  releaseStale.resolve();
+  await page.unrouteAll({ behavior: "wait" });
   assert.ok((await page.locator("#reader").innerText()).includes("Probe"));
   assert.ok(!(await page.locator("#reader").innerText()).includes("STALE"));
-  await page.unroute("**/files/**");
   await page.route("**/files/**", (r) =>
     r.fulfill({ status: 404, body: "gone" }),
   );
@@ -232,7 +237,77 @@ async function navigationRegressions(browser) {
   assert.equal(await p.locator("#submit").isDisabled(), true);
   await p.close();
 }
+async function learningFlow(browser) {
+  const page = await browser.newPage();
+  const note = "portfolio/k8s/notes/p1-pod-probe.md";
+  await page.goto(url);
+  await page.locator("#chapters").waitFor();
+  await page.goto(url + "#/practice/k8s-probes");
+  await page.locator('[name=answer][value=b]').check();
+  await page.goto(url + "#/read/" + encodeURIComponent(note));
+  await page.locator("#reader h1").waitFor();
+  await page.goto(url);
+  await page.locator("#chapters").waitFor();
+  assert.equal(await page.locator('.daily-grid a[href="#/practice/k8s-probes"]').filter({ hasText: "繼續練習" }).count(), 1, "reading must not hide unfinished practice");
+  await page.getByRole("link", { name: "回到閱讀位置" }).click();
+  await page.locator("#reader h1").waitFor();
+  assert.equal(await page.locator('#reading-practice a[href="#/practice/k8s-probes"]').count(), 1, "source note offers its chapter practice");
+  assert.equal(await page.locator('#reading-practice a[href="#/practice/ca-vpc-peering"]').count(), 0);
+  await page.locator('#reading-practice a[href="#/practice/k8s-probes"]').click();
+  assert.equal(await page.locator('[name=answer][value=b]').isChecked(), true, "reading round trip keeps draft");
+  await page.locator("#submit").click();
+  await page.locator("#next").click();
+  for (let i = 1; i < 6; i++) {
+    await page.locator("#skip").click();
+    await page.locator("#next").click();
+  }
+  await page.getByRole("heading", { name: "每一步，都更清楚一點。", exact: true }).waitFor();
+  const before = await page.evaluate(() => localStorage.getItem("learning-map.practice.v1"));
+  assert.equal(await page.locator("#question-review details").count(), 6, "completed round offers every primary question");
+  const first = page.locator("#question-review details").first();
+  await first.locator("summary").click();
+  assert.match(await first.innerText(), /首次作答[\s\S]*參考答案[\s\S]*解說/);
+  const skipped = page.locator("#question-review details").nth(1);
+  await skipped.locator("summary").click();
+  assert.match(await skipped.innerText(), /已略過/);
+  assert.equal(await page.evaluate(() => localStorage.getItem("learning-map.practice.v1")), before, "review never rewrites evidence");
+  await page.reload();
+  await page.locator("#question-review").waitFor();
+  assert.equal(await page.locator("#question-review details").count(), 6);
+  // Historical evidence can differ from the latest attempt; old revisions cannot pass a new question.
+  await page.evaluate(() => {
+    const state = JSON.parse(localStorage.getItem("learning-map.practice.v1"));
+    const attempts = state.chapters["k8s-probes"].attempts;
+    attempts["ready@1"].latestAttempt = { ...attempts["ready@1"].firstAttempt, answer: ["a"], correct: false, time: Date.now() };
+    attempts["roles@0"] = attempts["roles@1"];
+    delete attempts["roles@1"];
+    attempts["restarts@1"].latestAttempt = { ...attempts["restarts@1"].firstAttempt, answer: '<img src=x onerror="window.reviewInjected=true">', skipped: false };
+    localStorage.setItem("learning-map.practice.v1", JSON.stringify(state));
+  });
+  await page.reload();
+  const readyReview = page.locator('[data-review-question="ready"]');
+  await readyReview.locator("summary").click();
+  assert.match(await readyReview.innerText(), /首次作答[\s\S]*無提示答對[\s\S]*最新作答[\s\S]*答錯/);
+  const revised = page.locator('[data-review-question="roles"]');
+  await revised.locator("summary").click();
+  assert.match(await revised.innerText(), /尚未作答/);
+  const fillReview = page.locator('[data-review-question="restarts"]');
+  await fillReview.locator("summary").click();
+  assert.match(await fillReview.innerText(), /<img src=x/);
+  assert.equal(await page.locator("#question-review img").count(), 0, "saved answer is text, never executable HTML");
+  await page.setViewportSize({ width: 360, height: 800 });
+  assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
+  await page.screenshot({ path: "/tmp/learning-site-preview/question-review-mobile.png", fullPage: true });
+  await page.locator("#retry").click();
+  await page.locator("#question-title").waitFor();
+  assert.deepEqual(await page.evaluate(() => JSON.parse(localStorage.getItem("learning-map.practice.v1")).chapters["k8s-probes"].attempts["ready@1"].firstAttempt), JSON.parse(before).chapters["k8s-probes"].attempts["ready@1"].firstAttempt);
+  await page.close();
+  console.log("learning flow: reading + resume, related practice, per-question review and retry OK");
+}
+
 try {
+  await mkdir("/tmp/learning-site-preview", { recursive: true });
+  await learningFlow(browser);
   await smoke(browser);
   await failures(browser);
   await navigationRegressions(browser);

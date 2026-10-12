@@ -79,8 +79,9 @@ starting with `P3 / Chat System(Day 35)/ ...`; changing that format requires upd
 
 Coverage: k8s has 8 chapters (P0 apply→Running; P1 container isolation, probes, rollout,
 QoS/OOM; P2a Service, Ingress, DNS triage), each six primary questions plus one variant per
-primary. SD Cache-Aside, LeetCode Linked List Cycle and CA VPC Peering still have six primaries
-plus two variants and a shared generic hint. Other chapters explicitly show that
+primary. SD Cache-Aside, LeetCode Linked List Cycle and CA VPC Peering also have six primaries
+plus one variant per primary, question-specific hints and concrete practice challenges.
+There are 11 chapters and 132 questions in total. Other chapters explicitly show that
 exercises have not been written. Types are `choice` (single/multiple), `fill` (text/number),
 `order` and `match` (pairing/classification). Adding another chapter of these types needs
 only a bank entry and an exported source note, not a new page or renderer.
@@ -102,6 +103,13 @@ Routes: `#/`, `#/c/<coach>`, `#/search`, `#/practice/<chapter-id>`,
 `#/read/<encodeURIComponent(file-path)>`. Reading routes allow only exported Markdown.
 HTML diagrams keep opening separately. Unsupported relative Markdown links are inert;
 external http(s) references remain clickable.
+
+The home page keeps unfinished practice visible alongside recent reading. Loaded Markdown
+notes offer chapter exercises whose declared `sources` include that note; returning to an
+unfinished exercise preserves its draft. Completed rounds include expandable per-question
+reviews with first/latest answers, reference answers, explanations and source links. Only
+current-revision evidence is shown; attempted variants appear alongside primary questions.
+Viewing a review does not change stored answers or formal coach assessments.
 
 ## Local state and evidence
 
@@ -130,4 +138,6 @@ Set `CHROMIUM_PATH` for a non-default Chromium executable. In a trusted isolated
 container without Chromium sandbox support only, `CHROMIUM_NO_SANDBOX=1` is available.
 Screenshots go to `/tmp/learning-site-preview/`. The check covers 360px/desktop layouts,
 all input types, keyboard sorting, draft and feedback resume, search, reading, map/cards,
-failed requests, stale responses, storage quota errors and CDN fallbacks.
+failed requests, stale responses, storage quota errors and CDN fallbacks. It also checks
+simultaneous reading/practice resume, note-to-practice links, per-question reviews,
+first/latest separation, revision isolation and safe rendering of saved answer text.

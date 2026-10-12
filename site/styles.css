@@ -797,6 +797,35 @@ select {
   border-radius: 18px;
   border: 1px dashed #a5b49b;
 }
+.resume-practice {
+  margin-top: 22px;
+  padding-top: 18px;
+  border-top: 1px solid var(--line);
+}
+#question-review,
+#reading-practice {
+  margin-top: 36px;
+}
+.question-review {
+  margin: 12px 0;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--paper);
+  overflow-wrap: anywhere;
+}
+.question-review > summary {
+  cursor: pointer;
+  padding: 18px;
+  min-height: 44px;
+}
+.question-review .badge {
+  margin-left: 8px;
+}
+.review-content {
+  padding: 0 18px 18px;
+  border-top: 1px solid var(--line);
+  font-size: 14px;
+}
 .challenge h2 {
   margin: 8px 0;
 }

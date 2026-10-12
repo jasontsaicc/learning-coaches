@@ -7,6 +7,23 @@ import {
   loadPractice,
   savePractice,
 } from "./exercises.js";
+
+test("answer text shows learner choices, order and pairs rather than internal IDs", async () => {
+  const { answerText } = await import("./exercises.js");
+  assert.equal(typeof answerText, "function");
+  const items = [{ id: "a", text: "先讀取" }, { id: "b", text: "再寫入" }];
+  assert.equal(answerText({ type: "choice", options: items }, ["b"]), "再寫入");
+  assert.equal(answerText({ type: "choice", options: items }, []), "未作答");
+  assert.equal(answerText({ type: "order", items }, ["b", "a"]), "再寫入 → 先讀取");
+  assert.equal(answerText({ type: "match", items, targets: [{ id: "t", text: "快取" }] }, { a: "t" }), "先讀取 → 快取；再寫入 → 未選擇");
+  assert.equal(answerText({ type: "fill", answer: { kind: "number", unit: "秒" } }, "0"), "0 秒");
+  assert.equal(answerText({ type: "fill", answer: { kind: "text" } }, "<script>"), "<script>");
+  assert.equal(answerText({ type: "order", items }, null), "未作答");
+  assert.equal(answerText({ type: "choice", options: items }, "a"), "無法顯示此答案");
+  assert.equal(answerText({ type: "match", items, targets: [] }, 7), "無法顯示此答案");
+  assert.equal(answerText({ type: "fill", answer: { kind: "text" } }, { toString: "broken" }), "無法顯示此答案");
+  assert.equal(answerText({ type: "choice", options: items }, [{ toString: "broken" }]), "無法顯示此答案");
+});
 const choice = {
   id: "q",
   revision: 1,

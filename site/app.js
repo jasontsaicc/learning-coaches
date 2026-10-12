@@ -199,7 +199,7 @@ export async function startApp() {
         (c) => weakQuestions(c, practice.chapters[c.id]).length,
       );
     app.innerHTML = `<section class="welcome"><div><span class="eyebrow">YOUR LEARNING GARDEN</span><h1>讓理解，慢慢長成能力。</h1><p class="lead">接續一個想法，練習一個章節。<br>今天的每一小步，都有它的方向。</p><a class="btn primary" href="#chapters" id="browse-chapters">選一章，開始練習 →</a></div><div class="welcome-art" aria-hidden="true"><img src="img/k8s.svg" alt=""><span class="art-note">理解 · 練習 · 再試一次</span></div></section>
-   <div class="daily-grid"><section class="daily"><span class="eyebrow">接著上次的步調</span><h2>${target ? "繼續閱讀" : stCh ? "接續章節練習" : "從好奇的地方開始"}</h2><p>${esc(target ? (last.label ?? data.titles?.[target.path] ?? target.path.split("/").pop()) : (stCh?.title ?? "選擇一門課，找到你想弄懂的下一個觀念。"))}</p>${target ? (target.path ? `<a class="text-link" href="#/read/${encodeURIComponent(target.path)}">回到閱讀位置 →</a>` : `<button class="text-btn" data-topic="${esc(target.id)}">繼續閱讀 →</button>`) : stCh ? `<a class="text-link" href="#/practice/${stCh.id}">繼續練習 →</a>` : '<a class="text-link" href="#/c/k8s">探索課程 →</a>'}<p id="read-status" class="muted">${esc(readError)}</p></section>
+   <div class="daily-grid"><section class="daily"><span class="eyebrow">接著上次的步調</span><h2>${target ? "繼續閱讀" : stCh ? "接續章節練習" : "從好奇的地方開始"}</h2><p>${esc(target ? (last.label ?? data.titles?.[target.path] ?? target.path.split("/").pop()) : (stCh?.title ?? "選擇一門課，找到你想弄懂的下一個觀念。"))}</p>${target ? (target.path ? `<a class="text-link" href="#/read/${encodeURIComponent(target.path)}">回到閱讀位置 →</a>` : `<button class="text-btn" data-topic="${esc(target.id)}">繼續閱讀 →</button>`) : stCh ? `<a class="text-link" href="#/practice/${stCh.id}">繼續練習 →</a>` : '<a class="text-link" href="#/c/k8s">探索課程 →</a>'}${target && stCh ? `<div class="resume-practice"><h3>接續章節練習</h3><p>${esc(stCh.title)}</p><a class="text-link" href="#/practice/${stCh.id}">繼續練習 →</a></div>` : ""}<p id="read-status" class="muted">${esc(readError)}</p></section>
    <section class="daily sage"><span class="eyebrow">把不確定變得清楚</span><h2>${weak.length ? `${weak.length} 章可以再練一點` : "用一道題，檢查理解"}</h2><p>選擇、填空、排序與配對。找到你會用的原理。</p><a class="text-link" href="#/practice/${(weak[0] ?? stCh ?? data.chapters[0])?.id ?? ""}">${weak.length ? "回到待重練章節" : "試試章節練習"} →</a></section></div>
    <div class="section-heading"><div><span class="eyebrow">KEEP GROWING</span><h2>我的課程</h2></div><span class="muted">${coaches.length} 個探索方向</span></div><div class="course-grid">${coaches
      .map((c) => {
@@ -333,6 +333,9 @@ export async function startApp() {
         pre.textContent = text;
         reader.replaceChildren(pre);
       }
+      const chapters = data.chapters.filter((c) => c.sources.includes(path));
+      if (chapters.length)
+        app.insertAdjacentHTML("beforeend", `<section id="reading-practice" aria-labelledby="reading-practice-title"><h2 id="reading-practice-title">讀完了，檢查理解</h2><p class="muted">用這篇教材對應的章節練習，確認自己能不能運用。</p><div class="chapter-grid">${chapters.map(chapterCard).join("")}</div></section>`);
       reader.querySelectorAll("a").forEach((a) => {
         const href = a.getAttribute("href");
         if (href?.startsWith("https://") || href?.startsWith("http://")) {

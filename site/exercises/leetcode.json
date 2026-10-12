@@ -30,7 +30,7 @@
         "type": "choice",
         "objectiveId": "o1",
         "prompt": "兩個不同節點的 val 都是 7。這能證明鏈結串列有環嗎？",
-        "hint": "先追蹤每一步的狀態與責任，再看結果。",
+        "hint": "替兩個節點各畫一個方框，分開標示方框身份、內容值與 next 箭頭。",
         "explanation": "比對節點身份；Python 的 is 明確測身份，== 的行為可由類別定義。",
         "source": {
           "path": "workspaces/leetcode/linked-list/linked-list-cycle/notes.md",
@@ -64,7 +64,7 @@
         "type": "fill",
         "objectiveId": "o1",
         "prompt": "Python 條件：while fast ___ fast.next:。補一個運算子，要求左側為假時不存取 fast.next。",
-        "hint": "先追蹤每一步的狀態與責任，再看結果。",
+        "hint": "把 fast 代入 None，檢查候選運算子是否還會求值右側。",
         "explanation": "and 會短路；先檢查 fast 才能安全存取屬性。",
         "source": {
           "path": "workspaces/leetcode/linked-list/linked-list-cycle/notes.md",
@@ -84,7 +84,7 @@
         "type": "order",
         "objectiveId": "o2",
         "prompt": "slow 與 fast 都從 head 開始；非空串列。將偵測迴圈的單次步驟排好，排除初始化就相等的誤判。",
-        "hint": "先追蹤每一步的狀態與責任，再看結果。",
+        "hint": "先寫出初始化時兩個指標的位置，檢查何時比較才包含移動的證據。",
         "explanation": "移動後再比較，才能避免把起點相同直接當成環。",
         "source": {
           "path": "workspaces/leetcode/linked-list/linked-list-cycle/notes.md",
@@ -123,7 +123,7 @@
         "type": "choice",
         "objectiveId": "o2",
         "prompt": "從 visited set 改用標準快慢指標，對 n 個可達節點而言，主要改善是？",
-        "hint": "先追蹤每一步的狀態與責任，再看結果。",
+        "hint": "把 n 加倍，分別列出 visited set 與快慢指標需要額外保留的資料。",
         "explanation": "兩種方式最壞走訪時間均為 O(n)；快慢指標省下集合空間。",
         "source": {
           "path": "workspaces/leetcode/linked-list/linked-list-cycle/notes.md",
@@ -157,7 +157,7 @@
         "type": "fill",
         "objectiveId": "o2",
         "prompt": "A→B→C→D→B。slow、fast 起始都在 A，每輪各走 1、2 步，移動後才比較。第 2 輪結束 slow 在哪個節點？",
-        "hint": "先追蹤每一步的狀態與責任，再看結果。",
+        "hint": "只替 slow 畫每輪一條 next 箭頭，記錄輪次與落點。",
         "explanation": "第一輪 slow=B，第二輪 slow=C；不要拿 fast 的步數套到 slow。",
         "source": {
           "path": "workspaces/leetcode/linked-list/linked-list-cycle/notes.md",
@@ -177,7 +177,7 @@
         "type": "match",
         "objectiveId": "o2",
         "prompt": "配對觀察與結論。",
-        "hint": "先追蹤每一步的狀態與責任，再看結果。",
+        "hint": "區分走到尾端、重訪節點，以及僅有資料值相同這三種證據。",
         "explanation": "結論依身份與可達連結決定。",
         "source": {
           "path": "workspaces/leetcode/linked-list/linked-list-cycle/notes.md",
@@ -226,7 +226,7 @@
         "type": "choice",
         "objectiveId": "o1",
         "prompt": "只有一個節點 A，且 A.next 就是 A。slow、fast 移動後會如何？",
-        "hint": "先追蹤每一步的狀態與責任，再看結果。",
+        "hint": "沿 A.next 畫出一步與兩步的終點，不要假設 next 一定通往另一個節點。",
         "explanation": "最小環長是 1；判斷依身份和連結，不依資料值。",
         "source": {
           "path": "workspaces/leetcode/linked-list/linked-list-cycle/notes.md",
@@ -261,7 +261,7 @@
         "type": "fill",
         "objectiveId": "o2",
         "prompt": "改為 A→B→C→D→None。同樣從 A 開始。第 2 輪移動後 fast 是什麼？",
-        "hint": "先追蹤每一步的狀態與責任，再看結果。",
+        "hint": "替 fast 每輪連走兩條箭頭，尤其留意 D 後面的連結。",
         "explanation": "第一輪 fast=C，第二輪 fast=None；下一次條件終止。",
         "source": {
           "path": "workspaces/leetcode/linked-list/linked-list-cycle/notes.md",
@@ -275,14 +275,154 @@
           "caseSensitive": true
         },
         "variantOf": "trace"
+      },
+      {
+        "id": "guard-order",
+        "revision": 1,
+        "type": "choice",
+        "objectiveId": "o1",
+        "variantOf": "guard",
+        "prompt": "把迴圈條件改為 while fast.next and fast，且空串列令 fast = None。Python 會發生什麼？",
+        "hint": "依 Python 的求值方向，寫下最先需要存取的屬性及其接收者。",
+        "explanation": "and 的短路只能跳過右側；左側先存取 None.next，會引發 AttributeError。",
+        "source": {
+          "path": "workspaces/leetcode/linked-list/linked-list-cycle/notes.md",
+          "section": "這題的重點"
+        },
+        "multiple": false,
+        "options": [
+          {
+            "id": "a",
+            "text": "安全跳過迴圈",
+            "feedback": "右側檢查無法保護已先求值的左側。"
+          },
+          {
+            "id": "b",
+            "text": "在條件求值時引發 AttributeError",
+            "feedback": "None 沒有 next 屬性。"
+          },
+          {
+            "id": "c",
+            "text": "回傳有環",
+            "feedback": "條件在進入迴圈前就失敗。"
+          }
+        ],
+        "answer": [
+          "b"
+        ]
+      },
+      {
+        "id": "loop-return",
+        "revision": 1,
+        "type": "choice",
+        "objectiveId": "o2",
+        "variantOf": "loop",
+        "prompt": "A→B→C→D→B，兩個指標都從 A 開始。程式每輪先移動再比較，但第一輪未相遇就立刻 return False。這個改動有何結果？",
+        "hint": "先算第一輪兩個落點，再問尚未走完的連結能否被這一輪排除。",
+        "explanation": "第一輪 slow=B、fast=C，尚未相遇，但鏈上仍有 B→C→D→B 的環；過早回傳會漏判。",
+        "source": {
+          "path": "workspaces/leetcode/linked-list/linked-list-cycle/notes.md",
+          "section": "這題的重點"
+        },
+        "multiple": false,
+        "options": [
+          {
+            "id": "a",
+            "text": "正確判定無環",
+            "feedback": "第一輪未相遇不足以排除稍後相遇。"
+          },
+          {
+            "id": "b",
+            "text": "漏判這個有環串列",
+            "feedback": "return False 應等走到終止條件後才執行。"
+          },
+          {
+            "id": "c",
+            "text": "一定先拋出屬性錯誤",
+            "feedback": "這一輪所需 next 都存在。"
+          }
+        ],
+        "answer": [
+          "b"
+        ]
+      },
+      {
+        "id": "space-history",
+        "revision": 1,
+        "type": "choice",
+        "objectiveId": "o2",
+        "variantOf": "space",
+        "prompt": "程式使用快慢指標，同時把 slow 每輪經過的節點都 append 到 trace 清單。對含 n 個節點的無環串列，額外空間仍是 O(1) 嗎？",
+        "hint": "除了兩個指標，列出偵錯用途的容器，估算它會隨輸入長度留下多少紀錄。",
+        "explanation": "trace 的長度隨走訪輪數增長；無環串列中輪數為 Θ(n)，所以額外空間是 O(n)。",
+        "source": {
+          "path": "workspaces/leetcode/linked-list/linked-list-cycle/notes.md",
+          "section": "這題的重點"
+        },
+        "multiple": false,
+        "options": [
+          {
+            "id": "a",
+            "text": "是，只要使用兩個指標就一定是 O(1)",
+            "feedback": "額外容器也必須計入空間。"
+          },
+          {
+            "id": "b",
+            "text": "不是，trace 使額外空間成為 O(n)",
+            "feedback": "每輪保留一筆紀錄會線性增長。"
+          },
+          {
+            "id": "c",
+            "text": "不是，必然是 O(n²)",
+            "feedback": "每輪只保留一筆，不是所有節點配對。"
+          }
+        ],
+        "answer": [
+          "b"
+        ]
+      },
+      {
+        "id": "exit-odd-tail",
+        "revision": 1,
+        "type": "choice",
+        "objectiveId": "o2",
+        "variantOf": "exit",
+        "prompt": "A→B→C→None。移動一輪後 slow=B、fast=C，兩者未相遇；此時 fast.next 是 None。標準快慢指標偵測下一步應如何判斷？",
+        "hint": "把目前 fast 與 fast.next 分別代入迴圈條件，檢查是否還能安全走兩步。",
+        "explanation": "fast.next 已到尾端，條件不成立，迴圈結束並回傳無環；不必等 fast 本身成為 None。",
+        "source": {
+          "path": "workspaces/leetcode/linked-list/linked-list-cycle/notes.md",
+          "section": "這題的重點"
+        },
+        "multiple": false,
+        "options": [
+          {
+            "id": "a",
+            "text": "繼續存取 fast.next.next",
+            "feedback": "fast.next 是 None，這樣存取不安全。"
+          },
+          {
+            "id": "b",
+            "text": "因為未相遇，永遠無法下結論",
+            "feedback": "已觀察到可達尾端。"
+          },
+          {
+            "id": "c",
+            "text": "結束迴圈，判定無環",
+            "feedback": "尾端連結已證明這條鏈會終止。"
+          }
+        ],
+        "answer": [
+          "c"
+        ]
       }
     ],
     "challenge": {
-      "prompt": "不看解答，畫出本章流程，再改變一個條件並解釋結果。",
+      "prompt": "在本機 Python 3 建立 /tmp/cycle_demo.py，自行寫 ListNode 與 has_cycle(head)，以 python3 /tmp/cycle_demo.py 執行。測試空串列、單節點接 None、單節點自環、兩個 val 都為 7 的不同節點接 None，以及 A→B→C→D→B。執行前先預測每例結果；用節點標籤輸出每輪移動後的 slow/fast 位置。",
       "criteria": [
-        "逐步說明狀態如何改變",
-        "用實作或具體例子支持預測",
-        "交由教練檢查推理，網站不自動授予通過"
+        "五個案例的布林結果與預測逐一對照；空串列及尾端不發生屬性錯誤",
+        "重複值案例依節點身份判斷，自環案例能終止並辨識；trace 能指出相遇或終止那一輪",
+        "停用 trace 後說明保留多少額外狀態，以及記錄全部 trace 為何會改變空間複雜度；交由教練檢查"
       ]
     }
   }
