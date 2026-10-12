@@ -28,5 +28,5 @@
 
 - **公司 bastion 用 kubeadm EC2 lab 時，每次收工都要提醒 stop 3 台（2026-10-06 s42 學員要求）**：Gap Mode stop / step H 存檔後，固定給 `aws ec2 stop-instances` + `describe-instances` 查 `stopped` 兩條指令，由學員自己跑。學員中途說要走、沒走正式收工也要提醒。stop 不 destroy，整個 P3 結束才 destroy。
 
-- **Ansible / YAML 設定檔由 AI 產生,學員負責判斷要做什麼與讀結果(2026-10-12 s45 學員拍板)**:理由「工作上用 AI 工具生成,知道要做什麼就好」。why-first 預測題與指令執行仍由學員做;教練代打檔案後附「task ↔ 手動指令」對照表。
+- **Ansible / YAML 先給學員看再寫入(2026-10-12 s45 學員拍板,同日修正)**:預設教練先在對話貼出 YAML + 「task ↔ 手動指令」對照表,學員看過再寫入檔案;學員說沒時間時,教練直接補齊寫入。理由「工作上用 AI 工具生成,知道要做什麼就好」。why-first 預測題與指令執行仍由學員做。
 - **bastion 上的 lab kubectl 一律在 cp ssh session 跑(2026-10-12 s45)**:bastion 預設 context 是 PROD EKS,學員兩次 `kubectl get nodes` 打到 prod。給 kubectl 指令時明寫「在 cp 上跑」。
