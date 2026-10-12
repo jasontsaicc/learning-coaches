@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Parser self-check for site/build.py. Run: python3 site/test_build.py"""
 from build import (day_phases, leetcode_done, note_target, parse_mastery_line, parse_phases, parse_table,
-                   phase_by_day, phase_focus, sd_plan, slug, split_focus)
+                   phase_by_day, phase_focus, plan_inserts, sd_plan, slug, split_focus)
 
 # Real lines from workspaces/*/progress.md (## Mastery), plus one synthetic colon-in-name case.
 MASTERY = [
@@ -100,6 +100,8 @@ assert phase_focus(CA_CURR) == {"P1": ("Networking Gap-Scan", "找出 AWS networ
 assert split_focus("scheduler、affinity/taints、PDB") == ["scheduler", "affinity/taints", "PDB"]
 assert split_focus("把 migration 練到能推理,前置:P1") == []
 assert split_focus("SRE mock、story bank 提煉(STAR、英文版)、CKA") == ["SRE mock", "story bank 提煉(STAR、英文版)", "CKA"]
+PLAN = "### 12.2 Phase 對照\n\n| Phase | 原本 | 新插入 / 換題材 | 堂 |\n|---|---|---|---|\n| P3 調度 | x | 開 EC2;排障 drill(kubelet、MTU) | 10 |\n| GPU 模組(新) | | device plugin;MIG。學員同意加入 | 3 |\n| P6 衝刺 | y | | 8 |\n\n### 12.3 next\n"
+assert plan_inserts(PLAN) == [("P3 調度", ["開 EC2", "排障 drill(kubelet、MTU)"]), ("GPU 模組(新)", ["device plugin", "MIG"])], plan_inserts(PLAN)
 assert slug("Remove Nth Node From End") == "remove-nth-node-from-end"
 
 print("site/test_build.py OK")

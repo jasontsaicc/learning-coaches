@@ -18,9 +18,9 @@
 |-------|------------------------|------|----------------|
 | **P0 心智模型** | 聲明式 / reconcile loop / control plane 拆解 / apply→Running 全流程 | 無(入門 phase) | `references/phase-0-mental-model.md` |
 | **P1 核心物件 + 容器底層** | Pod/probe、Deployment/rollout、StatefulSet/Job、resource/QoS + namespace/cgroup/OOM | P0 gate | 無獨立教材檔;底層深化在 `references/foundations-linux-network.md` §2 |
-| **P2a 網路深水區** ⭐ | Service/kube-proxy/CoreDNS、Ingress、NetworkPolicy、CNI + 封包全鏈路 | P1 gate | `references/phase-2a-networking.md` |
+| **P2a 網路深水區** ⭐ | Service/kube-proxy/CoreDNS、Ingress → Gateway API、NetworkPolicy、CNI + 封包全鏈路 | P1 gate | `references/phase-2a-networking.md` |
 | **P2b 儲存 + 權限** | PV/PVC/CSI、StorageClass、RBAC/SA、IRSA、Secrets 管理、Pod Security Standards | P2a gate | `references/phase-2b-storage-rbac.md` |
-| **P3 調度 + 高並發 + 排障** ⭐ | scheduler、affinity/taints、HPA/VPA/Karpenter、PDB、capacity planning | P2b gate | `references/phase-3-scheduling-resilience.md` |
+| **P3 調度 + 高並發 + 排障** ⭐ | scheduler、affinity/taints、DRA(GPU 等裝置分配)、HPA/VPA/Karpenter、PDB、capacity planning | P2b gate | `references/phase-3-scheduling-resilience.md` |
 | **P4 可觀測性工程** | 三本柱、Prometheus/PromQL、SLI/SLO/Error Budget、OTel/Jaeger | P3 gate | `references/phase-4-observability.md` |
 | **P5 平台工程 / GitOps** | Helm、ArgoCD/GitOps、EKS prod terraform、progressive delivery、CRD/operator、admission webhook、cluster upgrade、etcd 運維(backup/restore/DR,含 Raft 深入) | P4 gate | `references/phase-5-platform-gitops.md` |
 | **P6 面試衝刺** | SRE 故障 mock、k8s × system design 交集、behavioral story bank 提煉(STAR、英文版)、CKA/CKAD 限時(副線) | P5 gate | `references/phase-6-interview-sprint.md` |

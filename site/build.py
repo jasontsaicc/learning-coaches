@@ -197,6 +197,21 @@ def split_focus(focus):
     return [x.strip() for x in parts if x.strip()] if len(parts) > 1 else []
 
 
+PLAN_INSERT_COL = "新插入 / 換題材"
+
+
+def plan_inserts(plan_text):
+    """k8s curriculum-plan '### 12.2' table -> [(row label, items)]; the insert column is split on ';'
+    and cut at the first '。' (trailing remarks like '學員 ... 同意加入')."""
+    m = re.search(r"^### 12\.2 [^\n]*\n(.*?)(?=^##|\Z)", plan_text, re.M | re.S)
+    header, rows = parse_table(m.group(1) if m else "")
+    if PLAN_INSERT_COL not in header:
+        raise ValueError(f"curriculum-plan §12.2: column {PLAN_INSERT_COL!r} not found (header: {header})")
+    i = header.index(PLAN_INSERT_COL)
+    return [(r[0], [x.strip() for x in r[i].split("。")[0].split(";") if x.strip()])
+            for r in rows if len(r) == len(header) and r[i]]
+
+
 LC_ROW_RE = re.compile(r"^\| (\d+) \| ([^|]+?) \|", re.M)
 
 
@@ -324,6 +339,16 @@ def build():
                 if ph["status"] == "not-started" and not any(t["parent"] == ph["id"] for t in topics):
                     for j, item in enumerate(split_focus(ph["plan"])):
                         add(f"{c}:{pid}:plan{j}", item, "topic", ph["id"], planned=True)
+        if c == "k8s":
+            # plan-of-record insertions (§12.2): P-rows add to that phase, other rows are new modules
+            for r, (row, items) in enumerate(plan_inserts((ws / "curriculum-plan.md").read_text())):
+                pid = (re.match(r"(P\d+[a-z]?) ", row) or [None, None])[1]
+                if pid in phases and (phases[pid]["status"] != "not-started" or any(t["parent"] == phases[pid]["id"] for t in topics)):
+                    continue  # same rule as focus items: real topics replace the plan
+                parent = phases[pid]["id"] if pid in phases else add(
+                    f"{c}:m{r}", row, "phase", c, status="not-started", plan="", files=[])["id"]
+                for j, item in enumerate(items):
+                    add(f"{parent}:ins{j}", item, "topic", parent, planned=True)
         by_id = {n["id"]: n for n in nodes}
         for f in notes:
             pattern = TOPIC_META_RE if f.endswith('.html') else TOPIC_COMMENT_RE

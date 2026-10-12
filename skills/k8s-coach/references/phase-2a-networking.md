@@ -145,6 +145,8 @@ kubectl describe ingress shop-ingress
 
 **Step 3 裝 ingress-nginx controller**
 
+> ingress-nginx 已於 2026-03 退役(不再出 security fix)。這裡仍用它,因為 lab 目的是證「物件 vs controller」,kind 上最快。lab 收尾接 `portfolio/k8s/notes/p2a-gateway-api.md`:同一個機制在 Gateway API 怎麼拆成三種角色。
+
 ```bash
 kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.11.1/deploy/static/provider/kind/deploy.yaml
 kubectl get pods -n ingress-nginx
