@@ -189,3 +189,24 @@ SD、LeetCode、CA 三章各有 6 道主題、2 道變式、1 句共用提示，
   同時修正慢回應測試的攔截器競態：改為明確釋放並等待 handler 完成，移除固定 300ms 延遲。
 
 同步、登入與備份繼續延後。題庫擴充到其他章節、間隔複習排程不屬於本輪交付。
+
+## 2026-10-12 k8s 學習路徑檢查
+
+檢查網站 k8s 節點是否正確、是否最新。節點與 `progress.md` 一致（到 s44，2026-10-09），
+但路徑落後於 plan of record（`curriculum-plan.md` §12），部分內容已過時。
+
+- 修正：`split_focus` 會切開括號內的 `、`，P6 出現 `提煉(STAR` / `英文版)` 兩個壞節點（`93576d7`）。
+- 新增：`plan_inserts()` 讀 §12.2「新插入 / 換題材」欄（以 `;` 切、截到 `。`）。P 開頭的列補進未開始的
+  phase，其他列（Terraform senior、Controller 選修、GPU 模組）成為獨立模組，依表格順序插入（`a627a83`、`914a814`）。
+  已開始或已有 topic 的 phase 不顯示插入項，規則同 focus。欄名改動會讓 build 失敗（刻意）。
+- 內容更新：ingress-nginx 2026-03 退役，新增 `portfolio/k8s/notes/p2a-gateway-api.md`，P2a lab Step 3 加退役說明；
+  DRA 於 v1.34 GA，新增 `p3-dra.md`，curriculum P3 focus 加 DRA、P2a 加 Gateway API。
+  Kubernetes 最新 minor 為 v1.37（2026-08-26），lab 鎖 v1.36 仍在支援期。
+- Flashcard 來源是 `workspaces/k8s/term-registry.md`，dev 不改；Gateway API / DRA 卡片留給 coach。
+
+驗證：`./scripts/lint-all.sh` ALL PASS；tailnet 站截圖確認 11 個 phase 順序、展開內容、360px 無橫向捲動、console 無錯誤。
+
+待辦（k8s-coach 處理，改 `workspaces/k8s/progress.md`）：
+1. 8 個 Mastery topic 補 phase 前綴：L4 vs L7、NetworkPolicy、conntrack、DNS 排障、分層判準、PID 1、EKS 儲存拓撲、kubectl debug。
+2. P3 改 `in-progress`（kubeadm 叢集即 §12.2 的 P3 開場）。
+3. 重跑 `./scripts/site-refresh.sh`：使用者上次部署早於 `914a814`，Cloudflare 上模組順序仍舊。
