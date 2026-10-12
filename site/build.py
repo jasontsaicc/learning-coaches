@@ -341,14 +341,21 @@ def build():
                         add(f"{c}:{pid}:plan{j}", item, "topic", ph["id"], planned=True)
         if c == "k8s":
             # plan-of-record insertions (§12.2): P-rows add to that phase, other rows are new modules
+            # placed right after the row above them, so the path keeps the table's order
+            prev = None
             for r, (row, items) in enumerate(plan_inserts((ws / "curriculum-plan.md").read_text())):
                 pid = (re.match(r"(P\d+[a-z]?) ", row) or [None, None])[1]
-                if pid in phases and (phases[pid]["status"] != "not-started" or any(t["parent"] == phases[pid]["id"] for t in topics)):
-                    continue  # same rule as focus items: real topics replace the plan
-                parent = phases[pid]["id"] if pid in phases else add(
-                    f"{c}:m{r}", row, "phase", c, status="not-started", plan="", files=[])["id"]
+                if pid in phases:
+                    prev = phases[pid]
+                    if prev["status"] != "not-started" or any(t["parent"] == prev["id"] for t in topics):
+                        continue  # same rule as focus items: real topics replace the plan
+                else:
+                    module = add(f"{c}:m{r}", row, "phase", c, status="not-started", plan="", files=[])
+                    if prev:
+                        nodes.insert(nodes.index(prev) + 1, nodes.pop())
+                    prev = module
                 for j, item in enumerate(items):
-                    add(f"{parent}:ins{j}", item, "topic", parent, planned=True)
+                    add(f"{prev['id']}:ins{j}", item, "topic", prev["id"], planned=True)
         by_id = {n["id"]: n for n in nodes}
         for f in notes:
             pattern = TOPIC_META_RE if f.endswith('.html') else TOPIC_COMMENT_RE
