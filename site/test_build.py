@@ -99,6 +99,7 @@ assert phase_focus(K8S_CURR) == {"P2a": ("網路深水區", "Service/kube-proxy�
 assert phase_focus(CA_CURR) == {"P1": ("Networking Gap-Scan", "找出 AWS networking 的洞。前置:P0。")}, phase_focus(CA_CURR)
 assert split_focus("scheduler、affinity/taints、PDB") == ["scheduler", "affinity/taints", "PDB"]
 assert split_focus("把 migration 練到能推理,前置:P1") == []
+assert split_focus("SRE mock、story bank 提煉(STAR、英文版)、CKA") == ["SRE mock", "story bank 提煉(STAR、英文版)", "CKA"]
 assert slug("Remove Nth Node From End") == "remove-nth-node-from-end"
 
 print("site/test_build.py OK")

@@ -192,7 +192,9 @@ def phase_focus(curriculum_text):
 
 def split_focus(focus):
     """'scheduler、affinity/taints、HPA/VPA/Karpenter' -> ['scheduler', 'affinity/taints', 'HPA/VPA/Karpenter']"""
-    return [x.strip() for x in focus.split("、") if x.strip()] if "、" in focus else []
+    # 、 inside (...) belongs to one item: '提煉(STAR、英文版)' stays whole
+    parts = re.split(r"、(?![^(（]*[)）])", focus)
+    return [x.strip() for x in parts if x.strip()] if len(parts) > 1 else []
 
 
 LC_ROW_RE = re.compile(r"^\| (\d+) \| ([^|]+?) \|", re.M)
