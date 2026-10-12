@@ -30,7 +30,7 @@ systemctl --user status learning-map   # serves site/dist on 100.86.161.122:8123
 | phases | `workspaces/<c>/progress.md` `## Phase status`; names/focus from `skills/<c>-coach/references/curriculum.md` (ca: `cloud-architect-coach`) |
 | learned topics + level | `## Mastery` lines, parsed by `parse_mastery_line` |
 | SD current topic | phase and Day derived from `## Current Session breakpoint`; only the derived status is exported |
-| planned (dashed) lessons | sd: `curriculum-detail.md` `### Day a-b: Title`; k8s: not-started phase focus split on `、` plus `curriculum-plan.md` §12.2 column `新插入 / 換題材` split on `;` (non-P rows become extra modules); leetcode: curriculum table rows |
+| planned (dashed) lessons | sd: `curriculum-detail.md` `### Day a-b: Title`; k8s: focus of phases with no Mastery topic yet, split on `、`, plus `curriculum-plan.md` §12.2 column `新插入 / 換題材` split on `;` (non-P rows become extra modules); leetcode: curriculum table rows |
 | leetcode problems (practiced, not automatically high) | folders `workspaces/leetcode/<group>/<slug>/` + `## 做過` for labels |
 | key points / flashcards | `KEYPOINTS` in `build.py` (one-liner tables, k8s term-registry, sd pattern-map) |
 | notes / HTML | `portfolio/<c>/notes/`, `workspaces/<c>/notes/`, leetcode problem folders, `portfolio/leetcode/notes/` |

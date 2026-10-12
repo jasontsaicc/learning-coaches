@@ -3246,8 +3246,8 @@
     "title": "DNS 排障",
     "topicRefs": [
       {
-        "parent": "k8s",
-        "label": "DNS 排障第一刀(先用 FQDN 二分)"
+        "parent": "k8s:P2a",
+        "label": "P2a DNS 排障第一刀(先用 FQDN 二分)"
       }
     ],
     "objectives": [

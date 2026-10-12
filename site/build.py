@@ -336,7 +336,7 @@ def build():
                     topics.append(add(f"{c}:plan{j}", f"{title} (Day {a}{f'-{b}' if b != a else ''})", "topic", f"{c}:{pid}", planned=True, files=[]))
         else:
             for pid, ph in phases.items():
-                if ph["status"] == "not-started" and not any(t["parent"] == ph["id"] for t in topics):
+                if not any(t["parent"] == ph["id"] for t in topics):
                     for j, item in enumerate(split_focus(ph["plan"])):
                         add(f"{c}:{pid}:plan{j}", item, "topic", ph["id"], planned=True)
         if c == "k8s":
@@ -347,7 +347,7 @@ def build():
                 pid = (re.match(r"(P\d+[a-z]?) ", row) or [None, None])[1]
                 if pid in phases:
                     prev = phases[pid]
-                    if prev["status"] != "not-started" or any(t["parent"] == prev["id"] for t in topics):
+                    if any(t["parent"] == prev["id"] for t in topics):
                         continue  # same rule as focus items: real topics replace the plan
                 else:
                     module = add(f"{c}:m{r}", row, "phase", c, status="not-started", plan="", files=[])

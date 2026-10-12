@@ -210,3 +210,7 @@ SD、LeetCode、CA 三章各有 6 道主題、2 道變式、1 句共用提示，
 1. 8 個 Mastery topic 補 phase 前綴：L4 vs L7、NetworkPolicy、conntrack、DNS 排障、分層判準、PID 1、EKS 儲存拓撲、kubectl debug。
 2. P3 改 `in-progress`（kubeadm 叢集即 §12.2 的 P3 開場）。
 3. 重跑 `./scripts/site-refresh.sh`：使用者上次部署早於 `914a814`，Cloudflare 上模組順序仍舊。
+
+同日使用者授權直接改 `progress.md`：待辦 1、2 完成（kubectl debug 歸 P1，分層判準 / PID 1 / EKS 儲存歸 P2b，其餘 P2a），
+term-registry 加 Gateway API、DRA 兩張卡；連帶更新 DNS 章節 topicRef 與兩篇 HTML 的 topic meta。
+計畫節點規則改為「phase 沒有 Mastery topic 就顯示」，不再看 status，P3 改 in-progress 後計畫項仍可見。

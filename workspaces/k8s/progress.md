@@ -27,7 +27,7 @@ s44(2026-10-09,家用 VM,純冷測無 lab)收工:3 題高價值冷測跑完(IRSA
 - P1 核心物件 + 容器底層: gate-passed(2026-06-25,legacy pre-Examiner)
 - P2a 網路深水區: in-progress(chunk 1 ✅ / chunk 2 ✅ / chunk 3 NetworkPolicy 剩 lab Step 5+6+gate+F/G / chunk 4 零件 4-1~4-4 ✅,4-5 盲講式已於 2026-08-11 退役改情境排障題)
 - P2b 儲存 + 權限: in-progress(C-1 ✅ s26,欠 `cg-demo` memory.max 讀數 / C-2 ✅ s29,欠 `reclaimPolicy: Delete` teardown 實證 / C-3 ✅ s31-32,step G 2/4 未過 / C-4 chunk 1-4 ✅ s33/s35/s36,4b 僅 supported,C-4 F/G 併入 s37 的 C-5 F/G;C-5 ✅ s37(chunk 3 supported、kind JWT 教練代跑);C-6 chunk 1 supported / 2 ✅ s38 / 3 ✅ supported s39,F ✅ s40,G 2/4 未過 s40)
-- P3 調度 + 高並發 + 排障: not-started
+- P3 調度 + 高並發 + 排障: in-progress(curriculum-plan §12.2 開場:kubeadm 3 台叢集 s41-s44 建置中;P2b 殘債壓課尾)
 - P4 可觀測性工程: not-started
 - P5 平台工程 / GitOps: not-started
 - P6 面試衝刺: not-started
@@ -50,17 +50,17 @@ weak-topic flags(2026-08-03 啟用,P2a 帶 flag 前進、gate 未考,學員決�
 - P1 resource/QoS/OOM: high (s10)
 - P2a Service/kube-proxy/DNAT/conntrack/CoreDNS 全鏈: high (s10)
 - P2a Ingress(規則 vs controller、L7 純字串比對): med (s14)
-- L4 vs L7 判準: low-med (s18)
-- NetworkPolicy(白名單 + default-deny 翻轉 + 第四個引擎): low-med (s23)
-- conntrack 精度(table full 新舊連線): med (s18)
-- DNS 排障第一刀(先用 FQDN 二分): med (s13)
+- P2a L4 vs L7 判準: low-med (s18)
+- P2a NetworkPolicy(白名單 + default-deny 翻轉 + 第四個引擎): low-med (s23)
+- P2a conntrack 精度(table full 新舊連線): med (s18)
+- P2a DNS 排障第一刀(先用 FQDN 二分): med (s13)
 - P2a CNI 封包全鏈 data plane(veth/路由表/MASQUERADE/conntrack): low-med (s23)
-- 分層判準「關掉 API Server 還在不在」: med (s25)
+- P2b 分層判準「關掉 API Server 還在不在」: med (s25)
 - P2b C-1 三階梯壽命(可寫層 / emptyDir / PVC): med-high (s26)
 - P2b C-1 可寫層 / overlayfs: med (s24)
 - P2b C-1 PV/PVC 解耦: med (s25)
-- PID 1 signal 保護: med (s26)
-- EKS 儲存拓撲(EBS AZ-scoped / nodeAffinity / volumeBindingMode): med (s26)
+- P2b PID 1 signal 保護: med (s26)
+- P2b EKS 儲存拓撲(EBS AZ-scoped / nodeAffinity / volumeBindingMode): med (s26)
 - P2b C-3 StatefulSet identity(ordinal / per-replica PVC / per-Pod DNS): med-high (s32)
 - P2b C-4 RBAC 四象限: low(scaffolded) (s33)
 - P2b C-4 RBAC 兩地基性質(純 allow / SA 是 Pod 身分): low(scaffolded) (s33)
@@ -69,7 +69,7 @@ weak-topic flags(2026-08-03 啟用,P2a 帶 flag 前進、gate 未考,學員決�
 - P2b C-6 Secret 分層(etcd 明文 / encryption at rest 擋備份 / RBAC 擋 API 讀者): low(scaffolded) (s38)
 - P2b C-6 env vs volume 輪替(啟動快照 vs kubelet 同步): med (s38)
 - P2b C-6 PSS 兩個檢查點(admission 看 YAML / kubelet 看 image user): low(scaffolded) (s40)
-- kubectl debug / ephemeral container: low (2026-09-01,ad hoc 非主線,未經 gate)
+- P1 kubectl debug / ephemeral container: low (2026-09-01,ad hoc 非主線,未經 gate)
 
 ## Scorecard history
 
