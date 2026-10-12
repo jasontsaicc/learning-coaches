@@ -6,7 +6,7 @@ Static personal learning site: course paths → chapter exercises → evidence a
 python3 site/build.py            # → site/dist/ (gitignored)
 python3 site/build.py --check    # parse only; lint-all.sh runs this + test_build.py
 systemctl --user status learning-map   # serves site/dist on 100.86.161.122:8123 (tailnet only)
-./scripts/site-refresh.sh               # rebuild + restart + health check
+./scripts/site-refresh.sh               # rebuild + restart + health check + Cloudflare deploy (needs ~/.cloudflare-token)
 ```
 
 ## Files
@@ -59,6 +59,7 @@ HTML buttons show the page `<title>`. To bring in a claude.ai artifact: `Artifac
 - Verify UI with a screenshot (`/browse`), not just data. If headless Chromium dies with "No usable sandbox", the AppArmor profile `/etc/apparmor.d/playwright-chromium` (userns) is missing or not loaded.
 - Flashcard state is per-browser `localStorage`; it never writes back to progress.md (source of truth).
 - Server: user unit `~/.config/systemd/user/learning-map.service` (linger on, survives reboot). Never needs a restart after a rebuild.
+- Cloudflare Pages project `learning-map`: Access apps (email OTP, one address) cover `learn.jasondevops.space` and `learning-map-eep.pages.dev` + `*.` previews. Any new hostname needs its own Access app before DNS. Deploys are manual (`site-refresh.sh`), not on commit.
 - Rebuild is automatic on commit via local `.git/hooks/post-commit` (not tracked; recreate on a new clone). Uncommitted note drops need a manual `python3 site/build.py`.
 
 
