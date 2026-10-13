@@ -13,6 +13,23 @@
      - docs/curriculum-roadmap.md、docs/planning-review.md → workspaces/sd/archive/pre-migration/
      - sd-coach skill 本體         → skills/sd-coach/(curriculum 詳文=references/curriculum-detail.md) -->
 
+## S53(2026-10-14,Day 36 chunk 1 group fan-out;停)
+
+- 接 S52 G 後直進 Day 36。Q1「照 1v1 做法 PUBLISH 幾次」→ 答 50(直接跳到 per-server channel,其實是更好的設計)。coach 用兩段式 probe 追問 channel 名 → 學生爆氣「你在講什麼」。coach 錯:答案對卻沒直說,一次塞兩問。改直講 A=500 / B=50。
+- Q2「去哪查 500 人在哪台」→「你又沒交代」= 新 Day 未教先考,違反「先教學後 drill」(S49 拍板)。coach 認錯,直接教兩張表 + 三步。
+- Recall 自講兩表、寫入時機與理由、500→50 ✅;離線 catch-up `group_id + seq` 自推 ✅(開頭「吧」)。
+- 10 萬人 capacity:先跳過數字猜「DB 先爆、Redis cache 嗎」(讀成 5 千)→ 要求填格後 500k ✅、單位標錯、PUBLISH 漏 ×5。server 訂閱 group 由 coach 教。
+- 「省掉哪一步」:connection map ✅(why 未自產);「成員表也省掉」❌ → 縮到 chat-2 決定訂閱 → 「group ID 吧」→ 「成員改變時」(半對)。chunk 1 判 supported 過。
+- 問句收尾:吧 ×2、嗎 ×4、這樣子嗎 ×1。三指標:argument 🟡 / capacity 🟡(算對但先猜)/ ops 未測。
+- coach 自省:學生答對但走不同路時,要直接說「對,而且是更好的版本」,不要 Socratic 反問。
+
+## S52 G(2026-10-13,Day 35 短 G 收題)
+
+- 換皮重測:叫車 driver↔rider 1v1(200 萬趟/天、peak 5 萬 active chat、留存 90 天)。Q1 第一段 unprompted:A = WS 連著 + PUBLISH 訂閱者 1/0 判在線;B = NAT 後 server 不能撥 → APNs/FCM,payload 只放通知(隱私/第三方 why);重開 app 查 DB 補。全程直述句。S52 續 F 的 A/B 摺疊本場未再現 🌟。
+- 弱點:catch-up 用「最後收到的時間戳」= chunk 4 回退。clock skew 圖戳後撈回「NTP 不準、原子 +1」;result set 預測對(空的,乘客看不到);scope 要縮題才出(R+D1 那段對話)、owner 選 Redis INCR(single thread why 正確)。
+- coach 錯:為一個小滑連挖四層(timestamp → scope → owner → Redis failover),超出 G 範圍;學生「太混亂、太深入」→ 停車,只給一句結論(seq 跟訊息同存 DB)。3AM/cost 未測。
+- 學生拍板快收、直進 Day 36。G 3/5(測到的維度)。
+
 ## S52 續(2026-10-13,quick-fire 兩卡 + F;G 前停)
 
 - 間隔 2 天,無 Comeback。開場第一則塞了回顧 + 路線 + 題目,學生回「我有 ADHD」→ 改每輪一圖一問(memory + coaching-brief 已記)。

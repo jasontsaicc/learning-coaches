@@ -51,6 +51,7 @@
 | server 不能主動連手機，因為 HTTP 單向 (S52) | 限制是 carrier NAT：誰能撥給誰。換 WebSocket 也撥不進去 | 軸錯：protocol 方向 vs 網路可達性 |
 | push payload 放訊息、挖掉卡號就好 (S52) | free text 挖不乾淨，漏一個就收不回來 → content-free | 單向門的代價沒算 |
 | 3AM 只設一條 alert：DB commit latency (S52) | page 在 end-to-end delivery latency；DB 只看得到自己 | 元件重要性 vs 使用者症狀摺成一軸 |
+| catch-up 用「最後收到的時間戳」(S52 G) | `conv_id + seq > last_seen`；clock skew 會讓晚送的訊息 ts 比較早而漏掉 | 時間戳的舊直覺回來了，chunk 4 教過仍回退 |
 
 ## 🌍 Real World
 
