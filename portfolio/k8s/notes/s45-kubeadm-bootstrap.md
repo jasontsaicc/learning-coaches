@@ -36,6 +36,8 @@ kubeadm init
 - 依賴套件是 Ansible 裝的,Pod 網路是 CNI 給的,都不是 kubeadm。
 - apiserver crash:kubelet 重拉。controller-manager 不行,因為它要透過 API server 才看得到東西。
 - manifest 被移走:kubelet 停掉那個 static pod。移走 scheduler → 新 Pod 沒人填 `nodeName` → `Pending`,Events 是空的。
+- stop/start EC2 後不用重跑 init:systemd 起 kubelet(enabled unit)→ kubelet 讀 `staticPodPath` → control plane 回來(s46 實測)。
+- static pod 是 kubelet 功能,不是 kubeadm 專屬。kubeadm / kind 用它跑 control plane;k3s 包成單一 `k3s server` process;EKS 看不到 control plane。Pod 名字尾巴接 node 名 = static pod。
 
 ## 沒有 CNI 時的因果鏈
 
