@@ -1,0 +1,465 @@
+<title>兩張紙條的 BST</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=JetBrains+Mono:wght@400;700&family=Noto+Sans+TC:wght@400;500;700&display=swap">
+<style>
+:root{
+  --paper:#F2F0F6; --surface:#FFFFFF; --ink:#191527; --body:#302B41;
+  --muted:#6E687E; --line:#CFCADB;
+  --c1:#4A4098; --c1-soft:#E3E0F3;
+  --c2:#AE3557; --c2-soft:#F6E0E7;
+  --signal:#10726B; --signal-soft:#D8ECE9;
+  --code-bg:#131022; --code-fg:#DEDAEA;
+  --hold:#EDEAF3;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#14121C; --surface:#1C1929; --ink:#EAE7F2; --body:#C6C1D4;
+    --muted:#8E88A0; --line:#322E44;
+    --c1:#9E94EC; --c1-soft:#241F42;
+    --c2:#E88BA4; --c2-soft:#3A1D28;
+    --signal:#4FC7B6; --signal-soft:#0F2F2C;
+    --code-bg:#0C0A14; --code-fg:#DAD5E6;
+    --hold:#1F1C2C;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#14121C; --surface:#1C1929; --ink:#EAE7F2; --body:#C6C1D4;
+  --muted:#8E88A0; --line:#322E44;
+  --c1:#9E94EC; --c1-soft:#241F42;
+  --c2:#E88BA4; --c2-soft:#3A1D28;
+  --signal:#4FC7B6; --signal-soft:#0F2F2C;
+  --code-bg:#0C0A14; --code-fg:#DAD5E6;
+  --hold:#1F1C2C;
+}
+
+*{box-sizing:border-box}
+body{
+  background:var(--paper); color:var(--body);
+  font-family:"Noto Sans TC","Hiragino Sans","Microsoft JhengHei",sans-serif;
+  font-size:16px; line-height:1.85;
+  padding:0 1.25rem 5rem;
+}
+.wrap{max-width:44rem; margin:0 auto}
+
+header{padding-block:3.5rem 1.5rem}
+.kicker{
+  font-family:"JetBrains Mono",monospace; font-size:.72rem; font-weight:700;
+  letter-spacing:.16em; text-transform:uppercase; color:var(--signal);
+}
+h1{
+  font-family:"Archivo","Noto Sans TC",sans-serif; font-weight:700;
+  font-size:clamp(2rem,6vw,2.9rem); line-height:1.12; letter-spacing:-.02em;
+  color:var(--ink); margin:.5rem 0 .6rem; text-wrap:balance;
+}
+.sub{color:var(--muted); font-size:1rem; margin:0}
+
+.rail{
+  height:9px; margin:2.75rem 0 2.25rem;
+  border-top:2px solid var(--line); border-bottom:2px solid var(--line);
+  background:repeating-linear-gradient(90deg,var(--line) 0 3px,transparent 3px 13px);
+}
+
+h2{
+  font-family:"Archivo","Noto Sans TC",sans-serif; font-weight:700;
+  font-size:1.4rem; color:var(--ink); letter-spacing:-.01em;
+  margin:0 0 .25rem; text-wrap:balance;
+}
+h2 .num{
+  font-family:"JetBrains Mono",monospace; font-size:.85rem; color:var(--signal);
+  margin-right:.6rem; vertical-align:.15em;
+}
+h3{font-family:"Archivo","Noto Sans TC",sans-serif;font-weight:600;font-size:1rem;color:var(--ink);margin:1.75rem 0 .4rem}
+h4{font-family:"Archivo","Noto Sans TC",sans-serif;font-weight:600;font-size:.95rem;color:var(--ink);margin:1.4rem 0 .3rem}
+section{margin-bottom:2.5rem}
+p{margin:.7rem 0}
+strong{color:var(--ink); font-weight:700}
+code{font-family:"JetBrains Mono",monospace; font-size:.87em; background:var(--signal-soft); color:var(--ink); padding:.1em .35em; border-radius:2px}
+
+.lede{font-size:1.1rem; color:var(--ink); border-left:3px solid var(--signal); padding-left:1rem; margin:1rem 0 1.25rem}
+
+.callout{background:var(--surface); border:1px solid var(--line); border-radius:4px; padding:1.1rem 1.25rem; margin:1.25rem 0}
+.callout.warn{border-left:4px solid var(--c2)}
+.callout.key{border-left:4px solid var(--signal)}
+.callout h3,.callout h4{margin-top:0}
+
+ul,ol{padding-left:1.35rem; margin:.7rem 0}
+li{margin:.35rem 0}
+
+.signals{list-style:none; padding:0; display:grid; gap:.5rem}
+.signals li{
+  display:flex; gap:.75rem; align-items:baseline;
+  background:var(--surface); border:1px solid var(--line); border-radius:4px; padding:.7rem .95rem; margin:0;
+}
+.signals .n{font-family:"JetBrains Mono",monospace; font-weight:700; color:var(--signal); flex-shrink:0}
+
+.tablewrap{overflow-x:auto; margin:1.25rem 0; border:1px solid var(--line); border-radius:4px; background:var(--surface)}
+table{border-collapse:collapse; width:100%; font-size:.86rem; font-variant-numeric:tabular-nums}
+th,td{text-align:left; padding:.55rem .8rem; border-bottom:1px solid var(--line); white-space:nowrap}
+th{font-family:"Archivo",sans-serif; font-weight:600; color:var(--ink); font-size:.78rem; letter-spacing:.03em; text-transform:uppercase}
+tr:last-child td{border-bottom:none}
+td.mono,th.mono{font-family:"JetBrains Mono",monospace}
+.t1{color:var(--c1); font-weight:700}
+.t2{color:var(--c2); font-weight:700}
+.hit{color:var(--signal); font-weight:700}
+
+pre{
+  background:var(--code-bg); color:var(--code-fg); border-radius:5px;
+  padding:1.1rem 1.25rem; overflow-x:auto; margin:1rem 0;
+  font-family:"JetBrains Mono",monospace; font-size:.84rem; line-height:1.75;
+}
+pre .cm{color:#8C86A8}
+pre .kw{color:#C39BEE}
+pre .fn{color:#7FD6C6}
+pre .hl{background:rgba(127,214,198,.14); display:block; margin:0 -1.25rem; padding:0 1.25rem}
+
+details{background:var(--surface); border:1px solid var(--line); border-radius:4px; margin:1rem 0; overflow:hidden}
+summary{
+  cursor:pointer; padding:.9rem 1.15rem; list-style:none;
+  font-family:"Archivo","Noto Sans TC",sans-serif; font-weight:600; color:var(--ink);
+  display:flex; align-items:baseline; gap:.6rem;
+}
+summary::-webkit-details-marker{display:none}
+summary::before{content:"▸"; color:var(--signal); font-size:.8rem}
+details[open] summary::before{content:"▾"}
+summary:focus-visible{outline:2px solid var(--signal); outline-offset:-2px}
+.lockhint{font-family:"Noto Sans TC",sans-serif;font-weight:400;font-size:.8rem;color:var(--muted);margin-left:auto}
+.dbody{padding:0 1.15rem 1.15rem; border-top:1px solid var(--line)}
+
+.mantra{font-family:"Archivo","Noto Sans TC",sans-serif;font-size:1.05rem;font-weight:600;color:var(--ink);background:var(--signal-soft);border-radius:4px;padding:1rem 1.2rem;margin:1rem 0}
+
+/* ── 樹 ── */
+.dia{display:block;max-width:100%;height:auto;margin:1.25rem auto}
+.dia .edge{stroke:var(--line);stroke-width:2}
+.dia .edge.nil{stroke-dasharray:4 4}
+.dia .box{fill:var(--surface);stroke:var(--line);stroke-width:2}
+.dia .box.a{fill:var(--c1-soft);stroke:var(--c1)}
+.dia .box.b{fill:var(--c2-soft);stroke:var(--c2)}
+.dia .nilbox{fill:none;stroke:var(--muted);stroke-width:1.5;stroke-dasharray:3 3}
+.dia .tval{fill:var(--ink);font-family:"JetBrains Mono",monospace;font-size:15px;font-weight:700;text-anchor:middle;dominant-baseline:central}
+.dia .nilv{fill:var(--muted);font-family:"JetBrains Mono",monospace;font-size:11px;text-anchor:middle;dominant-baseline:central}
+.dia .tag{fill:var(--muted);font-family:"JetBrains Mono",monospace;font-size:12px;text-anchor:middle}
+.dia .tag.hit{fill:var(--signal);font-weight:700}
+
+/* ── call stack 分鏡 ── */
+.film{display:grid;gap:1rem;margin:1.5rem 0}
+.shot{background:var(--surface);border:1px solid var(--line);border-radius:4px;padding:.9rem 1rem}
+.shot .hd{display:flex;gap:.7rem;align-items:baseline;flex-wrap:wrap;margin-bottom:.6rem}
+.shot .no{font-family:"JetBrains Mono",monospace;font-size:.68rem;font-weight:700;letter-spacing:.1em;color:var(--signal);border:1px solid var(--signal);border-radius:2px;padding:.1rem .35rem;flex-shrink:0}
+.shot .cap{font-size:.9rem;color:var(--body);line-height:1.6}
+.tower{display:flex;flex-direction:column;gap:3px;font-family:"JetBrains Mono",monospace;font-size:.78rem;overflow-x:auto}
+.fr{border:1px solid var(--line);border-radius:3px;padding:.4rem .6rem;background:var(--hold);color:var(--muted);min-width:min-content;white-space:nowrap}
+.fr.run{background:var(--signal-soft);border-color:var(--signal);color:var(--ink);font-weight:700}
+.fr.gone{border-style:dashed;background:transparent;opacity:.45;text-decoration:line-through}
+.fr .who{color:var(--ink);font-weight:700}
+.fr.run .who{color:var(--signal)}
+.fr .slot{color:var(--muted);font-weight:400}
+.fr .val{color:var(--c2);font-weight:700}
+.floor{font-family:"JetBrains Mono",monospace;font-size:.7rem;color:var(--muted);letter-spacing:.1em;border-top:2px solid var(--line);padding-top:.25rem;margin-top:2px}
+.emptystack{font-family:"JetBrains Mono",monospace;font-size:.78rem;color:var(--muted);padding:.4rem 0}
+
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(15rem,1fr));gap:1rem;margin:1.25rem 0}
+.two > div{background:var(--surface);border:1px solid var(--line);border-radius:4px;padding:.9rem 1.05rem}
+.two h4{margin-top:0}
+
+.wrongright{display:grid;gap:.5rem;margin:1rem 0}
+.wrongright > div{padding:.65rem .9rem;border-radius:3px;font-size:.92rem}
+.wr-x{background:var(--c2-soft);border-left:3px solid var(--c2)}
+.wr-o{background:var(--signal-soft);border-left:3px solid var(--signal)}
+.wr-y{background:var(--surface);border:1px solid var(--line);border-left:3px solid var(--muted)}
+
+.move{background:var(--surface);border:1px solid var(--line);border-radius:4px;padding:.9rem 1.05rem;margin:.85rem 0}
+.move h4{margin:0 0 .5rem;display:flex;gap:.6rem;align-items:baseline;flex-wrap:wrap}
+.move h4 .mv{font-family:"JetBrains Mono",monospace;font-size:.7rem;font-weight:700;letter-spacing:.1em;color:var(--signal);border:1px solid var(--signal);border-radius:2px;padding:.1rem .35rem;flex-shrink:0}
+.say{background:var(--c1-soft);border-radius:3px;padding:.6rem .8rem;margin:.4rem 0;color:var(--ink)}
+.say b{display:block;font-family:"JetBrains Mono",monospace;font-size:.66rem;letter-spacing:.12em;text-transform:uppercase;color:var(--c1);margin-bottom:.3rem}
+.think{font-size:.88rem;color:var(--muted);margin:.4rem 0}
+.think b{font-family:"JetBrains Mono",monospace;font-size:.66rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:.2rem}
+
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+.dia .box.p{fill:var(--c1-soft);stroke:var(--c1)}
+.dia .box.q{fill:var(--c2-soft);stroke:var(--c2)}
+.dia .box.ans{fill:var(--signal-soft);stroke:var(--signal);stroke-width:3}
+.dia .edge.walk{stroke:var(--signal);stroke-width:4;stroke-linecap:round}
+.dia .tag.p{fill:var(--c1);font-weight:700}
+.dia .tag.q{fill:var(--c2);font-weight:700}
+td.l{color:var(--c1);font-weight:700}
+td.r{color:var(--c2);font-weight:700}
+</style>
+<style>
+.dia .edgetag{fill:var(--signal);font-family:"JetBrains Mono",monospace;font-size:11px;font-weight:700;text-anchor:middle}
+.dia .box.no{fill:var(--c2-soft);stroke:var(--c2)}
+</style>
+
+<div class="wrap">
+
+<header>
+  <div class="kicker">LeetCode #98 · Tree · DFS 前序 + 往下傳兩張紙條(龜模式)· 2026-10-13</div>
+  <h1>兩張紙條的 BST</h1>
+  <p class="sub">Validate Binary Search Tree。#1448 傳一張紙條(路上最大值),這題傳兩張:low 和 high。</p>
+</header>
+
+<div class="rail"></div>
+
+<section>
+  <h2><span class="num">01</span>這題在幹嘛</h2>
+  <p class="lede">檢查一棵樹是不是 BST。規則:<strong>左邊整棵</strong>都比我小,<strong>右邊整棵</strong>都比我大。相等不行。</p>
+  <p>重點是「整棵」,不是只看小孩。用這棵樹,整頁都用它:</p>
+
+  <svg class="dia" viewBox="0 0 520 240" width="520" role="img" aria-label="樹:5 的小孩 4 和 6;4 的兩個小孩是 None;6 的小孩 3 和 7。3 是紅色,它在 5 的右邊卻比 5 小,所以不是 BST。">
+<line class="edge" x1="260" y1="50" x2="150" y2="96"/>
+<line class="edge" x1="260" y1="50" x2="370" y2="96"/>
+<line class="edge nil" x1="150" y1="130" x2="95" y2="166"/>
+<line class="edge nil" x1="150" y1="130" x2="205" y2="166"/>
+<line class="edge" x1="370" y1="130" x2="315" y2="166"/>
+<line class="edge" x1="370" y1="130" x2="425" y2="166"/>
+<rect class="box ans" x="238" y="16" width="44" height="34" rx="4"/><text class="tval" x="260" y="33">5</text>
+<rect class="box ans" x="128" y="96" width="44" height="34" rx="4"/><text class="tval" x="150" y="113">4</text>
+<rect class="box ans" x="348" y="96" width="44" height="34" rx="4"/><text class="tval" x="370" y="113">6</text>
+<rect class="nilbox" x="77" y="170" width="36" height="26" rx="3"/><text class="nilv" x="95" y="183">None</text>
+<rect class="nilbox" x="187" y="170" width="36" height="26" rx="3"/><text class="nilv" x="205" y="183">None</text>
+<rect class="box no" x="293" y="166" width="44" height="34" rx="4"/><text class="tval" x="315" y="183">3</text>
+<rect class="box ans" x="403" y="166" width="44" height="34" rx="4"/><text class="tval" x="425" y="183">7</text>
+<text class="tag hit" x="260" y="228">3 在 5 的右邊,卻比 5 小 → 不是 BST,答案 False</text>
+  </svg>
+
+  <div class="tablewrap"><table>
+    <tr><th>node</th><th>只看爸爸</th><th>看整條路上的祖先</th></tr>
+    <tr><td class="mono">4</td><td class="mono">4 &lt; 5 ✓</td><td class="mono">4 &lt; 5 ✓</td></tr>
+    <tr><td class="mono">6</td><td class="mono">6 &gt; 5 ✓</td><td class="mono">6 &gt; 5 ✓</td></tr>
+    <tr><td class="mono">3</td><td class="mono">3 &lt; 6 ✓</td><td class="t2">3 &lt; 6 ✓,但要 3 &gt; 5 ✗</td></tr>
+    <tr><td class="mono">7</td><td class="mono">7 &gt; 6 ✓</td><td class="mono">7 &gt; 6 ✓,7 &gt; 5 ✓</td></tr>
+  </table></div>
+</section>
+
+<section>
+  <h2><span class="num">02</span>這是什麼型</h2>
+  <ul class="signals">
+    <li><span class="n">1</span><span>答案跟<strong>祖先</strong>有關(3 要跟 5 比)→ 由上往下走,<strong>前序 + 往下傳值</strong>。跟 #1448 同一招。</span></li>
+    <li><span class="n">2</span><span>每站需要知道的是一個<strong>範圍</strong>:比誰大、比誰小 → 傳<strong>兩個</strong>參數 <code>low</code>、<code>high</code>。</span></li>
+    <li><span class="n">3</span><span>跟 #1448 不一樣的地方:<strong>這個函式交回 True / False</strong>,不是數數量。所以不用 <code>res</code> list,用 <code>return</code> 交回去。</span></li>
+  </ul>
+
+  <div class="tablewrap"><table>
+    <tr><th></th><th>#1448 Count Good Nodes</th><th>#98 Validate BST</th></tr>
+    <tr><td>紙條</td><td class="mono">max_so_far(1 張)</td><td class="mono">low, high(2 張)</td></tr>
+    <tr><td>這一站判斷</td><td class="mono">node.val &gt;= max_so_far</td><td class="mono">low &lt; node.val &lt; high</td></tr>
+    <tr><td>交給小孩</td><td>左右拿同一張 <code>new_max</code></td><td><strong>左右拿不同的紙條</strong></td></tr>
+    <tr><td>交回什麼</td><td>不交回,記在 <code>res</code></td><td class="mono">True / False</td></tr>
+  </table></div>
+</section>
+
+<section>
+  <h2><span class="num">03</span>直覺的錯法,和暴力法</h2>
+  <h3>錯法:只跟小孩比</h3>
+  <p>每站檢查 <code>node.left.val &lt; node.val &lt; node.right.val</code>。01 那棵樹每一站都過,會回 <strong>True</strong>,但答案是 False。它漏掉的是 3 和祖父 5 的關係。</p>
+  <h3>暴力法:每站掃整棵子樹</h3>
+  <p>每個 node 都去找「左邊整棵的最大值」和「右邊整棵的最小值」來比。對,但每站都要重掃一次子樹。</p>
+  <div class="tablewrap"><table>
+    <tr><th></th><th>每站掃整棵子樹</th><th>往下傳 low / high</th></tr>
+    <tr><td>每站做什麼</td><td>掃子樹全部 node</td><td class="hit">比 2 次</td></tr>
+    <tr><td>時間</td><td>O(n²) 最壞(一條線的樹)</td><td class="hit">O(n)</td></tr>
+    <tr><td>空間</td><td>O(h)</td><td class="hit">O(h) call stack</td></tr>
+  </table></div>
+  <p>暴力法浪費的事:<strong>祖先的值一路上都看過了</strong>。把「我要比誰大、比誰小」寫在紙條上交下去,小孩就不用回頭掃。</p>
+</section>
+
+<section>
+  <h2><span class="num">04</span>做法:手動走一遍</h2>
+  <div class="callout key">
+    <h3>每一站做兩件事</h3>
+    <div class="tablewrap" style="margin:0"><table>
+      <tr><th>步驟</th><th>動作</th></tr>
+      <tr><td>① 判斷自己</td><td><code>low &lt; 我 &lt; high</code>?不是 → 交回 False</td></tr>
+      <tr><td>② 交給小孩</td><td>往<strong>左</strong>:high 換成我(左邊要比我小)<br>往<strong>右</strong>:low 換成我(右邊要比我大)</td></tr>
+    </table></div>
+  </div>
+
+  <p>邊上的字是小孩收到的 <code>(low, high)</code>:</p>
+  <svg class="dia" viewBox="0 0 520 220" width="520" role="img" aria-label="同一棵樹,邊上標紙條。5 收到負無限到正無限。4 收到負無限到 5。6 收到 5 到正無限。3 收到 5 到 6,3 不大於 5,失敗。7 收到 6 到正無限。">
+<line class="edge" x1="260" y1="50" x2="150" y2="96"/>
+<line class="edge" x1="260" y1="50" x2="370" y2="96"/>
+<line class="edge" x1="370" y1="130" x2="315" y2="166"/>
+<line class="edge" x1="370" y1="130" x2="425" y2="166"/>
+<text class="edgetag" x="180" y="64">(-∞, 5)</text>
+<text class="edgetag" x="345" y="64">(5, ∞)</text>
+<text class="edgetag" x="310" y="146">(5, 6)</text>
+<text class="edgetag" x="432" y="146">(6, ∞)</text>
+<text class="tag" x="260" y="10">(-∞, ∞)</text>
+<rect class="box ans" x="238" y="16" width="44" height="34" rx="4"/><text class="tval" x="260" y="33">5</text>
+<rect class="box ans" x="128" y="96" width="44" height="34" rx="4"/><text class="tval" x="150" y="113">4</text>
+<rect class="box ans" x="348" y="96" width="44" height="34" rx="4"/><text class="tval" x="370" y="113">6</text>
+<rect class="box no" x="293" y="166" width="44" height="34" rx="4"/><text class="tval" x="315" y="183">3</text>
+<rect class="box ans" x="403" y="166" width="44" height="34" rx="4"/><text class="tval" x="425" y="183">7</text>
+<text class="tag hit" x="260" y="214">3 收到 (5, 6):5 &lt; 3 不成立 → False</text>
+  </svg>
+
+  <div class="tablewrap"><table>
+    <tr><th>順序</th><th class="mono">node</th><th>收到 (low, high)</th><th>① low &lt; 我 &lt; high?</th><th>② 左小孩拿</th><th>② 右小孩拿</th></tr>
+    <tr><td>1</td><td class="mono">5</td><td class="mono">(-∞, ∞)</td><td class="hit">✓</td><td class="mono">(-∞, 5)</td><td class="mono">(5, ∞)</td></tr>
+    <tr><td>2</td><td class="mono">4</td><td class="mono">(-∞, 5)</td><td class="hit">✓</td><td class="mono">None → True</td><td class="mono">None → True</td></tr>
+    <tr><td>3</td><td class="mono">6</td><td class="mono">(5, ∞)</td><td class="hit">✓</td><td class="mono">(5, 6)</td><td class="mono">(6, ∞)</td></tr>
+    <tr><td>4</td><td class="mono">3</td><td class="mono"><b>(5, 6)</b></td><td class="t2">✗ 5 &lt; 3 不成立</td><td colspan="2">交回 False,不用再往下</td></tr>
+  </table></div>
+  <p>3 交回 False → 6 交回 False → 5 交回 False。答案 <strong>False</strong>。7 根本沒被走到。</p>
+
+  <div class="callout warn">
+    <h3>看第 4 列:3 的 low 是 5,不是 6 給的</h3>
+    <p>6 往左走,只換掉 <strong>high</strong>(換成 6)。<strong>low 原封不動</strong>,還是 6 從 5 那裡收到的 5。這就是「祖父的限制」怎麼一路傳到孫子。</p>
+    <div class="two">
+      <div><h4>✓ 往左只換 high</h4><p class="mono">6 收到 (5, ∞)<br>3 拿 (5, 6)<br>3 &gt; 5? ✗ → False</p></div>
+      <div><h4>✗ 兩張都換成爸爸</h4><p class="mono">3 只跟 6 比<br>3 &lt; 6 ✓<br>回 True(錯)</p></div>
+    </div>
+  </div>
+
+  <h3>call stack:走到 3 的那一刻</h3>
+  <div class="film">
+    <div class="shot"><div class="hd"><span class="no">SHOT 1</span><span class="cap">4 那邊走完,交回 True。現在在 6。</span></div>
+      <div class="tower">
+        <div class="fr run"><span class="who">dfs(6, low=5, high=∞)</span> <span class="slot">→ 5&lt;6&lt;∞ ✓,要叫左小孩</span></div>
+        <div class="fr"><span class="who">dfs(5, low=-∞, high=∞)</span> <span class="slot">左邊拿到 True,卡在右邊這個呼叫</span></div>
+      </div><div class="floor">STACK BOTTOM</div></div>
+    <div class="shot"><div class="hd"><span class="no">SHOT 2</span><span class="cap">3 收到 (5, 6)。5 &lt; 3 不成立。</span></div>
+      <div class="tower">
+        <div class="fr run"><span class="who">dfs(3, low=5, high=6)</span> <span class="slot">→ return</span> <span class="val">False</span></div>
+        <div class="fr"><span class="who">dfs(6, low=5, high=∞)</span> <span class="slot">等左小孩的答案</span></div>
+        <div class="fr"><span class="who">dfs(5, low=-∞, high=∞)</span> <span class="slot">等右小孩的答案</span></div>
+      </div><div class="floor">STACK BOTTOM</div></div>
+    <div class="shot"><div class="hd"><span class="no">SHOT 3</span><span class="cap">False 一路往上交。左邊已經 False,<code>and</code> 不會再叫 7。</span></div>
+      <div class="tower">
+        <div class="fr gone"><span class="who">dfs(3, low=5, high=6)</span></div>
+        <div class="fr gone"><span class="who">dfs(6, low=5, high=∞)</span> <span class="slot">False and ... → False</span></div>
+        <div class="fr run"><span class="who">dfs(5, low=-∞, high=∞)</span> <span class="slot">True and False → return</span> <span class="val">False</span></div>
+      </div><div class="floor">STACK BOTTOM</div></div>
+  </div>
+</section>
+
+<details>
+  <summary>完整 code 加逐行解釋<span class="lockhint">先自己寫,卡住再開</span></summary>
+  <div class="dbody">
+<pre>
+<span class="kw">def</span> <span class="fn">isValidBST</span>(self, root):
+
+    <span class="kw">def</span> <span class="fn">dfs</span>(node, low, high):                 <span class="cm"># 兩張紙條</span>
+        <span class="kw">if</span> <span class="kw">not</span> node:
+            <span class="kw">return</span> True                        <span class="cm"># 空樹算合法</span>
+<span class="hl">        <span class="kw">if</span> <span class="kw">not</span> (low &lt; node.val &lt; high):        <span class="cm"># ① 判斷自己</span></span><span class="hl">            <span class="kw">return</span> False</span><span class="hl">        <span class="kw">return</span> (dfs(node.left, low, node.val) <span class="kw">and</span>   <span class="cm"># ② 往左:high 換成我</span></span><span class="hl">                dfs(node.right, node.val, high))     <span class="cm">#    往右:low 換成我</span></span>
+    <span class="kw">return</span> dfs(root, float(<span class="fn">"-inf"</span>), float(<span class="fn">"inf"</span>))
+</pre>
+    <div class="tablewrap"><table>
+      <tr><th>行</th><th>做什麼</th></tr>
+      <tr><td class="mono">return True</td><td>走到 None 交回 True。交回型別要跟下面一樣是 bool</td></tr>
+      <tr><td class="mono">low &lt; node.val &lt; high</td><td>Python 可以連寫,等於 <code>low &lt; node.val and node.val &lt; high</code>。用 <code>&lt;</code> 不是 <code>&lt;=</code>,相等不合法</td></tr>
+      <tr><td class="mono">and</td><td>左右兩邊都 True 才 True。左邊 False 就不跑右邊</td></tr>
+      <tr><td class="mono">float("-inf")</td><td>負無限大,比任何數字都小。root 上面沒有人,所以沒有限制</td></tr>
+      <tr><td class="mono">return dfs(...)</td><td>外層要把 dfs 的答案交出去,少了這個 <code>return</code> 會交回 None</td></tr>
+    </table></div>
+  </div>
+</details>
+
+<details>
+  <summary>逐輪執行模擬表(跟 04 同一棵樹)</summary>
+  <div class="dbody">
+    <div class="tablewrap"><table>
+      <tr><th>呼叫</th><th>low</th><th>high</th><th>判斷</th><th>交回</th></tr>
+      <tr><td class="mono">dfs(5)</td><td class="mono">-∞</td><td class="mono">∞</td><td class="hit">✓</td><td class="mono">等左右</td></tr>
+      <tr><td class="mono">dfs(4)</td><td class="mono">-∞</td><td class="mono">5</td><td class="hit">✓</td><td class="mono">True and True = True</td></tr>
+      <tr><td class="mono">dfs(None) ×2</td><td colspan="3">走到 None</td><td class="mono">True</td></tr>
+      <tr><td class="mono">dfs(6)</td><td class="mono">5</td><td class="mono">∞</td><td class="hit">✓</td><td class="mono">等左</td></tr>
+      <tr><td class="mono">dfs(3)</td><td class="mono">5</td><td class="mono">6</td><td class="t2">✗</td><td class="mono">False</td></tr>
+      <tr><td class="mono">dfs(6)</td><td colspan="3">左邊 False,<code>and</code> 停</td><td class="mono">False</td></tr>
+      <tr><td class="mono">dfs(5)</td><td colspan="3">True and False</td><td class="mono">False</td></tr>
+    </table></div>
+  </div>
+</details>
+
+<details>
+  <summary>口訣加模板</summary>
+  <div class="dbody">
+    <div class="mantra">帶兩張紙條往下走:往左換 high,往右換 low。</div>
+    <p>模板:<strong>前序 + 往下傳值</strong>。#1448 傳一個數,#98 傳一個範圍。題目說「跟祖先比」,就把祖先的資訊當參數交下去。</p>
+    <div class="tablewrap"><table>
+      <tr><th></th><th>複雜度</th></tr>
+      <tr><td>時間</td><td><strong>O(n)</strong>:每個 node 最多進一次</td></tr>
+      <tr><td>空間</td><td><strong>O(h)</strong>:call stack</td></tr>
+    </table></div>
+    <p>另一個做法:BST 的中序(左、我、右)會是嚴格遞增。中序走一遍,檢查每個值都比上一個大。這是 follow-up,今天不寫。</p>
+  </div>
+</details>
+
+<details>
+  <summary>L6 面試逐字稿</summary>
+  <div class="dbody">
+    <div class="move"><h4><span class="mv">MOVE 0</span>先問 constraint</h4>
+      <div class="say"><b>說</b>"Are duplicate values allowed? Can values be negative or very large? Is an empty tree valid?"</div>
+      <p class="think"><b>想</b>重複決定 <code>&lt;</code> 還是 <code>&lt;=</code>;值很大決定起點用無限大,不用某個數字;空樹決定 base case 交回 True。</p></div>
+    <div class="move"><h4><span class="mv">MOVE 1</span>舉例</h4>
+      <div class="say"><b>說</b>"Let me use 5, 4, 6, null, null, 3, 7. Every parent-child pair looks fine, but 3 is in the right subtree of 5 and is smaller than 5. So the answer is False."</div>
+      <p><b>寫</b>畫 01 那棵樹,把 3 圈起來,連一條線到 5。</p></div>
+    <div class="move"><h4><span class="mv">MOVE 2</span>錯法和暴力解 20 秒</h4>
+      <div class="say"><b>說</b>"Checking only children is wrong, as this example shows. Checking the whole subtree at every node works, but it's O(n squared) in the worst case."</div></div>
+    <div class="move"><h4><span class="mv">MOVE 3</span>Invariant</h4>
+      <div class="say"><b>說</b>"Each call gets the open range that all its ancestors allow. If the node is inside the range, it's valid with respect to every ancestor at once."</div>
+      <p class="think"><b>想</b>這句證明「只比 2 次就等於跟所有祖先比過」。</p></div>
+    <div class="move"><h4><span class="mv">MOVE 4</span>關鍵手法換了什麼</h4>
+      <div class="say"><b>說</b>"Going left, I tighten the upper bound to the current value. Going right, I tighten the lower bound. The other bound stays the same."</div></div>
+    <div class="move"><h4><span class="mv">MOVE 5</span>複雜度先講</h4>
+      <div class="say"><b>說</b>"That's O(n) time, since each node is visited at most once, and O(h) space for the call stack. Sound reasonable?"</div></div>
+    <div class="move"><h4><span class="mv">MOVE 6</span>code 分 3 段</h4>
+      <div class="say"><b>說</b>"The helper takes the node and its two bounds. An empty subtree is valid."</div>
+<pre><span class="kw">def</span> <span class="fn">dfs</span>(node, low, high):
+    <span class="kw">if</span> <span class="kw">not</span> node:
+        <span class="kw">return</span> True</pre>
+      <div class="say"><b>說</b>"If the node is out of range, stop. Otherwise, check both sides with tighter bounds."</div>
+<pre>    <span class="kw">if</span> <span class="kw">not</span> (low &lt; node.val &lt; high):
+        <span class="kw">return</span> False
+    <span class="kw">return</span> dfs(node.left, low, node.val) <span class="kw">and</span> dfs(node.right, node.val, high)</pre>
+      <div class="say"><b>說</b>"The root has no limits, so I start with negative and positive infinity."</div>
+<pre><span class="kw">return</span> dfs(root, float(<span class="fn">"-inf"</span>), float(<span class="fn">"inf"</span>))</pre></div>
+    <div class="move"><h4><span class="mv">MOVE 7</span>主動 dry run</h4>
+      <div class="say"><b>說</b>"At 6 the range is 5 to infinity. Going left, 3 gets 5 to 6. 3 is not greater than 5, so it returns False, and that goes all the way up."</div></div>
+    <div class="move"><h4><span class="mv">MOVE 8</span>主動掃 edge case</h4>
+      <div class="say"><b>說</b>"Duplicates fail because I use strict less-than. Using infinity instead of zero or int min means negative values and extreme values both work."</div></div>
+    <div class="move"><h4><span class="mv">MOVE 9</span>推廣</h4>
+      <div class="say"><b>說</b>"Another way is an inorder traversal: a valid BST gives a strictly increasing sequence. Same time and space."</div></div>
+
+    <h4>只給結論 vs 說明推理</h4>
+    <div class="tablewrap"><table>
+      <tr><th>Move</th><th>只給結論</th><th>說明推理</th></tr>
+      <tr><td>1</td><td>"Here's a tree."</td><td>"Every pair looks fine, but 3 breaks the rule with 5."</td></tr>
+      <tr><td>3</td><td>"I pass min and max."</td><td>"... so one check covers every ancestor at once."</td></tr>
+      <tr><td>8</td><td>"I use infinity."</td><td>"Zero or int min would break with extreme values."</td></tr>
+    </table></div>
+
+    <h4>Native English(可背、可換題用)</h4>
+    <ul>
+      <li>"Every parent-child pair looks fine, but this node breaks the rule with its grandparent."</li>
+      <li>"Each call gets the range that all its ancestors allow."</li>
+      <li>"Going left, I tighten the upper bound. The other bound stays the same."</li>
+    </ul>
+  </div>
+</details>
+
+<details>
+  <summary>這次的釐清(2026-10-13)</summary>
+  <div class="dbody">
+    <div class="wrongright">
+      <div class="wr-x">✗ 我以為:3 在 5 的左邊(因為 3 是 6 的左小孩)</div>
+      <div class="wr-o">✓ 其實是:看從 5 出發的第一步。<code>5 → 6 → 3</code> 第一步往右,所以 3 在 5 右邊那片,要比 5 大</div>
+      <div class="wr-y">→ 為什麼會搞混:「我是誰的左小孩」和「我在祖先的哪一邊」是兩件事</div>
+    </div>
+    <div class="wrongright">
+      <div class="wr-x">✗ 我以為:7 的上限是 root 5</div>
+      <div class="wr-o">✓ 其實是:往右走只給「要比它大」。<code>5 → 6 → 7</code> 兩步都往右,沒有上限,<code>high = ∞</code>。7 拿 <code>(6, ∞)</code></div>
+      <div class="wr-y">→ 規則:往左那一步給上限,往右那一步給下限</div>
+    </div>
+    <h4>數線版(比樹好懂)</h4>
+<pre>3: 5 往右 → &gt; 5,6 往左 → &lt; 6
+   ──────────5|===|6──────────   只能在 5 和 6 中間,3 不在 → False
+
+7: 5 往右 → &gt; 5,6 往右 → &gt; 6
+   ────────────6|===========&gt;   右邊沒有盡頭,high = ∞</pre>
+  </div>
+</details>
+
+</div>

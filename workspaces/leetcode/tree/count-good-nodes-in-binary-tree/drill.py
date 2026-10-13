@@ -25,24 +25,23 @@ class Solution:
         # ── 打在這裡 ──────────────────────────────────────
         # (1) 裝 good node 的 list
         res = []
-
+        max_val = root.val
         # (2) def dfs(node, 紙條): 走到 None 就停
-        def dfs(node, max_so_far):
+        def dfs(node, max_val):
             if not node:
                 return
-            # (3)     我 >= 紙條 -> 記一筆
-            if node.val >= max_so_far:
+        # (3)     我 >= 紙條 -> 記一筆
+            if node.val >= max_val:
                 res.append(node.val)
-            # (4)     算要交給小孩的新紙條
-            new_max = max(node.val, max_so_far)
-            # (5)     左、右小孩都拿新紙條
+        # (4)     算要交給小孩的新紙條
+            new_max =  max(max_val, node.val)
+        # (5)     左、右小孩都拿新紙條
             dfs(node.left, new_max)
             dfs(node.right, new_max)
 
         # 最後:從 root 開始走(第一張紙條寫什麼?),交回數量
-        dfs(root, root.val)
+        dfs(root, max_val)
         return len(res)
-
         # ────────────────────────────────────────────────
 
 
