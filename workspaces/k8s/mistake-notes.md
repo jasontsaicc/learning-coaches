@@ -399,3 +399,21 @@
 - 重測:s40 G 首答第一刀 `get rs` 方向對,因為只給「看不出來」,根因未講出(第 2 題為貼上文字)。
 - 下次抽考換皮:CronJob / StatefulSet 在 restricted ns 新 Pod 不出現,第一刀查誰、因為什麼。
 - s44 重測(2026-10-09):CronJob 版卡住,首答套舊形狀「ReplicaSet」,二選一後答 Job;StatefulSet 換皮自答 ✅(首答缺因為)。判準記成「describe 缺席 Pod 的上一層 controller」。下次:DaemonSet 版,不給鏈圖。
+
+## 2026-10-13 | NetworkPolicy 只管 podSelector 選到的 Pod
+- 判準:Pod 有沒有被任何 policy 的 podSelector 選到?沒選到 = 進出全開;選到 = 只放行白名單。多條選到同一 Pod 時白名單相加。
+- 下次抽考:ns 裡只有一條選 `app=db` 的 policy,frontend → backend 通不通、因為?
+
+## 2026-10-13 | default-deny 先死在 DNS 層
+- 判準:用名字打服務時,DNS 查詢是第一個 egress 封包。egress 全擋 → `Resolving timed out`;用 IP 直打 → `Connection timed out`。NetworkPolicy 丟封包不回應,所以是 timeout 不是 refused。
+- 下次抽考:同事說「default-deny 後 curl 報 Resolving timed out,CoreDNS 壞了」,你怎麼判?
+
+## 2026-10-13 | NetworkPolicy port 看 DNAT 後的 Pod port
+- 判準:封包進 node kernel 第一件事就是 kube-proxy DNAT,之後 Calico 才檢查 egress/ingress。兩道門都看 Pod IP:targetPort,不認識 Service。寫 Service port 不報錯但永遠對不到。
+- s46 實證:frontend-egress 寫 80 → timeout,改 5678 → 通。
+- 下次抽考:Service `port: 443 → targetPort: 8443`,ingress 寫哪個?
+
+## 2026-10-13 | from 裡 `-` 的 AND/OR
+- 正解:同一個 `-` 底下 namespaceSelector + podSelector = AND(ops-tools ns 裡 app=monitor 的 Pod,只有 prometheus)。各自一個 `-` = OR,逐項算再相加:項目 1 放行 ops-tools 整個 ns(prometheus + debug),項目 2 單獨 podSelector = policy 所在 ns 的 app=monitor(x)→ 三顆全放。
+- 本堂直給未驗。下次:A/B 兩份 YAML 實際 apply,三顆 Pod 實測。
+

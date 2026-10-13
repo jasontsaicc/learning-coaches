@@ -7,15 +7,15 @@
 
 ## Meta
 
-- session_count: 45
+- session_count: 46
 - last_weekly_review: 34(WR9 於 s34 壓縮版跑完,三主題 blind recall 全過;下次 WR 於 s41,s42/s43 仍未跑,已逾期)
-- last_session_date: 2026-10-12
+- last_session_date: 2026-10-13
 - warm_up_classification: mid
 - target_role: 雙目標 NVIDIA Pre-Production Engineer + AWS ProServe DC Cloud Architect,兼顧台廠資深 SRE(2026-09-30,curriculum-plan §12);投遞最快 2027-01
 
 ## Current Session breakpoint
 
-s45(2026-10-12,bastion)收工:kubeadm 叢集建成(cp init + Calico v3.33.0 + w1/w2 join 成功,3 台 v1.36.5 hold)。**下一步(bastion):先 start 3 台 → 在 cp session(非 bastion)`kubectl get nodes` 確認 3 台 Ready → P2a NetworkPolicy lab Step 5-6 搬到 kubeadm 叢集**。本堂 F/G 未跑(Gap stop,保留不記債)。收工 stop 不 destroy。剩餘債壓課尾:WR(逾期)/ P2b gate / 冷測(terraform 哪步發現錯誤)。家用 VM lab 殘留:ns `pss-lab` + Pod `dressed-nginx`。
+s46(2026-10-13,bastion)收工(學員累):kubeadm 叢集 ns `netpol-lab` Step 1-6 ✅,manifests 進 `portfolio/k8s/manifests/netpol-lab/`。**下一步(bastion):start 3 台 → from 裡 `-` 的 AND/OR 實測(A/B 兩份 YAML 各 apply 一次,用 prometheus/debug/x 三顆 Pod 驗,本堂只直給答案未驗)→ P2a chunk 3 F/G**。ns `netpol-lab` 保留。剩餘債壓課尾:WR(逾期)/ P2b gate / 冷測。
 
 <!-- schema §3 = 恰好一行。敘事與次要待辦寫 session-log.md,長效教練紀律寫 session-log.md
      「教練執行紀律」,不要在這裡疊舊堂。s32 及更早斷點原文見 session-log.md 對應堂,
@@ -25,7 +25,7 @@ s45(2026-10-12,bastion)收工:kubeadm 叢集建成(cp init + Calico v3.33.0 + w1
 
 - P0 心智模型: gate-passed(2026-06-22,legacy pre-Examiner)
 - P1 核心物件 + 容器底層: gate-passed(2026-06-25,legacy pre-Examiner)
-- P2a 網路深水區: in-progress(chunk 1 ✅ / chunk 2 ✅ / chunk 3 NetworkPolicy 剩 lab Step 5+6+gate+F/G / chunk 4 零件 4-1~4-4 ✅,4-5 盲講式已於 2026-08-11 退役改情境排障題)
+- P2a 網路深水區: in-progress(chunk 1 ✅ / chunk 2 ✅ / chunk 3 NetworkPolicy lab Step 1-6 ✅ s46(kubeadm),剩 AND/OR 實測+F/G / chunk 4 零件 4-1~4-4 ✅,4-5 盲講式已於 2026-08-11 退役改情境排障題)
 - P2b 儲存 + 權限: in-progress(C-1 ✅ s26,欠 `cg-demo` memory.max 讀數 / C-2 ✅ s29,欠 `reclaimPolicy: Delete` teardown 實證 / C-3 ✅ s31-32,step G 2/4 未過 / C-4 chunk 1-4 ✅ s33/s35/s36,4b 僅 supported,C-4 F/G 併入 s37 的 C-5 F/G;C-5 ✅ s37(chunk 3 supported、kind JWT 教練代跑);C-6 chunk 1 supported / 2 ✅ s38 / 3 ✅ supported s39,F ✅ s40,G 2/4 未過 s40)
 - P3 調度 + 高並發 + 排障: in-progress(curriculum-plan §12.2 開場:kubeadm 3 台叢集 s45 建成,cp + w1/w2 + Calico;P2b 殘債壓課尾)
 - P4 可觀測性工程: not-started
@@ -34,7 +34,7 @@ s45(2026-10-12,bastion)收工:kubeadm 叢集建成(cp init + Calico v3.33.0 + w1
 
 weak-topic flags(2026-08-03 啟用,P2a 帶 flag 前進、gate 未考,學員決定):
 - 七站封包全旅程(4-5):盲講式退役,改以情境排障題驗收(curriculum-plan §10.2)
-- chunk 3 NetworkPolicy 收尾:lab Step 5 兩條 policy + Step 6 驗收矩陣未做
+- chunk 3 NetworkPolicy 收尾:Step 5/6 ✅ s46;from `-` AND/OR 只直給未驗
 - 判準句 pattern(只給結論):跨七堂未愈,每堂續盯
 
 ## Mastery
@@ -166,6 +166,10 @@ weak-topic flags(2026-08-03 啟用,P2a 帶 flag 前進、gate 未考,學員決�
 - 2026-09-08 | 成功訊息不保證做到你以為的事(pattern 卡,ops 判準,同堂三次) | `-n ALL` 查了不存在的 ns、`--as=$SA` 空變數沒假扮、`patched (no change)` | 不先驗證指令是否真的生效就改結論 | unresolved | 3 | lab 中即測(2026-09-15 起不排卡) | 0
 - 2026-09-08 | `auth can-i --list` 不加 `--as` 問的是自己 | chunk 3 驗收給裸指令,無 `--as` 無 `-n`(同堂第二次);09-15 首答「`--as` 用 role 去模擬」 | 排障要問壞掉的身分,預設問的是自己;Role 是權限清單不是身分 | unresolved | 3 | C-5 引子題 | 0
 - 2026-09-08 | `--list` 三分判準(只剩噪音 / 缺 resource / 缺動詞) | 首答把原本 403 訊息當成 `--list` 輸出,且用「會 403」當判準(兩種都 403) | 兩個不同指令的輸出混為一談 | parked(2026-09-15 ROI 篩:Q1 no,面試不考讀 `--list` 輸出;學員決定退役,判準留檔備查) | - | - | 0
+- 2026-10-13 | NetworkPolicy 只管 podSelector 選到的 Pod | 答「有一條 NP 被套用就以這條為主」,提示後自答 | 把 policy 當 ns 級開關 | unresolved | 3 | 2026-10-16 | 0
+- 2026-10-13 | default-deny 先死在 DNS 層 | 答「全部擋住」,提示後答連線層,連錯兩次直給 | 沒把 DNS 查詢當成第一個 egress 封包 | unresolved | 3 | 2026-10-16 | 0
+- 2026-10-13 | NetworkPolicy port 看 DNAT 後的 Pod port | ingress 先答 80;egress 又答 80,實驗 timeout 後自答 DNAT | Service port 被當成一路帶到 gate | unresolved | 3 | 2026-10-16 | 0
+- 2026-10-13 | from 裡 `-` 的 AND/OR | B(OR)答「只要 ns=netpol-lab 就可以」,學員累直給 | OR 要逐項算再相加;單獨 podSelector = policy 所在 ns | unresolved | 3 | 2026-10-16 | 0
 
 ## Spaced-repetition queue
 
