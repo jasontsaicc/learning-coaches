@@ -1,4 +1,4 @@
-# s46 NetworkPolicy 白名單實測(kubeadm,2026-10-13)
+# s46 NetworkPolicy 白名單實測(kubeadm,2026-10-13;s48 補 AND/OR 與 stateful 實測)
 
 <!-- topic: P2a NetworkPolicy(白名單 + default-deny 翻轉 + 第四個引擎) -->
 
@@ -31,6 +31,7 @@ kubeadm 3 台叢集 + Calico v3.33.0,ns `netpol-lab`。frontend、db 在 w2,back
 - 兩端都被選中時,A → B 要 A 的 egress 和 B 的 ingress 都放行。同 AWS 跨帳號 assume role:呼叫方 identity policy + 目標 trust policy。
 - 用名字連線時,DNS 查詢是第一個 egress 封包。egress 全擋時先死在 DNS。
 - policy 丟封包不回應,錯誤是 timeout 不是 refused。看關鍵字分層:`Resolving` = DNS,`Connection` = 連線。
+- policy 是 stateful:規則只檢查連線第一個封包,回程 response 靠 conntrack 放行。Ingress 管「誰能主動連進來」。s48 實測:prometheus 被 Ingress 全擋,它 curl web 仍 200。
 - 封包進 node kernel 先做 kube-proxy DNAT,之後 Calico 才檢查。ingress 和 egress 都寫 Pod 的 targetPort(5678),不是 Service port(80)。寫錯不報錯,只是永遠對不到。
 
 ## from 裡的 `-`:AND vs OR
@@ -52,7 +53,18 @@ from:
 | A | `team=ops` ns 裡有 `app=monitor` 的 Pod |
 | B | `team=ops` ns 的所有 Pod,加上 policy 所在 ns 裡 `app=monitor` 的 Pod |
 
-單獨的 `podSelector` 指 policy 所在的 ns。B 比 A 多放行一整個 ns,apply 不報錯。本堂只講解,尚未實測。
+單獨的 `podSelector` 指 policy 所在的 ns。B 比 A 多放行一整個 ns,apply 不報錯。
+
+s48 實測(ns `andor` 的 web 套 B 版,`podSelector: {}`;monitoring 用 `kubernetes.io/metadata.name`):
+
+| client | ns / label | 結果 |
+|---|---|---|
+| x | andor / app=prometheus | 200(符合項目 2) |
+| prometheus | monitoring / app=prometheus | 200(符合項目 1) |
+| debug | monitoring / 無 label | 200(符合項目 1) |
+| y | other / app=prometheus | timeout(label 對,ns 不對) |
+
+ns 用 `kubernetes.io/metadata.name: <ns>` 選最穩,這個 label 由 k8s 自動加。
 
 ## 測試技巧
 

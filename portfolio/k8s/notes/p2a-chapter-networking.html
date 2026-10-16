@@ -102,7 +102,7 @@ pre { margin: 0; font-family: var(--font-mono); font-size: .82rem; line-height: 
     <p class="sub">k8s 課程 · 章節筆記 · Phase 2a</p>
     <h1>P2a 網路深水區</h1>
     <p>一個問題貫穿整章：<b>Pod A 打 <code>http://shop-api</code>，這個封包一路經過了誰、在哪裡被改寫、在哪裡可能死掉？</b></p>
-    <div class="meta"><span>in-progress（帶 weak-topic flag 前進）</span><span>sessions s7–s25</span><span>全鏈 <span class="lvl high">high</span> · NetworkPolicy / CNI <span class="lvl low">low-med</span></span></div>
+    <div class="meta"><span>in-progress（帶 weak-topic flag 前進）</span><span>sessions s7–s25</span><span>全鏈 <span class="lvl high">high</span> · NetworkPolicy <span class="lvl med">med</span> · CNI <span class="lvl low">low-med</span></span></div>
     <nav class="toc"><a href="#map">章節地圖</a><a href="#l0">L0 圖</a><a href="#l1">L1 原理</a><a href="#l2">L2 機制</a><a href="#l3">L3 取捨</a><a href="#l4">L4 EKS</a><a href="#l5">L5 規模</a><a href="#l6">L6 on-call</a><a href="#l7">L7 面試</a><a href="#trail">我的錯題</a><a href="#next">topic 深入</a></nav>
   </header>
 
@@ -113,7 +113,7 @@ pre { margin: 0; font-family: var(--font-mono); font-size: .82rem; line-height: 
         <g font-size="11" text-anchor="middle">
           <rect x="10" y="20" width="165" height="70" fill="var(--who)" stroke="var(--ink)" stroke-width="2"/><text x="92" y="44">[1] Service / kube-proxy</text><text x="92" y="62">CoreDNS / conntrack</text><text x="92" y="80" class="hand">✅ high</text>
           <rect x="190" y="20" width="165" height="70" fill="var(--see)" stroke="var(--ink)" stroke-width="2"/><text x="272" y="44">[2] Ingress</text><text x="272" y="62">規則 vs controller</text><text x="272" y="80" class="hand">✅ med</text>
-          <rect x="370" y="20" width="165" height="70" fill="var(--may)" stroke="var(--ink)" stroke-width="2"/><text x="452" y="44">[3] NetworkPolicy</text><text x="452" y="62">白名單 + 翻轉</text><text x="452" y="80" class="hand" fill="var(--wrong)">lab Step 5/6 未收</text>
+          <rect x="370" y="20" width="165" height="70" fill="var(--may)" stroke="var(--ink)" stroke-width="2"/><text x="452" y="44">[3] NetworkPolicy</text><text x="452" y="62">白名單 + 翻轉</text><text x="452" y="80" class="hand">✅ med（s48）</text>
           <rect x="550" y="20" width="160" height="70" fill="var(--may)" stroke="var(--ink)" stroke-width="2"/><text x="630" y="44">[4] CNI 資料面</text><text x="630" y="62">veth / 路由 / overlay</text><text x="630" y="80" class="hand">4-1~4-4 ✅</text>
         </g>
         <rect x="10" y="120" width="700" height="70" fill="var(--card)" stroke="var(--ink)" stroke-width="2"/>
