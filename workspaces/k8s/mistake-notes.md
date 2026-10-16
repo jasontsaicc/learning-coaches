@@ -416,4 +416,10 @@
 ## 2026-10-13 | from 裡 `-` 的 AND/OR
 - 正解:同一個 `-` 底下 namespaceSelector + podSelector = AND(ops-tools ns 裡 app=monitor 的 Pod,只有 prometheus)。各自一個 `-` = OR,逐項算再相加:項目 1 放行 ops-tools 整個 ns(prometheus + debug),項目 2 單獨 podSelector = policy 所在 ns 的 app=monitor(x)→ 三顆全放。
 - 本堂直給未驗。下次:A/B 兩份 YAML 實際 apply,三顆 Pod 實測。
+- s48 實測:andor-b(兩個 `-`)x/prometheus/debug=200、y=FAIL。G 段跨 ns 題根因一句到位,AND 修法正確。
+- 待補:兩個 `-` 的後果要講具體 blast radius(web ns 任何 Pod + backend ns 任何 app=frontend 都放行)。下次:給一份兩個 `-` 的 YAML,問「多放行了誰」。
 
+## 2026-10-16 | NetworkPolicy stateful:回程封包靠 conntrack 放行
+- 判準:policy 規則只檢查連線第一個封包(SYN)。放行後 kernel conntrack 記一筆 ESTABLISHED,回程 response 對到這筆就直接放行。Ingress 管「誰能主動連進來」,不是「所有進來的封包」。
+- s48 實證:monitoring 加 prom-deny-ingress(Ingress 全擋)後 prometheus → web 仍 200。學員喊太深,換皮題未答。
+- 下次抽考:prom-deny-ingress 還在,debug(同 ns、無 label)主動 curl prometheus,通不通、因為?

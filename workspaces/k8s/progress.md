@@ -7,15 +7,15 @@
 
 ## Meta
 
-- session_count: 47
+- session_count: 48
 - last_weekly_review: 34(WR9 於 s34 壓縮版跑完,三主題 blind recall 全過;下次 WR 於 s41,s42/s43 仍未跑,已逾期)
-- last_session_date: 2026-10-14
+- last_session_date: 2026-10-16
 - warm_up_classification: mid
 - target_role: 雙目標 NVIDIA Pre-Production Engineer + AWS ProServe DC Cloud Architect,兼顧台廠資深 SRE(2026-09-30,curriculum-plan §12);投遞最快 2027-01
 
 ## Current Session breakpoint
 
-s47(2026-10-14,bastion)Gap stop(下班):AND/OR 實測場景已搭好(ns `andor`:web 192.168.63.132:5678 + x;ns `monitoring`:prometheus/debug;ns `other`:y,皆無 policy)。**下一步(bastion):start 3 台 → 確認 web IP(重開機可能變)→ baseline 預測 + 4 顆 curl loop → 學員寫 YAML B apply → 驗 y(Q2 預測「通,因為符合 app=prometheus」待實驗推翻)→ 再測 YAML A → P2a chunk 3 F/G**。ns `netpol-lab` 保留。剩餘債壓課尾:WR(逾期)/ P2b gate / 冷測。
+無(s48 正常收工)。下一堂:WR(逾期,先跑)→ P2a Phase Gate(Examiner)/ P2b gate / 冷測;kubeadm lab ns andor 留 policy `andor-b`。
 
 <!-- schema §3 = 恰好一行。敘事與次要待辦寫 session-log.md,長效教練紀律寫 session-log.md
      「教練執行紀律」,不要在這裡疊舊堂。s32 及更早斷點原文見 session-log.md 對應堂,
@@ -25,7 +25,7 @@ s47(2026-10-14,bastion)Gap stop(下班):AND/OR 實測場景已搭好(ns `andor`:
 
 - P0 心智模型: gate-passed(2026-06-22,legacy pre-Examiner)
 - P1 核心物件 + 容器底層: gate-passed(2026-06-25,legacy pre-Examiner)
-- P2a 網路深水區: in-progress(chunk 1 ✅ / chunk 2 ✅ / chunk 3 NetworkPolicy lab Step 1-6 ✅ s46(kubeadm),剩 AND/OR 實測(s47 場景已搭、未 apply)+F/G / chunk 4 零件 4-1~4-4 ✅,4-5 盲講式已於 2026-08-11 退役改情境排障題)
+- P2a 網路深水區: in-progress(chunk 1 ✅ / chunk 2 ✅ / chunk 3 NetworkPolicy ✅ s48(lab Step 1-6 s46 + AND/OR 實測 + F/G s48) / chunk 4 零件 4-1~4-4 ✅,4-5 盲講式已於 2026-08-11 退役改情境排障題)
 - P2b 儲存 + 權限: in-progress(C-1 ✅ s26,欠 `cg-demo` memory.max 讀數 / C-2 ✅ s29,欠 `reclaimPolicy: Delete` teardown 實證 / C-3 ✅ s31-32,step G 2/4 未過 / C-4 chunk 1-4 ✅ s33/s35/s36,4b 僅 supported,C-4 F/G 併入 s37 的 C-5 F/G;C-5 ✅ s37(chunk 3 supported、kind JWT 教練代跑);C-6 chunk 1 supported / 2 ✅ s38 / 3 ✅ supported s39,F ✅ s40,G 2/4 未過 s40)
 - P3 調度 + 高並發 + 排障: in-progress(curriculum-plan §12.2 開場:kubeadm 3 台叢集 s45 建成,cp + w1/w2 + Calico;P2b 殘債壓課尾)
 - P4 可觀測性工程: not-started
@@ -34,7 +34,7 @@ s47(2026-10-14,bastion)Gap stop(下班):AND/OR 實測場景已搭好(ns `andor`:
 
 weak-topic flags(2026-08-03 啟用,P2a 帶 flag 前進、gate 未考,學員決定):
 - 七站封包全旅程(4-5):盲講式退役,改以情境排障題驗收(curriculum-plan §10.2)
-- chunk 3 NetworkPolicy 收尾:Step 5/6 ✅ s46;from `-` AND/OR 只直給未驗
+- chunk 3 NetworkPolicy 收尾:Step 5/6 ✅ s46;AND/OR 實測 ✅ s48(supported,OR 後果講不具體)
 - 判準句 pattern(只給結論):跨七堂未愈,每堂續盯
 
 ## Mastery
@@ -51,7 +51,7 @@ weak-topic flags(2026-08-03 啟用,P2a 帶 flag 前進、gate 未考,學員決�
 - P2a Service/kube-proxy/DNAT/conntrack/CoreDNS 全鏈: high (s10)
 - P2a Ingress(規則 vs controller、L7 純字串比對): med (s14)
 - P2a L4 vs L7 判準: low-med (s18)
-- P2a NetworkPolicy(白名單 + default-deny 翻轉 + 第四個引擎): low-med (s23)
+- P2a NetworkPolicy(白名單 + default-deny 翻轉 + 第四個引擎): med (s48)
 - P2a conntrack 精度(table full 新舊連線): med (s18)
 - P2a DNS 排障第一刀(先用 FQDN 二分): med (s13)
 - P2a CNI 封包全鏈 data plane(veth/路由表/MASQUERADE/conntrack): low-med (s23)
@@ -80,6 +80,7 @@ weak-topic flags(2026-08-03 啟用,P2a 帶 flag 前進、gate 未考,學員決�
      每場的完整維度符號與逐項評註逐字保存在 archive/progress-narrative-2026-09-07.md
      的 Scorecard history 節;Phase Gate 三振診斷或 trend tracking 時才拉。 -->
 
+- 2026-10-16 | step G (s48, tier 2, 跨 ns podSelector 不通) | 3.5/4 | 被問「問題在哪」要講出具體多放行誰(哪個 ns 的哪些 Pod),不停在通則 | 根因一句到位:「from.podSelector 沒搭 namespaceSelector 只找 policy 同 ns 的 Pod」 | coach
 - 2026-09-29 | step G (s40, tier 2, C-6 PSS Deployment 被擋) | 2/4 | 「先查 rs」的因為要講到機制:Pod 由 RS controller 建,被擋時錯誤只留在送請求的 RS event | 第一刀直接選 `kubectl get rs` → describe events | coach
 - 2026-09-18 | step G (s37, tier 2, MTTR 未測故分母 3) | 2/3 | 機制那格要講出 JWT → STS 比 trust policy 的 sub → 臨時憑證,不能停在「SA 取得 assume 權限」 | F 段 3 副本題自己拿 IRSA(同一 role)對照舊做法(看在哪台 node) | coach
 - 2026-08-28 | step G (s32, tier 2) | 2/4 | 排障題先強迫答「我這一發是第 1 步還是第 2 步」再給指令 | MTTR 第一題自帶完整判準句型,無提示正樣本第 6 次 | coach
@@ -166,10 +167,12 @@ weak-topic flags(2026-08-03 啟用,P2a 帶 flag 前進、gate 未考,學員決�
 - 2026-09-08 | 成功訊息不保證做到你以為的事(pattern 卡,ops 判準,同堂三次) | `-n ALL` 查了不存在的 ns、`--as=$SA` 空變數沒假扮、`patched (no change)` | 不先驗證指令是否真的生效就改結論 | unresolved | 3 | lab 中即測(2026-09-15 起不排卡) | 0
 - 2026-09-08 | `auth can-i --list` 不加 `--as` 問的是自己 | chunk 3 驗收給裸指令,無 `--as` 無 `-n`(同堂第二次);09-15 首答「`--as` 用 role 去模擬」 | 排障要問壞掉的身分,預設問的是自己;Role 是權限清單不是身分 | unresolved | 3 | C-5 引子題 | 0
 - 2026-09-08 | `--list` 三分判準(只剩噪音 / 缺 resource / 缺動詞) | 首答把原本 403 訊息當成 `--list` 輸出,且用「會 403」當判準(兩種都 403) | 兩個不同指令的輸出混為一談 | parked(2026-09-15 ROI 篩:Q1 no,面試不考讀 `--list` 輸出;學員決定退役,判準留檔備查) | - | - | 0
-- 2026-10-13 | NetworkPolicy 只管 podSelector 選到的 Pod | 答「有一條 NP 被套用就以這條為主」,提示後自答 | 把 policy 當 ns 級開關 | unresolved | 3 | 2026-10-16 | 0
-- 2026-10-13 | default-deny 先死在 DNS 層 | 答「全部擋住」,提示後答連線層,連錯兩次直給 | 沒把 DNS 查詢當成第一個 egress 封包 | unresolved | 3 | 2026-10-16 | 0
+- 2026-10-13 | NetworkPolicy 只管 podSelector 選到的 Pod | 答「有一條 NP 被套用就以這條為主」,提示後自答;s48 換皮(prometheus 被 Ingress-only policy 選中,它打 web)答「不會通,因為被選中了」✗,方向提示後 ✅ | 把 policy 當 ns 級開關 / 選中就全擋,不看 policyTypes 方向 | unresolved | 3 | 2026-10-19 | 1
+- 2026-10-13 | default-deny 先死在 DNS 層 | 答「全部擋住」,提示後答連線層,連錯兩次直給;s48 F 段誘答「egress 只放 orders:5432 就能連」直接同意,Resolving 提示後仍答查 db ingress,二選一後自答補 53 | 沒把 DNS 查詢當成第一個 egress 封包 | unresolved | 3 | 2026-10-19 | 1
 - 2026-10-13 | NetworkPolicy port 看 DNAT 後的 Pod port | ingress 先答 80;egress 又答 80,實驗 timeout 後自答 DNAT | Service port 被當成一路帶到 gate | unresolved | 3 | 2026-10-16 | 0
-- 2026-10-13 | from 裡 `-` 的 AND/OR | B(OR)答「只要 ns=netpol-lab 就可以」,學員累直給;s47 A 預測 ✅ 帶因為、B 三顆全通結論對,壓測 y(ns other、app=prometheus)答「通,因為符合 app=prometheus」✗ | OR 要逐項算再相加;單獨 podSelector = policy 所在 ns(s47 確認此半未內化,AND 那半已通) | unresolved | 3 | 2026-10-17 | 1
+- 2026-10-13 | from 裡 `-` 的 AND/OR | B(OR)答「只要 ns=netpol-lab 就可以」,學員累直給;s47 A 預測 ✅ 帶因為、B 三顆全通結論對,壓測 y(ns other、app=prometheus)答「通,因為符合 app=prometheus」✗;s48 實測 y=FAIL 推翻,G 根因一句到位、AND 修法寫對(supported),追問兩個 `-` 後果只答「規則聯集」 | OR 要逐項算再相加;單獨 podSelector = policy 所在 ns;OR 的 blast radius 講不具體 | unresolved | 3 | 2026-10-19 | 2
+
+- 2026-10-16 | NetworkPolicy stateful:回程封包靠 conntrack 放行 | prometheus 被 Ingress 全擋,預測它 curl web 拿不到 response(timeout),實測 200 | 把 policy 當成逐封包過濾,不知規則只檢查連線第一個封包 | unresolved | 3 | 2026-10-19 | 0
 
 ## Spaced-repetition queue
 
@@ -177,6 +180,7 @@ weak-topic flags(2026-08-03 啟用,P2a 帶 flag 前進、gate 未考,學員決�
      檢視序:過期優先、interval 小者優先;step A 每堂 ~2 題上限。
      每張卡的重測歷史與下次抽考題在 mistake-notes.md;term 卡到期日在 term-registry.md。 -->
 
+- topic:P2a-chunk3-NetworkPolicy | topic | 3 | 2026-10-19 | active
 - mistake:IRSA-trust-vs-permission | mistake | 7 | 2026-10-16 | active
 - mistake:兩道門(namespace視野vsUID身分) | mistake | 3 | 2026-09-28 | active
 - mistake:YAML-validation | mistake | 3 | 2026-08-08 | active
