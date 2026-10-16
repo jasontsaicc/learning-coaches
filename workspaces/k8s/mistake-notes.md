@@ -423,3 +423,22 @@
 - 判準:policy 規則只檢查連線第一個封包(SYN)。放行後 kernel conntrack 記一筆 ESTABLISHED,回程 response 對到這筆就直接放行。Ingress 管「誰能主動連進來」,不是「所有進來的封包」。
 - s48 實證:monitoring 加 prom-deny-ingress(Ingress 全擋)後 prometheus → web 仍 200。學員喊太深,換皮題未答。
 - 下次抽考:prom-deny-ingress 還在,debug(同 ns、無 label)主動 curl prometheus,通不通、因為?
+
+## 2026-10-16 | Pending 時 FailedScheduling 是誰寫的
+- 判準:`FailedScheduling` 由 scheduler 寫(From `default-scheduler`)。有 = scheduler 活著、Filter 擋下,讀 Message;`<none>` = 沒人寫,先查 scheduler Pod 本身。
+- s49 實證:100 CPU Pod → FailedScheduling;移走 kube-scheduler.yaml → 新 Pod Pending + `<none>`;放回 30s 內原 Pod 被排到 w1,未重建。
+- 下次抽考:EKS 上 Pod Pending、Events `<none>`,但 scheduler 是 AWS 託管看不到 Pod。你第一刀查什麼?
+
+## 2026-10-16 | 讀 FailedScheduling 判斷加 node 有沒有用
+- 判準:找 `Insufficient <resource>` = 容量問題,加 node 有用。`untolerated taint`(cp)每次都在,當背景。`didn't match node affinity/selector` = Pod 要的 label,新 node 沒那個 label 就沒用(Karpenter 會照 Pod 需求開帶 label 的 node,前提 NodePool 允許)。
+- s49:首答「沒用」被 taint 行帶走;四台表格填空後到位。taint vs affinity 為 C-2 內容,教練未教先考。
+- 下次抽考:`3 node(s) didn't match pod anti-affinity rules`,加 node 有沒有用?
+
+## 2026-10-16 | unschedulable Pod 何時被重排
+- 判準:排不進去的 Pod 進 unschedulable queue,不輪詢;等叢集事件(node 加入、Pod 刪除、label 改)才撈回 activeQ。scheduler 重啟時重新 list 所有 nodeName 空的 Pod。
+- 下次抽考:Pod Pending 中,你給 w1 加了它要的 label,要不要重建 Pod?因為?
+
+## 2026-10-16 | RBAC `-w` 需要 watch 的判準
+- 判準:verb 由 API 請求形狀決定:有名字 = get、沒名字 = list、`-w` = watch。唯讀三件套 `get,list,watch`。
+- s49 WR:結論對,因為答「風險不同」。
+- 下次抽考:`kubectl logs -f mypod` 被 403,缺哪個 resource/verb?

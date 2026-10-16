@@ -7,15 +7,15 @@
 
 ## Meta
 
-- session_count: 48
-- last_weekly_review: 34(WR9 於 s34 壓縮版跑完,三主題 blind recall 全過;下次 WR 於 s41,s42/s43 仍未跑,已逾期)
+- session_count: 49
+- last_weekly_review: 49(WR10 於 s49 課尾壓縮版:NetworkPolicy DNS supported / RBAC watch 結論對判準錯 / Secret 分層冷測過)
 - last_session_date: 2026-10-16
 - warm_up_classification: mid
 - target_role: 雙目標 NVIDIA Pre-Production Engineer + AWS ProServe DC Cloud Architect,兼顧台廠資深 SRE(2026-09-30,curriculum-plan §12);投遞最快 2027-01
 
 ## Current Session breakpoint
 
-無(s48 正常收工)。下一堂:WR(逾期,先跑)→ P2a Phase Gate(Examiner)/ P2b gate / 冷測;kubeadm lab ns andor 留 policy `andor-b`。
+無(s49 正常收工)。下一堂:P3 C-2(圖 + 情境題,先補教 taint vs nodeSelector/affinity)→ C-3 HPA lab;P2a/P2b Phase Gate 排在 C-3 前集中考;每堂無 G(§12.4)。
 
 <!-- schema §3 = 恰好一行。敘事與次要待辦寫 session-log.md,長效教練紀律寫 session-log.md
      「教練執行紀律」,不要在這裡疊舊堂。s32 及更早斷點原文見 session-log.md 對應堂,
@@ -27,7 +27,7 @@
 - P1 核心物件 + 容器底層: gate-passed(2026-06-25,legacy pre-Examiner)
 - P2a 網路深水區: in-progress(chunk 1 ✅ / chunk 2 ✅ / chunk 3 NetworkPolicy ✅ s48(lab Step 1-6 s46 + AND/OR 實測 + F/G s48) / chunk 4 零件 4-1~4-4 ✅,4-5 盲講式已於 2026-08-11 退役改情境排障題)
 - P2b 儲存 + 權限: in-progress(C-1 ✅ s26,欠 `cg-demo` memory.max 讀數 / C-2 ✅ s29,欠 `reclaimPolicy: Delete` teardown 實證 / C-3 ✅ s31-32,step G 2/4 未過 / C-4 chunk 1-4 ✅ s33/s35/s36,4b 僅 supported,C-4 F/G 併入 s37 的 C-5 F/G;C-5 ✅ s37(chunk 3 supported、kind JWT 教練代跑);C-6 chunk 1 supported / 2 ✅ s38 / 3 ✅ supported s39,F ✅ s40,G 2/4 未過 s40)
-- P3 調度 + 高並發 + 排障: in-progress(curriculum-plan §12.2 開場:kubeadm 3 台叢集 s45 建成,cp + w1/w2 + Calico;P2b 殘債壓課尾)
+- P3 調度 + 高並發 + 排障: in-progress(curriculum-plan §12.2 開場:kubeadm 3 台叢集 s45 建成,cp + w1/w2 + Calico;P2b 殘債壓課尾;C-1 scheduler ✅ s49)
 - P4 可觀測性工程: not-started
 - P5 平台工程 / GitOps: not-started
 - P6 面試衝刺: not-started
@@ -66,12 +66,13 @@ weak-topic flags(2026-08-03 啟用,P2a 帶 flag 前進、gate 未考,學員決�
 - P2b C-4 RBAC 兩地基性質(純 allow / SA 是 Pod 身分): low(scaffolded) (s33)
 - P2b C-5 instance profile vs IRSA 爆炸半徑(粒度 = SA): med (s37)
 - P2b C-5 IRSA 鏈(trust policy 比 sub vs permission policy): low(scaffolded) (s37)
-- P2b C-6 Secret 分層(etcd 明文 / encryption at rest 擋備份 / RBAC 擋 API 讀者): low(scaffolded) (s38)
+- P2b C-6 Secret 分層(etcd 明文 / encryption at rest 擋備份 / RBAC 擋 API 讀者): med (s49)
 - P2b C-6 env vs volume 輪替(啟動快照 vs kubelet 同步): med (s38)
 - P2b C-6 PSS 兩個檢查點(admission 看 YAML / kubelet 看 image user): low(scaffolded) (s40)
 - P3 kubeadm 叢集建置(init 產物 / static pod 由 kubelet 管 / join TLS bootstrap): low(supported) (s45)
 - P3 無 CNI 因果鏈(Ready=False → not-ready taint → coredns Pending): low(supported) (s45)
 - P3 bootstrap 元件不依賴自己(static pod / calico-node hostNetwork): low(supported) (s45)
+- P3 C-1 scheduler(邊界 / FailedScheduling 判準 / preemption): low-med (s49)
 - P1 kubectl debug / ephemeral container: low (2026-09-01,ad hoc 非主線,未經 gate)
 
 ## Scorecard history
@@ -112,8 +113,12 @@ weak-topic flags(2026-08-03 啟用,P2a 帶 flag 前進、gate 未考,學員決�
      interval 2 = +2 天臨時複習格(口頭型 resolved,過了才進 3/7/14)。
      unresolved-session-count 於 2026-07-10 遷移時依複測紀錄初始化(近似值)。 -->
 
+- 2026-10-16 | Pending 時 FailedScheduling 是誰寫的 | 預測「scheduler 活著但全 node 不合」會 Events <none> ✗,實驗 From default-scheduler 推翻 | Event 由 scheduler 寫;有 = scheduler 活著被規則擋,<none> = 查 scheduler 本身 | unresolved | 3 | 2026-10-19 | 0
+- 2026-10-16 | 讀 FailedScheduling 判斷加 node 有沒有用 | `1 taint, 2 Insufficient memory` 答加 node 沒用(被 cp taint 行帶走) | 找 Insufficient = 容量問題;cp taint 行每次都在是背景 | unresolved | 3 | 2026-10-19 | 0
+- 2026-10-16 | unschedulable Pod 何時被重排 | F 答「有個機制會去檢查」 | 精準版:冷宮等叢集事件(node 加入、Pod 被刪)喚醒,不是輪詢 | unresolved | 3 | 2026-10-19 | 0
+- 2026-10-16 | RBAC `-w` 需要 watch 的判準 | 結論對,因為答「風險不同」 | verb 由 API 請求形狀決定,不看指令名字 | unresolved | 3 | 2026-10-19 | 0
 - 2026-10-12 | 誰是 bootstrap 元件不能依賴自己(calico-node hostNetwork / apiserver 靠 kubelet) | calico-node 為何用 node IP:「不知道該怎麼說」→ 縮小後答出 Pod IP 由 Calico 給,仍接不到「Calico 不能等自己」,直給 | 「負責建立 X 的元件不能依賴 X」規則未內化;apiserver 那題(B kubelet)二選一答對 | unresolved | 3 | 2026-10-15 | 0
-- 2026-10-12 | static pod manifest 被移走 → Pod Pending 的因果 | 預測 Pending ✅,因為答「找不到設定 yaml」 | 沒接到 kubelet 停 scheduler static pod → 沒人填 nodeName;Pending + Events 空 = 懷疑 scheduler 本身 | unresolved | 3 | 2026-10-15 | 0
+- 2026-10-12 | static pod manifest 被移走 → Pod Pending 的因果 | 預測 Pending ✅,因為答「找不到設定 yaml」 | 沒接到 kubelet 停 scheduler static pod → 沒人填 nodeName;Pending + Events 空 = 懷疑 scheduler 本身 | unresolved | 3 | 2026-10-19 | 1
 - 2026-10-12 | kubeadm 職責邊界 | 總結成「安裝每個節點需要的網路、憑證、依賴」 | 依賴是 Ansible 裝的、Pod 網路是 CNI;kubeadm 只產 certs/kubeconfig/static pod manifest 後退出 | unresolved | 3 | 2026-10-15 | 0
 - 2026-10-12 | 下 kubectl 前先確認在跟哪個叢集講話 | bastion 上兩次 `kubectl get nodes` 打到 PROD atlas-aws-billing-prod(本意查 lab),第二次在教練提醒後 | prompt 雖顯示 context 但未看;唯讀無損,換成 delete/drain 即事故。對策:lab kubectl 一律在 cp session 跑 | unresolved | 3 | 2026-10-15 | 0
 - 2026-10-06 | SG inbound 開在誰身上(listen 方 vs 發起方) | 6443 忘了 port 號;答「6443 三台都開,因為要互相溝通」;10250 二選一選「只開 cp-1,來源 worker」 | 用「誰發起連線」決定 inbound,沒看「冒號後面的 port 在誰身上 listen」;apiserver 只在 cp-1,kubelet 在每台。s42 同日:bastion→cp:22 SSH 事後解釋,首答只給 port,一階提示後答「listen 的 cp SG 過濾進來流量」✅ 帶判準;換皮 cp→bastion 給對 port+source(SG 優於 IP),未明講改哪個 SG(supported,未冷測) | unresolved | 3 | 2026-10-09 | 0
@@ -137,7 +142,7 @@ weak-topic flags(2026-08-03 啟用,P2a 帶 flag 前進、gate 未考,學員決�
 - 2026-07-23 | 跨 node 走路由表不是 iptables(層級混淆家族) | 問跨 node 第一個指令答 iptables,縮小重問答 resolv.conf | 改寫層(NAT)與轉送層(routing)混淆 | unresolved | 7 | 2026-09-10 | 0
 - 2026-07-23 | kube-proxy 不在 Pod 啟動路徑上 | 把 kube-proxy 列為 kubelet 建 Pod 三件事之一 | 控制路徑 vs 資料路徑混淆 | unresolved | 3 | 2026-08-07 | 1
 - 2026-07-23 | 只給結論不給判準(pattern 卡,升級追蹤) | 同堂三次只給結論不 show work;2026-09-08 續犯(「因為是 get」=複述觀察非判準);09-25 續犯(「B 因為」後空白) | 輸出習慣不是能力;面試官無法區分會與猜對 | unresolved | 3 | 2026-09-24 | 7
-- 2026-07-17 | default-deny 後的分層(DNS 層 vs 連線層) | 只答「連線不到」,不分辨死在 DNS 層還是連線層 | 層級混淆;兩步都被鎖時不問哪步先發生 | unresolved | 3 | 2026-07-26 | 1
+- 2026-07-17 | default-deny 後的分層(DNS 層 vs 連線層) | 只答「連線不到」,不分辨死在 DNS 層還是連線層 | 層級混淆;兩步都被鎖時不問哪步先發生 | unresolved | 3 | 2026-10-19 | 2
 - 2026-07-28 | veth 誤記「跨 node 連線」 | 答「veth 是跨 node 的網卡連線」 | veth 只管 Pod netns 到 root netns 那段 | unresolved | 7 | 2026-08-10 | 1
 - 2026-07-28 | iptables=一棟樓(nat 表/filter 表) | 幻影站 4 + 誘答「DNAT 做完才進 iptables」 | 把 iptables 當一站,不知 DNAT 就在 nat 表裡 | unresolved | 3 | 2026-07-31 | 0
 - 2026-07-20 | CNI 基本合約 vs 選配 | 合約三件事兩輪講不出,把 NetworkPolicy 混進合約本體 | 新教內容首輪未固化 | unresolved | 3 | 2026-07-23 | 0
@@ -179,6 +184,10 @@ weak-topic flags(2026-08-03 啟用,P2a 帶 flag 前進、gate 未考,學員決�
 <!-- PROGRESS-SCHEMA §8 = item-ref | type | interval | next-review-date | status。
      檢視序:過期優先、interval 小者優先;step A 每堂 ~2 題上限。
      每張卡的重測歷史與下次抽考題在 mistake-notes.md;term 卡到期日在 term-registry.md。 -->
+- mistake:FailedScheduling是scheduler寫的 | mistake | 3 | 2026-10-19 | active
+- mistake:Insufficient才是容量問題 | mistake | 3 | 2026-10-19 | active
+- mistake:unschedulable等事件喚醒 | mistake | 3 | 2026-10-19 | active
+- mistake:RBAC-watch看請求形狀 | mistake | 3 | 2026-10-19 | active
 
 - topic:P2a-chunk3-NetworkPolicy | topic | 3 | 2026-10-19 | active
 - mistake:IRSA-trust-vs-permission | mistake | 7 | 2026-10-16 | active
@@ -189,7 +198,7 @@ weak-topic flags(2026-08-03 啟用,P2a 帶 flag 前進、gate 未考,學員決�
 - mistake:三分類-家族卡 | mistake | 3 | 2026-07-22 | active
 - mistake:L4-vs-L7 | mistake | 3 | 2026-07-22 | active
 - mistake:NetworkPolicy-出廠全通 | mistake | 3 | 2026-07-23 | active
-- mistake:default-deny-分層(DNS vs 連線) | mistake | 3 | 2026-08-06 | active
+- mistake:default-deny-分層(DNS vs 連線) | mistake | 3 | 2026-10-19 | active
 - mistake:跨-node-走路由表 | mistake | 3 | 2026-08-13 | active
 - mistake:blackhole路由與本機/32 | mistake | 3 | 2026-08-13 | active
 - mistake:跨-node-走路由表-舊記錄 | mistake | - | 2026-08-09 | retired(s27 已執行,由上面的新列接手)

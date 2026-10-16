@@ -318,3 +318,9 @@ EKS lab 仍遵守安全規則:公司 `eks` context 不當教材；需雲端實�
 - terraform-coach:上表 Terraform senior 6 場 + P3 開場的 EC2/VPC。
 - sd-coach:照原進度,題目偏 AWS 架構(multi-account、hybrid、migration)。
 - leetcode-coach:維持一天一題。
+
+### 12.4 P3 壓縮(2026-10-16 s49,學員拍板)
+
+- 每堂 G 拿掉,面試格式集中在 C-7 迷你 mock + Phase Gate。
+- lab 只留 keystone:C-1 scheduler、C-3 HPA、C-6 PDB;C-2/C-4/C-5 圖 + 情境題。
+- P3 剩餘目標 6-7 堂(原估 9)。執行細節見 coach-rules.md。

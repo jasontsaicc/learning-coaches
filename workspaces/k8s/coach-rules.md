@@ -30,3 +30,4 @@
 
 - **Ansible / YAML 先給學員看再寫入(2026-10-12 s45 學員拍板,同日修正)**:預設教練先在對話貼出 YAML + 「task ↔ 手動指令」對照表,學員看過再寫入檔案;學員說沒時間時,教練直接補齊寫入。理由「工作上用 AI 工具生成,知道要做什麼就好」。why-first 預測題與指令執行仍由學員做。
 - **bastion 上的 lab kubectl 一律在 cp ssh session 跑(2026-10-12 s45)**:bastion 預設 context 是 PROD EKS,學員兩次 `kubectl get nodes` 打到 prod。給 kubectl 指令時明寫「在 cp 上跑」。
+- **P3 加速 + 每堂 G 拿掉(2026-10-16 s49 學員拍板)**:學員認為 P3 拖太久(s41-s48 八堂才進 C-1),要求教學加快、每堂尾的 G 面試拿掉(理由:F 已有教不懂的同事)。執行:C-1/C-3/C-6 保留 lab;C-2/C-4/C-5 只給圖 + 一題情境題;支線一出現就 park、最多一句;F volley 最多 2 題。面試格式改由 C-7 迷你 mock 與 Phase Gate(Examiner)驗收。此決定偏離 ENGINE.md「F/G 不可省」的 lock,屬學員明示選擇,代價:每堂少一次計分的面試結構練習(開場框架、第一刀 MTTR)。
