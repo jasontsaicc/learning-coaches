@@ -462,4 +462,33 @@ td.r{color:var(--c2);font-weight:700}
   </div>
 </details>
 
+<details>
+  <summary>這次的釐清(2026-10-19)</summary>
+  <div class="dbody">
+    <div class="wrongright">
+      <div class="wr-x">✗ 我以為:BST 只是「有排序」,不知道怎麼套到某一個 node</div>
+      <div class="wr-o">✓ 其實是:對<b>每一個</b> node X,左邊整棵全部 &lt; X,右邊整棵全部 &gt; X。把樹直直壓扁到一條線,由左到右剛好排好序</div>
+      <div class="wr-y">→ 我們那棵壓扁是 <code>4 5 3 6 7</code>,3 插隊,所以 False</div>
+    </div>
+    <div class="wrongright">
+      <div class="wr-x">✗ 我以為:<code>if node.val &lt; low or node.val &gt; high</code> 就夠了</div>
+      <div class="wr-o">✓ 其實是:<code>[2,2,2]</code> 左小孩拿 <code>(-inf, 2)</code>,<code>2 &gt; 2</code> 是 False,攔不住。要寫 <code>&lt;=</code> 和 <code>&gt;=</code></div>
+      <div class="wr-y">→ BST 規定嚴格大小,相等也算壞掉</div>
+    </div>
+    <div class="wrongright">
+      <div class="wr-x">✗ 卡住:<code>dfs(node.left, ____, ____)</code> 不知道填什麼</div>
+      <div class="wr-o">✓ 其實是:先列出「現在站在 6」時三個變數的值:<code>node.val=6, low=5, high=inf</code>。3 要 <code>(5, 6)</code>,對表就是 <code>(low, node.val)</code></div>
+      <div class="wr-y">→ 往哪邊走,就把那一邊的紙條換成我,另一張照抄</div>
+    </div>
+<pre>              5   (-inf, inf)
+               \
+                \  floor = 5
+                 6   (5, inf)
+                / \
+   ceiling = 6 /   \ floor = 6
+              3     7
+           (5, 6)  (6, inf)</pre>
+  </div>
+</details>
+
 </div>

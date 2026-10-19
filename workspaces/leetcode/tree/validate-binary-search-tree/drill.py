@@ -25,13 +25,21 @@ class Solution:
     def isValidBST(self, root):
         # ── 打在這裡 ──────────────────────────────────────
         # (1) def dfs(node, low, high): 走到 None -> 交回 True
-
+        def dfs(node, low, high):
+            if not node:
+                return True
+            if node.val <= low or node.val >= high:
+                return False
+            left_ok = dfs(node.left, low, node.val)
+            right_ok = dfs(node.right, node.val, high)
+            return left_ok and right_ok
+        return dfs(root, float('-inf'), float('inf'))
         # (2)     我不在 low < 我 < high 裡面 -> 交回 False
 
         # (3)     左小孩拿 (low, 我),右小孩拿 (我, high),兩邊都要 True
 
         # 最後: 從 root 開始走(第一組紙條寫什麼?),交回結果
-        pass
+        
         # ────────────────────────────────────────────────
 
 

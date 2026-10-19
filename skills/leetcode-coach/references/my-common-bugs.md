@@ -11,15 +11,16 @@
 
 | # | 檢查 | 犯過 | 症狀 |
 |---|---|---|---|
-| 1 | 變數名有沒有手滑?(pairs→paris、answes、`nxt`→`next`、`dfa`→`dfs`、`amx`→`max`、`sel.ans`、`isSmaeTree`、`self.and`、`false`→`False`、`deepth`→`depth`、`reutrn`、`dequeue`→`deque`、`collection`→`collections`、`def def(node)`、`clearappend`、`reutrn` ×2、**10/13 呼叫寫成 `def(node.left, …)`**) | 16 | `NameError`。**語法完全合法,要等那行真的被執行才炸** — 這就是 linter(`ruff` / `pyflakes`)存在的理由 |
+| 1 | 變數名有沒有手滑?(pairs→paris、answes、`nxt`→`next`、`dfa`→`dfs`、`amx`→`max`、`sel.ans`、`isSmaeTree`、`self.and`、`false`→`False`、`deepth`→`depth`、`reutrn`、`dequeue`→`deque`、`collection`→`collections`、`def def(node)`、`clearappend`、`reutrn` ×2、**10/13 呼叫寫成 `def(node.left, …)`**、10/19 `hight`) | 17 | `NameError`。**語法完全合法,要等那行真的被執行才炸** — 這就是 linter(`ruff` / `pyflakes`)存在的理由 |
 | 2 | 用的名字在這張 frame 裡嗎?樹的小孩要從 node 身上拿:`root.left` 不是裸 `left`;遞迴呼叫自己是 `self.invertTree`(函式名),不是 `self.left`;參數叫 `root` 就不要寫 `node` | 9(2026-09-11 `dfa(left)`、2026-09-14 `self.left(left)`、2026-09-17 #100 `self.isSameTree(q.left)` 少了 `p.left`、2026-09-18 #110 在內層 `depth` 裡呼叫 `isBalanced(node.left)`、2026-09-20 #572 `if not node` 但參數叫 `root`、**2026-09-21 #110 把 `if not node` / `L` / `R` 整段寫在外層 `isBalanced` 裡**、2026-09-21 前序又把 `if not node` 寫在外層,委派寫成 `preorderTraversal(root.left)`、**2026-10-09 #1448 外層啟動行寫 `dfs(node, max_so_far)`,用了內層名字**、2026-10-13 #1448 默寫外層 `dfs(root, max_val)` 再犯) | `NameError` / `AttributeError`。處方固定:**畫 frame,列出裡面真正存在的名字**。上一題的參數名不在這張紙上 |
 | 3 | **縮排歸誰管**:`return` 卡在迴圈裡;`if` 後面該退回來的行縮進去了 | 7(2026-09-21 #110:`L =` 以下整段縮進 `if not node:`,那四件事永遠不執行;2026-09-29 #637 `for` 整段掉到 `while` 外面;2026-10-08 前序 dfs 內容跟 `def` 同層) | 找得到的全掛、找不到的全綠。不報錯,所以最貴。**處方:`if` 開一個房間,問「這個房間裡該有幾行」** |
 | 4 | `if` / `elif` / `else` / `for` / `while` / `def` 開頭的行,結尾冒號補了嗎?(2026-10-08 #235 `elif` 行尾) | 5 | `SyntaxError: invalid syntax`,箭頭指在關鍵字後。**語法錯在整個檔案讀進來時就炸,會把後面所有執行錯蓋掉** |
 | 5 | 算 index 有沒有用 `//`?`/` 回 float,float 不能當 index | 2 | `TypeError: list indices must be integers` |
 | 6 | 字元有沒有打錯?(`stack, append(i)` 的逗點、`len(matrix)[0]` 的括號位置) | 2 | 當場報錯,成本低 |
 | 7 | 閉區間 `[l, r]` 配 `while l <= r` 時,`r` 初始值是 `len(nums) - 1` 不是 `len(nums)` | 2 | `IndexError`,或測資不夠 hostile 而整組漏掉 |
-| 8 | Python list 是 `.append`,沒有 `.push` | 1 | `AttributeError` |
-| 9 | `if stack` 是「有東西」,`not stack` 是「空的」。`not stack` 要放 `or` 左邊短路保護 `stack[-1]` | 1 | `IndexError` 或邏輯全反 |
+| 8 | **相等要不要擋?** `<` vs `<=`、`>` vs `>=`。寫完條件拿「剛好相等」那組代進去算一次(2026-10-13 #1448 `>` 自改 `>=`;2026-10-19 #98 `[2,2,2]` 的 `2 > 2` 攔不住) | 2 | 不報錯,只有 duplicate / 邊界測資會掛 |
+| 9 | Python list 是 `.append`,沒有 `.push` | 1 | `AttributeError` |
+| 10 | `if stack` 是「有東西」,`not stack` 是「空的」。`not stack` 要放 `or` 左邊短路保護 `stack[-1]` | 1 | `IndexError` 或邏輯全反 |
 
 ## 你容易搞混的觀念
 
