@@ -7,15 +7,15 @@
 
 ## Meta
 
-- session_count: 49
+- session_count: 50
 - last_weekly_review: 49(WR10 於 s49 課尾壓縮版:NetworkPolicy DNS supported / RBAC watch 結論對判準錯 / Secret 分層冷測過)
-- last_session_date: 2026-10-16
+- last_session_date: 2026-10-20
 - warm_up_classification: mid
 - target_role: 雙目標 NVIDIA Pre-Production Engineer + AWS ProServe DC Cloud Architect,兼顧台廠資深 SRE(2026-09-30,curriculum-plan §12);投遞最快 2027-01
 
 ## Current Session breakpoint
 
-無(s49 正常收工)。下一堂:P3 C-2(圖 + 情境題,先補教 taint vs nodeSelector/affinity)→ C-3 HPA lab;P2a/P2b Phase Gate 排在 C-3 前集中考;每堂無 G(§12.4)。
+無(s50 提前收工,學員對推力/拉力比喻與追問煩躁)。下一堂:P2a/P2b Phase Gate 集中考 → P3 C-3 HPA lab;C-2 兩張新卡(FailedScheduling 行→修法、antiAffinity 無數量)排課尾;每堂無 G(§12.4)。
 
 <!-- schema §3 = 恰好一行。敘事與次要待辦寫 session-log.md,長效教練紀律寫 session-log.md
      「教練執行紀律」,不要在這裡疊舊堂。s32 及更早斷點原文見 session-log.md 對應堂,
@@ -27,7 +27,7 @@
 - P1 核心物件 + 容器底層: gate-passed(2026-06-25,legacy pre-Examiner)
 - P2a 網路深水區: in-progress(chunk 1 ✅ / chunk 2 ✅ / chunk 3 NetworkPolicy ✅ s48(lab Step 1-6 s46 + AND/OR 實測 + F/G s48) / chunk 4 零件 4-1~4-4 ✅,4-5 盲講式已於 2026-08-11 退役改情境排障題)
 - P2b 儲存 + 權限: in-progress(C-1 ✅ s26,欠 `cg-demo` memory.max 讀數 / C-2 ✅ s29,欠 `reclaimPolicy: Delete` teardown 實證 / C-3 ✅ s31-32,step G 2/4 未過 / C-4 chunk 1-4 ✅ s33/s35/s36,4b 僅 supported,C-4 F/G 併入 s37 的 C-5 F/G;C-5 ✅ s37(chunk 3 supported、kind JWT 教練代跑);C-6 chunk 1 supported / 2 ✅ s38 / 3 ✅ supported s39,F ✅ s40,G 2/4 未過 s40)
-- P3 調度 + 高並發 + 排障: in-progress(curriculum-plan §12.2 開場:kubeadm 3 台叢集 s45 建成,cp + w1/w2 + Calico;P2b 殘債壓課尾;C-1 scheduler ✅ s49)
+- P3 調度 + 高並發 + 排障: in-progress(curriculum-plan §12.2 開場:kubeadm 3 台叢集 s45 建成,cp + w1/w2 + Calico;P2b 殘債壓課尾;C-1 scheduler ✅ s49;C-2 調度約束 ✅ supported s50,無 lab)
 - P4 可觀測性工程: not-started
 - P5 平台工程 / GitOps: not-started
 - P6 面試衝刺: not-started
@@ -73,6 +73,7 @@ weak-topic flags(2026-08-03 啟用,P2a 帶 flag 前進、gate 未考,學員決�
 - P3 無 CNI 因果鏈(Ready=False → not-ready taint → coredns Pending): low(supported) (s45)
 - P3 bootstrap 元件不依賴自己(static pod / calico-node hostNetwork): low(supported) (s45)
 - P3 C-1 scheduler(邊界 / FailedScheduling 判準 / preemption): low-med (s49)
+- P3 C-2 調度約束(taint/affinity 專用節點、antiAffinity vs topologySpread、rollout 卡死): low(supported) (s50)
 - P1 kubectl debug / ephemeral container: low (2026-09-01,ad hoc 非主線,未經 gate)
 
 ## Scorecard history
@@ -114,8 +115,8 @@ weak-topic flags(2026-08-03 啟用,P2a 帶 flag 前進、gate 未考,學員決�
      unresolved-session-count 於 2026-07-10 遷移時依複測紀錄初始化(近似值)。 -->
 
 - 2026-10-16 | Pending 時 FailedScheduling 是誰寫的 | 預測「scheduler 活著但全 node 不合」會 Events <none> ✗,實驗 From default-scheduler 推翻 | Event 由 scheduler 寫;有 = scheduler 活著被規則擋,<none> = 查 scheduler 本身 | unresolved | 3 | 2026-10-19 | 0
-- 2026-10-16 | 讀 FailedScheduling 判斷加 node 有沒有用 | `1 taint, 2 Insufficient memory` 答加 node 沒用(被 cp taint 行帶走) | 找 Insufficient = 容量問題;cp taint 行每次都在是背景 | unresolved | 3 | 2026-10-19 | 0
-- 2026-10-16 | unschedulable Pod 何時被重排 | F 答「有個機制會去檢查」 | 精準版:冷宮等叢集事件(node 加入、Pod 被刪)喚醒,不是輪詢 | unresolved | 3 | 2026-10-19 | 0
+- 2026-10-16 | 讀 FailedScheduling 判斷加 node 有沒有用 | `1 taint, 2 Insufficient memory` 答加 node 沒用(被 cp taint 行帶走) | 找 Insufficient = 容量問題;cp taint 行每次都在是背景 | unresolved | 7 | 2026-10-27 | 0
+- 2026-10-16 | unschedulable Pod 何時被重排 | F 答「有個機制會去檢查」;s50 冷測結論對、因為答「會重試」 | 精準版:冷宮等叢集事件(node 加入、Pod 被刪)喚醒,不是輪詢 | unresolved | 3 | 2026-10-23 | 1
 - 2026-10-16 | RBAC `-w` 需要 watch 的判準 | 結論對,因為答「風險不同」 | verb 由 API 請求形狀決定,不看指令名字 | unresolved | 3 | 2026-10-19 | 0
 - 2026-10-12 | 誰是 bootstrap 元件不能依賴自己(calico-node hostNetwork / apiserver 靠 kubelet) | calico-node 為何用 node IP:「不知道該怎麼說」→ 縮小後答出 Pod IP 由 Calico 給,仍接不到「Calico 不能等自己」,直給 | 「負責建立 X 的元件不能依賴 X」規則未內化;apiserver 那題(B kubelet)二選一答對 | unresolved | 3 | 2026-10-15 | 0
 - 2026-10-12 | static pod manifest 被移走 → Pod Pending 的因果 | 預測 Pending ✅,因為答「找不到設定 yaml」 | 沒接到 kubelet 停 scheduler static pod → 沒人填 nodeName;Pending + Events 空 = 懷疑 scheduler 本身 | unresolved | 3 | 2026-10-19 | 1
@@ -178,6 +179,10 @@ weak-topic flags(2026-08-03 啟用,P2a 帶 flag 前進、gate 未考,學員決�
 - 2026-10-13 | from 裡 `-` 的 AND/OR | B(OR)答「只要 ns=netpol-lab 就可以」,學員累直給;s47 A 預測 ✅ 帶因為、B 三顆全通結論對,壓測 y(ns other、app=prometheus)答「通,因為符合 app=prometheus」✗;s48 實測 y=FAIL 推翻,G 根因一句到位、AND 修法寫對(supported),追問兩個 `-` 後果只答「規則聯集」 | OR 要逐項算再相加;單獨 podSelector = policy 所在 ns;OR 的 blast radius 講不具體 | unresolved | 3 | 2026-10-19 | 2
 
 - 2026-10-16 | NetworkPolicy stateful:回程封包靠 conntrack 放行 | prometheus 被 Ingress 全擋,預測它 curl web 拿不到 response(timeout),實測 200 | 把 policy 當成逐封包過濾,不知規則只檢查連線第一個封包 | unresolved | 3 | 2026-10-19 | 0
+- 2026-10-20 | nodeAffinity 只有軟性 | 以為 nodeAffinity 沒對到就去別台、nodeSelector 才硬;F teach-back 又講成「Score 加分」,追問後改口 required | required=Filter 硬擋 Pending、preferred=Score;nodeSelector=required 簡化版 | unresolved | 3 | 2026-10-23 | 0
+- 2026-10-20 | maxUnavailable 讀成不能砍 | surge=0/unavailable=1 答「跑不動,不能新增也不能砍」;填空答最少剩 1 顆(應 2) | maxUnavailable=可少幾顆,最少在跑 = replicas − maxUnavailable | unresolved | 3 | 2026-10-23 | 0
+- 2026-10-20 | antiAffinity 能表達數量 | F 誘答「required antiAffinity zone 可把 6 副本平均 3 AZ」答「也行」,反證後想改成「no 3 pods」 | required antiAffinity 只有是非(每 domain 最多 1),數量只能 topologySpread maxSkew | unresolved | 3 | 2026-10-23 | 0
+- 2026-10-20 | FailedScheduling 行對應修法 | `didn't match affinity/selector` 答修 toleration;`untolerated taint` 答加 label(兩向皆反,s49 同錯) | 照訊息關鍵字:taint 行→Pod 加 toleration;affinity/selector 行→node 加 label 或改 selector;Insufficient→容量 | unresolved | 3 | 2026-10-23 | 1
 
 ## Spaced-repetition queue
 
@@ -185,8 +190,8 @@ weak-topic flags(2026-08-03 啟用,P2a 帶 flag 前進、gate 未考,學員決�
      檢視序:過期優先、interval 小者優先;step A 每堂 ~2 題上限。
      每張卡的重測歷史與下次抽考題在 mistake-notes.md;term 卡到期日在 term-registry.md。 -->
 - mistake:FailedScheduling是scheduler寫的 | mistake | 3 | 2026-10-19 | active
-- mistake:Insufficient才是容量問題 | mistake | 3 | 2026-10-19 | active
-- mistake:unschedulable等事件喚醒 | mistake | 3 | 2026-10-19 | active
+- mistake:Insufficient才是容量問題 | mistake | 7 | 2026-10-27 | active
+- mistake:unschedulable等事件喚醒 | mistake | 3 | 2026-10-23 | active
 - mistake:RBAC-watch看請求形狀 | mistake | 3 | 2026-10-19 | active
 
 - topic:P2a-chunk3-NetworkPolicy | topic | 3 | 2026-10-19 | active
@@ -248,6 +253,11 @@ weak-topic flags(2026-08-03 啟用,P2a 帶 flag 前進、gate 未考,學員決�
 - mistake:PSS只查Pod不查Deployment | mistake | 3 | 2026-10-12 | active
 - mistake:app為什麼要root(port<1024/root目錄) | mistake | 3 | 2026-09-30 | active
 - topic:C-4-RBAC-最小權限+等價升權 | topic | 3 | 2026-09-16 | active(4b create pods=借SA 僅 supported,冷測換皮;併入 C-5)
+- topic:P3-C2-調度約束 | topic | 3 | 2026-10-23 | active
+- mistake:nodeAffinity只有軟性 | mistake | 3 | 2026-10-23 | active
+- mistake:maxUnavailable讀成不能砍 | mistake | 3 | 2026-10-23 | active
+- mistake:antiAffinity能表達數量 | mistake | 3 | 2026-10-23 | active
+- mistake:FailedScheduling行對應修法 | mistake | 3 | 2026-10-23 | active
 
 ## Curiosity branch
 

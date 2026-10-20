@@ -26,6 +26,10 @@
 | Gateway API | /ˈɡeɪt.weɪ ˌeɪ.piːˈaɪ/ | The successor to Ingress: a set of CRDs (GatewayClass, Gateway, HTTPRoute) that split routing config by role, still enforced by a separately installed controller. | Ingress 的接班人,一張紙拆成三張分給 infra / platform / app 三種角色;物件仍只是規則,要裝 controller 才會動(ingress-nginx 2026-03 退役) | 2026-10-12 | 2026-10-15 (筆記自學,未經教練教學;見 p2a-gateway-api.md) |
 | DRA (Dynamic Resource Allocation) | /ˌdiː.ɑːrˈeɪ/ | A Kubernetes API (GA in v1.34) where workloads request devices such as GPUs through ResourceClaims, and the scheduler picks a specific matching device. | 用 ResourceClaim 描述「要哪種裝置」,由 scheduler 挑定哪一顆;舊 device plugin 只能數數量,不知道是哪一顆 | 2026-10-12 | 2026-10-15 (筆記自學,未經教練教學;見 p3-dra.md) |
 
+| toleration | /ˌtɑː.ləˈreɪ.ʃən/ | A Pod-side setting that lets the Pod be placed on a node with a matching taint; it allows, it does not attract. | Pod 帶的「不怕這個 taint」,只解除阻擋,不會把 Pod 帶過去 | 2026-10-20 | 2026-10-23 |
+| node affinity | /noʊd əˈfɪn.ə.ti/ | Pod rules about which node labels it needs (required) or prefers (preferred). | Pod 指定要去哪種 node;required 沒符合就 Pending | 2026-10-20 | 2026-10-23 |
+| taint | /teɪnt/ | A node-side mark that blocks Pods lacking a matching toleration. | node 上的「沒 toleration 不准進」標記;cordon 底層也是它 | 2026-10-20 | 2026-10-23 |
+| maxSkew | /mæks skjuː/ | The largest allowed difference in replica count between the fullest and emptiest topology domain. | 最多跟最少的 domain 差幾顆;topologySpread 的旋鈕 | 2026-10-20 | 2026-10-23 |
 <!-- 2026-06-22 移除 kubeconfig / context / kind 三張卡:定義型瑣碼詞/工具名,面試不考,違反價值門檻(見 SKILL.md 術語卡)。current-context 改記為 ops 安全習慣,不當單字卡。 -->
 <!-- ops 安全習慣(非術語卡): `kubectl config current-context` = 動手前先確認指到哪個叢集,避免誤打 prod EKS。 -->
 

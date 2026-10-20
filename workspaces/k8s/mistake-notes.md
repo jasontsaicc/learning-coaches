@@ -437,8 +437,28 @@
 ## 2026-10-16 | unschedulable Pod 何時被重排
 - 判準:排不進去的 Pod 進 unschedulable queue,不輪詢;等叢集事件(node 加入、Pod 刪除、label 改)才撈回 activeQ。scheduler 重啟時重新 list 所有 nodeName 空的 Pod。
 - 下次抽考:Pod Pending 中,你給 w1 加了它要的 label,要不要重建 Pod?因為?
+- s50 冷測:不用重建 ✅,因為「k8s 會重試」✗(仍是輪詢想像)。下次換皮:Pod 因 Insufficient memory Pending,你刪掉另一個大 Pod,要等多久它才被排?
 
 ## 2026-10-16 | RBAC `-w` 需要 watch 的判準
 - 判準:verb 由 API 請求形狀決定:有名字 = get、沒名字 = list、`-w` = watch。唯讀三件套 `get,list,watch`。
 - s49 WR:結論對,因為答「風險不同」。
 - 下次抽考:`kubectl logs -f mypod` 被 403,缺哪個 resource/verb?
+
+## 2026-10-20 | nodeAffinity 只有軟性
+- 判準:required = Filter 硬擋,沒 node 符合就 Pending;preferred = Score 加分,沒符合照樣排別台。nodeSelector = required 的等值簡化版;兩者同寫是 AND。
+- s50 當堂換皮(required + toleration、w3 滿 → Pending)✅;F teach-back 又講「affinity 增加 Score 排序」,追問後改口 required。
+- 下次抽考:GPU job 用 preferred nodeAffinity gpu=true,GPU node 全滿,job 會怎樣?
+
+## 2026-10-20 | maxUnavailable 讀成不能砍
+- 判準:maxSurge = 可多開幾顆;maxUnavailable = 可少幾顆,最少在跑 = replicas − maxUnavailable。
+- 下次抽考:4 副本、maxSurge=0、maxUnavailable=2,更新中最少幾顆在跑?
+
+## 2026-10-20 | antiAffinity 能表達數量
+- 判準:required podAntiAffinity 只問「這個 domain 已有同 label Pod 嗎」,每 domain 最多 1 顆,沒有數字欄位。要數量/平均只能 topologySpread maxSkew。
+- s50:Q6(hostname、5 node、7 副本 → 2 Pending)教完當場 ✅ 帶因為。
+- 下次抽考:6 副本跨 3 AZ 平均,同事寫 required antiAffinity key=zone,上線後 `get pods` 會看到什麼?
+
+## 2026-10-20 | FailedScheduling 行對應修法
+- 判準:照訊息關鍵字分類,不用比喻。`untolerated taint` → Pod 加 toleration;`didn't match Pod's node affinity/selector` → node 加 label 或改 Pod selector;`Insufficient cpu/memory` → 加 node 或降 request。
+- s49 affinity/selector 行答成 taint;s50 兩向皆反(affinity 行答 toleration、taint 行答 label)。學員明確拒絕推力/拉力比喻。
+- 下次抽考:直接貼一則 FailedScheduling,問每一行要改 Pod 還是改 node,改哪個欄位。
