@@ -1,0 +1,547 @@
+<title>中序第 k 個</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=JetBrains+Mono:wght@400;700&family=Noto+Sans+TC:wght@400;500;700&display=swap">
+<style>
+:root{
+  --paper:#F2F0F6; --surface:#FFFFFF; --ink:#191527; --body:#302B41;
+  --muted:#6E687E; --line:#CFCADB;
+  --c1:#4A4098; --c1-soft:#E3E0F3;
+  --c2:#AE3557; --c2-soft:#F6E0E7;
+  --signal:#10726B; --signal-soft:#D8ECE9;
+  --code-bg:#131022; --code-fg:#DEDAEA;
+  --hold:#EDEAF3;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#14121C; --surface:#1C1929; --ink:#EAE7F2; --body:#C6C1D4;
+    --muted:#8E88A0; --line:#322E44;
+    --c1:#9E94EC; --c1-soft:#241F42;
+    --c2:#E88BA4; --c2-soft:#3A1D28;
+    --signal:#4FC7B6; --signal-soft:#0F2F2C;
+    --code-bg:#0C0A14; --code-fg:#DAD5E6;
+    --hold:#1F1C2C;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#14121C; --surface:#1C1929; --ink:#EAE7F2; --body:#C6C1D4;
+  --muted:#8E88A0; --line:#322E44;
+  --c1:#9E94EC; --c1-soft:#241F42;
+  --c2:#E88BA4; --c2-soft:#3A1D28;
+  --signal:#4FC7B6; --signal-soft:#0F2F2C;
+  --code-bg:#0C0A14; --code-fg:#DAD5E6;
+  --hold:#1F1C2C;
+}
+
+*{box-sizing:border-box}
+body{
+  background:var(--paper); color:var(--body);
+  font-family:"Noto Sans TC","Hiragino Sans","Microsoft JhengHei",sans-serif;
+  font-size:16px; line-height:1.85;
+  padding:0 1.25rem 5rem;
+}
+.wrap{max-width:44rem; margin:0 auto}
+
+header{padding-block:3.5rem 1.5rem}
+.kicker{
+  font-family:"JetBrains Mono",monospace; font-size:.72rem; font-weight:700;
+  letter-spacing:.16em; text-transform:uppercase; color:var(--signal);
+}
+h1{
+  font-family:"Archivo","Noto Sans TC",sans-serif; font-weight:700;
+  font-size:clamp(2rem,6vw,2.9rem); line-height:1.12; letter-spacing:-.02em;
+  color:var(--ink); margin:.5rem 0 .6rem; text-wrap:balance;
+}
+.sub{color:var(--muted); font-size:1rem; margin:0}
+
+.rail{
+  height:9px; margin:2.75rem 0 2.25rem;
+  border-top:2px solid var(--line); border-bottom:2px solid var(--line);
+  background:repeating-linear-gradient(90deg,var(--line) 0 3px,transparent 3px 13px);
+}
+
+h2{
+  font-family:"Archivo","Noto Sans TC",sans-serif; font-weight:700;
+  font-size:1.4rem; color:var(--ink); letter-spacing:-.01em;
+  margin:0 0 .25rem; text-wrap:balance;
+}
+h2 .num{
+  font-family:"JetBrains Mono",monospace; font-size:.85rem; color:var(--signal);
+  margin-right:.6rem; vertical-align:.15em;
+}
+h3{font-family:"Archivo","Noto Sans TC",sans-serif;font-weight:600;font-size:1rem;color:var(--ink);margin:1.75rem 0 .4rem}
+h4{font-family:"Archivo","Noto Sans TC",sans-serif;font-weight:600;font-size:.95rem;color:var(--ink);margin:1.4rem 0 .3rem}
+section{margin-bottom:2.5rem}
+p{margin:.7rem 0}
+strong{color:var(--ink); font-weight:700}
+code{font-family:"JetBrains Mono",monospace; font-size:.87em; background:var(--signal-soft); color:var(--ink); padding:.1em .35em; border-radius:2px}
+
+.lede{font-size:1.1rem; color:var(--ink); border-left:3px solid var(--signal); padding-left:1rem; margin:1rem 0 1.25rem}
+
+.callout{background:var(--surface); border:1px solid var(--line); border-radius:4px; padding:1.1rem 1.25rem; margin:1.25rem 0}
+.callout.warn{border-left:4px solid var(--c2)}
+.callout.key{border-left:4px solid var(--signal)}
+.callout h3,.callout h4{margin-top:0}
+
+ul,ol{padding-left:1.35rem; margin:.7rem 0}
+li{margin:.35rem 0}
+
+.signals{list-style:none; padding:0; display:grid; gap:.5rem}
+.signals li{
+  display:flex; gap:.75rem; align-items:baseline;
+  background:var(--surface); border:1px solid var(--line); border-radius:4px; padding:.7rem .95rem; margin:0;
+}
+.signals .n{font-family:"JetBrains Mono",monospace; font-weight:700; color:var(--signal); flex-shrink:0}
+
+.tablewrap{overflow-x:auto; margin:1.25rem 0; border:1px solid var(--line); border-radius:4px; background:var(--surface)}
+table{border-collapse:collapse; width:100%; font-size:.86rem; font-variant-numeric:tabular-nums}
+th,td{text-align:left; padding:.55rem .8rem; border-bottom:1px solid var(--line); white-space:nowrap}
+th{font-family:"Archivo",sans-serif; font-weight:600; color:var(--ink); font-size:.78rem; letter-spacing:.03em; text-transform:uppercase}
+tr:last-child td{border-bottom:none}
+td.mono,th.mono{font-family:"JetBrains Mono",monospace}
+.t1{color:var(--c1); font-weight:700}
+.t2{color:var(--c2); font-weight:700}
+.hit{color:var(--signal); font-weight:700}
+
+pre{
+  background:var(--code-bg); color:var(--code-fg); border-radius:5px;
+  padding:1.1rem 1.25rem; overflow-x:auto; margin:1rem 0;
+  font-family:"JetBrains Mono",monospace; font-size:.84rem; line-height:1.75;
+}
+pre .cm{color:#8C86A8}
+pre .kw{color:#C39BEE}
+pre .fn{color:#7FD6C6}
+pre .hl{background:rgba(127,214,198,.14); display:block; margin:0 -1.25rem; padding:0 1.25rem}
+
+details{background:var(--surface); border:1px solid var(--line); border-radius:4px; margin:1rem 0; overflow:hidden}
+summary{
+  cursor:pointer; padding:.9rem 1.15rem; list-style:none;
+  font-family:"Archivo","Noto Sans TC",sans-serif; font-weight:600; color:var(--ink);
+  display:flex; align-items:baseline; gap:.6rem;
+}
+summary::-webkit-details-marker{display:none}
+summary::before{content:"▸"; color:var(--signal); font-size:.8rem}
+details[open] summary::before{content:"▾"}
+summary:focus-visible{outline:2px solid var(--signal); outline-offset:-2px}
+.lockhint{font-family:"Noto Sans TC",sans-serif;font-weight:400;font-size:.8rem;color:var(--muted);margin-left:auto}
+.dbody{padding:0 1.15rem 1.15rem; border-top:1px solid var(--line)}
+
+.mantra{font-family:"Archivo","Noto Sans TC",sans-serif;font-size:1.05rem;font-weight:600;color:var(--ink);background:var(--signal-soft);border-radius:4px;padding:1rem 1.2rem;margin:1rem 0}
+
+/* ── 樹 ── */
+.dia{display:block;max-width:100%;height:auto;margin:1.25rem auto}
+.dia .edge{stroke:var(--line);stroke-width:2}
+.dia .edge.nil{stroke-dasharray:4 4}
+.dia .box{fill:var(--surface);stroke:var(--line);stroke-width:2}
+.dia .box.a{fill:var(--c1-soft);stroke:var(--c1)}
+.dia .box.b{fill:var(--c2-soft);stroke:var(--c2)}
+.dia .nilbox{fill:none;stroke:var(--muted);stroke-width:1.5;stroke-dasharray:3 3}
+.dia .tval{fill:var(--ink);font-family:"JetBrains Mono",monospace;font-size:15px;font-weight:700;text-anchor:middle;dominant-baseline:central}
+.dia .nilv{fill:var(--muted);font-family:"JetBrains Mono",monospace;font-size:11px;text-anchor:middle;dominant-baseline:central}
+.dia .tag{fill:var(--muted);font-family:"JetBrains Mono",monospace;font-size:12px;text-anchor:middle}
+.dia .tag.hit{fill:var(--signal);font-weight:700}
+
+/* ── call stack 分鏡 ── */
+.film{display:grid;gap:1rem;margin:1.5rem 0}
+.shot{background:var(--surface);border:1px solid var(--line);border-radius:4px;padding:.9rem 1rem}
+.shot .hd{display:flex;gap:.7rem;align-items:baseline;flex-wrap:wrap;margin-bottom:.6rem}
+.shot .no{font-family:"JetBrains Mono",monospace;font-size:.68rem;font-weight:700;letter-spacing:.1em;color:var(--signal);border:1px solid var(--signal);border-radius:2px;padding:.1rem .35rem;flex-shrink:0}
+.shot .cap{font-size:.9rem;color:var(--body);line-height:1.6}
+.tower{display:flex;flex-direction:column;gap:3px;font-family:"JetBrains Mono",monospace;font-size:.78rem;overflow-x:auto}
+.fr{border:1px solid var(--line);border-radius:3px;padding:.4rem .6rem;background:var(--hold);color:var(--muted);min-width:min-content;white-space:nowrap}
+.fr.run{background:var(--signal-soft);border-color:var(--signal);color:var(--ink);font-weight:700}
+.fr.gone{border-style:dashed;background:transparent;opacity:.45;text-decoration:line-through}
+.fr .who{color:var(--ink);font-weight:700}
+.fr.run .who{color:var(--signal)}
+.fr .slot{color:var(--muted);font-weight:400}
+.fr .val{color:var(--c2);font-weight:700}
+.floor{font-family:"JetBrains Mono",monospace;font-size:.7rem;color:var(--muted);letter-spacing:.1em;border-top:2px solid var(--line);padding-top:.25rem;margin-top:2px}
+.emptystack{font-family:"JetBrains Mono",monospace;font-size:.78rem;color:var(--muted);padding:.4rem 0}
+
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(15rem,1fr));gap:1rem;margin:1.25rem 0}
+.two > div{background:var(--surface);border:1px solid var(--line);border-radius:4px;padding:.9rem 1.05rem}
+.two h4{margin-top:0}
+
+.wrongright{display:grid;gap:.5rem;margin:1rem 0}
+.wrongright > div{padding:.65rem .9rem;border-radius:3px;font-size:.92rem}
+.wr-x{background:var(--c2-soft);border-left:3px solid var(--c2)}
+.wr-o{background:var(--signal-soft);border-left:3px solid var(--signal)}
+.wr-y{background:var(--surface);border:1px solid var(--line);border-left:3px solid var(--muted)}
+
+.move{background:var(--surface);border:1px solid var(--line);border-radius:4px;padding:.9rem 1.05rem;margin:.85rem 0}
+.move h4{margin:0 0 .5rem;display:flex;gap:.6rem;align-items:baseline;flex-wrap:wrap}
+.move h4 .mv{font-family:"JetBrains Mono",monospace;font-size:.7rem;font-weight:700;letter-spacing:.1em;color:var(--signal);border:1px solid var(--signal);border-radius:2px;padding:.1rem .35rem;flex-shrink:0}
+.say{background:var(--c1-soft);border-radius:3px;padding:.6rem .8rem;margin:.4rem 0;color:var(--ink)}
+.say b{display:block;font-family:"JetBrains Mono",monospace;font-size:.66rem;letter-spacing:.12em;text-transform:uppercase;color:var(--c1);margin-bottom:.3rem}
+.think{font-size:.88rem;color:var(--muted);margin:.4rem 0}
+.think b{font-family:"JetBrains Mono",monospace;font-size:.66rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:.2rem}
+
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+.dia .box.p{fill:var(--c1-soft);stroke:var(--c1)}
+.dia .box.q{fill:var(--c2-soft);stroke:var(--c2)}
+.dia .box.ans{fill:var(--signal-soft);stroke:var(--signal);stroke-width:3}
+.dia .edge.walk{stroke:var(--signal);stroke-width:4;stroke-linecap:round}
+.dia .tag.p{fill:var(--c1);font-weight:700}
+.dia .tag.q{fill:var(--c2);font-weight:700}
+td.l{color:var(--c1);font-weight:700}
+td.r{color:var(--c2);font-weight:700}
+</style>
+<style>
+.dia .edgetag{fill:var(--signal);font-family:"JetBrains Mono",monospace;font-size:11px;font-weight:700;text-anchor:middle}
+.dia .box.no{fill:var(--c2-soft);stroke:var(--c2)}
+</style>
+
+<style>
+.dia .order{fill:var(--c1);font-family:"JetBrains Mono",monospace;font-size:12px;font-weight:700}
+.dia .drop{stroke:var(--muted);stroke-width:1;stroke-dasharray:2 4}
+.dia .axis{stroke:var(--line);stroke-width:2}
+.dia .axv{fill:var(--ink);font-family:"JetBrains Mono",monospace;font-size:14px;font-weight:700;text-anchor:middle}
+.dia .axi{fill:var(--muted);font-family:"JetBrains Mono",monospace;font-size:11px;text-anchor:middle}
+.dia .axi.hit{fill:var(--signal);font-weight:700}
+</style>
+
+<div class="wrap">
+
+<header>
+  <div class="kicker">LeetCode #230 · Tree · BST + DFS 中序(龜模式)· 2026-10-20</div>
+  <h1>中序第 k 個</h1>
+  <p class="sub">Kth Smallest Element in a BST。前序、後序都寫過了,這題是中序的代表題。</p>
+</header>
+
+<div class="rail"></div>
+
+<section>
+  <h2><span class="num">01</span>這題在幹嘛</h2>
+  <p class="lede">給一棵 BST 和一個數字 <code>k</code>,交回<strong>第 k 小</strong>的值。<code>k</code> 從 1 開始數。</p>
+  <p>整頁都用這棵樹,<code>k = 3</code>:</p>
+
+  <div class="tablewrap" style="border:none;background:none">
+  <svg class="dia" viewBox="0 0 520 352" width="520" role="img" aria-label="樹:5 的小孩 3 和 6;3 的小孩 2 和 4;2 的左小孩是 1。6、4、1 的小孩都是 None,2 的右小孩也是 None。由小到大是 1 2 3 4 5 6,第 3 小是 3。">
+<line class="edge" x1="260" y1="50" x2="150" y2="96"/>
+<line class="edge" x1="260" y1="50" x2="370" y2="96"/>
+<line class="edge" x1="150" y1="130" x2="95" y2="166"/>
+<line class="edge" x1="150" y1="130" x2="205" y2="166"/>
+<line class="edge nil" x1="370" y1="130" x2="320" y2="170"/>
+<line class="edge nil" x1="370" y1="130" x2="420" y2="170"/>
+<line class="edge" x1="95" y1="200" x2="55" y2="236"/>
+<line class="edge nil" x1="95" y1="200" x2="135" y2="240"/>
+<line class="edge nil" x1="205" y1="200" x2="180" y2="240"/>
+<line class="edge nil" x1="205" y1="200" x2="235" y2="240"/>
+<line class="edge nil" x1="55" y1="270" x2="30" y2="310"/>
+<line class="edge nil" x1="55" y1="270" x2="80" y2="310"/>
+<rect class="box" x="238" y="16" width="44" height="34" rx="4"/><text class="tval" x="260" y="33">5</text>
+<rect class="box ans" x="128" y="96" width="44" height="34" rx="4"/><text class="tval" x="150" y="113">3</text>
+<rect class="box" x="348" y="96" width="44" height="34" rx="4"/><text class="tval" x="370" y="113">6</text>
+<rect class="box" x="73" y="166" width="44" height="34" rx="4"/><text class="tval" x="95" y="183">2</text>
+<rect class="box" x="183" y="166" width="44" height="34" rx="4"/><text class="tval" x="205" y="183">4</text>
+<rect class="nilbox" x="302" y="170" width="36" height="26" rx="3"/><text class="nilv" x="320" y="183">None</text>
+<rect class="nilbox" x="402" y="170" width="36" height="26" rx="3"/><text class="nilv" x="420" y="183">None</text>
+<rect class="box" x="33" y="236" width="44" height="34" rx="4"/><text class="tval" x="55" y="253">1</text>
+<rect class="nilbox" x="117" y="240" width="36" height="26" rx="3"/><text class="nilv" x="135" y="253">None</text>
+<rect class="nilbox" x="162" y="240" width="36" height="26" rx="3"/><text class="nilv" x="180" y="253">None</text>
+<rect class="nilbox" x="217" y="240" width="36" height="26" rx="3"/><text class="nilv" x="235" y="253">None</text>
+<rect class="nilbox" x="12" y="310" width="36" height="26" rx="3"/><text class="nilv" x="30" y="323">None</text>
+<rect class="nilbox" x="62" y="310" width="36" height="26" rx="3"/><text class="nilv" x="80" y="323">None</text>
+<text class="tag hit" x="380" y="270">由小到大:1 2 3 4 5 6</text>
+<text class="tag hit" x="380" y="292">第 3 小是 3</text>
+  </svg>
+  </div>
+
+  <div class="tablewrap"><table>
+    <tr><th>k</th><th>1</th><th>2</th><th class="hit">3</th><th>4</th><th>5</th><th>6</th></tr>
+    <tr><td>第 k 小</td><td class="mono">1</td><td class="mono">2</td><td class="mono hit">3</td><td class="mono">4</td><td class="mono">5</td><td class="mono">6</td></tr>
+  </table></div>
+</section>
+
+<section>
+  <h2><span class="num">02</span>這是什麼型</h2>
+  <p>把每個 node 直直往下拉到一條線上。#98 用過這招:合法的 BST 壓扁之後,由左到右剛好排好。</p>
+
+  <div class="tablewrap" style="border:none;background:none">
+  <svg class="dia" viewBox="0 0 520 330" width="520" role="img" aria-label="同一棵樹,每個 node 往下拉一條虛線到底部的數線。數線由左到右是 1 2 3 4 5 6,下面標 index 0 到 5。index 2 是 3。">
+<line class="edge" x1="260" y1="50" x2="150" y2="96"/>
+<line class="edge" x1="260" y1="50" x2="370" y2="96"/>
+<line class="edge" x1="150" y1="130" x2="95" y2="166"/>
+<line class="edge" x1="150" y1="130" x2="205" y2="166"/>
+<line class="edge" x1="95" y1="200" x2="55" y2="236"/>
+<line class="drop" x1="260" y1="50" x2="260" y2="278"/>
+<line class="drop" x1="150" y1="130" x2="150" y2="278"/>
+<line class="drop" x1="370" y1="130" x2="370" y2="278"/>
+<line class="drop" x1="95" y1="200" x2="95" y2="278"/>
+<line class="drop" x1="205" y1="200" x2="205" y2="278"/>
+<line class="drop" x1="55" y1="270" x2="55" y2="278"/>
+<rect class="box" x="238" y="16" width="44" height="34" rx="4"/><text class="tval" x="260" y="33">5</text>
+<rect class="box ans" x="128" y="96" width="44" height="34" rx="4"/><text class="tval" x="150" y="113">3</text>
+<rect class="box" x="348" y="96" width="44" height="34" rx="4"/><text class="tval" x="370" y="113">6</text>
+<rect class="box" x="73" y="166" width="44" height="34" rx="4"/><text class="tval" x="95" y="183">2</text>
+<rect class="box" x="183" y="166" width="44" height="34" rx="4"/><text class="tval" x="205" y="183">4</text>
+<rect class="box" x="33" y="236" width="44" height="34" rx="4"/><text class="tval" x="55" y="253">1</text>
+<line class="axis" x1="25" y1="282" x2="400" y2="282"/>
+<text class="axv" x="55" y="302">1</text><text class="axv" x="95" y="302">2</text><text class="axv" x="150" y="302" style="fill:var(--signal)">3</text><text class="axv" x="205" y="302">4</text><text class="axv" x="260" y="302">5</text><text class="axv" x="370" y="302">6</text>
+<text class="axi" x="55" y="322">[0]</text><text class="axi" x="95" y="322">[1]</text><text class="axi hit" x="150" y="322">[2]</text><text class="axi" x="205" y="322">[3]</text><text class="axi" x="260" y="322">[4]</text><text class="axi" x="370" y="322">[5]</text>
+  </svg>
+  </div>
+
+  <ul class="signals">
+    <li><span class="n">1</span><span>題目給 <strong>BST</strong>,又問「第幾小」「排第幾」→ 跟大小順序有關。</span></li>
+    <li><span class="n">2</span><span>BST 的<strong>中序(左、我、右)</strong>收出來的 list,剛好就是上面那條數線:<code>[1, 2, 3, 4, 5, 6]</code>。</span></li>
+    <li><span class="n">3</span><span>所以答案就是那條 list 的第 k 個。不用排序。</span></li>
+  </ul>
+
+  <div class="tablewrap"><table>
+    <tr><th></th><th>你寫過的中序(#94)</th><th>#230</th></tr>
+    <tr><td>走訪</td><td>左、我、右</td><td>一模一樣</td></tr>
+    <tr><td>收什麼</td><td class="mono">res.append(node.val)</td><td>一模一樣</td></tr>
+    <tr><td>交回什麼</td><td class="mono">res(整條 list)</td><td class="mono hit">res[k - 1](一個數)</td></tr>
+  </table></div>
+  <p>跟 #94 只差<strong>最後一行</strong>。</p>
+</section>
+
+<section>
+  <h2><span class="num">03</span>暴力法:收全部,再排序</h2>
+  <p>不管 BST,用任何順序把值收進 list,排好,拿第 k 個。用前序收:</p>
+<pre>前序收到   [5, 3, 2, 1, 4, 6]
+sort 之後  [1, 2, 3, 4, 5, 6]
+           res[3 - 1] = res[2] = 3</pre>
+  <div class="tablewrap"><table>
+    <tr><th></th><th>收全部 + sort</th><th>中序收</th></tr>
+    <tr><td>走訪</td><td>O(n)</td><td>O(n)</td></tr>
+    <tr><td>排序</td><td class="t2">O(n log n)</td><td class="hit">不用,收出來就排好</td></tr>
+    <tr><td>時間</td><td>O(n log n)</td><td class="hit">O(n)</td></tr>
+    <tr><td>空間</td><td>O(n) list</td><td>O(n) list + O(h) call stack</td></tr>
+  </table></div>
+  <p>暴力法浪費的事:<strong>BST 本來就排好了</strong>,它把順序丟掉,再花 O(n log n) 排回來。</p>
+</section>
+
+<section>
+  <h2><span class="num">04</span>做法:手動走一遍</h2>
+  <div class="callout key">
+    <h3>每一站做三件事,順序固定</h3>
+    <div class="tablewrap" style="margin:0"><table>
+      <tr><th>順序</th><th>動作</th></tr>
+      <tr><td>① 先往左</td><td>左邊整棵走完,才輪到我</td></tr>
+      <tr><td>② 收我</td><td>把我的值加到 <code>res</code> 最後面</td></tr>
+      <tr><td>③ 再往右</td><td>右邊整棵走完,這一站結束</td></tr>
+    </table></div>
+  </div>
+
+  <p>node 旁邊的紫色數字是「第幾個被收進 <code>res</code>」:</p>
+  <div class="tablewrap" style="border:none;background:none">
+  <svg class="dia" viewBox="0 0 520 352" width="520" role="img" aria-label="同一棵樹,每個 node 旁邊標收進 res 的順序:1 是第 1 個,2 是第 2 個,3 是第 3 個,4 是第 4 個,5 是第 5 個,6 是第 6 個。">
+<line class="edge" x1="260" y1="50" x2="150" y2="96"/>
+<line class="edge" x1="260" y1="50" x2="370" y2="96"/>
+<line class="edge" x1="150" y1="130" x2="95" y2="166"/>
+<line class="edge" x1="150" y1="130" x2="205" y2="166"/>
+<line class="edge nil" x1="370" y1="130" x2="320" y2="170"/>
+<line class="edge nil" x1="370" y1="130" x2="420" y2="170"/>
+<line class="edge" x1="95" y1="200" x2="55" y2="236"/>
+<line class="edge nil" x1="95" y1="200" x2="135" y2="240"/>
+<line class="edge nil" x1="205" y1="200" x2="180" y2="240"/>
+<line class="edge nil" x1="205" y1="200" x2="235" y2="240"/>
+<line class="edge nil" x1="55" y1="270" x2="30" y2="310"/>
+<line class="edge nil" x1="55" y1="270" x2="80" y2="310"/>
+<rect class="box" x="238" y="16" width="44" height="34" rx="4"/><text class="tval" x="260" y="33">5</text><text class="order" x="288" y="22">第 5</text>
+<rect class="box ans" x="128" y="96" width="44" height="34" rx="4"/><text class="tval" x="150" y="113">3</text><text class="order" x="178" y="102">第 3</text>
+<rect class="box" x="348" y="96" width="44" height="34" rx="4"/><text class="tval" x="370" y="113">6</text><text class="order" x="398" y="102">第 6</text>
+<rect class="box" x="73" y="166" width="44" height="34" rx="4"/><text class="tval" x="95" y="183">2</text><text class="order" x="62" y="160" text-anchor="end">第 2</text>
+<rect class="box" x="183" y="166" width="44" height="34" rx="4"/><text class="tval" x="205" y="183">4</text><text class="order" x="233" y="172">第 4</text>
+<rect class="nilbox" x="302" y="170" width="36" height="26" rx="3"/><text class="nilv" x="320" y="183">None</text>
+<rect class="nilbox" x="402" y="170" width="36" height="26" rx="3"/><text class="nilv" x="420" y="183">None</text>
+<rect class="box" x="33" y="236" width="44" height="34" rx="4"/><text class="tval" x="55" y="253">1</text><text class="order" x="28" y="230" text-anchor="end">第 1</text>
+<rect class="nilbox" x="117" y="240" width="36" height="26" rx="3"/><text class="nilv" x="135" y="253">None</text>
+<rect class="nilbox" x="162" y="240" width="36" height="26" rx="3"/><text class="nilv" x="180" y="253">None</text>
+<rect class="nilbox" x="217" y="240" width="36" height="26" rx="3"/><text class="nilv" x="235" y="253">None</text>
+<rect class="nilbox" x="12" y="310" width="36" height="26" rx="3"/><text class="nilv" x="30" y="323">None</text>
+<rect class="nilbox" x="62" y="310" width="36" height="26" rx="3"/><text class="nilv" x="80" y="323">None</text>
+  </svg>
+  </div>
+
+  <div class="tablewrap"><table>
+    <tr><th>步</th><th class="mono">node</th><th>在做哪一件</th><th class="mono">res</th></tr>
+    <tr><td>1</td><td class="mono">5</td><td>① 先往左 → 去 3</td><td class="mono">[]</td></tr>
+    <tr><td>2</td><td class="mono">3</td><td>① 先往左 → 去 2</td><td class="mono">[]</td></tr>
+    <tr><td>3</td><td class="mono">2</td><td>① 先往左 → 去 1</td><td class="mono">[]</td></tr>
+    <tr><td>4</td><td class="mono">1</td><td>① 先往左 → None,馬上 return</td><td class="mono">[]</td></tr>
+    <tr><td>5</td><td class="mono">1</td><td>② 收 1</td><td class="mono">[1]</td></tr>
+    <tr><td>6</td><td class="mono">1</td><td>③ 往右 → None。1 結束,回到 2</td><td class="mono">[1]</td></tr>
+    <tr><td>7</td><td class="mono">2</td><td>② 收 2</td><td class="mono">[1, 2]</td></tr>
+    <tr><td>8</td><td class="mono">2</td><td>③ 往右 → None。2 結束,回到 3</td><td class="mono">[1, 2]</td></tr>
+    <tr><td>9</td><td class="mono">3</td><td>② 收 3</td><td class="mono hit">[1, 2, 3]</td></tr>
+    <tr><td>10</td><td class="mono">3</td><td>③ 往右 → 去 4</td><td class="mono">[1, 2, 3]</td></tr>
+    <tr><td>11</td><td class="mono">4</td><td>① None ② 收 4 ③ None。回到 3,3 結束,回到 5</td><td class="mono">[1, 2, 3, 4]</td></tr>
+    <tr><td>12</td><td class="mono">5</td><td>② 收 5,③ 往右 → 去 6</td><td class="mono">[1, 2, 3, 4, 5]</td></tr>
+    <tr><td>13</td><td class="mono">6</td><td>① None ② 收 6 ③ None</td><td class="mono">[1, 2, 3, 4, 5, 6]</td></tr>
+  </table></div>
+  <p>走完之後 <code>res = [1, 2, 3, 4, 5, 6]</code>,<code>k = 3</code>,答案 <strong>3</strong>。</p>
+
+  <div class="callout warn">
+    <h3>第 3 個是 <code>res[2]</code>,不是 <code>res[3]</code></h3>
+    <div class="tablewrap" style="margin:.5rem 0 0"><table>
+      <tr><th>k(題目從 1 數)</th><td class="mono">1</td><td class="mono">2</td><td class="mono hit">3</td><td class="mono">4</td><td class="mono">5</td><td class="mono">6</td></tr>
+      <tr><th>index(Python 從 0 數)</th><td class="mono">0</td><td class="mono">1</td><td class="mono hit">2</td><td class="mono">3</td><td class="mono">4</td><td class="mono">5</td></tr>
+      <tr><th>res[index]</th><td class="mono">1</td><td class="mono">2</td><td class="mono hit">3</td><td class="mono">4</td><td class="mono">5</td><td class="mono">6</td></tr>
+    </table></div>
+    <p><code>res[3]</code> 是 4,錯一格。<code>k = 6</code> 時 <code>res[6]</code> 直接 <code>IndexError</code>。</p>
+  </div>
+
+  <h3>call stack:收 1 和收 2 的那兩刻</h3>
+  <div class="film">
+    <div class="shot"><div class="hd"><span class="no">SHOT 1</span><span class="cap">第 5 步。1 的左邊是 None,已經 return。現在收 1。上面三張紙都卡在「往左」那一行。</span></div>
+      <div class="tower">
+        <div class="fr run"><span class="who">dfs(1)</span> <span class="slot">左邊走完 → res.append(1)</span> <span class="val">res = [1]</span></div>
+        <div class="fr"><span class="who">dfs(2)</span> <span class="slot">卡在 dfs(node.left),等 1 結束</span></div>
+        <div class="fr"><span class="who">dfs(3)</span> <span class="slot">卡在 dfs(node.left),等 2 結束</span></div>
+        <div class="fr"><span class="who">dfs(5)</span> <span class="slot">卡在 dfs(node.left),等 3 結束</span></div>
+      </div><div class="floor">STACK BOTTOM</div></div>
+    <div class="shot"><div class="hd"><span class="no">SHOT 2</span><span class="cap">第 7 步。1 往右也是 None,1 這張紙撕掉。2 從「往左」的下一行接著跑,就是 append。</span></div>
+      <div class="tower">
+        <div class="fr gone"><span class="who">dfs(1)</span></div>
+        <div class="fr run"><span class="who">dfs(2)</span> <span class="slot">左邊回來了 → res.append(2)</span> <span class="val">res = [1, 2]</span></div>
+        <div class="fr"><span class="who">dfs(3)</span> <span class="slot">卡在 dfs(node.left),等 2 結束</span></div>
+        <div class="fr"><span class="who">dfs(5)</span> <span class="slot">卡在 dfs(node.left),等 3 結束</span></div>
+      </div><div class="floor">STACK BOTTOM</div></div>
+  </div>
+</section>
+
+<details>
+  <summary>完整 code 加逐行解釋<span class="lockhint">先自己寫,卡住再開</span></summary>
+  <div class="dbody">
+<pre>
+<span class="kw">def</span> <span class="fn">kthSmallest</span>(self, root, k):
+    res = []                                  <span class="cm"># 外層:收值的 list</span>
+
+    <span class="kw">def</span> <span class="fn">dfs</span>(node):
+        <span class="kw">if</span> <span class="kw">not</span> node:
+            <span class="kw">return</span>                            <span class="cm"># 空的,什麼都不收</span>
+        dfs(node.left)                        <span class="cm"># ① 先往左</span>
+<span class="hl">        res.append(node.val)                  <span class="cm"># ② 收我(夾在中間 = 中序)</span></span>        dfs(node.right)                       <span class="cm"># ③ 再往右</span>
+
+    dfs(root)                                 <span class="cm"># 啟動</span>
+<span class="hl">    <span class="kw">return</span> res[k - 1]                         <span class="cm"># 第 k 個 = index k-1</span></span></pre>
+    <div class="tablewrap"><table>
+      <tr><th>行</th><th>做什麼</th></tr>
+      <tr><td class="mono">res = []</td><td>放在外層。內層 <code>dfs</code> 每一站都往同一個 list 加</td></tr>
+      <tr><td class="mono">return</td><td>內層 <code>dfs</code> 不交回值,只負責把值收進 <code>res</code>。所以這裡空的 <code>return</code> 就好</td></tr>
+      <tr><td class="mono">append 夾在中間</td><td>放上面是前序、放下面是後序。夾在兩個呼叫中間才是中序,收出來才排好</td></tr>
+      <tr><td class="mono">dfs(root)</td><td>不寫這行,說明書寫好了沒人執行,<code>res</code> 永遠是 <code>[]</code></td></tr>
+      <tr><td class="mono">res[k - 1]</td><td>題目從 1 數,Python 從 0 數</td></tr>
+    </table></div>
+
+    <h4>Follow-up:收到第 k 個就停(今天不寫)</h4>
+    <p>上面的版本會把整棵走完。<code>k = 1</code> 只要最左邊那一個,後面都白走。收滿 <code>k</code> 個就不再往下:</p>
+<pre>
+<span class="kw">def</span> <span class="fn">dfs</span>(node):
+<span class="hl">    <span class="kw">if</span> <span class="kw">not</span> node <span class="kw">or</span> len(res) == k:         <span class="cm"># 收滿了,不再走</span></span>        <span class="kw">return</span>
+    dfs(node.left)
+<span class="hl">    <span class="kw">if</span> len(res) == k:                      <span class="cm"># 左邊回來時可能已經收滿</span></span>        <span class="kw">return</span>
+    res.append(node.val)
+    dfs(node.right)</pre>
+    <p>時間從 O(n) 變 O(h + k):先往左鑽到底花 h 步,再收 k 個。</p>
+  </div>
+</details>
+
+<details>
+  <summary>逐輪執行模擬表(跟 04 同一棵樹,看 code 哪一行在跑)</summary>
+  <div class="dbody">
+    <div class="tablewrap"><table>
+      <tr><th>呼叫</th><th>跑到哪一行</th><th class="mono">res</th></tr>
+      <tr><td class="mono">dfs(5)</td><td class="mono">dfs(node.left)</td><td class="mono">[]</td></tr>
+      <tr><td class="mono">dfs(3)</td><td class="mono">dfs(node.left)</td><td class="mono">[]</td></tr>
+      <tr><td class="mono">dfs(2)</td><td class="mono">dfs(node.left)</td><td class="mono">[]</td></tr>
+      <tr><td class="mono">dfs(1)</td><td class="mono">dfs(node.left)</td><td class="mono">[]</td></tr>
+      <tr><td class="mono">dfs(None)</td><td class="mono">if not node: return</td><td class="mono">[]</td></tr>
+      <tr><td class="mono">dfs(1)</td><td class="mono">res.append(1)</td><td class="mono">[1]</td></tr>
+      <tr><td class="mono">dfs(None)</td><td class="mono">return(1 的右邊)</td><td class="mono">[1]</td></tr>
+      <tr><td class="mono">dfs(2)</td><td class="mono">res.append(2)</td><td class="mono">[1, 2]</td></tr>
+      <tr><td class="mono">dfs(None)</td><td class="mono">return(2 的右邊)</td><td class="mono">[1, 2]</td></tr>
+      <tr><td class="mono">dfs(3)</td><td class="mono">res.append(3)</td><td class="mono hit">[1, 2, 3]</td></tr>
+      <tr><td class="mono">dfs(4)</td><td class="mono">左 None → res.append(4) → 右 None</td><td class="mono">[1, 2, 3, 4]</td></tr>
+      <tr><td class="mono">dfs(5)</td><td class="mono">res.append(5)</td><td class="mono">[1, 2, 3, 4, 5]</td></tr>
+      <tr><td class="mono">dfs(6)</td><td class="mono">左 None → res.append(6) → 右 None</td><td class="mono">[1, 2, 3, 4, 5, 6]</td></tr>
+      <tr><td>外層</td><td class="mono">return res[3 - 1]</td><td class="mono hit">3</td></tr>
+    </table></div>
+  </div>
+</details>
+
+<details>
+  <summary>口訣加模板</summary>
+  <div class="dbody">
+    <div class="mantra">BST 中序收出來就是排好的,第 k 個是 res[k - 1]。</div>
+    <p>模板:<strong>中序走訪</strong>(左、我、右)。題目給 BST 又問大小順序,先想中序。</p>
+    <div class="tablewrap"><table>
+      <tr><th>走訪</th><th>append 放哪</th><th>代表題</th></tr>
+      <tr><td>前序</td><td>兩個呼叫上面</td><td>#1448、#98(往下傳紙條)</td></tr>
+      <tr><td class="hit">中序</td><td class="hit">兩個呼叫中間</td><td class="hit">#230(BST 排好序)</td></tr>
+      <tr><td>後序</td><td>兩個呼叫下面</td><td>#104、#543(先問兩邊再算自己)</td></tr>
+    </table></div>
+    <div class="tablewrap"><table>
+      <tr><th></th><th>收全部</th><th>收滿 k 個就停</th></tr>
+      <tr><td>時間</td><td><strong>O(n)</strong></td><td><strong>O(h + k)</strong></td></tr>
+      <tr><td>空間</td><td><strong>O(n)</strong>:res</td><td><strong>O(h + k)</strong></td></tr>
+    </table></div>
+  </div>
+</details>
+
+<details>
+  <summary>L6 面試逐字稿</summary>
+  <div class="dbody">
+    <div class="move"><h4><span class="mv">MOVE 0</span>先問 constraint</h4>
+      <div class="say"><b>說</b>"Is k always valid, between 1 and n? Is k 1-indexed? Will this be called many times on a tree that changes?"</div>
+      <p class="think"><b>想</b>k 一定合法就不用處理越界;1-indexed 決定 <code>k - 1</code>;一直被呼叫又會改樹,就是 follow-up(每個 node 記子樹大小)。</p></div>
+    <div class="move"><h4><span class="mv">MOVE 1</span>舉例</h4>
+      <div class="say"><b>說</b>"Let me use 5, 3, 6, 2, 4, null, null, 1 with k equals 3. Sorted, the values are 1 through 6, so the answer is 3."</div>
+      <p><b>寫</b>畫 01 那棵樹,下面寫 <code>1 2 3 4 5 6</code>,圈 3。</p></div>
+    <div class="move"><h4><span class="mv">MOVE 2</span>暴力解 20 秒</h4>
+      <div class="say"><b>說</b>"I could collect all values, sort them, and take index k minus 1. That's O(n log n), and it ignores the BST order."</div></div>
+    <div class="move"><h4><span class="mv">MOVE 3</span>Invariant</h4>
+      <div class="say"><b>說</b>"In a BST, an inorder traversal visits values in sorted order. Everything on the left is smaller, then the node, then everything on the right is larger."</div>
+      <p class="think"><b>想</b>這句就是「不用 sort」的理由。</p></div>
+    <div class="move"><h4><span class="mv">MOVE 4</span>關鍵手法換了什麼</h4>
+      <div class="say"><b>說</b>"So I do a normal inorder traversal into a list. The k-th visited value is the answer."</div></div>
+    <div class="move"><h4><span class="mv">MOVE 5</span>複雜度先講</h4>
+      <div class="say"><b>說</b>"That's O(n) time and O(n) space for the list. I can stop early after k values, which makes it O(h plus k). Sound reasonable?"</div></div>
+    <div class="move"><h4><span class="mv">MOVE 6</span>code 分 3 段</h4>
+      <div class="say"><b>說</b>"I keep a result list outside the helper."</div>
+<pre>res = []</pre>
+      <div class="say"><b>說</b>"The helper goes left, adds the current value, then goes right."</div>
+<pre><span class="kw">def</span> <span class="fn">dfs</span>(node):
+    <span class="kw">if</span> <span class="kw">not</span> node:
+        <span class="kw">return</span>
+    dfs(node.left)
+    res.append(node.val)
+    dfs(node.right)</pre>
+      <div class="say"><b>說</b>"I run it from the root and return index k minus 1, because k starts at 1."</div>
+<pre>dfs(root)
+<span class="kw">return</span> res[k - 1]</pre></div>
+    <div class="move"><h4><span class="mv">MOVE 7</span>主動 dry run</h4>
+      <div class="say"><b>說</b>"From 5 I go left to 3, 2, then 1. 1 has no left child, so I add 1. Back at 2, I add 2. Back at 3, I add 3. Now the list has three values, and the answer is 3."</div></div>
+    <div class="move"><h4><span class="mv">MOVE 8</span>主動掃 edge case</h4>
+      <div class="say"><b>說</b>"k equals 1 gives the leftmost node. k equals n gives the rightmost. A tree that is one long chain still works, but the call stack gets n deep."</div></div>
+    <div class="move"><h4><span class="mv">MOVE 9</span>推廣</h4>
+      <div class="say"><b>說</b>"If the tree changes often and we ask a lot, I'd store the size of each subtree in every node. Then I can pick left or right at each step, like binary search, in O(h)."</div></div>
+
+    <h4>只給結論 vs 說明推理</h4>
+    <div class="tablewrap"><table>
+      <tr><th>Move</th><th>只給結論</th><th>說明推理</th></tr>
+      <tr><td>2</td><td>"I'll sort."</td><td>"Sorting ignores the order the BST already gives me."</td></tr>
+      <tr><td>3</td><td>"I use inorder."</td><td>"... because inorder visits a BST in sorted order."</td></tr>
+      <tr><td>6</td><td>"Return res[k-1]."</td><td>"... because k starts at 1 and the list starts at 0."</td></tr>
+    </table></div>
+
+    <h4>Native English(可背、可換題用)</h4>
+    <ul>
+      <li>"An inorder traversal of a BST gives the values in sorted order."</li>
+      <li>"The k-th visited value is the answer."</li>
+      <li>"I can stop as soon as I have k values."</li>
+    </ul>
+  </div>
+</details>
+
+<details>
+  <summary>這次的釐清(session 結束時補寫)</summary>
+  <div class="dbody">
+    <p>還沒寫。</p>
+  </div>
+</details>
+
+</div>

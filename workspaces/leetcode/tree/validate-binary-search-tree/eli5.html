@@ -491,4 +491,35 @@ td.r{color:var(--c2);font-weight:700}
   </div>
 </details>
 
+<details>
+  <summary>這次的釐清(2026-10-20)</summary>
+  <div class="dbody">
+    <div class="wrongright">
+      <div class="wr-x">✗ 我以為:<code>if not node</code> 要交 <code>False</code>(之前都寫 False)</div>
+      <div class="wr-o">✓ 其實是:空位置沒有東西可以比,不可能違反規則,交 <code>True</code></div>
+      <div class="wr-y">→ 判斷方法:走到 None 時,問這題的問題。#98 問「合法嗎」→ True;#572 問「找得到小樹嗎」→ False</div>
+    </div>
+    <div class="wrongright">
+      <div class="wr-x">✗ 我以為:這一站要檢查 <code>node.left</code>、<code>node.right</code> 在不在範圍裡</div>
+      <div class="wr-o">✓ 其實是:這一站只檢查自己 <code>node.val</code>,小孩交給下一站的 <code>dfs</code> 去查</div>
+      <div class="wr-y">→ 檢查小孩的寫法沒有遞迴,孫子以下永遠沒人查</div>
+    </div>
+    <div class="wrongright">
+      <div class="wr-x">✗ 我以為:左小孩的 <code>high</code> 是 <code>root</code></div>
+      <div class="wr-o">✓ 其實是:是「這一站的值」<code>node.val</code>。站在 6 往左交給 3,high 是 6,不是 root 5</div>
+      <div class="wr-y">→ 只有第一站的爸爸剛好是 root,深一層就不是</div>
+    </div>
+    <div class="wrongright">
+      <div class="wr-x">✗ 我以為:啟動行 <code>dfs(root, -inf, inf)</code> 就會把結果交出去</div>
+      <div class="wr-o">✓ 其實是:沒寫 <code>return</code>,dfs 算出的 True 被丟掉,<code>isValidBST</code> 交回 <code>None</code></div>
+      <div class="wr-y">→ 要寫 <code>return dfs(root, float('-inf'), float('inf'))</code></div>
+    </div>
+    <div class="wrongright">
+      <div class="wr-x">? 加壓:地板寫 <code>0</code> 會怎樣</div>
+      <div class="wr-o">✓ <code>[0, -1]</code>:root 0 拿 <code>(0, inf)</code>,<code>0 &lt;= 0</code> 成立,交 False。但這棵樹是合法的</div>
+      <div class="wr-y">→ root 上面沒有爸爸,沒有任何限制,第一組紙條一定是 <code>(-inf, inf)</code></div>
+    </div>
+  </div>
+</details>
+
 </div>

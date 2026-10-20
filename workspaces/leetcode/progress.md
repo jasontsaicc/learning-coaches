@@ -4,7 +4,15 @@
 
 # leetcode
 
-- 今天做到:2026-10-19。**#98 Validate BST 從零重蓋規則 → code 逐格長出 → 對照打 drill.py 8/8。** 隔 6 天,學員說生疏;開場不默寫。
+- 今天做到:2026-10-20。**開場默 #98:外殼 + 主邏輯逐格自填,只有啟動行 `return` 給答案;加壓題 `[0,-1]` 地板 0 答對。#230 圖解頁 + drill.py 做好,學員沒讀就收工。**
+  默寫原稿:外殼三格(def / `if not node` / `(-inf, inf)`)對;中間寫成「檢查 `node.left` 在範圍內就 `return True`」,沒有遞迴、啟動行沒 `return`。
+  逐格修:`None` 交什麼不確定(「之前都寫 False」,混到 #572)→ 一問自答 `True`;檢查誰三選一答 `node.val`;
+  抓壞人 `if` 一次對(`<=`/`>=`/`or`);左小孩 `high` **又答 `root`**(10/13 也答 root)→ 深一層 `5→6→3` 答 6 → 二選一答 `node.val`;
+  右小孩、`and` 一次對;啟動行問「交回什麼」答 bool(錯,是 `None`)→ 畫圖仍「不知道」→ 給 `return dfs(...)`。
+  拼字:`reutrn`、`hight` ×3、`right_OK`。加壓:`0 <= 0` 答 True、樹本來合法答「是」,結論給出。
+  **下次:#230 先讀圖解頁 https://claude.ai/artifact/Mzdfwkz1dR2ZLFDkjWsqUF ①到④,回答「跟哪個 template 最像」(答案:中序)。
+  開場默中序(自己寫過)。#98 下次不默,隔幾題再冷寫一次,盯啟動行 `return` 和 `node.val` 不是 `root`。**
+- 前一場 2026-10-19。**#98 Validate BST 從零重蓋規則 → code 逐格長出 → 對照打 drill.py 8/8。** 隔 6 天,學員說生疏;開場不默寫。
   Q1「右邊整棵要比 5 大還小」答「3 比較小」(抓到壞點);Q2「3 要比 6 大還小」答「不知道」,問「這是 BST 規則嗎,先教」→
   補規則卡 + **壓扁到數線**(`4 5 3 6 7`,3 插隊)後**自己推出「比 6 小,又要比 5 大」**(上次卡住的兩張紙條,這次自推)。
   7:答「比 6 大」對,上限卡住 → 問「路上有沒有往左」→ 答無上限,一次對(上次答 root)。
@@ -222,7 +230,7 @@
 | Tree BFS(queue + `len(q)` 先數人頭) | ✓ 9/23 圖解頁 | ✓ 9/24 默寫不出對照抄 | 🟡 9/23 首刷 7/7(for 行階 2);9/24 #199 換皮只改一行,指錯行 + `popright` 後給答案;**9/29 #637 整份自寫**,外殼(queue/res/return)與 `for` 縮排逐格補,5/5 | ✓ while 一圈一層,`len(q)` 先數好 |
 | BST 走訪(`while node` 比大小選一邊,#235) | ✓ 10/08 圖解頁 | | 🟡 10/08 首刷整份自寫 7/7(逐行長出,非冷寫);左右用字講反 1 次 | ✓ 同邊一起走,分叉那站就是答案 |
 | Tree 前序 + 往下傳值(#1448 紙條 `max_so_far`) | ✓ 10/09 圖解頁 | ✓ 10/09 | 🟡 10/09 清空重寫 7/7;(5) 交錯紙條 `node.val`、啟動行用內層名字,各一格修 | ✓ 爸爸把路上最大交給小孩 |
-| Tree 前序 + 往下傳範圍(#98 `low`/`high`) | ✓ 10/13 圖解頁 + 數線圖 | | 🟡 10/19 規則自推(壓扁數線 + 直樹紙條),code 逐格長出,對照打 8/8;未清空重寫 | ✓ 往左換 high,往右換 low |
+| Tree 前序 + 往下傳範圍(#98 `low`/`high`) | ✓ 10/13 圖解頁 + 數線圖 | | 🟡 10/19 規則自推(壓扁數線 + 直樹紙條),code 逐格長出,對照打 8/8;**10/20 隔 1 天默寫:外殼對、主邏輯逐格補回,爸爸值答 `root`(二次),啟動行漏 `return`** | ✓ 往左換 high,往右換 low |
 | Tree 兩棵一起走(#100 煞車 3 組合 + `and`) | | | 🟡 9/17 兔模式 9/9;煞車漏 ●▢、委派行階 2 | ✓ 先攔都空,再攔一邊空 |
 | Heap k-way merge(每條一個 head) | ✓ | | ✓ | ✓ |
 | Hashmap + 雙向鏈(LRU) | | | | |
@@ -231,7 +239,10 @@
 
 - **#98 Validate Binary Search Tree** — `tree/validate-binary-search-tree/`
   圖解頁:https://claude.ai/artifact/Mx3kyyce7CJUUhwFxAYxKA
-  2026-10-13 龜模式首刷,看懂題目 + 看過 code,未動手寫。2026-10-19 逐格長出 + 對照打 8/8。
+  2026-10-13 龜模式首刷,看懂題目 + 看過 code,未動手寫。2026-10-19 逐格長出 + 對照打 8/8。2026-10-20 開場默寫,逐格補完。
+- **#230 Kth Smallest Element in a BST** — `tree/kth-smallest-element-in-a-bst/`
+  圖解頁:https://claude.ai/artifact/Mzdfwkz1dR2ZLFDkjWsqUF
+  2026-10-20 圖解頁 + drill.py(空格,7 cases)產出,學員未讀。
 - **#1448 Count Good Nodes in Binary Tree** — `tree/count-good-nodes-in-binary-tree/`
   圖解頁:https://claude.ai/artifact/JzFxwemQcQvzKKHqFbEoNm
   2026-10-09 龜模式首刷,對照打一次後清空重寫 7/7。L6 逐字稿在圖解頁,未口頭練。
@@ -311,9 +322,8 @@
 ## 接下來
 
 0. **照 NeetCode 150 Trees 順序**(學員 9/29 定案,清單外的題不排):
-   #235 ✓(10/08 補)→ #102 ✓ → #199 ✓ → #1448 ✓(10/09)→ #98 ✓(10/19 對照打,下次開場默)→ **#230 Kth Smallest BST**
+   #235 ✓(10/08 補)→ #102 ✓ → #199 ✓ → #1448 ✓(10/09)→ #98 ✓(10/20 默寫逐格補完)→ **#230 Kth Smallest BST**(圖解頁已做,未讀)
    → #105 Construct from Pre+Inorder → #124 Max Path Sum(Hard)→ #297 Serialize(Hard)。
-   #98 10/19 對照打 8/8。下次開場默寫,加壓題「地板從 0 開始」還沒答。
 1. 外殼從 0 寫:9/21 前序已在「只有註解、沒有骨架」下自己排出四格。下一次連註解都拿掉,
    用 `tree/dual-track-shell/drill.py`(清空 Solution)。
 2. #572 隔堂複習(隔 2-4 天冷寫)。9/20 第 3 行是階 3 直接給的,沒自己寫過。
