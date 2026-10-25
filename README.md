@@ -64,12 +64,14 @@ learning-coaches/
 │   │   └── evals/                           # behavioral evals + fixtures
 │   │   ├── scripts/                         # lab-lc.sh (pytest + large-N tripwire) + test
 │   │   └── evals/                           # behavioral evals + fixtures
-│   └── cloud-architect-coach/
-│       ├── SKILL.md
-│       ├── references/                      # 7 hook files + subject material
-│       │                                    #   (gap-scan-aws-networking, case-bank,
-│       │                                    #    linux-interview-bank)
-│       └── evals/                           # behavioral evals + fixtures (no scripts)
+│   ├── cloud-architect-coach/
+│   │   ├── SKILL.md
+│   │   ├── references/                      # 7 hook files + subject material
+│   │   │                                    #   (gap-scan-aws-networking, case-bank,
+│   │   │                                    #    linux-interview-bank)
+│   │   └── evals/                           # behavioral evals + fixtures (no scripts)
+│   └── deep-dive-notes/                     # standalone, not a coach: layered HTML topic note,
+│                                            #   saved into portfolio/<coach>/notes/
 ├── workspaces/                              # per-coach learner state — git-TRACKED
 │   ├── k8s/                                 # progress.md (engine schema), term-registry,
 │   │                                        #   story-bank, session-log, environment,
@@ -122,8 +124,8 @@ archives as read-only.
 
 ## Deployment and Lint
 
-Claude Code uses user-level symlinks in `~/.claude/skills/`, e.g.
-`ln -s <repo>/skills/sd-coach ~/.claude/skills/sd-coach`. Local plugin testing uses
+Claude Code uses user-level symlinks in `~/.claude/skills/`. On a new VM, run
+`./scripts/link-skills.sh` (idempotent, links every `skills/*`). Local plugin testing uses
 `claude --plugin-dir <repo>` and `/reload-plugins`.
 
 Codex discovers every live coach through the checked-in symlinks under `.agents/skills/`.
