@@ -627,6 +627,16 @@ Append repeated evidence to the existing matching item rather than creating a du
 Stopping, requesting a worked example, or encountering an untaught tool is not itself a
 mistake. Record actual wrong reasoning separately from lack of instruction.
 
+**Entry filter:** before logging, run Depth Ceiling question 1 (will the target context
+ask this?). No, and the mechanism was right (only wording or tool trivia was off): correct
+it on the spot and do not log it.
+
+**Open cap (15):** at most 15 `unresolved` items. At session start, if the count is over
+15, step A becomes triage instead of the 2-item review. Take overdue items oldest first,
+run Depth Ceiling question 1 with the student, and mark `parked` the ones that fail it.
+Stop at 15. Reason: about 2 new items per session, each needing 3 passes, against a
+2-review cap means the queue can never drain without an exit.
+
 **Entry format:** defined once in `PROGRESS-SCHEMA.md` (section 7). The engine and the
 coaches point there rather than restating the fields, so the format cannot drift.
 

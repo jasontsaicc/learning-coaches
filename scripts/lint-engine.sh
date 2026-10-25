@@ -29,6 +29,8 @@ for s in "${required[@]}"; do
 done
 # guard against the spaced-repetition rhythm drifting
 grep -qF "3 -> 7 -> 14" "$ENGINE" || { echo "MISSING: spaced repetition rhythm 3 -> 7 -> 14"; fail=1; }
+# guard the Mistake Registry exit path (without it the queue only grows)
+grep -qF "Open cap (15)" "$ENGINE" || { echo "MISSING: Mistake Registry Open cap"; fail=1; }
 # guard against the pass threshold drifting
 grep -qF "60%" "$ENGINE" || { echo "MISSING: 60% pass threshold"; fail=1; }
 # guard the anti-sycophancy invariant against being gutted

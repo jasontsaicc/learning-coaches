@@ -98,7 +98,8 @@ here rather than restating it. Each entry:
 - `what-was-wrong` — the specific error or misconception.
 - `root-cause-tag` — short tag naming the underlying gap; this is the target the student
   must reach to resolve the item.
-- `status` — `unresolved | resolved`.
+- `status` — `unresolved | resolved | parked` (`parked` = failed the ROI check in ENGINE.md
+  Open cap; kept for reference, never reviewed).
 - `interval` — current spaced-repetition interval in days: `3 | 7 | 14`.
 - `next-review-date` — ISO date the item is next due in step A.
 - `unresolved-session-count` — how many sessions the item has been unresolved; at `>= 5`
@@ -107,6 +108,10 @@ here rather than restating it. Each entry:
 
 Resolution requires a correct explanation including the root cause; a partial answer does
 not resolve the item.
+
+The progress file holds only `unresolved` rows (at most 15, ENGINE.md Open cap). At step H,
+move `resolved` and `parked` rows unchanged to `archive/mistake-registry-closed.md` in the
+coach workspace.
 
 ---
 

@@ -190,6 +190,9 @@ At step H:
 3. Update the matrix only when the evidence lifecycle permits it.
 4. Record portfolio output as source material or promoted flagship evidence according to
    the promotion gate.
+5. Session log (narrative, not read at session start): one entry per session, at most 5
+   lines (what was learned, where it got stuck, next resume point). The hot file keeps
+   the last 5 sessions; move older entries unchanged to the workspace `archive/`.
 
 Repository synchronization is a separate operation. Inspect `git status` first, preserve
 unrelated user changes, and commit or push only when the user has authorized that action.

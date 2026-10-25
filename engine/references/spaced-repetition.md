@@ -106,8 +106,8 @@ student must reach.
 A domain registry item (such as a term card) is retired when it passes at the 14-day
 interval.
 
-Resolved and retired items are kept in the registry for reference but are no longer
-surfaced in the review queue.
+Resolved, retired, and parked items move to the coach workspace archive at step H
+(`PROGRESS-SCHEMA.md` section 7) and are no longer surfaced in the review queue.
 
 ---
 
@@ -120,7 +120,8 @@ enters the queue for its first review 3 days later.
 **Gap longer than the next-review date:** if the student returns after a gap that puts
 multiple items past their scheduled date, surface the lowest-interval items first (items
 at interval 3 before items at interval 7, etc.). Do not attempt to surface all overdue
-items at once; apply the 2-item-per-session cap and let the queue drain across sessions.
+items at once; apply the 2-item-per-session cap and let the queue drain across sessions. If the
+unresolved count is over the Open cap (ENGINE.md, Mistake Registry), triage runs first.
 
 **Feynman Gate pass scheduling:** when a chunk passes its Feynman Gate for the first
 time, it is added to the spaced repetition queue at the first interval (3 days) if not
