@@ -15,7 +15,7 @@ learning-coaches/
 ├── README.md
 ├── docs/                                    # design specs + implementation plans
 ├── competency/                              # cross-coach Senior/L6 evidence matrix
-├── legacy/                                  # frozen pre-merge repo snapshots (k8s, sd, leetcode)
+├── legacy/                                  # frozen pre-merge repo snapshots (sd, leetcode)
 ├── engine/
 │   ├── ENGINE.md                            # Shared teaching engine
 │   ├── GOVERNANCE.md                        # Cross-coach WIP, evidence, portfolio routing
