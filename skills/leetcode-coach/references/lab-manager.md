@@ -12,7 +12,7 @@
 
 ## 用法
 
-每題一個資料夾(規則見 `teaching-loop.md` 的 eli5 圖解頁規格一節),內含
+每題一個資料夾(規則見 `teaching-loop.md` 的「圖解頁」一節),內含
 `solution.py` 與 `test_<slug>.py`。測試檔由 coach 提供,`solution.py` 由學員產出。
 
 ```

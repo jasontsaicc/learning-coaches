@@ -74,6 +74,6 @@ symlinks. This rule is shared by Claude Code and Codex.
 ## Session 收尾
 
 1. 更新 `workspaces/leetcode/progress.md`(今天做到哪、pattern 狀態表、做過的題)。
-2. 圖解頁補寫「這次的釐清」區塊,redeploy 到同一個 artifact URL。
+2. 圖解頁補寫「這次的釐清」區塊(用 `deep-dive-notes`),redeploy 到同一個 artifact URL。
 3. 重複出現的搞混升級到 `references/my-common-bugs.md`,並重新按次數排序。
 4. 回報改了哪些檔。commit 與 push 只在使用者授權時做。

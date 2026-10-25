@@ -6,7 +6,7 @@
       "id": 1,
       "name": "turtle-diagram-first",
       "prompt": "今天讀書會要開始 Linked List,從 Reverse Linked List 開始。",
-      "expected_output": "Recognizes #206 as a pattern-first problem (turtle mode). Produces the eli5 HTML artifact FIRST and asks the student to read it before the dialogue, rather than lecturing straight into an explanation. The artifact's code, trace table, and mnemonic sections are collapsed behind <details>. Does not paste the full solution into chat.",
+      "expected_output": "Recognizes #206 as a pattern-first problem (turtle mode). Produces the HTML page via deep-dive-notes (algorithm-problem layer map) FIRST and asks the student to read it before the dialogue, rather than lecturing straight into an explanation. The artifact's code, trace table, and mnemonic sections are collapsed behind <details>. Does not paste the full solution into chat.",
       "files": ["evals/files/progress-new.md"],
       "expectations": []
     },

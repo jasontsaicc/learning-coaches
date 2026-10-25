@@ -38,7 +38,7 @@
 
 ## 龜模式(pattern 首刷題,或該題含新招)
 
-**先產出 eli5 圖解頁(規格見下),請學員自己讀完,再進對話。** 對話是在學員自己的理解上
+**先產出圖解頁(見下方「圖解頁」),請學員自己讀完,再進對話。** 對話是在學員自己的理解上
 加壓,不是從零開始講。
 
 8 步教學,4 階拷問織在步驟之間:
@@ -128,7 +128,7 @@
 
 **英文挑 3 到 4 句進 Native English block**,選最可背、最可遷移的句型,不選這題專用的句子。
 
-逐字稿同時寫進該題 eli5 圖解頁的摺疊區塊,學員之後可以回去 shadowing。
+逐字稿同時寫進該題圖解頁 Layer 7 的摺疊區塊,學員之後可以回去 shadowing。
 
 ## 卡住協定
 
@@ -176,34 +176,15 @@ while curr:
 第 1 層若時間不夠,降級成隔天開場默寫該 template(即第 3 層),並在 `progress.md` 的
 pattern 狀態表標記「對照打」。
 
-## eli5 圖解頁規格
+## 圖解頁
 
-每題一頁 HTML artifact。**先產出、學員先讀、再進對話。** code 區塊用原生 `<details>` 摺疊,
-學員自行決定何時展開。
-
-```
-① 白話:這題在幹嘛                        預設展開
-② 這是什麼型,加秒認信號                  預設展開
-③ 暴力法長怎樣、為什麼慢(圖)            預設展開
-④ 做法一步一步(圖,手動走一遍,無 code) 預設展開
-▸ 完整 code 加逐行解釋                    摺疊
-▸ 逐輪執行模擬表                          摺疊
-▸ 口訣加模板                              摺疊
-▸ L6 面試逐字稿                           摺疊
-▸ 這次的釐清(session 結束時補寫)        摺疊
-```
-
-「這次的釐清」格式:
-
-```
-✗ 我以為:nxt 每一圈都是同一個
-✓ 其實是:每一圈重新求值,第 2 圈的 nxt 是 3 不是 2
-→ 為什麼會搞混:把「賦值」看成「綁定」了
-```
+每題一頁 HTML,由 `deep-dive-notes` 產生(七層的「演算法題」對照表,coach 名 `leetcode`)。
+**先產出、學員先讀、再進對話。** 版面、摺疊規則、存檔位置都照該 skill,這裡不重寫。
 
 **題目資料夾規則:** 新題落在 `workspaces/leetcode/<pattern-slug>/<problem-slug>/`
-(例 `linked-list/merge-two-sorted-lists/`),圖解頁命名 `eli5.html` 放在該資料夾內,
-發布為 artifact,URL 記在該題 `notes.md`。同一題重跑時 redeploy 到同一個 URL。
+(例 `linked-list/merge-two-sorted-lists/`),內含 `solution.py`、`test_<slug>.py`、`notes.md`。
+圖解頁的 artifact URL 記在該題 `notes.md`。同一題重跑時 redeploy 到同一個 URL。
+既有的 `eli5.html` 原地保留,不搬。
 
 既有的 `p1-` / `p2-` / `p3-` 資料夾原地不動,不做搬遷。`#206` 沿用既有的
 `p3-binsearch-linkedlist/reverse-linked-list/`。路徑不一致由 `progress.md` 的「做過」行
