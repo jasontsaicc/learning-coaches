@@ -1,0 +1,339 @@
+<title>Multi-Region Session Store</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC:wght@400;700&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: one notebook column on graph paper; teal sd accent band; figures on taped cards, failure cases as comic panels */
+:root {
+  --paper: #F6F8FA;
+  --grid: rgba(90,130,170,.16);
+  --ink: #23313E;
+  --ink-soft: #55677A;
+  --card: #FFFFFF;
+  --accent: #0B7285;
+  --on-accent: #FFFFFF;
+  --tape: color-mix(in srgb, var(--accent) 35%, transparent);
+  --who: #FFE98A;
+  --see: #BDEEF6;
+  --may: #F9CDE0;
+  --wrong: #D2453A;
+  --ok: #2F8F5B;
+  --line: #9DB0C2;
+  --font-hand: "LXGW WenKai TC", "Noto Sans TC", "PingFang TC", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #1A2320; --grid: rgba(200,230,210,.08); --ink: #E6EDE8; --ink-soft: #A9BAB1;
+    --card: #24302C; --accent: #3BC9DB; --on-accent: #10221F; --who: #8A7A2A; --see: #2B6A74; --may: #7A3F57;
+    --wrong: #FF8A7E; --ok: #7FD3A1; --line: #5E7268; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #1A2320; --grid: rgba(200,230,210,.08); --ink: #E6EDE8; --ink-soft: #A9BAB1;
+  --card: #24302C; --accent: #3BC9DB; --on-accent: #10221F; --who: #8A7A2A; --see: #2B6A74; --may: #7A3F57;
+  --wrong: #FF8A7E; --ok: #7FD3A1; --line: #5E7268; color-scheme: dark;
+}
+body {
+  background-color: var(--paper);
+  background-image: linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 22px 22px;
+  color: var(--ink);
+  font-family: var(--font-hand);
+  font-size: 17px;
+  line-height: 1.75;
+}
+.band { background: var(--accent); color: var(--on-accent); padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 22px 18px; }
+.band > div { max-width: 760px; margin: 0 auto; display: grid; gap: 8px; }
+.band a { color: inherit; }
+.page { max-width: 760px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 28px 64px; display: grid; gap: 36px; }
+h1, h2, h3 { text-wrap: balance; line-height: 1.3; margin: 0; }
+h1 { font-size: 2.1rem; }
+h2 { font-size: 1.4rem; display: flex; flex-wrap: wrap; align-items: baseline; gap: 10px; }
+h2 .badge { font-family: var(--font-mono); font-size: .78rem; background: var(--accent); color: var(--on-accent); padding: 1px 8px; border-radius: 3px; }
+h2 .time { font-family: var(--font-mono); font-size: .74rem; color: var(--ink-soft); letter-spacing: .04em; }
+p { margin: 0; }
+section { display: grid; gap: 14px; min-width: 0; }
+.sub { font-size: .95rem; opacity: .9; }
+.lead { font-size: 1.12rem; font-weight: 700; }
+.progress { display: flex; flex-wrap: wrap; gap: 6px 12px; font-family: var(--font-mono); font-size: .8rem; }
+.progress a { color: inherit; text-decoration: none; }
+mark { background: linear-gradient(transparent 52%, var(--who) 52%); color: inherit; padding: 0 2px; }
+mark.see { background: linear-gradient(transparent 52%, var(--see) 52%); }
+mark.may { background: linear-gradient(transparent 52%, var(--may) 52%); }
+code { font-family: var(--font-mono); font-size: .86em; background: color-mix(in srgb, var(--line) 22%, transparent); padding: 1px 5px; border-radius: 3px; }
+.card { position: relative; background: var(--card); padding: 22px 16px 14px; box-shadow: 0 1px 3px rgba(0,0,0,.12); min-width: 0; }
+.card::before { content: ""; position: absolute; top: -9px; left: 50%; width: 92px; height: 20px; transform: translateX(-50%) rotate(-2deg); background: var(--tape); }
+.scroll { overflow-x: auto; }
+svg.fig { display: block; min-width: 600px; width: 100%; height: auto; }
+svg text { font-family: var(--font-mono); fill: var(--ink); }
+svg .hand { font-family: var(--font-hand); }
+.rule { border-left: 4px solid var(--accent); padding: 6px 12px; font-size: 1.05rem; }
+.wrong { border-left: 4px solid var(--wrong); padding: 4px 12px; display: grid; gap: 2px; }
+.wrong b { color: var(--wrong); font-size: .85rem; letter-spacing: .05em; }
+.fix { border-left: 4px solid var(--ok); padding: 4px 12px; }
+.panels { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 14px; }
+.panel { border: 2px solid var(--ink); background: var(--card); padding: 10px; display: grid; gap: 6px; min-width: 0; align-content: start; }
+.panel h3 { font-size: 1rem; font-family: var(--font-mono); }
+.panel p { font-size: .92rem; }
+.panel svg { width: 100%; height: auto; display: block; }
+@media (max-width: 560px) { .panels { grid-template-columns: 1fr; } }
+table { border-collapse: collapse; width: 100%; font-size: .95rem; font-variant-numeric: tabular-nums; }
+th, td { border-bottom: 1px dashed var(--line); padding: 8px 6px; text-align: left; vertical-align: top; }
+th { font-family: var(--font-mono); font-size: .78rem; letter-spacing: .05em; color: var(--ink-soft); font-weight: 600; }
+ol, ul { margin: 0; padding-left: 1.3em; display: grid; gap: 6px; }
+details { background: var(--card); border: 2px dashed var(--line); padding: 10px 14px; }
+details[open] { border-style: solid; }
+details summary { cursor: pointer; font-weight: 700; }
+details > div { display: grid; gap: 10px; margin-top: 10px; }
+.two { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 14px; }
+@media (max-width: 560px) { .two { grid-template-columns: 1fr; } }
+.en { font-family: var(--font-mono); font-size: .88rem; color: var(--ink-soft); }
+pre { margin: 0; font-family: var(--font-mono); font-size: .82rem; line-height: 1.5; background: var(--card); border: 1px solid var(--line); padding: 10px 12px; overflow-x: auto; }
+.next { border: 3px solid var(--accent); background: var(--card); padding: 14px 16px; display: grid; gap: 6px; }
+a { color: var(--accent); text-underline-offset: 3px; }
+a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+</style>
+
+<meta name="topic" content="Multi-Region Session Store design (Phase 2 Gate 題)">
+<header class="band">
+  <div>
+    <p class="sub">sd 課程 · Phase 2 Gate · S31（PASS 5/6），WR5 重打 S41–S44，Mastery med（s44）</p>
+    <h1>Multi-Region Session Store</h1>
+    <p>讀完這頁你能：用「傷害 = 窗口 × 人口 × 症狀」選 async，畫出 LWW 殭屍時間線，並說明撤銷為什麼要另開一條路。</p>
+    <nav class="progress" aria-label="layers"><a href="#l0">L0 ✓</a><a href="#l1">L1 ✓</a><a href="#l2">L2 ✓</a><a href="#l3">L3 ✓</a><a href="#l4">L4 ✓</a><a href="#l5">L5 ✓</a><a href="#l6">L6 ✓</a><a href="#l7">L7 ✓</a><a href="#trail">錯題</a></nav>
+  </div>
+</header>
+
+<main class="page">
+
+  <p class="sub">這是 spaced-repetition 裡現存最弱的一張卡。情境（WR5 版）：ScaleUp 美日雙區，10M DAU 各半，每區尖峰 50K req/s，session ~1KB，本地 lookup p99 &lt; 5ms，TTL 30 天 sliding，撤銷 30 秒全球生效，failover 時不能讓 500 萬人重登。</p>
+
+  <section id="l0">
+    <h2><span class="badge">L0</span>一張圖<span class="time">讀 1 分鐘</span></h2>
+    <p class="lead">健身房會員卡在台北分店辦的，去東京分店刷卡：東京要嘛打電話回台北問，要嘛事先就有一份抄本。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 680 180" role="img" aria-label="A member registered at the Taipei branch swipes a card in Tokyo. Option 1: Tokyo calls Taipei, slow and fails if Taipei is closed. Option 2: Tokyo already has a copy, fast but the copy can be stale.">
+        <rect x="30" y="40" width="160" height="70" fill="var(--see)" stroke="var(--ink)" stroke-width="1.5"/><text x="110" y="68" text-anchor="middle" font-size="12" class="hand">台北分店</text><text x="110" y="90" text-anchor="middle" font-size="10">會員資料在這</text>
+        <rect x="490" y="40" width="160" height="70" fill="var(--who)" stroke="var(--ink)" stroke-width="1.5"/><text x="570" y="68" text-anchor="middle" font-size="12" class="hand">東京分店</text><text x="570" y="90" text-anchor="middle" font-size="10">會員在這刷卡</text>
+        <path d="M490 60 Q340 10 190 60" fill="none" stroke="var(--ink)" stroke-width="2" stroke-dasharray="6 4"/><text x="340" y="30" text-anchor="middle" font-size="11">① 打電話問（慢；台北關門就沒辦法）</text>
+        <path d="M190 95 Q340 140 490 95" fill="none" stroke="var(--accent)" stroke-width="2.5"/><text x="340" y="140" text-anchor="middle" font-size="11">② 事先抄一份（快；但抄本可能是舊的）</text>
+        <text x="340" y="170" text-anchor="middle" font-size="12" class="hand">整題就在這兩條路之間標價</text>
+      </svg>
+    </div>
+  </section>
+
+  <section id="l1">
+    <h2><span class="badge">L1</span>第一性原理<span class="time">讀 3 分鐘</span></h2>
+    <p class="lead">限制是光速：美日來回約 150ms，而本地 lookup 預算只有 5ms。sliding TTL 又讓每個 request 都變成一次寫入。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 680 160" role="img" aria-label="Bars to scale: local lookup budget 5ms is 20 pixels, trans-Pacific round trip 150ms is 600 pixels, 30 times larger.">
+        <text x="30" y="30" font-size="11">本地 lookup 預算</text>
+        <rect x="30" y="38" width="20" height="26" fill="var(--ok)" stroke="var(--ink)"/><text x="58" y="56" font-size="11">5ms</text>
+        <text x="30" y="92" font-size="11">美 ↔ 日 round trip</text>
+        <rect x="30" y="100" width="600" height="26" fill="var(--may)" stroke="var(--ink)"/><text x="330" y="118" text-anchor="middle" font-size="11">~150ms = 預算的 30 倍</text>
+        <text x="30" y="150" font-size="11" class="hand">sync 複製 = 每個 request 都多等這一整條</text>
+      </svg>
+    </div>
+    <p>從這條限制直接推出兩件事：</p>
+    <ul>
+      <li>讀必須在本區完成，所以每區都要有一份 session。</li>
+      <li>寫不能等對岸確認，所以複製只能 async。代價是兩區有一段時間不一致。</li>
+    </ul>
+    <p>還有第二條限制：<mark>fetch-on-miss 的前提是源頭活著</mark>。整區掛掉時沒有源可以抓，這就是為什麼「為旅客」不用複製、「為 DR」一定要複製。同一個動作，需求變了答案就變。</p>
+  </section>
+
+  <section id="l2">
+    <h2><span class="badge">L2</span>機制<span class="time">讀 4 分鐘</span></h2>
+    <p class="lead">兩區 active-active：geo-DNS 就近導流，各自讀寫本地 session store，背景 async 互相複製，約 1 秒內追上。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 680 230" role="img" aria-label="Two regions, US and Japan. Geo DNS sends each user to the nearest region. Each region has API servers and a local session store. The two stores replicate to each other asynchronously in about one second. Each API server also holds an in-memory revocation denylist.">
+        <rect x="270" y="10" width="140" height="34" fill="var(--who)" stroke="var(--ink)"/><text x="340" y="31" text-anchor="middle" font-size="11">geo-DNS</text>
+        <rect x="20" y="60" width="270" height="150" fill="none" stroke="var(--accent)" stroke-width="2"/><text x="30" y="78" font-size="11">US region</text>
+        <rect x="390" y="60" width="270" height="150" fill="none" stroke="var(--accent)" stroke-width="2"/><text x="400" y="78" font-size="11">JP region</text>
+        <g fill="var(--card)" stroke="var(--ink)"><rect x="40" y="92" width="110" height="44"/><rect x="410" y="92" width="110" height="44"/></g>
+        <g font-size="10" text-anchor="middle"><text x="95" y="110">API servers</text><text x="465" y="110">API servers</text><text x="95" y="126" fill="var(--ink-soft)">+ denylist（RAM）</text><text x="465" y="126" fill="var(--ink-soft)">+ denylist（RAM）</text></g>
+        <g fill="var(--see)" stroke="var(--ink)" stroke-width="1.5"><rect x="40" y="152" width="230" height="40"/><rect x="410" y="152" width="230" height="40"/></g>
+        <g font-size="10" text-anchor="middle"><text x="155" y="176">session store（本地讀寫 &lt; 5ms）</text><text x="525" y="176">session store（本地讀寫 &lt; 5ms）</text></g>
+        <line x1="95" y1="136" x2="95" y2="152" stroke="var(--ink)"/><line x1="465" y1="136" x2="465" y2="152" stroke="var(--ink)"/>
+        <line x1="300" y1="44" x2="150" y2="92" stroke="var(--ink)"/><line x1="380" y1="44" x2="520" y2="92" stroke="var(--ink)"/>
+        <line x1="270" y1="166" x2="410" y2="166" stroke="var(--accent)" stroke-width="2.5" stroke-dasharray="7 4"/><line x1="410" y1="180" x2="270" y2="180" stroke="var(--accent)" stroke-width="2.5" stroke-dasharray="7 4"/>
+        <text x="340" y="160" text-anchor="middle" font-size="10" fill="var(--accent)">async ~1s</text><text x="340" y="198" text-anchor="middle" font-size="10" fill="var(--accent)">雙向</text>
+      </svg>
+    </div>
+    <div class="scroll">
+      <table>
+        <tr><th>算什麼</th><th>單位式</th><th>這題</th></tr>
+        <tr><td>存放空間</td><td>活躍 session × 大小</td><td>10M × 1KB = 10GB（S31 版 100M → 100GB）。空間不是瓶頸</td></tr>
+        <tr><td>每區寫入</td><td>sliding TTL：寫入 = 請求</td><td>50K writes/s</td></tr>
+        <tr><td>跨區複製量</td><td>寫入 × 大小</td><td>50K × 1KB ≈ 50MB/s，每個方向</td></tr>
+      </table>
+    </div>
+    <p class="sub">所以多存一份的成本不是空間，是不一致（S31 你一開始以為是「浪費空間」）。</p>
+  </section>
+
+  <section id="l3">
+    <h2><span class="badge">L3</span>取捨<span class="time">讀 5 分鐘</span></h2>
+    <p class="lead">一致性的妥協要標價：傷害 = 不一致窗口 × 落進窗口的人數 × 症狀嚴重度。算出來 async 趨近 0，sync 毀題。</p>
+    <div class="scroll">
+      <table>
+        <tr><th></th><th>窗口</th><th>落窗人口</th><th>症狀</th><th>結論</th></tr>
+        <tr><td>async</td><td>~1s</td><td>剛好那一秒換區的人（每天個位數）</td><td>重登一次</td><td>≈ 0</td></tr>
+        <tr><td>sync</td><td>每次寫 +150ms</td><td>全部人、每個 request</td><td>全站慢 30 倍，一區掛連帶另一區</td><td>出局</td></tr>
+      </table>
+    </div>
+    <p>但 async 加上 last-writer-wins（LWW），會在<b>撤銷</b>這件事上出事。這是你最弱的一格，照時間走一遍：</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 680 290" role="img" aria-label="LWW zombie timeline. At 100.0 support deletes session abc in US. At 100.2 the attacker hits Japan, which refreshes the sliding TTL and writes the session with timestamp 100.2. At 101.0 the delete reaches Japan but loses because 100.0 is older than 100.2. At 101.2 the Japan write reaches US and beats the tombstone. The session is alive in both regions.">
+        <text x="20" y="62" font-size="12" class="hand">US</text><text x="20" y="182" font-size="12" class="hand">JP</text>
+        <line x1="60" y1="58" x2="650" y2="58" stroke="var(--line)" stroke-width="2"/><line x1="60" y1="178" x2="650" y2="178" stroke="var(--line)" stroke-width="2"/>
+        <circle cx="110" cy="58" r="9" fill="var(--ok)" stroke="var(--ink)"/>
+        <text x="110" y="34" text-anchor="middle" font-size="10">① 客服 DEL abc</text><text x="110" y="46" text-anchor="middle" font-size="9" fill="var(--ink-soft)">ts = 100.0（tombstone）</text>
+        <circle cx="200" cy="178" r="9" fill="var(--wrong)" stroke="var(--ink)"/>
+        <text x="200" y="208" text-anchor="middle" font-size="10">② 攻擊者打 JP</text><text x="200" y="220" text-anchor="middle" font-size="9" fill="var(--ink-soft)">sliding TTL 續命：SET abc ts = 100.2</text>
+        <line x1="110" y1="67" x2="440" y2="170" stroke="var(--ink)" stroke-dasharray="6 4"/><polygon points="436,163 446,172 433,172" fill="var(--ink)"/>
+        <text x="300" y="104" font-size="10" transform="rotate(17 300 104)">DEL 複製過去</text>
+        <rect x="380" y="226" width="200" height="40" fill="var(--may)" stroke="var(--ink)"/><text x="480" y="243" text-anchor="middle" font-size="10">③ JP：100.0 &lt; 100.2</text><text x="480" y="257" text-anchor="middle" font-size="10">刪除輸了，被丟掉</text>
+        <line x1="440" y1="196" x2="460" y2="226" stroke="var(--ink)"/>
+        <line x1="200" y1="169" x2="520" y2="66" stroke="var(--wrong)" stroke-width="2" stroke-dasharray="6 4"/><polygon points="512,64 524,64 516,73" fill="var(--wrong)"/>
+        <text x="370" y="130" font-size="10" fill="var(--wrong)" transform="rotate(-18 370 130)">SET 複製過去</text>
+        <circle cx="520" cy="58" r="10" fill="var(--wrong)" stroke="var(--ink)"/>
+        <text x="560" y="34" text-anchor="middle" font-size="10" fill="var(--wrong)">④ US：100.2 &gt; 100.0</text><text x="560" y="46" text-anchor="middle" font-size="10" fill="var(--wrong)">session 復活</text>
+        <text x="340" y="284" text-anchor="middle" font-size="12" class="hand" fill="var(--wrong)">兩區都活著：刪除在 LWW 眼裡只是一次普通寫入</text>
+      </svg>
+    </div>
+    <div class="two">
+      <div class="fix"><b>修法：撤銷 ≠ 刪資料</b><br>「已撤銷」獨立成一種資料：一份很小的 denylist（客服一天踢幾筆到幾百筆）。append-only，session 的寫入路徑碰不到它，殭屍咬不動。</div>
+      <div class="fix"><b>放哪、怎麼傳</b><br>每台 API server 在記憶體放一份（~100ns lookup，零網路依賴）。用 pull：每 N 秒全量撈一次。全量 = 自癒，重啟的 server 自動補課。</div>
+    </div>
+    <div class="rule">sync / async 不是全域開關，是 <b>per write type</b> 各選：量大、症狀輕（session 續命）→ async；量小、症狀重（撤銷）→ 單獨一條更強的路。</div>
+    <details>
+      <summary>Bloom filter 為什麼出局</summary>
+      <div><p>先估量級：名單只有幾百筆，普通 set 就放得下。Bloom 是名單大到放不下才用的壓縮，代價是 false positive：誤把正常使用者踢下線。大砲打蚊子還附送誤殺。</p></div>
+    </details>
+  </section>
+
+  <section id="l4">
+    <h2><span class="badge">L4</span>AWS 怎麼做<span class="time">讀 4 分鐘</span></h2>
+    <p class="lead">Route 53 latency routing 導流，session 放 DynamoDB Global Tables（async、LWW），denylist 放一個小物件讓每台 server 定期 pull。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 680 220" role="img" aria-label="Route 53 latency routing with health checks sends users to us-east-1 or ap-northeast-1. Each region runs EKS API pods and a DynamoDB Global Tables replica, replicating with last writer wins. A small denylist object is pulled every 10 seconds by every pod.">
+        <rect x="250" y="10" width="180" height="34" fill="var(--who)" stroke="var(--ink)"/><text x="340" y="26" text-anchor="middle" font-size="10">Route 53 latency routing</text><text x="340" y="38" text-anchor="middle" font-size="9">+ health check</text>
+        <rect x="20" y="60" width="280" height="140" fill="none" stroke="var(--accent)" stroke-width="2"/><text x="30" y="78" font-size="10">us-east-1</text>
+        <rect x="380" y="60" width="280" height="140" fill="none" stroke="var(--accent)" stroke-width="2"/><text x="390" y="78" font-size="10">ap-northeast-1</text>
+        <g fill="var(--card)" stroke="var(--ink)"><rect x="40" y="90" width="110" height="36"/><rect x="400" y="90" width="110" height="36"/></g>
+        <g font-size="10" text-anchor="middle"><text x="95" y="112">EKS API pods</text><text x="455" y="112">EKS API pods</text></g>
+        <g fill="var(--see)" stroke="var(--ink)"><rect x="40" y="146" width="200" height="36"/><rect x="400" y="146" width="200" height="36"/></g>
+        <g font-size="10" text-anchor="middle"><text x="140" y="168">DynamoDB Global Table</text><text x="500" y="168">DynamoDB Global Table</text></g>
+        <g fill="var(--may)" stroke="var(--ink)"><rect x="170" y="90" width="110" height="36"/><rect x="530" y="90" width="110" height="36"/></g>
+        <g font-size="9" text-anchor="middle"><text x="225" y="106">denylist</text><text x="225" y="118">pull 每 10s</text><text x="585" y="106">denylist</text><text x="585" y="118">pull 每 10s</text></g>
+        <line x1="240" y1="164" x2="400" y2="164" stroke="var(--accent)" stroke-width="2.5" stroke-dasharray="7 4"/><text x="320" y="158" text-anchor="middle" font-size="9" fill="var(--accent)">async · LWW</text>
+        <line x1="300" y1="44" x2="150" y2="90" stroke="var(--ink)"/><line x1="380" y1="44" x2="510" y2="90" stroke="var(--ink)"/>
+      </svg>
+    </div>
+    <div class="scroll">
+      <table>
+        <tr><th>服務</th><th>用在哪</th><th>陷阱</th></tr>
+        <tr><td>Route 53 health check + failover</td><td>導流、切區</td><td>client 和中間 resolver 會把 DNS 快取得比 TTL 久，切區不是瞬間。沒演練過的 failover 等於沒有 failover。</td></tr>
+        <tr><td>DynamoDB Global Tables</td><td>兩區互抄</td><td>預設 async，衝突用 LWW 解決，就是 L3 的殭屍。另有 multi-region strong consistency 模式（較新，區域與限制需確認），代價是寫入要跨區確認。</td></tr>
+        <tr><td>ElastiCache Global Datastore</td><td>本地熱層</td><td>是 active-passive：只有一個 primary region 能寫，另一區唯讀。拿它做 active-active 會卡住。</td></tr>
+        <tr><td>Redis Enterprise Active-Active</td><td>真雙寫 Redis</td><td>用 CRDT 合併，不是 LWW。語意不同，要重新想刪除怎麼合併。</td></tr>
+        <tr><td>跨區流量</td><td>複製管道</td><td>每方向約 50MB/s，按 GB 計費（單價需確認）。sliding TTL 每個 request 都寫是主要來源。</td></tr>
+      </table>
+    </div>
+    <p class="sub">誰會吵：資安要撤銷秒級生效，PM 不准 500 萬人重登，財務看跨區流量帳單。design review 會被問：「刪除和續命同時發生，最後誰贏？」</p>
+  </section>
+
+  <section id="l5">
+    <h2><span class="badge">L5</span>規模化<span class="time">讀 3 分鐘</span></h2>
+    <p class="lead">每一級都在回答一個新的故障：server 重啟、一區掛掉、撤銷要全球生效。大廠最後多半改成「短命 token + denylist」。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 680 230" role="img" aria-label="Evolution ladder. Step 1 in-memory sessions with sticky load balancing. Step 2 one central Redis in one region. Step 3 home region plus fetch on miss plus async DR copy, the Phase 2 gate answer. Step 4 active-active async with a separate revocation denylist, the WR5 answer.">
+        <rect x="20" y="170" width="150" height="50" fill="var(--card)" stroke="var(--ink)" stroke-width="1.5"/>
+        <text x="30" y="190" font-size="11" class="hand">① server 記憶體</text><text x="30" y="208" font-size="9">sticky LB；重啟就全登出</text>
+        <rect x="180" y="130" width="150" height="90" fill="var(--see)" stroke="var(--ink)" stroke-width="1.5"/>
+        <text x="190" y="150" font-size="11" class="hand">② 中央 Redis</text><text x="190" y="170" font-size="9">一個 region</text><text x="190" y="186" font-size="9">一區掛 = 全登出</text>
+        <rect x="340" y="80" width="150" height="140" fill="var(--who)" stroke="var(--ink)" stroke-width="1.5"/>
+        <text x="350" y="100" font-size="11" class="hand">③ home region</text><text x="350" y="120" font-size="9">miss 才回源抓</text><text x="350" y="136" font-size="9">+ async 複製做 DR</text><text x="350" y="152" font-size="9">（S31 gate 答案）</text>
+        <rect x="500" y="30" width="160" height="190" fill="var(--may)" stroke="var(--ink)" stroke-width="1.5"/>
+        <text x="510" y="50" font-size="11" class="hand">④ active-active</text><text x="510" y="70" font-size="9">兩區都寫、async 互抄</text><text x="510" y="86" font-size="9">撤銷走 denylist</text><text x="510" y="102" font-size="9">（WR5 答案）</text>
+        <text x="95" y="160" text-anchor="middle" font-size="9" fill="var(--ink-soft)">換掉：存在單台</text>
+        <text x="255" y="120" text-anchor="middle" font-size="9" fill="var(--ink-soft)">換掉：單一 region</text>
+        <text x="415" y="70" text-anchor="middle" font-size="9" fill="var(--ink-soft)">換掉：回源依賴</text>
+      </svg>
+    </div>
+    <div class="scroll">
+      <table>
+        <tr><th>路線</th><th>真相在哪</th><th>好處</th><th>代價</th></tr>
+        <tr><td>Stateful session store</td><td>server 端</td><td>撤銷容易（刪掉或進 denylist）</td><td>要做跨區複製和殭屍防護</td></tr>
+        <tr><td>Stateless JWT（5–15 分）+ refresh</td><td>token 本身</td><td>90% 流量不用查 store</td><td>撤銷要等 token 過期，秒級要再加 denylist</td></tr>
+      </table>
+    </div>
+    <p class="sub">業界現實：多數公司走短命 JWT，接受分鐘級撤銷窗口，因為便宜。要 30 秒級才加 denylist。</p>
+  </section>
+
+  <section id="l6">
+    <h2><span class="badge">L6</span>故障與 on-call<span class="time">讀 4 分鐘</span></h2>
+    <p class="lead">兩個最要盯的訊號：replication lag（= 一區掛掉時會丟幾秒的 session）和 denylist pull 的新鮮度（pull 無聲死掉 = 撤銷失效）。</p>
+    <div class="panels">
+      <div class="panel"><h3>A · 一區整個掛掉</h3><p>Route 53 health check 切走，但 DNS 快取讓部分使用者晚一點才過來。最後 ~1s 還沒複製出去的 session 丟掉，那些人重登。</p></div>
+      <div class="panel"><h3>B · lag 爆到 30s</h3><p>這時一區掛掉，丟的是 30 秒的 session。lag 就是資料遺失窗口，要 page。</p></div>
+      <div class="panel"><h3>C · pull loop 無聲死掉</h3><p>沒有錯誤，因為根本沒在跑。被撤銷的 session 繼續活著。監控「上一次成功 pull 的時間」，這是你 S42 零提示自己講出來的。</p></div>
+      <div class="panel"><h3>D · 殭屍 session</h3><p>有人用「刪 session」當撤銷：DEL 被 LWW 推翻。症狀是「客服說已踢掉，帳號還在下單」。</p></div>
+    </div>
+    <details>
+      <summary>pull 間隔 N 要多少？先自己算再打開</summary>
+      <div>
+        <p>撤銷 30 秒全球生效。最壞情況 = 複製 1s + 剛好錯過一輪 N + 下一輪又失敗一輪 N。</p>
+        <pre>1 + 2N ≤ 30  →  N ≤ 14.5</pre>
+        <p>選 N = 10，留餘裕給 GC 停頓或慢請求。N = 20 被戳破的原因：一次 timeout 就變 1 + 40 = 41s &gt; 30s。</p>
+      </div>
+    </details>
+    <div class="scroll">
+      <table>
+        <tr><th>3AM page test</th><th>這題的答案</th></tr>
+        <tr><td>什麼會 page 我</td><td>replication lag &gt; 5s；任一台 server 的 denylist 上次成功 pull &gt; 25s</td></tr>
+        <tr><td>SLI</td><td>本地 session lookup P99、replication lag、denylist staleness</td></tr>
+        <tr><td>SLO</td><td>lookup P99 &lt; 5ms；撤銷 30s 內全球生效</td></tr>
+        <tr><td>只開 ticket</td><td>跨區流量逼近預算、session store 容量成長</td></tr>
+      </table>
+    </div>
+    <p>第一個指令（看 Global Table 複製到日本落後多少）：</p>
+    <pre>aws cloudwatch get-metric-statistics --namespace AWS/DynamoDB --metric-name ReplicationLatency --dimensions Name=TableName,Value=sessions Name=ReceivingRegion,Value=ap-northeast-1 --start-time 2026-10-26T00:00:00Z --end-time 2026-10-26T01:00:00Z --period 60 --statistics Maximum --region us-east-1</pre>
+  </section>
+
+  <section id="l7">
+    <h2><span class="badge">L7</span>面試<span class="time">讀 3 分鐘</span></h2>
+    <p class="lead">題目（WR5 原題）：「美日雙區，任一區登入後請求可能落到任一區。一區掛掉不能讓 500 萬人重登，撤銷要 30 秒全球生效。怎麼設計 session store？」</p>
+    <p>先自己講：sync 還 async、用數字講為什麼、撤銷怎麼做、監控什麼。再打開。</p>
+    <details>
+      <summary>L4 vs L6 對照</summary>
+      <div>
+        <div class="wrong"><b>L4</b>「兩區互相同步，用 async，因為比較快。」<br>問題：「比較快」沒數字、沒講 async 的代價、沒發現撤銷會被 LWW 推翻、沒監控。</div>
+        <div class="fix"><b>L6</b> 多了四件事：</div>
+        <ol>
+          <li>用數字排除 sync：sliding TTL 讓每個 request 都寫，150ms × 每個請求 = 預算 5ms 的 30 倍。</li>
+          <li>標價 async：1s 窗口 × 每天個位數的人 × 重登一次 ≈ 0。</li>
+          <li>發現殭屍：LWW 下刪除打不贏續命，所以撤銷另做 denylist，in-memory + pull。</li>
+          <li>監控：lag 是資料遺失窗口；pull staleness 抓無聲死掉。</li>
+        </ol>
+        <p class="en">"I'd run both regions active-active with async replication. Sync is out: sliding TTLs make every request a write, and a 150ms trans-Pacific round trip is 30 times my 5ms budget. Async costs about a one-second window, and only users who switch regions in that second notice, so a handful a day re-login. Revocation can't be a plain delete, though. With last-writer-wins, the attacker's TTL refreshes keep resurrecting the session. So revoked IDs are their own tiny denylist, held in memory by every API server and pulled in full every 10 seconds. I'd page on replication lag, because it's my data-loss window, and on denylist staleness, because a dead pull loop fails silently."</p>
+      </div>
+    </details>
+  </section>
+
+  <section id="trail">
+    <h2><span class="badge">錯題</span>這次的釐清<span class="time">讀 3 分鐘</span></h2>
+    <div class="wrong"><b>我錯在這</b>✗ US 掛掉時，request 跑到 EU 就能登入（S31）<br>✓ home-region 設計下 EU 根本沒這些 session，而且回源的前提是 US 活著<br>→ 為什麼搞混：把「旅客回源」套到「源頭整個掛掉」，沒看到那個隱藏前提。</div>
+    <div class="wrong"><b>我錯在這</b>✗ 多存一份副本的代價是浪費空間（S31）<br>✓ session 才 1KB；真正的代價是兩份不一致<br>→ 為什麼搞混：反射性想到資源成本，沒連到 consistency。</div>
+    <div class="wrong"><b>我錯在這</b>✗「兩區互抄會有同步的問題」講到這就卡（S41）<br>✓ 用公式走數字：窗口 × 人口 × 症狀<br>→ 為什麼搞混：聞到風險但沒走數字 timeline（S31、S36 同款）。</div>
+    <div class="wrong"><b>我錯在這</b>✗ 殭屍時間線組不出來，last-writer-wins 這個詞也陌生（S41、S44）<br>✓ 照 L3 那張圖：DEL ts 舊 → 輸給續命 SET → 複製回去讓 session 復活<br>→ 為什麼搞混：機制推得動，標籤沒綁定。下次換場景複測。</div>
+  </section>
+
+  <div class="next">
+    <b>下一步（2 分鐘）</b>
+    <p>不看這頁，畫 L3 的殭屍時間線：兩條線（US、JP）、四個點、兩條斜的複製箭頭。畫得出來，這張卡就能往前推。</p>
+  </div>
+
+</main>

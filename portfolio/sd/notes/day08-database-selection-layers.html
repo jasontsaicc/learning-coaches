@@ -1,0 +1,389 @@
+<title>Database Selection</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC:wght@400;700&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: one notebook column on graph paper; teal sd accent band; figures on taped cards, failure cases as comic panels */
+:root {
+  --paper: #F6F8FA;
+  --grid: rgba(90,130,170,.16);
+  --ink: #23313E;
+  --ink-soft: #55677A;
+  --card: #FFFFFF;
+  --accent: #0B7285;
+  --on-accent: #FFFFFF;
+  --tape: color-mix(in srgb, var(--accent) 35%, transparent);
+  --who: #FFE98A;
+  --see: #BDEEF6;
+  --may: #F9CDE0;
+  --wrong: #D2453A;
+  --ok: #2F8F5B;
+  --line: #9DB0C2;
+  --font-hand: "LXGW WenKai TC", "Noto Sans TC", "PingFang TC", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #1A2320; --grid: rgba(200,230,210,.08); --ink: #E6EDE8; --ink-soft: #A9BAB1;
+    --card: #24302C; --accent: #3BC9DB; --on-accent: #10221F; --who: #8A7A2A; --see: #2B6A74; --may: #7A3F57;
+    --wrong: #FF8A7E; --ok: #7FD3A1; --line: #5E7268; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #1A2320; --grid: rgba(200,230,210,.08); --ink: #E6EDE8; --ink-soft: #A9BAB1;
+  --card: #24302C; --accent: #3BC9DB; --on-accent: #10221F; --who: #8A7A2A; --see: #2B6A74; --may: #7A3F57;
+  --wrong: #FF8A7E; --ok: #7FD3A1; --line: #5E7268; color-scheme: dark;
+}
+body {
+  background-color: var(--paper);
+  background-image: linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 22px 22px;
+  color: var(--ink);
+  font-family: var(--font-hand);
+  font-size: 17px;
+  line-height: 1.75;
+}
+.band { background: var(--accent); color: var(--on-accent); padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 22px 18px; }
+.band > div { max-width: 760px; margin: 0 auto; display: grid; gap: 8px; }
+.band a { color: inherit; }
+.page { max-width: 760px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 28px 64px; display: grid; gap: 36px; }
+h1, h2, h3 { text-wrap: balance; line-height: 1.3; margin: 0; }
+h1 { font-size: 2.1rem; }
+h2 { font-size: 1.4rem; display: flex; flex-wrap: wrap; align-items: baseline; gap: 10px; }
+h2 .badge { font-family: var(--font-mono); font-size: .78rem; background: var(--accent); color: var(--on-accent); padding: 1px 8px; border-radius: 3px; }
+h2 .time { font-family: var(--font-mono); font-size: .74rem; color: var(--ink-soft); letter-spacing: .04em; }
+p { margin: 0; }
+section { display: grid; gap: 14px; min-width: 0; }
+.sub { font-size: .95rem; opacity: .9; }
+.lead { font-size: 1.12rem; font-weight: 700; }
+.progress { display: flex; flex-wrap: wrap; gap: 6px 12px; font-family: var(--font-mono); font-size: .8rem; }
+.progress a { color: inherit; text-decoration: none; }
+mark { background: linear-gradient(transparent 52%, var(--who) 52%); color: inherit; padding: 0 2px; }
+mark.see { background: linear-gradient(transparent 52%, var(--see) 52%); }
+mark.may { background: linear-gradient(transparent 52%, var(--may) 52%); }
+code { font-family: var(--font-mono); font-size: .86em; background: color-mix(in srgb, var(--line) 22%, transparent); padding: 1px 5px; border-radius: 3px; }
+.card { position: relative; background: var(--card); padding: 22px 16px 14px; box-shadow: 0 1px 3px rgba(0,0,0,.12); min-width: 0; }
+.card::before { content: ""; position: absolute; top: -9px; left: 50%; width: 92px; height: 20px; transform: translateX(-50%) rotate(-2deg); background: var(--tape); }
+.scroll { overflow-x: auto; }
+svg.fig { display: block; min-width: 600px; width: 100%; height: auto; }
+svg text { font-family: var(--font-mono); fill: var(--ink); }
+svg .hand { font-family: var(--font-hand); }
+.rule { border-left: 4px solid var(--accent); padding: 6px 12px; font-size: 1.05rem; }
+.wrong { border-left: 4px solid var(--wrong); padding: 4px 12px; display: grid; gap: 2px; }
+.wrong b { color: var(--wrong); font-size: .85rem; letter-spacing: .05em; }
+.fix { border-left: 4px solid var(--ok); padding: 4px 12px; }
+.panels { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 14px; }
+.panel { border: 2px solid var(--ink); background: var(--card); padding: 10px; display: grid; gap: 6px; min-width: 0; align-content: start; }
+.panel h3 { font-size: 1rem; font-family: var(--font-mono); }
+.panel p { font-size: .92rem; }
+.panel svg { width: 100%; height: auto; display: block; }
+@media (max-width: 560px) { .panels { grid-template-columns: 1fr; } }
+table { border-collapse: collapse; width: 100%; font-size: .95rem; font-variant-numeric: tabular-nums; }
+th, td { border-bottom: 1px dashed var(--line); padding: 8px 6px; text-align: left; vertical-align: top; }
+th { font-family: var(--font-mono); font-size: .78rem; letter-spacing: .05em; color: var(--ink-soft); font-weight: 600; }
+ol, ul { margin: 0; padding-left: 1.3em; display: grid; gap: 6px; }
+details { background: var(--card); border: 2px dashed var(--line); padding: 10px 14px; }
+details[open] { border-style: solid; }
+details summary { cursor: pointer; font-weight: 700; }
+details > div { display: grid; gap: 10px; margin-top: 10px; }
+.two { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 14px; }
+@media (max-width: 560px) { .two { grid-template-columns: 1fr; } }
+.en { font-family: var(--font-mono); font-size: .88rem; color: var(--ink-soft); }
+pre { margin: 0; font-family: var(--font-mono); font-size: .82rem; line-height: 1.5; background: var(--card); border: 1px solid var(--line); padding: 10px 12px; overflow-x: auto; }
+.next { border: 3px solid var(--accent); background: var(--card); padding: 14px 16px; display: grid; gap: 6px; }
+a { color: var(--accent); text-underline-offset: 3px; }
+a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+</style>
+
+<header class="band">
+  <div>
+    <p class="sub">sd 課程 · P1 核心元件 · Day 8-9 · S8–S9，Mastery med（s39）</p>
+    <h1>Database Selection</h1>
+    <p>讀完這頁你能：用 access pattern 和資料關聯（不是資料量）選 SQL / NoSQL，講對 B-tree vs LSM-tree，並說出 replica lag 怎麼咬人。</p>
+    <nav class="progress" aria-label="layers"><a href="#l0">L0 ✓</a><a href="#l1">L1 ✓</a><a href="#l2">L2 ✓</a><a href="#l3">L3 ✓</a><a href="#l4">L4 ✓</a><a href="#l5">L5 ✓</a><a href="#l6">L6 ✓</a><a href="#l7">L7 ✓</a><a href="#trail">錯題</a></nav>
+  </div>
+</header>
+
+<main class="page">
+
+  <p class="sub">Mastery 還是 med 的原因：訂單 → SQL 的三個理由很穩，但「NoSQL 什麼時候選」的完整光譜還沒 drill 過。這頁補那一塊。</p>
+
+  <section id="l0">
+    <h2><span class="badge">L0</span>一張圖<span class="time">讀 1 分鐘</span></h2>
+    <p class="lead">圖書館 vs 寄物櫃。圖書館能跨書查（JOIN），寄物櫃只認號碼但存取超快、隨便加櫃子。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 680 190" role="img" aria-label="Left: a library with an index card catalog linking books, like SQL with JOIN. Right: rows of lockers opened by number only, easy to add more rows, like key-value NoSQL.">
+        <text x="160" y="22" text-anchor="middle" font-size="13" class="hand">圖書館 = SQL</text>
+        <g fill="var(--see)" stroke="var(--ink)"><rect x="40" y="40" width="60" height="80"/><rect x="130" y="40" width="60" height="80"/><rect x="220" y="40" width="60" height="80"/></g>
+        <g font-size="10" text-anchor="middle"><text x="70" y="84">users</text><text x="160" y="84">orders</text><text x="250" y="84">items</text></g>
+        <g stroke="var(--accent)" stroke-width="2" fill="none"><path d="M100 70 Q115 55 130 70"/><path d="M190 90 Q205 105 220 90"/></g>
+        <text x="160" y="146" text-anchor="middle" font-size="11" class="hand">foreign key 串起來，一句 JOIN 跨表查</text>
+        <text x="160" y="166" text-anchor="middle" font-size="10" fill="var(--ink-soft)">代價：擴充要整棟樓一起長大</text>
+        <line x1="340" y1="30" x2="340" y2="180" stroke="var(--line)" stroke-dasharray="4 4"/>
+        <text x="510" y="22" text-anchor="middle" font-size="13" class="hand">寄物櫃 = KV / document</text>
+        <g fill="var(--who)" stroke="var(--ink)">
+          <rect x="380" y="40" width="40" height="36"/><rect x="425" y="40" width="40" height="36"/><rect x="470" y="40" width="40" height="36"/><rect x="515" y="40" width="40" height="36"/>
+          <rect x="380" y="84" width="40" height="36"/><rect x="425" y="84" width="40" height="36"/><rect x="470" y="84" width="40" height="36"/><rect x="515" y="84" width="40" height="36"/>
+        </g>
+        <g fill="none" stroke="var(--line)" stroke-dasharray="4 3"><rect x="565" y="40" width="40" height="36"/><rect x="565" y="84" width="40" height="36"/></g>
+        <text x="585" y="134" text-anchor="middle" font-size="9" fill="var(--ink-soft)">再加一排</text>
+        <text x="490" y="152" text-anchor="middle" font-size="11" class="hand">給 key 直接拿，加櫃子 = horizontal scale</text>
+        <text x="490" y="172" text-anchor="middle" font-size="10" fill="var(--ink-soft)">代價：櫃子之間不能 JOIN</text>
+      </svg>
+    </div>
+  </section>
+
+  <section id="l1">
+    <h2><span class="badge">L1</span>第一性原理<span class="time">讀 3 分鐘</span></h2>
+    <p class="lead">限制有兩條：磁碟上「隨機寫」比「循序寫」貴很多；一台機器的寫入有上限，跨機器的 JOIN 要走網路。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 680 200" role="img" aria-label="Top: random writes jump to pages scattered across the disk, each one a seek. Bottom: sequential writes append to the end of a log in one continuous run.">
+        <text x="20" y="22" font-size="12" class="hand">隨機寫：改到哪頁就跳到哪頁（B-tree in-place update）</text>
+        <g fill="var(--card)" stroke="var(--ink)">
+          <rect x="30" y="34" width="60" height="30"/><rect x="95" y="34" width="60" height="30"/><rect x="160" y="34" width="60" height="30"/><rect x="225" y="34" width="60" height="30"/><rect x="290" y="34" width="60" height="30"/><rect x="355" y="34" width="60" height="30"/><rect x="420" y="34" width="60" height="30"/><rect x="485" y="34" width="60" height="30"/><rect x="550" y="34" width="60" height="30"/>
+        </g>
+        <g fill="var(--may)" stroke="var(--ink)"><rect x="95" y="34" width="60" height="30"/><rect x="420" y="34" width="60" height="30"/><rect x="225" y="34" width="60" height="30"/></g>
+        <g stroke="var(--wrong)" stroke-width="2" fill="none"><path d="M125 70 Q290 110 450 70"/><path d="M450 70 Q350 100 255 70"/></g>
+        <text x="320" y="112" text-anchor="middle" font-size="10" fill="var(--wrong)">每次都是一次 seek / 一次 random I/O</text>
+        <text x="20" y="142" font-size="12" class="hand">循序寫：永遠接在尾巴（LSM-tree / WAL append）</text>
+        <g fill="var(--ok)" opacity=".55" stroke="var(--ink)"><rect x="30" y="154" width="60" height="30"/><rect x="95" y="154" width="60" height="30"/><rect x="160" y="154" width="60" height="30"/></g>
+        <g fill="none" stroke="var(--line)" stroke-dasharray="4 3"><rect x="225" y="154" width="60" height="30"/><rect x="290" y="154" width="60" height="30"/></g>
+        <line x1="225" y1="194" x2="345" y2="194" stroke="var(--ok)" stroke-width="2.5"/><polygon points="345,189 355,194 345,199" fill="var(--ok)"/>
+        <text x="460" y="174" font-size="10">一路往後寫，不用跳</text>
+      </svg>
+    </div>
+    <p>所有 DB 的設計都在這兩條限制之間挑位置：</p>
+    <ul>
+      <li>讀快的結構（B-tree），寫的時候要付隨機 I/O。</li>
+      <li>寫快的結構（LSM-tree），讀的時候要翻好幾層。</li>
+      <li>資料放一台能 JOIN、能 ACID；拆到多台才 scale，但跨台的 JOIN 和 transaction 變貴。</li>
+    </ul>
+    <div class="rule">所以選型的關鍵是 <b>access pattern + 資料關聯 + 一致性需求</b>。資料量大不等於 NoSQL：SQL 加 sharding 也能扛大量資料。</div>
+  </section>
+
+  <section id="l2">
+    <h2><span class="badge">L2</span>機制<span class="time">讀 5 分鐘</span></h2>
+    <p class="lead">B-tree 原地改頁、先寫 WAL 保命；LSM 先寫記憶體、滿了整批倒出成 SSTable、背景 compaction 合併。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 680 250" role="img" aria-label="LSM write path: a write goes to the WAL and the in-memory memtable. When the memtable is full it flushes to an immutable SSTable on disk. Background compaction merges SSTables. A read checks the memtable, then newest to oldest SSTables, using a Bloom filter per SSTable to skip files.">
+        <rect x="20" y="40" width="90" height="40" fill="var(--card)" stroke="var(--ink)"/><text x="65" y="64" text-anchor="middle" font-size="11">write</text>
+        <rect x="160" y="20" width="130" height="36" fill="var(--who)" stroke="var(--ink)"/><text x="225" y="42" text-anchor="middle" font-size="10">WAL（append）</text>
+        <rect x="160" y="70" width="130" height="44" fill="var(--see)" stroke="var(--ink)" stroke-width="2"/><text x="225" y="90" text-anchor="middle" font-size="10">memtable（RAM）</text><text x="225" y="104" text-anchor="middle" font-size="9">排序好的</text>
+        <line x1="110" y1="56" x2="160" y2="38" stroke="var(--ink)"/><line x1="110" y1="64" x2="160" y2="90" stroke="var(--ink)"/>
+        <line x1="290" y1="92" x2="340" y2="92" stroke="var(--ink)"/><text x="315" y="84" text-anchor="middle" font-size="9">滿了 flush</text>
+        <g fill="var(--card)" stroke="var(--ink)"><rect x="340" y="70" width="70" height="44"/><rect x="420" y="70" width="70" height="44"/><rect x="500" y="70" width="70" height="44"/></g>
+        <g font-size="9" text-anchor="middle"><text x="375" y="90">SSTable</text><text x="375" y="104">最新</text><text x="455" y="90">SSTable</text><text x="535" y="90">SSTable</text><text x="535" y="104">最舊</text></g>
+        <path d="M455 118 Q495 150 535 118" fill="none" stroke="var(--accent)" stroke-width="2"/><text x="495" y="160" text-anchor="middle" font-size="10" fill="var(--accent)">compaction 合併、丟掉舊版本</text>
+        <text x="20" y="200" font-size="12" class="hand">讀：</text>
+        <g fill="var(--card)" stroke="var(--ink)"><rect x="60" y="184" width="100" height="28"/><rect x="190" y="184" width="100" height="28"/><rect x="320" y="184" width="100" height="28"/><rect x="450" y="184" width="100" height="28" stroke-dasharray="5 3"/></g>
+        <g font-size="9" text-anchor="middle"><text x="110" y="202">① memtable</text><text x="240" y="202">② 最新 SSTable</text><text x="370" y="202">③ 下一層</text><text x="500" y="202">… 直到找到</text></g>
+        <g stroke="var(--ink)"><line x1="160" y1="198" x2="190" y2="198"/><line x1="290" y1="198" x2="320" y2="198"/><line x1="420" y1="198" x2="450" y2="198"/></g>
+        <text x="340" y="236" text-anchor="middle" font-size="10" fill="var(--ink-soft)">每個 SSTable 帶一個 Bloom filter：說「沒有」就整個檔案跳過（Day 26）</text>
+      </svg>
+    </div>
+    <div class="two">
+      <div class="fix"><b>B-tree</b>（PostgreSQL、MySQL InnoDB）<br>像書的目錄：翻到頁碼直接看。寫的時候先 append 到 WAL（crash 後 replay），再改 data page。頁滿了就 page split。</div>
+      <div class="fix"><b>LSM-tree</b>（Cassandra、RocksDB）<br>Log-Structured <b>Merge</b>：先 log 再 merge，所以寫快讀慢。像先寫便條紙，累積一疊再歸檔。</div>
+    </div>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 680 170" role="img" aria-label="Read replicas: writes go to the leader, which ships the WAL to replicas. Reads go to replicas. A user writes name equals Jason to the leader, then reads from a replica that is 2 seconds behind and still sees the old value.">
+        <rect x="30" y="60" width="90" height="40" fill="var(--card)" stroke="var(--ink)"/><text x="75" y="84" text-anchor="middle" font-size="11">user</text>
+        <rect x="230" y="20" width="110" height="40" fill="var(--who)" stroke="var(--ink)" stroke-width="2"/><text x="285" y="38" text-anchor="middle" font-size="11">leader</text><text x="285" y="52" text-anchor="middle" font-size="9">name = Jason</text>
+        <rect x="460" y="20" width="130" height="40" fill="var(--see)" stroke="var(--ink)"/><text x="525" y="38" text-anchor="middle" font-size="11">replica 1</text><text x="525" y="52" text-anchor="middle" font-size="9">name = Jason</text>
+        <rect x="460" y="100" width="130" height="40" fill="var(--may)" stroke="var(--ink)"/><text x="525" y="118" text-anchor="middle" font-size="11">replica 2（落後 2s）</text><text x="525" y="132" text-anchor="middle" font-size="9">name = （舊值）Jay</text>
+        <line x1="120" y1="72" x2="230" y2="42" stroke="var(--ink)"/><text x="170" y="48" font-size="9">① write</text>
+        <line x1="340" y1="40" x2="460" y2="40" stroke="var(--ink)"/><line x1="340" y1="48" x2="460" y2="114" stroke="var(--ink)" stroke-dasharray="5 4"/><text x="400" y="34" text-anchor="middle" font-size="9">WAL 複製（async）</text>
+        <line x1="120" y1="90" x2="460" y2="124" stroke="var(--wrong)" stroke-width="2"/><text x="250" y="122" font-size="9" fill="var(--wrong)">② 馬上 read → 讀到舊值</text>
+        <text x="340" y="162" text-anchor="middle" font-size="11" class="hand">read-your-writes 壞掉：自己剛改的名字不見了</text>
+      </svg>
+    </div>
+  </section>
+
+  <section id="l3">
+    <h2><span class="badge">L3</span>取捨<span class="time">讀 5 分鐘</span></h2>
+    <p class="lead">按「每一類資料」各自選，不是整個系統選一顆 DB。問三個問題：要 JOIN / transaction 嗎？schema 固定嗎？讀多還是寫多？</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 680 250" role="img" aria-label="Decision flow. Need transactions or many joins? Yes: SQL. No: is the schema flexible per record? Yes: document store. No: is access always by key at very high write volume? Yes: key-value or wide-column. No: SQL is still fine.">
+        <polygon points="340,10 470,40 340,70 210,40" fill="var(--who)" stroke="var(--ink)"/><text x="340" y="36" text-anchor="middle" font-size="10">要 ACID transaction</text><text x="340" y="50" text-anchor="middle" font-size="10">或大量 JOIN？</text>
+        <line x1="470" y1="40" x2="530" y2="40" stroke="var(--ink)"/><text x="500" y="32" text-anchor="middle" font-size="9">是</text>
+        <rect x="530" y="22" width="130" height="36" fill="var(--see)" stroke="var(--ink)" stroke-width="2"/><text x="595" y="44" text-anchor="middle" font-size="11">SQL（訂單、帳務）</text>
+        <line x1="340" y1="70" x2="340" y2="95" stroke="var(--ink)"/><text x="352" y="88" font-size="9">否</text>
+        <polygon points="340,95 470,125 340,155 210,125" fill="var(--who)" stroke="var(--ink)"/><text x="340" y="121" text-anchor="middle" font-size="10">每筆結構不一樣？</text><text x="340" y="135" text-anchor="middle" font-size="10">（商品屬性）</text>
+        <line x1="470" y1="125" x2="530" y2="125" stroke="var(--ink)"/><text x="500" y="117" text-anchor="middle" font-size="9">是</text>
+        <rect x="530" y="107" width="130" height="36" fill="var(--see)" stroke="var(--ink)" stroke-width="2"/><text x="595" y="122" text-anchor="middle" font-size="10">Document</text><text x="595" y="136" text-anchor="middle" font-size="9">或 PG JSONB</text>
+        <line x1="340" y1="155" x2="340" y2="180" stroke="var(--ink)"/><text x="352" y="173" font-size="9">否</text>
+        <polygon points="340,180 470,210 340,240 210,210" fill="var(--who)" stroke="var(--ink)"/><text x="340" y="206" text-anchor="middle" font-size="10">永遠用 key 查</text><text x="340" y="220" text-anchor="middle" font-size="10">+ 寫入量超大？</text>
+        <line x1="470" y1="210" x2="530" y2="210" stroke="var(--ink)"/><text x="500" y="202" text-anchor="middle" font-size="9">是</text>
+        <rect x="530" y="192" width="130" height="36" fill="var(--see)" stroke="var(--ink)" stroke-width="2"/><text x="595" y="207" text-anchor="middle" font-size="10">KV / wide-column</text><text x="595" y="221" text-anchor="middle" font-size="9">（log、事件、session）</text>
+        <line x1="210" y1="210" x2="150" y2="210" stroke="var(--ink)"/><text x="180" y="202" text-anchor="middle" font-size="9">否</text>
+        <rect x="20" y="192" width="130" height="36" fill="var(--card)" stroke="var(--ink)"/><text x="85" y="214" text-anchor="middle" font-size="10">SQL 照樣夠用</text>
+      </svg>
+    </div>
+    <div class="scroll">
+      <table>
+        <tr><th>決策</th><th>A 的好處</th><th>B 的好處</th><th>怎麼選</th></tr>
+        <tr><td>Normalize vs Denormalize</td><td>改一處就好、不重複</td><td>讀不用 JOIN，快</td><td>讀多改少、而且 JOIN 成為瓶頸，才反正規化（De- = 反）</td></tr>
+        <tr><td>B-tree vs LSM</td><td>讀快</td><td>寫快</td><td>read-heavy 用 B-tree；write-heavy（log、時序）用 LSM</td></tr>
+        <tr><td>讀 leader vs 讀 replica</td><td>永遠最新</td><td>分散讀負載</td><td>自己剛寫的讀 leader；別人的、可以舊幾秒的讀 replica</td></tr>
+      </table>
+    </div>
+    <div class="scroll">
+      <table>
+        <tr><th>一致性</th><th>保證</th><th>例子</th><th>代價</th></tr>
+        <tr><td>Strong</td><td>讀到一定最新</td><td>轉帳、庫存</td><td>latency 高</td></tr>
+        <tr><td>Read-your-writes</td><td>自己寫完自己一定看得到</td><td>自己發的文</td><td>要 sticky 或讀 leader</td></tr>
+        <tr><td>Eventual</td><td>最後會一致</td><td>分析、推薦</td><td>要講得出能接受舊多久</td></tr>
+      </table>
+    </div>
+    <p class="sub">面試關鍵：不要只說「選 eventual」，要講 why 和可以接受的 staleness window。</p>
+  </section>
+
+  <section id="l4">
+    <h2><span class="badge">L4</span>AWS 怎麼做<span class="time">讀 4 分鐘</span></h2>
+    <p class="lead">關聯資料放 Aurora / RDS，前面掛 RDS Proxy 管連線；用 key 查的大量資料放 DynamoDB；寫爆的時序資料放 Keyspaces 或 Timestream。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 680 220" role="img" aria-label="Polyglot layout on AWS. App pods on EKS connect through RDS Proxy to an Aurora writer and two readers for orders. The same app uses DynamoDB for the catalog and sessions, and Keyspaces for clickstream events.">
+        <rect x="20" y="80" width="110" height="60" fill="var(--card)" stroke="var(--accent)" stroke-width="2"/><text x="75" y="106" text-anchor="middle" font-size="11">EKS app</text><text x="75" y="122" text-anchor="middle" font-size="9">幾百個 pod</text>
+        <rect x="170" y="30" width="110" height="40" fill="var(--who)" stroke="var(--ink)"/><text x="225" y="54" text-anchor="middle" font-size="10">RDS Proxy</text>
+        <rect x="320" y="20" width="110" height="34" fill="var(--see)" stroke="var(--ink)" stroke-width="2"/><text x="375" y="41" text-anchor="middle" font-size="10">Aurora writer</text>
+        <rect x="320" y="62" width="110" height="28" fill="var(--see)" stroke="var(--ink)"/><text x="375" y="80" text-anchor="middle" font-size="9">reader × 2</text>
+        <rect x="460" y="30" width="200" height="40" fill="none" stroke="var(--ink-soft)" stroke-dasharray="4 3"/><text x="560" y="48" text-anchor="middle" font-size="9">共用 storage volume，跨 3 AZ</text><text x="560" y="62" text-anchor="middle" font-size="9">（所以 replica lag 通常很小）</text>
+        <rect x="170" y="110" width="200" height="40" fill="var(--may)" stroke="var(--ink)"/><text x="270" y="128" text-anchor="middle" font-size="10">DynamoDB</text><text x="270" y="142" text-anchor="middle" font-size="9">catalog、session（用 key 查）</text>
+        <rect x="170" y="165" width="200" height="40" fill="var(--card)" stroke="var(--ink)"/><text x="270" y="183" text-anchor="middle" font-size="10">Keyspaces（Cassandra）</text><text x="270" y="197" text-anchor="middle" font-size="9">clickstream（寫爆）</text>
+        <g stroke="var(--ink)"><line x1="130" y1="100" x2="170" y2="50"/><line x1="280" y1="50" x2="320" y2="38"/><line x1="280" y1="54" x2="320" y2="76"/><line x1="130" y1="115" x2="170" y2="130"/><line x1="130" y1="128" x2="170" y2="185"/></g>
+        <text x="520" y="140" text-anchor="middle" font-size="11" class="hand">一個系統，三種資料，三顆 DB</text>
+        <text x="520" y="160" text-anchor="middle" font-size="10" fill="var(--ink-soft)">polyglot persistence</text>
+      </svg>
+    </div>
+    <div class="scroll">
+      <table>
+        <tr><th>服務</th><th>用在哪</th><th>陷阱</th></tr>
+        <tr><td>RDS PostgreSQL read replica</td><td>分散讀</td><td>async 複製，寫入量大或長 transaction 時 lag 會到秒級以上。看 <code>ReplicaLag</code>。</td></tr>
+        <tr><td>Aurora</td><td>關聯資料主力</td><td>reader 共用 storage，lag 通常在 100ms 以內，但還是不為零。只有一個 writer，寫入上限 = 一台 instance。</td></tr>
+        <tr><td>RDS Proxy</td><td>connection pooling</td><td>pod 數 × 每個 pool 大小很容易超過 <code>max_connections</code>。Proxy 收斂連線，但 session 狀態（temp table、<code>SET</code>）會讓連線被 pin 住，失去共用效果。</td></tr>
+        <tr><td>DynamoDB</td><td>key 存取、大量</td><td>單一 partition 上限 3,000 RCU / 1,000 WCU，熱 key 會 throttle。GSI 只能 eventually consistent 讀。item 上限 400KB。</td></tr>
+        <tr><td>DocumentDB</td><td>document（Mongo 相容）</td><td>是「相容」不是 MongoDB 本身，部分 operator 不支援，搬之前要先跑相容性檢查。</td></tr>
+      </table>
+    </div>
+    <p class="sub">誰會吵：後端想用熟悉的 ORM 全塞 PostgreSQL，SRE 不想多養一種 DB 的 on-call，財務看 DynamoDB on-demand 帳單。design review 會被問：「你為什麼需要第二種 DB？用 JSONB 不行嗎？」</p>
+  </section>
+
+  <section id="l5">
+    <h2><span class="badge">L5</span>規模化<span class="time">讀 3 分鐘</span></h2>
+    <p class="lead">先讀後寫：讀撐不住加 replica 和 cache，寫撐不住才 shard。shard 是最後一步，因為跨 shard 的 JOIN 和 transaction 從此變貴。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 680 230" role="img" aria-label="Evolution ladder. Step 1 single RDS instance. Step 2 read replicas plus a cache for read pressure. Step 3 bigger writer or Aurora. Step 4 shard by partition key, or move the hottest key-access tables to DynamoDB.">
+        <rect x="20" y="170" width="150" height="50" fill="var(--card)" stroke="var(--ink)" stroke-width="1.5"/>
+        <text x="30" y="190" font-size="11" class="hand">① 一台 RDS</text><text x="30" y="208" font-size="9">什麼都放這</text>
+        <rect x="180" y="130" width="150" height="90" fill="var(--see)" stroke="var(--ink)" stroke-width="1.5"/>
+        <text x="190" y="150" font-size="11" class="hand">② 讀太多</text><text x="190" y="170" font-size="9">read replica</text><text x="190" y="186" font-size="9">+ cache（Day 6-7）</text>
+        <rect x="340" y="80" width="150" height="140" fill="var(--who)" stroke="var(--ink)" stroke-width="1.5"/>
+        <text x="350" y="100" font-size="11" class="hand">③ 寫開始緊</text><text x="350" y="120" font-size="9">vertical scale</text><text x="350" y="136" font-size="9">換 Aurora</text><text x="350" y="152" font-size="9">connection pooling</text>
+        <rect x="500" y="30" width="160" height="190" fill="var(--may)" stroke="var(--ink)" stroke-width="1.5"/>
+        <text x="510" y="50" font-size="11" class="hand">④ 寫超過一台</text><text x="510" y="70" font-size="9">依 partition key shard</text><text x="510" y="86" font-size="9">（Vitess / Citus / 自己切）</text><text x="510" y="110" font-size="9">或把最熱、用 key 查的</text><text x="510" y="126" font-size="9">那幾張表搬到 DynamoDB</text>
+        <text x="95" y="160" text-anchor="middle" font-size="9" fill="var(--ink-soft)">換掉：讀全壓 leader</text>
+        <text x="255" y="120" text-anchor="middle" font-size="9" fill="var(--ink-soft)">換掉：小機器</text>
+        <text x="415" y="70" text-anchor="middle" font-size="9" fill="var(--ink-soft)">換掉：單一 writer</text>
+      </svg>
+    </div>
+    <div class="scroll">
+      <table>
+        <tr><th>路線</th><th>做法</th><th>好處</th><th>代價</th></tr>
+        <tr><td>撐住 SQL</td><td>Vitess / Citus 幫你 shard</td><td>保留 SQL 和 ORM</td><td>跨 shard JOIN、resharding 很痛</td></tr>
+        <tr><td>換 NoSQL</td><td>熱路徑搬 DynamoDB</td><td>scale 是內建的</td><td>access pattern 要先想好，事後加查詢很難</td></tr>
+      </table>
+    </div>
+    <details>
+      <summary>之後再看：data model 六步</summary>
+      <div><ol><li>Entities 有哪些</li><li>Access pattern 最常怎麼查</li><li>Partition key 按什麼分</li><li>Secondary index 還要查什麼</li><li>Hot partition 會不會有熱 key</li><li>Backfill 舊資料怎麼遷</li></ol></div>
+    </details>
+  </section>
+
+  <section id="l6">
+    <h2><span class="badge">L6</span>故障與 on-call<span class="time">讀 4 分鐘</span></h2>
+    <p class="lead">DB 最常見的三種 page：replica 落後、連線用完、熱 partition 被 throttle。三種都在 metric 上看得到，前提是你有設 alarm。</p>
+    <div class="panels">
+      <div class="panel">
+        <h3>A · replica lag</h3>
+        <svg viewBox="0 0 300 80" role="img" aria-label="Replica lag line climbing from near zero to 30 seconds after a big batch job.">
+          <polyline points="10,65 80,63 120,62 150,40 180,20 230,15 290,14" fill="none" stroke="var(--wrong)" stroke-width="2.5"/>
+          <line x1="10" y1="55" x2="290" y2="55" stroke="var(--ok)" stroke-dasharray="4 3"/><text x="292" y="58" font-size="9" text-anchor="end">alert 5s</text>
+          <text x="150" y="76" text-anchor="middle" font-size="9">batch job 開跑</text>
+        </svg>
+        <p>使用者看到舊資料。止血：讀流量導回 leader，或暫停 batch。</p>
+      </div>
+      <div class="panel">
+        <h3>B · 連線用完</h3>
+        <svg viewBox="0 0 300 80" role="img" aria-label="Many pods each with a pool of 20 exceed the database max connections.">
+          <g fill="var(--card)" stroke="var(--ink)"><rect x="10" y="10" width="40" height="22"/><rect x="55" y="10" width="40" height="22"/><rect x="100" y="10" width="40" height="22"/><rect x="145" y="10" width="40" height="22"/></g>
+          <text x="210" y="26" font-size="9">… × 300 pod</text>
+          <rect x="60" y="48" width="180" height="24" fill="var(--may)" stroke="var(--ink)"/><text x="150" y="64" text-anchor="middle" font-size="9">300 × 20 = 6,000 &gt; max_connections</text>
+        </svg>
+        <p>錯誤是 <code>FATAL: sorry, too many clients already</code>。常在 HPA 擴容時爆。</p>
+      </div>
+      <div class="panel">
+        <h3>C · 熱 partition</h3>
+        <svg viewBox="0 0 300 80" role="img" aria-label="One DynamoDB partition at its limit while others are idle.">
+          <rect x="10" y="20" width="80" height="40" fill="var(--wrong)" opacity=".6" stroke="var(--ink)"/><rect x="110" y="20" width="80" height="40" fill="var(--card)" stroke="var(--ink)"/><rect x="210" y="20" width="80" height="40" fill="var(--card)" stroke="var(--ink)"/>
+          <text x="50" y="44" text-anchor="middle" font-size="9">1,000 WCU 滿</text><text x="150" y="44" text-anchor="middle" font-size="9">閒</text><text x="250" y="44" text-anchor="middle" font-size="9">閒</text>
+        </svg>
+        <p>表的總容量還很多，但一個 key 打爆一個 partition。<code>ProvisionedThroughputExceededException</code>。</p>
+      </div>
+      <div class="panel">
+        <h3>D · LSM compaction 跟不上</h3>
+        <svg viewBox="0 0 300 80" role="img" aria-label="SSTable count piling up faster than compaction merges them.">
+          <g fill="var(--card)" stroke="var(--ink)"><rect x="10" y="50" width="30" height="20"/><rect x="45" y="44" width="30" height="26"/><rect x="80" y="36" width="30" height="34"/><rect x="115" y="26" width="30" height="44"/><rect x="150" y="16" width="30" height="54" fill="var(--may)"/></g>
+          <text x="200" y="40" font-size="9">SSTable 越堆越多</text><text x="200" y="56" font-size="9">→ 讀變慢、寫被擋</text>
+        </svg>
+        <p>寫入速度長期 &gt; compaction 速度，讀要翻的層數變多，最後 write stall。</p>
+      </div>
+    </div>
+    <div class="scroll">
+      <table>
+        <tr><th>Metric</th><th>Alert 範例</th></tr>
+        <tr><td>RDS <code>ReplicaLag</code> / Aurora <code>AuroraReplicaLag</code></td><td>&gt; 5s</td></tr>
+        <tr><td><code>DatabaseConnections</code></td><td>&gt; 90% of max</td></tr>
+        <tr><td>DynamoDB <code>ThrottledRequests</code></td><td>&gt; 0 持續 5 分鐘</td></tr>
+        <tr><td><code>FreeStorageSpace</code></td><td>&lt; 15%</td></tr>
+      </table>
+    </div>
+    <p>第一個指令（在 PostgreSQL replica 上看落後多久）：</p>
+    <pre>SELECT now() - pg_last_xact_replay_timestamp() AS replica_lag;</pre>
+    <p class="sub">SLO 範例（你筆記裡定的目標）：query P99 &lt; 100ms、replication lag &lt; 1s、connection 使用率 &lt; 80%。</p>
+  </section>
+
+  <section id="l7">
+    <h2><span class="badge">L7</span>面試<span class="time">讀 3 分鐘</span></h2>
+    <p class="lead">題目：「電商要存三種資料：訂單、商品目錄（每類商品屬性都不同）、使用者點擊 log（每秒 5 萬筆）。你怎麼選 DB？」</p>
+    <p>先自己講：三類各選什麼、各一個理由、一個監控點。再打開。</p>
+    <details>
+      <summary>L4 vs L6 對照</summary>
+      <div>
+        <div class="wrong"><b>L4</b>「資料量很大，所以用 NoSQL。」<br>問題：用資料量選、整個系統選一顆、沒問 access pattern、跳過 scope。</div>
+        <div class="fix"><b>L6</b> 多了四件事：</div>
+        <ol>
+          <li>先 clarify：每類怎麼查、要不要 transaction、能接受舊多久。</li>
+          <li>按資料類別各選：訂單 SQL（ACID、JOIN）、目錄 JSONB 或 document、點擊 log 用 LSM 系（write-heavy、只 append）。</li>
+          <li>講代價：多一種 DB = 多一套 on-call；能用 JSONB 撐就先不加。</li>
+          <li>營運：replica lag 會破 read-your-writes，所以「剛下的單」讀 leader；監控 lag、連線數、throttle。</li>
+        </ol>
+        <p class="en">"I'd pick per data type, not one database for everything. Orders need ACID transactions and joins, so they go in PostgreSQL on Aurora. Product attributes vary by category, so I'd start with a JSONB column and only move to a document store if that gets painful. Clicks are 50k writes a second, append-only, read by key or time range, which fits an LSM-based store like Cassandra. Data volume alone isn't the deciding factor; sharded SQL handles large data too. Reads of an order right after checkout go to the writer, because a lagging replica would break read-your-writes, and I'd alert on replica lag and connection count."</p>
+      </div>
+    </details>
+  </section>
+
+  <section id="trail">
+    <h2><span class="badge">錯題</span>這次的釐清<span class="time">讀 2 分鐘</span></h2>
+    <div class="wrong"><b>我錯在這</b>✗ LSM-tree 讀快、B-tree 寫快<br>✓ 反過來：B-tree read-optimized，LSM write-optimized<br>→ 為什麼搞混：沒拆字。Log-Structured Merge = 先 log 再 merge，所以寫快讀慢。</div>
+    <div class="wrong"><b>我錯在這</b>✗ Denormalization 就是 Normalization<br>✓ 完全相反：normalize 消除重複，denormalize 允許重複換讀取速度<br>→ 為什麼搞混：沒注意 De- 是「反」。</div>
+    <div class="wrong"><b>我錯在這</b>✗ 看到「大量資料」就選 NoSQL<br>✓ 關鍵是 access pattern 和資料關聯；SQL + sharding 也扛得住大量資料<br>→ 為什麼搞混：「大量 = NoSQL」的刻板印象，沒先分析怎麼查。</div>
+    <div class="wrong"><b>我錯在這</b>✗ Interview Drill 直接開始設計<br>✓ Step 1 先 clarify + scope negotiation<br>→ 為什麼搞混：緊張就跳步。這筆後來演化成頭號主線，registry 還開著。</div>
+  </section>
+
+  <div class="next">
+    <b>下一步（2 分鐘）</b>
+    <p>不看這頁，畫出 L3 那三個菱形的決策流程，在每個出口寫一個例子。</p>
+  </div>
+
+</main>
