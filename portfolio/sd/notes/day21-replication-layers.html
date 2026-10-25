@@ -1,0 +1,324 @@
+<title>Replication and Leader Election</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC:wght@400;700&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: one notebook column on graph paper; teal sd accent band; figures on taped cards, failure cases as comic panels */
+:root {
+  --paper: #F6F8FA;
+  --grid: rgba(90,130,170,.16);
+  --ink: #23313E;
+  --ink-soft: #55677A;
+  --card: #FFFFFF;
+  --accent: #0B7285;
+  --on-accent: #FFFFFF;
+  --tape: color-mix(in srgb, var(--accent) 35%, transparent);
+  --who: #FFE98A;
+  --see: #BDEEF6;
+  --may: #F9CDE0;
+  --wrong: #D2453A;
+  --ok: #2F8F5B;
+  --line: #9DB0C2;
+  --font-hand: "LXGW WenKai TC", "Noto Sans TC", "PingFang TC", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #1A2320; --grid: rgba(200,230,210,.08); --ink: #E6EDE8; --ink-soft: #A9BAB1;
+    --card: #24302C; --accent: #3BC9DB; --on-accent: #10221F; --who: #8A7A2A; --see: #2B6A74; --may: #7A3F57;
+    --wrong: #FF8A7E; --ok: #7FD3A1; --line: #5E7268; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #1A2320; --grid: rgba(200,230,210,.08); --ink: #E6EDE8; --ink-soft: #A9BAB1;
+  --card: #24302C; --accent: #3BC9DB; --on-accent: #10221F; --who: #8A7A2A; --see: #2B6A74; --may: #7A3F57;
+  --wrong: #FF8A7E; --ok: #7FD3A1; --line: #5E7268; color-scheme: dark;
+}
+body {
+  background-color: var(--paper);
+  background-image: linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 22px 22px;
+  color: var(--ink);
+  font-family: var(--font-hand);
+  font-size: 17px;
+  line-height: 1.75;
+}
+.band { background: var(--accent); color: var(--on-accent); padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 22px 18px; }
+.band > div { max-width: 760px; margin: 0 auto; display: grid; gap: 8px; }
+.band a { color: inherit; }
+.page { max-width: 760px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 28px 64px; display: grid; gap: 36px; }
+h1, h2, h3 { text-wrap: balance; line-height: 1.3; margin: 0; }
+h1 { font-size: 2.1rem; }
+h2 { font-size: 1.4rem; display: flex; flex-wrap: wrap; align-items: baseline; gap: 10px; }
+h2 .badge { font-family: var(--font-mono); font-size: .78rem; background: var(--accent); color: var(--on-accent); padding: 1px 8px; border-radius: 3px; }
+h2 .time { font-family: var(--font-mono); font-size: .74rem; color: var(--ink-soft); letter-spacing: .04em; }
+p { margin: 0; }
+section { display: grid; gap: 14px; min-width: 0; }
+.sub { font-size: .95rem; opacity: .9; }
+.lead { font-size: 1.12rem; font-weight: 700; }
+.progress { display: flex; flex-wrap: wrap; gap: 6px 12px; font-family: var(--font-mono); font-size: .8rem; }
+.progress a { color: inherit; text-decoration: none; }
+mark { background: linear-gradient(transparent 52%, var(--who) 52%); color: inherit; padding: 0 2px; }
+mark.see { background: linear-gradient(transparent 52%, var(--see) 52%); }
+mark.may { background: linear-gradient(transparent 52%, var(--may) 52%); }
+code { font-family: var(--font-mono); font-size: .86em; background: color-mix(in srgb, var(--line) 22%, transparent); padding: 1px 5px; border-radius: 3px; }
+.card { position: relative; background: var(--card); padding: 22px 16px 14px; box-shadow: 0 1px 3px rgba(0,0,0,.12); min-width: 0; }
+.card::before { content: ""; position: absolute; top: -9px; left: 50%; width: 92px; height: 20px; transform: translateX(-50%) rotate(-2deg); background: var(--tape); }
+.scroll { overflow-x: auto; }
+svg.fig { display: block; min-width: 600px; width: 100%; height: auto; }
+svg text { font-family: var(--font-mono); fill: var(--ink); }
+svg .hand { font-family: var(--font-hand); }
+.rule { border-left: 4px solid var(--accent); padding: 6px 12px; font-size: 1.05rem; }
+.wrong { border-left: 4px solid var(--wrong); padding: 4px 12px; display: grid; gap: 2px; }
+.wrong b { color: var(--wrong); font-size: .85rem; letter-spacing: .05em; }
+.fix { border-left: 4px solid var(--ok); padding: 4px 12px; }
+.panels { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 14px; }
+.panel { border: 2px solid var(--ink); background: var(--card); padding: 10px; display: grid; gap: 6px; min-width: 0; align-content: start; }
+.panel h3 { font-size: 1rem; font-family: var(--font-mono); }
+.panel p { font-size: .92rem; }
+.panel svg { width: 100%; height: auto; display: block; }
+@media (max-width: 560px) { .panels { grid-template-columns: 1fr; } }
+table { border-collapse: collapse; width: 100%; font-size: .95rem; font-variant-numeric: tabular-nums; }
+th, td { border-bottom: 1px dashed var(--line); padding: 8px 6px; text-align: left; vertical-align: top; }
+th { font-family: var(--font-mono); font-size: .78rem; letter-spacing: .05em; color: var(--ink-soft); font-weight: 600; }
+ol, ul { margin: 0; padding-left: 1.3em; display: grid; gap: 6px; }
+details { background: var(--card); border: 2px dashed var(--line); padding: 10px 14px; }
+details[open] { border-style: solid; }
+details summary { cursor: pointer; font-weight: 700; }
+details > div { display: grid; gap: 10px; margin-top: 10px; }
+.two { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 14px; }
+@media (max-width: 560px) { .two { grid-template-columns: 1fr; } }
+.en { font-family: var(--font-mono); font-size: .88rem; color: var(--ink-soft); }
+pre { margin: 0; font-family: var(--font-mono); font-size: .82rem; line-height: 1.5; background: var(--card); border: 1px solid var(--line); padding: 10px 12px; overflow-x: auto; }
+.next { border: 3px solid var(--accent); background: var(--card); padding: 14px 16px; display: grid; gap: 6px; }
+a { color: var(--accent); text-underline-offset: 3px; }
+a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+</style>
+
+<header class="band">
+  <div>
+    <p class="sub">sd 課程 · P2 分散式核心 · Day 21-22 · S27，step G 5/5</p>
+    <h1>Replication and Leader Election</h1>
+    <p>讀完這頁你能：順著一條因果鏈講完 replication，用過半票解釋為什麼不會腦裂，並說出 3AM leader 掛掉時寫入會停多久。</p>
+    <nav class="progress" aria-label="layers"><a href="#l0">L0 ✓</a><a href="#l1">L1 ✓</a><a href="#l2">L2 ✓</a><a href="#l3">L3 ✓</a><a href="#l4">L4 ✓</a><a href="#l5">L5 ✓</a><a href="#l6">L6 ✓</a><a href="#l7">L7 ✓</a><a href="#trail">錯題</a></nav>
+  </div>
+</header>
+
+<main class="page">
+
+  <p class="sub">step G 5/5：你選 C 時主動講了反面代價，read-after-write 三個解法一口氣零提示講完。這頁把它整理成能在白板上畫的版本。</p>
+
+  <section id="l0">
+    <h2><span class="badge">L0</span>一張圖<span class="time">讀 1 分鐘</span></h2>
+    <p class="lead">會議只有一位正式記錄（leader），其他人抄他的版本。記錄請病假，就要投票選新的，而且要過半數才算。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 680 180" role="img" aria-label="One secretary writes the official minutes; three others copy them. When the secretary is absent, the others vote and need a majority to pick a new one.">
+        <rect x="40" y="40" width="150" height="60" fill="var(--who)" stroke="var(--ink)" stroke-width="2"/><text x="115" y="66" text-anchor="middle" font-size="12" class="hand">正式記錄</text><text x="115" y="86" text-anchor="middle" font-size="10">唯一能寫的人</text>
+        <g fill="var(--see)" stroke="var(--ink)"><rect x="260" y="20" width="110" height="36"/><rect x="260" y="70" width="110" height="36"/><rect x="260" y="120" width="110" height="36"/></g>
+        <g font-size="10" text-anchor="middle"><text x="315" y="42">抄本 1</text><text x="315" y="92">抄本 2</text><text x="315" y="142">抄本 3</text></g>
+        <g stroke="var(--ink)"><line x1="190" y1="62" x2="260" y2="38"/><line x1="190" y1="70" x2="260" y2="88"/><line x1="190" y1="78" x2="260" y2="138"/></g>
+        <rect x="430" y="50" width="220" height="80" fill="var(--card)" stroke="var(--ink)" stroke-dasharray="5 3"/>
+        <text x="540" y="76" text-anchor="middle" font-size="11" class="hand">記錄請假 →</text><text x="540" y="98" text-anchor="middle" font-size="11" class="hand">抄本們投票，過半才算</text><text x="540" y="118" text-anchor="middle" font-size="10" fill="var(--ink-soft)">不能同時有兩位正式記錄</text>
+      </svg>
+    </div>
+  </section>
+
+  <section id="l1">
+    <h2><span class="badge">L1</span>第一性原理<span class="time">讀 3 分鐘</span></h2>
+    <p class="lead">一條因果鏈記住全部：硬體會壞 → 要多份 → 多份就有「誰對」→ leader 給唯一順序 → leader 會死 → 要選舉 → 選舉怕腦裂 → 過半解決。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 680 240" role="img" aria-label="Causal chain: hardware fails 2 to 10 percent a year, so keep copies; copies raise who is right, solved by a single leader giving one ordering; the leader can die, so elect a new one; elections risk split brain, solved by majority votes; copying takes time, so monitor replication lag.">
+        <g fill="var(--card)" stroke="var(--ink)" stroke-width="1.5">
+          <rect x="20" y="20" width="190" height="40"/><rect x="245" y="20" width="190" height="40"/><rect x="470" y="20" width="190" height="40"/>
+          <rect x="470" y="110" width="190" height="40"/><rect x="245" y="110" width="190" height="40"/><rect x="20" y="110" width="190" height="40"/>
+        </g>
+        <g font-size="10" text-anchor="middle">
+          <text x="115" y="44">硬體年故障率 2–10%</text><text x="340" y="44">→ 存多份（replication）</text><text x="565" y="44">多份：誰對？</text>
+          <text x="565" y="134">single leader：唯一順序</text><text x="340" y="134">leader 會死 → election</text><text x="115" y="134">選舉怕 split-brain</text>
+        </g>
+        <g stroke="var(--ink)"><line x1="210" y1="40" x2="245" y2="40"/><line x1="435" y1="40" x2="470" y2="40"/><line x1="565" y1="60" x2="565" y2="110"/><line x1="470" y1="130" x2="435" y2="130"/><line x1="245" y1="130" x2="210" y2="130"/></g>
+        <rect x="20" y="180" width="190" height="40" fill="var(--who)" stroke="var(--ink)" stroke-width="1.5"/><text x="115" y="204" text-anchor="middle" font-size="10">過半票（majority）</text>
+        <line x1="115" y1="150" x2="115" y2="180" stroke="var(--ink)"/>
+        <rect x="245" y="180" width="415" height="40" fill="var(--may)" stroke="var(--ink)" stroke-width="1.5"/><text x="452" y="204" text-anchor="middle" font-size="10">另一條支線：光速有限，複製要時間 → replication lag → 要監控</text>
+      </svg>
+    </div>
+    <p>面試時順著這條鏈講，聽起來像在推理，不是在背書。</p>
+  </section>
+
+  <section id="l2">
+    <h2><span class="badge">L2</span>機制<span class="time">讀 5 分鐘</span></h2>
+    <p class="lead">sync / async / semi-sync 的差別只有一個：leader 什麼時候回 client「OK」。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 680 230" role="img" aria-label="Three write timelines. Sync: leader waits for every replica before OK, slowest. Semi-sync: leader waits for at least one replica, then OK. Async: leader writes locally and returns OK at once; if it crashes before shipping, that write is lost.">
+        <text x="20" y="40" font-size="12" class="hand">sync</text><text x="20" y="110" font-size="12" class="hand">semi-sync</text><text x="20" y="180" font-size="12" class="hand">async</text>
+        <g stroke="var(--line)" stroke-width="2"><line x1="110" y1="36" x2="650" y2="36"/><line x1="110" y1="106" x2="650" y2="106"/><line x1="110" y1="176" x2="650" y2="176"/></g>
+        <g fill="var(--ok)" stroke="var(--ink)"><circle cx="130" cy="36" r="6"/><circle cx="130" cy="106" r="6"/><circle cx="130" cy="176" r="6"/></g>
+        <text x="130" y="22" text-anchor="middle" font-size="9">寫本地</text>
+        <g fill="var(--see)" stroke="var(--ink)"><rect x="200" y="28" width="60" height="16"/><rect x="300" y="28" width="60" height="16"/></g><text x="230" y="40" text-anchor="middle" font-size="8">replica1 ack</text><text x="330" y="40" text-anchor="middle" font-size="8">replica2 ack</text>
+        <rect x="400" y="26" width="50" height="20" fill="var(--who)" stroke="var(--ink)"/><text x="425" y="40" text-anchor="middle" font-size="10">OK</text>
+        <rect x="200" y="98" width="60" height="16" fill="var(--see)" stroke="var(--ink)"/><text x="230" y="110" text-anchor="middle" font-size="8">replica1 ack</text>
+        <rect x="280" y="96" width="50" height="20" fill="var(--who)" stroke="var(--ink)"/><text x="305" y="110" text-anchor="middle" font-size="10">OK</text>
+        <rect x="350" y="98" width="60" height="16" fill="var(--card)" stroke="var(--line)" stroke-dasharray="4 3"/><text x="380" y="110" text-anchor="middle" font-size="8">replica2 晚點</text>
+        <rect x="150" y="166" width="50" height="20" fill="var(--who)" stroke="var(--ink)"/><text x="175" y="180" text-anchor="middle" font-size="10">OK</text>
+        <text x="230" y="172" font-size="14" fill="var(--wrong)">✕</text><text x="250" y="180" font-size="9" fill="var(--wrong)">leader 在這裡掛掉 → 這筆沒傳出去，已回 OK 卻不見了</text>
+        <text x="470" y="40" font-size="9" fill="var(--ink-soft)">最慢、零遺失；一台 replica 掛就卡寫入</text>
+        <text x="430" y="110" font-size="9" fill="var(--ink-soft)">折衷：至少一份在別台</text>
+      </svg>
+    </div>
+    <p>判斷標準只有一個：<mark>丟掉這一筆的代價</mark>。訂單 = 錢，不能丟 → sync 或 semi-sync。按讚 → async 就好。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 680 190" role="img" aria-label="Seven nodes split by a partition into a group of four and a group of three. The four-node side has a majority, 4 greater than 3.5, and elects a leader. The three-node side cannot reach a majority, so it cannot elect one. Two majorities cannot exist at once.">
+        <rect x="30" y="30" width="330" height="110" fill="var(--see)" opacity=".35" stroke="var(--ink)"/>
+        <rect x="420" y="30" width="230" height="110" fill="var(--may)" opacity=".35" stroke="var(--ink)"/>
+        <line x1="390" y1="20" x2="390" y2="150" stroke="var(--wrong)" stroke-width="3" stroke-dasharray="8 5"/><text x="390" y="168" text-anchor="middle" font-size="10" fill="var(--wrong)">partition</text>
+        <g fill="var(--card)" stroke="var(--ink)" stroke-width="1.5"><circle cx="80" cy="85" r="20"/><circle cx="150" cy="85" r="20"/><circle cx="220" cy="85" r="20"/><circle cx="290" cy="85" r="20"/><circle cx="470" cy="85" r="20"/><circle cx="535" cy="85" r="20"/><circle cx="600" cy="85" r="20"/></g>
+        <circle cx="150" cy="85" r="20" fill="var(--who)" stroke="var(--ink)" stroke-width="2.5"/><text x="150" y="89" text-anchor="middle" font-size="9">leader</text>
+        <text x="195" y="128" text-anchor="middle" font-size="11" class="hand">4 台：4 &gt; 7/2 = 3.5 → 選得出 leader</text>
+        <text x="535" y="128" text-anchor="middle" font-size="11" class="hand">3 台：湊不到過半 → 不能選</text>
+        <text x="340" y="186" text-anchor="middle" font-size="11">兩個「過半」的群組不可能同時存在 → 腦裂在數學上不可能（跟 W + R &gt; N 同一個鴿籠原理）</text>
+      </svg>
+    </div>
+  </section>
+
+  <section id="l3">
+    <h2><span class="badge">L3</span>取捨<span class="time">讀 4 分鐘</span></h2>
+    <p class="lead">三種 topology 是一根滑桿：越往右，寫入可用性越高，衝突越難處理。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 680 160" role="img" aria-label="Slider from single leader to multi leader to leaderless. Moving right, write availability rises and conflict complexity rises.">
+        <line x1="60" y1="70" x2="620" y2="70" stroke="var(--ink)" stroke-width="2"/><polygon points="620,64 632,70 620,76" fill="var(--ink)"/>
+        <g stroke="var(--ink)" stroke-width="1.5"><circle cx="100" cy="70" r="11" fill="var(--accent)"/><circle cx="340" cy="70" r="11" fill="var(--who)"/><circle cx="580" cy="70" r="11" fill="var(--may)"/></g>
+        <g font-size="11" text-anchor="middle"><text x="100" y="102">Single-leader</text><text x="340" y="102">Multi-leader</text><text x="580" y="102">Leaderless</text></g>
+        <g font-size="9" text-anchor="middle" fill="var(--ink-soft)"><text x="100" y="120">唯一順序，零衝突</text><text x="100" y="134">寫入卡在一台</text><text x="340" y="120">每區都能寫</text><text x="340" y="134">同 key 並發寫 = 衝突</text><text x="580" y="120">quorum W + R &gt; N</text><text x="580" y="134">衝突靠 LWW / vector clock</text></g>
+        <text x="340" y="36" text-anchor="middle" font-size="11" class="hand">→ 寫入可用性 ↑　衝突複雜度 ↑</text>
+      </svg>
+    </div>
+    <div class="scroll">
+      <table>
+        <tr><th>read-after-write 三解</th><th>做法</th><th>代價</th></tr>
+        <tr><td>Read from leader</td><td>剛寫完的讀直接打 leader</td><td>leader 負擔變大</td></tr>
+        <tr><td>Sync replication</td><td>等 replica 確認才回 OK</td><td>寫入變慢（CAP 選 C）</td></tr>
+        <tr><td>Sticky / 時間窗</td><td>寫後一段時間內，同一 user 的讀走 leader</td><td>實作較複雜</td></tr>
+      </table>
+    </div>
+    <div class="fix"><b>read replica ≠ strong consistency</b>：replica 解的是讀取擴展，不是一致性。replication lag 反而讓「讀自己剛寫的」會失敗。</div>
+  </section>
+
+  <section id="l4">
+    <h2><span class="badge">L4</span>AWS 怎麼做<span class="time">讀 4 分鐘</span></h2>
+    <p class="lead">RDS Multi-AZ 是「sync standby + 自動 failover」；read replica 是「async + 擴充讀」。兩個解的問題不一樣，常被搞混。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 680 220" role="img" aria-label="RDS layout. Primary in AZ a with a synchronous Multi-AZ standby in AZ b that is not readable and takes over on failover by flipping the DNS endpoint. An asynchronous read replica in AZ c serves reads. The app connects by DNS name.">
+        <rect x="20" y="90" width="100" height="50" fill="var(--card)" stroke="var(--accent)" stroke-width="2"/><text x="70" y="112" text-anchor="middle" font-size="10">app</text><text x="70" y="128" text-anchor="middle" font-size="9">連 DNS endpoint</text>
+        <rect x="170" y="20" width="160" height="80" fill="none" stroke="var(--ink-soft)" stroke-dasharray="5 4"/><text x="180" y="36" font-size="10">AZ a</text>
+        <rect x="350" y="20" width="160" height="80" fill="none" stroke="var(--ink-soft)" stroke-dasharray="5 4"/><text x="360" y="36" font-size="10">AZ b</text>
+        <rect x="350" y="130" width="160" height="80" fill="none" stroke="var(--ink-soft)" stroke-dasharray="5 4"/><text x="360" y="146" font-size="10">AZ c</text>
+        <rect x="190" y="46" width="120" height="40" fill="var(--who)" stroke="var(--ink)" stroke-width="2"/><text x="250" y="70" text-anchor="middle" font-size="10">primary</text>
+        <rect x="370" y="46" width="120" height="40" fill="var(--see)" stroke="var(--ink)"/><text x="430" y="64" text-anchor="middle" font-size="10">standby</text><text x="430" y="78" text-anchor="middle" font-size="8">不能讀</text>
+        <rect x="370" y="156" width="120" height="40" fill="var(--card)" stroke="var(--ink)"/><text x="430" y="174" text-anchor="middle" font-size="10">read replica</text><text x="430" y="188" text-anchor="middle" font-size="8">可以讀</text>
+        <line x1="310" y1="66" x2="370" y2="66" stroke="var(--accent)" stroke-width="2.5"/><text x="340" y="60" text-anchor="middle" font-size="9" fill="var(--accent)">sync</text>
+        <line x1="270" y1="86" x2="380" y2="156" stroke="var(--ink)" stroke-dasharray="5 3"/><text x="300" y="130" font-size="9">async</text>
+        <line x1="120" y1="108" x2="190" y2="70" stroke="var(--ink)"/><line x1="120" y1="122" x2="370" y2="176" stroke="var(--ink)"/>
+        <rect x="540" y="46" width="130" height="60" fill="var(--may)" stroke="var(--ink)"/><text x="605" y="66" text-anchor="middle" font-size="9">failover：</text><text x="605" y="80" text-anchor="middle" font-size="9">DNS 改指 standby</text><text x="605" y="94" text-anchor="middle" font-size="9">通常 60–120 秒</text>
+      </svg>
+    </div>
+    <div class="scroll">
+      <table>
+        <tr><th>服務</th><th>用在哪</th><th>陷阱</th></tr>
+        <tr><td>RDS Multi-AZ（instance）</td><td>HA、自動 failover</td><td>standby 不能讀。failover 是改 DNS，app 或 JVM 把 DNS 快取太久就會一直連舊 IP。</td></tr>
+        <tr><td>RDS read replica</td><td>擴充讀</td><td>async，會 lag。promote 成 primary 是手動、單向的，不是 failover。</td></tr>
+        <tr><td>Aurora</td><td>主力 OLTP</td><td>replica 共用 storage，failover 通常比 RDS 快（官方說通常 30 秒內）。沒有 replica 的 cluster failover 要重建 instance，慢很多。</td></tr>
+        <tr><td>Amazon MSK（Kafka）</td><td>訊息複製</td><td><code>acks=all</code> 要配 <code>min.insync.replicas=2</code> 才是 semi-sync 的效果。只設 acks=all、ISR 剩一台時等於沒有複製。</td></tr>
+        <tr><td>EKS 的 etcd</td><td>K8s 狀態（Raft）</td><td>AWS 代管，看不到。但同樣的過半原理：3 台 etcd 容忍 1 台掛，5 台容忍 2 台。</td></tr>
+      </table>
+    </div>
+    <p class="sub">誰會吵：財務問 standby 不能讀為什麼要付錢，SRE 回答那是 HA 不是效能。design review 會被問：「failover 那 60 秒，下單的 request 怎麼辦？」</p>
+  </section>
+
+  <section id="l5">
+    <h2><span class="badge">L5</span>規模化<span class="time">讀 3 分鐘</span></h2>
+    <p class="lead">每一級都在縮短「leader 死掉到恢復寫入」的時間，或擴大能扛的故障範圍：一台 → 一個 AZ → 一個 region。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 680 230" role="img" aria-label="Evolution ladder. Step 1 one database, hardware failure means downtime. Step 2 async replica with manual failover. Step 3 Multi-AZ sync standby with automatic failover. Step 4 cross-region, such as Aurora Global Database, storage-level replication usually under a second.">
+        <rect x="20" y="170" width="150" height="50" fill="var(--card)" stroke="var(--ink)" stroke-width="1.5"/>
+        <text x="30" y="190" font-size="11" class="hand">① 一台 DB</text><text x="30" y="208" font-size="9">硬碟壞 = 停機 + 掉資料</text>
+        <rect x="180" y="130" width="150" height="90" fill="var(--see)" stroke="var(--ink)" stroke-width="1.5"/>
+        <text x="190" y="150" font-size="11" class="hand">② async replica</text><text x="190" y="170" font-size="9">人工 promote</text><text x="190" y="186" font-size="9">半夜要叫人</text>
+        <rect x="340" y="80" width="150" height="140" fill="var(--who)" stroke="var(--ink)" stroke-width="1.5"/>
+        <text x="350" y="100" font-size="11" class="hand">③ Multi-AZ</text><text x="350" y="120" font-size="9">sync standby</text><text x="350" y="136" font-size="9">自動 failover</text><text x="350" y="152" font-size="9">扛一個 AZ 掛掉</text>
+        <rect x="500" y="30" width="160" height="190" fill="var(--may)" stroke="var(--ink)" stroke-width="1.5"/>
+        <text x="510" y="50" font-size="11" class="hand">④ 跨 region</text><text x="510" y="70" font-size="9">Aurora Global Database</text><text x="510" y="86" font-size="9">storage 層複製</text><text x="510" y="102" font-size="9">通常 &lt; 1 秒</text><text x="510" y="126" font-size="9">扛整個 region 掛掉</text>
+        <text x="95" y="160" text-anchor="middle" font-size="9" fill="var(--ink-soft)">換掉：單點</text>
+        <text x="255" y="120" text-anchor="middle" font-size="9" fill="var(--ink-soft)">換掉：人工切換</text>
+        <text x="415" y="70" text-anchor="middle" font-size="9" fill="var(--ink-soft)">換掉：單一 region</text>
+      </svg>
+    </div>
+    <div class="scroll">
+      <table>
+        <tr><th>路線</th><th>例子</th><th>好處</th><th>代價</th></tr>
+        <tr><td>Single-leader + consensus</td><td>etcd、CockroachDB（每個 range 一個 Raft group）</td><td>強一致，不用想衝突</td><td>寫入要等過半副本</td></tr>
+        <tr><td>Leaderless quorum</td><td>Cassandra、Dynamo 系</td><td>沒有 failover 窗口，一直能寫</td><td>衝突要自己處理</td></tr>
+      </table>
+    </div>
+    <details>
+      <summary>之後再看：Raft 細節（面試只需要過半直覺）</summary>
+      <div><p>term 號碼、log replication、heartbeat timeout 觸發選舉。另外 park 中：Service Discovery（Consul、K8s DNS、Cloud Map）、vector clock 數學。</p></div>
+    </details>
+  </section>
+
+  <section id="l6">
+    <h2><span class="badge">L6</span>故障與 on-call<span class="time">讀 4 分鐘</span></h2>
+    <p class="lead">leader 掛掉本身不可怕，可怕的是三件事：failover 窗口內寫入失敗、async 下已確認的寫入不見、選舉一直重來（flapping）。</p>
+    <div class="panels">
+      <div class="panel"><h3>A · failover 窗口</h3><p>RDS 約 60–120 秒寫不進去。app 要有 retry + backoff，而且 request 要是 idempotent，否則重試會重複下單。</p></div>
+      <div class="panel"><h3>B · async 掉資料</h3><p>primary 回了 OK、還沒傳出去就掛。promote replica 後那幾筆不見了。訂單類資料不能用純 async。</p></div>
+      <div class="panel"><h3>C · 腦裂</h3><p>舊 leader 只是失聯沒死，網路恢復後還以為自己是 leader。要 fencing：新 leader 的 term 更大，舊的寫入被拒。</p></div>
+      <div class="panel"><h3>D · 選舉 flapping</h3><p>網路抖動讓 heartbeat 一直逾時，leader 一直換。每換一次就停一次寫入。這是腦裂前兆。</p></div>
+    </div>
+    <div class="scroll">
+      <table>
+        <tr><th>看什麼</th><th>出事長相</th></tr>
+        <tr><td>RDS <code>ReplicaLag</code></td><td>上升 = failover 時會掉更多、讀到更舊</td></tr>
+        <tr><td>RDS event：failover</td><td>一天多次 = 底層不穩</td></tr>
+        <tr><td>etcd <code>etcd_server_leader_changes_seen_total</code></td><td>短時間增加多次 = flapping</td></tr>
+        <tr><td>app 寫入錯誤率</td><td>failover 窗口內飆高，之後應該回落</td></tr>
+      </table>
+    </div>
+    <p>第一個指令（看最近 60 分鐘有沒有 failover）：</p>
+    <pre>aws rds describe-events --source-type db-instance --duration 60</pre>
+    <p class="sub">SLO 範例（自訂）：replication lag P99 &lt; 1s；failover 後 2 分鐘內寫入恢復。</p>
+  </section>
+
+  <section id="l7">
+    <h2><span class="badge">L7</span>面試<span class="time">讀 3 分鐘</span></h2>
+    <p class="lead">題目：「訂單 DB 的 leader 凌晨 3 點掛了，會發生什麼？另外，使用者下單後重新整理看不到訂單，為什麼？」</p>
+    <p>先自己講：選 sync 還 async、選舉怎麼防腦裂、窗口多長、看不到訂單的原因和三個解法。再打開。</p>
+    <details>
+      <summary>L4 vs L6 對照</summary>
+      <div>
+        <div class="wrong"><b>L4</b>「會自動切到 replica。看不到訂單是因為 cache。」<br>問題：沒講多久、沒講會不會掉資料、沒講過半、把 lag 誤認成 cache。</div>
+        <div class="fix"><b>L6</b> 多了四件事：</div>
+        <ol>
+          <li>先選：訂單 = 錢，single-leader + semi-sync，代價是寫入慢一點。</li>
+          <li>選舉：要過半票，兩個過半群組不可能同時存在，所以不會腦裂。</li>
+          <li>窗口：選舉期間幾秒到一兩分鐘寫不進去，app 要 retry + idempotency key。</li>
+          <li>看不到訂單 = replication lag：剛寫的讀打 leader、sticky、或那條路徑 sync。監控 lag 和選舉頻率。</li>
+        </ol>
+        <p class="en">"For orders I'd use a single leader with semi-sync replication, so every acknowledged write exists on at least two nodes. When the leader dies, the replicas elect a new one, and it takes a majority vote. Two majorities can't exist at the same time, so we never end up with two leaders. During the election writes are unavailable for a short window, so clients retry with an idempotency key. If a user can't see their order after refreshing, the read probably hit a replica before the write got there. I'd send read-after-write traffic to the leader. I'd monitor replication lag and how often leaders change, because frequent elections mean the cluster is unstable."</p>
+      </div>
+    </details>
+  </section>
+
+  <section id="trail">
+    <h2><span class="badge">錯題</span>這次的釐清<span class="time">讀 2 分鐘</span></h2>
+    <div class="wrong"><b>我錯在這</b>✗ 被問「為什麼 single-leader 不用解衝突」，答「只有一個節點，但 leader 是 bottleneck」<br>✓ 答案是「一個節點提供唯一的寫入順序」。bottleneck 是另一個問題（缺點）<br>→ 為什麼搞混：把缺點和「為什麼免衝突」混在一起答，沒抓到題目真正問的點。</div>
+    <div class="wrong"><b>我錯在這</b>✗（潛在）加了 read replica 就有強一致<br>✓ replica 有 lag，可能讀到舊資料。它的價值是讀取擴展<br>→ 為什麼搞混：把「多份」當成「更一致」，其實多份帶來的是一致性問題。</div>
+    <div class="fix"><b>做對的</b>：4 台 vs 3 台那題，你自己算出 4 &gt; 3.5 過半、3 台選不出來。這就是 Raft 的核心，面試講到這裡就夠。</div>
+  </section>
+
+  <div class="next">
+    <b>下一步（2 分鐘）</b>
+    <p>不看這頁，從「硬體會壞」開始，把 L1 那條因果鏈六個框畫出來。</p>
+  </div>
+
+</main>

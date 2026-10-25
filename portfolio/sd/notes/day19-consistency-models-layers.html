@@ -1,0 +1,317 @@
+<title>Consistency Models</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC:wght@400;700&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: one notebook column on graph paper; teal sd accent band; figures on taped cards, failure cases as comic panels */
+:root {
+  --paper: #F6F8FA;
+  --grid: rgba(90,130,170,.16);
+  --ink: #23313E;
+  --ink-soft: #55677A;
+  --card: #FFFFFF;
+  --accent: #0B7285;
+  --on-accent: #FFFFFF;
+  --tape: color-mix(in srgb, var(--accent) 35%, transparent);
+  --who: #FFE98A;
+  --see: #BDEEF6;
+  --may: #F9CDE0;
+  --wrong: #D2453A;
+  --ok: #2F8F5B;
+  --line: #9DB0C2;
+  --font-hand: "LXGW WenKai TC", "Noto Sans TC", "PingFang TC", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #1A2320; --grid: rgba(200,230,210,.08); --ink: #E6EDE8; --ink-soft: #A9BAB1;
+    --card: #24302C; --accent: #3BC9DB; --on-accent: #10221F; --who: #8A7A2A; --see: #2B6A74; --may: #7A3F57;
+    --wrong: #FF8A7E; --ok: #7FD3A1; --line: #5E7268; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #1A2320; --grid: rgba(200,230,210,.08); --ink: #E6EDE8; --ink-soft: #A9BAB1;
+  --card: #24302C; --accent: #3BC9DB; --on-accent: #10221F; --who: #8A7A2A; --see: #2B6A74; --may: #7A3F57;
+  --wrong: #FF8A7E; --ok: #7FD3A1; --line: #5E7268; color-scheme: dark;
+}
+body {
+  background-color: var(--paper);
+  background-image: linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 22px 22px;
+  color: var(--ink);
+  font-family: var(--font-hand);
+  font-size: 17px;
+  line-height: 1.75;
+}
+.band { background: var(--accent); color: var(--on-accent); padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 22px 18px; }
+.band > div { max-width: 760px; margin: 0 auto; display: grid; gap: 8px; }
+.band a { color: inherit; }
+.page { max-width: 760px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 28px 64px; display: grid; gap: 36px; }
+h1, h2, h3 { text-wrap: balance; line-height: 1.3; margin: 0; }
+h1 { font-size: 2.1rem; }
+h2 { font-size: 1.4rem; display: flex; flex-wrap: wrap; align-items: baseline; gap: 10px; }
+h2 .badge { font-family: var(--font-mono); font-size: .78rem; background: var(--accent); color: var(--on-accent); padding: 1px 8px; border-radius: 3px; }
+h2 .time { font-family: var(--font-mono); font-size: .74rem; color: var(--ink-soft); letter-spacing: .04em; }
+p { margin: 0; }
+section { display: grid; gap: 14px; min-width: 0; }
+.sub { font-size: .95rem; opacity: .9; }
+.lead { font-size: 1.12rem; font-weight: 700; }
+.progress { display: flex; flex-wrap: wrap; gap: 6px 12px; font-family: var(--font-mono); font-size: .8rem; }
+.progress a { color: inherit; text-decoration: none; }
+mark { background: linear-gradient(transparent 52%, var(--who) 52%); color: inherit; padding: 0 2px; }
+mark.see { background: linear-gradient(transparent 52%, var(--see) 52%); }
+mark.may { background: linear-gradient(transparent 52%, var(--may) 52%); }
+code { font-family: var(--font-mono); font-size: .86em; background: color-mix(in srgb, var(--line) 22%, transparent); padding: 1px 5px; border-radius: 3px; }
+.card { position: relative; background: var(--card); padding: 22px 16px 14px; box-shadow: 0 1px 3px rgba(0,0,0,.12); min-width: 0; }
+.card::before { content: ""; position: absolute; top: -9px; left: 50%; width: 92px; height: 20px; transform: translateX(-50%) rotate(-2deg); background: var(--tape); }
+.scroll { overflow-x: auto; }
+svg.fig { display: block; min-width: 600px; width: 100%; height: auto; }
+svg text { font-family: var(--font-mono); fill: var(--ink); }
+svg .hand { font-family: var(--font-hand); }
+.rule { border-left: 4px solid var(--accent); padding: 6px 12px; font-size: 1.05rem; }
+.wrong { border-left: 4px solid var(--wrong); padding: 4px 12px; display: grid; gap: 2px; }
+.wrong b { color: var(--wrong); font-size: .85rem; letter-spacing: .05em; }
+.fix { border-left: 4px solid var(--ok); padding: 4px 12px; }
+.panels { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 14px; }
+.panel { border: 2px solid var(--ink); background: var(--card); padding: 10px; display: grid; gap: 6px; min-width: 0; align-content: start; }
+.panel h3 { font-size: 1rem; font-family: var(--font-mono); }
+.panel p { font-size: .92rem; }
+.panel svg { width: 100%; height: auto; display: block; }
+@media (max-width: 560px) { .panels { grid-template-columns: 1fr; } }
+table { border-collapse: collapse; width: 100%; font-size: .95rem; font-variant-numeric: tabular-nums; }
+th, td { border-bottom: 1px dashed var(--line); padding: 8px 6px; text-align: left; vertical-align: top; }
+th { font-family: var(--font-mono); font-size: .78rem; letter-spacing: .05em; color: var(--ink-soft); font-weight: 600; }
+ol, ul { margin: 0; padding-left: 1.3em; display: grid; gap: 6px; }
+details { background: var(--card); border: 2px dashed var(--line); padding: 10px 14px; }
+details[open] { border-style: solid; }
+details summary { cursor: pointer; font-weight: 700; }
+details > div { display: grid; gap: 10px; margin-top: 10px; }
+.two { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 14px; }
+@media (max-width: 560px) { .two { grid-template-columns: 1fr; } }
+.en { font-family: var(--font-mono); font-size: .88rem; color: var(--ink-soft); }
+pre { margin: 0; font-family: var(--font-mono); font-size: .82rem; line-height: 1.5; background: var(--card); border: 1px solid var(--line); padding: 10px 12px; overflow-x: auto; }
+.next { border: 3px solid var(--accent); background: var(--card); padding: 14px 16px; display: grid; gap: 6px; }
+a { color: var(--accent); text-underline-offset: 3px; }
+a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+</style>
+
+<header class="band">
+  <div>
+    <p class="sub">sd 課程 · P2 分散式核心 · Day 19-20 · S26（2026-06-03），step G 4/5</p>
+    <h1>Consistency Models</h1>
+    <p>讀完這頁你能：把一致性講成一道光譜（不是開關），用鴿籠原理解釋 W + R &gt; N，並按「每個操作」選一致性等級。</p>
+    <nav class="progress" aria-label="layers"><a href="#l0">L0 ✓</a><a href="#l1">L1 ✓</a><a href="#l2">L2 ✓</a><a href="#l3">L3 ✓</a><a href="#l4">L4 ✓</a><a href="#l5">L5 ✓</a><a href="#l6">L6 ✓</a><a href="#l7">L7 ✓</a><a href="#trail">錯題</a></nav>
+  </div>
+</header>
+
+<main class="page">
+
+  <p class="sub">接續 Day 17：CAP 講「partition 時選 C 還是 A」。這一課講平時：一致性是一道光譜，本質是用延遲預算換新鮮度。</p>
+
+  <section id="l0">
+    <h2><span class="badge">L0</span>一張圖<span class="time">讀 1 分鐘</span></h2>
+    <p class="lead">寄包裹：strong 是當面交貨；eventual 是運送中，一定會到但不知道幾點；沒有一致性是包裹寄丟。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 680 170" role="img" aria-label="Spectrum from expensive to cheap: strong, causal, read-your-writes, eventual. Below the line, no consistency is off the scale: the package is lost.">
+        <line x1="40" y1="70" x2="620" y2="70" stroke="var(--ink)" stroke-width="2"/><polygon points="620,64 632,70 620,76" fill="var(--ink)"/>
+        <text x="40" y="40" font-size="11" class="hand">最貴、最新</text><text x="632" y="40" font-size="11" class="hand" text-anchor="end">最便宜、可能舊</text>
+        <g stroke="var(--ink)" stroke-width="1.5"><circle cx="90" cy="70" r="10" fill="var(--may)"/><circle cx="250" cy="70" r="10" fill="var(--who)"/><circle cx="410" cy="70" r="10" fill="var(--who)"/><circle cx="570" cy="70" r="10" fill="var(--see)"/></g>
+        <g font-size="11" text-anchor="middle"><text x="90" y="100">Strong</text><text x="250" y="100">Causal</text><text x="410" y="100">Read-your-writes</text><text x="570" y="100">Eventual</text></g>
+        <g font-size="10" text-anchor="middle" fill="var(--ink-soft)"><text x="90" y="118">當面交貨</text><text x="250" y="118">先問後答不亂序</text><text x="410" y="118">自己寄的自己看得到</text><text x="570" y="118">運送中，一定會到</text></g>
+        <text x="340" y="155" text-anchor="middle" font-size="11" fill="var(--wrong)">光譜外：no consistency = 包裹寄丟，可能永遠不到</text>
+      </svg>
+    </div>
+  </section>
+
+  <section id="l1">
+    <h2><span class="badge">L1</span>第一性原理<span class="time">讀 3 分鐘</span></h2>
+    <p class="lead">限制是光速：台北到東京來回約 50ms。寫入後 1ms，資料還在海底電纜裡，東京根本還沒收到。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 680 190" role="img" aria-label="Timeline. At 0ms Taipei writes balance 900. The update is in flight for about 25ms one way. A Tokyo read at 1ms still sees the old value 1000. Strong consistency means the writer waits until Tokyo acknowledges, about 50ms round trip.">
+        <text x="20" y="52" font-size="12" class="hand">台北</text><text x="20" y="142" font-size="12" class="hand">東京</text>
+        <line x1="70" y1="48" x2="650" y2="48" stroke="var(--line)" stroke-width="2"/><line x1="70" y1="138" x2="650" y2="138" stroke="var(--line)" stroke-width="2"/>
+        <circle cx="100" cy="48" r="8" fill="var(--ok)" stroke="var(--ink)"/><text x="100" y="30" text-anchor="middle" font-size="10">0ms 寫 balance = 900</text>
+        <line x1="100" y1="56" x2="330" y2="132" stroke="var(--accent)" stroke-width="2.5"/><polygon points="324,124 334,134 320,134" fill="var(--accent)"/>
+        <text x="230" y="84" font-size="10" fill="var(--accent)">在路上 ~25ms</text>
+        <circle cx="120" cy="138" r="8" fill="var(--may)" stroke="var(--ink)"/><text x="120" y="164" text-anchor="middle" font-size="10">1ms 讀 → 1000（舊）</text>
+        <circle cx="340" cy="138" r="8" fill="var(--ok)" stroke="var(--ink)"/><text x="340" y="164" text-anchor="middle" font-size="10">25ms 才收到 900</text>
+        <line x1="340" y1="130" x2="560" y2="56" stroke="var(--ink)" stroke-dasharray="5 3"/><text x="470" y="84" font-size="10">ack 回來</text>
+        <circle cx="570" cy="48" r="8" fill="var(--who)" stroke="var(--ink)"/><text x="570" y="30" text-anchor="middle" font-size="10">~50ms strong 才能回 OK</text>
+      </svg>
+    </div>
+    <p>從這條限制直接推出：要東京「馬上」看到最新（strong），寫入的人就必須<mark>等</mark>東京確認。等 = 延遲。所以一致性等級其實就是「你願意等多久」和「你能容忍多舊」。</p>
+    <p class="sub">S26 你一開始想不出「instant consistency 的代價」，答案就是這張圖：同步 = 等待 = 慢。</p>
+  </section>
+
+  <section id="l2">
+    <h2><span class="badge">L2</span>機制<span class="time">讀 4 分鐘</span></h2>
+    <p class="lead">Quorum 是一致性的旋鈕：N 份副本，寫要 W 份確認、讀要問 R 份。W + R &gt; N，讀和寫的集合一定會重疊。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 680 230" role="img" aria-label="N equals 3 replicas. Left, W equals 2 and R equals 2: the write set is replicas 1 and 2, the read set is replicas 2 and 3, they overlap at replica 2 which holds the new value. Right, W equals 1 and R equals 1: write hits replica 1, read hits replica 3, no overlap, the read returns the old value.">
+        <text x="170" y="22" text-anchor="middle" font-size="13" class="hand" fill="var(--ok)">W=2, R=2（4 &gt; 3）</text>
+        <g stroke="var(--ink)" stroke-width="1.5"><rect x="40" y="60" width="70" height="50" fill="var(--ok)" opacity=".55"/><rect x="135" y="60" width="70" height="50" fill="var(--ok)" opacity=".55"/><rect x="230" y="60" width="70" height="50" fill="var(--card)"/></g>
+        <g font-size="10" text-anchor="middle"><text x="75" y="82">副本 1</text><text x="75" y="98">v2 新</text><text x="170" y="82">副本 2</text><text x="170" y="98">v2 新</text><text x="265" y="82">副本 3</text><text x="265" y="98">v1 舊</text></g>
+        <rect x="32" y="52" width="180" height="66" fill="none" stroke="var(--accent)" stroke-width="2.5"/><text x="122" y="46" text-anchor="middle" font-size="10" fill="var(--accent)">寫入集合</text>
+        <path d="M127 120 L307 120 L307 54 L127 54 Z" fill="none" stroke="var(--wrong)" stroke-width="2.5" stroke-dasharray="6 4"/>
+        <text x="217" y="140" text-anchor="middle" font-size="10" fill="var(--wrong)">讀取集合</text>
+        <text x="170" y="170" text-anchor="middle" font-size="11" class="hand">重疊在副本 2 → 一定讀得到 v2</text>
+        <text x="170" y="190" text-anchor="middle" font-size="10" fill="var(--ink-soft)">3 個位子坐 4 個人，一定有人共用位子</text>
+        <line x1="340" y1="30" x2="340" y2="210" stroke="var(--line)" stroke-dasharray="4 4"/>
+        <text x="510" y="22" text-anchor="middle" font-size="13" class="hand" fill="var(--wrong)">W=1, R=1（2 ≤ 3）</text>
+        <g stroke="var(--ink)" stroke-width="1.5"><rect x="380" y="60" width="70" height="50" fill="var(--ok)" opacity=".55"/><rect x="475" y="60" width="70" height="50" fill="var(--card)"/><rect x="570" y="60" width="70" height="50" fill="var(--card)"/></g>
+        <g font-size="10" text-anchor="middle"><text x="415" y="82">副本 1</text><text x="415" y="98">v2 新</text><text x="510" y="82">副本 2</text><text x="510" y="98">v1 舊</text><text x="605" y="82">副本 3</text><text x="605" y="98">v1 舊</text></g>
+        <rect x="372" y="52" width="86" height="66" fill="none" stroke="var(--accent)" stroke-width="2.5"/>
+        <rect x="562" y="52" width="86" height="66" fill="none" stroke="var(--wrong)" stroke-width="2.5" stroke-dasharray="6 4"/>
+        <text x="510" y="170" text-anchor="middle" font-size="11" class="hand">沒重疊 → 讀到 v1</text>
+        <text x="510" y="190" text-anchor="middle" font-size="10" fill="var(--ink-soft)">最快，但就是 eventual 的調法</text>
+      </svg>
+    </div>
+    <div class="scroll">
+      <table>
+        <tr><th>調法（N=3）</th><th>寫</th><th>讀</th><th>效果</th></tr>
+        <tr><td>W=3, R=1</td><td>最慢，一台掛就寫不進去</td><td>最快</td><td>讀多寫少、要新鮮</td></tr>
+        <tr><td>W=2, R=2</td><td>中</td><td>中</td><td>常見平衡點，容忍一台掛</td></tr>
+        <tr><td>W=1, R=1</td><td>最快</td><td>最快</td><td>不保證讀到最新</td></tr>
+      </table>
+    </div>
+  </section>
+
+  <section id="l3">
+    <h2><span class="badge">L3</span>取捨<span class="time">讀 4 分鐘</span></h2>
+    <p class="lead">不是整個系統選一個等級，是每個操作各選：同一個按讚功能，總數用 eventual，「我自己按的讚」用 read-your-writes。</p>
+    <div class="scroll">
+      <table>
+        <tr><th>Model</th><th>保證什麼</th><th>成本</th><th>例子</th></tr>
+        <tr><td>Strong</td><td>所有人永遠看到最新</td><td>最高：同步等待，partition 時犧牲可用性</td><td>銀行餘額、庫存</td></tr>
+        <tr><td>Causal</td><td>有因果的事件不亂序</td><td>中</td><td>留言串、聊天問答</td></tr>
+        <tr><td>Read-your-writes</td><td>寫的人自己看得到自己的寫入</td><td>低</td><td>改個人資料、發文後看自己</td></tr>
+        <tr><td>Eventual</td><td>最後一定收斂</td><td>最低</td><td>DNS、按讚總數</td></tr>
+      </table>
+    </div>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 680 180" role="img" aria-label="Causal violation. Alice posts a question, Bob replies. A reader in another region receives Bob's reply before Alice's question, so the answer appears before the question.">
+        <text x="20" y="24" font-size="12" class="hand">為什麼需要 causal：別的 region 的讀者看到的順序</text>
+        <rect x="40" y="44" width="250" height="34" fill="var(--see)" stroke="var(--ink)"/><text x="165" y="66" text-anchor="middle" font-size="10">① Alice：「明天開會嗎？」</text>
+        <rect x="40" y="88" width="250" height="34" fill="var(--see)" stroke="var(--ink)"/><text x="165" y="110" text-anchor="middle" font-size="10">② Bob：「開，10 點」（回覆 ①）</text>
+        <text x="165" y="146" text-anchor="middle" font-size="10" class="hand">寫入的實際順序</text>
+        <line x1="310" y1="83" x2="370" y2="83" stroke="var(--ink)"/><polygon points="370,77 380,83 370,89" fill="var(--ink)"/>
+        <rect x="400" y="44" width="250" height="34" fill="var(--may)" stroke="var(--ink)"/><text x="525" y="66" text-anchor="middle" font-size="10">② Bob：「開，10 點」</text>
+        <rect x="400" y="88" width="250" height="34" fill="var(--may)" stroke="var(--ink)"/><text x="525" y="110" text-anchor="middle" font-size="10">① Alice：「明天開會嗎？」</text>
+        <text x="525" y="146" text-anchor="middle" font-size="10" class="hand" fill="var(--wrong)">eventual 下可能這樣到：答案先於問題</text>
+        <text x="340" y="172" text-anchor="middle" font-size="10" fill="var(--ink-soft)">causal 只保證有因果的這兩則不亂序，不要求全世界所有事件排成一列（那是 strong）</text>
+      </svg>
+    </div>
+    <div class="rule">面試關鍵：不要只說「選 eventual」。要說 <b>why</b>，以及<b>業務能接受舊多久</b>（staleness window）。</div>
+  </section>
+
+  <section id="l4">
+    <h2><span class="badge">L4</span>AWS 怎麼做<span class="time">讀 4 分鐘</span></h2>
+    <p class="lead">AWS 的服務多半讓你 per request 選等級。要記的是：每個服務的「strong」只在某個範圍內成立。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 680 210" role="img" aria-label="Scope of strong reads on AWS. DynamoDB ConsistentRead is strong within one region only; a global table replica in another region is eventual. GSIs are always eventual. S3 is strong read-after-write for objects. Aurora readers lag the writer slightly.">
+        <rect x="20" y="30" width="300" height="160" fill="none" stroke="var(--accent)" stroke-width="2"/><text x="30" y="48" font-size="11">us-east-1</text>
+        <rect x="360" y="30" width="300" height="160" fill="none" stroke="var(--accent)" stroke-width="2"/><text x="370" y="48" font-size="11">ap-northeast-1</text>
+        <rect x="40" y="62" width="130" height="40" fill="var(--see)" stroke="var(--ink)"/><text x="105" y="80" text-anchor="middle" font-size="10">DynamoDB 表</text><text x="105" y="94" text-anchor="middle" font-size="9">ConsistentRead ✓ strong</text>
+        <rect x="180" y="62" width="120" height="40" fill="var(--may)" stroke="var(--ink)"/><text x="240" y="80" text-anchor="middle" font-size="10">GSI</text><text x="240" y="94" text-anchor="middle" font-size="9">永遠 eventual</text>
+        <rect x="40" y="120" width="130" height="40" fill="var(--see)" stroke="var(--ink)"/><text x="105" y="138" text-anchor="middle" font-size="10">S3 物件</text><text x="105" y="152" text-anchor="middle" font-size="9">read-after-write strong</text>
+        <rect x="180" y="120" width="120" height="40" fill="var(--who)" stroke="var(--ink)"/><text x="240" y="138" text-anchor="middle" font-size="10">Aurora reader</text><text x="240" y="152" text-anchor="middle" font-size="9">落後 writer 一點</text>
+        <rect x="380" y="62" width="160" height="40" fill="var(--may)" stroke="var(--ink)"/><text x="460" y="80" text-anchor="middle" font-size="10">Global Table replica</text><text x="460" y="94" text-anchor="middle" font-size="9">對 us-east-1 寫入 = eventual</text>
+        <line x1="170" y1="82" x2="380" y2="82" stroke="var(--accent)" stroke-dasharray="6 4" stroke-width="2"/><text x="275" y="200" text-anchor="middle" font-size="10" fill="var(--ink-soft)">strong 的範圍到 region 邊界為止</text>
+      </svg>
+    </div>
+    <div class="scroll">
+      <table>
+        <tr><th>服務</th><th>怎麼選等級</th><th>陷阱</th></tr>
+        <tr><td>DynamoDB</td><td><code>ConsistentRead=true</code></td><td>只在同一個 region 的表上 strong；耗 2 倍 RCU；GSI 不支援。</td></tr>
+        <tr><td>DynamoDB Global Tables</td><td>預設 async</td><td>跨區讀是 eventual，衝突 LWW。另有 multi-region strong 模式（限制需確認）。</td></tr>
+        <tr><td>Amazon Keyspaces</td><td>CQL consistency level</td><td>寫入固定 <code>LOCAL_QUORUM</code>；讀可選 <code>ONE</code> / <code>LOCAL_ONE</code> / <code>LOCAL_QUORUM</code>，跟自管 Cassandra 能調的不一樣。</td></tr>
+        <tr><td>Aurora</td><td>讀 writer 或 reader endpoint</td><td>reader 通常落後不到 100ms，但不是 0。剛寫完要讀，打 writer。</td></tr>
+        <tr><td>S3</td><td>不用選</td><td>2020-12 起物件讀寫是 strong read-after-write。舊文章說的 eventual 已過時。</td></tr>
+      </table>
+    </div>
+    <p class="sub">誰會吵：PM 要「改完馬上看到」，DBA 不想讓所有讀都壓在 writer 上。design review 會被問：「這個讀走 reader，能接受舊多久？」</p>
+  </section>
+
+  <section id="l5">
+    <h2><span class="badge">L5</span>規模化<span class="time">讀 3 分鐘</span></h2>
+    <p class="lead">一台 DB 時一致性是免費的。每加一層副本或一個 region，你就要開始逐個操作決定等級。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 680 230" role="img" aria-label="Evolution ladder. Step 1 one database, strong for free. Step 2 read replicas, reads become eventual, read your writes by reading the leader. Step 3 multi-region, per operation levels and quorum stores. Step 4 global strong with consensus and synchronized clocks such as Spanner, paying cross-region latency on writes.">
+        <rect x="20" y="170" width="150" height="50" fill="var(--card)" stroke="var(--ink)" stroke-width="1.5"/>
+        <text x="30" y="190" font-size="11" class="hand">① 一台 DB</text><text x="30" y="208" font-size="9">strong 是免費的</text>
+        <rect x="180" y="130" width="150" height="90" fill="var(--see)" stroke="var(--ink)" stroke-width="1.5"/>
+        <text x="190" y="150" font-size="11" class="hand">② read replica</text><text x="190" y="170" font-size="9">讀變 eventual</text><text x="190" y="186" font-size="9">自己的讀打 leader</text>
+        <rect x="340" y="80" width="150" height="140" fill="var(--who)" stroke="var(--ink)" stroke-width="1.5"/>
+        <text x="350" y="100" font-size="11" class="hand">③ 多 region</text><text x="350" y="120" font-size="9">per operation 選</text><text x="350" y="136" font-size="9">錢 strong、讚 eventual</text><text x="350" y="152" font-size="9">quorum 旋鈕</text>
+        <rect x="500" y="30" width="160" height="190" fill="var(--may)" stroke="var(--ink)" stroke-width="1.5"/>
+        <text x="510" y="50" font-size="11" class="hand">④ 全球 strong</text><text x="510" y="70" font-size="9">consensus + 時鐘</text><text x="510" y="86" font-size="9">（Spanner TrueTime、</text><text x="510" y="102" font-size="9">CockroachDB）</text><text x="510" y="126" font-size="9">代價：寫入要跨區等</text>
+        <text x="95" y="160" text-anchor="middle" font-size="9" fill="var(--ink-soft)">換掉：讀全壓一台</text>
+        <text x="255" y="120" text-anchor="middle" font-size="9" fill="var(--ink-soft)">換掉：單一 region</text>
+        <text x="415" y="70" text-anchor="middle" font-size="9" fill="var(--ink-soft)">換掉：手動排順序</text>
+      </svg>
+    </div>
+    <div class="scroll">
+      <table>
+        <tr><th>路線</th><th>例子</th><th>好處</th><th>代價</th></tr>
+        <tr><td>Consensus 做 strong</td><td>Spanner、CockroachDB、etcd</td><td>開發者不用想衝突</td><td>寫入延遲 = 跨多數副本的 RTT</td></tr>
+        <tr><td>Eventual + 衝突解決</td><td>Dynamo 系、Cassandra</td><td>寫入永遠快、永遠可用</td><td>要處理衝突（LWW、vector clock、merge）</td></tr>
+      </table>
+    </div>
+  </section>
+
+  <section id="l6">
+    <h2><span class="badge">L6</span>故障與 on-call<span class="time">讀 4 分鐘</span></h2>
+    <p class="lead">eventual 系統的核心 SLI 是 replication lag：它直接量化「資料現在有多舊」。lag 一爆，eventual 就變成「很久以後才一致」。</p>
+    <div class="panels">
+      <div class="panel"><h3>A · lag 爆掉</h3><p>使用者改完個人資料，重新整理看到舊的，以為沒存，再按一次 → 重複操作。</p></div>
+      <div class="panel"><h3>B · 以為有 quorum</h3><p>有人把 W=1、R=1 當預設，以為讀得到最新。正常時看不出來，一有 lag 就讀到舊值。</p></div>
+      <div class="panel"><h3>C · 答案先於問題</h3><p>沒有 causal 保證的留言串，跨區讀者看到回覆比問題早到。修法：回覆帶上它依賴的訊息 id，沒到就先等。</p></div>
+      <div class="panel"><h3>D · strong 讀打到 GSI</h3><p>程式碼對 GSI 下 <code>ConsistentRead=true</code> 會直接報錯；改成不帶就默默變 eventual。</p></div>
+    </div>
+    <div class="scroll">
+      <table>
+        <tr><th>看什麼</th><th>Alert 範例</th></tr>
+        <tr><td>replication lag P99</td><td>&gt; 1s 持續 5 分鐘（你筆記裡的 SLO）</td></tr>
+        <tr><td>stale read rate</td><td>讀到的版本號 &lt; 使用者已知的最新版本號，比例上升</td></tr>
+        <tr><td>Aurora <code>AuroraReplicaLag</code></td><td>&gt; 1s</td></tr>
+      </table>
+    </div>
+    <p>第一個指令（Aurora MySQL，看每個 reader 落後多少）：</p>
+    <pre>SELECT server_id, replica_lag_in_milliseconds FROM information_schema.replica_host_status;</pre>
+    <p class="sub">stale read rate 要自己做：寫入回傳版本號，client 帶著讀，server 端比對後打 metric。</p>
+  </section>
+
+  <section id="l7">
+    <h2><span class="badge">L7</span>面試<span class="time">讀 3 分鐘</span></h2>
+    <p class="lead">題目：「全球社群 app 有三個功能：按讚數、留言串、錢包餘額。使用者分布在台日美。各選什麼一致性？」</p>
+    <p>先自己講：三個各選什麼、各一個理由、你怎麼調、監控什麼。再打開。</p>
+    <details>
+      <summary>L4 vs L6 對照</summary>
+      <div>
+        <div class="wrong"><b>L4</b>「全部用 strong，比較安全。」或「用 eventual，比較快。」<br>問題：整個系統只選一個等級，沒講代價，沒講能接受舊多久。</div>
+        <div class="fix"><b>L6</b> 多了四件事：</div>
+        <ol>
+          <li>先講限制：跨區 RTT 50–150ms，全站 strong 會讓每次寫入都等這麼久。</li>
+          <li>per operation：讚數 eventual（舊幾秒沒人在意），自己按的讚 read-your-writes，留言 causal，餘額 strong。</li>
+          <li>講旋鈕：N=3 時 W=2、R=2 保證重疊；要快就降，代價是可能讀到舊的。</li>
+          <li>營運：replication lag P99 當 SLI，SLO 1s。</li>
+        </ol>
+        <p class="en">"Consistency is a spectrum, and here it's really a latency budget: with 50 to 150 milliseconds between regions, making everything strong would put that wait on every write. So I'd choose per operation. The like count can be eventual, nobody notices if it's a few seconds behind, but your own like should show up immediately, so that's read-your-writes. Comment threads need causal ordering so a reply never shows up before its question. The wallet balance is strong. In a quorum store with three replicas I'd use W=2 and R=2 so reads and writes overlap. For the eventual parts, P99 replication lag is my SLI, with a one-second SLO."</p>
+      </div>
+    </details>
+  </section>
+
+  <section id="trail">
+    <h2><span class="badge">錯題</span>這次的釐清<span class="time">讀 2 分鐘</span></h2>
+    <div class="wrong"><b>我錯在這</b>✗ 想不出「instant consistency 要付什麼代價」<br>✓ 代價是延遲：寫入者要等所有副本確認才算完成<br>→ 為什麼搞混：還沒把「同步 = 等待 = 慢」這條因果鏈內化。看 L1 那張時間線。</div>
+    <div class="wrong"><b>我錯在這</b>✗ W + R &gt; N 為什麼能保證讀到最新，卡了兩次<br>✓ 鴿籠原理：寫的群 + 讀的群 &gt; N → 一定重疊 → 重疊那台有新值<br>→ 為什麼搞混：集合重疊太抽象，要「3 個位子坐 4 個人」的畫面才通。</div>
+    <div class="wrong"><b>我錯在這</b>✗ eventual = 不一致<br>✓ eventual 有「最後一定收斂」的保證；no consistency 才是可能永遠不一致<br>→ 為什麼搞混：只看到「現在可能舊」，漏了「一定會到」那一半。</div>
+  </section>
+
+  <div class="next">
+    <b>下一步（2 分鐘）</b>
+    <p>不看這頁，畫 N=3、W=2、R=2 的三個框，圈出寫入集合和讀取集合，指出重疊在哪。</p>
+  </div>
+
+</main>
