@@ -9,7 +9,7 @@ Claude Code and Codex learning coaches. Repository structure and setup live in `
 - `k8s`, `sd`, `terraform`, and `cloud-architect` share `engine/`. `leetcode-coach` is
   standalone.
 - Course sessions may update `workspaces/`. Development work must leave it unchanged.
-- Treat `legacy/`, `workspaces/*/archive/pre-migration/`, and
+- Treat `workspaces/*/archive/pre-migration/` and
   `workspaces/leetcode/archive/pre-rebuild/` as read-only history.
 - Scaffold a coach with `./scripts/new-coach.sh <name>`; all generated TODO markers must
   be resolved before lint passes.

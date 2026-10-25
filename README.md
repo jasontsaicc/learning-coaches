@@ -15,7 +15,6 @@ learning-coaches/
 ├── README.md
 ├── docs/                                    # design specs + implementation plans
 ├── competency/                              # cross-coach Senior/L6 evidence matrix
-├── legacy/                                  # frozen pre-merge repo snapshots (sd, leetcode)
 ├── engine/
 │   ├── ENGINE.md                            # Shared teaching engine
 │   ├── GOVERNANCE.md                        # Cross-coach WIP, evidence, portfolio routing
@@ -113,14 +112,13 @@ untracked scratch space. `portfolio/` is the curated, shareable output area; onl
 that clear the coach's quality bar land there.
 
 Each workspace was merged in from standalone pre-monorepo repos (histories merged via git
-subtree). `legacy/` holds frozen pre-merge snapshots; treat it and the `pre-migration`
-archives as read-only.
+subtree). Treat the `pre-migration` archives as read-only.
 
 | workspace | migrated from | originals kept in |
 |---|---|---|
 | k8s | `k8s-mastery-lab-skill` | `workspaces/k8s/archive/pre-migration/` |
 | sd | `system-design-coach` + `system-design-notes` | `workspaces/sd/archive/pre-migration/` |
-| leetcode | `leetcode-notes` (learner state) + `leetcode_coach` (teaching philosophy) | `workspaces/leetcode/archive/pre-migration/`, histories in `legacy/leetcode/` |
+| leetcode | `leetcode-notes` (learner state) + `leetcode_coach` (teaching philosophy) | `workspaces/leetcode/archive/pre-migration/`, pre-merge histories in git history (`legacy/` removed 2026-10-26) |
 
 ## Deployment and Lint
 
