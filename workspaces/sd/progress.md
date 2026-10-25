@@ -11,9 +11,9 @@
 
 ## Meta
 
-- session_count: 51
+- session_count: 54
 - last_weekly_review: 50 — WR5 於 S50 收帳(Topic 1 @S42 / Topic 2 @S45 / **Topic 3 @S50 學生選「收」**;過期卡 sweep 以 S50 倒帳形式完成:14 → 7 張 + 7 封存)。⚠️ **artifact audit 未跑**(engine WR flow 第 6 步),掛在下一次 WR
-- last_session_date: 2026-10-14
+- last_session_date: 2026-10-25
 - warm_up_classification: (standalone 時期未記錄;學員已 P3,Step 0 模式預設 Exploration)
 
 ## Current Session breakpoint
@@ -27,7 +27,9 @@
 
 P3 / Chat System(Day 36)/ chunk 1 group fan-out ✅(S53 2026-10-14,supported):Recall 自講兩表 + 500→50;10 萬人 capacity 先猜後算(500k ✅、PUBLISH 漏 ×5);server 訂閱 group 由 coach 教;「成員表省掉」錯 → 修成「查的時機換了」,答「成員改變時」(半對,連線時由 coach 補)。
 
-下一場 resume:Day 36 chunk 2 Presence(heartbeat、status propagation)→ chunk 3 Read Receipts → F/G。3AM page + cost 雙問併入 Day 36 G。
+P3 / Chat System(Day 36)/ chunk 2 Presence heartbeat ✅(S54 2026-10-25,supported,最小單位):暖身 catch-up 冷測 last_message_id + 不用 timestamp ✅、clock skew 後果「以為收到其實漏」自產;scope 答 user_id ❌ → 反例後「group id 嗎」→ 圖後自講 conversation 單位 + DB 原子 +1(supported)。heartbeat:10 萬/s 自算 ✅;耗電由 coach 給;太長=誤判在線不走推播自產;interval 選擇未 commit(30s + 2-3× timeout 由 coach 給)。學生兩次要求全貌圖(圖先行有效)。
+
+下一場 resume:Day 36 chunk 2 後半 status propagation(在線狀態怎麼推給關心的人、fan-out 量)→ chunk 3 Read Receipts → F/G。3AM page + cost 雙問併入 Day 36 G。
 
 ## Phase status
 
@@ -105,8 +107,10 @@ Weak-topic flags: 無(至今沒有帶 flag 過 gate 的紀錄)。
 
 ### Live(unresolved,48 筆)
 
+- (s54) | Chat System(heartbeat interval) | trade-off 兩邊代價講出,但沒 commit 選擇;「60 秒嗎」問句 | 頭號主線 commit 缺席(s38 家族)| unresolved | 3 | 2026-10-28 | 0
+
 - (s53) | Chat System(group fan-out) | server 訂閱 group 後說「省掉查 group 有多少 member」;問 chat-2 怎麼決定訂閱哪些 group 只答「group ID 吧」 | 「移走」當「刪除」:成員查詢從每則訊息移到連線時/成員異動時,沒消失(RP2 causal chain 少一環)。connection map 省掉那點對,但 why(server 自知身上連了誰)未自產 | unresolved | 3 | 2026-10-17 | 0
-- (s52 G) | Chat System(ordering 留存) | 換皮 G:B 路徑 catch-up 答「查該客戶 ID 最後收到的訊息時間戳」;clock skew 圖戳後修法撈回「NTP 不準、只往前、原子 +1」,但 counter 的 scope(per conversation)要縮題才出、owner 選 Redis INCR(S51 定案是 DB 欄位) | 強先驗劫持:時間戳 = 舊 DevOps 直覺,chunk 4(S51)教過仍回退;scope 格 S51 已漏一次 = 同格重犯(RP5 cold transfer) | unresolved | 3 | 2026-10-16 | 0
+- (s52 G) | Chat System(ordering 留存) [S54 冷測:scope 仍答 user_id,反例+圖後 supported;interval 維持 3,next 2026-10-28] | 換皮 G:B 路徑 catch-up 答「查該客戶 ID 最後收到的訊息時間戳」;clock skew 圖戳後修法撈回「NTP 不準、只往前、原子 +1」,但 counter 的 scope(per conversation)要縮題才出、owner 選 Redis INCR(S51 定案是 DB 欄位) | 強先驗劫持:時間戳 = 舊 DevOps 直覺,chunk 4(S51)教過仍回退;scope 格 S51 已漏一次 = 同格重犯(RP5 cold transfer) | unresolved | 3 | 2026-10-16 | 0
 - (s52) | Circuit Breaker(術語) | quick-fire:auth 變慢、CB 跳開後的 state 名稱「不知道」;跳開後 call 的去向只答「不會送」,fail fast 未講 | OPEN 名字第三次掉(S28 resolved → S40 重焊 → S52);HALF-OPEN 的理由(「一起動又被打掛」)自推但沒掛上名字 = 機制在、標籤未綁(RP5) | unresolved | 3 | 2026-10-14 | 0
 - (s52) | Chat System(offline delivery) | 「server 為何不能主動連 Bob 手機」理由答「HTTP 是 request/response 單向」;push 答對卻用「但是不是離題了?」收回 | 軸錯:限制是誰能撥給誰(NAT、無 public IP、OS 關背景連線),不是 protocol 方向;反證「換 WebSocket 就能撥?」可破(RP1) | unresolved | 7 | 2026-10-20 | 1 S52 續 F 再現:「WebSocket 是 request and response,所以 server 不能主動撥號」= protocol 方向 vs 誰撥號軸仍摺疊;又說「推播 server 不能主動發起」(反了)。S52 G 換皮 unprompted ✅「手機在 NAT 後,server 無法主動建立連線」= 誰撥號軸正確,interval 3→7。
 - (s52) | Observability(alert 選點) | 3AM 只能設一條 page:選 M2 DB commit latency,理由「DB 是最重要的真相來源」;重選時先講「網路監控」 | 軸摺疊:元件重要性 vs 使用者症狀;Redis-down 反證後自修成 end-to-end delivery latency。離線 3 天陷阱自答「只算在線 + PUBLISH return 1」(RP7) | unresolved | 3 | 2026-10-14 | 0
