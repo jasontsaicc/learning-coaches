@@ -324,3 +324,8 @@ EKS lab 仍遵守安全規則:公司 `eks` context 不當教材；需雲端實�
 - 每堂 G 拿掉,面試格式集中在 C-7 迷你 mock + Phase Gate。
 - lab 只留 keystone:C-1 scheduler、C-3 HPA、C-6 PDB;C-2/C-4/C-5 圖 + 情境題。
 - P3 剩餘目標 6-7 堂(原估 9)。執行細節見 coach-rules.md。
+
+### 12.5 NVIDIA 降為 stretch(2026-10-17,學員拍板)
+
+- 主目標收斂為 AWS ProServe + 台廠資深 SRE/DevOps;NVIDIA Pre-Prod 降為 stretch。學員理由:先把基礎打穩,後面再加強。
+- §12.2 順序不動。GPU 模組維持在 P5 之後,改標 [FLEX],與 controller 選修同級;進度掉了先砍這兩項。

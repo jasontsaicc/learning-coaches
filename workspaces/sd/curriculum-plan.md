@@ -11,6 +11,7 @@
 ~~無明確面試日期 → 深度優先,全課表照走,預估 2026 年 12 月初完課~~
 ~~(2026-07-18 改向:目標鎖定 AWS 職缺面試,深度優先讓位給面試就緒。見 Sprint re-plan。)~~
 **(2026-08-11 再改向:ProServe 拒信,目標回泛用大廠 senior DevOps/SRE,SD 面試型態按 SRE/infra loop〔NALSD 導向〕調整。見 Re-plan 2026-08-11。)**
+**(2026-10-17 再改向:主目標 AWS ProServe + 台廠資深 SRE/DevOps,NVIDIA Pre-Prod 為 stretch〔k8s curriculum-plan §12.5〕。隊列重排見 Re-plan 2026-10-17。)**
 Readiness 領先 curriculum position 的原則不變(見 scorecard-dims 的 Readiness Report 規則)。
 
 ## Learning Mode(S23 拍板,仍生效)
@@ -127,6 +128,17 @@ drill 才進 4-step。理由:clarify 不需新知識但後面三步需要,拿新
   真實 senior 工作九成是 brownfield,不留到壓軸。
 - **cost 收尾問**:每題 mock 收尾固定一問:「這架構一個月燒多少錢、砍 30% 動哪裡、
   怎麼證明沒砍到可靠性」。與 3AM page test 並列為固定收尾雙問。
+
+## Re-plan 2026-10-17(目標收斂,學員拍板,生效中;覆蓋 08-11 的隊列順序)
+
+**新隊列:** Day 36 chunk 2-3 + F/G 收尾 → Metrics/Logging(46-47)→ Brownfield migration(62-63)
+→ deploy system mock → Distributed Cache(38-39)→ P4 mocks。
+- Day 37(PoC + Full Diagram)跳過,與 07-18 砍 PoC 一致。
+- **News Feed(40-42)降級**為 pattern-map 驗證,不排課。理由同 Payment:剩下最 SWE 味的題,
+  對 ProServe 與 SRE loop 都偏遠。
+- Brownfield 提前到第二順位:ProServe 最可能的題型。情境外皮優先用 multi-account、hybrid、
+  migration(k8s curriculum-plan §12.3)。
+- 08-11 的 capacity 主軸、cost + 3AM 收尾雙問、design-critique 每三場一次照舊。
 
 ## Re-plan triggers
 
