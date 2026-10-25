@@ -1,0 +1,413 @@
+<title>Presence Heartbeat</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC:wght@400;700&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: one notebook column on graph paper; teal sd accent band; figures on taped cards, failure cases as comic panels */
+:root {
+  --paper: #F6F8FA;
+  --grid: rgba(90,130,170,.16);
+  --ink: #23313E;
+  --ink-soft: #55677A;
+  --card: #FFFFFF;
+  --accent: #0B7285;
+  --on-accent: #FFFFFF;
+  --tape: color-mix(in srgb, var(--accent) 35%, transparent);
+  --who: #FFE98A;
+  --see: #BDEEF6;
+  --may: #F9CDE0;
+  --wrong: #D2453A;
+  --ok: #2F8F5B;
+  --line: #9DB0C2;
+  --font-hand: "LXGW WenKai TC", "Noto Sans TC", "PingFang TC", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #1A2320; --grid: rgba(200,230,210,.08); --ink: #E6EDE8; --ink-soft: #A9BAB1;
+    --card: #24302C; --accent: #3BC9DB; --on-accent: #10221F; --who: #8A7A2A; --see: #2B6A74; --may: #7A3F57;
+    --wrong: #FF8A7E; --ok: #7FD3A1; --line: #5E7268; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #1A2320; --grid: rgba(200,230,210,.08); --ink: #E6EDE8; --ink-soft: #A9BAB1;
+  --card: #24302C; --accent: #3BC9DB; --on-accent: #10221F; --who: #8A7A2A; --see: #2B6A74; --may: #7A3F57;
+  --wrong: #FF8A7E; --ok: #7FD3A1; --line: #5E7268; color-scheme: dark;
+}
+body {
+  background-color: var(--paper);
+  background-image: linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 22px 22px;
+  color: var(--ink);
+  font-family: var(--font-hand);
+  font-size: 17px;
+  line-height: 1.75;
+}
+.band { background: var(--accent); color: var(--on-accent); padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 22px 18px; }
+.band > div { max-width: 760px; margin: 0 auto; display: grid; gap: 8px; }
+.band a { color: inherit; }
+.page { max-width: 760px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 28px 64px; display: grid; gap: 36px; }
+h1, h2, h3 { text-wrap: balance; line-height: 1.3; margin: 0; }
+h1 { font-size: 2.1rem; }
+h2 { font-size: 1.4rem; display: flex; flex-wrap: wrap; align-items: baseline; gap: 10px; }
+h2 .badge { font-family: var(--font-mono); font-size: .78rem; background: var(--accent); color: var(--on-accent); padding: 1px 8px; border-radius: 3px; }
+h2 .time { font-family: var(--font-mono); font-size: .74rem; color: var(--ink-soft); letter-spacing: .04em; }
+p { margin: 0; }
+section { display: grid; gap: 14px; min-width: 0; }
+.sub { font-size: .95rem; opacity: .9; }
+.lead { font-size: 1.12rem; font-weight: 700; }
+.progress { display: flex; flex-wrap: wrap; gap: 6px 12px; font-family: var(--font-mono); font-size: .8rem; }
+.progress a { color: inherit; text-decoration: none; }
+mark { background: linear-gradient(transparent 52%, var(--who) 52%); color: inherit; padding: 0 2px; }
+mark.see { background: linear-gradient(transparent 52%, var(--see) 52%); }
+mark.may { background: linear-gradient(transparent 52%, var(--may) 52%); }
+code { font-family: var(--font-mono); font-size: .86em; background: color-mix(in srgb, var(--line) 22%, transparent); padding: 1px 5px; border-radius: 3px; }
+.card { position: relative; background: var(--card); padding: 22px 16px 14px; box-shadow: 0 1px 3px rgba(0,0,0,.12); min-width: 0; }
+.card::before { content: ""; position: absolute; top: -9px; left: 50%; width: 92px; height: 20px; transform: translateX(-50%) rotate(-2deg); background: var(--tape); }
+.scroll { overflow-x: auto; }
+svg.fig { display: block; min-width: 600px; width: 100%; height: auto; }
+svg text { font-family: var(--font-mono); fill: var(--ink); }
+svg .hand { font-family: var(--font-hand); }
+.rule { border-left: 4px solid var(--accent); padding: 6px 12px; font-size: 1.05rem; }
+.wrong { border-left: 4px solid var(--wrong); padding: 4px 12px; display: grid; gap: 2px; }
+.wrong b { color: var(--wrong); font-size: .85rem; letter-spacing: .05em; }
+.fix { border-left: 4px solid var(--ok); padding: 4px 12px; }
+.panels { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 14px; }
+.panel { border: 2px solid var(--ink); background: var(--card); padding: 10px; display: grid; gap: 6px; min-width: 0; align-content: start; }
+.panel h3 { font-size: 1rem; font-family: var(--font-mono); }
+.panel p { font-size: .92rem; }
+.panel svg { width: 100%; height: auto; display: block; }
+@media (max-width: 560px) { .panels { grid-template-columns: 1fr; } }
+table { border-collapse: collapse; width: 100%; font-size: .95rem; font-variant-numeric: tabular-nums; }
+th, td { border-bottom: 1px dashed var(--line); padding: 8px 6px; text-align: left; vertical-align: top; }
+th { font-family: var(--font-mono); font-size: .78rem; letter-spacing: .05em; color: var(--ink-soft); font-weight: 600; }
+ol, ul { margin: 0; padding-left: 1.3em; display: grid; gap: 6px; }
+details { background: var(--card); border: 2px dashed var(--line); padding: 10px 14px; }
+details[open] { border-style: solid; }
+details summary { cursor: pointer; font-weight: 700; }
+details > div { display: grid; gap: 10px; margin-top: 10px; }
+.two { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 14px; }
+@media (max-width: 560px) { .two { grid-template-columns: 1fr; } }
+.en { font-family: var(--font-mono); font-size: .88rem; color: var(--ink-soft); }
+pre { margin: 0; font-family: var(--font-mono); font-size: .82rem; line-height: 1.5; background: var(--card); border: 1px solid var(--line); padding: 10px 12px; overflow-x: auto; }
+.next { border: 3px solid var(--accent); background: var(--card); padding: 14px 16px; display: grid; gap: 6px; }
+a { color: var(--accent); text-underline-offset: 3px; }
+a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+</style>
+
+<header class="band">
+  <div>
+    <p class="sub">sd 課程 · P3 Chat System · Day 36 chunk 2 前半 · S54（2026-10-25）</p>
+    <h1>Presence Heartbeat</h1>
+    <p>讀完這頁你能：說出「為什麼要 heartbeat、interval 選多少、timeout 為什麼是 2–3 倍」，並 commit 一個數字。</p>
+    <nav class="progress" aria-label="layers"><a href="#l0">L0 ✓</a><a href="#l1">L1 ✓</a><a href="#l2">L2 ✓</a><a href="#l3">L3 ✓</a><a href="#l4">L4 ✓</a><a href="#l5">L5 ✓</a><a href="#l6">L6 ✓</a><a href="#l7">L7 ✓</a><a href="#warmup">暖身冷測</a><a href="#trail">錯題</a></nav>
+  </div>
+</header>
+
+<main class="page">
+
+  <p class="sub">上一課：<a href="day36-group-fanout.html">Group Chat Fan-out</a>（chunk 1）。下一課：status propagation（在線狀態怎麼推給關心的人），還沒教，這頁不考。</p>
+
+  <section id="l0">
+    <h2><span class="badge">L0</span>一張圖<span class="time">讀 1 分鐘</span></h2>
+    <p class="lead">登山隊每 30 秒用對講機報平安；連續三次沒聲音，隊長才判定失聯。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 680 190" role="img" aria-label="Two hikers check in every 30 seconds. Hiker B stops after 60 seconds; three missed check-ins later, at 150 seconds, B is marked lost.">
+        <text x="20" y="62" font-size="13" class="hand">隊員 A</text>
+        <text x="20" y="122" font-size="13" class="hand">隊員 B</text>
+        <line x1="90" y1="58" x2="650" y2="58" stroke="var(--line)" stroke-width="2"/>
+        <line x1="90" y1="118" x2="650" y2="118" stroke="var(--line)" stroke-width="2"/>
+        <g fill="var(--ok)" stroke="var(--ink)" stroke-width="1.5">
+          <circle cx="110" cy="58" r="9"/><circle cx="200" cy="58" r="9"/><circle cx="290" cy="58" r="9"/><circle cx="380" cy="58" r="9"/><circle cx="470" cy="58" r="9"/><circle cx="560" cy="58" r="9"/>
+          <circle cx="110" cy="118" r="9"/><circle cx="200" cy="118" r="9"/><circle cx="290" cy="118" r="9"/>
+        </g>
+        <g fill="none" stroke="var(--wrong)" stroke-width="2" stroke-dasharray="4 3">
+          <circle cx="380" cy="118" r="9"/><circle cx="470" cy="118" r="9"/><circle cx="560" cy="118" r="9"/>
+        </g>
+        <text x="380" y="148" text-anchor="middle" font-size="10">miss 1</text>
+        <text x="470" y="148" text-anchor="middle" font-size="10">miss 2</text>
+        <text x="560" y="148" text-anchor="middle" font-size="10">miss 3</text>
+        <rect x="300" y="96" width="270" height="44" fill="var(--may)" opacity=".45"/>
+        <text x="320" y="108" font-size="11" class="hand">B 其實已經掉進山谷，隊長還不知道</text>
+        <line x1="590" y1="92" x2="590" y2="140" stroke="var(--wrong)" stroke-width="3"/>
+        <text x="598" y="112" font-size="12" class="hand" fill="var(--wrong)">判定失聯</text>
+        <g font-size="10" fill="var(--ink-soft)">
+          <text x="110" y="180" text-anchor="middle">0s</text><text x="200" y="180" text-anchor="middle">30s</text><text x="290" y="180" text-anchor="middle">60s</text><text x="380" y="180" text-anchor="middle">90s</text><text x="470" y="180" text-anchor="middle">120s</text><text x="560" y="180" text-anchor="middle">150s</text>
+        </g>
+        <text x="110" y="26" font-size="12" class="hand">● 有報到　◌ 該報沒報（看不見的那段）</text>
+      </svg>
+    </div>
+  </section>
+
+  <section id="l1">
+    <h2><span class="badge">L1</span>第一性原理<span class="time">讀 3 分鐘</span></h2>
+    <p class="lead">限制：斷線有兩種，只有一種會通知你。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 680 230" role="img" aria-label="Clean close sends a FIN so the server knows at once. Dirty disconnect, like a phone entering a tunnel, sends nothing; the server socket stays ESTABLISHED and Linux TCP keepalive would only probe after 7200 seconds.">
+        <text x="20" y="30" font-size="13" class="hand">① 乾淨斷線：使用者滑掉 App</text>
+        <rect x="30" y="44" width="90" height="36" fill="var(--see)" stroke="var(--ink)" stroke-width="1.5"/><text x="75" y="67" text-anchor="middle" font-size="12">phone</text>
+        <rect x="520" y="44" width="130" height="36" fill="var(--card)" stroke="var(--ink)" stroke-width="1.5"/><text x="585" y="67" text-anchor="middle" font-size="12">chat server</text>
+        <line x1="120" y1="62" x2="512" y2="62" stroke="var(--ok)" stroke-width="2.5"/><polygon points="512,56 522,62 512,68" fill="var(--ok)"/>
+        <text x="316" y="54" text-anchor="middle" font-size="11">WS close frame / TCP FIN</text>
+        <text x="585" y="100" text-anchor="middle" font-size="11" class="hand" fill="var(--ok)">close event → 立刻 offline</text>
+
+        <text x="20" y="140" font-size="13" class="hand">② 髒斷線：進隧道、換基地台、電池拔掉</text>
+        <rect x="30" y="154" width="90" height="36" fill="var(--may)" stroke="var(--ink)" stroke-width="1.5"/><text x="75" y="177" text-anchor="middle" font-size="12">phone ✕</text>
+        <rect x="520" y="154" width="130" height="36" fill="var(--card)" stroke="var(--ink)" stroke-width="1.5"/><text x="585" y="177" text-anchor="middle" font-size="12">chat server</text>
+        <line x1="120" y1="172" x2="512" y2="172" stroke="var(--line)" stroke-width="2" stroke-dasharray="6 5"/>
+        <text x="316" y="164" text-anchor="middle" font-size="11">（什麼封包都沒有）</text>
+        <text x="316" y="190" text-anchor="middle" font-size="11" fill="var(--wrong)">socket 還是 ESTABLISHED，server 以為他在線</text>
+        <text x="585" y="214" text-anchor="middle" font-size="10" fill="var(--ink-soft)">TCP keepalive 預設 7200s 才問</text>
+      </svg>
+    </div>
+    <p>手機斷線多半是 ② 這種。沒有 FIN，server 就只能靠<mark>「一段時間沒聽到你」</mark>推論你不在了。這就是 heartbeat：<b>用「沒有訊號」來推論狀態</b>，所以一定有延遲，而且一定會誤判。</p>
+    <p>拿掉它會怎樣：接 Day 35。Bob 的連線已死，但 server 還掛著那條 socket、還 SUBSCRIBE 著，<code>PUBLISH</code> 回 1，系統以為送到了，<mark class="may">不走 push</mark>。訊息躺在 DB，Bob 手機什麼都沒響。這一格是你 S54 自己推出來的。</p>
+  </section>
+
+  <section id="l2">
+    <h2><span class="badge">L2</span>機制<span class="time">讀 4 分鐘</span></h2>
+    <p class="lead">client 每 30 秒送一次 heartbeat，server 把 presence key 的 TTL 重設成 90 秒；key 過期 = offline。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 680 250" role="img" aria-label="Sawtooth chart of the TTL on presence:alice. Heartbeats at 0, 30 and 60 seconds reset TTL to 90. Alice enters a tunnel at 65 seconds. TTL then runs down to zero at 150 seconds, when the key expires and Alice is offline. 60 to 150 seconds is a 90 second blind window.">
+        <text x="20" y="24" font-size="12" class="hand">Redis key <tspan font-family="IBM Plex Mono, monospace">presence:alice</tspan> 的剩餘 TTL</text>
+        <line x1="60" y1="190" x2="640" y2="190" stroke="var(--ink)" stroke-width="1.5"/>
+        <line x1="60" y1="30" x2="60" y2="190" stroke="var(--ink)" stroke-width="1.5"/>
+        <g font-size="10" fill="var(--ink-soft)">
+          <text x="52" y="194" text-anchor="end">0</text><text x="52" y="144" text-anchor="end">30</text><text x="52" y="94" text-anchor="end">60</text><text x="52" y="44" text-anchor="end">90</text>
+          <text x="60" y="206" text-anchor="middle">0s</text><text x="150" y="206" text-anchor="middle">30s</text><text x="240" y="206" text-anchor="middle">60s</text><text x="330" y="206" text-anchor="middle">90s</text><text x="420" y="206" text-anchor="middle">120s</text><text x="510" y="206" text-anchor="middle">150s</text><text x="600" y="206" text-anchor="middle">180s</text>
+        </g>
+        <rect x="240" y="30" width="270" height="160" fill="var(--may)" opacity=".35"/>
+        <polyline points="60,40 150,90 150,40 240,90 240,40 510,190" fill="none" stroke="var(--accent)" stroke-width="3"/>
+        <g fill="var(--ok)" stroke="var(--ink)" stroke-width="1.2"><circle cx="60" cy="40" r="6"/><circle cx="150" cy="40" r="6"/><circle cx="240" cy="40" r="6"/></g>
+        <g fill="none" stroke="var(--wrong)" stroke-width="1.8" stroke-dasharray="3 3"><circle cx="330" cy="40" r="6"/><circle cx="420" cy="40" r="6"/><circle cx="510" cy="40" r="6"/></g>
+        <line x1="255" y1="30" x2="255" y2="190" stroke="var(--ink)" stroke-dasharray="2 4"/>
+        <text x="260" y="62" font-size="11" class="hand">65s 進隧道</text>
+        <text x="300" y="150" font-size="12" class="hand">盲區 90s：key 還在，大家看到綠點</text>
+        <circle cx="510" cy="190" r="7" fill="var(--wrong)"/>
+        <text x="520" y="180" font-size="11" fill="var(--wrong)">EXPIRED → offline</text>
+        <text x="60" y="232" font-size="11">每次 heartbeat：SET presence:alice online EX 90</text>
+      </svg>
+    </div>
+    <ol>
+      <li>client 在 WebSocket 上每 30 秒送一則小訊息（例：<code>{"t":"hb"}</code>）。</li>
+      <li>chat server 收到就寫 <code>SET presence:&lt;uid&gt; online EX 90</code>。每寫一次 TTL 歸位成 90。</li>
+      <li>乾淨斷線：server 收到 close event，直接 <code>DEL</code>，不用等 TTL。</li>
+      <li>髒斷線：沒有人 DEL，key 自己在第 90 秒過期。</li>
+      <li>容量：300 萬人在線 ÷ 30s = <mark>每秒 10 萬次寫入</mark>。這個數字你 S54 自己算出來的。</li>
+    </ol>
+    <p class="sub">300 萬在線是用你算出的 10 萬/s 乘回 30s 得到的規模；重點是公式 <code>在線人數 ÷ interval = writes/s</code>。</p>
+  </section>
+
+  <section id="l3">
+    <h2><span class="badge">L3</span>取捨<span class="time">讀 4 分鐘</span></h2>
+    <p class="lead">interval 是一個蹺蹺板：短 = 耗電 + 寫入暴增；長 = 偵測慢 + 誤判在線不走 push。選 30s，timeout 90s。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 680 230" role="img" aria-label="Butterfly chart for 3 million users. Interval 5s: 600k writes per second, detects offline in 15s. Interval 30s: 100k writes per second, 90s. Interval 120s: 25k writes per second, 360s.">
+        <text x="160" y="24" text-anchor="middle" font-size="12" class="hand">← 代價：Redis writes/s（+ 耗電）</text>
+        <text x="520" y="24" text-anchor="middle" font-size="12" class="hand">代價：多久才發現離線（timeout = 3×）→</text>
+        <g font-size="12" text-anchor="middle"><text x="340" y="70">5s</text><text x="340" y="130">30s</text><text x="340" y="190">120s</text></g>
+        <rect x="90" y="52" width="210" height="26" fill="var(--may)" stroke="var(--ink)"/><text x="96" y="70" font-size="11">60 萬/s</text>
+        <rect x="265" y="112" width="35" height="26" fill="var(--who)" stroke="var(--ink)"/><text x="258" y="130" font-size="11" text-anchor="end">10 萬/s</text>
+        <rect x="291" y="172" width="9" height="26" fill="var(--see)" stroke="var(--ink)"/><text x="284" y="190" font-size="11" text-anchor="end">2.5 萬/s</text>
+        <rect x="380" y="52" width="9" height="26" fill="var(--see)" stroke="var(--ink)"/><text x="396" y="70" font-size="11">15s</text>
+        <rect x="380" y="112" width="52" height="26" fill="var(--who)" stroke="var(--ink)"/><text x="440" y="130" font-size="11">90s</text>
+        <rect x="380" y="172" width="210" height="26" fill="var(--may)" stroke="var(--ink)"/><text x="584" y="190" font-size="11" text-anchor="end">360s</text>
+        <rect x="318" y="104" width="44" height="42" fill="none" stroke="var(--accent)" stroke-width="3"/>
+        <text x="340" y="220" text-anchor="middle" font-size="11" class="hand">300 萬在線；框起來的是推薦值</text>
+      </svg>
+    </div>
+    <div class="two">
+      <div class="fix"><b>timeout 為什麼是 2–3×，不是 1×</b><br>行動網路會掉一個封包、會抖。timeout = 1× 的話，一次遲到就判離線，綠點一直閃（flapping）。3× 等於「容忍連掉兩次」。</div>
+      <div class="fix"><b>30s 還有一個硬約束</b><br>要比路上最短的 idle timeout 短。ALB 預設 60s 沒流量就砍連線，heartbeat 剛好兼當 keep-alive。見 L4。</div>
+    </div>
+    <p>被淘汰的替代方案：<b>TCP keepalive</b>。兩個原因輸掉：</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 680 150" role="img" aria-label="Phone to ALB is TCP connection 1, ALB to chat server is TCP connection 2. Server TCP keepalive only probes connection 2 and the ALB answers. The app heartbeat travels the whole path.">
+        <rect x="20" y="50" width="100" height="40" fill="var(--see)" stroke="var(--ink)" stroke-width="1.5"/><text x="70" y="75" text-anchor="middle" font-size="12">phone</text>
+        <rect x="290" y="50" width="100" height="40" fill="var(--who)" stroke="var(--ink)" stroke-width="1.5"/><text x="340" y="75" text-anchor="middle" font-size="12">ALB</text>
+        <rect x="560" y="50" width="100" height="40" fill="var(--card)" stroke="var(--ink)" stroke-width="1.5"/><text x="610" y="75" text-anchor="middle" font-size="12">server</text>
+        <text x="205" y="44" text-anchor="middle" font-size="11">TCP 連線 #1</text><text x="475" y="44" text-anchor="middle" font-size="11">TCP 連線 #2</text>
+        <line x1="120" y1="70" x2="290" y2="70" stroke="var(--ink)" stroke-width="1.5"/><line x1="390" y1="70" x2="560" y2="70" stroke="var(--ink)" stroke-width="1.5"/>
+        <path d="M560 100 Q475 125 395 100" fill="none" stroke="var(--wrong)" stroke-width="2"/><polygon points="398,94 390,100 400,105" fill="var(--wrong)"/>
+        <text x="475" y="140" text-anchor="middle" font-size="11" fill="var(--wrong)">keepalive 只問到 ALB，ALB 會回</text>
+        <path d="M70 46 Q340 0 610 46" fill="none" stroke="var(--ok)" stroke-width="2.5" stroke-dasharray="7 4"/>
+        <text x="340" y="16" text-anchor="middle" font-size="11" fill="var(--ok)">app heartbeat 走完整條路</text>
+      </svg>
+    </div>
+    <ul>
+      <li>預設太慢：Linux <code>tcp_keepalive_time = 7200s</code>。</li>
+      <li>只量到一跳：LB 終結 TCP，server 的 keepalive 問的是 LB，不是手機。</li>
+    </ul>
+  </section>
+
+  <section id="l4">
+    <h2><span class="badge">L4</span>AWS 怎麼做<span class="time">讀 4 分鐘</span></h2>
+    <p class="lead">ALB 接 WebSocket，chat server 在 EKS，presence 放 ElastiCache Redis 的 TTL key。interval 先對齊 LB 的 idle timeout。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 680 210" role="img" aria-label="Phone connects over WebSocket to an ALB with 60s idle timeout, then to chat server pods on EKS, which write presence keys with 90s TTL to ElastiCache Redis. API Gateway WebSocket is an alternative path with a 10 minute idle timeout and per-message billing.">
+        <rect x="20" y="80" width="90" height="44" fill="var(--see)" stroke="var(--ink)" stroke-width="1.5"/><text x="65" y="106" text-anchor="middle" font-size="12">phone</text>
+        <rect x="170" y="80" width="120" height="44" fill="var(--who)" stroke="var(--ink)" stroke-width="1.5"/><text x="230" y="100" text-anchor="middle" font-size="12">ALB</text><text x="230" y="116" text-anchor="middle" font-size="10">idle 60s</text>
+        <rect x="350" y="62" width="140" height="80" fill="var(--card)" stroke="var(--accent)" stroke-width="2"/><text x="420" y="84" text-anchor="middle" font-size="12">EKS</text>
+        <rect x="364" y="94" width="50" height="34" fill="var(--card)" stroke="var(--ink)"/><text x="389" y="115" text-anchor="middle" font-size="10">chat-1</text>
+        <rect x="426" y="94" width="50" height="34" fill="var(--card)" stroke="var(--ink)"/><text x="451" y="115" text-anchor="middle" font-size="10">chat-2</text>
+        <rect x="540" y="80" width="125" height="44" fill="var(--may)" stroke="var(--ink)" stroke-width="1.5"/><text x="602" y="100" text-anchor="middle" font-size="11">ElastiCache</text><text x="602" y="116" text-anchor="middle" font-size="10">presence:* EX 90</text>
+        <line x1="110" y1="102" x2="170" y2="102" stroke="var(--ink)" stroke-width="1.5"/><line x1="290" y1="102" x2="350" y2="102" stroke="var(--ink)" stroke-width="1.5"/><line x1="490" y1="102" x2="540" y2="102" stroke="var(--ink)" stroke-width="1.5"/>
+        <text x="140" y="94" text-anchor="middle" font-size="10">WS</text><text x="515" y="94" text-anchor="middle" font-size="10">SET</text>
+        <text x="230" y="40" text-anchor="middle" font-size="11" class="hand">hb 每 30s &lt; idle 60s，連線不被砍</text>
+        <rect x="170" y="160" width="190" height="36" fill="none" stroke="var(--ink-soft)" stroke-dasharray="5 4"/><text x="265" y="176" text-anchor="middle" font-size="10">替代：API Gateway WebSocket</text><text x="265" y="190" text-anchor="middle" font-size="10">idle 10 min · 連線最長 2h</text>
+      </svg>
+    </div>
+    <div class="scroll">
+      <table>
+        <tr><th>服務</th><th>用在哪</th><th>陷阱</th></tr>
+        <tr><td>ALB</td><td>WS 入口</td><td>idle timeout 預設 60s（可調 1–4000s）。interval ≥ 60s 會讓閒置連線每分鐘被砍一次，變成 reconnect storm。</td></tr>
+        <tr><td>API Gateway WebSocket</td><td>serverless 版入口</td><td>idle 10 分鐘、連線最長 2 小時，client 一定要會重連。每則 heartbeat 都算一則計費訊息：10 萬/s ≈ 每天 86 億則（單價需確認）。</td></tr>
+        <tr><td>NLB</td><td>TCP 直通</td><td>TCP idle timeout 預設 350s。比 ALB 長，但手機端的 carrier NAT 可能更早砍掉對應表（需確認各電信值）。</td></tr>
+        <tr><td>ElastiCache Redis</td><td>presence TTL key</td><td>過期是 lazy + 抽樣刪除，keyspace notification（<code>notify-keyspace-events</code> 要在 parameter group 開）在真正刪掉時才發，不是 TTL 到點那一刻；而且是 fire-and-forget。</td></tr>
+        <tr><td>DynamoDB TTL</td><td>不要用在這裡</td><td>過期項目可能幾天後才被刪（官方：within a few days）。presence 要秒級，用它會整天看到假綠點。</td></tr>
+      </table>
+    </div>
+    <p class="sub">誰會吵：mobile team 要長 interval 省電，SRE 要算 Redis 寫入量和 LB timeout，PM 要綠點準。design review 會被問：「你的 interval 跟 LB idle timeout 怎麼對齊？」</p>
+  </section>
+
+  <section id="l5">
+    <h2><span class="badge">L5</span>規模化<span class="time">讀 3 分鐘</span></h2>
+    <p class="lead">規模一大，換掉的是「每次 heartbeat 都寫中央 Redis」：改成 chat server 自己判斷連線死活，只在狀態改變時寫。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 680 230" role="img" aria-label="Evolution ladder. Step 1 single server with an in-memory map of last seen times. Step 2 many servers writing Redis SET EX on every heartbeat, about 100k writes per second. Step 3 each chat server checks liveness locally and writes only on state changes, plus a per-server lease.">
+        <rect x="20" y="160" width="200" height="56" fill="var(--see)" stroke="var(--ink)" stroke-width="1.5"/>
+        <text x="30" y="182" font-size="12" class="hand">① 1 台 server</text><text x="30" y="204" font-size="10">記憶體 map uid→last_seen</text>
+        <rect x="240" y="100" width="200" height="116" fill="var(--who)" stroke="var(--ink)" stroke-width="1.5"/>
+        <text x="250" y="122" font-size="12" class="hand">② 多台 server</text><text x="250" y="144" font-size="10">每次 hb：SET EX 90</text><text x="250" y="162" font-size="10">寫入 = 在線 ÷ 30</text><text x="250" y="180" font-size="10">300 萬 → 10 萬/s</text>
+        <rect x="460" y="40" width="200" height="176" fill="var(--may)" stroke="var(--ink)" stroke-width="1.5"/>
+        <text x="470" y="62" font-size="12" class="hand">③ 大廠</text><text x="470" y="84" font-size="10">server 本地 timer 判死活</text><text x="470" y="102" font-size="10">只寫 online/offline 轉換</text><text x="470" y="120" font-size="10">+ 每台 server 一把 lease</text><text x="470" y="138" font-size="10">寫入 = 狀態轉換率</text><text x="470" y="156" font-size="10">讀：打開聊天室才查</text>
+        <text x="120" y="150" text-anchor="middle" font-size="10" fill="var(--ink-soft)">換掉：單點</text>
+        <text x="340" y="90" text-anchor="middle" font-size="10" fill="var(--ink-soft)">換掉：每次 hb 都寫</text>
+      </svg>
+    </div>
+    <p>③ 的關鍵：Day 35 已經說過 <mark class="see">chat server 知道自己身上連著誰</mark>。連線死活它自己最清楚，不用每 30 秒報告給 Redis。Redis 只記「轉換」。代價：chat server 整台掛掉時沒人發 offline，所以每台 server 要有自己的 lease key，lease 過期 = 這台上的人全部 offline。</p>
+    <div class="scroll">
+      <table>
+        <tr><th>路線</th><th>真相在哪</th><th>好處</th><th>代價</th></tr>
+        <tr><td>中央 TTL store</td><td>Redis key</td><td>簡單，任何 server 都能讀</td><td>寫入量 ∝ 在線人數</td></tr>
+        <tr><td>連線擁有者 + lease</td><td>持有連線的 server</td><td>寫入量 ∝ 狀態轉換</td><td>server 掛掉 = 一次幾萬人同時 offline</td></tr>
+      </table>
+    </div>
+  </section>
+
+  <section id="l6">
+    <h2><span class="badge">L6</span>故障與 on-call<span class="time">讀 4 分鐘</span></h2>
+    <p class="lead">presence 壞掉通常不會報錯，它會「說謊」：大家綠、大家灰，或一直閃。</p>
+    <div class="panels">
+      <div class="panel">
+        <h3>A · chat server 被 kill</h3>
+        <svg viewBox="0 0 300 90" role="img" aria-label="A server crashes; 50 thousand keys all expire at the same moment 90 seconds later.">
+          <rect x="10" y="20" width="70" height="40" fill="var(--may)" stroke="var(--ink)"/><text x="45" y="45" text-anchor="middle" font-size="11">chat-7 ✕</text>
+          <line x1="80" y1="40" x2="150" y2="40" stroke="var(--line)" stroke-dasharray="4 3"/><text x="115" y="34" text-anchor="middle" font-size="9">沒人 DEL</text>
+          <rect x="150" y="20" width="140" height="40" fill="var(--card)" stroke="var(--ink)"/><text x="220" y="38" text-anchor="middle" font-size="10">5 萬 key</text><text x="220" y="52" text-anchor="middle" font-size="10" fill="var(--wrong)">90s 後同時過期</text>
+          <text x="150" y="82" text-anchor="middle" font-size="10" class="hand">一波 offline 一次湧出</text>
+        </svg>
+        <p>90 秒假綠點，接著一次幾萬筆 offline 要推給別人（下一課的 fan-out）。</p>
+      </div>
+      <div class="panel">
+        <h3>B · 訊號忽好忽壞</h3>
+        <svg viewBox="0 0 300 90" role="img" aria-label="State flips online offline online offline.">
+          <polyline points="10,30 60,30 60,65 110,65 110,30 160,30 160,65 210,65 210,30 290,30" fill="none" stroke="var(--accent)" stroke-width="2.5"/>
+          <text x="10" y="22" font-size="9">online</text><text x="10" y="82" font-size="9">offline</text>
+          <text x="200" y="82" font-size="10" class="hand">flapping</text>
+        </svg>
+        <p>每次閃都觸發一次推送。止血：offline 加 grace period，轉換做 debounce。</p>
+      </div>
+      <div class="panel">
+        <h3>C · Redis failover / 被清空</h3>
+        <svg viewBox="0 0 300 90" role="img" aria-label="Redis loses all keys, so every user reads as offline.">
+          <rect x="10" y="20" width="110" height="44" fill="var(--may)" stroke="var(--ink)"/><text x="65" y="40" text-anchor="middle" font-size="10">Redis</text><text x="65" y="56" text-anchor="middle" font-size="10">0 個 key</text>
+          <line x1="120" y1="42" x2="170" y2="42" stroke="var(--ink)"/><polygon points="170,37 178,42 170,47" fill="var(--ink)"/>
+          <text x="236" y="40" text-anchor="middle" font-size="11">全部人 = offline</text><text x="236" y="58" text-anchor="middle" font-size="10" fill="var(--wrong)">直到下一次 hb</text>
+        </svg>
+        <p>最多一個 interval（30s）全灰。若 push 決策讀 presence，會誤發大量 push。</p>
+      </div>
+      <div class="panel">
+        <h3>D · interval ≥ LB idle timeout</h3>
+        <svg viewBox="0 0 300 90" role="img" aria-label="ALB cuts idle connections every 60 seconds, causing repeated reconnects.">
+          <line x1="10" y1="45" x2="290" y2="45" stroke="var(--line)" stroke-width="2"/>
+          <g stroke="var(--wrong)" stroke-width="2.5"><line x1="90" y1="30" x2="90" y2="60"/><line x1="170" y1="30" x2="170" y2="60"/><line x1="250" y1="30" x2="250" y2="60"/></g>
+          <text x="90" y="78" text-anchor="middle" font-size="9">60s 砍</text><text x="170" y="78" text-anchor="middle" font-size="9">60s 砍</text><text x="250" y="78" text-anchor="middle" font-size="9">60s 砍</text>
+          <text x="10" y="22" font-size="10" class="hand">每次重連都打一次 catch-up</text>
+        </svg>
+        <p>reconnect storm 加 catch-up 查詢打 DB，是 S50 thundering herd 的同一張臉。</p>
+      </div>
+    </div>
+    <div class="scroll">
+      <table>
+        <tr><th>看什麼</th><th>正常</th><th>出事長相</th></tr>
+        <tr><td>heartbeats/s ÷ (連線數 ÷ 30)</td><td>≈ 1</td><td>掉到 0.5 = 一半 client 沒在報</td></tr>
+        <tr><td>Redis <code>expired_keys</code> 增量</td><td>平穩</td><td>尖峰 = 某台 server 掛了</td></tr>
+        <tr><td>ALB <code>NewConnectionCount</code></td><td>平穩</td><td>週期性尖峰 = timeout 對不齊</td></tr>
+        <tr><td>presence 轉換/s</td><td>平穩</td><td>持續偏高 = flapping</td></tr>
+      </table>
+    </div>
+    <p>第一個指令：</p>
+    <pre>redis-cli -h &lt;endpoint&gt; --tls INFO stats | grep -E 'expired_keys|evicted_keys'</pre>
+    <p>SLO 範例（自訂目標，不是業界標準）：<code>99% 的髒斷線在 120 秒內轉成 offline</code>。量法：client 端回報的重連時間 vs server 端 offline 轉換時間。</p>
+  </section>
+
+  <section id="l7">
+    <h2><span class="badge">L7</span>面試<span class="time">讀 3 分鐘</span></h2>
+    <p class="lead">題目：「300 萬人同時在線的聊天 App，你怎麼知道一個人離線了？heartbeat 設多少？」</p>
+    <p>先自己用三句話講：怎麼偵測、選多少、兩邊代價。再打開。</p>
+    <details>
+      <summary>L4 vs L6 對照</summary>
+      <div>
+        <div class="wrong"><b>L4</b>「client 定期送 heartbeat，一段時間沒收到就標 offline。大概 60 秒吧？」<br>問題：沒數字、問句收尾、沒說代價、沒對齊 LB。</div>
+        <div class="fix"><b>L6</b> 多了四件事：</div>
+        <ol>
+          <li>拆兩種斷線：乾淨的靠 close event，髒的才靠 heartbeat。</li>
+          <li>commit 數字：30s interval、90s timeout，理由是容忍掉兩個封包，而且 30 &lt; ALB 60s idle。</li>
+          <li>算帳：300 萬 ÷ 30 = 10 萬 writes/s；規模再大就改成只寫狀態轉換加 server lease。</li>
+          <li>故障：server 掛掉一次幾萬人 offline、flapping 要 debounce。</li>
+        </ol>
+        <p class="en">"Clean disconnects fire a close event, so heartbeats only cover the dirty ones, like a phone going into a tunnel. I'd send one every 30 seconds and expire presence after 90, so we tolerate two lost beats without flapping. 30 also stays under the ALB's 60-second idle timeout, so the heartbeat doubles as keep-alive. At 3 million users that's 100k writes a second; if that hurts, the chat server tracks liveness locally and only writes transitions, with a per-server lease for crashes."</p>
+      </div>
+    </details>
+  </section>
+
+  <section id="warmup">
+    <h2><span class="badge">暖身</span>冷測：catch-up 與 ordering<span class="time">讀 3 分鐘</span></h2>
+    <p class="lead">catch-up 帶 <code>last_message_id</code> 不帶時間戳 ✅。counter 的 scope 是 conversation，不是 user。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 680 230" role="img" aria-label="Left: per-user counters give one group message three different numbers, so there is no shared order and each message costs three increments. Right: one counter per conversation gives every member the same seq 1045 with a single atomic increment.">
+        <text x="160" y="24" text-anchor="middle" font-size="13" class="hand" fill="var(--wrong)">✗ per user_id</text>
+        <text x="510" y="24" text-anchor="middle" font-size="13" class="hand" fill="var(--ok)">✓ per conversation</text>
+        <rect x="110" y="40" width="100" height="34" fill="var(--who)" stroke="var(--ink)"/><text x="160" y="62" text-anchor="middle" font-size="11">msg「開會囉」</text>
+        <g stroke="var(--ink)" fill="var(--card)"><rect x="20" y="130" width="90" height="56"/><rect x="120" y="130" width="90" height="56"/><rect x="220" y="130" width="90" height="56"/></g>
+        <g font-size="10" text-anchor="middle"><text x="65" y="152">Alice</text><text x="165" y="152">Bob</text><text x="265" y="152">Carol</text></g>
+        <g font-size="11" text-anchor="middle" fill="var(--wrong)"><text x="65" y="174">seq 88</text><text x="165" y="174">seq 412</text><text x="265" y="174">seq 7</text></g>
+        <g stroke="var(--ink)"><line x1="160" y1="74" x2="65" y2="130"/><line x1="160" y1="74" x2="165" y2="130"/><line x1="160" y1="74" x2="265" y2="130"/></g>
+        <text x="165" y="210" text-anchor="middle" font-size="11" class="hand">同一則三個號碼，沒有共同順序；一則要 +1 三次</text>
+        <line x1="340" y1="40" x2="340" y2="200" stroke="var(--line)" stroke-dasharray="4 4"/>
+        <rect x="430" y="40" width="160" height="34" fill="var(--who)" stroke="var(--ink)"/><text x="510" y="62" text-anchor="middle" font-size="11">conv:all-co next_seq</text>
+        <text x="510" y="100" text-anchor="middle" font-size="10">同一 transaction：UPDATE … +1 RETURNING</text>
+        <g stroke="var(--ink)" fill="var(--card)"><rect x="370" y="130" width="90" height="56"/><rect x="470" y="130" width="90" height="56"/><rect x="570" y="130" width="90" height="56"/></g>
+        <g font-size="10" text-anchor="middle"><text x="415" y="152">Alice</text><text x="515" y="152">Bob</text><text x="615" y="152">Carol</text></g>
+        <g font-size="11" text-anchor="middle" fill="var(--ok)"><text x="415" y="174">seq 1045</text><text x="515" y="174">seq 1045</text><text x="615" y="174">seq 1045</text></g>
+        <text x="515" y="210" text-anchor="middle" font-size="11" class="hand">1v1 跟 group 都是一個 conversation</text>
+      </svg>
+    </div>
+    <p>你自己產出的：clock skew 的後果是<mark>「以為收到，其實漏了」</mark>。晚送的訊息時間戳比較早，<code>ts &gt; last_seen</code> 就把它跳過。</p>
+  </section>
+
+  <section id="trail">
+    <h2><span class="badge">錯題</span>這次的釐清<span class="time">讀 2 分鐘</span></h2>
+    <div class="wrong"><b>我錯在這</b>✗ 我以為 counter 的 scope 是 <code>user_id</code><br>✓ 其實是 conversation（1v1 或 group 都是）<br>→ 為什麼搞混：「誰收到」跟「這串訊息的順序」是兩件事。S51、S52 G 都漏過這格，S54 冷測第三次，反例加圖後才自講出來。</div>
+    <div class="wrong"><b>我錯在這</b>✗ interval 兩邊代價講了，最後丟「60 秒嗎？」<br>✓ 要 commit：「30s，timeout 90s，因為 ___」<br>→ 為什麼搞混：怕選錯就用問句收尾。面試官要的是你選一個並扛住代價（s38 家族）。</div>
+    <div class="wrong"><b>我錯在這</b>✗ 太短的代價只想到 server 負載<br>✓ 還有手機耗電：每次 heartbeat 都要把 radio 叫醒<br>→ 為什麼搞混：DevOps 視角只看 server 側，client 側的成本要刻意問一次。</div>
+  </section>
+
+  <div class="next">
+    <b>下一步（2 分鐘）</b>
+    <p>回 chat，不看這頁，用一句話 commit：「我選 ___ 秒 interval、___ 秒 timeout，因為 ___，代價是 ___。」</p>
+  </div>
+
+</main>
