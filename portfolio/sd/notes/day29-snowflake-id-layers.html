@@ -1,0 +1,372 @@
+<title>Snowflake ID</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC:wght@400;700&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: one notebook column on graph paper; teal sd accent band; figures on taped cards, failure cases as comic panels */
+:root {
+  --paper: #F6F8FA;
+  --grid: rgba(90,130,170,.16);
+  --ink: #23313E;
+  --ink-soft: #55677A;
+  --card: #FFFFFF;
+  --accent: #0B7285;
+  --on-accent: #FFFFFF;
+  --tape: color-mix(in srgb, var(--accent) 35%, transparent);
+  --who: #FFE98A;
+  --see: #BDEEF6;
+  --may: #F9CDE0;
+  --wrong: #D2453A;
+  --ok: #2F8F5B;
+  --line: #9DB0C2;
+  --font-hand: "LXGW WenKai TC", "Noto Sans TC", "PingFang TC", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #1A2320; --grid: rgba(200,230,210,.08); --ink: #E6EDE8; --ink-soft: #A9BAB1;
+    --card: #24302C; --accent: #3BC9DB; --on-accent: #10221F; --who: #8A7A2A; --see: #2B6A74; --may: #7A3F57;
+    --wrong: #FF8A7E; --ok: #7FD3A1; --line: #5E7268; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #1A2320; --grid: rgba(200,230,210,.08); --ink: #E6EDE8; --ink-soft: #A9BAB1;
+  --card: #24302C; --accent: #3BC9DB; --on-accent: #10221F; --who: #8A7A2A; --see: #2B6A74; --may: #7A3F57;
+  --wrong: #FF8A7E; --ok: #7FD3A1; --line: #5E7268; color-scheme: dark;
+}
+body {
+  background-color: var(--paper);
+  background-image: linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 22px 22px;
+  color: var(--ink);
+  font-family: var(--font-hand);
+  font-size: 17px;
+  line-height: 1.75;
+}
+.band { background: var(--accent); color: var(--on-accent); padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 22px 18px; }
+.band > div { max-width: 760px; margin: 0 auto; display: grid; gap: 8px; }
+.band a { color: inherit; }
+.page { max-width: 760px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 28px 64px; display: grid; gap: 36px; }
+h1, h2, h3 { text-wrap: balance; line-height: 1.3; margin: 0; }
+h1 { font-size: 2.1rem; }
+h2 { font-size: 1.4rem; display: flex; flex-wrap: wrap; align-items: baseline; gap: 10px; }
+h2 .badge { font-family: var(--font-mono); font-size: .78rem; background: var(--accent); color: var(--on-accent); padding: 1px 8px; border-radius: 3px; }
+h2 .time { font-family: var(--font-mono); font-size: .74rem; color: var(--ink-soft); letter-spacing: .04em; }
+p { margin: 0; }
+section { display: grid; gap: 14px; min-width: 0; }
+.sub { font-size: .95rem; opacity: .9; }
+.lead { font-size: 1.12rem; font-weight: 700; }
+.progress { display: flex; flex-wrap: wrap; gap: 6px 12px; font-family: var(--font-mono); font-size: .8rem; }
+.progress a { color: inherit; text-decoration: none; }
+mark { background: linear-gradient(transparent 52%, var(--who) 52%); color: inherit; padding: 0 2px; }
+mark.see { background: linear-gradient(transparent 52%, var(--see) 52%); }
+mark.may { background: linear-gradient(transparent 52%, var(--may) 52%); }
+code { font-family: var(--font-mono); font-size: .86em; background: color-mix(in srgb, var(--line) 22%, transparent); padding: 1px 5px; border-radius: 3px; }
+.card { position: relative; background: var(--card); padding: 22px 16px 14px; box-shadow: 0 1px 3px rgba(0,0,0,.12); min-width: 0; }
+.card::before { content: ""; position: absolute; top: -9px; left: 50%; width: 92px; height: 20px; transform: translateX(-50%) rotate(-2deg); background: var(--tape); }
+.scroll { overflow-x: auto; }
+svg.fig { display: block; min-width: 600px; width: 100%; height: auto; }
+svg text { font-family: var(--font-mono); fill: var(--ink); }
+svg .hand { font-family: var(--font-hand); }
+.rule { border-left: 4px solid var(--accent); padding: 6px 12px; font-size: 1.05rem; }
+.wrong { border-left: 4px solid var(--wrong); padding: 4px 12px; display: grid; gap: 2px; }
+.wrong b { color: var(--wrong); font-size: .85rem; letter-spacing: .05em; }
+.fix { border-left: 4px solid var(--ok); padding: 4px 12px; }
+.panels { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 14px; }
+.panel { border: 2px solid var(--ink); background: var(--card); padding: 10px; display: grid; gap: 6px; min-width: 0; align-content: start; }
+.panel h3 { font-size: 1rem; font-family: var(--font-mono); }
+.panel p { font-size: .92rem; }
+.panel svg { width: 100%; height: auto; display: block; }
+@media (max-width: 560px) { .panels { grid-template-columns: 1fr; } }
+table { border-collapse: collapse; width: 100%; font-size: .95rem; font-variant-numeric: tabular-nums; }
+th, td { border-bottom: 1px dashed var(--line); padding: 8px 6px; text-align: left; vertical-align: top; }
+th { font-family: var(--font-mono); font-size: .78rem; letter-spacing: .05em; color: var(--ink-soft); font-weight: 600; }
+ol, ul { margin: 0; padding-left: 1.3em; display: grid; gap: 6px; }
+details { background: var(--card); border: 2px dashed var(--line); padding: 10px 14px; }
+details[open] { border-style: solid; }
+details summary { cursor: pointer; font-weight: 700; }
+details > div { display: grid; gap: 10px; margin-top: 10px; }
+.two { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 14px; }
+@media (max-width: 560px) { .two { grid-template-columns: 1fr; } }
+.en { font-family: var(--font-mono); font-size: .88rem; color: var(--ink-soft); }
+pre { margin: 0; font-family: var(--font-mono); font-size: .82rem; line-height: 1.5; background: var(--card); border: 1px solid var(--line); padding: 10px 12px; overflow-x: auto; }
+.next { border: 3px solid var(--accent); background: var(--card); padding: 14px 16px; display: grid; gap: 6px; }
+a { color: var(--accent); text-underline-offset: 3px; }
+a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+</style>
+
+<header class="band">
+  <div>
+    <p class="sub">sd 課程 · P3 經典設計題 · Day 29-30 · S36（2026-06-28），WR5 Topic 3 冷測 S50</p>
+    <h1>Snowflake ID</h1>
+    <p>讀完這頁你能：白板畫出 64-bit 三格、講出每格解決什麼問題，並說明 clock skew 為什麼會撞號、怎麼擋。</p>
+    <nav class="progress" aria-label="layers"><a href="#l0">L0 ✓</a><a href="#l1">L1 ✓</a><a href="#l2">L2 ✓</a><a href="#l3">L3 ✓</a><a href="#l4">L4 ✓</a><a href="#l5">L5 ✓</a><a href="#l6">L6 ✓</a><a href="#l7">L7 ✓</a><a href="#trail">錯題</a></nav>
+  </div>
+</header>
+
+<main class="page">
+
+  <p class="sub">上一課：Day 27-28 URL Shortener 的 KGS（中央發號段）。這一課是同一個「發唯一號」問題的另一條路：去中心化。</p>
+
+  <section id="l0">
+    <h2><span class="badge">L0</span>一張圖<span class="time">讀 1 分鐘</span></h2>
+    <p class="lead">像發票號碼：日期 + 店號 + 當天流水號。每家店自己開，不用打電話問總部。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 680 170" role="img" aria-label="A 64-bit ID drawn to scale: 1 sign bit, 41 bits timestamp in milliseconds, 5 bits datacenter, 5 bits worker, 12 bits sequence.">
+        <rect x="20" y="50" width="10" height="44" fill="var(--card)" stroke="var(--ink)" stroke-width="1.5"/>
+        <rect x="30" y="50" width="410" height="44" fill="var(--who)" stroke="var(--ink)" stroke-width="1.5"/>
+        <rect x="440" y="50" width="50" height="44" fill="var(--see)" stroke="var(--ink)" stroke-width="1.5"/>
+        <rect x="490" y="50" width="50" height="44" fill="var(--see)" stroke="var(--ink)" stroke-width="1.5"/>
+        <rect x="540" y="50" width="120" height="44" fill="var(--may)" stroke="var(--ink)" stroke-width="1.5"/>
+        <g font-size="11" text-anchor="middle">
+          <text x="25" y="40">0</text><text x="235" y="77">41 bits timestamp（ms）</text><text x="465" y="77">5 dc</text><text x="515" y="77">5 wk</text><text x="600" y="77">12 seq</text>
+        </g>
+        <g font-size="12" class="hand" text-anchor="middle">
+          <text x="235" y="120">日期：給順序</text><text x="490" y="120">店號：跨機器不撞</text><text x="600" y="120">流水號：同毫秒不撞</text>
+        </g>
+        <text x="20" y="24" font-size="11" fill="var(--ink-soft)">高位 ←</text><text x="660" y="24" font-size="11" fill="var(--ink-soft)" text-anchor="end">→ 低位</text>
+        <text x="20" y="155" font-size="11" fill="var(--ink-soft)">寬度照 bit 數畫：sign 永遠是 0，讓 ID 在 signed int64 裡也是正數</text>
+      </svg>
+    </div>
+  </section>
+
+  <section id="l1">
+    <h2><span class="badge">L1</span>第一性原理<span class="time">讀 3 分鐘</span></h2>
+    <p class="lead">限制：唯一性要嘛靠「每發一號都協調一次」，要嘛靠「事先把身分切開」。前者一定有瓶頸。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 680 210" role="img" aria-label="Left: all servers call one central DB counter, which becomes a bottleneck and single point of failure. Right: two servers count on their own and both issue ID 1001, a collision.">
+        <text x="160" y="24" text-anchor="middle" font-size="13" class="hand">A · 每號都問中央</text>
+        <g fill="var(--card)" stroke="var(--ink)"><rect x="30" y="40" width="70" height="30"/><rect x="125" y="40" width="70" height="30"/><rect x="220" y="40" width="70" height="30"/></g>
+        <g font-size="10" text-anchor="middle"><text x="65" y="60">app-1</text><text x="160" y="60">app-2</text><text x="255" y="60">app-3</text></g>
+        <g stroke="var(--ink)"><line x1="65" y1="70" x2="150" y2="130"/><line x1="160" y1="70" x2="160" y2="130"/><line x1="255" y1="70" x2="170" y2="130"/></g>
+        <rect x="100" y="130" width="120" height="40" fill="var(--may)" stroke="var(--ink)" stroke-width="2"/>
+        <text x="160" y="148" text-anchor="middle" font-size="11">DB next_id +1</text><text x="160" y="163" text-anchor="middle" font-size="10" fill="var(--wrong)">瓶頸 + SPOF</text>
+        <text x="160" y="196" text-anchor="middle" font-size="11" class="hand">它掛了，全站下不了單</text>
+        <line x1="340" y1="30" x2="340" y2="200" stroke="var(--line)" stroke-dasharray="4 4"/>
+        <text x="510" y="24" text-anchor="middle" font-size="13" class="hand">B · 各自 +1</text>
+        <g fill="var(--card)" stroke="var(--ink)"><rect x="390" y="50" width="100" height="40"/><rect x="540" y="50" width="100" height="40"/></g>
+        <g font-size="11" text-anchor="middle"><text x="440" y="74">app-1：1001</text><text x="590" y="74">app-2：1001</text></g>
+        <line x1="440" y1="90" x2="505" y2="135" stroke="var(--wrong)" stroke-width="2"/><line x1="590" y1="90" x2="525" y2="135" stroke="var(--wrong)" stroke-width="2"/>
+        <circle cx="515" cy="145" r="14" fill="var(--wrong)"/><text x="515" y="150" text-anchor="middle" font-size="12" fill="var(--card)">✕</text>
+        <text x="515" y="185" text-anchor="middle" font-size="11" class="hand">撞號：同一個 PK 兩筆訂單</text>
+      </svg>
+    </div>
+    <p>Snowflake 的解法：<mark>把「我是誰」寫進 ID 裡</mark>。只要每台的 machineID 不同，兩台算出來的數字就不可能一樣。協調只剩下「開機時拿一次 machineID」。</p>
+    <p>拿掉三格中的任一格會怎樣：</p>
+    <ul>
+      <li>拿掉 machineID：兩台同毫秒同 seq，撞。</li>
+      <li>拿掉 sequence：一台一毫秒只能發一個（1000/s 封頂）。</li>
+      <li>拿掉 timestamp：重啟後 seq 從 0 重數，重發舊號。</li>
+    </ul>
+  </section>
+
+  <section id="l2">
+    <h2><span class="badge">L2</span>機制<span class="time">讀 4 分鐘</span></h2>
+    <p class="lead">每次發號只做三個比較：時間倒退了嗎、還在同一毫秒嗎、seq 用完了嗎。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 680 250" role="img" aria-label="Flow: read now. If now is less than lastTs, refuse. If now equals lastTs, increment sequence; if it overflows past 4095, spin until the next millisecond. Otherwise reset sequence to 0. Then shift and OR the fields into the ID.">
+        <rect x="20" y="20" width="120" height="36" fill="var(--card)" stroke="var(--ink)" stroke-width="1.5"/><text x="80" y="43" text-anchor="middle" font-size="11">now = 現在 ms</text>
+        <line x1="140" y1="38" x2="190" y2="38" stroke="var(--ink)"/>
+        <polygon points="250,14 310,38 250,62 190,38" fill="var(--who)" stroke="var(--ink)"/><text x="250" y="42" text-anchor="middle" font-size="10">now&lt;last?</text>
+        <line x1="310" y1="38" x2="360" y2="38" stroke="var(--wrong)" stroke-width="2"/><text x="335" y="30" text-anchor="middle" font-size="10" fill="var(--wrong)">是</text>
+        <rect x="360" y="20" width="170" height="36" fill="var(--may)" stroke="var(--ink)"/><text x="445" y="43" text-anchor="middle" font-size="11">拒發（或等追回）</text>
+        <line x1="250" y1="62" x2="250" y2="100" stroke="var(--ink)"/><text x="262" y="86" font-size="10">否</text>
+        <polygon points="250,100 310,124 250,148 190,124" fill="var(--who)" stroke="var(--ink)"/><text x="250" y="128" text-anchor="middle" font-size="10">now==last?</text>
+        <line x1="310" y1="124" x2="360" y2="124" stroke="var(--ink)"/><text x="335" y="116" text-anchor="middle" font-size="10">是</text>
+        <rect x="360" y="106" width="130" height="36" fill="var(--card)" stroke="var(--ink)"/><text x="425" y="129" text-anchor="middle" font-size="11">seq += 1</text>
+        <line x1="490" y1="124" x2="530" y2="124" stroke="var(--ink)"/>
+        <rect x="530" y="106" width="135" height="36" fill="var(--card)" stroke="var(--ink)" stroke-dasharray="5 3"/><text x="597" y="122" text-anchor="middle" font-size="10">seq&gt;4095：</text><text x="597" y="136" text-anchor="middle" font-size="10">空轉到下一 ms</text>
+        <line x1="190" y1="124" x2="110" y2="124" stroke="var(--ink)"/><text x="150" y="116" text-anchor="middle" font-size="10">否</text>
+        <rect x="20" y="106" width="90" height="36" fill="var(--card)" stroke="var(--ink)"/><text x="65" y="129" text-anchor="middle" font-size="11">seq = 0</text>
+        <rect x="140" y="190" width="400" height="40" fill="var(--see)" stroke="var(--ink)" stroke-width="1.5"/>
+        <text x="340" y="215" text-anchor="middle" font-size="11">id = (now−epoch)&lt;&lt;22 | dc&lt;&lt;17 | wk&lt;&lt;12 | seq ；last = now</text>
+        <line x1="65" y1="142" x2="200" y2="190" stroke="var(--ink)"/><line x1="425" y1="142" x2="400" y2="190" stroke="var(--ink)"/>
+      </svg>
+    </div>
+    <div class="scroll">
+      <table>
+        <tr><th>數字</th><th>怎麼來</th><th>意思</th></tr>
+        <tr><td>2^41 ms ≈ 69 年</td><td>41 bit 毫秒</td><td>從自訂 epoch 起算能用 69 年（Twitter epoch 是 2010-11-04）</td></tr>
+        <tr><td>2^10 = 1024 台</td><td>5 dc + 5 worker</td><td>32 機房 × 每機房 32 台</td></tr>
+        <tr><td>4096 / ms / 台</td><td>2^12 = 1024 × 4</td><td>一台每秒 ≈ 400 萬</td></tr>
+        <tr><td>10 萬/s 需求</td><td>400 萬 ÷ 10 萬</td><td>一台就有 40 倍餘裕。多台是為了 HA 和就近，不是為了 QPS</td></tr>
+      </table>
+    </div>
+    <p class="sub">S50 校準：精確 bit 數不是考點。考點是三格各解什麼問題。</p>
+  </section>
+
+  <section id="l3">
+    <h2><span class="badge">L3</span>取捨<span class="time">讀 4 分鐘</span></h2>
+    <p class="lead">四條路排成一條光譜：協調越少越能 scale，代價是 ID 越長或越難排序。Snowflake 停在「只在開機協調一次」。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 680 200" role="img" aria-label="Spectrum from full coordination to none: DB auto-increment, KGS, Snowflake, UUID v4. Left side is short and perfectly ordered but central; right side is coordination free but long and unordered.">
+        <line x1="40" y1="70" x2="640" y2="70" stroke="var(--ink)" stroke-width="2"/><polygon points="640,64 652,70 640,76" fill="var(--ink)"/>
+        <text x="40" y="40" font-size="11" class="hand">每號都協調</text><text x="652" y="40" font-size="11" class="hand" text-anchor="end">完全不協調</text>
+        <g stroke="var(--ink)" stroke-width="1.5"><circle cx="90" cy="70" r="9" fill="var(--may)"/><circle cx="260" cy="70" r="9" fill="var(--who)"/><circle cx="430" cy="70" r="12" fill="var(--accent)"/><circle cx="600" cy="70" r="9" fill="var(--see)"/></g>
+        <g font-size="11" text-anchor="middle"><text x="90" y="104">DB auto-inc</text><text x="260" y="104">KGS 領號段</text><text x="430" y="104">Snowflake</text><text x="600" y="104">UUID v4</text></g>
+        <g font-size="10" text-anchor="middle" fill="var(--ink-soft)">
+          <text x="90" y="124">完美順序</text><text x="90" y="140">SPOF + 瓶頸</text>
+          <text x="260" y="124">可以很短</text><text x="260" y="140">中央要 HA，會丟號</text>
+          <text x="430" y="124">粗略時間序</text><text x="430" y="140">怕 clock skew</text>
+          <text x="600" y="124">128 bit、隨機</text><text x="600" y="140">B-tree 亂插</text>
+        </g>
+        <text x="340" y="184" text-anchor="middle" font-size="12" class="hand">要短（給人看）→ KGS；要可排序 + 高吞吐（內部 PK）→ Snowflake</text>
+      </svg>
+    </div>
+    <div class="two">
+      <div class="fix"><b>timestamp 為什麼放最高位</b><br>多位數排序由最高位決定。<code>2026-06-28</code> 照字串排就是時間序；寫成 <code>28-06-2026</code> 就亂了。放最高位，新 ID 永遠比舊的大，B-tree 只往最右邊 append。</div>
+      <div class="fix"><b>machineID 誰發</b><br>這是 Snowflake 的「小謊」：還是要協調，只是只在開機協調一次。跟 KGS 領一個號段用很久是同一招：把協調成本攤平。</div>
+    </div>
+    <details>
+      <summary>之後再看：安全面</summary>
+      <div><p>Snowflake 洩漏建立時間，同一台的 seq 連續。內部 PK 沒問題；暴露給 client 就加密或換隨機 ID。DB auto-inc 更糟：洩漏總訂單量（German tank problem），還能被枚舉。這一格是你 S36 零提示自己講的。</p></div>
+    </details>
+  </section>
+
+  <section id="l4">
+    <h2><span class="badge">L4</span>AWS 怎麼做<span class="time">讀 4 分鐘</span></h2>
+    <p class="lead">AWS 沒有現成的 Snowflake 服務。你自己跑：EKS StatefulSet 的 ordinal 當 workerID，region 對到 dc bits，時鐘交給 Amazon Time Sync。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 680 220" role="img" aria-label="Two regions. Each has an EKS StatefulSet id-gen-0 to 2; the ordinal becomes worker ID and the region becomes datacenter ID. Every node syncs time with chrony to Amazon Time Sync Service at 169.254.169.123. Order service calls id-gen or embeds the library.">
+        <rect x="20" y="30" width="300" height="150" fill="none" stroke="var(--accent)" stroke-width="2"/><text x="30" y="50" font-size="11">ap-northeast-1 → dc=1</text>
+        <rect x="360" y="30" width="300" height="150" fill="none" stroke="var(--accent)" stroke-width="2"/><text x="370" y="50" font-size="11">us-west-2 → dc=2</text>
+        <g fill="var(--card)" stroke="var(--ink)">
+          <rect x="40" y="70" width="80" height="34"/><rect x="130" y="70" width="80" height="34"/><rect x="220" y="70" width="80" height="34"/>
+          <rect x="380" y="70" width="80" height="34"/><rect x="470" y="70" width="80" height="34"/><rect x="560" y="70" width="80" height="34"/>
+        </g>
+        <g font-size="10" text-anchor="middle"><text x="80" y="91">id-gen-0</text><text x="170" y="91">id-gen-1</text><text x="260" y="91">id-gen-2</text><text x="420" y="91">id-gen-0</text><text x="510" y="91">id-gen-1</text><text x="600" y="91">id-gen-2</text></g>
+        <text x="170" y="124" text-anchor="middle" font-size="10" fill="var(--ink-soft)">ordinal → workerID 0/1/2</text>
+        <text x="510" y="124" text-anchor="middle" font-size="10" fill="var(--ink-soft)">同樣 0/1/2，靠 dc 區分</text>
+        <rect x="40" y="140" width="260" height="28" fill="var(--who)" stroke="var(--ink)"/><text x="170" y="159" text-anchor="middle" font-size="10">chrony → 169.254.169.123（Time Sync）</text>
+        <rect x="380" y="140" width="260" height="28" fill="var(--who)" stroke="var(--ink)"/><text x="510" y="159" text-anchor="middle" font-size="10">chrony → 169.254.169.123（Time Sync）</text>
+        <text x="340" y="208" text-anchor="middle" font-size="11" class="hand">兩個 region 都有 id-gen-0：沒有 dc bits 就會撞</text>
+      </svg>
+    </div>
+    <div class="scroll">
+      <table>
+        <tr><th>元件</th><th>用在哪</th><th>陷阱</th></tr>
+        <tr><td>Amazon Time Sync Service</td><td>時鐘來源（chrony）</td><td>它做 leap smear。跟不 smear 的公共 NTP 混用，閏秒那天兩邊差最多 1 秒。</td></tr>
+        <tr><td>chrony</td><td>校時方式</td><td><code>makestep</code> 允許的情況下時鐘會「跳」，可能往回跳；slew（慢慢調）不會倒退。開機初期最危險。</td></tr>
+        <tr><td>EKS StatefulSet</td><td>發 workerID</td><td>ordinal 只在同一個 StatefulSet 內唯一。另外，對失聯 node 上的 pod 做 force delete，可能同時跑兩個同名 pod。</td></tr>
+        <tr><td>DynamoDB lease</td><td>非 K8s 時發 workerID</td><td>conditional write 搶 ID + TTL 釋放。process 被 GC 停住、lease 過期被別人搶走，醒來還在發號 = 兩台同 ID。</td></tr>
+        <tr><td>Aurora auto-increment</td><td>最簡單的起點</td><td>只有一個 writer，所有發號排同一個 instance。failover 期間發不了號。</td></tr>
+      </table>
+    </div>
+    <p class="sub">誰會吵：DBA 要可排序的 PK（index locality），資安要不可猜，app team 不想多一跳 network。design review 會被問：「workerID 怎麼保證不重複？pod 重建時呢？」</p>
+  </section>
+
+  <section id="l5">
+    <h2><span class="badge">L5</span>規模化<span class="time">讀 3 分鐘</span></h2>
+    <p class="lead">每升一級都在把「協調」往外推：從每號協調，到每號段協調，到只在開機協調。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 680 230" role="img" aria-label="Evolution ladder. Step 1: one DB auto increment. Step 2: two ticket servers, one issues odd and one even IDs, as Flickr did. Step 3: Snowflake style IDs computed locally with machine ID, as Twitter did, or inside the database per shard, as Instagram did.">
+        <rect x="20" y="160" width="200" height="56" fill="var(--see)" stroke="var(--ink)" stroke-width="1.5"/>
+        <text x="30" y="182" font-size="12" class="hand">① 一顆 DB</text><text x="30" y="204" font-size="10">AUTO_INCREMENT</text>
+        <rect x="240" y="100" width="200" height="116" fill="var(--who)" stroke="var(--ink)" stroke-width="1.5"/>
+        <text x="250" y="122" font-size="12" class="hand">② 兩台 ticket server</text><text x="250" y="144" font-size="10">一台發奇數、一台發偶數</text><text x="250" y="162" font-size="10">increment = 2</text><text x="250" y="180" font-size="10">（Flickr 2010 做法）</text>
+        <rect x="460" y="40" width="200" height="176" fill="var(--may)" stroke="var(--ink)" stroke-width="1.5"/>
+        <text x="470" y="62" font-size="12" class="hand">③ 本地計算</text><text x="470" y="84" font-size="10">Snowflake（Twitter）</text><text x="470" y="102" font-size="10">time + machine + seq</text><text x="470" y="128" font-size="10">Instagram：在 PostgreSQL</text><text x="470" y="146" font-size="10">裡算，machine 換成</text><text x="470" y="164" font-size="10">shard ID</text>
+        <text x="120" y="150" text-anchor="middle" font-size="10" fill="var(--ink-soft)">換掉：SPOF</text>
+        <text x="340" y="90" text-anchor="middle" font-size="10" fill="var(--ink-soft)">換掉：每號一次 round trip</text>
+      </svg>
+    </div>
+    <div class="scroll">
+      <table>
+        <tr><th>路線</th><th>長相</th><th>好處</th><th>代價</th></tr>
+        <tr><td>獨立 ID service</td><td>id-gen 一組 pod，大家 RPC 來拿</td><td>workerID 只要管一組；一個 team owns</td><td>每號多一跳；它掛了全站掛</td></tr>
+        <tr><td>內嵌 library</td><td>每個 service 自己算</td><td>零 network hop</td><td>每個 service 都要分 workerID，bit 會不夠用</td></tr>
+      </table>
+    </div>
+    <details>
+      <summary>之後再看：字串版表親</summary>
+      <div><p>ULID、KSUID：可排序的字串 ID，時間在前、亂數在後，不需要 machineID。面試提到名字就夠。</p></div>
+    </details>
+  </section>
+
+  <section id="l6">
+    <h2><span class="badge">L6</span>故障與 on-call<span class="time">讀 4 分鐘</span></h2>
+    <p class="lead">Snowflake 最怕的故障是「安靜地發出重複號」。拒發會報錯，重複號不會。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 680 200" role="img" aria-label="Clock skew timeline. At 1000ms the node issues sequence 0, 1, 2. The clock reaches 1100ms, then NTP steps it back to 1000ms. The node thinks it is a new millisecond, resets sequence, and issues 1000-5-0 again: a duplicate.">
+        <line x1="40" y1="100" x2="640" y2="100" stroke="var(--line)" stroke-width="2"/>
+        <g fill="var(--ok)" stroke="var(--ink)"><circle cx="90" cy="100" r="8"/><circle cx="120" cy="100" r="8"/><circle cx="150" cy="100" r="8"/></g>
+        <text x="120" y="78" text-anchor="middle" font-size="10">(1000,5,0)(1000,5,1)(1000,5,2)</text>
+        <text x="120" y="130" text-anchor="middle" font-size="10">wall clock 1000ms</text>
+        <text x="320" y="130" text-anchor="middle" font-size="10">走到 1100ms</text>
+        <line x1="320" y1="90" x2="320" y2="110" stroke="var(--ink)"/>
+        <path d="M330 60 Q240 20 160 60" fill="none" stroke="var(--wrong)" stroke-width="2.5"/><polygon points="165,52 156,62 168,64" fill="var(--wrong)"/>
+        <text x="250" y="30" text-anchor="middle" font-size="11" fill="var(--wrong)">NTP step：拉回 1000ms</text>
+        <circle cx="470" cy="100" r="10" fill="var(--wrong)" stroke="var(--ink)"/>
+        <text x="470" y="78" text-anchor="middle" font-size="10" fill="var(--wrong)">又發 (1000,5,0)</text>
+        <text x="470" y="130" text-anchor="middle" font-size="11" class="hand" fill="var(--wrong)">撞號：以為是新的一毫秒</text>
+        <rect x="380" y="150" width="270" height="36" fill="var(--card)" stroke="var(--ok)" stroke-width="2"/>
+        <text x="515" y="173" text-anchor="middle" font-size="11">擋法：now &lt; lastTs → 拒發</text>
+      </svg>
+    </div>
+    <div class="panels">
+      <div class="panel">
+        <h3>A · 時鐘倒退</h3>
+        <p>有偵測：拒發，看到錯誤率飆高，可以 page。沒偵測：重複號流進 DB，只在 PK 衝突時才露臉。</p>
+      </div>
+      <div class="panel">
+        <h3>B · 兩台同 workerID</h3>
+        <p>每台都覺得自己正常，完全沒錯誤。唯一的訊號是下游 <code>duplicate key</code> 錯誤。這要當 page 等級。</p>
+      </div>
+      <div class="panel">
+        <h3>C · seq 打滿</h3>
+        <p>同毫秒超過 4096 個就空轉等下一毫秒。看到的是發號 latency 上升。打滿率持續偏高 = 加節點。</p>
+      </div>
+      <div class="panel">
+        <h3>D · 依賴 ID 服務掛掉</h3>
+        <p>獨立 ID service 的路線：它掛 = 全站不能建單。所以要多台、client 端要能 fallback 到另一台。</p>
+      </div>
+    </div>
+    <div class="scroll">
+      <table>
+        <tr><th>監控什麼</th><th>正常</th><th>出事長相</th></tr>
+        <tr><td>每台 clock offset</td><td>&lt; 幾 ms</td><td>突然跳大 = 校時出事</td></tr>
+        <tr><td>拒發次數</td><td>0</td><td>&gt; 0 = 時鐘倒退正在發生</td></tr>
+        <tr><td>seq 打滿率</td><td>低</td><td>持續偏高 = 容量不夠</td></tr>
+        <tr><td>下游 duplicate key</td><td>0</td><td>&gt; 0 = workerID 衝突或沒擋到倒退</td></tr>
+      </table>
+    </div>
+    <p>第一個指令：</p>
+    <pre>chronyc tracking</pre>
+    <p class="sub">看 <code>System time</code>（現在偏多少）和 <code>Leap status</code>。SLO 範例（自訂）：發號 availability 99.99%；重複號是 invariant，目標 0，出現一次就 page。</p>
+  </section>
+
+  <section id="l7">
+    <h2><span class="badge">L7</span>面試<span class="time">讀 3 分鐘</span></h2>
+    <p class="lead">題目（WR5 Topic 3 原題）：「電商 100 台 server、每秒 5 萬個 ID、ID 要大致照時間排序。怎麼設計？」</p>
+    <p>先自己講：選什麼、三格各解什麼、為什麼不用另外兩條路、最大的雷。再打開。</p>
+    <details>
+      <summary>L4 vs L6 對照</summary>
+      <div>
+        <div class="wrong"><b>L4</b>「用 Snowflake，最適合。」<br>問題：裸結論，沒講為什麼不用 DB / UUID，沒有數字，沒講監控。</div>
+        <div class="fix"><b>L6</b> 多了四件事：</div>
+        <ol>
+          <li>先排除：DB auto-inc 是瓶頸 + SPOF，UUID 不能排序、B-tree 亂插。</li>
+          <li>三格功能：time 給順序，machine 跨機不撞，seq 同毫秒不撞。100 台用 10 bit 夠。</li>
+          <li>算帳：一台 400 萬/s，5 萬/s 一台就夠，多台是 HA。</li>
+          <li>雷：clock skew，偵測到倒退就拒發；監控 clock offset 和 duplicate key。</li>
+        </ol>
+        <p class="en">"I'd use a Snowflake-style 64-bit ID: timestamp in the high bits, then machine ID, then a per-millisecond sequence. The timestamp gives rough time order, the machine ID stops collisions across nodes, and the sequence stops them within one node. A DB auto-increment would be a bottleneck and a single point of failure, and UUIDs don't sort, which hurts the B-tree. One node can issue about 4 million IDs a second, so 50k is easy; I run several for availability. The main risk is clock skew: if the clock goes backward, the node refuses to issue rather than risk a duplicate, and I alert on clock offset and on duplicate-key errors downstream."</p>
+      </div>
+    </details>
+  </section>
+
+  <section id="trail">
+    <h2><span class="badge">錯題</span>這次的釐清<span class="time">讀 2 分鐘</span></h2>
+    <div class="wrong"><b>我錯在這</b>✗ 我以為「不准中央配號」= 每台分一段號碼區間<br>✓ 其實是把機器身分（machineID）揉進 ID，每台自己算<br>→ 為什麼搞混：還停在 KGS「切號碼空間」的思路，沒跳到「切身分」。</div>
+    <div class="wrong"><b>我錯在這</b>✗ 我以為防撞可以 hash(機器名)<br>✓ 其實 hash 會碰撞，只是「大概不撞」；門牌號直接塞進去才是保證<br>→ 為什麼搞混：反射性想到 hash，忘了 Day 27「counter 消滅碰撞」。</div>
+    <div class="wrong"><b>我錯在這</b>✗ 我以為 clock skew「很危險」就夠了<br>✓ 其實要講機制：倒退 → 重入舊毫秒 → seq 歸零 → 重發舊號<br>→ 為什麼搞混：停在感覺，沒翻成因果鏈。</div>
+    <div class="wrong"><b>我錯在這</b>✗ 看到 <code>2^12</code> 就放棄算<br>✓ 其實是 <code>1024 × 4 ≈ 4000</code>，再乘 1000 ms<br>→ 為什麼搞混：被寫法嚇到，不是不會。看到 <code>2^n</code> 先拆成 <code>1024 × 2^(n−10)</code>。</div>
+  </section>
+
+  <div class="next">
+    <b>下一步（2 分鐘）</b>
+    <p>拿一張紙，不看這頁，畫出 64-bit 那條長條，在每格下面寫一句「它解決什麼」。</p>
+  </div>
+
+</main>

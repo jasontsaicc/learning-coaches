@@ -1,0 +1,358 @@
+<title>Notification System</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC:wght@400;700&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: one notebook column on graph paper; teal sd accent band; figures on taped cards, failure cases as comic panels */
+:root {
+  --paper: #F6F8FA;
+  --grid: rgba(90,130,170,.16);
+  --ink: #23313E;
+  --ink-soft: #55677A;
+  --card: #FFFFFF;
+  --accent: #0B7285;
+  --on-accent: #FFFFFF;
+  --tape: color-mix(in srgb, var(--accent) 35%, transparent);
+  --who: #FFE98A;
+  --see: #BDEEF6;
+  --may: #F9CDE0;
+  --wrong: #D2453A;
+  --ok: #2F8F5B;
+  --line: #9DB0C2;
+  --font-hand: "LXGW WenKai TC", "Noto Sans TC", "PingFang TC", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #1A2320; --grid: rgba(200,230,210,.08); --ink: #E6EDE8; --ink-soft: #A9BAB1;
+    --card: #24302C; --accent: #3BC9DB; --on-accent: #10221F; --who: #8A7A2A; --see: #2B6A74; --may: #7A3F57;
+    --wrong: #FF8A7E; --ok: #7FD3A1; --line: #5E7268; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #1A2320; --grid: rgba(200,230,210,.08); --ink: #E6EDE8; --ink-soft: #A9BAB1;
+  --card: #24302C; --accent: #3BC9DB; --on-accent: #10221F; --who: #8A7A2A; --see: #2B6A74; --may: #7A3F57;
+  --wrong: #FF8A7E; --ok: #7FD3A1; --line: #5E7268; color-scheme: dark;
+}
+body {
+  background-color: var(--paper);
+  background-image: linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 22px 22px;
+  color: var(--ink);
+  font-family: var(--font-hand);
+  font-size: 17px;
+  line-height: 1.75;
+}
+.band { background: var(--accent); color: var(--on-accent); padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 22px 18px; }
+.band > div { max-width: 760px; margin: 0 auto; display: grid; gap: 8px; }
+.band a { color: inherit; }
+.page { max-width: 760px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 28px 64px; display: grid; gap: 36px; }
+h1, h2, h3 { text-wrap: balance; line-height: 1.3; margin: 0; }
+h1 { font-size: 2.1rem; }
+h2 { font-size: 1.4rem; display: flex; flex-wrap: wrap; align-items: baseline; gap: 10px; }
+h2 .badge { font-family: var(--font-mono); font-size: .78rem; background: var(--accent); color: var(--on-accent); padding: 1px 8px; border-radius: 3px; }
+h2 .time { font-family: var(--font-mono); font-size: .74rem; color: var(--ink-soft); letter-spacing: .04em; }
+p { margin: 0; }
+section { display: grid; gap: 14px; min-width: 0; }
+.sub { font-size: .95rem; opacity: .9; }
+.lead { font-size: 1.12rem; font-weight: 700; }
+.progress { display: flex; flex-wrap: wrap; gap: 6px 12px; font-family: var(--font-mono); font-size: .8rem; }
+.progress a { color: inherit; text-decoration: none; }
+mark { background: linear-gradient(transparent 52%, var(--who) 52%); color: inherit; padding: 0 2px; }
+mark.see { background: linear-gradient(transparent 52%, var(--see) 52%); }
+mark.may { background: linear-gradient(transparent 52%, var(--may) 52%); }
+code { font-family: var(--font-mono); font-size: .86em; background: color-mix(in srgb, var(--line) 22%, transparent); padding: 1px 5px; border-radius: 3px; }
+.card { position: relative; background: var(--card); padding: 22px 16px 14px; box-shadow: 0 1px 3px rgba(0,0,0,.12); min-width: 0; }
+.card::before { content: ""; position: absolute; top: -9px; left: 50%; width: 92px; height: 20px; transform: translateX(-50%) rotate(-2deg); background: var(--tape); }
+.scroll { overflow-x: auto; }
+svg.fig { display: block; min-width: 600px; width: 100%; height: auto; }
+svg text { font-family: var(--font-mono); fill: var(--ink); }
+svg .hand { font-family: var(--font-hand); }
+.rule { border-left: 4px solid var(--accent); padding: 6px 12px; font-size: 1.05rem; }
+.wrong { border-left: 4px solid var(--wrong); padding: 4px 12px; display: grid; gap: 2px; }
+.wrong b { color: var(--wrong); font-size: .85rem; letter-spacing: .05em; }
+.fix { border-left: 4px solid var(--ok); padding: 4px 12px; }
+.panels { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 14px; }
+.panel { border: 2px solid var(--ink); background: var(--card); padding: 10px; display: grid; gap: 6px; min-width: 0; align-content: start; }
+.panel h3 { font-size: 1rem; font-family: var(--font-mono); }
+.panel p { font-size: .92rem; }
+.panel svg { width: 100%; height: auto; display: block; }
+@media (max-width: 560px) { .panels { grid-template-columns: 1fr; } }
+table { border-collapse: collapse; width: 100%; font-size: .95rem; font-variant-numeric: tabular-nums; }
+th, td { border-bottom: 1px dashed var(--line); padding: 8px 6px; text-align: left; vertical-align: top; }
+th { font-family: var(--font-mono); font-size: .78rem; letter-spacing: .05em; color: var(--ink-soft); font-weight: 600; }
+ol, ul { margin: 0; padding-left: 1.3em; display: grid; gap: 6px; }
+details { background: var(--card); border: 2px dashed var(--line); padding: 10px 14px; }
+details[open] { border-style: solid; }
+details summary { cursor: pointer; font-weight: 700; }
+details > div { display: grid; gap: 10px; margin-top: 10px; }
+.two { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 14px; }
+@media (max-width: 560px) { .two { grid-template-columns: 1fr; } }
+.en { font-family: var(--font-mono); font-size: .88rem; color: var(--ink-soft); }
+pre { margin: 0; font-family: var(--font-mono); font-size: .82rem; line-height: 1.5; background: var(--card); border: 1px solid var(--line); padding: 10px 12px; overflow-x: auto; }
+.next { border: 3px solid var(--accent); background: var(--card); padding: 14px 16px; display: grid; gap: 6px; }
+a { color: var(--accent); text-underline-offset: 3px; }
+a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+</style>
+
+<header class="band">
+  <div>
+    <p class="sub">sd 課程 · P3 經典設計題 · Day 33 · mock #1（S46–S48），留存冷測 S49</p>
+    <h1>Notification System</h1>
+    <p>讀完這頁你能：用 50 分鐘撞 60 秒的算式論證「三條 queue + 三組 worker」，分清 bulkhead 和 circuit breaker，並跑完 3AM page test。</p>
+    <nav class="progress" aria-label="layers"><a href="#l0">L0 ✓</a><a href="#l1">L1 ✓</a><a href="#l2">L2 ✓</a><a href="#l3">L3 ✓</a><a href="#l4">L4 ✓</a><a href="#l5">L5 ✓</a><a href="#l6">L6 ✓</a><a href="#l7">L7 ✓</a><a href="#trail">錯題</a></nav>
+  </div>
+</header>
+
+<main class="page">
+
+  <p class="sub">情境：零售銀行要送三種簡訊。詐騙警示 P99 60s（3–5 萬/日，尖峰 200–300/s）；交易通知分鐘級（500 萬/日）；行銷每週 2–3 檔，每檔 100–300 萬則、可暫停、24h 過期。</p>
+
+  <section id="l0">
+    <h2><span class="badge">L0</span>一張圖<span class="time">讀 1 分鐘</span></h2>
+    <p class="lead">銀行櫃台：急件客人排第一也沒用，要等到有櫃員空出來。所以急件要有自己的櫃員。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 680 200" role="img" aria-label="Left: one line with a priority ticket; the fraud customer is first in line but all three tellers are busy with marketing, so he waits. Right: a dedicated fraud teller is free and serves him at once.">
+        <text x="160" y="22" text-anchor="middle" font-size="13" class="hand" fill="var(--wrong)">✗ 優先號碼牌 + 共用櫃員</text>
+        <g fill="var(--may)" stroke="var(--ink)"><rect x="40" y="40" width="70" height="40"/><rect x="125" y="40" width="70" height="40"/><rect x="210" y="40" width="70" height="40"/></g>
+        <g font-size="10" text-anchor="middle"><text x="75" y="58">櫃員</text><text x="75" y="72">忙行銷</text><text x="160" y="58">櫃員</text><text x="160" y="72">忙行銷</text><text x="245" y="58">櫃員</text><text x="245" y="72">忙行銷</text></g>
+        <circle cx="160" cy="120" r="14" fill="var(--who)" stroke="var(--ink)"/><text x="160" y="124" text-anchor="middle" font-size="10">詐騙</text>
+        <text x="160" y="152" text-anchor="middle" font-size="10">排第一，但沒人有空</text>
+        <g fill="var(--card)" stroke="var(--line)"><circle cx="110" cy="175" r="8"/><circle cx="135" cy="175" r="8"/><circle cx="160" cy="175" r="8"/><circle cx="185" cy="175" r="8"/><circle cx="210" cy="175" r="8"/></g>
+        <text x="245" y="179" font-size="10" fill="var(--ink-soft)">200 萬行銷…</text>
+        <line x1="340" y1="30" x2="340" y2="190" stroke="var(--line)" stroke-dasharray="4 4"/>
+        <text x="510" y="22" text-anchor="middle" font-size="13" class="hand" fill="var(--ok)">✓ 詐騙專屬櫃員</text>
+        <rect x="390" y="40" width="70" height="40" fill="var(--see)" stroke="var(--ink)"/><text x="425" y="58" text-anchor="middle" font-size="10">詐騙櫃員</text><text x="425" y="72" text-anchor="middle" font-size="10">空著</text>
+        <g fill="var(--may)" stroke="var(--ink)"><rect x="480" y="40" width="70" height="40"/><rect x="565" y="40" width="70" height="40"/></g>
+        <g font-size="10" text-anchor="middle"><text x="515" y="64">行銷櫃員</text><text x="600" y="64">行銷櫃員</text></g>
+        <circle cx="425" cy="120" r="14" fill="var(--who)" stroke="var(--ink)"/><text x="425" y="124" text-anchor="middle" font-size="10">詐騙</text>
+        <line x1="425" y1="106" x2="425" y2="82" stroke="var(--ok)" stroke-width="2.5"/><polygon points="419,86 425,78 431,86" fill="var(--ok)"/>
+        <text x="425" y="152" text-anchor="middle" font-size="10">馬上被服務</text>
+      </svg>
+    </div>
+  </section>
+
+  <section id="l1">
+    <h2><span class="badge">L1</span>第一性原理<span class="time">讀 3 分鐘</span></h2>
+    <p class="lead">限制有兩條：producer 不能被 provider 的延遲綁架；三種訊息的時效差了三個數量級，不能走同一條路。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 680 220" role="img" aria-label="Top: layer 0, three services call the SMS provider synchronously, so a slow provider slows all three. Bottom: one shared queue; a 2 million message campaign at 1000 per second takes 2000 seconds, about 33 minutes, against a 60 second fraud SLO, drawn to scale.">
+        <text x="20" y="22" font-size="12" class="hand">第 0 層（現狀）：每個 service 直接 HTTP 打 provider</text>
+        <g fill="var(--card)" stroke="var(--ink)"><rect x="30" y="34" width="100" height="24"/><rect x="30" y="62" width="100" height="24"/><rect x="30" y="90" width="100" height="24"/></g>
+        <g font-size="10" text-anchor="middle"><text x="80" y="50">Fraud svc</text><text x="80" y="78">Order svc</text><text x="80" y="106">Campaign svc</text></g>
+        <g stroke="var(--ink)"><line x1="130" y1="46" x2="300" y2="74"/><line x1="130" y1="74" x2="300" y2="74"/><line x1="130" y1="102" x2="300" y2="74"/></g>
+        <rect x="300" y="58" width="120" height="32" fill="var(--may)" stroke="var(--ink)"/><text x="360" y="78" text-anchor="middle" font-size="10">Provider（慢 1s）</text>
+        <text x="440" y="78" font-size="11" class="hand" fill="var(--wrong)">→ 三個 service 一起慢 1s</text>
+        <text x="20" y="150" font-size="12" class="hand">共用一條 queue：行銷一檔要排多久？</text>
+        <rect x="30" y="162" width="600" height="22" fill="var(--may)" stroke="var(--ink)"/><text x="330" y="178" text-anchor="middle" font-size="10">200 萬 ÷ 1000/s = 2000s ≈ 33 分鐘</text>
+        <rect x="30" y="190" width="18" height="22" fill="var(--ok)" stroke="var(--ink)"/><text x="56" y="206" font-size="10">詐騙 SLO 60s（照比例）</text>
+      </svg>
+    </div>
+    <p>第 1 層加 queue 解決第一條：API 收下回 <code>202 Accepted</code>，producer 不用等 provider。第二條要第 2 層：<mark>一條變三條</mark>，而且 queue 和 worker 都要分。這一格你 S46 自己答出「還是會卡在在跑大量的 marketing」。</p>
+  </section>
+
+  <section id="l2">
+    <h2><span class="badge">L2</span>機制<span class="time">讀 5 分鐘</span></h2>
+    <p class="lead">三條 queue 各配一組 worker，各有自己的 scaling policy。每個 worker 送出前依序過五道檢查。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 680 230" role="img" aria-label="Layer 2 architecture: services call the Notification API, which returns 202 and routes to fraud, transaction and marketing queues. Each queue has its own worker pool, 60, 15 and 50 workers. All send to provider A; a circuit breaker fails over to provider B.">
+        <rect x="20" y="95" width="90" height="40" fill="var(--card)" stroke="var(--ink)"/><text x="65" y="113" text-anchor="middle" font-size="10">services</text><text x="65" y="127" text-anchor="middle" font-size="10">（sync）</text>
+        <rect x="130" y="95" width="100" height="40" fill="var(--who)" stroke="var(--ink)" stroke-width="1.5"/><text x="180" y="113" text-anchor="middle" font-size="10">Notif API</text><text x="180" y="127" text-anchor="middle" font-size="10">回 202 + router</text>
+        <line x1="110" y1="115" x2="130" y2="115" stroke="var(--ink)"/>
+        <g fill="var(--see)" stroke="var(--ink)"><rect x="270" y="30" width="110" height="34"/><rect x="270" y="98" width="110" height="34"/><rect x="270" y="166" width="110" height="34"/></g>
+        <g font-size="10" text-anchor="middle"><text x="325" y="51">fraud-queue</text><text x="325" y="119">txn-queue</text><text x="325" y="187">mktg-queue</text></g>
+        <g stroke="var(--ink)" stroke-dasharray="5 3"><line x1="230" y1="110" x2="270" y2="47"/><line x1="230" y1="115" x2="270" y2="115"/><line x1="230" y1="120" x2="270" y2="183"/></g>
+        <text x="250" y="88" font-size="9" fill="var(--ink-soft)">async</text>
+        <g fill="var(--card)" stroke="var(--accent)" stroke-width="2"><rect x="410" y="30" width="100" height="34"/><rect x="410" y="98" width="100" height="34"/><rect x="410" y="166" width="100" height="34"/></g>
+        <g font-size="10" text-anchor="middle"><text x="460" y="51">workers ×60</text><text x="460" y="119">workers ×15</text><text x="460" y="187">workers ×50</text></g>
+        <g stroke="var(--ink)"><line x1="380" y1="47" x2="410" y2="47"/><line x1="380" y1="115" x2="410" y2="115"/><line x1="380" y1="183" x2="410" y2="183"/></g>
+        <rect x="550" y="70" width="110" height="34" fill="var(--card)" stroke="var(--ink)"/><text x="605" y="91" text-anchor="middle" font-size="10">Provider A</text>
+        <rect x="550" y="140" width="110" height="34" fill="var(--card)" stroke="var(--ink)" stroke-dasharray="5 3"/><text x="605" y="161" text-anchor="middle" font-size="10">Provider B</text>
+        <g stroke="var(--ink)"><line x1="510" y1="47" x2="550" y2="87"/><line x1="510" y1="115" x2="550" y2="87"/><line x1="510" y1="183" x2="550" y2="87"/></g>
+        <line x1="605" y1="104" x2="605" y2="140" stroke="var(--wrong)" stroke-width="2"/><text x="612" y="126" font-size="9" fill="var(--wrong)">CB 跳開</text>
+        <text x="460" y="222" text-anchor="middle" font-size="10" fill="var(--ink-soft)">每條 queue 一個獨立 scaling policy</text>
+      </svg>
+    </div>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 680 120" role="img" aria-label="Worker pipeline: receive, check expire_at, check pause flag, dedupe conditional write, per user daily counter, send, then ack. Expired or duplicate messages are dropped and acked without sending.">
+        <g fill="var(--card)" stroke="var(--ink)">
+          <rect x="10" y="30" width="78" height="44"/><rect x="100" y="30" width="78" height="44"/><rect x="190" y="30" width="78" height="44"/><rect x="280" y="30" width="96" height="44"/><rect x="388" y="30" width="96" height="44"/><rect x="496" y="30" width="78" height="44" fill="var(--who)"/><rect x="586" y="30" width="78" height="44"/>
+        </g>
+        <g font-size="10" text-anchor="middle">
+          <text x="49" y="56">收訊息</text><text x="139" y="50">expire_at</text><text x="139" y="64">過期？</text><text x="229" y="50">pause</text><text x="229" y="64">旗標？</text><text x="328" y="50">dedupe</text><text x="328" y="64">conditional write</text><text x="436" y="50">每人每日</text><text x="436" y="64">counter</text><text x="535" y="56">送 SMS</text><text x="625" y="56">ack</text>
+        </g>
+        <text x="139" y="98" text-anchor="middle" font-size="9" fill="var(--wrong)">過期 → 丟</text><text x="229" y="98" text-anchor="middle" font-size="9" fill="var(--ink-soft)">暫停 → 不 poll</text><text x="328" y="98" text-anchor="middle" font-size="9" fill="var(--wrong)">發過 → ack 不發</text><text x="436" y="98" text-anchor="middle" font-size="9" fill="var(--wrong)">超上限 → 丟</text>
+      </svg>
+    </div>
+    <div class="scroll">
+      <table>
+        <tr><th>要算什麼</th><th>單位式（先寫這個）</th><th>這題</th></tr>
+        <tr><td>要幾台 worker</td><td>N = λ × W（Little's Law）</td><td>300/s × 0.2s = 60 台（最少）</td></tr>
+        <tr><td>消化一檔要多久</td><td>總則數 ÷ 消費速率</td><td>200 萬 ÷ 1000/s = 2000s</td></tr>
+        <tr><td>pool 每秒放出幾台</td><td>台數 ÷ 單則佔用秒數</td><td>130 ÷ 36s = 3.6 台/s</td></tr>
+        <tr><td>headroom</td><td>到達率 × W ÷ 台數</td><td>開 120 台：2.5/s/台 × 0.2 = 50% 使用率</td></tr>
+      </table>
+    </div>
+    <p class="sub">假設講在前面：「I'm assuming 200ms per send」。面試官不同意也只是調數字，不會判你錯。</p>
+  </section>
+
+  <section id="l3">
+    <h2><span class="badge">L3</span>取捨<span class="time">讀 5 分鐘</span></h2>
+    <p class="lead">priority 解決 ordering，不解決 isolation。它決定你排第幾，不決定有沒有 worker 有空。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 680 210" role="img" aria-label="Two separate axes. Bulkhead limits blast radius, who goes down with it. Circuit breaker limits duration, how long you stay stuck. A provider timeout is a duration problem; a poison marketing message is a blast radius problem.">
+        <line x1="80" y1="180" x2="640" y2="180" stroke="var(--ink)" stroke-width="1.5"/><polygon points="640,174 652,180 640,186" fill="var(--ink)"/>
+        <line x1="80" y1="180" x2="80" y2="20" stroke="var(--ink)" stroke-width="1.5"/><polygon points="74,20 80,8 86,20" fill="var(--ink)"/>
+        <text x="560" y="200" font-size="11" class="hand">卡多久（時間）</text><text x="90" y="18" font-size="11" class="hand">誰陪葬（範圍）</text>
+        <rect x="100" y="40" width="230" height="56" fill="var(--see)" stroke="var(--ink)"/><text x="215" y="62" text-anchor="middle" font-size="12">Bulkhead</text><text x="215" y="80" text-anchor="middle" font-size="10">船破洞照樣進水，只是不沉船</text>
+        <rect x="390" y="110" width="230" height="56" fill="var(--who)" stroke="var(--ink)"/><text x="505" y="132" text-anchor="middle" font-size="12">Circuit breaker</text><text x="505" y="150" text-anchor="middle" font-size="10">36s timeout → fail fast</text>
+        <text x="215" y="118" text-anchor="middle" font-size="10" fill="var(--ink-soft)">救：行銷 poison message</text>
+        <text x="505" y="96" text-anchor="middle" font-size="10" fill="var(--ink-soft)">救：provider 退化</text>
+      </svg>
+    </div>
+    <div class="scroll">
+      <table>
+        <tr><th>Max 的「一條 queue + priority」死在哪</th><th>機制</th></tr>
+        <tr><td>Failure isolation</td><td>一則行銷 poison message 觸發 retry storm，shared pool 全被吃光</td></tr>
+        <tr><td>Independent scaling</td><td>autoscaling 看 queue depth，200 萬則把 fraud 的訊號淹掉</td></tr>
+        <tr><td>Pause / TTL</td><td>暫停行銷只能 pull 出來再丟，照樣燒 worker</td></tr>
+        <tr><td>Provider quota</td><td>TPS 是帳號級共享，行銷燒光，fraud 收 429</td></tr>
+        <tr><td>工程現實</td><td>SQS 沒有 priority，Kafka 也沒有，AWS 技術棧裡做不出來</td></tr>
+      </table>
+    </div>
+    <div class="two">
+      <div class="fix"><b>先承認對方對的地方</b><br>Provider 50ms 回應時，Max 是對的：fraud 排第一，等的只是一台 worker 放手。你 S48 沒有因為「Max 是反派」就反射性反對。</div>
+      <div class="wrong"><b>自己付的代價</b>分開不是免費。任何 separate/isolate 的代價 = 管理面 ×N（三套 alarm、scaling policy、dashboard）+ idle 資源。這格 S49 三輪才擠出來。</div>
+    </div>
+    <p class="sub">誠實轉折：provider 退化時，分不分 pool 都會死，因為瓶頸在下游。專屬 30 台反而更慢（30 ÷ 36 = 0.83/s）。救命的是 circuit breaker。</p>
+  </section>
+
+  <section id="l4">
+    <h2><span class="badge">L4</span>AWS 怎麼做<span class="time">讀 4 分鐘</span></h2>
+    <p class="lead">三條 SQS、三個 Lambda（各自 reserved concurrency = bulkhead）、DynamoDB 做 dedupe 和頻率上限、SMS 走 AWS End User Messaging 或第三方。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 680 230" role="img" aria-label="AWS layout: API Gateway to a Notification API on Lambda or ECS, to three SQS queues, each drained by its own Lambda with reserved concurrency. Lambdas use DynamoDB for dedupe and counters and send through AWS End User Messaging SMS or Twilio. CloudWatch watches oldest message age.">
+        <rect x="10" y="95" width="90" height="40" fill="var(--card)" stroke="var(--ink)"/><text x="55" y="119" text-anchor="middle" font-size="10">API Gateway</text>
+        <rect x="120" y="95" width="90" height="40" fill="var(--who)" stroke="var(--ink)"/><text x="165" y="113" text-anchor="middle" font-size="10">Notif API</text><text x="165" y="127" text-anchor="middle" font-size="9">Lambda / ECS</text>
+        <g fill="var(--see)" stroke="var(--ink)"><rect x="240" y="30" width="90" height="34"/><rect x="240" y="98" width="90" height="34"/><rect x="240" y="166" width="90" height="34"/></g>
+        <g font-size="10" text-anchor="middle"><text x="285" y="51">SQS fraud</text><text x="285" y="119">SQS txn</text><text x="285" y="187">SQS mktg</text></g>
+        <g fill="var(--card)" stroke="var(--accent)" stroke-width="2"><rect x="360" y="30" width="110" height="34"/><rect x="360" y="98" width="110" height="34"/><rect x="360" y="166" width="110" height="34"/></g>
+        <g font-size="9" text-anchor="middle"><text x="415" y="51">Lambda RC=60</text><text x="415" y="119">Lambda RC=15</text><text x="415" y="187">Lambda RC=50</text></g>
+        <rect x="500" y="20" width="160" height="34" fill="var(--may)" stroke="var(--ink)"/><text x="580" y="41" text-anchor="middle" font-size="10">DynamoDB dedupe + counter</text>
+        <rect x="500" y="98" width="160" height="34" fill="var(--card)" stroke="var(--ink)"/><text x="580" y="119" text-anchor="middle" font-size="10">End User Messaging SMS</text>
+        <rect x="500" y="166" width="160" height="34" fill="var(--card)" stroke="var(--ink)" stroke-dasharray="5 3"/><text x="580" y="187" text-anchor="middle" font-size="10">Twilio（CB 後備）</text>
+        <g stroke="var(--ink)"><line x1="100" y1="115" x2="120" y2="115"/><line x1="210" y1="110" x2="240" y2="47"/><line x1="210" y1="115" x2="240" y2="115"/><line x1="210" y1="120" x2="240" y2="183"/><line x1="330" y1="47" x2="360" y2="47"/><line x1="330" y1="115" x2="360" y2="115"/><line x1="330" y1="183" x2="360" y2="183"/><line x1="470" y1="115" x2="500" y2="115"/><line x1="470" y1="47" x2="500" y2="37"/><line x1="470" y1="120" x2="500" y2="183"/></g>
+        <text x="285" y="222" text-anchor="middle" font-size="10" fill="var(--ink-soft)">CloudWatch：ApproximateAgeOfOldestMessage</text>
+      </svg>
+    </div>
+    <div class="scroll">
+      <table>
+        <tr><th>服務</th><th>用在哪</th><th>陷阱</th></tr>
+        <tr><td>SQS</td><td>三條 queue</td><td>沒有 priority。standard queue 是 at-least-once、不保證順序。visibility timeout 預設 30s：一則卡 36s 的訊息會在處理中重新可見，被另一台再送一次。Lambda 觸發時建議設成 function timeout 的 6 倍。</td></tr>
+        <tr><td>Lambda reserved concurrency</td><td>per-pool bulkhead</td><td>帳號預設 concurrency 1,000 是共享池。reserved 會從池子裡切走，沒設的 function 可能被餓死。</td></tr>
+        <tr><td>DynamoDB</td><td>dedupe、頻率上限</td><td>每則多一次寫入（500 萬/日 = 500 萬次）。dedupe 表一定配 TTL，不然無限長大。</td></tr>
+        <tr><td>End User Messaging SMS（舊名 Pinpoint SMS）</td><td>送簡訊</td><td>新帳號的 SMS 月花費上限預設很低（US$1），沒申請調高就會停發。TPS 也是帳號級。</td></tr>
+        <tr><td>CloudWatch alarm</td><td>dead man's switch</td><td>通道死掉時 metric 沒資料，預設 <code>TreatMissingData</code> 不會叫。要設成 <code>breaching</code>。</td></tr>
+      </table>
+    </div>
+    <p class="sub">誰會吵：行銷 PM 要一檔越快發完越好，風控要 fraud 永遠 60 秒內，財務看 SMS 單價和 idle worker。design review 會被問：「三套 pool 的 idle 成本你怎麼說服財務？」</p>
+  </section>
+
+  <section id="l5">
+    <h2><span class="badge">L5</span>規模化<span class="time">讀 3 分鐘</span></h2>
+    <p class="lead">多數公司停在「一條 queue + 一組 worker」，直到第一次行銷檔次壓垮交易通知才拆。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 680 230" role="img" aria-label="Evolution ladder. Step 1: each service calls the provider directly. Step 2: one queue and one worker pool. Step 3: one queue and pool per message type plus circuit breaker and second provider. Step 4 at large scale: per channel workers, preference center, and provider routing by cost and deliverability.">
+        <rect x="20" y="170" width="150" height="50" fill="var(--card)" stroke="var(--ink)" stroke-width="1.5"/>
+        <text x="30" y="190" font-size="11" class="hand">① 直接 HTTP</text><text x="30" y="208" font-size="9">producer 被綁架</text>
+        <rect x="180" y="130" width="150" height="90" fill="var(--see)" stroke="var(--ink)" stroke-width="1.5"/>
+        <text x="190" y="150" font-size="11" class="hand">② 一條 queue</text><text x="190" y="170" font-size="9">解耦 + 削峰</text><text x="190" y="186" font-size="9">但行銷擋住詐騙</text>
+        <rect x="340" y="80" width="150" height="140" fill="var(--who)" stroke="var(--ink)" stroke-width="1.5"/>
+        <text x="350" y="100" font-size="11" class="hand">③ 一類一條</text><text x="350" y="120" font-size="9">queue + pool 都分</text><text x="350" y="136" font-size="9">CB + 第二家 provider</text><text x="350" y="152" font-size="9">dead man's switch</text>
+        <rect x="500" y="30" width="160" height="190" fill="var(--may)" stroke="var(--ink)" stroke-width="1.5"/>
+        <text x="510" y="50" font-size="11" class="hand">④ 大廠</text><text x="510" y="70" font-size="9">多通道：SMS / email / push</text><text x="510" y="86" font-size="9">各自一組 worker</text><text x="510" y="102" font-size="9">user preference center</text><text x="510" y="118" font-size="9">依成本、送達率選 provider</text><text x="510" y="134" font-size="9">per-campaign 節流</text>
+        <text x="95" y="160" text-anchor="middle" font-size="9" fill="var(--ink-soft)">換掉：同步呼叫</text>
+        <text x="255" y="120" text-anchor="middle" font-size="9" fill="var(--ink-soft)">換掉：共用一條路</text>
+        <text x="415" y="70" text-anchor="middle" font-size="9" fill="var(--ink-soft)">換掉：單一通道</text>
+      </svg>
+    </div>
+    <div class="scroll">
+      <table>
+        <tr><th>路線</th><th>長相</th><th>好處</th><th>代價</th></tr>
+        <tr><td>Managed（SQS + Lambda）</td><td>AWS 原生</td><td>不用顧 broker；reserved concurrency 直接當 bulkhead</td><td>沒有 priority；Lambda 冷啟動和 concurrency 上限</td></tr>
+        <tr><td>自管 broker（Kafka / RabbitMQ）</td><td>EKS 上跑</td><td>RabbitMQ 有 priority；Kafka 可重播</td><td>你要顧 broker 的 on-call</td></tr>
+      </table>
+    </div>
+  </section>
+
+  <section id="l6">
+    <h2><span class="badge">L6</span>故障與 on-call<span class="time">讀 5 分鐘</span></h2>
+    <p class="lead">最危險的故障是「什麼都沒發生」：fraud 流量本來就低，通道靜默死掉時錯誤率是 0，dashboard 漂亮得像沒事。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 680 210" role="img" aria-label="Provider timeout timeline. Each message pins a worker for 36 seconds: 10 second read timeout plus 2 second connect, times 3 retries. A 130 worker pool frees 3.6 workers per second against a fraud peak of 300 per second, an 83 times gap. Message 300 waits 84 seconds, past the 60 second SLO.">
+        <text x="20" y="22" font-size="12" class="hand">Provider A 退化：數字走一遍</text>
+        <rect x="30" y="40" width="360" height="30" fill="var(--may)" stroke="var(--ink)"/><text x="210" y="60" text-anchor="middle" font-size="10">一則佔住 worker：(10s read + 2s connect) × 3 次 = 36s</text>
+        <rect x="30" y="86" width="14" height="30" fill="var(--see)" stroke="var(--ink)"/><text x="52" y="106" font-size="10">pool 放出：130 ÷ 36 = 3.6 台/s</text>
+        <rect x="30" y="126" width="600" height="30" fill="var(--wrong)" opacity=".5" stroke="var(--ink)"/><text x="330" y="146" text-anchor="middle" font-size="10">fraud 尖峰到達：300/s（缺口 83 倍，backlog 每秒 +296）</text>
+        <line x1="30" y1="180" x2="630" y2="180" stroke="var(--line)" stroke-width="2"/>
+        <line x1="459" y1="170" x2="459" y2="190" stroke="var(--ink)" stroke-width="2"/><text x="459" y="204" text-anchor="middle" font-size="10">60s SLO</text>
+        <circle cx="630" cy="180" r="7" fill="var(--wrong)"/><text x="622" y="170" text-anchor="end" font-size="10" fill="var(--wrong)">第 300 則：84s</text>
+      </svg>
+    </div>
+    <div class="panels">
+      <div class="panel"><h3>A · Provider 退化</h3><p>上圖。分 pool 救不了，circuit breaker 跳開走 B 才救得了。</p></div>
+      <div class="panel"><h3>B · 行銷 poison message</h3><p>retry storm 吃光自己那池。分 pool 的話 fraud 那 60 台沒事，這就是 bulkhead 的價值。</p></div>
+      <div class="panel"><h3>C · 通道靜默死掉</h3><p>錯誤率 0、延遲 0，因為根本沒流量。只有 dead man's switch 抓得到：「5 分鐘內送出量 = 0」。</p></div>
+      <div class="panel"><h3>D · visibility timeout 太短</h3><p>處理 36s &gt; 30s，訊息被另一台再拿走。dedupe 會擋住重複發送，但 worker 被燒兩倍。</p></div>
+    </div>
+    <div class="scroll">
+      <table>
+        <tr><th>3AM page test</th><th>這題的答案</th></tr>
+        <tr><td>什麼會 page 我</td><td>fraud oldest message age &gt; 30s（SLO 的一半）；fraud 5 分鐘送出量 = 0</td></tr>
+        <tr><td>SLI</td><td>端到端投遞延遲 P99（進 API 到 provider 回 200）、成功率、oldest message age</td></tr>
+        <tr><td>SLO</td><td>fraud P99 &lt; 60s、成功率 &gt; 99.9%</td></tr>
+        <tr><td>Dashboard</td><td>三條 queue 的 depth + age；分通道延遲；provider A/B 錯誤率與 CB 狀態</td></tr>
+        <tr><td>只開 ticket</td><td>行銷 backlog 偏高、單一 template 錯誤率上升、DynamoDB 寫入逼近預算</td></tr>
+      </table>
+    </div>
+    <p>第一個指令（看 fraud queue 最舊的訊息等了多久）：</p>
+    <pre>aws cloudwatch get-metric-statistics --namespace AWS/SQS --metric-name ApproximateAgeOfOldestMessage --dimensions Name=QueueName,Value=fraud-queue --start-time 2026-10-26T00:00:00Z --end-time 2026-10-26T01:00:00Z --period 60 --statistics Maximum</pre>
+    <p class="sub">注意：<code>ApproximateAgeOfOldestMessage</code> 是 CloudWatch metric，不是 <code>get-queue-attributes</code> 能拿到的屬性。</p>
+  </section>
+
+  <section id="l7">
+    <h2><span class="badge">L7</span>面試<span class="time">讀 3 分鐘</span></h2>
+    <p class="lead">題目：「A retail banking client wants to send fraud alerts, transaction confirmations, and marketing campaigns. Walk me through how you'd design that.」</p>
+    <p>先自己講：clarify 問哪一條、為什麼三條、Max 的 priority 方案死在哪、誰會 page 你。再打開。</p>
+    <details>
+      <summary>L4 vs L6 對照</summary>
+      <div>
+        <div class="wrong"><b>L4</b>「用一條 queue 加 priority，fraud 排前面。」或「我會開 120 台。」<br>問題：裸結論、沒數字、沒講自付代價、沒有收尾的 3AM page。</div>
+        <div class="fix"><b>L6</b> 多了五件事：</div>
+        <ol>
+          <li>clarify 只問會改變架構的：「三類的時效差多少？」</li>
+          <li>用數字論證：200 萬 ÷ 1000/s = 33 分鐘，撞 60 秒 SLO。</li>
+          <li>分清兩軸：bulkhead 管範圍、circuit breaker 管時間。</li>
+          <li>主動講代價：三套 alarm、scaling policy、idle worker。</li>
+          <li>收尾：oldest message age 和 dead man's switch 會 page，行銷 backlog 只開 ticket。</li>
+        </ol>
+        <p class="en">"These three message types have latency needs three orders of magnitude apart. A 2-million-message campaign at a thousand a second takes 33 minutes, and fraud alerts have a 60-second SLO, so they can't share a path. I give each type its own queue and its own worker pool. Priority would fix ordering, not isolation, and SQS doesn't support it anyway. The cost is triple the alarms and some idle capacity. Separate pools contain a bad marketing batch; a slow provider is a different problem, and a circuit breaker that fails over to a second provider fixes that one. I'd page on fraud oldest-message age above 30 seconds and on a dead man's switch, because a silently dead channel shows a zero error rate."</p>
+      </div>
+    </details>
+  </section>
+
+  <section id="trail">
+    <h2><span class="badge">錯題</span>這次的釐清<span class="time">讀 2 分鐘</span></h2>
+    <div class="wrong"><b>我錯在這</b>✗ fraud 排第一還是會被前面的 200 萬則卡住<br>✓ priority 決定排第幾，不決定有沒有 worker 有空<br>→ 為什麼搞混：用「隊伍位置」解釋所有延遲（S47 連三輪），銀行櫃員畫面才轉向。</div>
+    <div class="wrong"><b>我錯在這</b>✗ 第一則等 36 秒，所以 P99 60s 沒破<br>✓ P99 看最慢的 1%：第 300 則等 84 秒<br>→ 為什麼搞混：拿 best case 交 P99 的卷。</div>
+    <div class="wrong"><b>我錯在這</b>✗ separate pool 讓 worker「不用一直等」<br>✓ 一樣被佔住，差別是 fraud 那池沒事。bulkhead = 損害關在一個艙裡<br>→ 為什麼搞混：把「損害範圍」講成「損害消失」。</div>
+    <div class="wrong"><b>我錯在這</b>✗「130 台、每則佔 36 秒，每秒空出幾台」不知道怎麼算<br>✓ 一台 36 秒放手一次 = 1/36 台/秒，乘 130<br>→ 為什麼搞混：算術會，缺「場景翻成算式」。先寫單位式再填數字。</div>
+  </section>
+
+  <div class="next">
+    <b>下一步（2 分鐘）</b>
+    <p>不看這頁，畫出三層漸進圖（第 0 層 → 加 queue → 一變三），在第 2 層旁邊寫下「33 分鐘撞 60 秒」那條算式。</p>
+  </div>
+
+</main>
