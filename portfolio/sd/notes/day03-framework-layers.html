@@ -1,0 +1,290 @@
+<title>4-Step SD Framework</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC:wght@400;700&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: one notebook column on graph paper; teal sd accent band; figures on taped cards, failure cases as comic panels */
+:root {
+  --paper: #F6F8FA;
+  --grid: rgba(90,130,170,.16);
+  --ink: #23313E;
+  --ink-soft: #55677A;
+  --card: #FFFFFF;
+  --accent: #0B7285;
+  --on-accent: #FFFFFF;
+  --tape: color-mix(in srgb, var(--accent) 35%, transparent);
+  --who: #FFE98A;
+  --see: #BDEEF6;
+  --may: #F9CDE0;
+  --wrong: #D2453A;
+  --ok: #2F8F5B;
+  --line: #9DB0C2;
+  --font-hand: "LXGW WenKai TC", "Noto Sans TC", "PingFang TC", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #1A2320; --grid: rgba(200,230,210,.08); --ink: #E6EDE8; --ink-soft: #A9BAB1;
+    --card: #24302C; --accent: #3BC9DB; --on-accent: #10221F; --who: #8A7A2A; --see: #2B6A74; --may: #7A3F57;
+    --wrong: #FF8A7E; --ok: #7FD3A1; --line: #5E7268; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #1A2320; --grid: rgba(200,230,210,.08); --ink: #E6EDE8; --ink-soft: #A9BAB1;
+  --card: #24302C; --accent: #3BC9DB; --on-accent: #10221F; --who: #8A7A2A; --see: #2B6A74; --may: #7A3F57;
+  --wrong: #FF8A7E; --ok: #7FD3A1; --line: #5E7268; color-scheme: dark;
+}
+body {
+  background-color: var(--paper);
+  background-image: linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 22px 22px;
+  color: var(--ink);
+  font-family: var(--font-hand);
+  font-size: 17px;
+  line-height: 1.75;
+}
+.band { background: var(--accent); color: var(--on-accent); padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 22px 18px; }
+.band > div { max-width: 760px; margin: 0 auto; display: grid; gap: 8px; }
+.band a { color: inherit; }
+.page { max-width: 760px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 28px 64px; display: grid; gap: 36px; }
+h1, h2, h3 { text-wrap: balance; line-height: 1.3; margin: 0; }
+h1 { font-size: 2.1rem; }
+h2 { font-size: 1.4rem; display: flex; flex-wrap: wrap; align-items: baseline; gap: 10px; }
+h2 .badge { font-family: var(--font-mono); font-size: .78rem; background: var(--accent); color: var(--on-accent); padding: 1px 8px; border-radius: 3px; }
+h2 .time { font-family: var(--font-mono); font-size: .74rem; color: var(--ink-soft); letter-spacing: .04em; }
+p { margin: 0; }
+section { display: grid; gap: 14px; min-width: 0; }
+.sub { font-size: .95rem; opacity: .9; }
+.lead { font-size: 1.12rem; font-weight: 700; }
+.progress { display: flex; flex-wrap: wrap; gap: 6px 12px; font-family: var(--font-mono); font-size: .8rem; }
+.progress a { color: inherit; text-decoration: none; }
+mark { background: linear-gradient(transparent 52%, var(--who) 52%); color: inherit; padding: 0 2px; }
+mark.see { background: linear-gradient(transparent 52%, var(--see) 52%); }
+mark.may { background: linear-gradient(transparent 52%, var(--may) 52%); }
+code { font-family: var(--font-mono); font-size: .86em; background: color-mix(in srgb, var(--line) 22%, transparent); padding: 1px 5px; border-radius: 3px; }
+.card { position: relative; background: var(--card); padding: 22px 16px 14px; box-shadow: 0 1px 3px rgba(0,0,0,.12); min-width: 0; }
+.card::before { content: ""; position: absolute; top: -9px; left: 50%; width: 92px; height: 20px; transform: translateX(-50%) rotate(-2deg); background: var(--tape); }
+.scroll { overflow-x: auto; }
+svg.fig { display: block; min-width: 600px; width: 100%; height: auto; }
+svg text { font-family: var(--font-mono); fill: var(--ink); }
+svg .hand { font-family: var(--font-hand); }
+.rule { border-left: 4px solid var(--accent); padding: 6px 12px; font-size: 1.05rem; }
+.wrong { border-left: 4px solid var(--wrong); padding: 4px 12px; display: grid; gap: 2px; }
+.wrong b { color: var(--wrong); font-size: .85rem; letter-spacing: .05em; }
+.fix { border-left: 4px solid var(--ok); padding: 4px 12px; }
+.panels { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 14px; }
+.panel { border: 2px solid var(--ink); background: var(--card); padding: 10px; display: grid; gap: 6px; min-width: 0; align-content: start; }
+.panel h3 { font-size: 1rem; font-family: var(--font-mono); }
+.panel p { font-size: .92rem; }
+.panel svg { width: 100%; height: auto; display: block; }
+@media (max-width: 560px) { .panels { grid-template-columns: 1fr; } }
+table { border-collapse: collapse; width: 100%; font-size: .95rem; font-variant-numeric: tabular-nums; }
+th, td { border-bottom: 1px dashed var(--line); padding: 8px 6px; text-align: left; vertical-align: top; }
+th { font-family: var(--font-mono); font-size: .78rem; letter-spacing: .05em; color: var(--ink-soft); font-weight: 600; }
+ol, ul { margin: 0; padding-left: 1.3em; display: grid; gap: 6px; }
+details { background: var(--card); border: 2px dashed var(--line); padding: 10px 14px; }
+details[open] { border-style: solid; }
+details summary { cursor: pointer; font-weight: 700; }
+details > div { display: grid; gap: 10px; margin-top: 10px; }
+.two { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 14px; }
+@media (max-width: 560px) { .two { grid-template-columns: 1fr; } }
+.en { font-family: var(--font-mono); font-size: .88rem; color: var(--ink-soft); }
+pre { margin: 0; font-family: var(--font-mono); font-size: .82rem; line-height: 1.5; background: var(--card); border: 1px solid var(--line); padding: 10px 12px; overflow-x: auto; }
+.next { border: 3px solid var(--accent); background: var(--card); padding: 14px 16px; display: grid; gap: 6px; }
+a { color: var(--accent); text-underline-offset: 3px; }
+a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+</style>
+
+<header class="band">
+  <div>
+    <p class="sub">sd 課程 · P0 Thinking Framework · Day 3</p>
+    <h1>4-Step SD Framework</h1>
+    <p>讀完這頁你能：照時間表走完 Clarify → High-level → Deep Dive → Scale，知道 Step 2 為什麼是 API → Data → Diagram 的順序，深入時講滿 What / Why / How / Limitation，並用一句話協商範圍。</p>
+    <nav class="progress" aria-label="layers"><a href="#l0">L0 ✓</a><a href="#l1">L1 ✓</a><a href="#l2">L2 ✓</a><a href="#l3">L3 ✓</a><a href="#l4">L4 ✓</a><a href="#l5">L5 ✓</a><a href="#l6">L6 ✓</a><a href="#l7">L7 ✓</a><a href="#trail">錯題</a></nav>
+  </div>
+</header>
+
+<main class="page">
+
+  <p class="sub">Day 1 講「被評什麼」，這頁講「照什麼順序做」。四個 step 和四個維度一對一。你在 Phase 3 反覆出現的「收尾沒講監控」，就是 Step 4 的第三格。</p>
+
+  <section id="l0">
+    <h2><span class="badge">L0</span>一張圖<span class="time">讀 1 分鐘</span></h2>
+    <p class="lead">45 分鐘是一條有四個站的路線。每站有停留時間，超時就壓縮下一站。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 680 150" role="img" aria-label="A 45 minute bar. 0 to 5 minutes Clarify. 5 to 10 Estimation. 10 to 20 High-level design. 20 to 35 Deep dive. 35 to 45 Scale, trade-offs and monitoring. Each segment is labeled with the Day 1 dimension it earns: navigation, design, depth, trade-off.">
+        <g stroke="var(--ink)" stroke-width="1.5"><rect x="30" y="40" width="67" height="44" fill="var(--who)"/><rect x="97" y="40" width="67" height="44" fill="var(--card)"/><rect x="164" y="40" width="133" height="44" fill="var(--see)"/><rect x="297" y="40" width="200" height="44" fill="var(--may)"/><rect x="497" y="40" width="133" height="44" fill="var(--ok)"/></g>
+        <g font-size="10" text-anchor="middle"><text x="63" y="60">① Clarify</text><text x="130" y="60">估算</text><text x="230" y="60">② High-level</text><text x="397" y="60">③ Deep Dive</text><text x="563" y="60">④ Scale</text></g>
+        <g font-size="8" text-anchor="middle"><text x="63" y="76">0–5</text><text x="130" y="76">5–10</text><text x="230" y="76">10–20</text><text x="397" y="76">20–35</text><text x="563" y="76">35–45</text></g>
+        <g font-size="9" text-anchor="middle" fill="var(--ink-soft)"><text x="63" y="104">問</text><text x="230" y="104">畫</text><text x="397" y="104">深</text><text x="563" y="104">比</text></g>
+        <text x="340" y="134" text-anchor="middle" font-size="11" class="hand">每一站對到 Day 1 的一個評分維度</text>
+      </svg>
+    </div>
+  </section>
+
+  <section id="l1">
+    <h2><span class="badge">L1</span>第一性原理<span class="time">讀 3 分鐘</span></h2>
+    <p class="lead">沒見過的題目會讓人腦袋空白。框架的用處是：第一步永遠不需要先知道答案。任何系統都能拆成「Storage + API + 這題獨有的邏輯」。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 680 190" role="img" aria-label="Any unseen system splits into three parts: storage, API, and its unique domain logic. Parking lot: storage holds car entries and exits, API handles enter, exit and pay, the unique part is spot status, cached. Library: storage holds books and loans, API handles borrow, return and shelve, the unique part is live availability.">
+        <rect x="240" y="14" width="200" height="34" fill="var(--may)" stroke="var(--ink)" stroke-width="2"/><text x="340" y="36" text-anchor="middle" font-size="11" class="hand">沒見過的題目</text>
+        <g fill="var(--who)" stroke="var(--ink)" stroke-width="1.5"><rect x="40" y="76" width="170" height="34"/><rect x="255" y="76" width="170" height="34"/><rect x="470" y="76" width="170" height="34"/></g>
+        <g font-size="10" text-anchor="middle"><text x="125" y="98">Storage</text><text x="340" y="98">API</text><text x="555" y="98">獨有的 domain logic</text></g>
+        <g stroke="var(--ink)"><line x1="300" y1="48" x2="125" y2="76"/><line x1="340" y1="48" x2="340" y2="76"/><line x1="380" y1="48" x2="555" y2="76"/></g>
+        <g fill="var(--card)" stroke="var(--ink)"><rect x="40" y="126" width="170" height="54"/><rect x="255" y="126" width="170" height="54"/><rect x="470" y="126" width="170" height="54"/></g>
+        <g font-size="8" text-anchor="middle"><text x="125" y="146">停車場：進出紀錄</text><text x="125" y="164">圖書館：書、借閱紀錄</text><text x="340" y="146">停車場：進場 / 出場 / 結帳</text><text x="340" y="164">圖書館：借 / 還 / 上架</text><text x="555" y="146">停車場：車位狀態（cache）</text><text x="555" y="164">圖書館：即時庫存</text></g>
+      </svg>
+    </div>
+    <p>你在 LeetCode 也有同樣的「空白頁」問題。在 SD 這邊，解藥就是 <mark>Step 1 先問需求</mark>：題目越模糊，越是在考你會不會問。</p>
+  </section>
+
+  <section id="l2">
+    <h2><span class="badge">L2</span>機制<span class="time">讀 5 分鐘</span></h2>
+    <p class="lead">Step 2 的順序是 API → Data → Diagram。API 決定系統要處理哪些 request，有了 request 才知道圖上需要哪些元件。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 680 200" role="img" aria-label="Step 2 order. API first: POST slash urls and GET slash code define what the system must handle. Data model next: a table with code and long URL, created at. Diagram last: because GET is read heavy, add a cache; because POST needs unique codes, add an ID generator. Each box in the diagram traces back to an API line.">
+        <rect x="20" y="30" width="190" height="90" fill="var(--who)" stroke="var(--ink)" stroke-width="2"/><text x="115" y="52" text-anchor="middle" font-size="11" class="hand">① API</text><text x="115" y="74" text-anchor="middle" font-size="9">POST /urls</text><text x="115" y="90" text-anchor="middle" font-size="9">GET /{code} → 302</text>
+        <rect x="245" y="30" width="190" height="90" fill="var(--see)" stroke="var(--ink)" stroke-width="1.5"/><text x="340" y="52" text-anchor="middle" font-size="11" class="hand">② Data</text><text x="340" y="74" text-anchor="middle" font-size="9">code（PK）</text><text x="340" y="90" text-anchor="middle" font-size="9">long_url、created_at</text>
+        <rect x="470" y="30" width="190" height="90" fill="var(--may)" stroke="var(--ink)" stroke-width="1.5"/><text x="565" y="52" text-anchor="middle" font-size="11" class="hand">③ Diagram</text><text x="565" y="74" text-anchor="middle" font-size="9">GET 很多 → 加 cache</text><text x="565" y="90" text-anchor="middle" font-size="9">POST 要唯一碼 → 加發號器</text>
+        <g stroke="var(--ink)" stroke-width="1.5"><line x1="210" y1="75" x2="245" y2="75"/><line x1="435" y1="75" x2="470" y2="75"/></g>
+        <path d="M 565 120 Q 340 190 115 120" fill="none" stroke="var(--accent)" stroke-dasharray="5 3"/><text x="340" y="176" text-anchor="middle" font-size="9">圖上每個框都追得回某一行 API</text>
+      </svg>
+    </div>
+    <p class="lead">Step 3 只挑 1–2 個核心元件，每個講滿四格。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 680 130" role="img" aria-label="Four boxes for every deep dive: What, the technology chosen; Why, why this over the others; How, how it works; Limitation, where it breaks. Example for a cache: Redis; in-memory under a millisecond with TTL; cache-aside, delete on write; memory is expensive and a node loss means a burst of misses.">
+        <g fill="var(--card)" stroke="var(--ink)" stroke-width="1.5"><rect x="20" y="20" width="150" height="90"/><rect x="185" y="20" width="150" height="90"/><rect x="350" y="20" width="150" height="90"/><rect x="515" y="20" width="150" height="90" stroke="var(--wrong)"/></g>
+        <g font-size="11" text-anchor="middle" class="hand"><text x="95" y="42">What</text><text x="260" y="42">Why</text><text x="425" y="42">How</text><text x="590" y="42">Limitation</text></g>
+        <g font-size="9" text-anchor="middle"><text x="95" y="66">選了什麼</text><text x="95" y="88">例：Redis</text><text x="260" y="66">為什麼不選別的</text><text x="260" y="88">in-memory &lt; 1 ms、TTL</text><text x="425" y="66">怎麼運作</text><text x="425" y="88">cache-aside、寫時刪</text><text x="590" y="66">哪裡會壞</text><text x="590" y="88">記憶體貴、掛一台 = miss 暴增</text></g>
+      </svg>
+    </div>
+    <div class="scroll">
+      <table>
+        <tr><th>Step</th><th>做什麼</th><th>收尾的一句</th></tr>
+        <tr><td>① Clarify</td><td>Functional（做什麼）+ Non-functional（做得多好），問 5–8 題就收</td><td>"I'll assume X for now."</td></tr>
+        <tr><td>② High-level</td><td>API → Data → Diagram</td><td>"Here's the happy path end to end."</td></tr>
+        <tr><td>③ Deep Dive</td><td>挑 1–2 個，講滿四格</td><td>"The limitation here is…"</td></tr>
+        <tr><td>④ Scale</td><td>10 倍流量哪裡先倒、trade-off、監控什麼</td><td>"I'd alert on…"</td></tr>
+      </table>
+    </div>
+  </section>
+
+  <section id="l3">
+    <h2><span class="badge">L3</span>取捨<span class="time">讀 3 分鐘</span></h2>
+    <p class="lead">範圍是可以談的。主動協商比默默做全部好：你用一句話把時間花在最值錢的地方，面試官也看到你會排優先順序。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 680 150" role="img" aria-label="Scope negotiation. A broad problem, notification system, has many parts: delivery pipeline, user preferences, templates, analytics, retries. Saying I'll focus on the delivery pipeline, should I also cover preferences, narrows to one core plus one optional, which gives time to go deep.">
+        <rect x="20" y="40" width="200" height="80" fill="var(--card)" stroke="var(--ink)" stroke-width="1.5"/>
+        <g font-size="9"><text x="30" y="60">delivery pipeline</text><text x="30" y="76">user preferences</text><text x="30" y="92">templates</text><text x="30" y="108">analytics、retries…</text></g>
+        <text x="120" y="30" text-anchor="middle" font-size="10" class="hand">Notification System 全部</text>
+        <rect x="260" y="50" width="200" height="60" fill="var(--may)" stroke="var(--ink)" stroke-width="2"/><text x="360" y="72" text-anchor="middle" font-size="9">"I'll focus on the delivery pipeline.</text><text x="360" y="88" text-anchor="middle" font-size="9">Should I also cover preferences?"</text>
+        <rect x="500" y="40" width="160" height="40" fill="var(--who)" stroke="var(--ink)" stroke-width="2"/><text x="580" y="64" text-anchor="middle" font-size="10">核心：pipeline（深）</text>
+        <rect x="500" y="90" width="160" height="30" fill="var(--card)" stroke="var(--ink)" stroke-dasharray="4 3"/><text x="580" y="109" text-anchor="middle" font-size="9">選配：preferences</text>
+        <g stroke="var(--ink)"><line x1="220" y1="80" x2="260" y2="80"/><line x1="460" y1="70" x2="500" y2="60"/><line x1="460" y1="90" x2="500" y2="105"/></g>
+      </svg>
+    </div>
+    <div class="scroll">
+      <table>
+        <tr><th>常見的錯</th><th>代價</th></tr>
+        <tr><td>Step 1 超過 5 分鐘</td><td>後面三步被壓縮，面試官看不到設計能力</td></tr>
+        <tr><td>Deep Dive 每個元件都講一遍</td><td>每個都淺；不如挑 1–2 個講到 Limitation</td></tr>
+        <tr><td>先畫圖再想 API</td><td>圖上的框沒有理由，被問「這個為什麼在這」答不出</td></tr>
+      </table>
+    </div>
+  </section>
+
+  <section id="l4">
+    <h2><span class="badge">L4</span>職場真實面<span class="time">讀 3 分鐘</span></h2>
+    <p class="lead">上班時寫 design doc（RFC），章節順序幾乎就是這四步。面試練的框架，就是你之後寫 doc 的骨架。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 680 210" role="img" aria-label="Mapping the four steps to design doc sections. Clarify maps to Goals and Non-goals plus requirements. High-level maps to Proposed design with API and data model and a diagram. Deep dive maps to Detailed design for the risky component. Scale maps to Alternatives considered, Risks, and Monitoring and rollout. Reviewers comment on each section in a design review meeting.">
+        <g fill="var(--who)" stroke="var(--ink)" stroke-width="1.5"><rect x="20" y="20" width="180" height="38"/><rect x="20" y="68" width="180" height="38"/><rect x="20" y="116" width="180" height="38"/><rect x="20" y="164" width="180" height="38"/></g>
+        <g font-size="10"><text x="30" y="44">① Clarify</text><text x="30" y="92">② High-level</text><text x="30" y="140">③ Deep Dive</text><text x="30" y="188">④ Scale &amp; Trade-offs</text></g>
+        <g fill="var(--card)" stroke="var(--ink)"><rect x="280" y="20" width="380" height="38"/><rect x="280" y="68" width="380" height="38"/><rect x="280" y="116" width="380" height="38"/><rect x="280" y="164" width="380" height="38"/></g>
+        <g font-size="9"><text x="290" y="44">Goals / Non-goals、Requirements（含 SLO）</text><text x="290" y="92">Proposed design：API、data model、架構圖</text><text x="290" y="140">Detailed design：最有風險的那一塊</text><text x="290" y="188">Alternatives considered、Risks、Monitoring &amp; rollout</text></g>
+        <g stroke="var(--ink)"><line x1="200" y1="39" x2="280" y2="39"/><line x1="200" y1="87" x2="280" y2="87"/><line x1="200" y1="135" x2="280" y2="135"/><line x1="200" y1="183" x2="280" y2="183"/></g>
+      </svg>
+    </div>
+    <div class="scroll">
+      <table>
+        <tr><th>doc 章節</th><th>design review 會被問</th><th>常見陷阱</th></tr>
+        <tr><td>Non-goals</td><td>「這個為什麼不做？」</td><td>沒寫 non-goals，review 時 scope 一直被加</td></tr>
+        <tr><td>Proposed design</td><td>「資料怎麼流？誰是真相來源？」</td><td>圖上沒有箭頭方向</td></tr>
+        <tr><td>Alternatives</td><td>「為什麼不用 X？」</td><td>只寫被選的，淘汰的沒寫理由</td></tr>
+        <tr><td>Monitoring &amp; rollout</td><td>「上線出事怎麼 roll back〔還原到前一版〕？」</td><td>只有「加 dashboard」，沒有告警門檻</td></tr>
+      </table>
+    </div>
+  </section>
+
+  <section id="l5">
+    <h2><span class="badge">L5</span>規模化<span class="time">讀 3 分鐘</span></h2>
+    <p class="lead">一開始照表操課，熟了之後框架變成背景，你開始依面試官的反應調整順序。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 680 230" role="img" aria-label="Ladder of framework use. Step 1 follow the script step by step. Step 2 keep time and say transitions out loud. Step 3 adapt: if the interviewer jumps to a component, go deep there and come back. Step 4 drive the session with checkpoints like does this match what you had in mind, and later run design reviews yourself.">
+        <rect x="20" y="170" width="150" height="50" fill="var(--card)" stroke="var(--ink)" stroke-width="1.5"/>
+        <text x="30" y="190" font-size="11" class="hand">① 照表走</text><text x="30" y="208" font-size="9">一步一步不跳</text>
+        <rect x="180" y="130" width="150" height="90" fill="var(--see)" stroke="var(--ink)" stroke-width="1.5"/>
+        <text x="190" y="150" font-size="11" class="hand">② 控時間</text><text x="190" y="170" font-size="9">講出轉場：</text><text x="190" y="186" font-size="9">"Moving on to…"</text>
+        <rect x="340" y="80" width="150" height="140" fill="var(--who)" stroke="var(--ink)" stroke-width="1.5"/>
+        <text x="350" y="100" font-size="11" class="hand">③ 會轉彎</text><text x="350" y="120" font-size="9">面試官跳去某元件</text><text x="350" y="136" font-size="9">就先深入，再拉回來</text>
+        <rect x="500" y="30" width="160" height="190" fill="var(--may)" stroke="var(--ink)" stroke-width="1.5"/>
+        <text x="510" y="50" font-size="11" class="hand">④ 主導</text><text x="510" y="70" font-size="9">設檢查點：</text><text x="510" y="86" font-size="9">"Does this match what</text><text x="510" y="102" font-size="9">you had in mind?"</text><text x="510" y="122" font-size="9">之後主持 design review</text>
+        <text x="95" y="160" text-anchor="middle" font-size="9" fill="var(--ink-soft)">加上：時間感</text>
+        <text x="255" y="120" text-anchor="middle" font-size="9" fill="var(--ink-soft)">加上：彈性</text>
+        <text x="415" y="70" text-anchor="middle" font-size="9" fill="var(--ink-soft)">加上：主導權</text>
+      </svg>
+    </div>
+  </section>
+
+  <section id="l6">
+    <h2><span class="badge">L6</span>面試現場怎麼壞<span class="time">讀 3 分鐘</span></h2>
+    <p class="lead">框架最常在三個時刻斷掉：時間用完、被打斷後迷路、掉進兔子洞。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 680 140" role="img" aria-label="Rabbit hole. At minute 20 the candidate starts explaining Redis eviction internals and is still there at minute 38. Step 4 gets 7 minutes and monitoring is never mentioned. A checkpoint at minute 30, saying I can go deeper here or move on to scaling, would have saved it.">
+        <line x1="40" y1="70" x2="640" y2="70" stroke="var(--ink)" stroke-width="2"/>
+        <rect x="290" y="54" width="250" height="32" fill="var(--wrong)" opacity=".7" stroke="var(--ink)"/><text x="415" y="74" text-anchor="middle" font-size="9" fill="var(--card)">20–38 分：一直講 Redis eviction 細節</text>
+        <rect x="540" y="54" width="100" height="32" fill="var(--card)" stroke="var(--ink)" stroke-dasharray="4 3"/><text x="590" y="74" text-anchor="middle" font-size="9">Step 4 剩 7 分</text>
+        <line x1="440" y1="40" x2="440" y2="100" stroke="var(--ok)" stroke-width="2"/><text x="440" y="32" text-anchor="middle" font-size="9" fill="var(--ok)">30 分該問：「要再深入，還是先談 scale？」</text>
+        <text x="340" y="124" text-anchor="middle" font-size="9" fill="var(--wrong)">結果：監控那格空白（你 S29、S30、S34 的老盲點）</text>
+      </svg>
+    </div>
+    <div class="panels">
+      <div class="panel"><h3>A · 時間用完</h3><p>救法：每一步結束講一句轉場，順便看一眼時間。</p></div>
+      <div class="panel"><h3>B · 被打斷後迷路</h3><p>救法：回答完問題後說「Back to the deep dive on X」，把自己拉回地圖上。</p></div>
+      <div class="panel"><h3>C · 兔子洞</h3><p>見上圖。救法：深入 10 分鐘就設一個檢查點，讓面試官選。</p></div>
+    </div>
+  </section>
+
+  <section id="l7">
+    <h2><span class="badge">L7</span>面試<span class="time">讀 3 分鐘</span></h2>
+    <p class="lead">題目：「Design a notification system.」只做 Step 1：你會問哪些問題、怎麼收範圍？</p>
+    <p>先自己講出 Functional、Non-functional 各兩題，加一句 scope negotiation。再打開。</p>
+    <details>
+      <summary>L4 vs L6 對照</summary>
+      <div>
+        <div class="wrong"><b>L4</b>「這題範圍好大，我不知道從哪開始。是用 SNS 嗎？」<br>問題：模糊就是題目的一部分；直接跳工具；沒有範圍。</div>
+        <div class="fix"><b>L6</b> 多了三件事：</div>
+        <ol>
+          <li>Functional：哪些管道（push / email / SMS）？要不要使用者偏好？通知可以漏嗎、要 retry 嗎？</li>
+          <li>Non-functional：多少使用者、一次發給多少人？延遲要 1 秒內還是幾分鐘都行？</li>
+          <li>Scope：「I'll focus on the delivery pipeline. Should I also cover preferences, or go deeper on delivery?」</li>
+        </ol>
+        <p class="en">"A notification system can mean a lot of things, so let me narrow it down. Which channels do we need, push, email, SMS? Can users set preferences, like email only? Is it okay to miss a notification, or do we need guaranteed delivery with retries? On scale, how many users do we have, and how many people does one send reach? Does it need to arrive within a second, or are a few minutes fine? I'll focus on the core delivery pipeline. Should I also cover preference management, or would you rather I go deeper on delivery?"</p>
+      </div>
+    </details>
+  </section>
+
+  <section id="trail">
+    <h2><span class="badge">錯題</span>這次的釐清<span class="time">讀 2 分鐘</span></h2>
+    <div class="wrong"><b>我錯在這</b>✗ 不懂「API 決定邊界」；以為架構圖是第一步<br>✓ API 定義要處理哪些 request，架構圖是為了處理它們才長出來<br>→ 為什麼搞混：先看到圖，就以為圖是起點。L2 第一張圖的虛線就是「框追得回 API」。</div>
+    <div class="wrong"><b>我錯在這</b>✗ Notification System 太廣，不知道怎麼問<br>✓ 「太廣」本身就是訊號，代表要問「是什麼場景的通知」<br>→ 為什麼搞混：沒意識到模糊是故意的。</div>
+    <div class="wrong"><b>我錯在這</b>✗ 以為 scope negotiation 要很厲害才敢談<br>✓ 模板一句話：「我先做 X，要不要也做 Y？」<br>→ 為什麼搞混：把協商想成討價還價，其實只是排優先順序。</div>
+  </section>
+
+  <div class="next">
+    <b>下一步（2 分鐘）</b>
+    <p>不看這頁，畫出 45 分鐘那條時間軸，每段寫上 step 名和收尾那一句英文。</p>
+  </div>
+
+</main>

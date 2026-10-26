@@ -1,0 +1,321 @@
+<title>Distributed Cache Design</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC:wght@400;700&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: one notebook column on graph paper; teal sd accent band; figures on taped cards, failure cases as comic panels */
+:root {
+  --paper: #F6F8FA;
+  --grid: rgba(90,130,170,.16);
+  --ink: #23313E;
+  --ink-soft: #55677A;
+  --card: #FFFFFF;
+  --accent: #0B7285;
+  --on-accent: #FFFFFF;
+  --tape: color-mix(in srgb, var(--accent) 35%, transparent);
+  --who: #FFE98A;
+  --see: #BDEEF6;
+  --may: #F9CDE0;
+  --wrong: #D2453A;
+  --ok: #2F8F5B;
+  --line: #9DB0C2;
+  --font-hand: "LXGW WenKai TC", "Noto Sans TC", "PingFang TC", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #1A2320; --grid: rgba(200,230,210,.08); --ink: #E6EDE8; --ink-soft: #A9BAB1;
+    --card: #24302C; --accent: #3BC9DB; --on-accent: #10221F; --who: #8A7A2A; --see: #2B6A74; --may: #7A3F57;
+    --wrong: #FF8A7E; --ok: #7FD3A1; --line: #5E7268; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #1A2320; --grid: rgba(200,230,210,.08); --ink: #E6EDE8; --ink-soft: #A9BAB1;
+  --card: #24302C; --accent: #3BC9DB; --on-accent: #10221F; --who: #8A7A2A; --see: #2B6A74; --may: #7A3F57;
+  --wrong: #FF8A7E; --ok: #7FD3A1; --line: #5E7268; color-scheme: dark;
+}
+body {
+  background-color: var(--paper);
+  background-image: linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 22px 22px;
+  color: var(--ink);
+  font-family: var(--font-hand);
+  font-size: 17px;
+  line-height: 1.75;
+}
+.band { background: var(--accent); color: var(--on-accent); padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 22px 18px; }
+.band > div { max-width: 760px; margin: 0 auto; display: grid; gap: 8px; }
+.band a { color: inherit; }
+.page { max-width: 760px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 28px 64px; display: grid; gap: 36px; }
+h1, h2, h3 { text-wrap: balance; line-height: 1.3; margin: 0; }
+h1 { font-size: 2.1rem; }
+h2 { font-size: 1.4rem; display: flex; flex-wrap: wrap; align-items: baseline; gap: 10px; }
+h2 .badge { font-family: var(--font-mono); font-size: .78rem; background: var(--accent); color: var(--on-accent); padding: 1px 8px; border-radius: 3px; }
+h2 .time { font-family: var(--font-mono); font-size: .74rem; color: var(--ink-soft); letter-spacing: .04em; }
+p { margin: 0; }
+section { display: grid; gap: 14px; min-width: 0; }
+.sub { font-size: .95rem; opacity: .9; }
+.lead { font-size: 1.12rem; font-weight: 700; }
+.progress { display: flex; flex-wrap: wrap; gap: 6px 12px; font-family: var(--font-mono); font-size: .8rem; }
+.progress a { color: inherit; text-decoration: none; }
+mark { background: linear-gradient(transparent 52%, var(--who) 52%); color: inherit; padding: 0 2px; }
+mark.see { background: linear-gradient(transparent 52%, var(--see) 52%); }
+mark.may { background: linear-gradient(transparent 52%, var(--may) 52%); }
+code { font-family: var(--font-mono); font-size: .86em; background: color-mix(in srgb, var(--line) 22%, transparent); padding: 1px 5px; border-radius: 3px; }
+.card { position: relative; background: var(--card); padding: 22px 16px 14px; box-shadow: 0 1px 3px rgba(0,0,0,.12); min-width: 0; }
+.card::before { content: ""; position: absolute; top: -9px; left: 50%; width: 92px; height: 20px; transform: translateX(-50%) rotate(-2deg); background: var(--tape); }
+.scroll { overflow-x: auto; }
+svg.fig { display: block; min-width: 600px; width: 100%; height: auto; }
+svg text { font-family: var(--font-mono); fill: var(--ink); }
+svg .hand { font-family: var(--font-hand); }
+.rule { border-left: 4px solid var(--accent); padding: 6px 12px; font-size: 1.05rem; }
+.wrong { border-left: 4px solid var(--wrong); padding: 4px 12px; display: grid; gap: 2px; }
+.wrong b { color: var(--wrong); font-size: .85rem; letter-spacing: .05em; }
+.fix { border-left: 4px solid var(--ok); padding: 4px 12px; }
+.panels { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 14px; }
+.panel { border: 2px solid var(--ink); background: var(--card); padding: 10px; display: grid; gap: 6px; min-width: 0; align-content: start; }
+.panel h3 { font-size: 1rem; font-family: var(--font-mono); }
+.panel p { font-size: .92rem; }
+.panel svg { width: 100%; height: auto; display: block; }
+@media (max-width: 560px) { .panels { grid-template-columns: 1fr; } }
+table { border-collapse: collapse; width: 100%; font-size: .95rem; font-variant-numeric: tabular-nums; }
+th, td { border-bottom: 1px dashed var(--line); padding: 8px 6px; text-align: left; vertical-align: top; }
+th { font-family: var(--font-mono); font-size: .78rem; letter-spacing: .05em; color: var(--ink-soft); font-weight: 600; }
+ol, ul { margin: 0; padding-left: 1.3em; display: grid; gap: 6px; }
+details { background: var(--card); border: 2px dashed var(--line); padding: 10px 14px; }
+details[open] { border-style: solid; }
+details summary { cursor: pointer; font-weight: 700; }
+details > div { display: grid; gap: 10px; margin-top: 10px; }
+.two { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 14px; }
+@media (max-width: 560px) { .two { grid-template-columns: 1fr; } }
+.en { font-family: var(--font-mono); font-size: .88rem; color: var(--ink-soft); }
+pre { margin: 0; font-family: var(--font-mono); font-size: .82rem; line-height: 1.5; background: var(--card); border: 1px solid var(--line); padding: 10px 12px; overflow-x: auto; }
+.next { border: 3px solid var(--accent); background: var(--card); padding: 14px 16px; display: grid; gap: 6px; }
+a { color: var(--accent); text-underline-offset: 3px; }
+a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+</style>
+
+<meta name="topic" content="Distributed Cache design (Phase 1 Gate 題)">
+<header class="band">
+  <div>
+    <p class="sub">sd 課程 · Phase 1 → 2 Gate · S24 mini-mock 3/3 PASS</p>
+    <h1>Distributed Cache Design</h1>
+    <p>讀完這頁你能：從 100 GB 和 500K reads/s 推出要幾個 shard，選 client-side 或 proxy routing 並講出代價，解釋 cache 為什麼選 AP，並說出一台節點死掉之後的完整時間線。</p>
+    <nav class="progress" aria-label="layers"><a href="#l0">L0 ✓</a><a href="#l1">L1 ✓</a><a href="#l2">L2 ✓</a><a href="#l3">L3 ✓</a><a href="#l4">L4 ✓</a><a href="#l5">L5 ✓</a><a href="#l6">L6 ✓</a><a href="#l7">L7 ✓</a><a href="#trail">錯題</a></nav>
+  </div>
+</header>
+
+<main class="page">
+
+  <p class="sub">這題是 P1 的畢業考：把 Caching、Consistent Hashing、Replication 組起來，CAP 在這裡被「節點會掛」自然推出來。S24 有兩筆錯還沒結：routing 答「不確定」、clarify 時在等人給答案。L3 和 L7 處理這兩件事。</p>
+
+  <section id="l0">
+    <h2><span class="badge">L0</span>一張圖<span class="time">讀 1 分鐘</span></h2>
+    <p class="lead">連鎖圖書館：熱門書分散放在幾間分館（sharding），每本在兩間都有（replica），總館的原版才是真相（DB）。分館關門，你就去另一間拿副本。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 680 180" role="img" aria-label="A library chain. Branch 1 holds books A to H, branch 2 holds I to P, branch 3 holds Q to Z. Each branch also holds a copy of a neighbor's books. The central library holds the original of every book. When branch 2 closes, readers get I to P from the copy at branch 3, and anything missing comes from the central library.">
+        <g fill="var(--who)" stroke="var(--ink)" stroke-width="1.5"><rect x="30" y="40" width="140" height="60"/><rect x="200" y="40" width="140" height="60" stroke="var(--wrong)" stroke-dasharray="5 3"/><rect x="370" y="40" width="140" height="60"/></g>
+        <g font-size="10" text-anchor="middle"><text x="100" y="64">分館 1：A–H</text><text x="100" y="82" font-size="8">+ Q–Z 副本</text><text x="270" y="64" fill="var(--wrong)">分館 2：關門</text><text x="270" y="82" font-size="8">（I–P）</text><text x="440" y="64">分館 3：Q–Z</text><text x="440" y="82" font-size="8">+ I–P 副本 ← 改來這</text></g>
+        <rect x="560" y="40" width="100" height="60" fill="var(--see)" stroke="var(--ink)" stroke-width="2"/><text x="610" y="64" text-anchor="middle" font-size="10">總館（DB）</text><text x="610" y="82" text-anchor="middle" font-size="8">所有原版</text>
+        <path d="M 270 100 Q 355 150 440 100" fill="none" stroke="var(--accent)" stroke-width="2"/><text x="355" y="150" text-anchor="middle" font-size="9">讀者改去拿副本</text>
+        <text x="340" y="174" text-anchor="middle" font-size="10" class="hand">分館的書舊一點沒關係，總館永遠是對的</text>
+      </svg>
+    </div>
+  </section>
+
+  <section id="l1">
+    <h2><span class="badge">L1</span>第一性原理<span class="time">讀 3 分鐘</span></h2>
+    <p class="lead">每個設計決定都被一個數字逼出來。先算容量，再看節點會壞，最後看延遲目標。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 680 220" role="img" aria-label="Number to design chain. 50 million keys times 2 kilobytes is about 100 gigabytes, more than the roughly 32 gigabytes usable on one node, so sharding is required: at least 4 shards, about 6 with headroom. Hardware fails 2 to 10 percent a year, so each shard needs a replica. 500 thousand reads a second at P99 under 5 milliseconds means one extra network hop matters, which favors client side routing. Hot keys missing together cause a stampede, which needs request coalescing.">
+        <g fill="var(--card)" stroke="var(--ink)" stroke-width="1.5"><rect x="20" y="20" width="200" height="44"/><rect x="20" y="78" width="200" height="44"/><rect x="20" y="136" width="200" height="44"/><rect x="20" y="194" width="200" height="22"/></g>
+        <g font-size="9"><text x="30" y="40">50M keys × 2 KB ≈ 100 GB</text><text x="30" y="56">單節點可用約 32 GB</text><text x="30" y="98">硬體年故障率 2–10%</text><text x="30" y="114">節點一定會掛</text><text x="30" y="156">500K reads/s</text><text x="30" y="172">P99 &lt; 5 ms</text><text x="30" y="209">熱 key 同時 miss</text></g>
+        <g fill="var(--who)" stroke="var(--ink)" stroke-width="1.5"><rect x="300" y="20" width="360" height="44"/><rect x="300" y="78" width="360" height="44"/><rect x="300" y="136" width="360" height="44"/><rect x="300" y="194" width="360" height="22"/></g>
+        <g font-size="9"><text x="310" y="40">→ 必須 sharding：100 ÷ 32 ≈ 3.2 → 至少 4 個 shard</text><text x="310" y="56">加 headroom 約 6 個 shard（consistent hashing 分）</text><text x="310" y="98">→ 必須 replication：每個 shard 至少 1 個 replica</text><text x="310" y="114">6 shard × (1 primary + 1 replica) = 12 個 node</text><text x="310" y="156">→ 少一跳很重要：client-side routing</text><text x="310" y="172">每個 shard 約 83K reads/s</text><text x="310" y="209">→ request coalescing（防 thundering herd）</text></g>
+        <g stroke="var(--ink)"><line x1="220" y1="42" x2="300" y2="42"/><line x1="220" y1="100" x2="300" y2="100"/><line x1="220" y1="158" x2="300" y2="158"/><line x1="220" y1="205" x2="300" y2="205"/></g>
+      </svg>
+    </div>
+    <p>CAP 是在這裡被推出來的：節點會掛 → 每份資料存兩份 → 寫入時「等兩份都更新完才回」還是「不等」？這就是 consistency 和 availability 的選擇。</p>
+  </section>
+
+  <section id="l2">
+    <h2><span class="badge">L2</span>機制<span class="time">讀 5 分鐘</span></h2>
+    <p class="lead">smart client 自己持有 ring，直接算出 key 在哪個 shard，一跳就到。miss 時走 cache-aside 回 DB。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 680 230" role="img" aria-label="Architecture. App servers embed a smart client holding the consistent hash ring and the node list, learned through gossip or a config service. The client hashes the key, picks the shard, and talks directly to that shard's primary. Six shards, each with a primary and a replica in another AZ. On a miss the app reads the database, writes the value back with a TTL, and returns it. Concurrent misses on the same key share one DB load.">
+        <rect x="20" y="70" width="150" height="90" fill="var(--card)" stroke="var(--accent)" stroke-width="2"/><text x="95" y="92" text-anchor="middle" font-size="10">app server</text>
+        <rect x="35" y="104" width="120" height="44" fill="var(--may)" stroke="var(--ink)"/><text x="95" y="122" text-anchor="middle" font-size="9">smart client</text><text x="95" y="138" text-anchor="middle" font-size="8">持有 ring + 節點名單</text>
+        <g fill="var(--who)" stroke="var(--ink)"><rect x="240" y="20" width="90" height="30"/><rect x="240" y="60" width="90" height="30"/><rect x="240" y="100" width="90" height="30"/><rect x="240" y="140" width="90" height="30"/><rect x="240" y="180" width="90" height="30"/></g>
+        <g fill="var(--see)" stroke="var(--ink)"><rect x="340" y="20" width="70" height="30"/><rect x="340" y="60" width="70" height="30"/><rect x="340" y="100" width="70" height="30"/><rect x="340" y="140" width="70" height="30"/><rect x="340" y="180" width="70" height="30"/></g>
+        <g font-size="8" text-anchor="middle"><text x="285" y="39">shard 1 primary</text><text x="285" y="79">shard 2 primary</text><text x="285" y="119">shard 3 primary</text><text x="285" y="159">⋯</text><text x="285" y="199">shard 6 primary</text><text x="375" y="39">replica</text><text x="375" y="79">replica</text><text x="375" y="119">replica</text><text x="375" y="159">⋯</text><text x="375" y="199">replica</text></g>
+        <line x1="170" y1="115" x2="240" y2="75" stroke="var(--accent)" stroke-width="2.5"/><text x="180" y="88" font-size="8">一跳直達</text>
+        <rect x="470" y="70" width="190" height="90" fill="var(--card)" stroke="var(--ink)" stroke-width="1.5"/><text x="565" y="92" text-anchor="middle" font-size="10">DB（真相來源）</text><text x="565" y="112" text-anchor="middle" font-size="8">miss → 讀 DB → 回寫 + TTL</text><text x="565" y="128" text-anchor="middle" font-size="8">同 key 同時 miss：</text><text x="565" y="142" text-anchor="middle" font-size="8">只讓一個去讀（coalescing）</text>
+        <path d="M 95 160 Q 300 240 470 130" fill="none" stroke="var(--ink)" stroke-dasharray="5 3"/><text x="420" y="216" font-size="8">miss 時</text>
+        <text x="440" y="20" font-size="8" fill="var(--ink-soft)">replica 放另一個 AZ</text>
+      </svg>
+    </div>
+    <p class="lead">一個節點死掉時，沒有 replica 和有 replica 的差別。這就是你 S24 自己推出來的 stampede 和 cascading failure。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 680 200" role="img" aria-label="Node failure timeline. At t0 shard 3 primary dies. Without a replica, all keys on shard 3, one sixth of the data, miss at once, the DB receives a burst of reads, slows down, the app times out, and the failure cascades. With a replica, the replica is promoted, clients update the node list, and only the writes during the failover window are affected; reads keep hitting cache.">
+        <line x1="40" y1="20" x2="40" y2="190" stroke="var(--wrong)" stroke-width="2" stroke-dasharray="5 3"/><text x="46" y="30" font-size="9" fill="var(--wrong)">t0：shard 3 primary 死</text>
+        <text x="60" y="66" font-size="11" class="hand">沒有 replica</text>
+        <g fill="var(--card)" stroke="var(--ink)"><rect x="170" y="50" width="120" height="30" fill="var(--may)"/><rect x="310" y="50" width="120" height="30" fill="var(--wrong)" opacity=".7"/><rect x="450" y="50" width="200" height="30" fill="var(--wrong)" opacity=".9"/></g>
+        <g font-size="8" text-anchor="middle"><text x="230" y="69">1/6 的 key 全 miss</text><text x="370" y="69" fill="var(--card)">DB 收到讀取暴增</text><text x="550" y="69" fill="var(--card)">DB 變慢 → app timeout → 連鎖倒</text></g>
+        <g stroke="var(--ink)"><line x1="290" y1="65" x2="310" y2="65"/><line x1="430" y1="65" x2="450" y2="65"/></g>
+        <text x="60" y="136" font-size="11" class="hand">有 replica</text>
+        <g fill="var(--card)" stroke="var(--ink)"><rect x="170" y="120" width="150" height="30" fill="var(--who)"/><rect x="340" y="120" width="150" height="30" fill="var(--who)"/><rect x="510" y="120" width="140" height="30" fill="var(--ok)"/></g>
+        <g font-size="8" text-anchor="middle"><text x="245" y="139">replica 升為 primary</text><text x="415" y="139">client 更新節點名單</text><text x="580" y="139">讀照樣命中 cache</text></g>
+        <g stroke="var(--ink)"><line x1="320" y1="135" x2="340" y2="135"/><line x1="490" y1="135" x2="510" y2="135"/></g>
+        <text x="340" y="180" text-anchor="middle" font-size="9" fill="var(--ink-soft)">只有 failover 那段時間的寫入受影響；cache 寫不進去最差就是多 miss 幾次</text>
+      </svg>
+    </div>
+  </section>
+
+  <section id="l3">
+    <h2><span class="badge">L3</span>取捨<span class="time">讀 4 分鐘</span></h2>
+    <p class="lead">routing 放哪沒有對錯，是取捨。你 S24 答「不確定」，缺的就是這個反射：開放題先列兩邊的代價，再依需求選。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 680 190" role="img" aria-label="Client side routing versus proxy. Client side: the app talks straight to the shard, one hop, lowest latency, but every client must learn about node changes, through gossip or a config service, and client libraries in every language must agree. Proxy: the app talks to a proxy that knows the ring, so clients stay simple and node changes happen in one place, but there is an extra hop and the proxy itself needs high availability.">
+        <text x="170" y="22" text-anchor="middle" font-size="11" class="hand">Client-side（smart client）</text>
+        <rect x="30" y="50" width="80" height="34" fill="var(--card)" stroke="var(--accent)" stroke-width="2"/><text x="70" y="71" text-anchor="middle" font-size="9">app + ring</text>
+        <rect x="200" y="50" width="80" height="34" fill="var(--who)" stroke="var(--ink)"/><text x="240" y="71" text-anchor="middle" font-size="9">shard</text>
+        <line x1="110" y1="67" x2="200" y2="67" stroke="var(--ink)" stroke-width="2"/><text x="155" y="60" text-anchor="middle" font-size="8">1 跳</text>
+        <text x="170" y="112" text-anchor="middle" font-size="9" fill="var(--ok)">✓ 最快</text><text x="170" y="130" text-anchor="middle" font-size="9" fill="var(--wrong)">✕ 節點變了要通知所有 client</text><text x="170" y="148" text-anchor="middle" font-size="9" fill="var(--wrong)">✕ 每種語言的 client 要算得一樣</text>
+        <line x1="340" y1="20" x2="340" y2="180" stroke="var(--line)" stroke-dasharray="4 4"/>
+        <text x="510" y="22" text-anchor="middle" font-size="11" class="hand">Proxy</text>
+        <rect x="370" y="50" width="70" height="34" fill="var(--card)" stroke="var(--accent)" stroke-width="2"/><text x="405" y="71" text-anchor="middle" font-size="9">app</text>
+        <rect x="475" y="50" width="70" height="34" fill="var(--may)" stroke="var(--ink)"/><text x="510" y="71" text-anchor="middle" font-size="9">proxy</text>
+        <rect x="580" y="50" width="70" height="34" fill="var(--who)" stroke="var(--ink)"/><text x="615" y="71" text-anchor="middle" font-size="9">shard</text>
+        <g stroke="var(--ink)" stroke-width="2"><line x1="440" y1="67" x2="475" y2="67"/><line x1="545" y1="67" x2="580" y2="67"/></g>
+        <text x="510" y="112" text-anchor="middle" font-size="9" fill="var(--ok)">✓ client 簡單，節點變動只改一處</text><text x="510" y="130" text-anchor="middle" font-size="9" fill="var(--wrong)">✕ 多一跳</text><text x="510" y="148" text-anchor="middle" font-size="9" fill="var(--wrong)">✕ proxy 自己要做 HA</text>
+        <text x="340" y="178" text-anchor="middle" font-size="10" class="hand">P99 &lt; 5 ms → 選 client-side；團隊多語言、常換節點 → 選 proxy</text>
+      </svg>
+    </div>
+    <div class="scroll">
+      <table>
+        <tr><th>partition 時</th><th>行為</th><th>cache 選哪個</th></tr>
+        <tr><td>CP</td><td>拒絕回答，避免給舊值</td><td>不選：cache 拒答等於沒有 cache，流量全打 DB</td></tr>
+        <tr><td>AP</td><td>照樣回答，可能是舊值</td><td>選：DB 是真相來源，TTL 讓舊值自己過期（self-healing）</td></tr>
+      </table>
+    </div>
+    <div class="fix"><b>同一間公司可以兩種都有</b>：商品瀏覽的 cache 選 AP；扣庫存、結帳不走 cache，在 DB 用 CP。判準：給錯資料會不會直接賠錢。</div>
+  </section>
+
+  <section id="l4">
+    <h2><span class="badge">L4</span>AWS 怎麼做<span class="time">讀 4 分鐘</span></h2>
+    <p class="lead">ElastiCache cluster mode 就是「固定 slot + cluster-aware client」的 client-side 路線。ElastiCache Serverless 則是一個 endpoint，比較接近 proxy 路線。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 680 230" role="img" aria-label="Two AWS options. Option A: ElastiCache cluster mode enabled with 6 shards, each with a primary in one AZ and a replica in another, Multi-AZ automatic failover; the app uses a cluster-aware client that maps slots to shards and follows MOVED replies. Option B: ElastiCache Serverless behind one endpoint that scales on its own; simpler for the app, priced by data stored and requests. Both sit in front of RDS or DynamoDB as the source of truth.">
+        <text x="20" y="22" font-size="11" class="hand">A · cluster mode（client-side）</text>
+        <rect x="20" y="40" width="110" height="60" fill="var(--card)" stroke="var(--accent)" stroke-width="2"/><text x="75" y="64" text-anchor="middle" font-size="9">app</text><text x="75" y="80" text-anchor="middle" font-size="8">cluster-aware client</text>
+        <rect x="170" y="30" width="250" height="80" fill="none" stroke="var(--ink-soft)" stroke-dasharray="5 4"/>
+        <g fill="var(--who)" stroke="var(--ink)"><rect x="185" y="44" width="70" height="24"/><rect x="265" y="44" width="70" height="24"/><rect x="345" y="44" width="60" height="24"/></g>
+        <g fill="var(--see)" stroke="var(--ink)"><rect x="185" y="76" width="70" height="24"/><rect x="265" y="76" width="70" height="24"/><rect x="345" y="76" width="60" height="24"/></g>
+        <g font-size="8" text-anchor="middle"><text x="220" y="60">shard 1 (AZ-a)</text><text x="300" y="60">shard 2 (AZ-c)</text><text x="375" y="60">⋯ ×6</text><text x="220" y="92">replica (AZ-c)</text><text x="300" y="92">replica (AZ-a)</text><text x="375" y="92">⋯</text></g>
+        <line x1="130" y1="70" x2="185" y2="56" stroke="var(--ink)"/>
+        <text x="20" y="142" font-size="11" class="hand">B · Serverless（像 proxy）</text>
+        <rect x="20" y="156" width="110" height="50" fill="var(--card)" stroke="var(--accent)" stroke-width="2"/><text x="75" y="185" text-anchor="middle" font-size="9">app</text>
+        <rect x="170" y="156" width="250" height="50" fill="var(--may)" stroke="var(--ink)" stroke-width="1.5"/><text x="295" y="176" text-anchor="middle" font-size="9">一個 endpoint，自己擴縮</text><text x="295" y="192" text-anchor="middle" font-size="8">依存量和 request 數計費</text>
+        <line x1="130" y1="181" x2="170" y2="181" stroke="var(--ink)"/>
+        <rect x="490" y="90" width="170" height="60" fill="var(--see)" stroke="var(--ink)" stroke-width="2"/><text x="575" y="114" text-anchor="middle" font-size="10">RDS / DynamoDB</text><text x="575" y="132" text-anchor="middle" font-size="8">真相來源</text>
+        <g stroke="var(--ink)" stroke-dasharray="4 3"><line x1="420" y1="70" x2="490" y2="110"/><line x1="420" y1="181" x2="490" y2="135"/></g>
+      </svg>
+    </div>
+    <div class="scroll">
+      <table>
+        <tr><th>設定</th><th>用在哪</th><th>陷阱</th></tr>
+        <tr><td>cluster mode + replicas</td><td>分片 + HA</td><td>要開 Multi-AZ 和 automatic failover，replica 才會自動升。只建 replica 不開 failover，primary 死了還是要人工處理。</td></tr>
+        <tr><td>讀 replica</td><td>分散讀取</td><td>cluster mode 下 client 要送 <code>READONLY</code> 才會讀 replica，讀到的可能是舊值。對 cache 通常可以接受，但要知道。</td></tr>
+        <tr><td><code>reserved-memory-percent</code></td><td>容量估算</td><td>預設保留 25%。估「單節點 32 GB 可用」時，要挑記憶體大於 42 GB 的機型。</td></tr>
+        <tr><td>multi-key 指令</td><td><code>MGET</code>、transaction</td><td>key 跨 slot 會回 <code>CROSSSLOT</code>。要一起操作的 key 用 hash tag 放同一個 slot。</td></tr>
+        <tr><td>ElastiCache Serverless</td><td>不想管 shard</td><td>省掉容量規劃，但量大且穩定時，按用量計費可能比固定節點貴。先估再選。</td></tr>
+      </table>
+    </div>
+    <p class="sub">誰會吵：財務看到 12 個 node，問 replica 為什麼要錢；SRE 回「沒有它，一台死就是 1/6 流量砸 DB」。design review 會問：「shard 死掉時，DB 扛得住多出來的那 1/6 嗎？」</p>
+  </section>
+
+  <section id="l5">
+    <h2><span class="badge">L5</span>規模化<span class="time">讀 3 分鐘</span></h2>
+    <p class="lead">每一級換掉的，都是上一級「一個東西壞了就全部壞」的那一塊。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 680 230" role="img" aria-label="Evolution ladder. Step 1 one Redis node, memory limit and single point of failure. Step 2 primary plus replica with automatic failover, still limited by one node's memory. Step 3 cluster mode with sharding by hash slots, replicas per shard across AZs. Step 4 multi region with Global Datastore for reads near users, plus a small in-process L1 cache for the hottest keys.">
+        <rect x="20" y="170" width="150" height="50" fill="var(--card)" stroke="var(--ink)" stroke-width="1.5"/>
+        <text x="30" y="190" font-size="11" class="hand">① 一台 Redis</text><text x="30" y="208" font-size="9">記憶體上限 + SPOF</text>
+        <rect x="180" y="130" width="150" height="90" fill="var(--see)" stroke="var(--ink)" stroke-width="1.5"/>
+        <text x="190" y="150" font-size="11" class="hand">② primary + replica</text><text x="190" y="170" font-size="9">自動 failover</text><text x="190" y="186" font-size="9">還是一台的記憶體</text>
+        <rect x="340" y="80" width="150" height="140" fill="var(--who)" stroke="var(--ink)" stroke-width="1.5"/>
+        <text x="350" y="100" font-size="11" class="hand">③ cluster mode</text><text x="350" y="120" font-size="9">slot 分片</text><text x="350" y="136" font-size="9">每 shard 一個 replica</text><text x="350" y="152" font-size="9">跨 AZ</text>
+        <rect x="500" y="30" width="160" height="190" fill="var(--may)" stroke="var(--ink)" stroke-width="1.5"/>
+        <text x="510" y="50" font-size="11" class="hand">④ 多 region + L1</text><text x="510" y="70" font-size="9">Global Datastore</text><text x="510" y="86" font-size="9">就近讀</text><text x="510" y="106" font-size="9">app 內小 L1 cache</text><text x="510" y="122" font-size="9">擋最熱的 key</text>
+        <text x="95" y="160" text-anchor="middle" font-size="9" fill="var(--ink-soft)">換掉：單點</text>
+        <text x="255" y="120" text-anchor="middle" font-size="9" fill="var(--ink-soft)">換掉：單機記憶體</text>
+        <text x="415" y="70" text-anchor="middle" font-size="9" fill="var(--ink-soft)">換掉：單一 region</text>
+      </svg>
+    </div>
+    <div class="scroll">
+      <table>
+        <tr><th>路線</th><th>例子</th><th>好處</th><th>代價</th></tr>
+        <tr><td>Client-side 分片</td><td>Redis Cluster、ketama</td><td>少一跳、沒有中間層會壞</td><td>client 要 cluster-aware；節點名單要同步</td></tr>
+        <tr><td>Proxy 分片</td><td>Twemproxy、Envoy Redis proxy、ElastiCache Serverless</td><td>client 是普通 Redis client</td><td>多一跳；proxy 要 HA</td></tr>
+      </table>
+    </div>
+  </section>
+
+  <section id="l6">
+    <h2><span class="badge">L6</span>故障與 on-call<span class="time">讀 4 分鐘</span></h2>
+    <p class="lead">分散式 cache 出事時，最早的訊號通常不在 cache 上，而在 DB：DB QPS 突然往上跳。</p>
+    <div class="panels">
+      <div class="panel"><h3>A · shard 掛了</h3><p>hit ratio 掉約 1/N，DB QPS 同時升。看 failover 有沒有自動發生。</p></div>
+      <div class="panel"><h3>B · stampede</h3><p>熱 key 過期或 shard 剛換，上千 request 同時 miss。coalescing 和 TTL jitter 是防線。</p></div>
+      <div class="panel"><h3>C · 熱 shard</h3><p>一個 shard 的 CPU 是別人的好幾倍。key 數平均，但流量不平均。加 L1 cache 或拆熱 key。</p></div>
+      <div class="panel"><h3>D · 記憶體滿</h3><p>evictions 一直升，hit ratio 慢慢掉。不是壞了，是容量估錯或資料長大了。</p></div>
+    </div>
+    <div class="scroll">
+      <table>
+        <tr><th>看什麼</th><th>出事長相</th></tr>
+        <tr><td>整體 hit ratio</td><td>突然掉約 1/N = 某個 shard 出事</td></tr>
+        <tr><td>DB QPS</td><td>跟 miss 一起跳 = stampede 前兆</td></tr>
+        <tr><td>per-shard <code>EngineCPUUtilization</code></td><td>一個特別高 = 熱 shard</td></tr>
+        <tr><td><code>Evictions</code>、<code>DatabaseMemoryUsagePercentage</code></td><td>持續上升 = 容量不夠</td></tr>
+      </table>
+    </div>
+    <p>第一個指令（看 replication group 和每個 shard 的狀態，確認 <code>AutomaticFailover</code> 和 <code>MultiAZ</code> 是 enabled）：</p>
+    <pre>aws elasticache describe-replication-groups --replication-group-id my-cache</pre>
+    <p class="sub">SLO 範例（S24 定的）：hit ratio &gt; 90%、cache P99 &lt; 5 ms。</p>
+  </section>
+
+  <section id="l7">
+    <h2><span class="badge">L7</span>面試<span class="time">讀 3 分鐘</span></h2>
+    <p class="lead">題目：「設計一個分散式 cache。5,000 萬個 key、每個 2 KB，500K reads/s，P99 &lt; 5 ms。」</p>
+    <p>先自己講：開頭主動圈什麼範圍、幾個 shard、routing 放哪、replica 怎麼配、partition 時選 C 還是 A、一台死了會怎樣。再打開。</p>
+    <details>
+      <summary>L4 vs L6 對照</summary>
+      <div>
+        <div class="wrong"><b>L4</b>「用 Redis cluster，資料用 hash 分到幾台。請問要支援哪些功能？」<br>問題：沒有數字；把 clarify 變成等面試官給答案；沒講 routing、replica、CAP、故障。</div>
+        <div class="fix"><b>L6</b> 多了四件事：</div>
+        <ol>
+          <li>主動圈範圍：「I'll assume get / set / delete with TTL, cache-aside in front of a DB.」</li>
+          <li>數字驅動：100 GB ÷ 32 GB → 至少 4 shard，取 6；每 shard 一個跨 AZ replica。用 consistent hashing（或 slot）分。</li>
+          <li>Routing：P99 &lt; 5 ms，選 client-side 少一跳；代價是節點變動要同步給所有 client。</li>
+          <li>CAP 選 AP：DB 是真相、TTL 自癒。一台死：replica 升上來；沒升起來前 1/6 的 key miss，用 coalescing 擋 stampede。監控 hit ratio、DB QPS、per-shard CPU。</li>
+        </ol>
+        <p class="en">"I'll assume a get, set, and delete API with TTLs, used as cache-aside in front of a database. A hundred gigabytes doesn't fit on one node with about 32 usable, so I need at least four shards, and I'd start with six for headroom. Keys are spread with consistent hashing. Each shard gets a replica in another AZ, because at this scale a node failure is routine. With a five millisecond P99, I want one network hop, so I'd use a smart client that knows the ring. The cost is that every client has to learn about membership changes. During a partition I'd choose availability. The database is the source of truth, and TTLs make stale entries heal themselves. If a primary dies, its replica takes over. Until it does, a sixth of the keys miss, so I'd coalesce concurrent misses to keep the database from getting stampeded. I'd watch hit ratio, database QPS, and per-shard CPU."</p>
+      </div>
+    </details>
+  </section>
+
+  <section id="trail">
+    <h2><span class="badge">錯題</span>這次的釐清<span class="time">讀 2 分鐘</span></h2>
+    <div class="wrong"><b>我錯在這</b>✗ S24：routing 放 client 還是 proxy「不確定」<br>✓ 兩個都對，是取捨：client-side 快但要同步名單；proxy 好管但多一跳、自己要 HA<br>→ 為什麼搞混：還沒有「開放題 = 列兩邊代價」的反射。L3 那張圖就是兩邊的帳。</div>
+    <div class="wrong"><b>我錯在這</b>✗ S24：clarify 時在等人給答案<br>✓ 面試要主動斷言、圈範圍：「I'll focus on X, assume Y for now」<br>→ 為什麼搞混：S8 scope negotiation 的老問題換了個樣子。</div>
+    <div class="wrong"><b>我錯在這</b>✗ 不清楚 partition 是什麼<br>✓ partition = 機器都活著，但彼此網路斷了，各自繼續收 request，資料開始分歧。不等於機器死掉<br>→ 為什麼搞混：把「死」和「失聯」當成同一件事。Day 17 那頁的 L2 有圖。</div>
+    <div class="fix"><b>做對的</b>：「node 掛 → 1/N 的 key 全 miss → 全砸 DB → stampede → 連鎖倒」這條鏈是你自己推出來的，P1 gate 記錄寫的是 Phase 2 等級的反應。</div>
+  </section>
+
+  <div class="next">
+    <b>下一步（2 分鐘）</b>
+    <p>不看這頁，從「50M × 2 KB」開始，一路算到「12 個 node」，每一步寫一個理由。</p>
+  </div>
+
+</main>

@@ -1,0 +1,289 @@
+<title>SD Interview Rubric</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC:wght@400;700&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: one notebook column on graph paper; teal sd accent band; figures on taped cards, failure cases as comic panels */
+:root {
+  --paper: #F6F8FA;
+  --grid: rgba(90,130,170,.16);
+  --ink: #23313E;
+  --ink-soft: #55677A;
+  --card: #FFFFFF;
+  --accent: #0B7285;
+  --on-accent: #FFFFFF;
+  --tape: color-mix(in srgb, var(--accent) 35%, transparent);
+  --who: #FFE98A;
+  --see: #BDEEF6;
+  --may: #F9CDE0;
+  --wrong: #D2453A;
+  --ok: #2F8F5B;
+  --line: #9DB0C2;
+  --font-hand: "LXGW WenKai TC", "Noto Sans TC", "PingFang TC", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #1A2320; --grid: rgba(200,230,210,.08); --ink: #E6EDE8; --ink-soft: #A9BAB1;
+    --card: #24302C; --accent: #3BC9DB; --on-accent: #10221F; --who: #8A7A2A; --see: #2B6A74; --may: #7A3F57;
+    --wrong: #FF8A7E; --ok: #7FD3A1; --line: #5E7268; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #1A2320; --grid: rgba(200,230,210,.08); --ink: #E6EDE8; --ink-soft: #A9BAB1;
+  --card: #24302C; --accent: #3BC9DB; --on-accent: #10221F; --who: #8A7A2A; --see: #2B6A74; --may: #7A3F57;
+  --wrong: #FF8A7E; --ok: #7FD3A1; --line: #5E7268; color-scheme: dark;
+}
+body {
+  background-color: var(--paper);
+  background-image: linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 22px 22px;
+  color: var(--ink);
+  font-family: var(--font-hand);
+  font-size: 17px;
+  line-height: 1.75;
+}
+.band { background: var(--accent); color: var(--on-accent); padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 22px 18px; }
+.band > div { max-width: 760px; margin: 0 auto; display: grid; gap: 8px; }
+.band a { color: inherit; }
+.page { max-width: 760px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 28px 64px; display: grid; gap: 36px; }
+h1, h2, h3 { text-wrap: balance; line-height: 1.3; margin: 0; }
+h1 { font-size: 2.1rem; }
+h2 { font-size: 1.4rem; display: flex; flex-wrap: wrap; align-items: baseline; gap: 10px; }
+h2 .badge { font-family: var(--font-mono); font-size: .78rem; background: var(--accent); color: var(--on-accent); padding: 1px 8px; border-radius: 3px; }
+h2 .time { font-family: var(--font-mono); font-size: .74rem; color: var(--ink-soft); letter-spacing: .04em; }
+p { margin: 0; }
+section { display: grid; gap: 14px; min-width: 0; }
+.sub { font-size: .95rem; opacity: .9; }
+.lead { font-size: 1.12rem; font-weight: 700; }
+.progress { display: flex; flex-wrap: wrap; gap: 6px 12px; font-family: var(--font-mono); font-size: .8rem; }
+.progress a { color: inherit; text-decoration: none; }
+mark { background: linear-gradient(transparent 52%, var(--who) 52%); color: inherit; padding: 0 2px; }
+mark.see { background: linear-gradient(transparent 52%, var(--see) 52%); }
+mark.may { background: linear-gradient(transparent 52%, var(--may) 52%); }
+code { font-family: var(--font-mono); font-size: .86em; background: color-mix(in srgb, var(--line) 22%, transparent); padding: 1px 5px; border-radius: 3px; }
+.card { position: relative; background: var(--card); padding: 22px 16px 14px; box-shadow: 0 1px 3px rgba(0,0,0,.12); min-width: 0; }
+.card::before { content: ""; position: absolute; top: -9px; left: 50%; width: 92px; height: 20px; transform: translateX(-50%) rotate(-2deg); background: var(--tape); }
+.scroll { overflow-x: auto; }
+svg.fig { display: block; min-width: 600px; width: 100%; height: auto; }
+svg text { font-family: var(--font-mono); fill: var(--ink); }
+svg .hand { font-family: var(--font-hand); }
+.rule { border-left: 4px solid var(--accent); padding: 6px 12px; font-size: 1.05rem; }
+.wrong { border-left: 4px solid var(--wrong); padding: 4px 12px; display: grid; gap: 2px; }
+.wrong b { color: var(--wrong); font-size: .85rem; letter-spacing: .05em; }
+.fix { border-left: 4px solid var(--ok); padding: 4px 12px; }
+.panels { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 14px; }
+.panel { border: 2px solid var(--ink); background: var(--card); padding: 10px; display: grid; gap: 6px; min-width: 0; align-content: start; }
+.panel h3 { font-size: 1rem; font-family: var(--font-mono); }
+.panel p { font-size: .92rem; }
+.panel svg { width: 100%; height: auto; display: block; }
+@media (max-width: 560px) { .panels { grid-template-columns: 1fr; } }
+table { border-collapse: collapse; width: 100%; font-size: .95rem; font-variant-numeric: tabular-nums; }
+th, td { border-bottom: 1px dashed var(--line); padding: 8px 6px; text-align: left; vertical-align: top; }
+th { font-family: var(--font-mono); font-size: .78rem; letter-spacing: .05em; color: var(--ink-soft); font-weight: 600; }
+ol, ul { margin: 0; padding-left: 1.3em; display: grid; gap: 6px; }
+details { background: var(--card); border: 2px dashed var(--line); padding: 10px 14px; }
+details[open] { border-style: solid; }
+details summary { cursor: pointer; font-weight: 700; }
+details > div { display: grid; gap: 10px; margin-top: 10px; }
+.two { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 14px; }
+@media (max-width: 560px) { .two { grid-template-columns: 1fr; } }
+.en { font-family: var(--font-mono); font-size: .88rem; color: var(--ink-soft); }
+pre { margin: 0; font-family: var(--font-mono); font-size: .82rem; line-height: 1.5; background: var(--card); border: 1px solid var(--line); padding: 10px 12px; overflow-x: auto; }
+.next { border: 3px solid var(--accent); background: var(--card); padding: 14px 16px; display: grid; gap: 6px; }
+a { color: var(--accent); text-underline-offset: 3px; }
+a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+</style>
+
+<header class="band">
+  <div>
+    <p class="sub">sd 課程 · P0 Thinking Framework · Day 1</p>
+    <h1>SD Interview Rubric</h1>
+    <p>讀完這頁你能：說出 SD 面試的四個評分維度（問 → 畫 → 深 → 比），逐維度比較一個好答案和一個爛答案差在哪，並知道 L4 和 L6 在同一題上被期待的差距。</p>
+    <nav class="progress" aria-label="layers"><a href="#l0">L0 ✓</a><a href="#l1">L1 ✓</a><a href="#l2">L2 ✓</a><a href="#l3">L3 ✓</a><a href="#l4">L4 ✓</a><a href="#l5">L5 ✓</a><a href="#l6">L6 ✓</a><a href="#l7">L7 ✓</a><a href="#trail">錯題</a></nav>
+  </div>
+</header>
+
+<main class="page">
+
+  <p class="sub">這是整個 SD 課程的地基。後面每一題的 drill 計分（Think Aloud / Scope / 用上當天的元件）都是從這四個維度長出來的。</p>
+
+  <section id="l0">
+    <h2><span class="badge">L0</span>一張圖<span class="time">讀 1 分鐘</span></h2>
+    <p class="lead">廚藝比賽：評審不是只吃最後那盤。他們看你有沒有先問「幾人份、有沒有過敏」，有沒有先寫菜單，能不能說出「為什麼用烤的」，以及「要脆的話改用煎」。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 680 170" role="img" aria-label="Four score cards in order. Ask: how many people, any allergies. Draw: the menu before cooking. Deep: why roast instead of fry. Compare: roasting uses less oil but is not crispy; for crispy, fry. Mnemonic: ask, draw, deep, compare.">
+        <g fill="var(--card)" stroke="var(--ink)" stroke-width="1.5"><rect x="20" y="30" width="145" height="100"/><rect x="185" y="30" width="145" height="100"/><rect x="350" y="30" width="145" height="100"/><rect x="515" y="30" width="145" height="100"/></g>
+        <g fill="var(--who)" stroke="var(--ink)"><rect x="20" y="30" width="145" height="30"/><rect x="185" y="30" width="145" height="30"/><rect x="350" y="30" width="145" height="30"/><rect x="515" y="30" width="145" height="30"/></g>
+        <g font-size="12" text-anchor="middle" class="hand"><text x="92" y="51">① 問</text><text x="257" y="51">② 畫</text><text x="422" y="51">③ 深</text><text x="587" y="51">④ 比</text></g>
+        <g font-size="9" text-anchor="middle"><text x="92" y="84">幾人份？</text><text x="92" y="100">有沒有過敏？</text><text x="257" y="84">先寫菜單</text><text x="257" y="100">再開火</text><text x="422" y="84">為什麼用烤</text><text x="422" y="100">不用煎？</text><text x="587" y="84">烤：少油不脆</text><text x="587" y="100">要脆 → 改煎</text></g>
+        <text x="340" y="158" text-anchor="middle" font-size="11" class="hand">評審看的是過程，不只是那一盤</text>
+      </svg>
+    </div>
+  </section>
+
+  <section id="l1">
+    <h2><span class="badge">L1</span>第一性原理<span class="time">讀 3 分鐘</span></h2>
+    <p class="lead">SD 題沒有標準答案，45 分鐘也蓋不出真系統。所以面試官能觀察的只有你怎麼想：怎麼收斂模糊、怎麼做決定、怎麼承認代價。這正是 design review 裡每天在做的事。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 680 190" role="img" aria-label="Constraint chain. The question is vague on purpose and has no single right answer. 45 minutes is too short to build anything. So the only observable signal is the thinking process. That process splits into four dimensions, each mapping to a daily job skill: clarifying requirements with a PM, drawing a proposal, defending a choice in review, and naming the cost of a decision.">
+        <g fill="var(--card)" stroke="var(--ink)" stroke-width="1.5"><rect x="20" y="20" width="190" height="44"/><rect x="245" y="20" width="190" height="44"/><rect x="470" y="20" width="190" height="44"/></g>
+        <g font-size="10" text-anchor="middle"><text x="115" y="46">題目故意模糊、沒有標準答案</text><text x="340" y="46">45 分鐘蓋不出系統</text><text x="565" y="46">只看得到「怎麼想」</text></g>
+        <g stroke="var(--ink)"><line x1="210" y1="42" x2="245" y2="42"/><line x1="435" y1="42" x2="470" y2="42"/><line x1="565" y1="64" x2="565" y2="90"/></g>
+        <g fill="var(--who)" stroke="var(--ink)"><rect x="20" y="100" width="150" height="70"/><rect x="185" y="100" width="150" height="70"/><rect x="350" y="100" width="150" height="70"/><rect x="515" y="100" width="150" height="70"/></g>
+        <g font-size="9" text-anchor="middle"><text x="95" y="122">Problem Navigation</text><text x="95" y="142">= 跟 PM 釐清需求</text><text x="260" y="122">System Design</text><text x="260" y="142">= 畫提案架構圖</text><text x="425" y="122">Technical Depth</text><text x="425" y="142">= review 時守得住</text><text x="590" y="122">Trade-off Analysis</text><text x="590" y="142">= 講出代價</text></g>
+        <line x1="565" y1="90" x2="95" y2="90" stroke="var(--ink)"/><g stroke="var(--ink)"><line x1="95" y1="90" x2="95" y2="100"/><line x1="260" y1="90" x2="260" y2="100"/><line x1="425" y1="90" x2="425" y2="100"/><line x1="590" y1="90" x2="590" y2="100"/></g>
+      </svg>
+    </div>
+    <p><mark>Dimension 1 是 Dimension 2 的地基</mark>：沒有需求的架構圖就是亂猜。</p>
+  </section>
+
+  <section id="l2">
+    <h2><span class="badge">L2</span>機制<span class="time">讀 4 分鐘</span></h2>
+    <p class="lead">同一題 URL Shortener，兩個答案的架構都「能動」。差別在四個維度上一格一格比。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 680 230" role="img" aria-label="Scoring grid for two URL shortener answers. Answer A: no questions, server plus MySQL, says store it in the database, no trade-offs; it fails all four. Answer B: asks QPS, expiry, custom alias; draws service plus NoSQL plus Redis cache; explains why 7 base62 characters are enough with 62 to the 7th; compares base62 counters, collision free but predictable, against random hashes, safer but extra DB writes; it passes all four.">
+        <g font-size="10" class="hand"><text x="150" y="24" text-anchor="middle">回答 A</text><text x="460" y="24" text-anchor="middle">回答 B</text></g>
+        <g font-size="9"><text x="10" y="56">① 問</text><text x="10" y="102">② 畫</text><text x="10" y="148">③ 深</text><text x="10" y="194">④ 比</text></g>
+        <g fill="var(--card)" stroke="var(--wrong)" stroke-width="1.5"><rect x="50" y="36" width="200" height="36"/><rect x="50" y="82" width="200" height="36"/><rect x="50" y="128" width="200" height="36"/><rect x="50" y="174" width="200" height="36"/></g>
+        <g font-size="9"><text x="60" y="58">✕ 沒問需求就開畫</text><text x="60" y="104">✕ 只有 server + MySQL</text><text x="60" y="150">✕「存到資料庫」就沒了</text><text x="60" y="196">✕ 沒有比較</text></g>
+        <g fill="var(--who)" stroke="var(--ok)" stroke-width="1.5"><rect x="270" y="36" width="390" height="36"/><rect x="270" y="82" width="390" height="36"/><rect x="270" y="128" width="390" height="36"/><rect x="270" y="174" width="390" height="36"/></g>
+        <g font-size="9"><text x="280" y="58">✓ 問 QPS、要不要過期、能不能自訂短碼</text><text x="280" y="104">✓ service + NoSQL + Redis cache，有分層</text><text x="280" y="150">✓ 用 62⁷ 算出為什麼 7 碼夠</text><text x="280" y="196">✓ base62 不撞但可預測 vs random hash 安全但多寫 DB</text></g>
+        <text x="340" y="225" text-anchor="middle" font-size="10" class="hand">面試不是看「能不能動」，是看思考過程</text>
+      </svg>
+    </div>
+    <div class="scroll">
+      <table>
+        <tr><th>維度</th><th>✗ 爛</th><th>✓ 好</th></tr>
+        <tr><td>Problem Navigation</td><td>聽完題目就畫</td><td>先花 3–5 分鐘問需求，不確定就「I'll assume X」</td></tr>
+        <tr><td>System Design</td><td>一口氣畫超複雜</td><td>先 high-level，再逐層深入</td></tr>
+        <tr><td>Technical Depth</td><td>「用 Redis 做 cache」就停</td><td>講 why（in-memory、&lt; 1 ms、TTL）和限制</td></tr>
+        <tr><td>Trade-off Analysis</td><td>只講優點</td><td>優點 + 缺點 + 什麼條件下改選別的</td></tr>
+      </table>
+    </div>
+  </section>
+
+  <section id="l3">
+    <h2><span class="badge">L3</span>取捨<span class="time">讀 3 分鐘</span></h2>
+    <p class="lead">四個維度互相搶時間。問太久沒時間畫，畫太廣沒時間深。好的答案是有意識地分配。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 680 150" role="img" aria-label="Two failure shapes on a 45 minute bar. Top: 15 minutes of questions leaves almost no time for depth; the interviewer never sees design skill. Bottom: drawing twelve components shallowly leaves no time to go deep on any; better to pick one or two and go deep. Balanced bar: 5 ask, 10 draw, 15 deep, 10 compare, 5 spare.">
+        <g stroke="var(--ink)"><rect x="40" y="20" width="200" height="26" fill="var(--wrong)" opacity=".7"/><rect x="240" y="20" width="240" height="26" fill="var(--see)"/><rect x="480" y="20" width="160" height="26" fill="var(--card)"/></g>
+        <g font-size="9"><text x="50" y="37" fill="var(--card)">問了 15 分鐘</text><text x="250" y="37">畫</text><text x="490" y="37">深：剩 5 分鐘</text></g>
+        <g stroke="var(--ink)"><rect x="40" y="60" width="70" height="26" fill="var(--who)"/><rect x="110" y="60" width="450" height="26" fill="var(--wrong)" opacity=".7"/><rect x="560" y="60" width="80" height="26" fill="var(--card)"/></g>
+        <g font-size="9"><text x="50" y="77">問</text><text x="120" y="77" fill="var(--card)">畫 12 個元件、每個講一句</text><text x="570" y="77">比：沒時間</text></g>
+        <g stroke="var(--ink)"><rect x="40" y="104" width="67" height="26" fill="var(--who)"/><rect x="107" y="104" width="133" height="26" fill="var(--see)"/><rect x="240" y="104" width="200" height="26" fill="var(--may)"/><rect x="440" y="104" width="133" height="26" fill="var(--ok)"/><rect x="573" y="104" width="67" height="26" fill="var(--card)"/></g>
+        <g font-size="9"><text x="50" y="121">問 5</text><text x="117" y="121">畫 10</text><text x="250" y="121">深 15（挑 1–2 個）</text><text x="450" y="121">比 + 監控 10</text><text x="583" y="121">餘 5</text></g>
+        <text x="340" y="146" text-anchor="middle" font-size="9" fill="var(--ink-soft)">下面那條就是 Day 3 的 4-Step 時間表</text>
+      </svg>
+    </div>
+    <div class="fix"><b>問問題不等於承諾你都會</b>：問「一對一還是群聊？」是在展示你知道兩者複雜度不同。面試官通常會順勢幫你縮小範圍。</div>
+  </section>
+
+  <section id="l4">
+    <h2><span class="badge">L4</span>職場真實面<span class="time">讀 3 分鐘</span></h2>
+    <p class="lead">面試官手上就是這四格。你講的每句話，會被記到某一格當證據，面試完拿去 debrief 跟其他面試官對。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 680 210" role="img" aria-label="How a loop works. During the interview, the interviewer writes notes into four rubric boxes with quotes as evidence. After the interview, each interviewer submits a written score per dimension. In the debrief, the hiring panel compares evidence across interviewers and decides the level, for example L4 or L5 or L6. A box with no evidence counts as a miss, even if you knew it.">
+        <rect x="20" y="30" width="170" height="150" fill="var(--card)" stroke="var(--ink)" stroke-width="1.5"/><text x="105" y="50" text-anchor="middle" font-size="10" class="hand">面試中</text>
+        <g fill="var(--who)" stroke="var(--ink)"><rect x="35" y="62" width="140" height="24"/><rect x="35" y="92" width="140" height="24"/><rect x="35" y="122" width="140" height="24"/><rect x="35" y="152" width="140" height="24" fill="var(--card)" stroke-dasharray="4 3"/></g>
+        <g font-size="8"><text x="42" y="78">問：「先問了 QPS 和過期」</text><text x="42" y="108">畫：「三層、有 cache」</text><text x="42" y="138">深：「算了 62⁷」</text><text x="42" y="168" fill="var(--wrong)">比：（空白 = 沒證據）</text></g>
+        <rect x="250" y="60" width="170" height="90" fill="var(--see)" stroke="var(--ink)" stroke-width="1.5"/><text x="335" y="84" text-anchor="middle" font-size="10" class="hand">面試後</text><text x="335" y="104" text-anchor="middle" font-size="9">每格寫分數 + 引用</text><text x="335" y="120" text-anchor="middle" font-size="9">你講過的原話</text>
+        <rect x="480" y="60" width="180" height="90" fill="var(--may)" stroke="var(--ink)" stroke-width="1.5"/><text x="570" y="84" text-anchor="middle" font-size="10" class="hand">debrief</text><text x="570" y="104" text-anchor="middle" font-size="9">幾位面試官對證據</text><text x="570" y="120" text-anchor="middle" font-size="9">決定 level</text>
+        <g stroke="var(--ink)"><line x1="190" y1="105" x2="250" y2="105"/><line x1="420" y1="105" x2="480" y2="105"/></g>
+        <text x="340" y="200" text-anchor="middle" font-size="10" fill="var(--wrong)">你「知道但沒講出來」的東西，在 debrief 裡等於不存在</text>
+      </svg>
+    </div>
+    <div class="scroll">
+      <table>
+        <tr><th>維度</th><th>上班時對應的場合</th><th>常見陷阱</th></tr>
+        <tr><td>Problem Navigation</td><td>跟 PM 開需求會</td><td>沒問清楚就開工，做完才發現 scope 不對</td></tr>
+        <tr><td>System Design</td><td>寫 design doc 的架構章節</td><td>圖畫了，但沒標資料怎麼流</td></tr>
+        <tr><td>Technical Depth</td><td>design review 被追問</td><td>「大家都用這個」不是理由</td></tr>
+        <tr><td>Trade-off Analysis</td><td>doc 的 Alternatives considered</td><td>只寫被選的方案，被淘汰的沒寫為什麼</td></tr>
+      </table>
+    </div>
+  </section>
+
+  <section id="l5">
+    <h2><span class="badge">L5</span>規模化<span class="time">讀 3 分鐘</span></h2>
+    <p class="lead">同一題，等級越高，被期待的不是「元件更多」，而是「決定更有根據、看得更遠」。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 680 230" role="img" aria-label="Level ladder. Entry level draws working boxes. L4 explains why each box exists. L5 compares alternatives with numbers and states costs. L6 drives the scope, ties every choice to a number, names failure modes and how to monitor them, and says what not to build.">
+        <rect x="20" y="170" width="150" height="50" fill="var(--card)" stroke="var(--ink)" stroke-width="1.5"/>
+        <text x="30" y="190" font-size="11" class="hand">① 入門</text><text x="30" y="208" font-size="9">畫得出能動的框框</text>
+        <rect x="180" y="130" width="150" height="90" fill="var(--see)" stroke="var(--ink)" stroke-width="1.5"/>
+        <text x="190" y="150" font-size="11" class="hand">② L4</text><text x="190" y="170" font-size="9">每個框講得出</text><text x="190" y="186" font-size="9">為什麼在那</text>
+        <rect x="340" y="80" width="150" height="140" fill="var(--who)" stroke="var(--ink)" stroke-width="1.5"/>
+        <text x="350" y="100" font-size="11" class="hand">③ L5</text><text x="350" y="120" font-size="9">用數字比較方案</text><text x="350" y="136" font-size="9">主動講代價</text>
+        <rect x="500" y="30" width="160" height="190" fill="var(--may)" stroke="var(--ink)" stroke-width="1.5"/>
+        <text x="510" y="50" font-size="11" class="hand">④ L6</text><text x="510" y="70" font-size="9">自己圈 scope</text><text x="510" y="86" font-size="9">每個決定引用一個數字</text><text x="510" y="102" font-size="9">講故障模式 + 怎麼監控</text><text x="510" y="118" font-size="9">說出「這裡不需要複雜」</text>
+        <text x="95" y="160" text-anchor="middle" font-size="9" fill="var(--ink-soft)">加上：why</text>
+        <text x="255" y="120" text-anchor="middle" font-size="9" fill="var(--ink-soft)">加上：數字 + 代價</text>
+        <text x="415" y="70" text-anchor="middle" font-size="9" fill="var(--ink-soft)">加上：主導 + 營運</text>
+      </svg>
+    </div>
+    <div class="scroll">
+      <table>
+        <tr><th>準備路線</th><th>做法</th><th>好處</th><th>代價</th></tr>
+        <tr><td>背題</td><td>背 20 題標準答案</td><td>看過的題很順</td><td>題目一換皮就卡；被追問 why 就露餡</td></tr>
+        <tr><td>練框架 + 元件</td><td>四維度 + building blocks，每題當練習</td><td>沒看過的題也起得了手</td><td>前期慢，要大量口說練習</td></tr>
+      </table>
+    </div>
+  </section>
+
+  <section id="l6">
+    <h2><span class="badge">L6</span>面試現場怎麼壞<span class="time">讀 3 分鐘</span></h2>
+    <p class="lead">面試當下最常見的四種壞法，每種都有一句可以救回來的話。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 680 150" role="img" aria-label="Silence costs evidence. A timeline of a 45 minute interview where the candidate thinks silently for 4 minutes; that stretch is drawn empty in the rubric because the interviewer has nothing to write down. Thinking aloud fills the same 4 minutes with evidence.">
+        <line x1="40" y1="60" x2="640" y2="60" stroke="var(--ink)" stroke-width="2"/>
+        <rect x="220" y="44" width="120" height="32" fill="var(--card)" stroke="var(--wrong)" stroke-dasharray="5 3"/><text x="280" y="64" text-anchor="middle" font-size="9" fill="var(--wrong)">默默想 4 分鐘</text>
+        <text x="280" y="96" text-anchor="middle" font-size="9" fill="var(--wrong)">面試官筆記：空白</text>
+        <line x1="40" y1="120" x2="640" y2="120" stroke="var(--ink)" stroke-width="2"/>
+        <rect x="220" y="104" width="120" height="32" fill="var(--who)" stroke="var(--ink)"/><text x="280" y="124" text-anchor="middle" font-size="9">邊想邊講</text>
+        <text x="460" y="124" font-size="9">「我在比 A 和 B，A 的問題是…」→ 每句都是證據</text>
+        <text x="20" y="64" font-size="9">✗</text><text x="20" y="124" font-size="9">✓</text>
+      </svg>
+    </div>
+    <div class="panels">
+      <div class="panel"><h3>A · 腦袋空白</h3><p>救法：「Let me start by clarifying the requirements.」Step 1 不需要先知道答案。</p></div>
+      <div class="panel"><h3>B · 默默想</h3><p>見上圖。救法：把比較過程講出來，講錯也是證據。</p></div>
+      <div class="panel"><h3>C · 只講優點</h3><p>救法：每個選擇後面固定接一句「the cost is…」。</p></div>
+      <div class="panel"><h3>D · 等面試官追問</h3><p>救法：一次講足「選什麼 + 為什麼 + 代價」。這是你 S8、S24 的老毛病。</p></div>
+    </div>
+  </section>
+
+  <section id="l7">
+    <h2><span class="badge">L7</span>面試<span class="time">讀 3 分鐘</span></h2>
+    <p class="lead">題目：「Design a URL shortener.」只看開頭 3 分鐘：你第一句話說什麼？</p>
+    <p>先自己講出開頭三分鐘的內容，再打開。</p>
+    <details>
+      <summary>L4 vs L6 對照</summary>
+      <div>
+        <div class="wrong"><b>L4</b>「好，我會用一台 server 加 MySQL，使用者送長網址進來…」<br>問題：直接畫，四格裡「問」那格沒有證據。</div>
+        <div class="fix"><b>L6</b> 多了三件事：</div>
+        <ol>
+          <li>先問會改變設計的問題：每天多少新連結、讀寫比、要不要點擊統計、能不能自訂短碼。</li>
+          <li>主動圈範圍：「I'll focus on create and redirect. Edit and delete are out of scope for now.」</li>
+          <li>宣告接下來的路線：「先估數字，再畫 high-level，然後深入短碼生成。」</li>
+        </ol>
+        <p class="en">"Before I draw anything, let me ask a few questions that will shape the design. Roughly how many new links per day, and what's the read to write ratio? Do we need click analytics? Should users be able to pick a custom alias? I'll assume links don't expire unless you'd like otherwise. I'll focus on creating links and redirecting, and leave editing and deleting out of scope. My plan is to estimate the numbers first, then sketch the high-level design, and then go deep on how we generate short codes."</p>
+      </div>
+    </details>
+  </section>
+
+  <section id="trail">
+    <h2><span class="badge">錯題</span>這次的釐清<span class="time">讀 2 分鐘</span></h2>
+    <div class="wrong"><b>我錯在這</b>✗ 問問題會暴露我不會的東西，所以不敢問<br>✓ 問問題是在展示你知道複雜度在哪<br>→ 為什麼搞混：把「問」當成「承諾全部都做得出來」。</div>
+    <div class="wrong"><b>我錯在這</b>✗ 沒有生產經驗的技術（例如 WebSocket）講不出深度<br>✓ 深度 = 知道它解決什麼、跟替代方案差在哪、限制是什麼<br>→ 為什麼搞混：把 Technical Depth 當成「用過」。</div>
+    <div class="wrong"><b>我錯在這</b>✗ 分析兩個答案只說「B 比較完整」<br>✓ 逐個維度比，說出每一格具體差在哪<br>→ 為什麼搞混：停在整體感覺，沒用框架拆。L2 那張四格表就是拆法。</div>
+  </section>
+
+  <div class="next">
+    <b>下一步（2 分鐘）</b>
+    <p>不看這頁，說出四個維度的英文名和口訣，各配一個「爛答案」的例子。</p>
+  </div>
+
+</main>

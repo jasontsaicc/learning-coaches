@@ -1,0 +1,329 @@
+<title>API Design</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC:wght@400;700&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: one notebook column on graph paper; teal sd accent band; figures on taped cards, failure cases as comic panels */
+:root {
+  --paper: #F6F8FA;
+  --grid: rgba(90,130,170,.16);
+  --ink: #23313E;
+  --ink-soft: #55677A;
+  --card: #FFFFFF;
+  --accent: #0B7285;
+  --on-accent: #FFFFFF;
+  --tape: color-mix(in srgb, var(--accent) 35%, transparent);
+  --who: #FFE98A;
+  --see: #BDEEF6;
+  --may: #F9CDE0;
+  --wrong: #D2453A;
+  --ok: #2F8F5B;
+  --line: #9DB0C2;
+  --font-hand: "LXGW WenKai TC", "Noto Sans TC", "PingFang TC", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #1A2320; --grid: rgba(200,230,210,.08); --ink: #E6EDE8; --ink-soft: #A9BAB1;
+    --card: #24302C; --accent: #3BC9DB; --on-accent: #10221F; --who: #8A7A2A; --see: #2B6A74; --may: #7A3F57;
+    --wrong: #FF8A7E; --ok: #7FD3A1; --line: #5E7268; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #1A2320; --grid: rgba(200,230,210,.08); --ink: #E6EDE8; --ink-soft: #A9BAB1;
+  --card: #24302C; --accent: #3BC9DB; --on-accent: #10221F; --who: #8A7A2A; --see: #2B6A74; --may: #7A3F57;
+  --wrong: #FF8A7E; --ok: #7FD3A1; --line: #5E7268; color-scheme: dark;
+}
+body {
+  background-color: var(--paper);
+  background-image: linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 22px 22px;
+  color: var(--ink);
+  font-family: var(--font-hand);
+  font-size: 17px;
+  line-height: 1.75;
+}
+.band { background: var(--accent); color: var(--on-accent); padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 22px 18px; }
+.band > div { max-width: 760px; margin: 0 auto; display: grid; gap: 8px; }
+.band a { color: inherit; }
+.page { max-width: 760px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 28px 64px; display: grid; gap: 36px; }
+h1, h2, h3 { text-wrap: balance; line-height: 1.3; margin: 0; }
+h1 { font-size: 2.1rem; }
+h2 { font-size: 1.4rem; display: flex; flex-wrap: wrap; align-items: baseline; gap: 10px; }
+h2 .badge { font-family: var(--font-mono); font-size: .78rem; background: var(--accent); color: var(--on-accent); padding: 1px 8px; border-radius: 3px; }
+h2 .time { font-family: var(--font-mono); font-size: .74rem; color: var(--ink-soft); letter-spacing: .04em; }
+p { margin: 0; }
+section { display: grid; gap: 14px; min-width: 0; }
+.sub { font-size: .95rem; opacity: .9; }
+.lead { font-size: 1.12rem; font-weight: 700; }
+.progress { display: flex; flex-wrap: wrap; gap: 6px 12px; font-family: var(--font-mono); font-size: .8rem; }
+.progress a { color: inherit; text-decoration: none; }
+mark { background: linear-gradient(transparent 52%, var(--who) 52%); color: inherit; padding: 0 2px; }
+mark.see { background: linear-gradient(transparent 52%, var(--see) 52%); }
+mark.may { background: linear-gradient(transparent 52%, var(--may) 52%); }
+code { font-family: var(--font-mono); font-size: .86em; background: color-mix(in srgb, var(--line) 22%, transparent); padding: 1px 5px; border-radius: 3px; }
+.card { position: relative; background: var(--card); padding: 22px 16px 14px; box-shadow: 0 1px 3px rgba(0,0,0,.12); min-width: 0; }
+.card::before { content: ""; position: absolute; top: -9px; left: 50%; width: 92px; height: 20px; transform: translateX(-50%) rotate(-2deg); background: var(--tape); }
+.scroll { overflow-x: auto; }
+svg.fig { display: block; min-width: 600px; width: 100%; height: auto; }
+svg text { font-family: var(--font-mono); fill: var(--ink); }
+svg .hand { font-family: var(--font-hand); }
+.rule { border-left: 4px solid var(--accent); padding: 6px 12px; font-size: 1.05rem; }
+.wrong { border-left: 4px solid var(--wrong); padding: 4px 12px; display: grid; gap: 2px; }
+.wrong b { color: var(--wrong); font-size: .85rem; letter-spacing: .05em; }
+.fix { border-left: 4px solid var(--ok); padding: 4px 12px; }
+.panels { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 14px; }
+.panel { border: 2px solid var(--ink); background: var(--card); padding: 10px; display: grid; gap: 6px; min-width: 0; align-content: start; }
+.panel h3 { font-size: 1rem; font-family: var(--font-mono); }
+.panel p { font-size: .92rem; }
+.panel svg { width: 100%; height: auto; display: block; }
+@media (max-width: 560px) { .panels { grid-template-columns: 1fr; } }
+table { border-collapse: collapse; width: 100%; font-size: .95rem; font-variant-numeric: tabular-nums; }
+th, td { border-bottom: 1px dashed var(--line); padding: 8px 6px; text-align: left; vertical-align: top; }
+th { font-family: var(--font-mono); font-size: .78rem; letter-spacing: .05em; color: var(--ink-soft); font-weight: 600; }
+ol, ul { margin: 0; padding-left: 1.3em; display: grid; gap: 6px; }
+details { background: var(--card); border: 2px dashed var(--line); padding: 10px 14px; }
+details[open] { border-style: solid; }
+details summary { cursor: pointer; font-weight: 700; }
+details > div { display: grid; gap: 10px; margin-top: 10px; }
+.two { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 14px; }
+@media (max-width: 560px) { .two { grid-template-columns: 1fr; } }
+.en { font-family: var(--font-mono); font-size: .88rem; color: var(--ink-soft); }
+pre { margin: 0; font-family: var(--font-mono); font-size: .82rem; line-height: 1.5; background: var(--card); border: 1px solid var(--line); padding: 10px 12px; overflow-x: auto; }
+.next { border: 3px solid var(--accent); background: var(--card); padding: 14px 16px; display: grid; gap: 6px; }
+a { color: var(--accent); text-underline-offset: 3px; }
+a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+</style>
+
+<header class="band">
+  <div>
+    <p class="sub">sd 課程 · P1 Building Blocks · Day 12-13 · S14-S17，drill 3/3</p>
+    <h1>API Design</h1>
+    <p>讀完這頁你能：依「誰在呼叫、多頻繁、資料多複雜」選 REST、GraphQL 或 gRPC，說出 cursor 為什麼比 offset 穩，分清 breaking 和 non-breaking change，並把下單 API 做成按兩次也只扣一次。</p>
+    <nav class="progress" aria-label="layers"><a href="#l0">L0 ✓</a><a href="#l1">L1 ✓</a><a href="#l2">L2 ✓</a><a href="#l3">L3 ✓</a><a href="#l4">L4 ✓</a><a href="#l5">L5 ✓</a><a href="#l6">L6 ✓</a><a href="#l7">L7 ✓</a><a href="#trail">錯題</a></nav>
+  </div>
+</header>
+
+<main class="page">
+
+  <p class="sub">這題錯最多的是「沒想過 client 會作假」：價格和 user_id 放在 request body 讓 client 傳。L3 有一張圖專門畫這件事。</p>
+
+  <section id="l0">
+    <h2><span class="badge">L0</span>一張圖<span class="time">讀 1 分鐘</span></h2>
+    <p class="lead">餐廳：REST 是固定菜單，點了 A 餐就是整份 A 餐。GraphQL 是自助餐，要什麼夾什麼。gRPC 是廚房內部的對講機，快，但客人聽不懂。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 680 170" role="img" aria-label="Three counters. REST, a fixed menu: order set A and get every dish in it, including ones you did not want. GraphQL, a buffet: take exactly the two dishes you want, the kitchen does more work. gRPC, the kitchen intercom: short coded messages between cooks, very fast, not meant for customers.">
+        <g fill="var(--card)" stroke="var(--ink)" stroke-width="1.5"><rect x="20" y="30" width="200" height="110"/><rect x="240" y="30" width="200" height="110"/><rect x="460" y="30" width="200" height="110"/></g>
+        <g fill="var(--who)" stroke="var(--ink)"><rect x="20" y="30" width="200" height="28"/><rect x="240" y="30" width="200" height="28"/><rect x="460" y="30" width="200" height="28"/></g>
+        <g font-size="11" text-anchor="middle" class="hand"><text x="120" y="50">REST：固定菜單</text><text x="340" y="50">GraphQL：自助餐</text><text x="560" y="50">gRPC：廚房對講機</text></g>
+        <g font-size="9" text-anchor="middle"><text x="120" y="82">點 A 餐 → 整份 50 樣</text><text x="120" y="100">只想吃 2 樣也全上</text><text x="120" y="118" fill="var(--ink-soft)">（over-fetching）</text><text x="340" y="82">夾你要的 2 樣</text><text x="340" y="100">廚房要多準備</text><text x="340" y="118" fill="var(--ink-soft)">（burden 移到後端 / client）</text><text x="560" y="82">「3 號桌、2 份、急」</text><text x="560" y="100">短碼、超快</text><text x="560" y="118" fill="var(--ink-soft)">（binary，人看不懂）</text></g>
+        <text x="340" y="162" text-anchor="middle" font-size="10" class="hand">大公司三種都用：對外 REST、聚合 GraphQL、內部 gRPC</text>
+      </svg>
+    </div>
+  </section>
+
+  <section id="l1">
+    <h2><span class="badge">L1</span>第一性原理<span class="time">讀 3 分鐘</span></h2>
+    <p class="lead">三個限制逼出這些選擇：手機頻寬有限、使用者期待 100 ms 內回應、API 一旦公開就很難改。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 680 190" role="img" aria-label="Three constraints. Mobile bandwidth: 50 fields returned when 2 are used wastes data on every call. Latency: each extra round trip adds tens of milliseconds, so three calls to build one screen is too slow. Change cost: once a public API ships, renaming a field breaks every client that cannot be updated, so the contract must be stable or versioned.">
+        <g fill="var(--card)" stroke="var(--ink)" stroke-width="1.5"><rect x="20" y="20" width="200" height="90"/><rect x="240" y="20" width="200" height="90"/><rect x="460" y="20" width="200" height="90"/></g>
+        <g font-size="11" text-anchor="middle" class="hand"><text x="120" y="42">頻寬</text><text x="340" y="42">延遲</text><text x="560" y="42">改動成本</text></g>
+        <g font-size="9" text-anchor="middle"><text x="120" y="64">回 50 欄、只用 2 欄</text><text x="120" y="80">每次都在浪費流量</text><text x="340" y="64">一個畫面打 3 支 API</text><text x="340" y="80">每多一趟就多幾十 ms</text><text x="560" y="64">公開後改欄位名</text><text x="560" y="80">所有舊 client 一起壞</text></g>
+        <g fill="var(--who)" stroke="var(--ink)"><rect x="20" y="130" width="200" height="40"/><rect x="240" y="130" width="200" height="40"/><rect x="460" y="130" width="200" height="40"/></g>
+        <g font-size="9" text-anchor="middle"><text x="120" y="154">→ GraphQL 讓 client 選欄位</text><text x="340" y="154">→ BFF / GraphQL 一次聚合</text><text x="560" y="154">→ versioning + 強 contract</text></g>
+        <g stroke="var(--ink)"><line x1="120" y1="110" x2="120" y2="130"/><line x1="340" y1="110" x2="340" y2="130"/><line x1="560" y1="110" x2="560" y2="130"/></g>
+      </svg>
+    </div>
+  </section>
+
+  <section id="l2">
+    <h2><span class="badge">L2</span>機制<span class="time">讀 5 分鐘</span></h2>
+    <p class="lead">REST 的核心是 resource-based：URL 是名詞（collection 用複數），HTTP method 是動詞。這樣不看文件也猜得到怎麼用。</p>
+    <div class="scroll">
+      <table>
+        <tr><th>Method</th><th>用途</th><th>Idempotent？</th><th>例子</th></tr>
+        <tr><td>GET</td><td>讀</td><td>✓</td><td><code>GET /v1/restaurants/{restaurant_id}/menu</code></td></tr>
+        <tr><td>POST</td><td>新增</td><td>✗（要靠 Idempotency-Key）</td><td><code>POST /v1/orders</code></td></tr>
+        <tr><td>PUT / PATCH</td><td>整筆 / 部分更新</td><td>✓</td><td><code>PATCH /v1/users/{user_id}</code></td></tr>
+        <tr><td>DELETE</td><td>刪</td><td>✓</td><td><code>DELETE /v1/carts/{cart_id}/items/{item_id}</code></td></tr>
+      </table>
+    </div>
+    <p class="lead">Offset 分頁要先掃過前面 N 筆再丟掉，而且資料一變就跳位。Cursor 記住「上次看到哪」，用 index 直接跳過去。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 680 200" role="img" aria-label="Offset pagination. Page 1 shows items 1 to 10. Before page 2 loads, a new item is inserted at the top. Page 2 with offset 10 now starts at old item 10, so item 10 appears twice. Deep offsets also scan and discard all earlier rows. Cursor pagination: page 2 asks for id less than the last seen id, using the index to seek directly, so a new insert at the top does not shift anything.">
+        <text x="20" y="24" font-size="11" class="hand">Offset：?offset=10&amp;limit=10</text>
+        <g fill="var(--see)" stroke="var(--ink)"><rect x="20" y="36" width="300" height="24"/></g><text x="30" y="52" font-size="9">第 1 頁：1–10</text>
+        <rect x="20" y="66" width="60" height="24" fill="var(--may)" stroke="var(--ink)"/><text x="30" y="82" font-size="9">新的 1 筆插到最前面</text>
+        <g fill="var(--card)" stroke="var(--ink)"><rect x="20" y="96" width="300" height="24"/></g><rect x="20" y="96" width="30" height="24" fill="var(--wrong)" opacity=".7" stroke="var(--ink)"/><text x="60" y="112" font-size="9">第 2 頁從舊的第 10 筆開始 → 第 10 筆看到兩次</text>
+        <text x="20" y="144" font-size="9" fill="var(--wrong)">offset = 100 萬時，DB 要先掃 100 萬筆再丟掉 → 越翻越慢</text>
+        <line x1="350" y1="20" x2="350" y2="190" stroke="var(--line)" stroke-dasharray="4 4"/>
+        <text x="370" y="24" font-size="11" class="hand">Cursor：?cursor=abc&amp;limit=10</text>
+        <g fill="var(--see)" stroke="var(--ink)"><rect x="370" y="36" width="290" height="24"/></g><text x="380" y="52" font-size="9">第 1 頁：回 10 筆 + next_cursor（最後一筆的 id）</text>
+        <rect x="370" y="66" width="60" height="24" fill="var(--may)" stroke="var(--ink)"/><text x="380" y="82" font-size="9">新的插到最前面</text>
+        <rect x="370" y="96" width="290" height="24" fill="var(--who)" stroke="var(--ok)" stroke-width="2"/><text x="380" y="112" font-size="9">WHERE id &lt; cursor LIMIT 10 → 不受影響</text>
+        <text x="370" y="144" font-size="9" fill="var(--ok)">走 index seek，第 1 頁和第 10 萬頁一樣快</text>
+        <text x="370" y="164" font-size="9" fill="var(--ink-soft)">代價：不能直接跳到第 37 頁</text>
+      </svg>
+    </div>
+    <p class="lead">按兩次「下單」：client 先產生一個 Idempotency-Key，server 用它記住這筆 request 走到哪一步。只有「有 / 沒有」不夠，要有中間狀態，crash 後才能接著做。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 680 170" role="img" aria-label="Idempotency record states. Request arrives with key K. If no record, create it as pending, then processing: create order, then charge. When done, store the response and mark completed. A second request with key K: if completed, return the stored response; if processing, the earlier attempt crashed or is running, so check which steps finished and resume, not restart.">
+        <g stroke="var(--ink)" stroke-width="1.5"><rect x="20" y="50" width="110" height="50" rx="8" fill="var(--card)"/><rect x="170" y="50" width="110" height="50" rx="8" fill="var(--see)"/><rect x="320" y="50" width="150" height="50" rx="8" fill="var(--may)"/><rect x="510" y="50" width="150" height="50" rx="8" fill="var(--ok)"/></g>
+        <g font-size="10" text-anchor="middle"><text x="75" y="72">沒有紀錄</text><text x="75" y="88" font-size="8">第一次看到 K</text><text x="225" y="80">pending</text><text x="395" y="72">processing</text><text x="395" y="88" font-size="8">建單 ✓ → 扣款 …</text><text x="585" y="72">completed</text><text x="585" y="88" font-size="8">存好 response</text></g>
+        <g stroke="var(--ink)"><line x1="130" y1="75" x2="170" y2="75"/><line x1="280" y1="75" x2="320" y2="75"/><line x1="470" y1="75" x2="510" y2="75"/></g>
+        <text x="585" y="130" text-anchor="middle" font-size="9">第二次帶 K 來 → 直接回存好的 response</text>
+        <text x="395" y="130" text-anchor="middle" font-size="9" fill="var(--wrong)">卡在這裡 = 上次 crash 了</text><text x="395" y="146" text-anchor="middle" font-size="9">看哪幾步做完 → 從沒做的接著做（resume，不是 restart）</text>
+        <text x="340" y="30" text-anchor="middle" font-size="10" class="hand">key = (user_id, Idempotency-Key)</text>
+      </svg>
+    </div>
+  </section>
+
+  <section id="l3">
+    <h2><span class="badge">L3</span>取捨<span class="time">讀 4 分鐘</span></h2>
+    <p class="lead">核心矛盾是通用性 vs 效率。三種都不是最好，只有最適合誰在呼叫。</p>
+    <div class="scroll">
+      <table>
+        <tr><th></th><th>REST</th><th>GraphQL</th><th>gRPC</th></tr>
+        <tr><td>適合</td><td>對外、簡單 CRUD</td><td>多種 client、要的欄位不同</td><td>內部 service 對 service、高頻</td></tr>
+        <tr><td>好處</td><td>簡單、GET 能被 CDN cache</td><td>client 選欄位，沒有 over-fetching</td><td>protobuf binary，比 JSON 快很多；<code>.proto</code> 是強制 contract</td></tr>
+        <tr><td>代價</td><td>over-fetching；前端一變後端就要改</td><td>全部走 POST，CDN 難 cache；後端變複雜；N+1</td><td>browser 不原生支援；人看不懂</td></tr>
+      </table>
+    </div>
+    <p class="lead">安全上的一條鐵律：request body 是 client 寫的，client 可以亂寫。價格和身分都不能信 body。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 680 170" role="img" aria-label="A tampered order request. The client sends price 1 dollar and user id 999 in the JSON body. If the server trusts the body, it charges 1 dollar to someone else's account. Correct design: the body only has restaurant id, item ids and quantities. The server looks up the price from the database and takes the user id from the verified auth token.">
+        <rect x="20" y="30" width="250" height="100" fill="var(--card)" stroke="var(--wrong)" stroke-width="2"/>
+        <text x="30" y="50" font-size="9">POST /v1/orders</text><text x="30" y="70" font-size="9">{ "items": [...],</text><text x="30" y="88" font-size="9" fill="var(--wrong)">  "price": 1,       ← client 改的</text><text x="30" y="106" font-size="9" fill="var(--wrong)">  "user_id": 999 }  ← 別人的帳號</text>
+        <text x="145" y="150" text-anchor="middle" font-size="9" fill="var(--wrong)">信 body = 用 1 元扣別人的卡</text>
+        <line x1="290" y1="80" x2="370" y2="80" stroke="var(--ink)" stroke-width="1.5"/><polygon points="370,75 380,80 370,85" fill="var(--ink)"/>
+        <rect x="390" y="30" width="270" height="100" fill="var(--who)" stroke="var(--ok)" stroke-width="2"/>
+        <text x="400" y="50" font-size="9">body 只放：restaurant_id、items[{item_id, quantity}]</text><text x="400" y="74" font-size="9">價格 → server 從 DB 算</text><text x="400" y="94" font-size="9">user_id → 從驗過的 JWT 的 sub 拿</text>
+        <text x="525" y="150" text-anchor="middle" font-size="9" fill="var(--ok)">client 能決定的只有「要什麼」</text>
+      </svg>
+    </div>
+    <div class="scroll">
+      <table>
+        <tr><th>改動</th><th>breaking？</th><th>怎麼做</th></tr>
+        <tr><td>新增欄位、新增 optional 參數</td><td>不是</td><td>原版直接加</td></tr>
+        <tr><td>改欄位名、刪欄位、改型別</td><td>是</td><td>開 <code>/v2/</code>，舊版加 <code>Sunset</code> header，到期回 410 Gone</td></tr>
+      </table>
+    </div>
+  </section>
+
+  <section id="l4">
+    <h2><span class="badge">L4</span>AWS 怎麼做<span class="time">讀 4 分鐘</span></h2>
+    <p class="lead">對外 REST 進 API Gateway（auth、限流、驗格式），GET 再放 CloudFront cache。GraphQL 用 AppSync。內部 gRPC 走 ALB 或 mesh。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 680 230" role="img" aria-label="Mobile and web clients. Public GET requests go through CloudFront, which caches menus. All REST calls hit API Gateway, which validates JWTs, throttles per API key and validates request schema. A BFF or AppSync GraphQL endpoint aggregates data for the mobile app. Inside the VPC, services talk gRPC through an ALB with a gRPC target group. The order service stores idempotency records in DynamoDB.">
+        <rect x="10" y="90" width="80" height="50" fill="var(--card)" stroke="var(--ink)"/><text x="50" y="112" text-anchor="middle" font-size="10">mobile</text><text x="50" y="128" text-anchor="middle" font-size="10">web</text>
+        <rect x="120" y="20" width="120" height="44" fill="var(--see)" stroke="var(--ink)"/><text x="180" y="40" text-anchor="middle" font-size="9">CloudFront</text><text x="180" y="54" text-anchor="middle" font-size="8">cache GET 菜單</text>
+        <rect x="120" y="94" width="120" height="60" fill="var(--who)" stroke="var(--ink)" stroke-width="2"/><text x="180" y="114" text-anchor="middle" font-size="9">API Gateway</text><text x="180" y="128" text-anchor="middle" font-size="8">JWT、限流</text><text x="180" y="142" text-anchor="middle" font-size="8">request 驗格式</text>
+        <rect x="120" y="176" width="120" height="44" fill="var(--may)" stroke="var(--ink)"/><text x="180" y="196" text-anchor="middle" font-size="9">AppSync / BFF</text><text x="180" y="210" text-anchor="middle" font-size="8">GraphQL 聚合</text>
+        <rect x="290" y="40" width="370" height="170" fill="none" stroke="var(--ink-soft)" stroke-dasharray="5 4"/><text x="300" y="56" font-size="9">VPC</text>
+        <rect x="310" y="94" width="110" height="60" fill="var(--card)" stroke="var(--accent)" stroke-width="2"/><text x="365" y="118" text-anchor="middle" font-size="9">order service</text><text x="365" y="134" text-anchor="middle" font-size="8">REST 對外</text>
+        <rect x="450" y="94" width="90" height="60" fill="var(--see)" stroke="var(--ink)"/><text x="495" y="118" text-anchor="middle" font-size="9">ALB</text><text x="495" y="134" text-anchor="middle" font-size="8">gRPC TG</text>
+        <rect x="560" y="70" width="90" height="40" fill="var(--card)" stroke="var(--ink)"/><text x="605" y="94" text-anchor="middle" font-size="8">inventory（gRPC）</text>
+        <rect x="560" y="140" width="90" height="40" fill="var(--card)" stroke="var(--ink)"/><text x="605" y="160" text-anchor="middle" font-size="8">DynamoDB</text><text x="605" y="172" text-anchor="middle" font-size="7">idempotency 紀錄</text>
+        <g stroke="var(--ink)"><line x1="90" y1="105" x2="120" y2="42"/><line x1="90" y1="115" x2="120" y2="124"/><line x1="90" y1="128" x2="120" y2="198"/><line x1="240" y1="124" x2="310" y2="124"/><line x1="420" y1="124" x2="450" y2="124"/><line x1="540" y1="115" x2="560" y2="90"/><line x1="420" y1="140" x2="560" y2="160"/></g>
+      </svg>
+    </div>
+    <div class="scroll">
+      <table>
+        <tr><th>服務</th><th>用在哪</th><th>陷阱</th></tr>
+        <tr><td>API Gateway（REST API）</td><td>對外入口</td><td>integration timeout 預設上限 29 秒，payload 上限 10 MB。報表、大檔上傳不要走同步 API，改 async 或 S3 presigned URL。</td></tr>
+        <tr><td>CloudFront</td><td>cache GET</td><td>預設不 cache POST，所以 GraphQL 幾乎 cache 不到。cache key 沒包含 <code>Authorization</code> 時，千萬別 cache 個人化的回應，不然 A 會看到 B 的資料。</td></tr>
+        <tr><td>AppSync</td><td>GraphQL</td><td>每個欄位一個 resolver，清單裡每筆再查一次 = N+1，DB 被打爆。要 batch resolver，並限制 query 深度。</td></tr>
+        <tr><td>ALB + gRPC</td><td>內部 gRPC</td><td>target group 的 protocol version 要選 gRPC，health check 看的是 gRPC status code，不是 HTTP 200。</td></tr>
+        <tr><td>Powertools idempotency</td><td>Lambda 版 Idempotency-Key</td><td>它在 DynamoDB 存 INPROGRESS / COMPLETED 狀態。紀錄的過期時間太短，晚到的重試會被當成新 request。</td></tr>
+      </table>
+    </div>
+    <p class="sub">誰會吵：前端要 GraphQL 少打幾支 API，SRE 擔心 cache 不到、DB 被 N+1 打爆。design review 會問：「這支 POST 被重試三次會怎樣？」</p>
+  </section>
+
+  <section id="l5">
+    <h2><span class="badge">L5</span>規模化<span class="time">讀 3 分鐘</span></h2>
+    <p class="lead">每一級都在把「呼叫方和提供方」之間的約定，從口頭默契變成會被自動檢查的 contract。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 680 230" role="img" aria-label="Evolution ladder. Step 1 one REST monolith. Step 2 versioned REST behind an API gateway with auth and rate limits. Step 3 a BFF or GraphQL for different clients and gRPC between internal services. Step 4 contract checks in CI with OpenAPI diff and consumer driven contract tests, schema registry, and a deprecation lifecycle with Sunset headers and 410 Gone.">
+        <rect x="20" y="170" width="150" height="50" fill="var(--card)" stroke="var(--ink)" stroke-width="1.5"/>
+        <text x="30" y="190" font-size="11" class="hand">① 一個 REST</text><text x="30" y="208" font-size="9">monolith，沒版本</text>
+        <rect x="180" y="130" width="150" height="90" fill="var(--see)" stroke="var(--ink)" stroke-width="1.5"/>
+        <text x="190" y="150" font-size="11" class="hand">② /v1 + Gateway</text><text x="190" y="170" font-size="9">auth、限流集中</text><text x="190" y="186" font-size="9">&gt; 10K req/s 時加</text>
+        <rect x="340" y="80" width="150" height="140" fill="var(--who)" stroke="var(--ink)" stroke-width="1.5"/>
+        <text x="350" y="100" font-size="11" class="hand">③ 分流</text><text x="350" y="120" font-size="9">對外 REST + CDN</text><text x="350" y="136" font-size="9">聚合 BFF / GraphQL</text><text x="350" y="152" font-size="9">內部 gRPC</text>
+        <rect x="500" y="30" width="160" height="190" fill="var(--may)" stroke="var(--ink)" stroke-width="1.5"/>
+        <text x="510" y="50" font-size="11" class="hand">④ contract 自動化</text><text x="510" y="70" font-size="9">CI 檢查 breaking change</text><text x="510" y="86" font-size="9">（OpenAPI diff、Pact）</text><text x="510" y="102" font-size="9">從 spec 產 SDK 和文件</text><text x="510" y="118" font-size="9">Sunset → 410 Gone</text>
+        <text x="95" y="160" text-anchor="middle" font-size="9" fill="var(--ink-soft)">換掉：改了就壞</text>
+        <text x="255" y="120" text-anchor="middle" font-size="9" fill="var(--ink-soft)">換掉：一種格式打天下</text>
+        <text x="415" y="70" text-anchor="middle" font-size="9" fill="var(--ink-soft)">換掉：靠人記得</text>
+      </svg>
+    </div>
+  </section>
+
+  <section id="l6">
+    <h2><span class="badge">L6</span>故障與 on-call<span class="time">讀 4 分鐘</span></h2>
+    <p class="lead">API 出事的長相通常寫在 4xx 和 5xx 的比例裡：4xx 突增多半是 contract 對不上，5xx 是自己壞了。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 680 150" role="img" aria-label="Error rates around a deploy. Before the deploy, 4xx sits near 1 percent and 5xx near 0.1 percent. Right after a deploy that renamed a field, 4xx jumps to 12 percent while 5xx stays flat: old clients are sending the old field name. That pattern points at a breaking change, not a server crash.">
+        <line x1="40" y1="120" x2="640" y2="120" stroke="var(--ink)" stroke-width="2"/>
+        <line x1="300" y1="20" x2="300" y2="130" stroke="var(--ink)" stroke-dasharray="4 3"/><text x="300" y="144" text-anchor="middle" font-size="9">deploy：改了欄位名</text>
+        <path d="M 40 110 L 300 110 L 320 40 L 640 42" fill="none" stroke="var(--wrong)" stroke-width="2.5"/><text x="330" y="34" font-size="9" fill="var(--wrong)">4xx 衝到 12%：舊 client 送舊欄位</text>
+        <path d="M 40 117 L 640 117" fill="none" stroke="var(--ok)" stroke-width="2"/><text x="560" y="112" font-size="9">5xx 沒動</text>
+      </svg>
+    </div>
+    <div class="panels">
+      <div class="panel"><h3>A · breaking change 上線</h3><p>見上圖。roll back，再開 <code>/v2/</code>。CI 加 breaking change 檢查。</p></div>
+      <div class="panel"><h3>B · 重試變重複單</h3><p>client timeout 後重送 POST，沒有 Idempotency-Key 就是兩張單。</p></div>
+      <div class="panel"><h3>C · 深頁變慢</h3><p>某支列表 API 的 P99 隨頁數變高 = 還在用 offset。改 cursor。</p></div>
+      <div class="panel"><h3>D · N+1</h3><p>GraphQL 一個 query 打出幾百個 DB 查詢。看 DB QPS 和 API QPS 的比例。</p></div>
+    </div>
+    <div class="scroll">
+      <table>
+        <tr><th>看什麼（per endpoint）</th><th>告警</th></tr>
+        <tr><td>P99 latency</td><td>&gt; 200 ms 持續 5 分鐘</td></tr>
+        <tr><td>4xx rate</td><td>&gt; 5%：contract 可能對不上</td></tr>
+        <tr><td>5xx rate</td><td>&gt; 1%：server 自己壞了</td></tr>
+        <tr><td>Idempotency-Key 命中率</td><td>突增 = client 在大量重試（retry storm）</td></tr>
+      </table>
+    </div>
+    <p>第一個指令（同一個 key 送兩次，兩次應該拿到同一個 order_id）：</p>
+    <pre>curl -s -X POST https://api.example.com/v1/orders -H 'Authorization: Bearer '"$TOKEN" -H 'Idempotency-Key: 7f3c9a2e-1b4d-4c8e-9f00-2a6b5d1e8c33' -H 'Content-Type: application/json' -d '{"restaurant_id":"r1","items":[{"item_id":"i9","quantity":2}]}'</pre>
+    <p class="sub">記住層次：metric 是原始值（142 ms）→ SLI 是量什麼（P99 latency）→ SLO 是目標（P99 &lt; 200 ms）→ dashboard 是把它畫出來。</p>
+  </section>
+
+  <section id="l7">
+    <h2><span class="badge">L7</span>面試<span class="time">讀 3 分鐘</span></h2>
+    <p class="lead">題目：「設計外送 App 的 API：找餐廳、看菜單、下單、追蹤訂單。」</p>
+    <p>先自己講：用哪種 style、主要 endpoint、分頁用哪種、下單的 body 放什麼、按兩次怎麼辦。再打開。</p>
+    <details>
+      <summary>L4 vs L6 對照</summary>
+      <div>
+        <div class="wrong"><b>L4</b>「<code>POST /createOrder</code>，body 放 user_id、items、total_price，用 offset 分頁。」<br>問題：動詞在 URL；client 能改價格和身分；餐廳一直新增，offset 會跳位；沒處理重複下單。</div>
+        <div class="fix"><b>L6</b> 多了四件事：</div>
+        <ol>
+          <li>對外 REST（可 cache），內部 gRPC：<code>GET /v1/restaurants</code>、<code>GET /v1/restaurants/{restaurant_id}/menu</code>、<code>POST /v1/orders</code>、<code>GET /v1/orders/{order_id}</code>。</li>
+          <li>餐廳列表用 cursor：資料一直在加，量也大。</li>
+          <li>body 只放 restaurant_id 和 items；價格 server 算，user_id 從 token 拿。</li>
+          <li>Deep dive 下單：Idempotency-Key + pending / processing / completed，crash 後從沒做完的步驟接著做。監控 per-endpoint P99、4xx / 5xx、key 命中率。</li>
+        </ol>
+        <p class="en">"For the client-facing API I'd use REST, since it's simple and GET responses can be cached. Internally, services talk gRPC. The core endpoints are GET restaurants, GET a restaurant's menu, POST orders, and GET an order by ID. The restaurant list uses cursor pagination, because new restaurants keep getting added and offsets would skip or repeat items. The order body only carries the restaurant ID and the items with quantities. The server computes the price from the database and takes the user ID from the auth token, since anything in the body can be tampered with. The part I'd go deep on is duplicate orders. The client sends an idempotency key, and the server tracks it through pending, processing, and completed. A retry with the same key gets the stored response, and if we crashed halfway, we resume from the step that didn't finish."</p>
+      </div>
+    </details>
+  </section>
+
+  <section id="trail">
+    <h2><span class="badge">錯題</span>這次的釐清<span class="time">讀 2 分鐘</span></h2>
+    <div class="wrong"><b>我錯在這</b>✗ price 和 user_id 放 body 讓 client 傳<br>✓ 價格 server 從 DB 算，user_id 從 token 取<br>→ 為什麼搞混：沒想過 client 可以竄改 request。L3 那張圖就是攻擊者看到的畫面。</div>
+    <div class="wrong"><b>我錯在這</b>✗ Versioning：「修改不需要新版本」<br>✓ 改名、刪除欄位是 breaking change，要開新版本<br>→ 為什麼搞混：把「修改」和「新增」混成一類。</div>
+    <div class="wrong"><b>我錯在這</b>✗ idempotency 紀錄只有「有 / 沒有」<br>✓ 要有 pending → processing → completed，crash 後才能 resume<br>→ 為什麼搞混：只想到擋重複，沒想到做到一半掛掉。</div>
+    <div class="wrong"><b>我錯在這</b>✗ 分頁講成 "offline"，cursor 想不起名字；把 SLI 當成 metric 本身<br>✓ Offset（偏移量）和 Cursor（游標）。metric 是數值，SLI 是「量什麼」<br>→ 為什麼搞混：理解了但名詞沒綁上。</div>
+  </section>
+
+  <div class="next">
+    <b>下一步（2 分鐘）</b>
+    <p>不看這頁，畫出 idempotency 紀錄的四個狀態，標出「第二次 request 進來時」每個狀態各該怎麼回。</p>
+  </div>
+
+</main>
