@@ -1,781 +1,349 @@
-<!DOCTYPE html>
-<html lang="zh-Hant">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Consistent Hashing — Day 15 · The Ring</title>
+<title>Consistent Hashing</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC:wght@400;700&family=IBM+Plex+Mono:wght@400;600&display=swap">
 <style>
-  :root{
-    --bg:#070609; --bg2:#0b0a10; --panel:#121017; --panel-2:#17141f; --panel-3:#1d1928;
-    --line:rgba(255,255,255,.07); --line-hi:rgba(255,255,255,.15);
-    --ink:#eee9df; --soft:#aaa39a; --muted:#6f685f; --dim:#403a35;
-    --gold:#f4c462; --gold-2:#ffd98a; --key:#6cc6ff;
-    --hit:#f4c462; --miss:#6f685f;
-    /* augmentation tokens (names kept for .aug-- + .chart reuse) */
-    --verify:#7bd88f; --sign:#f4c462; --danger:#ff7a8a;
-    --aug:#b89cff; --intv:#6cc6ff; --war:#ff7a8a; --link:#9bb7ff;
-    --display:"Didot","Bodoni 72","Playfair Display",Georgia,"PingFang TC",serif;
-    --body:"Avenir Next","Avenir","Helvetica Neue","PingFang TC",sans-serif;
-    --mono:"SF Mono","SFMono-Regular","JetBrains Mono","Menlo","Monaco",ui-monospace,monospace;
-    --measure:72ch;
+/* Layout: one notebook column on graph paper; teal sd accent band; figures on taped cards, failure cases as comic panels */
+:root {
+  --paper: #F6F8FA;
+  --grid: rgba(90,130,170,.16);
+  --ink: #23313E;
+  --ink-soft: #55677A;
+  --card: #FFFFFF;
+  --accent: #0B7285;
+  --on-accent: #FFFFFF;
+  --tape: color-mix(in srgb, var(--accent) 35%, transparent);
+  --who: #FFE98A;
+  --see: #BDEEF6;
+  --may: #F9CDE0;
+  --wrong: #D2453A;
+  --ok: #2F8F5B;
+  --line: #9DB0C2;
+  --font-hand: "LXGW WenKai TC", "Noto Sans TC", "PingFang TC", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #1A2320; --grid: rgba(200,230,210,.08); --ink: #E6EDE8; --ink-soft: #A9BAB1;
+    --card: #24302C; --accent: #3BC9DB; --on-accent: #10221F; --who: #8A7A2A; --see: #2B6A74; --may: #7A3F57;
+    --wrong: #FF8A7E; --ok: #7FD3A1; --line: #5E7268; color-scheme: dark;
   }
-  *{box-sizing:border-box;margin:0;padding:0}
-  html{scroll-behavior:smooth}
-  body{
-    background:var(--bg); color:var(--ink);
-    font-family:var(--body); font-size:17.5px; line-height:1.62;
-    -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
-    background-image:
-      radial-gradient(circle at 50% 34%, rgba(244,196,98,.10), transparent 40%),
-      repeating-radial-gradient(circle at 50% 34%, transparent 0 39px, rgba(255,255,255,.012) 39px 40px),
-      radial-gradient(1100px 720px at 50% 118%, rgba(108,198,255,.045), transparent 60%),
-      linear-gradient(180deg, #0a0810, #070609 58%, #050406);
-    background-attachment:fixed;
-  }
-  body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.5;
-    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='2'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='.02'/%3E%3C/svg%3E");mix-blend-mode:overlay;}
-  .wrap{position:relative;z-index:1;max-width:900px;margin:0 auto;padding:0 26px 150px}
-
-  header.bar{position:sticky;top:0;z-index:30;margin:0 -26px 0;padding:12px 26px;
-    background:rgba(7,6,9,.86);backdrop-filter:blur(15px) saturate(150%);border-bottom:1px solid var(--line);
-    display:flex;align-items:center;gap:16px;flex-wrap:wrap;}
-  .bar__id{font-family:var(--mono);font-size:12px;letter-spacing:.12em;color:var(--muted);display:flex;align-items:center;gap:9px}
-  .bar__id .dot{width:8px;height:8px;border-radius:50%;background:var(--gold);box-shadow:0 0 11px var(--gold)}
-  .bar__id b{color:var(--gold);font-weight:600}
-  .bar__progress{margin-left:auto;display:flex;align-items:center;gap:11px;font-family:var(--mono);font-size:12px;color:var(--soft)}
-  .meter{width:118px;height:6px;border-radius:2px;background:var(--panel-2);overflow:hidden;border:1px solid var(--line)}
-  .meter i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--dim),var(--gold));transition:width .45s cubic-bezier(.2,.7,.2,1)}
-  .bar__btns{display:flex;gap:7px}
-  button.ctl{font-family:var(--mono);font-size:11px;letter-spacing:.04em;color:var(--soft);background:var(--panel);border:1px solid var(--line);padding:7px 11px;border-radius:6px;cursor:pointer;transition:.16s}
-  button.ctl:hover{color:var(--ink);border-color:var(--gold);background:var(--panel-2)}
-  button.ctl:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
-
-  .hero{margin-top:30px;padding-top:14px;text-align:center}
-  .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.34em;text-transform:uppercase;color:var(--gold);margin-bottom:14px}
-  h1{font-family:var(--display);font-size:clamp(46px,8vw,84px);font-weight:600;line-height:1;letter-spacing:.01em}
-  h1 em{font-style:italic;color:var(--gold)}
-  .sub{margin:18px auto 0;font-size:16px;color:var(--soft);max-width:60ch}
-  .sub b{color:var(--ink);font-weight:600}
-
-  .ringwrap{margin:24px auto 4px;max-width:548px}
-  .ringwrap svg{display:block;width:100%;height:auto;filter:drop-shadow(0 0 22px rgba(244,196,98,.16))}
-  .ring-c{fill:none;stroke:var(--gold);stroke-width:2}
-  .ring-glow{fill:none;stroke:var(--gold);stroke-width:8;opacity:.10}
-  .ring text{font-family:var(--mono);fill:var(--soft);font-size:12px}
-  .ring .ttl{fill:var(--gold);font-family:var(--display);font-size:19px;letter-spacing:.05em}
-  .ring .subt{fill:var(--muted);font-size:11px}
-  .ring .nlab{fill:var(--gold-2);font-size:13px}
-  .ring .klab{fill:var(--key);font-size:12px}
-  .ring .cw{fill:var(--gold);font-size:13px}
-  .ring .ann{fill:var(--soft);font-size:11.5px}
-  .node{fill:var(--gold)} .halo{fill:var(--gold);opacity:.16}
-  .keyd{fill:var(--key)} .keyhalo{fill:var(--key);opacity:.2}
-  .arc{fill:none;stroke:var(--gold);stroke-width:1.6;stroke-dasharray:4 4}
-
-  .face{font-family:var(--mono);font-size:13.5px;color:var(--soft);background:rgba(244,196,98,.045);
-    border:1px solid rgba(244,196,98,.22);border-radius:11px;padding:14px 18px;line-height:1.66;margin:18px auto 0;max-width:70ch;text-align:left}
-  .face b{color:var(--gold-2)}
-
-  .chips{display:flex;flex-wrap:wrap;gap:9px;margin-top:22px;justify-content:center}
-  .chip{font-family:var(--mono);font-size:11.5px;color:var(--soft);border:1px solid var(--line-hi);border-radius:30px;padding:5px 13px;letter-spacing:.03em}
-  .chip.ok{color:var(--gold);border-color:rgba(244,196,98,.4)} .chip.go{color:var(--key);border-color:rgba(108,198,255,.4)}
-
-  .legend{display:flex;flex-wrap:wrap;gap:7px 15px;margin:24px 0 4px;padding:16px 0 2px;border-top:1px dashed var(--line);font-family:var(--mono);font-size:11.5px;color:var(--muted);justify-content:center}
-  .legend span{display:flex;align-items:center;gap:7px} .legend i{width:10px;height:10px;border-radius:3px;display:inline-block}
-
-  section{margin-top:60px}
-  .kick{font-family:var(--mono);font-size:12px;letter-spacing:.06em;color:var(--muted);margin-bottom:13px;display:flex;align-items:center;gap:11px}
-  .kick .n{color:var(--gold);font-weight:600} .kick .ar{color:var(--gold)}
-  .kick::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,var(--line),transparent)}
-  h2{font-family:var(--display);font-size:34px;font-weight:600;letter-spacing:.01em;line-height:1.08}
-  h2 .tag{font-family:var(--mono);font-size:12px;font-weight:400;color:var(--muted);letter-spacing:.02em;margin-left:11px;vertical-align:middle}
-  h3{font-family:var(--display);font-size:23px;font-weight:600;margin:34px 0 12px;color:var(--ink)}
-  h3 .ix{font-family:var(--mono);color:var(--gold);font-size:15px;margin-right:9px}
-  p{max-width:var(--measure);margin:13px 0;color:var(--soft)}
-  p.lead{color:var(--ink);font-size:19px}
-  strong{color:var(--ink);font-weight:700} em.core{font-style:normal;color:var(--gold);font-weight:600}
-
-  .manifest{list-style:none;display:grid;gap:8px;margin-top:6px}
-  .manifest li{display:flex;gap:13px;align-items:baseline;font-family:var(--mono);font-size:14px;color:var(--soft);padding:11px 15px;background:var(--panel);border:1px solid var(--line);border-radius:9px;border-left:2px solid var(--gold)}
-  .manifest li b{color:var(--gold)}
-
-  .recall{margin:24px 0}
-  .recall__q{font-family:var(--display);font-size:22px;font-weight:600;color:var(--ink);line-height:1.34}
-  .recall__q .qn{font-family:var(--mono);font-size:12px;color:var(--gold);font-weight:600;margin-right:10px;letter-spacing:.02em;border:1px solid rgba(244,196,98,.35);border-radius:5px;padding:2px 7px;vertical-align:3px}
-  details.reveal{margin-top:13px;border:1px solid var(--line);border-radius:12px;background:var(--panel);overflow:hidden;transition:border-color .2s}
-  details.reveal[open]{border-color:rgba(244,196,98,.35)}
-  details.reveal>summary{list-style:none;cursor:pointer;padding:13px 18px;display:flex;align-items:center;gap:12px;font-family:var(--mono);font-size:12.5px;letter-spacing:.03em;color:var(--muted);user-select:none;transition:.16s}
-  details.reveal>summary::-webkit-details-marker{display:none}
-  details.reveal>summary:hover{color:var(--gold);background:var(--panel-2)}
-  details.reveal>summary:focus-visible{outline:2px solid var(--gold);outline-offset:-2px}
-  .lock{width:9px;height:9px;border-radius:50%;background:var(--miss);flex:none;box-shadow:0 0 0 4px rgba(111,104,95,.12);transition:.25s}
-  details.reveal[open]>summary .lock{background:var(--gold);box-shadow:0 0 13px var(--gold)}
-  details.reveal>summary .cue::before{content:"↻ 順時針查找 · 想一下，點開定位 · "}
-  details.reveal[open]>summary .cue::before{content:"◉ 落點命中 · "}
-  .reveal__body{padding:5px 20px 21px;border-top:1px solid var(--line);color:var(--soft)}
-  details.reveal[open] .reveal__body{animation:decrypt .5s cubic-bezier(.2,.7,.2,1)}
-  @keyframes decrypt{from{filter:blur(8px);opacity:0;transform:translateY(-4px)}to{filter:blur(0);opacity:1;transform:none}}
-  .reveal__body>:first-child{margin-top:15px}
-  .reveal__body ul{list-style:none;padding:0;margin:0}
-  .reveal__body ul li{margin:8px 0;padding-left:18px;position:relative}
-  .reveal__body ul li::before{content:"▸";position:absolute;left:0;color:var(--gold)}
-
-  table{width:100%;border-collapse:collapse;margin:17px 0;font-size:14.5px;font-family:var(--body)}
-  th,td{text-align:left;padding:10px 13px;border-bottom:1px solid var(--line);vertical-align:top;color:var(--soft)}
-  th{font-family:var(--mono);font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);font-weight:600}
-  tr:last-child td{border-bottom:none} td strong{color:var(--ink)}
-  table.lined td:first-child{color:var(--ink);font-weight:600;width:30%}
-
-  pre{font-family:var(--mono);font-size:13px;line-height:1.72;background:#0b0910;border:1px solid var(--line);border-left:2px solid var(--gold);border-radius:10px;padding:17px 19px;overflow-x:auto;color:#d4cdc0;margin:17px 0}
-  pre .c{color:var(--muted)} pre .g{color:var(--gold-2)} pre .k{color:var(--key)}
-  code{font-family:var(--mono);font-size:.85em;background:var(--panel-2);padding:2px 6px;border-radius:5px;color:var(--gold-2)}
-  p code,td code,li code{color:var(--gold-2)}
-
-  .note{margin:17px 0;padding:15px 17px 15px 19px;border-radius:10px;background:var(--panel);border:1px solid var(--line)}
-  .note.trap{border-left:3px solid var(--danger)} .note.principle{border-left:3px solid var(--gold)}
-  .note .lbl{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;display:block;margin-bottom:7px}
-  .note.trap .lbl{color:var(--danger)} .note.principle .lbl{color:var(--gold)}
-  .note p{margin:6px 0;color:var(--soft)}
-
-  .aug{margin:21px 0;border-radius:13px;background:linear-gradient(180deg,rgba(184,156,255,.06),rgba(184,156,255,.02));border:1px solid rgba(184,156,255,.26);border-left:3px solid var(--aug);overflow:hidden}
-  .aug__tag{display:flex;align-items:center;gap:10px;padding:10px 17px;background:rgba(184,156,255,.09);border-bottom:1px solid rgba(184,156,255,.16);font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--aug)}
-  .aug__tag .badge{margin-left:auto;font-size:10px;color:#c0b0ee;border:1px solid rgba(184,156,255,.34);border-radius:20px;padding:3px 10px;letter-spacing:.05em;text-transform:none}
-  .aug__body{padding:15px 19px 19px}
-  .aug__body h4{font-family:var(--display);font-size:20px;color:var(--ink);margin:0 0 8px;font-weight:600}
-  .aug__body p{color:var(--soft);margin:10px 0;max-width:var(--measure)}
-  .aug__body strong{color:#dad2f0} .aug__body em{font-style:normal;color:var(--aug);font-weight:600}
-  .aug__body ul{margin:10px 0 10px 4px;list-style:none}
-  .aug__body li{color:var(--soft);margin:7px 0;padding-left:19px;position:relative}
-  .aug__body li::before{content:"▸";position:absolute;left:0;color:var(--aug)}
-  .aug--cost{border-left-color:var(--sign);background:linear-gradient(180deg,rgba(244,196,98,.06),rgba(244,196,98,.02));border-color:rgba(244,196,98,.24)}
-  .aug--cost .aug__tag{background:rgba(244,196,98,.1);color:var(--sign);border-bottom-color:rgba(244,196,98,.16)}
-  .aug--cost .aug__body em{color:var(--sign)} .aug--cost .aug__tag .badge{color:#dcc079;border-color:rgba(244,196,98,.34)}
-  .aug--biz{border-left-color:var(--verify);background:linear-gradient(180deg,rgba(123,216,143,.055),rgba(123,216,143,.02));border-color:rgba(123,216,143,.22)}
-  .aug--biz .aug__tag{background:rgba(123,216,143,.1);color:var(--verify);border-bottom-color:rgba(123,216,143,.16)}
-  .aug--biz .aug__body em{color:var(--verify)} .aug--biz .aug__tag .badge{color:#9bd9a8;border-color:rgba(123,216,143,.34)}
-  .aug--intv{border-left-color:var(--intv);background:linear-gradient(180deg,rgba(108,198,255,.06),rgba(108,198,255,.02));border-color:rgba(108,198,255,.24)}
-  .aug--intv .aug__tag{background:rgba(108,198,255,.1);color:var(--intv);border-bottom-color:rgba(108,198,255,.16)}
-  .aug--intv .aug__body em{color:var(--intv)} .aug--intv .aug__tag .badge{color:#9ad2f0;border-color:rgba(108,198,255,.34)}
-  .aug--war{border-left-color:var(--war);background:linear-gradient(180deg,rgba(255,122,138,.06),rgba(255,122,138,.02));border-color:rgba(255,122,138,.24)}
-  .aug--war .aug__tag{background:rgba(255,122,138,.1);color:var(--war);border-bottom-color:rgba(255,122,138,.16)}
-  .aug--war .aug__body em{color:var(--war)} .aug--war .aug__tag .badge{color:#f0a6b0;border-color:rgba(255,122,138,.34)}
-
-  .rubric{margin:8px 0 0;border-top:1px solid var(--line)}
-  .rubric>div{display:grid;grid-template-columns:100px 1fr;gap:14px;padding:10px 0;border-bottom:1px solid var(--line)}
-  .rubric>div:last-child{border-bottom:none}
-  .rubric .k{font-family:var(--mono);font-size:10.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);padding-top:3px}
-  .rubric .v{color:var(--soft);font-size:14.5px;line-height:1.5}
-  .rubric .weak .k{color:var(--danger)} .rubric .strong .k{color:var(--verify)} .rubric .staff .k{color:var(--sign)} .rubric .red .k{color:var(--danger)}
-  .rubric .v b{color:var(--ink)}
-
-  .xlink{margin:13px 0;font-family:var(--mono);font-size:12.5px;color:var(--soft);background:rgba(255,255,255,.022);border:1px dashed rgba(255,255,255,.14);border-radius:8px;padding:9px 13px;line-height:1.6}
-  .xlink b{color:var(--ink);font-weight:600} .xlink .ic{color:var(--gold);margin-right:8px}
-
-  .recall--soc .recall__q{color:#dad2f0}
-  .recall--soc .recall__q .qn{color:var(--aug);border-color:rgba(184,156,255,.4)}
-  .recall--soc details.reveal{border-color:rgba(184,156,255,.24);background:linear-gradient(180deg,rgba(184,156,255,.04),transparent)}
-  .recall--soc details.reveal>summary:hover{color:var(--aug);background:rgba(184,156,255,.06)}
-  .recall--soc details.reveal[open]{border-color:rgba(184,156,255,.4)}
-  .recall--soc details.reveal[open]>summary .lock{background:var(--aug);box-shadow:0 0 13px var(--aug)}
-  .recall--soc .reveal__body ul li::before{color:var(--aug)}
-  .socbadge{display:inline-block;font-family:var(--mono);font-size:10px;letter-spacing:.04em;color:#c0b0ee;border:1px solid rgba(184,156,255,.34);border-radius:20px;padding:2px 9px;margin-left:9px;vertical-align:2px}
-
-  .chart{margin:15px 0 6px;background:#0b0910;border:1px solid var(--line);border-radius:11px;padding:15px 13px 11px}
-  .chart svg{display:block;width:100%;height:auto}
-  .chart figcaption{font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:9px;text-align:center;line-height:1.55}
-  .chart .axis{stroke:var(--dim);stroke-width:1} .chart .grid{stroke:rgba(255,255,255,.05);stroke-width:1}
-  .chart text{font-family:var(--mono);fill:var(--muted);font-size:11px}
-  .chart .lbl{fill:var(--soft);font-size:12px} .chart .ttl{fill:var(--ink);font-size:13px;font-family:var(--display)}
-
-  .mistake{margin:13px 0;border:1px solid var(--line);border-radius:11px;overflow:hidden}
-  .mistake__bad{padding:13px 17px;background:rgba(255,122,138,.07);border-left:3px solid var(--danger)}
-  .mistake__bad .lbl{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--danger);display:block;margin-bottom:5px}
-  .mistake details{border-top:1px solid var(--line)}
-  .mistake summary{list-style:none;cursor:pointer;padding:12px 17px;font-family:var(--mono);font-size:12px;color:var(--muted);display:flex;gap:11px;align-items:center;transition:.16s}
-  .mistake summary::-webkit-details-marker{display:none}
-  .mistake summary:hover{color:var(--gold);background:var(--panel-2)}
-  .mistake summary:focus-visible{outline:2px solid var(--gold);outline-offset:-2px}
-  .mistake__good{padding:4px 17px 15px;border-top:1px solid var(--line);border-left:3px solid var(--gold)}
-  .mistake details[open] .mistake__good{animation:decrypt .45s}
-  .mistake__good .lbl{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);display:block;margin:11px 0 5px}
-
-  .vgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(218px,1fr));gap:13px;margin-top:8px}
-  .vcard{display:block;width:100%;background:none;border:none;padding:0;cursor:pointer;perspective:1100px;font:inherit;text-align:left}
-  .vcard__in{display:block;position:relative;height:104px;width:100%;transition:transform .55s cubic-bezier(.3,.7,.2,1);transform-style:preserve-3d}
-  .vcard[aria-pressed="true"] .vcard__in{transform:rotateY(180deg)}
-  .vface{position:absolute;inset:0;backface-visibility:hidden;display:flex;flex-direction:column;justify-content:center;gap:7px;padding:15px 17px;border-radius:11px;border:1px solid var(--line);overflow:hidden}
-  .vface .tick{font-family:var(--mono);font-size:10px;letter-spacing:.13em;text-transform:uppercase;color:var(--muted)}
-  .vface.zh{background:var(--panel)} .vface.zh .tick{color:var(--gold)}
-  .vface.zh .term{font-family:var(--display);font-size:21px;color:var(--ink);font-weight:600}
-  .vface.en{background:var(--panel-2);transform:rotateY(180deg);border-color:rgba(244,196,98,.3)} .vface.en .tick{color:var(--gold)}
-  .vface.en .term{font-family:var(--mono);font-size:15px;color:var(--gold-2);line-height:1.4}
-  .vcard:focus-visible{outline:2px solid var(--gold);outline-offset:3px;border-radius:12px}
-
-  footer{margin-top:84px;padding-top:24px;border-top:1px solid var(--line);font-family:var(--mono);font-size:11.5px;color:var(--dim);line-height:1.85}
-  footer b{color:var(--muted)} footer code{background:none;color:var(--muted);font-size:1em;padding:0}
-  a{color:var(--link);text-decoration:none;border-bottom:1px solid rgba(155,183,255,.3)} a:hover{border-color:var(--link)}
-
-  .anim{opacity:0;animation:rise .7s cubic-bezier(.2,.7,.2,1) forwards}
-  @keyframes rise{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
-  .d1{animation-delay:.05s} .d2{animation-delay:.2s} .d3{animation-delay:.35s}
-
-  @media (max-width:580px){
-    body{font-size:16px} .wrap{padding:0 16px 110px}
-    header.bar{margin:0 -16px} .bar__progress{width:100%;margin:5px 0 0;order:3}
-    h1{font-size:48px} .rubric>div{grid-template-columns:1fr;gap:3px}
-  }
-  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;scroll-behavior:auto}.anim{opacity:1}.vcard__in{transition:none}}
+}
+:root[data-theme="dark"] {
+  --paper: #1A2320; --grid: rgba(200,230,210,.08); --ink: #E6EDE8; --ink-soft: #A9BAB1;
+  --card: #24302C; --accent: #3BC9DB; --on-accent: #10221F; --who: #8A7A2A; --see: #2B6A74; --may: #7A3F57;
+  --wrong: #FF8A7E; --ok: #7FD3A1; --line: #5E7268; color-scheme: dark;
+}
+body {
+  background-color: var(--paper);
+  background-image: linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 22px 22px;
+  color: var(--ink);
+  font-family: var(--font-hand);
+  font-size: 17px;
+  line-height: 1.75;
+}
+.band { background: var(--accent); color: var(--on-accent); padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 22px 18px; }
+.band > div { max-width: 760px; margin: 0 auto; display: grid; gap: 8px; }
+.band a { color: inherit; }
+.page { max-width: 760px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 28px 64px; display: grid; gap: 36px; }
+h1, h2, h3 { text-wrap: balance; line-height: 1.3; margin: 0; }
+h1 { font-size: 2.1rem; }
+h2 { font-size: 1.4rem; display: flex; flex-wrap: wrap; align-items: baseline; gap: 10px; }
+h2 .badge { font-family: var(--font-mono); font-size: .78rem; background: var(--accent); color: var(--on-accent); padding: 1px 8px; border-radius: 3px; }
+h2 .time { font-family: var(--font-mono); font-size: .74rem; color: var(--ink-soft); letter-spacing: .04em; }
+p { margin: 0; }
+section { display: grid; gap: 14px; min-width: 0; }
+.sub { font-size: .95rem; opacity: .9; }
+.lead { font-size: 1.12rem; font-weight: 700; }
+.progress { display: flex; flex-wrap: wrap; gap: 6px 12px; font-family: var(--font-mono); font-size: .8rem; }
+.progress a { color: inherit; text-decoration: none; }
+mark { background: linear-gradient(transparent 52%, var(--who) 52%); color: inherit; padding: 0 2px; }
+mark.see { background: linear-gradient(transparent 52%, var(--see) 52%); }
+mark.may { background: linear-gradient(transparent 52%, var(--may) 52%); }
+code { font-family: var(--font-mono); font-size: .86em; background: color-mix(in srgb, var(--line) 22%, transparent); padding: 1px 5px; border-radius: 3px; }
+.card { position: relative; background: var(--card); padding: 22px 16px 14px; box-shadow: 0 1px 3px rgba(0,0,0,.12); min-width: 0; }
+.card::before { content: ""; position: absolute; top: -9px; left: 50%; width: 92px; height: 20px; transform: translateX(-50%) rotate(-2deg); background: var(--tape); }
+.scroll { overflow-x: auto; }
+svg.fig { display: block; min-width: 600px; width: 100%; height: auto; }
+svg text { font-family: var(--font-mono); fill: var(--ink); }
+svg .hand { font-family: var(--font-hand); }
+.rule { border-left: 4px solid var(--accent); padding: 6px 12px; font-size: 1.05rem; }
+.wrong { border-left: 4px solid var(--wrong); padding: 4px 12px; display: grid; gap: 2px; }
+.wrong b { color: var(--wrong); font-size: .85rem; letter-spacing: .05em; }
+.fix { border-left: 4px solid var(--ok); padding: 4px 12px; }
+.panels { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 14px; }
+.panel { border: 2px solid var(--ink); background: var(--card); padding: 10px; display: grid; gap: 6px; min-width: 0; align-content: start; }
+.panel h3 { font-size: 1rem; font-family: var(--font-mono); }
+.panel p { font-size: .92rem; }
+.panel svg { width: 100%; height: auto; display: block; }
+@media (max-width: 560px) { .panels { grid-template-columns: 1fr; } }
+table { border-collapse: collapse; width: 100%; font-size: .95rem; font-variant-numeric: tabular-nums; }
+th, td { border-bottom: 1px dashed var(--line); padding: 8px 6px; text-align: left; vertical-align: top; }
+th { font-family: var(--font-mono); font-size: .78rem; letter-spacing: .05em; color: var(--ink-soft); font-weight: 600; }
+ol, ul { margin: 0; padding-left: 1.3em; display: grid; gap: 6px; }
+details { background: var(--card); border: 2px dashed var(--line); padding: 10px 14px; }
+details[open] { border-style: solid; }
+details summary { cursor: pointer; font-weight: 700; }
+details > div { display: grid; gap: 10px; margin-top: 10px; }
+.two { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 14px; }
+@media (max-width: 560px) { .two { grid-template-columns: 1fr; } }
+.en { font-family: var(--font-mono); font-size: .88rem; color: var(--ink-soft); }
+pre { margin: 0; font-family: var(--font-mono); font-size: .82rem; line-height: 1.5; background: var(--card); border: 1px solid var(--line); padding: 10px 12px; overflow-x: auto; }
+.next { border: 3px solid var(--accent); background: var(--card); padding: 14px 16px; display: grid; gap: 6px; }
+a { color: var(--accent); text-underline-offset: 3px; }
+a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 </style>
-</head>
-<body>
-<div class="wrap">
 
-  <header class="bar">
-    <span class="bar__id"><span class="dot"></span>SD&nbsp;·&nbsp;<b>DAY 15</b>&nbsp;·&nbsp;THE RING</span>
-    <div class="bar__progress">
-      <span id="pcount">定位 0 / 0</span>
-      <span class="meter"><i id="pbar"></i></span>
-    </div>
-    <div class="bar__btns">
-      <button class="ctl" id="revealAll">全部定位</button>
-      <button class="ctl" id="resetAll">重置 ring</button>
-    </div>
-  </header>
+<header class="band">
+  <div>
+    <p class="sub">sd 課程 · P2 分散式核心 · Day 15-16 · S22-S23 教學，S40 複測過</p>
+    <h1>Consistent Hashing</h1>
+    <p>讀完這頁你能：算出 <code>hash % N</code> 加一台會搬多少 key，畫出 ring 上加一台只影響哪一段，分清「ring 解搬遷量、vnode 解均勻」兩個軸，並說出一台掛掉之後流量往哪裡去。</p>
+    <nav class="progress" aria-label="layers"><a href="#l0">L0 ✓</a><a href="#l1">L1 ✓</a><a href="#l2">L2 ✓</a><a href="#l3">L3 ✓</a><a href="#l4">L4 ✓</a><a href="#l5">L5 ✓</a><a href="#l6">L6 ✓</a><a href="#l7">L7 ✓</a><a href="#trail">錯題</a></nav>
+  </div>
+</header>
 
-  <div class="hero anim d1">
-    <div class="eyebrow">Day 15 · Session 22-23 · Consistent Hashing</div>
-    <h1>The <em>Ring</em></h1>
-    <p class="sub">把 server 和 key 都 hash 到同一個<b>環</b>上，每個 key 由「順時針第一台 server」負責 — 加減一台機器只搬<b>~1/N</b> 的 key，不是整批重洗。</p>
+<main class="page">
 
-    <div class="ringwrap">
-      <svg class="ring" viewBox="0 0 600 470" role="img" aria-label="一致性雜湊環：server 的虛擬節點散布環上，key 順時針找到負責的 server">
-        <circle class="ring-glow" cx="300" cy="230" r="148"/>
-        <circle class="ring-c" cx="300" cy="230" r="148"/>
-        <!-- nodes (vnodes) -->
-        <circle class="halo" cx="300" cy="82" r="11"/><circle class="node" cx="300" cy="82" r="5"/>
-        <text class="nlab" x="300" y="66" text-anchor="middle">A·0</text>
-        <circle class="halo" cx="428" cy="156" r="11"/><circle class="node" cx="428" cy="156" r="5"/>
-        <text class="nlab" x="446" y="150" text-anchor="start">B·0</text>
-        <circle class="halo" cx="434" cy="293" r="11"/><circle class="node" cx="434" cy="293" r="5"/>
-        <text class="nlab" x="450" y="298" text-anchor="start">A·1</text>
-        <circle class="halo" cx="313" cy="377" r="11"/><circle class="node" cx="313" cy="377" r="5"/>
-        <text class="nlab" x="322" y="397" text-anchor="start">C·0</text>
-        <circle class="halo" cx="172" cy="304" r="11"/><circle class="node" cx="172" cy="304" r="5"/>
-        <text class="nlab" x="156" y="309" text-anchor="end">B·1</text>
-        <circle class="halo" cx="166" cy="168" r="11"/><circle class="node" cx="166" cy="168" r="5"/>
-        <text class="nlab" x="150" y="162" text-anchor="end">C·1</text>
-        <!-- key + clockwise lookup to next node (C·1) -->
-        <circle class="keyhalo" cx="153" cy="217" r="11"/><circle class="keyd" cx="153" cy="217" r="5"/>
-        <text class="klab" x="140" y="221" text-anchor="end">key</text>
-        <path class="arc" d="M159 210 A 148 148 0 0 1 166 168"/>
-        <polygon points="166,168 159,176 171,177" fill="var(--gold)"/>
-        <!-- center -->
-        <text class="ttl" x="300" y="222" text-anchor="middle">HASH RING</text>
-        <text class="subt" x="300" y="244" text-anchor="middle">0 → 2³² → 0</text>
-        <text class="cw" x="300" y="288" text-anchor="middle">↻ clockwise</text>
-        <text class="ann" x="300" y="442" text-anchor="middle">key 順時針第一台 = C 負責　·　每台 server 撒 ~150 個 vnode</text>
+  <p class="sub">S40 判定：失敗時間線和 ring / vnode 兩個軸都過了。vnode 背後的統計數學已 park（面試不考）。這頁是七層的完整版，取代舊版頁面。</p>
+
+  <section id="l0">
+    <h2><span class="badge">L0</span>一張圖<span class="time">讀 1 分鐘</span></h2>
+    <p class="lead">環狀公車路線：站牌（server）和乘客（key）都在同一圈上。每位乘客往順時針走，上第一個遇到的站。多蓋一個站，只有它前面那一小段的乘客改站。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 680 200" role="img" aria-label="A circular bus route. Three stops A, B, C sit on the circle. Passengers stand on the circle and walk clockwise to the first stop. A new stop D is added between A and B; only the passengers between A and D switch to D, everyone else keeps their stop.">
+        <circle cx="200" cy="100" r="75" fill="none" stroke="var(--ink)" stroke-width="2"/>
+        <g stroke="var(--ink)" stroke-width="1.5"><rect x="230" y="22" width="22" height="22" fill="var(--who)"/><rect x="230" y="156" width="22" height="22" fill="var(--who)"/><rect x="113" y="102" width="22" height="22" fill="var(--who)"/></g>
+        <g font-size="10" text-anchor="middle"><text x="241" y="37">A</text><text x="241" y="171">B</text><text x="124" y="117">C</text></g>
+        <g fill="var(--see)" stroke="var(--ink)"><circle cx="268" cy="62" r="6"/><circle cx="272" cy="135" r="6"/><circle cx="160" cy="165" r="6"/><circle cx="140" cy="55" r="6"/></g>
+        <path d="M 280 70 A 75 75 0 0 1 280 125" fill="none" stroke="var(--accent)" stroke-width="2"/><polygon points="276,125 284,133 286,122" fill="var(--accent)"/>
+        <text x="200" y="196" text-anchor="middle" font-size="10" class="hand">乘客順時針走到第一個站</text>
+        <line x1="360" y1="20" x2="360" y2="180" stroke="var(--line)" stroke-dasharray="4 4"/>
+        <circle cx="520" cy="100" r="75" fill="none" stroke="var(--ink)" stroke-width="2"/>
+        <g stroke="var(--ink)" stroke-width="1.5"><rect x="550" y="22" width="22" height="22" fill="var(--who)"/><rect x="550" y="156" width="22" height="22" fill="var(--who)"/><rect x="433" y="102" width="22" height="22" fill="var(--who)"/><rect x="584" y="88" width="22" height="22" fill="var(--may)"/></g>
+        <g font-size="10" text-anchor="middle"><text x="561" y="37">A</text><text x="561" y="171">B</text><text x="444" y="117">C</text><text x="595" y="103">D</text></g>
+        <g fill="var(--see)" stroke="var(--ink)"><circle cx="592" cy="135" r="6"/><circle cx="480" cy="165" r="6"/><circle cx="460" cy="55" r="6"/></g>
+        <circle cx="588" cy="62" r="6" fill="var(--wrong)" stroke="var(--ink)"/>
+        <text x="620" y="60" font-size="9" fill="var(--wrong)">只有他改站</text>
+        <text x="520" y="196" text-anchor="middle" font-size="10" class="hand">新站 D：其他人完全沒感覺</text>
       </svg>
     </div>
+  </section>
 
-    <div class="face"><b># 面試 one-liner (headline first)</b><br>
-"Consistent hashing maps both keys and nodes onto a ring, so adding or removing a node only remaps about <b>1/N</b> of the keys instead of nearly all — and virtual nodes keep the load evenly spread."</div>
-
-    <div class="chips">
-      <span class="chip ok">🟢 Complete · 概念全收</span>
-      <span class="chip">原始筆記逐字保留</span>
-      <span class="chip go">PoC 折進 Day 17 Distributed Cache</span>
+  <section id="l1">
+    <h2><span class="badge">L1</span>第一性原理<span class="time">讀 3 分鐘</span></h2>
+    <p class="lead">server 數 N 不是常數：會擴容、縮容、故障。把 N 當除數，N 一變，幾乎所有 key 都換主人。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 680 200" role="img" aria-label="Twelve keys numbered 0 to 11. Row one shows key mod 3, row two shows key mod 4. Only keys 0, 1 and 2 get the same server in both rows. The other 9 keys, 75 percent, move when going from 3 to 4 servers.">
+        <text x="20" y="54" font-size="10">key</text><text x="20" y="94" font-size="10">% 3</text><text x="20" y="134" font-size="10">% 4</text>
+        <g font-size="11" text-anchor="middle">
+          <g fill="var(--ok)" stroke="var(--ink)"><rect x="60" y="70" width="46" height="70"/><rect x="106" y="70" width="46" height="70"/><rect x="152" y="70" width="46" height="70"/></g>
+          <g fill="var(--card)" stroke="var(--ink)"><rect x="198" y="70" width="46" height="70"/><rect x="244" y="70" width="46" height="70"/><rect x="290" y="70" width="46" height="70"/><rect x="336" y="70" width="46" height="70"/><rect x="382" y="70" width="46" height="70"/><rect x="428" y="70" width="46" height="70"/><rect x="474" y="70" width="46" height="70"/><rect x="520" y="70" width="46" height="70"/><rect x="566" y="70" width="46" height="70"/></g>
+          <text x="83" y="54">0</text><text x="129" y="54">1</text><text x="175" y="54">2</text><text x="221" y="54">3</text><text x="267" y="54">4</text><text x="313" y="54">5</text><text x="359" y="54">6</text><text x="405" y="54">7</text><text x="451" y="54">8</text><text x="497" y="54">9</text><text x="543" y="54">10</text><text x="589" y="54">11</text>
+          <text x="83" y="94">0</text><text x="129" y="94">1</text><text x="175" y="94">2</text><text x="221" y="94">0</text><text x="267" y="94">1</text><text x="313" y="94">2</text><text x="359" y="94">0</text><text x="405" y="94">1</text><text x="451" y="94">2</text><text x="497" y="94">0</text><text x="543" y="94">1</text><text x="589" y="94">2</text>
+          <text x="83" y="134">0</text><text x="129" y="134">1</text><text x="175" y="134">2</text><text x="221" y="134" fill="var(--wrong)">3</text><text x="267" y="134" fill="var(--wrong)">0</text><text x="313" y="134" fill="var(--wrong)">1</text><text x="359" y="134" fill="var(--wrong)">2</text><text x="405" y="134" fill="var(--wrong)">3</text><text x="451" y="134" fill="var(--wrong)">0</text><text x="497" y="134" fill="var(--wrong)">1</text><text x="543" y="134" fill="var(--wrong)">2</text><text x="589" y="134" fill="var(--wrong)">3</text>
+        </g>
+        <text x="129" y="166" text-anchor="middle" font-size="10" class="hand" fill="var(--ok)">3 個不動（25%）</text>
+        <text x="405" y="166" text-anchor="middle" font-size="10" class="hand" fill="var(--wrong)">9 個搬家（75%）</text>
+        <text x="340" y="192" text-anchor="middle" font-size="10">100 萬個 cache key → 75 萬個同時 miss → DB 被打爆，只能停機</text>
+      </svg>
     </div>
+    <p>問題的根：key 的位置綁在「N 現在是多少」。要一個<mark>位置跟 N 無關</mark>的設計：key 算一次座標就固定，server 也放到同一個座標系上。</p>
+  </section>
 
-    <div class="legend">
-      <span><i style="background:var(--gold)"></i>原始筆記 · 回憶卡</span>
-      <span><i style="background:var(--aug)"></i>🏛 架構師觀點</span>
-      <span><i style="background:var(--intv)"></i>🎯 面試官視角</span>
-      <span><i style="background:var(--war)"></i>💥 真實事故</span>
-      <span><i style="background:var(--sign)"></i>💰 成本拐點 + 圖</span>
-      <span><i style="background:var(--verify)"></i>💼 業務情境</span>
-      <span><i style="background:var(--aug);opacity:.7"></i>❓ 蘇格拉底深掘</span>
-      <span><i style="background:#9aa0b0"></i>🔗 跨主題連結</span>
+  <section id="l2">
+    <h2><span class="badge">L2</span>機制<span class="time">讀 5 分鐘</span></h2>
+    <p class="lead">把 0 到 2³²−1 折成一個環。key 和 server 都 hash 到環上，key 歸順時針第一台 server。加一台只搶走它前面那一段弧，平均搬 K/N 個 key。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 680 230" role="img" aria-label="Before and after rings. Before: servers A at 1 o'clock, B at 5 o'clock, C at 9 o'clock. Key k1 at 2 o'clock belongs to B. After adding D at 3 o'clock, k1 now belongs to D. Keys k2, k3, k4 keep their owners. Only the arc from A to D changes hands, shown in red.">
+        <text x="200" y="20" text-anchor="middle" font-size="11" class="hand">加 D 之前</text><text x="500" y="20" text-anchor="middle" font-size="11" class="hand">加 D 之後</text>
+        <circle cx="200" cy="120" r="90" fill="none" stroke="var(--ink)" stroke-width="2"/>
+        <circle cx="500" cy="120" r="90" fill="none" stroke="var(--ink)" stroke-width="2"/>
+        <path d="M 545 42 A 90 90 0 0 1 590 120" fill="none" stroke="var(--wrong)" stroke-width="5"/>
+        <g stroke="var(--ink)" stroke-width="1.5" fill="var(--who)"><circle cx="245" cy="42" r="10"/><circle cx="245" cy="198" r="10"/><circle cx="111" cy="136" r="10"/><circle cx="545" cy="42" r="10"/><circle cx="545" cy="198" r="10"/><circle cx="411" cy="136" r="10"/></g>
+        <circle cx="590" cy="120" r="10" fill="var(--may)" stroke="var(--ink)" stroke-width="1.5"/>
+        <g font-size="10" text-anchor="middle"><text x="245" y="46">A</text><text x="245" y="202">B</text><text x="111" y="140">C</text><text x="545" y="46">A</text><text x="545" y="202">B</text><text x="411" y="140">C</text><text x="590" y="124">D</text></g>
+        <g fill="var(--see)" stroke="var(--ink)"><rect x="273" y="70" width="10" height="10"/><rect x="273" y="160" width="10" height="10"/><rect x="164" y="200" width="10" height="10"/><rect x="117" y="70" width="10" height="10"/><rect x="417" y="70" width="10" height="10"/><rect x="573" y="160" width="10" height="10"/><rect x="464" y="200" width="10" height="10"/></g>
+        <rect x="573" y="70" width="10" height="10" fill="var(--wrong)" stroke="var(--ink)"/>
+        <g font-size="9"><text x="288" y="79">k1 → B</text><text x="288" y="169">k2 → B</text><text x="140" y="222">k3 → C</text><text x="72" y="70">k4 → A</text><text x="600" y="79" fill="var(--wrong)">k1 → D</text><text x="588" y="169">k2 → B</text><text x="440" y="222">k3 → C</text><text x="372" y="70">k4 → A</text></g>
+        <text x="500" y="128" text-anchor="middle" font-size="9" fill="var(--wrong)">只有 A→D 這段弧換主人</text>
+      </svg>
     </div>
+    <p class="lead">只有 3 台時，3 個點在 2³² 的空間裡隨機落下，弧長很不平均。vnode：每台放很多個點，樣本數變大，弧長就平均。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 680 190" role="img" aria-label="The ring unrolled into a bar. Top bar, no virtual nodes: A and B land close together, so C owns about 92 percent of the keyspace. Bottom bar, with virtual nodes: each server has many small points, and the bar alternates A, B, C in short segments, so each owns about a third.">
+        <text x="20" y="40" font-size="10">無 vnode</text>
+        <rect x="100" y="24" width="20" height="30" fill="var(--who)" stroke="var(--ink)"/><rect x="120" y="24" width="30" height="30" fill="var(--see)" stroke="var(--ink)"/><rect x="150" y="24" width="500" height="30" fill="var(--may)" stroke="var(--ink)"/>
+        <g font-size="9" text-anchor="middle"><text x="110" y="44">A</text><text x="135" y="44">B</text><text x="400" y="44">C：~92% 的 keyspace</text></g>
+        <text x="400" y="72" text-anchor="middle" font-size="9" fill="var(--wrong)">C 掛了 → 92% 流量瞬間全丟給 A → A 也倒</text>
+        <text x="20" y="120" font-size="10">有 vnode</text>
+        <g stroke="var(--ink)">
+          <rect x="100" y="104" width="46" height="30" fill="var(--who)"/><rect x="146" y="104" width="38" height="30" fill="var(--see)"/><rect x="184" y="104" width="44" height="30" fill="var(--may)"/><rect x="228" y="104" width="36" height="30" fill="var(--see)"/><rect x="264" y="104" width="48" height="30" fill="var(--who)"/><rect x="312" y="104" width="40" height="30" fill="var(--may)"/><rect x="352" y="104" width="42" height="30" fill="var(--who)"/><rect x="394" y="104" width="46" height="30" fill="var(--may)"/><rect x="440" y="104" width="40" height="30" fill="var(--see)"/><rect x="480" y="104" width="44" height="30" fill="var(--who)"/><rect x="524" y="104" width="42" height="30" fill="var(--see)"/><rect x="566" y="104" width="84" height="30" fill="var(--may)"/>
+        </g>
+        <text x="375" y="156" text-anchor="middle" font-size="9">A、B、C 交錯成很多小段，各約 1/3</text>
+        <text x="375" y="178" text-anchor="middle" font-size="10" class="hand">3 個樣本 → 數百個樣本：這是統計問題，不是 hash 問題</text>
+      </svg>
+    </div>
+    <details>
+      <summary>之後再看：lookup 程式碼</summary>
+      <div><pre>func (r *Ring) GetServer(key string) string {
+    pos := hash(key)
+    idx := sort.Search(len(r.nodes), func(i int) bool {
+        return r.nodes[i] &gt;= pos // 第一個 &gt;= pos 的點
+    })
+    if idx == len(r.nodes) {
+        idx = 0 // 走到底就繞回起點：環
+    }
+    return r.nodeMap[r.nodes[idx]] // vnode 位置 → 實體 server
+}</pre><p>sorted slice + binary search = O(log 點數)。<code>nodeMap</code> 把 vnode 和實體 server 解耦，加一台 = 插入 150 個點。</p></div>
+    </details>
+  </section>
+
+  <section id="l3">
+    <h2><span class="badge">L3</span>取捨<span class="time">讀 4 分鐘</span></h2>
+    <p class="lead">兩個軸要分開講：ring 解「搬多少」，vnode 解「分得勻不勻」。只講 ring 不講 vnode，面試官會追問 C 拿 92% 怎麼辦。</p>
+    <div class="scroll">
+      <table>
+        <tr><th>vnode 數量</th><th>賺到</th><th>付出</th></tr>
+        <tr><td>少（每台 1 個）</td><td>routing table 小</td><td>弧長嚴重不均，一台掛了下一台接全部</td></tr>
+        <tr><td>中（每台 16–256）</td><td>夠均勻</td><td>表大一點，加減節點要動很多點</td></tr>
+        <tr><td>極多（每台 10,000）</td><td>均勻度幾乎沒再進步（邊際效益遞減）</td><td>表很大、gossip 同步變重</td></tr>
+      </table>
+    </div>
+    <div class="scroll">
+      <table>
+        <tr><th>切法</th><th>好處</th><th>代價</th></tr>
+        <tr><td>Range（A–M、N–Z）</td><td>範圍查詢只打一台</td><td>某段 key 特別熱就是熱點</td></tr>
+        <tr><td>Hash / consistent hashing</td><td>分布均勻</td><td>範圍查詢要掃所有節點</td></tr>
+      </table>
+    </div>
+    <div class="fix"><b>什麼時候不要用</b>：節點數固定不會變，<code>hash % N</code> 最簡單。consistent hashing 的價值全在 elasticity〔彈性擴縮〕。</div>
+  </section>
+
+  <section id="l4">
+    <h2><span class="badge">L4</span>AWS 怎麼做<span class="time">讀 4 分鐘</span></h2>
+    <p class="lead">AWS 上你很少自己實作環。多數服務用「固定數量的 slot / partition」：key 先對到 slot，slot 再對到節點。加節點時搬的是 slot，不是重算每個 key。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 680 220" role="img" aria-label="ElastiCache cluster mode. A key goes through CRC16 mod 16384 to get a slot number. A slot table maps slots 0 to 5460 to shard 1, 5461 to 10922 to shard 2, and 10923 to 16383 to shard 3. When shard 4 is added, a range of slots moves to it; keys in other slots stay. A client that sends to the wrong shard gets a MOVED reply.">
+        <rect x="20" y="80" width="90" height="44" fill="var(--card)" stroke="var(--ink)"/><text x="65" y="98" text-anchor="middle" font-size="10">key</text><text x="65" y="114" text-anchor="middle" font-size="8">user:42</text>
+        <rect x="140" y="80" width="140" height="44" fill="var(--who)" stroke="var(--ink)" stroke-width="1.5"/><text x="210" y="98" text-anchor="middle" font-size="10">CRC16(key) mod 16384</text><text x="210" y="114" text-anchor="middle" font-size="8">= slot 號碼（固定不變）</text>
+        <g fill="var(--see)" stroke="var(--ink)"><rect x="320" y="30" width="170" height="40"/><rect x="320" y="82" width="170" height="40"/><rect x="320" y="134" width="170" height="40"/></g>
+        <g font-size="9" text-anchor="middle"><text x="405" y="54">slot 0–5460 → shard 1</text><text x="405" y="106">slot 5461–10922 → shard 2</text><text x="405" y="158">slot 10923–16383 → shard 3</text></g>
+        <rect x="530" y="82" width="130" height="92" fill="var(--may)" stroke="var(--ink)" stroke-dasharray="5 3"/><text x="595" y="104" text-anchor="middle" font-size="10">加 shard 4</text><text x="595" y="122" text-anchor="middle" font-size="8">從每個 shard 搬一段 slot</text><text x="595" y="138" text-anchor="middle" font-size="8">其他 slot 的 key 不動</text><text x="595" y="158" text-anchor="middle" font-size="8">（online resharding）</text>
+        <g stroke="var(--ink)"><line x1="110" y1="102" x2="140" y2="102"/><line x1="280" y1="102" x2="320" y2="102"/><line x1="490" y1="50" x2="530" y2="100"/><line x1="490" y1="154" x2="530" y2="150"/></g>
+        <text x="340" y="204" text-anchor="middle" font-size="10" class="hand">同一個想法：key 的位置跟節點數無關，只有「slot → 節點」這張表會變</text>
+      </svg>
+    </div>
+    <div class="scroll">
+      <table>
+        <tr><th>服務</th><th>用在哪</th><th>陷阱</th></tr>
+        <tr><td>ElastiCache cluster mode</td><td>分片 cache</td><td>16384 個 hash slot，不是 ring。client 要支援 cluster 模式，才會處理 resharding 時的 <code>MOVED</code> / <code>ASK</code>，否則一搬 slot 就報錯。</td></tr>
+        <tr><td>ElastiCache Memcached</td><td>簡單 KV cache</td><td>server 不分片，是 client 做 consistent hashing（ketama）。兩個服務的 client hash 設定不同，同一個 key 會打到不同節點，等於全部 miss。</td></tr>
+        <tr><td>DynamoDB</td><td>代管 KV</td><td>partition key 內部被 hash 分到 partition，你看不到。key 種類太少（例如 status）就是 hot partition：每個 partition 約 3,000 RCU / 1,000 WCU。</td></tr>
+        <tr><td>Istio / Envoy on EKS</td><td>sticky routing</td><td>DestinationRule 的 <code>consistentHash</code>（ring hash / Maglev）。pod 擴縮會改環，一部分 user 換 pod，session 不能只放在 pod 記憶體。</td></tr>
+        <tr><td>Cassandra on EC2</td><td>自架寬表</td><td><code>num_tokens</code> 舊版預設 256，4.0 起改 16。已上線的節點不能直接改，要換節點重建。</td></tr>
+      </table>
+    </div>
+    <p class="sub">誰會吵：DBA 選了 low-cardinality 的 partition key，SRE 半夜收到 throttling。design review 會問：「你的 shard key 是什麼？最熱的 key 會落在幾台上？」</p>
+  </section>
+
+  <section id="l5">
+    <h2><span class="badge">L5</span>規模化<span class="time">讀 3 分鐘</span></h2>
+    <p class="lead">每一級都在減少「節點數變動時要搬的量」，最後把搬遷變成背景自動的事。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 680 230" role="img" aria-label="Evolution ladder. Step 1 a single cache node. Step 2 hash mod N on a fixed fleet, fine until you add a node. Step 3 client-side ring with virtual nodes, like ketama for Memcached. Step 4 managed slots or partitions with online resharding and automatic split, like Redis Cluster and DynamoDB.">
+        <rect x="20" y="170" width="150" height="50" fill="var(--card)" stroke="var(--ink)" stroke-width="1.5"/>
+        <text x="30" y="190" font-size="11" class="hand">① 一台 cache</text><text x="30" y="208" font-size="9">記憶體滿就要拆</text>
+        <rect x="180" y="130" width="150" height="90" fill="var(--see)" stroke="var(--ink)" stroke-width="1.5"/>
+        <text x="190" y="150" font-size="11" class="hand">② hash % N</text><text x="190" y="170" font-size="9">固定台數 OK</text><text x="190" y="186" font-size="9">加一台搬 75%</text>
+        <rect x="340" y="80" width="150" height="140" fill="var(--who)" stroke="var(--ink)" stroke-width="1.5"/>
+        <text x="350" y="100" font-size="11" class="hand">③ ring + vnode</text><text x="350" y="120" font-size="9">client 端算（ketama）</text><text x="350" y="136" font-size="9">加一台搬 ~1/N</text>
+        <rect x="500" y="30" width="160" height="190" fill="var(--may)" stroke="var(--ink)" stroke-width="1.5"/>
+        <text x="510" y="50" font-size="11" class="hand">④ 代管 slot</text><text x="510" y="70" font-size="9">Redis Cluster 16384 slot</text><text x="510" y="86" font-size="9">DynamoDB 自動 split</text><text x="510" y="106" font-size="9">搬遷在背景進行</text><text x="510" y="122" font-size="9">client 收 MOVED 自動改路</text>
+        <text x="95" y="160" text-anchor="middle" font-size="9" fill="var(--ink-soft)">換掉：單台上限</text>
+        <text x="255" y="120" text-anchor="middle" font-size="9" fill="var(--ink-soft)">換掉：N 當除數</text>
+        <text x="415" y="70" text-anchor="middle" font-size="9" fill="var(--ink-soft)">換掉：人工搬</text>
+      </svg>
+    </div>
+    <div class="scroll">
+      <table>
+        <tr><th>路線</th><th>例子</th><th>好處</th><th>代價</th></tr>
+        <tr><td>Ring + vnode</td><td>Cassandra、Dynamo 論文、ketama</td><td>完全去中心，任何節點都能算出 owner</td><td>vnode 數要調；均勻度靠機率</td></tr>
+        <tr><td>固定 slot + 對照表</td><td>Redis Cluster、Kafka partition</td><td>搬遷單位清楚（一個 slot），可精準控制</td><td>slot 數一開始就定死，對照表要同步給所有 client</td></tr>
+      </table>
+    </div>
+  </section>
+
+  <section id="l6">
+    <h2><span class="badge">L6</span>故障與 on-call<span class="time">讀 4 分鐘</span></h2>
+    <p class="lead">一台掛掉時，它的弧交給順時針下一台。沒有 vnode，下一台一個人接全部，可能跟著倒，變成連鎖。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 680 220" role="img" aria-label="Failure timeline. At t0 node B dies. Without virtual nodes, all of B's keys go to C, so C's load doubles to 200 percent; at t1 C falls over and its load plus B's goes to A, a cascade. With virtual nodes, B's many small arcs are spread across A and C, each rising to about 150 percent. Either way, B's cache keys miss and the DB gets about one third more traffic until the cache warms.">
+        <text x="20" y="36" font-size="11" class="hand">無 vnode</text>
+        <g fill="var(--card)" stroke="var(--ink)"><rect x="120" y="20" width="100" height="30"/><rect x="250" y="20" width="100" height="30" fill="var(--wrong)" opacity=".7"/><rect x="380" y="20" width="120" height="30" fill="var(--may)"/><rect x="530" y="20" width="130" height="30" fill="var(--wrong)" opacity=".7"/></g>
+        <g font-size="9" text-anchor="middle"><text x="170" y="39">A 100%</text><text x="300" y="39">t0：B 掛</text><text x="440" y="39">C 接全部 = 200%</text><text x="595" y="39">t1：C 也倒 → 連鎖</text></g>
+        <g stroke="var(--ink)"><line x1="350" y1="35" x2="380" y2="35"/><line x1="500" y1="35" x2="530" y2="35"/></g>
+        <text x="20" y="106" font-size="11" class="hand">有 vnode</text>
+        <g fill="var(--card)" stroke="var(--ink)"><rect x="250" y="90" width="100" height="30" fill="var(--wrong)" opacity=".7"/><rect x="380" y="76" width="120" height="26" fill="var(--who)"/><rect x="380" y="108" width="120" height="26" fill="var(--who)"/></g>
+        <g font-size="9" text-anchor="middle"><text x="300" y="109">t0：B 掛</text><text x="440" y="93">A ≈ 150%</text><text x="440" y="125">C ≈ 150%</text></g>
+        <g stroke="var(--ink)"><line x1="350" y1="100" x2="380" y2="89"/><line x1="350" y1="110" x2="380" y2="121"/></g>
+        <text x="530" y="110" font-size="9">B 的很多小段</text><text x="530" y="124" font-size="9">分散給所有人</text>
+        <rect x="120" y="160" width="540" height="44" fill="var(--may)" stroke="var(--ink)"/>
+        <text x="390" y="180" text-anchor="middle" font-size="10">兩種都一樣：B 上的 cache key 全部 miss → DB 多吃約 1/N 的流量，直到 cache 暖回來</text>
+        <text x="390" y="196" text-anchor="middle" font-size="9" fill="var(--ink-soft)">（3 台時是 1/3，所以 DB 要留這個餘裕）</text>
+      </svg>
+    </div>
+    <div class="panels">
+      <div class="panel"><h3>A · 節點掛掉</h3><p>見上圖。要確認剩下的節點各有 50% 以上的餘裕，或 replica 能接手。</p></div>
+      <div class="panel"><h3>B · 分布歪掉</h3><p>vnode 太少或 hash 函式不均，一台的 key 數明顯比別人多。看 per-node key count。</p></div>
+      <div class="panel"><h3>C · 熱 key</h3><p>consistent hashing 保證「key 數平均」，不保證「流量平均」。一個爆紅的 key 永遠落在同一台，要 local cache 或複製熱 key。</p></div>
+      <div class="panel"><h3>D · client 版本不一致</h3><p>新舊 client 的 hash 或 vnode 設定不同，同一個 key 被送到不同節點。部署期間 hit ratio 會掉。</p></div>
+    </div>
+    <div class="scroll">
+      <table>
+        <tr><th>看什麼</th><th>出事長相</th></tr>
+        <tr><td>最熱節點 / 平均（skew）</td><td>&gt; 1.5 倍告警</td></tr>
+        <tr><td>節點變動後的 hit ratio</td><td>掉超過 1/N = 搬的比預期多，查 client 設定</td></tr>
+        <tr><td>per-node CPU / ops</td><td>key 數平均但某台特別高 = 熱 key</td></tr>
+      </table>
+    </div>
+    <p>第一個指令（看 slot 現在分在哪幾個 shard）：</p>
+    <pre>redis-cli -h my-cluster.xxxxxx.clustercfg.cache.amazonaws.com --tls -c CLUSTER SLOTS</pre>
+    <p class="sub">Cassandra 對應的是 <code>nodetool status</code>，看 Owns 欄位每台佔多少 %。</p>
+  </section>
+
+  <section id="l7">
+    <h2><span class="badge">L7</span>面試<span class="time">讀 3 分鐘</span></h2>
+    <p class="lead">題目：「分散式 cache 現在 3 台，用 <code>hash(key) % 3</code> 分片。下個月要擴到 4 台。會發生什麼？你怎麼改？如果之後一台掛了呢？」</p>
+    <p>先自己講：搬多少、為什麼、ring 怎麼解、vnode 解什麼、掛一台時流量去哪。再打開。</p>
+    <details>
+      <summary>L4 vs L6 對照</summary>
+      <div>
+        <div class="wrong"><b>L4</b>「改成 consistent hashing，就不用搬資料。」<br>問題：還是要搬（約 1/N）；沒講 vnode；沒講掛一台時誰接。</div>
+        <div class="fix"><b>L6</b> 多了四件事：</div>
+        <ol>
+          <li>量化：3 → 4 台，<code>% N</code> 讓約 75% 的 key 換主人，cache 等於清空，DB 被打爆。</li>
+          <li>Ring：key 和 server 都上環，加一台只搬它前面那段弧，約 1/N。</li>
+          <li>vnode：3 個點太少會歪，一台可能拿 90%。每台放 100 到 200 個點，掛一台時負載分散給所有人，不會連鎖。</li>
+          <li>實務：ElastiCache cluster mode 用 16384 slot 做同一件事。監控 per-node skew 和節點變動後的 hit ratio；熱 key 另外處理。</li>
+        </ol>
+        <p class="en">"With hash mod N, going from three to four nodes remaps about 75 percent of keys. For a cache that's basically a full flush, and the DB takes the hit. Consistent hashing puts keys and nodes on the same ring. Adding a node only takes over the arc right before it, so about one in N keys move. With only three points on the ring, the arcs can be very uneven, and one node might own 90 percent. So each physical node gets a hundred or more virtual nodes. That evens out the load, and when a node dies its keys spread across everyone instead of piling onto one neighbor. On AWS, ElastiCache cluster mode does the same thing with 16,384 hash slots. I'd monitor per-node skew and the hit ratio after any membership change."</p>
+      </div>
+    </details>
+  </section>
+
+  <section id="trail">
+    <h2><span class="badge">錯題</span>這次的釐清<span class="time">讀 2 分鐘</span></h2>
+    <div class="wrong"><b>容易混</b>✗ consistent hashing 讓負載變平均<br>✓ ring 解的是「加減節點搬多少」。平均靠的是 vnode。熱 key 兩個都解不了<br>→ 為什麼搞混：三個問題都叫「分布」，其實是三個軸。S40 的「ring / vnode 兩軸」就是在拆這個。</div>
+    <div class="fix"><b>做對的</b>：看到 3 個 server 的 ring，你自己說出「樣本太少 → variance 大」。這個視角在 Bloom、HyperLogLog、sharding 都會再出現。</div>
+    <div class="fix"><b>舊筆記更正</b>：「Cassandra 預設 256 tokens」是 3.x 的數字。4.0 起預設 16。</div>
+  </section>
+
+  <div class="next">
+    <b>下一步（2 分鐘）</b>
+    <p>不看這頁，寫出 key 0 到 11 的 <code>% 3</code> 和 <code>% 4</code>，數出有幾個不用搬。</p>
   </div>
 
-  <section class="anim d3">
-    <div class="kick"><span class="ar">▸</span><span class="n">00</span> Coverage</div>
-    <h2>這場做完了什麼</h2>
-    <ul class="manifest">
-      <li><b>✓ First Principles</b>&nbsp;&nbsp;<code>hash % N</code> 為什麼一加機器就 ~75% 搬家</li>
-      <li><b>✓ Ring Model</b>&nbsp;&nbsp;key 位置從「動態」變「固定座標」</li>
-      <li><b>✓ Virtual Nodes</b>&nbsp;&nbsp;3 點 → 450 點，variance 崩塌</li>
-      <li><b>✓ Lookup Code</b>&nbsp;&nbsp;sorted slice + binary search，O(log N)</li>
-      <li><b>✓ vnodes trade-off</b>&nbsp;&nbsp;150 vs 10000 + Cassandra 256 錨點</li>
-      <li><b>✓ When to use</b>&nbsp;&nbsp;觸發條件 + 何時 NOT 用（固定 N → 直接 % N）</li>
-    </ul>
-  </section>
-
-  <section>
-    <div class="kick"><span class="ar">▸</span><span class="n">01</span> First Principles</div>
-    <h2>為什麼 <span style="font-family:var(--mono);font-size:.7em;color:var(--gold-2)">hash % N</span> 會崩 <span class="tag">先講，再核對</span></h2>
-    <p class="lead">分散式系統的伺服器數量 N 不是常數（擴容、縮容、節點故障）。任何依賴 N 當除數的設計，N 一變就崩。</p>
-
-    <div class="recall">
-      <div class="recall__q"><span class="qn">推導</span>N 從 3 變 4，為什麼大約 75% 的 key 要搬家？</div>
-      <details class="reveal"><summary><span class="lock"></span><span class="cue"></span></summary>
-        <div class="reveal__body">
-          <table>
-            <tr><th>狀況</th><th>N</th><th>公式</th><th>結果</th></tr>
-            <tr><td>Day 1</td><td>3</td><td><code>hash(k) % 3</code></td><td>key 落在 server 0/1/2</td></tr>
-            <tr><td>Day 2 加一台</td><td>4</td><td><code>hash(k) % 4</code></td><td>key 落在 server 0/1/2/3</td></tr>
-          </table>
-          <ul>
-            <li>只有當 <code>hash(k) % 3 == hash(k) % 4</code> 才不動 → 大約 1/4 的 key</li>
-            <li><strong>約 75% 的 key 需要搬家</strong></li>
-            <li>100 萬筆 = 75 萬筆同時搬移 → 網路爆炸 / 寫入失敗 / 讀打錯節點 → <strong>只能停機</strong></li>
-          </ul>
-          <p><strong>結論：</strong><code>% N</code> 把「key 的位置」綁在「N 的當前值」上。我們需要一個「key 位置與 N 無關」的設計。</p>
-        </div>
-      </details>
-    </div>
-
-    <div class="recall recall--soc">
-      <div class="recall__q"><span class="qn">深掘</span>為什麼剛好「約 75%」不動的是 25%？N 從 3→4 時，哪些 key 留在原地？<span class="socbadge">蘇格拉底深掘 · 非原始筆記</span></div>
-      <details class="reveal"><summary><span class="lock"></span><span class="cue"></span></summary>
-        <div class="reveal__body">
-          <p>留下不動的，是那些剛好滿足 <code>hash(k) % 3 == hash(k) % 4</code> 的 key。把 hash 值想成在數線上，<code>%3</code> 和 <code>%4</code> 的循環只有在<strong>兩個週期同時對齊</strong>時才給同一個答案。直覺估計：新除數是 4，命中同餘的比例大約是 1/4，所以約 <strong>25% 不動、75% 要搬</strong>。</p>
-          <p>關鍵不是精確的百分比，是這個結構性事實：<em>只要 N 出現在除數，改 N 就會讓「絕大多數」key 重新落點</em>。consistent hashing 的整個價值，就是把 N 從決定 key 位置的公式裡拿掉。</p>
-        </div>
-      </details>
-    </div>
-  </section>
-
-  <section>
-    <div class="kick"><span class="ar">▸</span><span class="n">02</span> Ring Model</div>
-    <h2>環狀模型 <span class="tag">key 位置變固定座標</span></h2>
-
-    <div class="recall">
-      <div class="recall__q"><span class="qn">核心</span>Ring 的核心轉換是什麼？為什麼它 reshard-safe？</div>
-      <details class="reveal"><summary><span class="lock"></span><span class="cue"></span></summary>
-        <div class="reveal__body">
-          <ul>
-            <li>把 hash space 折成一個環：<code>0 ──── 2^32-1 ──── 0</code></li>
-            <li><strong>Server 也被 hash 到環上</strong>（不只是 key）</li>
-            <li>每個 key 由「順時針方向第一台 server」負責</li>
-          </ul>
-          <table>
-            <tr><th>比較</th><th>hash % N</th><th>Ring</th></tr>
-            <tr><td>Key 的位置</td><td><strong>動態</strong>（隨 N 浮動）</td><td><strong>固定座標</strong>（一次算好就不變）</td></tr>
-            <tr><td>加 1 台 server</td><td>所有 key 重算（~75% 搬家）</td><td>只有「新 server 擠進那段弧」的 key 受影響</td></tr>
-            <tr><td>平均搬遷量</td><td>O(K)</td><td><strong>O(K/N)</strong></td></tr>
-          </table>
-        </div>
-      </details>
-    </div>
-
-    <div class="recall recall--soc">
-      <div class="recall__q"><span class="qn">深掘</span>Ring 說 key 位置「固定」。但加機器時 key 的「歸屬 server」明明還是變了啊。到底什麼固定了、什麼變了？<span class="socbadge">蘇格拉底深掘 · 非原始筆記</span></div>
-      <details class="reveal"><summary><span class="lock"></span><span class="cue"></span></summary>
-        <div class="reveal__body">
-          <p><strong>固定的是 key 的「座標」</strong>（<code>hash(key)</code> 在環上的角度），它跟有幾台 server 完全無關，一次算好永遠不變。<strong>會變的是「誰負責這個座標」</strong>，而且只在新 server 剛好插進這個 key 和它原本 owner 之間那一小段弧時才變。</p>
-          <p>對比 <code>% N</code>：那裡 key 連「座標」都是 <code>hash%N</code> 算出來的，N 一變座標就變，所以全體重算。Ring 把「座標」和「歸屬」<em>解耦</em>：座標恆定，歸屬只在局部弧上重新指派。這個「位置與 N 解耦」跟 Day 27 用 KGS 把短碼跟 server 數脫鉤是同一種思路。</p>
-        </div>
-      </details>
-    </div>
-  </section>
-
-  <section>
-    <div class="kick"><span class="ar">▸</span><span class="n">03</span> Virtual Nodes</div>
-    <h2>純 Ring 的陷阱與解法 <span class="tag">統計，不是 hash</span></h2>
-
-    <div class="recall">
-      <div class="recall__q"><span class="qn">陷阱</span>純 Ring 用 3 台 server 有什麼隱藏問題？根本原因？</div>
-      <details class="reveal"><summary><span class="lock"></span><span class="cue"></span></summary>
-        <div class="reveal__body">
-          <p>3 台 server 隨機 hash 到環上，位置可能很不均勻：</p>
-<pre>A @  100,000,000
-B @  150,000,000   <span class="c">← A 和 B 很近</span>
-C @ 3,000,000,000  <span class="c">← C 離很遠</span></pre>
-          <p>Server C 要負責「從 B 到 A」這段巨大的弧（~92% 的 keyspace）→ <strong>負載嚴重失衡</strong>。C 死掉，92% 流量瞬間轉到 A → cascade failure。</p>
-          <p><strong>根本原因：</strong>樣本太少。3 個點分佈在 2^32 空間，統計學救不了你。</p>
-        </div>
-      </details>
-    </div>
-
-    <div class="recall">
-      <div class="recall__q"><span class="qn">解法</span>Virtual Nodes 怎麼做？為什麼有效？</div>
-      <details class="reveal"><summary><span class="lock"></span><span class="cue"></span></summary>
-        <div class="reveal__body">
-          <p>每台實體 server 在環上放<strong>很多個點</strong>（150 個常見）：</p>
-<pre>A → hash("A-0"), hash("A-1"), ..., hash("A-149")
-B → hash("B-0"), hash("B-1"), ..., hash("B-149")
-C → hash("C-0"), hash("C-1"), ..., hash("C-149")</pre>
-          <ul>
-            <li>環上總共 450 個點隨機分佈，每台 server 擁有 ~150 個散落的小弧</li>
-            <li><strong>樣本數 3 → 450，variance 大幅降低。</strong></li>
-          </ul>
-        </div>
-      </details>
-    </div>
-
-    <div class="recall">
-      <div class="recall__q"><span class="qn">Code</span>Core lookup 怎麼寫？三個關鍵點？</div>
-      <details class="reveal"><summary><span class="lock"></span><span class="cue"></span></summary>
-        <div class="reveal__body">
-<pre><span class="k">type</span> Ring <span class="k">struct</span> {
-    nodes   []uint32           <span class="c">// sorted positions on ring</span>
-    nodeMap map[uint32]string  <span class="c">// position → physical server name</span>
-}
-
-<span class="k">func</span> (r *Ring) GetServer(key string) string {
-    pos := hash(key)
-    <span class="c">// Binary search for first node position &gt;= pos</span>
-    idx := sort.Search(len(r.nodes), <span class="k">func</span>(i int) bool {
-        <span class="k">return</span> r.nodes[i] &gt;= pos
-    })
-    <span class="c">// Wrap-around at end of ring</span>
-    <span class="k">if</span> idx == len(r.nodes) {
-        idx = 0
-    }
-    <span class="k">return</span> r.nodeMap[r.nodes[idx]]
-}</pre>
-          <ul>
-            <li><strong>Sorted slice + binary search</strong> → O(log N) lookup</li>
-            <li><strong>Wrap-around</strong> = 環的順時針性質</li>
-            <li><strong>nodeMap</strong> 把虛擬位置和實體 server 解耦 → 加減 server = 插入/刪除 150 entries</li>
-          </ul>
-        </div>
-      </details>
-    </div>
-
-    <figure class="aug aug--intv">
-      <figcaption class="aug__tag">🎯 面試官視角 · 「為什麼需要 virtual nodes」<span class="badge">面試官增補 · 非原始筆記</span></figcaption>
-      <div class="aug__body">
-        <h4>這題我在探什麼、怎麼打分</h4>
-        <div class="rubric">
-          <div><span class="k">在探什麼</span><span class="v">你懂不懂 vnodes 是<b>統計問題</b>的解（樣本數 → variance），還是只背「放很多點比較均勻」。</span></div>
-          <div class="weak"><span class="k">弱答</span><span class="v">「consistent hashing 就是把 key hash 到環上」。問到負載不均答不出來，或不知道 vnodes。<b>mid 以下。</b></span></div>
-          <div class="strong"><span class="k">強答</span><span class="v">講出純 ring 在少節點時弧長不均 → 一台可能吃 90% → vnodes 把每台撒成 150 點，<b>variance 崩塌</b>。</span></div>
-          <div class="staff"><span class="k">Staff 答</span><span class="v">點出這是 <b>Law of Large Numbers</b>；給實務錨點（Cassandra 256 tokens）；提 vnode 數的 diminishing returns；提<b>加權 vnode</b> 處理異質機器。</span></div>
-          <div><span class="k">致命追問</span><span class="v">「vnode 設 10000 不是更均勻？代價？」「一台 server 死了，它的 key 去哪？」「環的狀態怎麼在節點間同步？」</span></div>
-          <div class="red"><span class="k">紅旗</span><span class="v">把 vnodes 講成「為了 hash 更亂」；或堅稱節點數固定也該用 CH（其實 <code>% N</code> 更簡單）。</span></div>
-        </div>
-      </div>
-    </figure>
-
-    <figure class="aug">
-      <figcaption class="aug__tag">🏛 架構師觀點 · 環 + vnodes vs 固定 hash slots<span class="badge">架構師增補 · 非原始筆記</span></figcaption>
-      <div class="aug__body">
-        <h4>不是每個系統都用「環」，Redis Cluster 走另一條</h4>
-        <p>你筆記的 ring + vnodes 是 <em>Cassandra / DynamoDB</em> 那一派。但 <strong>Redis Cluster 不用環</strong>，它用 <em>16384 個固定 hash slot</em>：<code>slot = CRC16(key) % 16384</code>，slot 再分配給節點。加減節點 = 搬「一批 slot」而不是「一段弧」。</p>
-        <ul>
-          <li>環（連續座標）：粒度無限細，靠 vnodes 撒點求均勻；節點靠 gossip 同步彼此位置</li>
-          <li>固定 slot（離散桶）：16384 個桶是上限也是粒度，搬移以 slot 為單位，狀態小、好管理，代價是節點數不該超過 slot 數太多</li>
-          <li>兩者都在解同一個問題（key → 動態節點），差在「連續環 + 取樣」還是「固定桶 + 指派」</li>
-        </ul>
-        <p>面試講得出「ring/vnodes 是一派，Redis Cluster 的 16384 slots 是另一派，trade-off 在粒度 vs 狀態管理」，層級立刻不一樣。</p>
-      </div>
-    </figure>
-
-    <h3><span class="ix">·</span>vnodes trade-off（150 vs 10,000）</h3>
-    <div class="recall">
-      <div class="recall__q"><span class="qn">回想</span>vnodes 從 150 加到 10000，賺到什麼、付出什麼？實務錨點？</div>
-      <details class="reveal"><summary><span class="lock"></span><span class="cue"></span></summary>
-        <div class="reveal__body">
-          <table>
-            <tr><th>更多 vnodes</th><th>賺到</th><th>付出</th></tr>
-            <tr><td>150 → 10,000</td><td>distribution 更均勻（load 更平）</td><td>routing table 更大 + node 間 gossip 同步更重</td></tr>
-          </table>
-          <ul>
-            <li>超過某個點 = <strong>diminishing returns</strong>：均勻度幾乎不再進步，memory 照付</li>
-            <li>實務錨點：<strong>Cassandra 預設 256 tokens/node</strong>。記這數字就夠面試用</li>
-            <li>⏸ Parked：背後「為何更多點 → variance 下降」的 Law of Large Numbers 數學，面試不考</li>
-          </ul>
-        </div>
-      </details>
-    </div>
-
-    <figure class="aug aug--cost">
-      <figcaption class="aug__tag">💰 成本拐點 · vnode 數的 diminishing returns<span class="badge">架構師增補 · 非原始筆記</span></figcaption>
-      <div class="aug__body">
-        <h4>均勻度趨飽和，成本卻線性爬</h4>
-        <p>vnode 數是個經典「邊際遞減 vs 線性成本」旋鈕。往上加 → <em>load skew（最熱/最冷比值）快速下降</em>，但很快趨近 1.0 的飽和地板；同時 <strong>routing table 大小 + gossip 同步量</strong>跟著 vnode 數線性爬。兩條線一交叉就是甜蜜區，實務落在幾百（Cassandra 256），不是越大越好。</p>
-        <figure class="chart">
-          <svg viewBox="0 0 600 320" role="img" aria-label="load skew 隨 vnode 數遞減趨飽和，狀態成本線性上升">
-            <text class="ttl" x="300" y="20" text-anchor="middle">vnode 數：load skew（遞減趨飽和）vs 狀態成本（線性）</text>
-            <line class="axis" x1="64" y1="270" x2="560" y2="270"/>
-            <line class="axis" x1="64" y1="270" x2="64" y2="44"/>
-            <text x="312" y="304" text-anchor="middle">每台 vnode 數 →</text>
-            <text x="20" y="160" text-anchor="middle" transform="rotate(-90 20 160)">skew / 成本 →</text>
-            <line class="grid" x1="64" y1="213" x2="560" y2="213"/>
-            <line class="grid" x1="64" y1="156" x2="560" y2="156"/>
-            <line class="grid" x1="64" y1="99" x2="560" y2="99"/>
-            <text x="120" y="288" text-anchor="middle">16</text>
-            <text x="270" y="288" text-anchor="middle">256</text>
-            <text x="430" y="288" text-anchor="middle">2000</text>
-            <text x="540" y="288" text-anchor="middle">10000</text>
-            <polyline points="90,84 150,150 230,202 320,232 430,246 545,252" fill="none" stroke="var(--intv)" stroke-width="2.5"/>
-            <text class="lbl" x="545" y="244" fill="var(--intv)" text-anchor="end">load skew（越低越平）</text>
-            <polyline points="90,258 545,70" fill="none" stroke="var(--sign)" stroke-width="2.5"/>
-            <text class="lbl" x="430" y="120" fill="var(--sign)" text-anchor="end">routing table + gossip 成本</text>
-            <circle cx="270" cy="220" r="6" fill="#fff"/>
-            <text x="282" y="208" fill="var(--ink)" text-anchor="start">甜蜜區 ≈ 256</text>
-          </svg>
-          <figcaption>示意：呈現「邊際遞減 vs 線性成本」結構與拐點，非實際數值。skew 很快觸底，成本一路爬，所以不無腦設大。</figcaption>
-        </figure>
-      </div>
-    </figure>
-
-    <figure class="aug aug--war">
-      <figcaption class="aug__tag">💥 真實事故 · 節點死亡的 cascade failure<span class="badge">公開故障類別 · 非原始筆記</span></figcaption>
-      <div class="aug__body">
-        <h4>一台死，整段弧砸到鄰居，鄰居也死</h4>
-        <p><strong>症狀：</strong>一個 cache/分片節點掛掉，它負責的所有 key 瞬間轉到「順時針下一台」。那台 server 流量翻倍、過載、latency 爆，接著<em>它也死</em>，它的 key 又砸給下一台 → 雪崩。</p>
-        <p><strong>根因：</strong>正是你筆記寫的<strong>負載失衡</strong>。純 ring（少 vnode）時某台吃了超大弧，它一死就把巨量負載集中倒給單一鄰居。這是公開、被反覆寫進 SRE 教材的 <em>cache 節點 cascade / thundering herd onto neighbor</em> 故障類別。</p>
-        <p><strong>事後修法：</strong>(1) vnodes 把每台的負載打散成許多小弧，一台死它的 key 會分散到<strong>多台</strong>不同鄰居，不集中砸一台；(2) 加 replication，key 有副本不只靠單一 owner；(3) 限流 / 熔斷保護承接的節點。本質跟 Day 06 cache stampede 同源：別讓負載「同時、全部」湧向單一目標。</p>
-      </div>
-    </figure>
-  </section>
-
-  <section>
-    <div class="kick"><span class="ar">▸</span><span class="n">04</span> Range vs Hash · When to Use</div>
-    <h2>用不用、怎麼選 <span class="tag">面試最值錢</span></h2>
-
-    <div class="recall">
-      <div class="recall__q"><span class="qn">Range vs Hash</span>兩種 partitioning 的取捨？</div>
-      <details class="reveal"><summary><span class="lock"></span><span class="cue"></span></summary>
-        <div class="reveal__body">
-          <ul>
-            <li><strong>Range-based</strong>：按 key 範圍切（A-M / N-Z）。利於<strong>範圍查詢</strong>，但易<strong>熱點</strong>（某段 key 特別熱）</li>
-            <li><strong>Hash-based / consistent hashing</strong>：按 hash 切。分佈<strong>均勻</strong>，但<strong>範圍查詢</strong>要掃所有節點</li>
-          </ul>
-        </div>
-      </details>
-    </div>
-
-    <div class="recall">
-      <div class="recall__q"><span class="qn">When</span>什麼時候用 consistent hashing？什麼時候 NOT 用？</div>
-      <details class="reveal"><summary><span class="lock"></span><span class="cue"></span></summary>
-        <div class="reveal__body">
-          <p><strong>觸發條件一句話：</strong>要把 stateful 資料/負載分散到一組「<strong>會變動</strong>」的節點上，且希望加減節點時只搬 ~1/N 的 key。</p>
-          <table>
-            <tr><th>看到這個場景</th><th>想到 consistent hashing</th></tr>
-            <tr><td>Distributed cache (Redis/Memcached cluster)</td><td>cache node 擴縮，不想加一台就 invalidate 全部</td></tr>
-            <tr><td>NoSQL 分片 (Cassandra/DynamoDB)</td><td>資料按 key 分散到動態節點</td></tr>
-            <tr><td>Sticky load balancing</td><td>同一個 user/key 永遠打到同一台 backend</td></tr>
-          </table>
-          <p><strong>反向（何時 NOT 用）：</strong>節點數<strong>固定不變</strong> → 直接 <code>hash % N</code> 更簡單。CH 的全部價值在 <em>elasticity</em>。</p>
-        </div>
-      </details>
-    </div>
-
-    <figure class="aug aug--biz">
-      <figcaption class="aug__tag">💼 真實業務情境 · 同樣分片，固定和彈性選相反<span class="badge">架構師增補 · 非原始筆記</span></figcaption>
-      <div class="aug__body">
-        <h4>「該不該上 consistent hashing」取決於這組節點會不會變</h4>
-        <p><strong>情境 A · 固定 3 台的內部快取（永遠不擴縮）：</strong>節點數是常數，<code>hash % 3</code> 三行搞定、零依賴、好 debug。這裡上 consistent hashing 是<em>over-engineering</em>：多了環、vnode、gossip 一整套，換不到任何彈性，因為你根本不會加減機器。</p>
-        <p><strong>情境 B · 會 autoscaling 的 cache 艦隊（流量高峰自動擴到 50 台、離峰縮回）：</strong>每次擴縮如果用 <code>% N</code> 就 ~全部 invalidate、DB 被打爆。<em>必須</em>用 CH，加一台只動 1/N。<strong>同一個「key 分片」需求，因為「這組節點會不會變動」而答案完全相反。</strong>面試官想看你先問「節點數固定嗎、會 autoscale 嗎」再決定要不要這套複雜度。</p>
-      </div>
-    </figure>
-
-    <div class="recall">
-      <div class="recall__q"><span class="qn">Observability</span>CH 的 SLI / Alert / Dashboard？</div>
-      <details class="reveal"><summary><span class="lock"></span><span class="cue"></span></summary>
-        <div class="reveal__body">
-          <p>SLI = key distribution skew（最熱 node / 最冷 node 的比值）、lookup P99；Alert = 某 node 負載 &gt; 平均 ×1.5（分佈失衡）；Dashboard = per-node key count。（天花板版，點到為止）</p>
-        </div>
-      </details>
-    </div>
-
-    <div class="xlink"><span class="ic">🔗</span><b>跨主題連結：</b>Hash 分佈均勻、但範圍查詢要掃全節點 = 同 <b>Day 27 NoSQL KV vs SQL</b> 的取捨：access pattern 決定分片法。要 point lookup + 彈性就 hash 分片，要 range scan 就 range 分片。</div>
-  </section>
-
-  <section>
-    <div class="kick"><span class="ar">▸</span><span class="n">05</span> 🔗 Derivation Insight</div>
-    <h2>推導路徑 <span class="tag">最讓我驚訝的一點</span></h2>
-
-    <div class="recall recall--soc">
-      <div class="recall__q"><span class="qn">深掘</span>vnodes 把 3 點變 450 點來降 variance。這跟 Bloom filter 用多個 hash、sharding 求均勻，是不是同一個統計原理？<span class="socbadge">蘇格拉底深掘 · 非原始筆記</span></div>
-      <details class="reveal"><summary><span class="lock"></span><span class="cue"></span></summary>
-        <div class="reveal__body">
-          <p>是，同一個 <strong>Law of Large Numbers</strong> 家族：<em>樣本數越大，實際分佈越貼近期望，variance 越小</em>。</p>
-          <ul>
-            <li><strong>vnodes</strong>：3 個點 → 450 個點，弧長分佈從「可能極不均」收斂到「都差不多」</li>
-            <li><strong>Bloom filter（Day 26）</strong>：用 k 個獨立 hash 把一個元素打散到多個 bit，降低單一 hash 不幸碰撞造成的誤判 variance</li>
-            <li><strong>Sharding</strong>：key 夠多 + hash 夠散，每個 shard 的負載趨近平均</li>
-          </ul>
-          <p>你筆記自己寫了這句「原來分散式系統的均勻分佈本質上是個 Law of Large Numbers 問題」。記住這個視角：看到「靠隨機 + 大量樣本求均勻」就是這一招，HyperLogLog 也是。</p>
-        </div>
-      </details>
-    </div>
-
-    <div class="note principle">
-      <span class="lbl">我的推導路徑（原始筆記）</span>
-      <p>1. 看到 <code>hash % N</code> → 發現 N 變 key 的歸屬就變</p>
-      <p>2. 量化問題：~75% 的 key 要搬 → 不可能 online 做</p>
-      <p>3. 看到 Ring 模型 → 立刻抓到「key 位置從動態變固定座標」的差別</p>
-      <p>4. 看 3 個 server 的 ring → 馬上想到「樣本太少 → 統計學失效 → 負載失衡」</p>
-      <p style="color:var(--gold-2)">最讓我驚訝：我自己把「sample size → variance」脫口而出 — 原來均勻分佈本質是 Law of Large Numbers，這視角在 Bloom Filter / HyperLogLog / Sharding 都會重現。</p>
-    </div>
-
-    <div class="xlink"><span class="ic">🔗</span><b>跨主題連結：</b>「樣本數 → variance 崩塌」= <b>Day 26 Bloom Filter / HyperLogLog</b>、<b>sharding 均勻分佈</b> 同一個 Law of Large Numbers 家族。看到「靠大量隨機樣本求均勻」就認出它。</div>
-  </section>
-
-  <section>
-    <div class="kick"><span class="ar">▸</span><span class="n">06</span> 🔴 My Mistakes &amp; Misconceptions</div>
-    <h2>糾錯 <span class="tag">先看錯的，再翻正解</span></h2>
-
-    <div class="mistake">
-      <div class="mistake__bad"><span class="lbl">✗ 當初的錯</span>Security One-liner 只記得 token 屬性（scoped/short/revocable）和 JWT 簽章</div>
-      <details><summary><span class="lock"></span><span class="cue">想一下正確理解 → 點開</span></summary>
-        <div class="mistake__good"><span class="lbl">✓ 正確理解</span>這些屬性是「衍生」的，不是核心 — 核心是 OAuth 把三邊關係（user-client-Resource Server）獨立出 Authorization Server。我把實作機制當成本質：屬性是結果，不是原因。</div>
-      </details>
-    </div>
-  </section>
-
-  <section>
-    <div class="kick"><span class="ar">▸</span><span class="n">07</span> 🗣️ English Practice</div>
-    <h2>先用英文講一次，再看 polish</h2>
-
-    <div class="recall">
-      <div class="recall__q">把一把密碼拆成多張窄、短、可獨立撤銷的票券 — 用簽章廉價驗證</div>
-      <details class="reveal"><summary><span class="lock"></span><span class="cue"></span></summary>
-        <div class="reveal__body"><p style="font-family:var(--mono);font-size:14px;color:var(--gold-2);line-height:1.6">"Split one master credential into multiple narrow, short-lived, independently revocable tokens — verified cheaply via signature."</p></div>
-      </details>
-    </div>
-    <div class="recall">
-      <div class="recall__q">OAuth 把三邊關係獨立成 Authorization Server，讓 user 變成 credential 的源頭和撤銷權的擁有者。Scoped/revocable/short-lived 是衍生屬性，不是本身</div>
-      <details class="reveal"><summary><span class="lock"></span><span class="cue"></span></summary>
-        <div class="reveal__body"><p style="font-family:var(--mono);font-size:13.5px;color:var(--gold-2);line-height:1.6">"OAuth takes the three-party relationship — user authorizing a client to access a Resource Server on their behalf — and architecturally isolates it as a dedicated Authorization Server. This makes the user the origin of credentials and the owner of revocation. Scoped, revocable, and short-lived are properties derived from that architectural decision, not the decision itself."</p></div>
-      </details>
-    </div>
-    <div class="recall">
-      <div class="recall__q">hash % N 的 key 位置會隨 N 浮動，所以全部重算。Ring 的 key 位置是固定座標，只有新 server 擠進去那一小段的鄰居關係變了，其他人完全沒感覺</div>
-      <details class="reveal"><summary><span class="lock"></span><span class="cue"></span></summary>
-        <div class="reveal__body"><p style="font-family:var(--mono);font-size:13.5px;color:var(--gold-2);line-height:1.6">"With `hash % N`, key positions drift as N changes — so the entire dataset has to be remapped. On the ring, key positions are fixed coordinates; adding a server only affects the small arc where it's inserted. Everyone else is untouched."</p></div>
-      </details>
-    </div>
-    <div class="recall">
-      <div class="recall__q">一台 server = ring 上 1 個點 → 樣本太少 → 統計學讓你失望 → 負載嚴重失衡</div>
-      <details class="reveal"><summary><span class="lock"></span><span class="cue"></span></summary>
-        <div class="reveal__body"><p style="font-family:var(--mono);font-size:14px;color:var(--gold-2);line-height:1.6">"One server equals one point on the ring — that's too few samples. Statistics fails you at small N, and you end up with severely uneven load distribution."</p></div>
-      </details>
-    </div>
-  </section>
-
-  <section>
-    <div class="kick"><span class="ar">▸</span><span class="n">08</span> 🎤 How to Say It in Interview</div>
-    <h2>面試時怎麼開口</h2>
-
-    <div class="recall">
-      <div class="recall__q"><span class="qn">Opening</span>30 秒開場怎麼講？</div>
-      <details class="reveal"><summary><span class="lock"></span><span class="cue"></span></summary>
-        <div class="reveal__body"><p style="font-family:var(--mono);font-size:13.5px;color:var(--gold-2);line-height:1.6">"Consistent Hashing solves a specific problem: when you use `hash(key) % N` to distribute data across servers, changing N forces roughly 75% of keys to move. That makes scaling impossible without downtime. Consistent hashing fixes this by giving every key a fixed coordinate on a ring, independent of how many servers exist. Adding or removing a server only moves the K/N keys in the affected arc."</p></div>
-      </details>
-    </div>
-    <div class="recall">
-      <div class="recall__q"><span class="qn">If asked</span>"why virtual nodes?"</div>
-      <details class="reveal"><summary><span class="lock"></span><span class="cue"></span></summary>
-        <div class="reveal__body"><p style="font-family:var(--mono);font-size:13.5px;color:var(--gold-2);line-height:1.6">"With few physical servers on a ring, random hash placement creates uneven arcs — one server can end up owning 90% of the keyspace. Virtual nodes increase the sample size: each physical server gets 150 positions on the ring, so the variance of arc sizes collapses. It's a statistics fix, not a hashing fix."</p></div>
-      </details>
-    </div>
-  </section>
-
-  <section>
-    <div class="kick"><span class="ar">▸</span><span class="n">09</span> 📌 Key Vocab · Ring Positions</div>
-    <h2>翻卡：中 → 英 <span class="tag">點環上一點，看英文</span></h2>
-    <div class="vgrid" id="vgrid">
-      <button class="vcard" aria-pressed="false"><span class="vcard__in">
-        <span class="vface zh"><span class="tick">POS · 中文 · 點翻</span><span class="term">一致性雜湊</span></span>
-        <span class="vface en"><span class="tick">English</span><span class="term">consistent hashing</span></span></span></button>
-      <button class="vcard" aria-pressed="false"><span class="vcard__in">
-        <span class="vface zh"><span class="tick">POS · 中文 · 點翻</span><span class="term">環狀模型</span></span>
-        <span class="vface en"><span class="tick">English</span><span class="term">ring model / hash ring</span></span></span></button>
-      <button class="vcard" aria-pressed="false"><span class="vcard__in">
-        <span class="vface zh"><span class="tick">POS · 中文 · 點翻</span><span class="term">虛擬節點</span></span>
-        <span class="vface en"><span class="tick">English</span><span class="term">virtual nodes (vnodes)</span></span></span></button>
-      <button class="vcard" aria-pressed="false"><span class="vcard__in">
-        <span class="vface zh"><span class="tick">POS · 中文 · 點翻</span><span class="term">順時針第一台</span></span>
-        <span class="vface en"><span class="tick">English</span><span class="term">first node clockwise</span></span></span></button>
-      <button class="vcard" aria-pressed="false"><span class="vcard__in">
-        <span class="vface zh"><span class="tick">POS · 中文 · 點翻</span><span class="term">重新分片</span></span>
-        <span class="vface en"><span class="tick">English</span><span class="term">resharding / remapping</span></span></span></button>
-      <button class="vcard" aria-pressed="false"><span class="vcard__in">
-        <span class="vface zh"><span class="tick">POS · 中文 · 點翻</span><span class="term">負載傾斜</span></span>
-        <span class="vface en"><span class="tick">English</span><span class="term">load skew / imbalance</span></span></span></button>
-      <button class="vcard" aria-pressed="false"><span class="vcard__in">
-        <span class="vface zh"><span class="tick">POS · 中文 · 點翻</span><span class="term">級聯故障</span></span>
-        <span class="vface en"><span class="tick">English</span><span class="term">cascade failure</span></span></span></button>
-      <button class="vcard" aria-pressed="false"><span class="vcard__in">
-        <span class="vface zh"><span class="tick">POS · 中文 · 點翻</span><span class="term">大數法則</span></span>
-        <span class="vface en"><span class="tick">English</span><span class="term">law of large numbers</span></span></span></button>
-      <button class="vcard" aria-pressed="false"><span class="vcard__in">
-        <span class="vface zh"><span class="tick">POS · 中文 · 點翻</span><span class="term">樣本數</span></span>
-        <span class="vface en"><span class="tick">English</span><span class="term">sample size</span></span></span></button>
-      <button class="vcard" aria-pressed="false"><span class="vcard__in">
-        <span class="vface zh"><span class="tick">POS · 中文 · 點翻</span><span class="term">變異數</span></span>
-        <span class="vface en"><span class="tick">English</span><span class="term">variance</span></span></span></button>
-      <button class="vcard" aria-pressed="false"><span class="vcard__in">
-        <span class="vface zh"><span class="tick">POS · 中文 · 點翻</span><span class="term">二分搜尋</span></span>
-        <span class="vface en"><span class="tick">English</span><span class="term">binary search (O(log N))</span></span></span></button>
-      <button class="vcard" aria-pressed="false"><span class="vcard__in">
-        <span class="vface zh"><span class="tick">POS · 中文 · 點翻</span><span class="term">環繞</span></span>
-        <span class="vface en"><span class="tick">English</span><span class="term">wrap-around</span></span></span></button>
-      <button class="vcard" aria-pressed="false"><span class="vcard__in">
-        <span class="vface zh"><span class="tick">POS · 中文 · 點翻</span><span class="term">彈性（擴縮）</span></span>
-        <span class="vface en"><span class="tick">English</span><span class="term">elasticity</span></span></span></button>
-      <button class="vcard" aria-pressed="false"><span class="vcard__in">
-        <span class="vface zh"><span class="tick">POS · 中文 · 點翻</span><span class="term">範圍 vs 雜湊分區</span></span>
-        <span class="vface en"><span class="tick">English</span><span class="term">range vs hash partitioning</span></span></span></button>
-      <button class="vcard" aria-pressed="false"><span class="vcard__in">
-        <span class="vface zh"><span class="tick">POS · 增補 · 點翻</span><span class="term">雜湊槽 (Redis Cluster)</span></span>
-        <span class="vface en"><span class="tick">English</span><span class="term">hash slots (16384)</span></span></span></button>
-      <button class="vcard" aria-pressed="false"><span class="vcard__in">
-        <span class="vface zh"><span class="tick">POS · 增補 · 點翻</span><span class="term">加權虛擬節點</span></span>
-        <span class="vface en"><span class="tick">English</span><span class="term">weighted vnodes</span></span></span></button>
-    </div>
-  </section>
-
-  <footer>
-    Consistent Hashing (Theory) — Day 15 · <b>The Ring</b><br>
-    原始筆記逐字保留並以主動回憶呈現；🏛/🎯/💥/💰/💼/❓/🔗 為增補(非原始筆記)，皆標徽章區隔。<br>
-    成本圖為示意:呈現成本結構與決策拐點，非實際數值。💥 為公開且反覆出現的故障類別，非杜撰特定公司事故。<br>
-    部分英文 practice / mistake 為原始筆記當場跨主題殘留(security)，逐字保留。<br>
-    單檔離線 · 無外部相依。 source: <code>notes/day15-consistent-hashing.md</code>
-  </footer>
-
-</div>
-
-<script>
-(function(){
-  "use strict";
-  var reveals = Array.prototype.slice.call(document.querySelectorAll("details"));
-  var pc = document.getElementById("pcount");
-  var pb = document.getElementById("pbar");
-  function refresh(){
-    var open = reveals.filter(function(d){return d.open;}).length;
-    var total = reveals.length;
-    pc.textContent = "定位 " + open + " / " + total;
-    pb.style.width = (total ? (open/total*100) : 0) + "%";
-  }
-  reveals.forEach(function(d){ d.addEventListener("toggle", refresh); });
-  document.getElementById("revealAll").addEventListener("click", function(){
-    reveals.forEach(function(d){ d.open = true; }); refresh();
-  });
-  document.getElementById("resetAll").addEventListener("click", function(){
-    reveals.forEach(function(d){ d.open = false; }); refresh();
-    window.scrollTo({top:0, behavior:"smooth"});
-  });
-  function flip(card){
-    card.setAttribute("aria-pressed", card.getAttribute("aria-pressed")==="true" ? "false" : "true");
-  }
-  var vg = document.getElementById("vgrid");
-  vg.addEventListener("click", function(e){
-    var c = e.target.closest(".vcard"); if(c) flip(c);
-  });
-  vg.addEventListener("keydown", function(e){
-    if(e.key!=="Enter" && e.key!==" ") return;
-    var c = e.target.closest(".vcard"); if(!c) return;
-    e.preventDefault(); flip(c);
-  });
-  refresh();
-})();
-</script>
-</body>
-</html>
+</main>
