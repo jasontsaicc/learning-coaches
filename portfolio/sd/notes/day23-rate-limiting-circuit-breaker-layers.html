@@ -1,0 +1,363 @@
+<title>Rate Limiting and Circuit Breaker</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC:wght@400;700&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: one notebook column on graph paper; teal sd accent band; figures on taped cards, failure cases as comic panels */
+:root {
+  --paper: #F6F8FA;
+  --grid: rgba(90,130,170,.16);
+  --ink: #23313E;
+  --ink-soft: #55677A;
+  --card: #FFFFFF;
+  --accent: #0B7285;
+  --on-accent: #FFFFFF;
+  --tape: color-mix(in srgb, var(--accent) 35%, transparent);
+  --who: #FFE98A;
+  --see: #BDEEF6;
+  --may: #F9CDE0;
+  --wrong: #D2453A;
+  --ok: #2F8F5B;
+  --line: #9DB0C2;
+  --font-hand: "LXGW WenKai TC", "Noto Sans TC", "PingFang TC", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #1A2320; --grid: rgba(200,230,210,.08); --ink: #E6EDE8; --ink-soft: #A9BAB1;
+    --card: #24302C; --accent: #3BC9DB; --on-accent: #10221F; --who: #8A7A2A; --see: #2B6A74; --may: #7A3F57;
+    --wrong: #FF8A7E; --ok: #7FD3A1; --line: #5E7268; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #1A2320; --grid: rgba(200,230,210,.08); --ink: #E6EDE8; --ink-soft: #A9BAB1;
+  --card: #24302C; --accent: #3BC9DB; --on-accent: #10221F; --who: #8A7A2A; --see: #2B6A74; --may: #7A3F57;
+  --wrong: #FF8A7E; --ok: #7FD3A1; --line: #5E7268; color-scheme: dark;
+}
+body {
+  background-color: var(--paper);
+  background-image: linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 22px 22px;
+  color: var(--ink);
+  font-family: var(--font-hand);
+  font-size: 17px;
+  line-height: 1.75;
+}
+.band { background: var(--accent); color: var(--on-accent); padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 22px 18px; }
+.band > div { max-width: 760px; margin: 0 auto; display: grid; gap: 8px; }
+.band a { color: inherit; }
+.page { max-width: 760px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 28px 64px; display: grid; gap: 36px; }
+h1, h2, h3 { text-wrap: balance; line-height: 1.3; margin: 0; }
+h1 { font-size: 2.1rem; }
+h2 { font-size: 1.4rem; display: flex; flex-wrap: wrap; align-items: baseline; gap: 10px; }
+h2 .badge { font-family: var(--font-mono); font-size: .78rem; background: var(--accent); color: var(--on-accent); padding: 1px 8px; border-radius: 3px; }
+h2 .time { font-family: var(--font-mono); font-size: .74rem; color: var(--ink-soft); letter-spacing: .04em; }
+p { margin: 0; }
+section { display: grid; gap: 14px; min-width: 0; }
+.sub { font-size: .95rem; opacity: .9; }
+.lead { font-size: 1.12rem; font-weight: 700; }
+.progress { display: flex; flex-wrap: wrap; gap: 6px 12px; font-family: var(--font-mono); font-size: .8rem; }
+.progress a { color: inherit; text-decoration: none; }
+mark { background: linear-gradient(transparent 52%, var(--who) 52%); color: inherit; padding: 0 2px; }
+mark.see { background: linear-gradient(transparent 52%, var(--see) 52%); }
+mark.may { background: linear-gradient(transparent 52%, var(--may) 52%); }
+code { font-family: var(--font-mono); font-size: .86em; background: color-mix(in srgb, var(--line) 22%, transparent); padding: 1px 5px; border-radius: 3px; }
+.card { position: relative; background: var(--card); padding: 22px 16px 14px; box-shadow: 0 1px 3px rgba(0,0,0,.12); min-width: 0; }
+.card::before { content: ""; position: absolute; top: -9px; left: 50%; width: 92px; height: 20px; transform: translateX(-50%) rotate(-2deg); background: var(--tape); }
+.scroll { overflow-x: auto; }
+svg.fig { display: block; min-width: 600px; width: 100%; height: auto; }
+svg text { font-family: var(--font-mono); fill: var(--ink); }
+svg .hand { font-family: var(--font-hand); }
+.rule { border-left: 4px solid var(--accent); padding: 6px 12px; font-size: 1.05rem; }
+.wrong { border-left: 4px solid var(--wrong); padding: 4px 12px; display: grid; gap: 2px; }
+.wrong b { color: var(--wrong); font-size: .85rem; letter-spacing: .05em; }
+.fix { border-left: 4px solid var(--ok); padding: 4px 12px; }
+.panels { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 14px; }
+.panel { border: 2px solid var(--ink); background: var(--card); padding: 10px; display: grid; gap: 6px; min-width: 0; align-content: start; }
+.panel h3 { font-size: 1rem; font-family: var(--font-mono); }
+.panel p { font-size: .92rem; }
+.panel svg { width: 100%; height: auto; display: block; }
+@media (max-width: 560px) { .panels { grid-template-columns: 1fr; } }
+table { border-collapse: collapse; width: 100%; font-size: .95rem; font-variant-numeric: tabular-nums; }
+th, td { border-bottom: 1px dashed var(--line); padding: 8px 6px; text-align: left; vertical-align: top; }
+th { font-family: var(--font-mono); font-size: .78rem; letter-spacing: .05em; color: var(--ink-soft); font-weight: 600; }
+ol, ul { margin: 0; padding-left: 1.3em; display: grid; gap: 6px; }
+details { background: var(--card); border: 2px dashed var(--line); padding: 10px 14px; }
+details[open] { border-style: solid; }
+details summary { cursor: pointer; font-weight: 700; }
+details > div { display: grid; gap: 10px; margin-top: 10px; }
+.two { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 14px; }
+@media (max-width: 560px) { .two { grid-template-columns: 1fr; } }
+.en { font-family: var(--font-mono); font-size: .88rem; color: var(--ink-soft); }
+pre { margin: 0; font-family: var(--font-mono); font-size: .82rem; line-height: 1.5; background: var(--card); border: 1px solid var(--line); padding: 10px 12px; overflow-x: auto; }
+.next { border: 3px solid var(--accent); background: var(--card); padding: 14px 16px; display: grid; gap: 6px; }
+a { color: var(--accent); text-underline-offset: 3px; }
+a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+</style>
+
+<header class="band">
+  <div>
+    <p class="sub">sd 課程 · P2 分散式核心 · Day 23-24 · S28 教學，S40 重焊，S52 又掉</p>
+    <h1>Rate Limiting and Circuit Breaker</h1>
+    <p>讀完這頁你能：說出 Token Bucket 和 Sliding Window 怎麼選，畫出 Circuit Breaker 三個狀態和箭頭上的條件，並解釋為什麼 OPEN 代表「不通」。</p>
+    <nav class="progress" aria-label="layers"><a href="#l0">L0 ✓</a><a href="#l1">L1 ✓</a><a href="#l2">L2 ✓</a><a href="#l3">L3 ✓</a><a href="#l4">L4 ✓</a><a href="#l5">L5 ✓</a><a href="#l6">L6 ✓</a><a href="#l7">L7 ✓</a><a href="#trail">錯題</a></nav>
+  </div>
+</header>
+
+<main class="page">
+
+  <p class="sub">S52 quick-fire：CB 跳開後的狀態名稱答「不知道」。這是 OPEN 第三次掉（S28 → S40 → S52）。機制你會，名字沒綁上去。這頁 L0 專門處理這件事。</p>
+
+  <section id="l0">
+    <h2><span class="badge">L0</span>一張圖<span class="time">讀 1 分鐘</span></h2>
+    <p class="lead">Rate limiter 是入口的票口：沒票不准進。Circuit breaker 是家裡的配電箱：下游短路就跳電，電路斷開（OPEN）就不通電。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 680 200" role="img" aria-label="Left: a ticket gate where each request needs one token from a jar; no token means rejected. Right: two switches. A closed switch connects the wire, so current flows. An open switch leaves a gap, so nothing flows. Circuit breaker OPEN means requests do not go through.">
+        <rect x="20" y="40" width="70" height="90" fill="var(--see)" stroke="var(--ink)" stroke-width="1.5"/>
+        <g fill="var(--who)" stroke="var(--ink)"><circle cx="40" cy="110" r="7"/><circle cx="58" cy="110" r="7"/><circle cx="76" cy="110" r="7"/><circle cx="49" cy="94" r="7"/></g>
+        <text x="55" y="30" text-anchor="middle" font-size="11" class="hand">token 罐</text>
+        <line x1="90" y1="85" x2="150" y2="85" stroke="var(--ink)" stroke-width="2"/><polygon points="150,80 160,85 150,90" fill="var(--ink)"/>
+        <rect x="160" y="60" width="90" height="50" fill="var(--card)" stroke="var(--ink)"/><text x="205" y="82" text-anchor="middle" font-size="10">拿 1 顆才進</text><text x="205" y="98" text-anchor="middle" font-size="10" fill="var(--wrong)">沒有 → 429</text>
+        <text x="135" y="160" text-anchor="middle" font-size="11" class="hand">入口：擋「太多進來」</text>
+        <line x1="300" y1="20" x2="300" y2="180" stroke="var(--line)" stroke-dasharray="4 4"/>
+        <text x="490" y="30" text-anchor="middle" font-size="11" class="hand">出口：擋「下游死了還硬打」</text>
+        <line x1="340" y1="80" x2="420" y2="80" stroke="var(--ink)" stroke-width="2"/><line x1="420" y1="80" x2="470" y2="80" stroke="var(--ok)" stroke-width="4"/><line x1="470" y1="80" x2="540" y2="80" stroke="var(--ink)" stroke-width="2"/>
+        <g fill="var(--ink)"><circle cx="420" cy="80" r="4"/><circle cx="470" cy="80" r="4"/></g>
+        <text x="600" y="76" font-size="11" class="hand">CLOSED</text><text x="600" y="92" font-size="9">接上 = 電通 = 請求通過</text>
+        <line x1="340" y1="140" x2="420" y2="140" stroke="var(--ink)" stroke-width="2"/><line x1="420" y1="140" x2="462" y2="112" stroke="var(--wrong)" stroke-width="4"/><line x1="470" y1="140" x2="540" y2="140" stroke="var(--ink)" stroke-width="2"/>
+        <g fill="var(--ink)"><circle cx="420" cy="140" r="4"/><circle cx="470" cy="140" r="4"/></g>
+        <text x="600" y="136" font-size="11" class="hand" fill="var(--wrong)">OPEN</text><text x="600" y="152" font-size="9">斷開 = 沒電 = fail fast</text>
+        <text x="445" y="175" text-anchor="middle" font-size="9" fill="var(--ink-soft)">中間有缺口，電流（請求）過不去</text>
+      </svg>
+    </div>
+    <div class="fix"><b>為什麼 OPEN 一直掉</b>：中文直覺「開 = 通」（開門、開燈），電路剛好相反。<mark>open circuit = 斷路 = 不通</mark>。記配電箱跳電那一下，開關彈開，燈全暗。</div>
+  </section>
+
+  <section id="l1">
+    <h2><span class="badge">L1</span>第一性原理<span class="time">讀 3 分鐘</span></h2>
+    <p class="lead">兩個限制逼出這兩個工具：下游有硬上限，而且等待本身會吃光資源。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 680 220" role="img" aria-label="Little's law: concurrency equals QPS times latency. At 1000 QPS and 50 milliseconds latency, 50 requests are in flight. If the DB hangs and each call waits for a 30 second timeout, 30,000 requests are in flight, so the caller's thread pool of 200 is exhausted and the caller dies too.">
+        <text x="340" y="28" text-anchor="middle" font-size="13" class="hand">Little's Law：同時在等的請求數 = QPS × 每個請求花的時間</text>
+        <rect x="30" y="50" width="280" height="70" fill="var(--see)" stroke="var(--ink)" stroke-width="1.5"/>
+        <text x="170" y="74" text-anchor="middle" font-size="11">正常：1000 QPS × 0.05 s</text><text x="170" y="98" text-anchor="middle" font-size="13" class="hand">= 50 個在等</text>
+        <rect x="370" y="50" width="280" height="70" fill="var(--may)" stroke="var(--ink)" stroke-width="1.5"/>
+        <text x="510" y="74" text-anchor="middle" font-size="11">DB 卡住，每個等滿 timeout 30 s</text><text x="510" y="98" text-anchor="middle" font-size="13" class="hand" fill="var(--wrong)">= 30,000 個在等</text>
+        <rect x="370" y="140" width="280" height="56" fill="var(--card)" stroke="var(--wrong)" stroke-width="2"/>
+        <text x="510" y="162" text-anchor="middle" font-size="10">thread pool 只有 200 → 第 201 個開始排隊</text><text x="510" y="180" text-anchor="middle" font-size="10" fill="var(--wrong)">呼叫方自己也死了 = 雪崩（cascading failure）</text>
+        <line x1="510" y1="120" x2="510" y2="140" stroke="var(--ink)"/>
+        <rect x="30" y="140" width="280" height="56" fill="var(--card)" stroke="var(--ink)"/>
+        <text x="170" y="162" text-anchor="middle" font-size="10">DB 硬上限 1000 QPS，爬蟲打 50K QPS</text><text x="170" y="180" text-anchor="middle" font-size="10">→ 不擋就直接打掛 DB</text>
+      </svg>
+    </div>
+    <p>拿掉 rate limiter：一個爬蟲就能讓所有人一起掛。拿掉 circuit breaker：下游慢一點，上游就跟著慢到死。<mark>慢比掛更危險</mark>，因為掛了會馬上回錯，慢會一直佔著連線。</p>
+  </section>
+
+  <section id="l2">
+    <h2><span class="badge">L2</span>機制<span class="time">讀 5 分鐘</span></h2>
+    <p class="lead">Token Bucket 用 lazy refill：不開背景程式補 token，有人敲門時才算「這段空窗該補幾顆」。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 680 210" role="img" aria-label="Lazy refill timeline for one bucket with capacity 100 and refill rate 10 per second. At t equals 0 the bucket has 0 tokens. Nothing happens for 3 seconds and no code runs. At t equals 3 a request arrives, the code computes 0 plus 3 times 10 equals 30 tokens, takes one, and 29 remain. The idle gap is drawn dashed because nothing computes there.">
+        <line x1="40" y1="120" x2="640" y2="120" stroke="var(--ink)" stroke-width="2"/>
+        <g font-size="10" text-anchor="middle"><text x="80" y="140">t = 0</text><text x="480" y="140">t = 3 s</text></g>
+        <rect x="60" y="70" width="40" height="50" fill="var(--card)" stroke="var(--ink)"/><text x="80" y="62" text-anchor="middle" font-size="10">0 顆</text>
+        <rect x="110" y="96" width="350" height="18" fill="var(--card)" stroke="var(--line)" stroke-dasharray="5 4"/><text x="285" y="109" text-anchor="middle" font-size="9" fill="var(--ink-soft)">空窗：沒有任何程式在跑，也沒人幫它補（省下的就是這段）</text>
+        <rect x="460" y="40" width="40" height="80" fill="var(--who)" stroke="var(--ink)"/><text x="480" y="32" text-anchor="middle" font-size="10">29 顆</text>
+        <polygon points="480,180 472,166 488,166" fill="var(--accent)"/><text x="480" y="196" text-anchor="middle" font-size="10">請求敲門</text>
+        <rect x="520" y="40" width="150" height="70" fill="var(--may)" stroke="var(--ink)"/>
+        <text x="595" y="58" text-anchor="middle" font-size="9">min(100, 0 + 3 × 10)</text><text x="595" y="74" text-anchor="middle" font-size="9">= 30，拿走 1</text><text x="595" y="90" text-anchor="middle" font-size="9">記下 last = t3</text>
+        <text x="340" y="24" text-anchor="middle" font-size="11" class="hand">capacity 100，refillRate 10/s</text>
+      </svg>
+    </div>
+    <p>100 萬個 user 各一個桶：eager 每秒要掃 100 萬次，lazy 只算有流量的桶。成本跟著流量走，不跟著桶數走。</p>
+    <p class="lead">Circuit Breaker 是三個狀態加三條箭頭。面試要講出箭頭上的條件，不只是名字。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 680 240" role="img" aria-label="State machine. CLOSED: requests pass and failures are counted. When the failure rate crosses 50 percent of the last 100 calls, go to OPEN. OPEN: every call fails fast without touching the downstream. After a wait of 60 seconds, go to HALF-OPEN. HALF-OPEN: let 10 probe calls through. If they succeed, go back to CLOSED. If they fail, go back to OPEN.">
+        <rect x="30" y="80" width="170" height="80" rx="10" fill="var(--ok)" stroke="var(--ink)" stroke-width="2"/>
+        <text x="115" y="108" text-anchor="middle" font-size="14" class="hand">CLOSED</text><text x="115" y="128" text-anchor="middle" font-size="9">請求照常通過</text><text x="115" y="144" text-anchor="middle" font-size="9">一邊數失敗率</text>
+        <rect x="480" y="80" width="170" height="80" rx="10" fill="var(--wrong)" opacity=".85" stroke="var(--ink)" stroke-width="2"/>
+        <text x="565" y="108" text-anchor="middle" font-size="14" class="hand" fill="var(--card)">OPEN</text><text x="565" y="128" text-anchor="middle" font-size="9" fill="var(--card)">不打下游</text><text x="565" y="144" text-anchor="middle" font-size="9" fill="var(--card)">直接回錯 / fallback</text>
+        <rect x="255" y="170" width="170" height="60" rx="10" fill="var(--may)" stroke="var(--ink)" stroke-width="2"/>
+        <text x="340" y="194" text-anchor="middle" font-size="14" class="hand">HALF-OPEN</text><text x="340" y="214" text-anchor="middle" font-size="9">只放少量試探</text>
+        <line x1="200" y1="100" x2="480" y2="100" stroke="var(--ink)" stroke-width="1.5"/><polygon points="480,95 490,100 480,105" fill="var(--ink)"/>
+        <text x="340" y="92" text-anchor="middle" font-size="9">失敗率 ≥ 50%（最近 100 次）</text>
+        <line x1="540" y1="160" x2="425" y2="190" stroke="var(--ink)" stroke-width="1.5"/><polygon points="428,184 418,193 431,195" fill="var(--ink)"/>
+        <text x="535" y="190" font-size="9">等 60 s</text>
+        <line x1="255" y1="190" x2="140" y2="160" stroke="var(--ink)" stroke-width="1.5"/><polygon points="146,158 136,159 143,167" fill="var(--ink)"/>
+        <text x="120" y="190" font-size="9">10 次試探成功</text>
+        <path d="M 340 170 Q 360 40 560 80" fill="none" stroke="var(--wrong)" stroke-width="1.5" stroke-dasharray="5 3"/><polygon points="552,74 562,80 552,86" fill="var(--wrong)"/>
+        <text x="380" y="58" font-size="9" fill="var(--wrong)">試探又失敗 → 退回 OPEN</text>
+        <text x="340" y="22" text-anchor="middle" font-size="9" fill="var(--ink-soft)">數字是 resilience4j 預設值：failureRateThreshold 50、slidingWindowSize 100、waitDurationInOpenState 60s、permittedNumberOfCallsInHalfOpenState 10</text>
+      </svg>
+    </div>
+    <p>HALF-OPEN 存在的理由，你在 S52 自己推出來了：「一下全放又被打掛」。這個現象的名字叫 <mark>thundering herd</mark>。</p>
+  </section>
+
+  <section id="l3">
+    <h2><span class="badge">L3</span>取捨<span class="time">讀 4 分鐘</span></h2>
+    <p class="lead">選演算法只問一句：下游能不能容忍瞬間超量？能 → Token Bucket。不能 → Sliding Window。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 680 190" role="img" aria-label="Fixed window boundary problem with limit 100 per minute. 100 requests arrive in the last second of minute one and 100 in the first second of minute two. Each window sees only 100, so both pass, but 200 requests hit within 2 seconds. A sliding window covering that 2 second span would count 200 and block half.">
+        <line x1="40" y1="130" x2="640" y2="130" stroke="var(--ink)" stroke-width="2"/>
+        <line x1="340" y1="40" x2="340" y2="150" stroke="var(--ink)" stroke-dasharray="6 4"/>
+        <text x="190" y="160" text-anchor="middle" font-size="10">第 1 分鐘（上限 100）</text><text x="490" y="160" text-anchor="middle" font-size="10">第 2 分鐘（上限 100）</text>
+        <rect x="300" y="60" width="38" height="70" fill="var(--who)" stroke="var(--ink)"/><text x="319" y="54" text-anchor="middle" font-size="9">100</text>
+        <rect x="342" y="60" width="38" height="70" fill="var(--who)" stroke="var(--ink)"/><text x="361" y="54" text-anchor="middle" font-size="9">100</text>
+        <rect x="292" y="30" width="96" height="108" fill="none" stroke="var(--wrong)" stroke-width="2.5"/>
+        <text x="450" y="80" font-size="10" fill="var(--wrong)">2 秒內 200 個 = 2 倍上限</text><text x="450" y="98" font-size="9">fixed window 兩邊各看到 100，都放行</text>
+        <text x="340" y="182" text-anchor="middle" font-size="10" class="hand">sliding window 任何時間窗都算 → 會擋下後面 100 個</text>
+      </svg>
+    </div>
+    <div class="scroll">
+      <table>
+        <tr><th></th><th>Token Bucket</th><th>Sliding Window</th></tr>
+        <tr><td>行為</td><td>容許 burst（花掉攢下的 token）</td><td>任何時間窗都嚴格封頂</td></tr>
+        <tr><td>適合</td><td>per-user 限速，偶爾爆量 OK</td><td>global 封頂，DB 有硬上限</td></tr>
+        <tr><td>記憶體</td><td>每桶 2 個數字</td><td>log 版要存每個時間戳，counter 版近似</td></tr>
+      </table>
+    </div>
+    <p>兩層疊加才完整：<mark>per-user 管公平，global 管保命</mark>。只有 global 一個桶，爬蟲會把 token 吸乾，正常 user 被餓死。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 680 160" role="img" aria-label="Three app servers each keep a local counter with limit 100, so the real limit becomes 300. Moving the counter to a shared Redis gives one global view but adds a network hop, a hot spot, and a single point of failure.">
+        <g fill="var(--card)" stroke="var(--ink)"><rect x="30" y="30" width="80" height="34"/><rect x="30" y="72" width="80" height="34"/><rect x="30" y="114" width="80" height="34"/></g>
+        <g font-size="9" text-anchor="middle"><text x="70" y="51">app1：100</text><text x="70" y="93">app2：100</text><text x="70" y="135">app3：100</text></g>
+        <text x="190" y="93" text-anchor="middle" font-size="11" class="hand" fill="var(--wrong)">實際 = 300</text>
+        <line x1="270" y1="20" x2="270" y2="150" stroke="var(--line)" stroke-dasharray="4 4"/>
+        <g fill="var(--card)" stroke="var(--ink)"><rect x="300" y="30" width="80" height="34"/><rect x="300" y="72" width="80" height="34"/><rect x="300" y="114" width="80" height="34"/></g>
+        <g font-size="9" text-anchor="middle"><text x="340" y="51">app1</text><text x="340" y="93">app2</text><text x="340" y="135">app3</text></g>
+        <rect x="450" y="66" width="90" height="46" fill="var(--who)" stroke="var(--ink)" stroke-width="2"/><text x="495" y="86" text-anchor="middle" font-size="10">Redis</text><text x="495" y="102" text-anchor="middle" font-size="9">共用 100</text>
+        <g stroke="var(--ink)"><line x1="380" y1="47" x2="450" y2="80"/><line x1="380" y1="89" x2="450" y2="89"/><line x1="380" y1="131" x2="450" y2="98"/></g>
+        <g font-size="9" fill="var(--ink-soft)"><text x="555" y="70">代價：+1 網路 hop</text><text x="555" y="88">熱點 bottleneck</text><text x="555" y="106">SPOF → fail-open?</text></g>
+      </svg>
+    </div>
+    <details>
+      <summary>之後再看：Redis 計數的 race condition</summary>
+      <div><p>兩台 app 同時 <code>GET</code> 到 99、各自 <code>SET 100</code>，結果放了 101 個。解法是把「讀、判斷、寫」包成一個原子操作：<code>INCR</code> + <code>EXPIRE</code>，或一段 Lua script（Redis 執行 script 時不穿插別的指令）。Day 31 有完整版。</p></div>
+    </details>
+  </section>
+
+  <section id="l4">
+    <h2><span class="badge">L4</span>AWS 怎麼做<span class="time">讀 4 分鐘</span></h2>
+    <p class="lead">限流分層放：邊緣擋 IP，API Gateway 擋 API key，app 裡擋 user。Circuit breaker 放在呼叫下游的那一端。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 680 230" role="img" aria-label="Request path. Client to CloudFront with WAF rate-based rule per IP, then API Gateway usage plan per API key with token bucket throttling, then service on ECS or EKS. Inside the service, a per-user limiter checks ElastiCache with an atomic script, and a circuit breaker wraps calls to RDS.">
+        <rect x="10" y="90" width="70" height="44" fill="var(--card)" stroke="var(--ink)"/><text x="45" y="116" text-anchor="middle" font-size="10">client</text>
+        <rect x="110" y="70" width="120" height="84" fill="var(--see)" stroke="var(--ink)" stroke-width="1.5"/>
+        <text x="170" y="92" text-anchor="middle" font-size="10">CloudFront + WAF</text><text x="170" y="112" text-anchor="middle" font-size="9">rate-based rule</text><text x="170" y="128" text-anchor="middle" font-size="9">per IP</text><text x="170" y="144" text-anchor="middle" font-size="8" fill="var(--ink-soft)">窗口 1/2/5/10 分鐘</text>
+        <rect x="260" y="70" width="120" height="84" fill="var(--see)" stroke="var(--ink)" stroke-width="1.5"/>
+        <text x="320" y="92" text-anchor="middle" font-size="10">API Gateway</text><text x="320" y="112" text-anchor="middle" font-size="9">usage plan</text><text x="320" y="128" text-anchor="middle" font-size="9">per API key</text><text x="320" y="144" text-anchor="middle" font-size="8" fill="var(--ink-soft)">token bucket</text>
+        <rect x="410" y="40" width="140" height="150" fill="var(--card)" stroke="var(--accent)" stroke-width="2"/>
+        <text x="480" y="60" text-anchor="middle" font-size="10">service（ECS / EKS）</text>
+        <rect x="425" y="72" width="110" height="34" fill="var(--who)" stroke="var(--ink)"/><text x="480" y="93" text-anchor="middle" font-size="9">per-user limiter</text>
+        <rect x="425" y="140" width="110" height="34" fill="var(--may)" stroke="var(--ink)"/><text x="480" y="161" text-anchor="middle" font-size="9">circuit breaker</text>
+        <rect x="580" y="60" width="90" height="44" fill="var(--card)" stroke="var(--ink)"/><text x="625" y="80" text-anchor="middle" font-size="9">ElastiCache</text><text x="625" y="94" text-anchor="middle" font-size="8">INCR / Lua</text>
+        <rect x="580" y="136" width="90" height="44" fill="var(--card)" stroke="var(--ink)"/><text x="625" y="162" text-anchor="middle" font-size="10">RDS</text>
+        <g stroke="var(--ink)" stroke-width="1.5"><line x1="80" y1="112" x2="110" y2="112"/><line x1="230" y1="112" x2="260" y2="112"/><line x1="380" y1="112" x2="410" y2="112"/><line x1="535" y1="89" x2="580" y2="82"/><line x1="535" y1="157" x2="580" y2="158"/></g>
+        <text x="200" y="212" text-anchor="middle" font-size="10" class="hand">粗：擋攻擊</text><text x="480" y="212" text-anchor="middle" font-size="10" class="hand">細：公平 + 保護下游</text>
+      </svg>
+    </div>
+    <div class="scroll">
+      <table>
+        <tr><th>服務</th><th>用在哪</th><th>陷阱</th></tr>
+        <tr><td>AWS WAF rate-based rule</td><td>邊緣擋單一 IP 爆量</td><td>窗口是 1/2/5/10 分鐘，不是每秒精準限速。公司 NAT 後幾千人共用一個 IP，會整批被擋。最低門檻 10。</td></tr>
+        <tr><td>API Gateway throttling</td><td>per API key / per stage</td><td>帳號層級預設每 region 10,000 RPS、burst 5,000，同 region 所有 API 共用。一個吵的 API 會讓別的 API 也收到 429。</td></tr>
+        <tr><td>ElastiCache（Redis / Valkey）</td><td>集中計數</td><td>GET 再 SET 有 race，要用 INCR 或 Lua。Redis 掛了要事先決定 fail-open 還 fail-close，不是出事才想。</td></tr>
+        <tr><td>Envoy / Istio outlier detection</td><td>mesh 層的 circuit breaking</td><td>它踢掉的是「壞掉的那台 host」，不是整個下游。整個下游都慢時還是要 app 層 CB。App Mesh 已於 2026-09-30 停止支援，新專案別選。</td></tr>
+        <tr><td>ECS deployment circuit breaker</td><td>部署失敗自動 rollback〔還原到前一版〕</td><td>同名不同物。它管的是部署，不是 request。面試講 CB 時不要拿它舉例。</td></tr>
+      </table>
+    </div>
+    <p class="sub">誰會吵：業務說「VIP 客戶不能被 429」，SRE 說「那就給 VIP 獨立的 usage plan，不是拿掉 limit」。design review 會問：「Redis 掛了，你 fail-open 還是 fail-close？為什麼？」</p>
+  </section>
+
+  <section id="l5">
+    <h2><span class="badge">L5</span>規模化<span class="time">讀 3 分鐘</span></h2>
+    <p class="lead">每一級都在把「計數」和「斷路」從單機往外推：單台 → 共用 → 邊緣 → 自動調整。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 680 230" role="img" aria-label="Evolution ladder. Step 1 nginx limit_req on one server. Step 2 in-app token bucket per instance, breaks with N times limit. Step 3 shared Redis counter plus a circuit breaker library. Step 4 edge limits in WAF and API Gateway plus mesh outlier detection and adaptive concurrency limits.">
+        <rect x="20" y="170" width="150" height="50" fill="var(--card)" stroke="var(--ink)" stroke-width="1.5"/>
+        <text x="30" y="190" font-size="11" class="hand">① nginx limit_req</text><text x="30" y="208" font-size="9">單台，夠用</text>
+        <rect x="180" y="130" width="150" height="90" fill="var(--see)" stroke="var(--ink)" stroke-width="1.5"/>
+        <text x="190" y="150" font-size="11" class="hand">② app 內 TB</text><text x="190" y="170" font-size="9">每台一個桶</text><text x="190" y="186" font-size="9">多台 = N × limit</text>
+        <rect x="340" y="80" width="150" height="140" fill="var(--who)" stroke="var(--ink)" stroke-width="1.5"/>
+        <text x="350" y="100" font-size="11" class="hand">③ Redis 共用</text><text x="350" y="120" font-size="9">INCR / Lua</text><text x="350" y="136" font-size="9">+ CB library</text><text x="350" y="152" font-size="9">（resilience4j 等）</text>
+        <rect x="500" y="30" width="160" height="190" fill="var(--may)" stroke="var(--ink)" stroke-width="1.5"/>
+        <text x="510" y="50" font-size="11" class="hand">④ 分層 + 自動</text><text x="510" y="70" font-size="9">WAF / API GW 擋邊緣</text><text x="510" y="86" font-size="9">mesh outlier detection</text><text x="510" y="102" font-size="9">adaptive concurrency：</text><text x="510" y="118" font-size="9">看 latency 自動調上限</text>
+        <text x="95" y="160" text-anchor="middle" font-size="9" fill="var(--ink-soft)">換掉：單台</text>
+        <text x="255" y="120" text-anchor="middle" font-size="9" fill="var(--ink-soft)">換掉：各算各的</text>
+        <text x="415" y="70" text-anchor="middle" font-size="9" fill="var(--ink-soft)">換掉：手調數字</text>
+      </svg>
+    </div>
+    <div class="scroll">
+      <table>
+        <tr><th>CB 放哪</th><th>例子</th><th>好處</th><th>代價</th></tr>
+        <tr><td>App library</td><td>resilience4j、Polly、gobreaker</td><td>能寫 fallback（回快取、回預設值）</td><td>每種語言各一套，設定散在各 repo</td></tr>
+        <tr><td>Service mesh</td><td>Envoy、Istio</td><td>語言無關，平台團隊統一管</td><td>多一層 sidecar 要維運，只能回錯不能做業務 fallback</td></tr>
+      </table>
+    </div>
+  </section>
+
+  <section id="l6">
+    <h2><span class="badge">L6</span>故障與 on-call<span class="time">讀 4 分鐘</span></h2>
+    <p class="lead">保護機制自己也會壞：limiter 誤殺好人、CB 一直跳、重試把下游打得更死。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 680 150" role="img" aria-label="Retry storm. One user request goes through three layers, each retrying 3 times. The bottom service receives 3 times 3 times 3 equals 27 calls for one user request, right when it is already struggling.">
+        <g fill="var(--card)" stroke="var(--ink)" stroke-width="1.5"><rect x="20" y="50" width="100" height="44"/><rect x="180" y="50" width="100" height="44"/><rect x="340" y="50" width="100" height="44"/><rect x="500" y="50" width="160" height="44" fill="var(--may)"/></g>
+        <g font-size="10" text-anchor="middle"><text x="70" y="76">user：1 次</text><text x="230" y="76">gateway × 3</text><text x="390" y="76">service × 3</text><text x="580" y="70">DB 收到</text><text x="580" y="86" fill="var(--wrong)">3 × 3 × 3 = 27 次</text></g>
+        <g stroke="var(--ink)"><line x1="120" y1="72" x2="180" y2="72"/><line x1="280" y1="72" x2="340" y2="72"/><line x1="440" y1="72" x2="500" y2="72"/></g>
+        <text x="340" y="130" text-anchor="middle" font-size="11" class="hand">下游已經在喘的時候，重試把流量放大 27 倍。只在一層重試，加 backoff + jitter，配 CB</text>
+      </svg>
+    </div>
+    <div class="panels">
+      <div class="panel"><h3>A · Redis 掛了</h3><p>limiter 查不到計數。事先寫好：一般 API fail-open（保可用），登入、付款 fail-close（保安全）。</p></div>
+      <div class="panel"><h3>B · CB flapping</h3><p>樣本太少就判斷（minimumNumberOfCalls 太低），一兩個錯就跳。OPEN、CLOSED 一直換。</p></div>
+      <div class="panel"><h3>C · 重試風暴</h3><p>見上圖。AWS 2021-12-07 us-east-1 事件摘要寫到，內部網路被一波連線激增壓垮。</p></div>
+      <div class="panel"><h3>D · 誤殺</h3><p>429 突增但沒有攻擊跡象。常見原因：WAF 擋到公司 NAT IP，或 limit 是幾年前的流量算的。</p></div>
+    </div>
+    <div class="scroll">
+      <table>
+        <tr><th>看什麼</th><th>出事長相</th></tr>
+        <tr><td>429 數量（API GW <code>4XXError</code>、app counter）</td><td>突增 = 攻擊或誤殺，要看來源 IP / key 分布</td></tr>
+        <tr><td>CB 狀態（<code>resilience4j_circuitbreaker_state</code>）</td><td>OPEN = 下游正在壞；一直跳 = flapping</td></tr>
+        <tr><td>下游 P99 latency</td><td>先升 = 即將跳 CB，是領先指標</td></tr>
+        <tr><td>重試率</td><td>跟錯誤率一起升 = 風暴開始</td></tr>
+      </table>
+    </div>
+    <p>第一個指令（WAF 現在正在擋哪些 IP）：</p>
+    <pre>aws wafv2 get-rate-based-statement-managed-keys --scope REGIONAL --web-acl-name my-acl --web-acl-id &lt;id&gt; --rule-name per-ip-limit</pre>
+    <p class="sub">事件摘要：<a href="https://aws.amazon.com/message/12721/">Summary of the AWS Service Event in the Northern Virginia (US-EAST-1) Region</a>。SLO 範例（自訂）：正常 user 被誤擋的比例 &lt; 0.01%。</p>
+  </section>
+
+  <section id="l7">
+    <h2><span class="badge">L7</span>面試<span class="time">讀 3 分鐘</span></h2>
+    <p class="lead">題目：「API 有 3 台 app server，後面的 DB 只扛得住 1000 QPS。最近有爬蟲狂打，DB 也偶爾變慢。你怎麼設計保護？」</p>
+    <p>先自己講：用哪種演算法、放幾層、計數放哪、DB 變慢時怎麼辦、CB 三個狀態和條件。再打開。</p>
+    <details>
+      <summary>L4 vs L6 對照</summary>
+      <div>
+        <div class="wrong"><b>L4</b>「加一個 rate limiter，每秒 1000。DB 慢的話加 timeout。」<br>問題：一個桶會被爬蟲吸乾；3 台各算各的變 3000；timeout 只是讓等待有上限，連線照樣被佔滿。</div>
+        <div class="fix"><b>L6</b> 多了四件事：</div>
+        <ol>
+          <li>兩層：per-user Token Bucket 管公平，global Sliding Window 封頂 1000 保 DB。</li>
+          <li>計數集中到 Redis，用 Lua 原子化。先講好 Redis 掛了 fail-open 還 fail-close。</li>
+          <li>DB 前面放 CB：失敗率過門檻 → OPEN，fail fast 放掉連線；cooldown 後 HALF-OPEN 少量試探，避免 thundering herd。</li>
+          <li>監控 429 數、CB 狀態、DB P99。重試只在一層做，加 jitter。</li>
+        </ol>
+        <p class="en">"I'd use two limiters. A per-user token bucket keeps things fair, and a global sliding window caps traffic at the DB's 1,000 QPS. Since there are three servers, the counters live in Redis, updated atomically with a Lua script. If Redis goes down, read endpoints fail open and writes fail closed. In front of the DB I'd add a circuit breaker. When the failure rate crosses a threshold, it trips open and fails fast, so threads aren't stuck waiting on timeouts. After a cooldown it goes half-open and lets a few probe requests through. That way recovery doesn't turn into a thundering herd. I'd watch the 429 rate, the breaker state, and the DB's P99 latency."</p>
+      </div>
+    </details>
+  </section>
+
+  <section id="trail">
+    <h2><span class="badge">錯題</span>這次的釐清<span class="time">讀 2 分鐘</span></h2>
+    <div class="wrong"><b>我錯在這</b>✗ S52：CB 跳開後的狀態「不知道」，call 的去向只答「不會送」<br>✓ 狀態叫 OPEN。call 的去向是 fail fast：馬上回錯或走 fallback<br>→ 為什麼搞混：中文「開 = 通」，電路的 open = 斷。L0 那張開關圖就是解藥。</div>
+    <div class="wrong"><b>我錯在這</b>✗ Drill：global 一個桶就好<br>✓ global 只保 DB，會被爬蟲吸乾、餓死正常 user。要 per-user + global 兩層<br>→ 為什麼搞混：只看到「保護 DB」一個目標，漏了「公平性」。</div>
+    <div class="fix"><b>做對的</b>：HALF-OPEN 的理由（「一起動又被打掛」）你自己推出來。機制在，只差把 thundering herd 這個名字掛上去。</div>
+  </section>
+
+  <div class="next">
+    <b>下一步（2 分鐘）</b>
+    <p>不看這頁，畫出 CB 三個框和三條箭頭，每條箭頭寫上條件。畫完對照 L2。</p>
+  </div>
+
+</main>
