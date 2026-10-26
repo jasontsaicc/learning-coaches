@@ -1,0 +1,340 @@
+<title>Security and Auth</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC:wght@400;700&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: one notebook column on graph paper; teal sd accent band; figures on taped cards, failure cases as comic panels */
+:root {
+  --paper: #F6F8FA;
+  --grid: rgba(90,130,170,.16);
+  --ink: #23313E;
+  --ink-soft: #55677A;
+  --card: #FFFFFF;
+  --accent: #0B7285;
+  --on-accent: #FFFFFF;
+  --tape: color-mix(in srgb, var(--accent) 35%, transparent);
+  --who: #FFE98A;
+  --see: #BDEEF6;
+  --may: #F9CDE0;
+  --wrong: #D2453A;
+  --ok: #2F8F5B;
+  --line: #9DB0C2;
+  --font-hand: "LXGW WenKai TC", "Noto Sans TC", "PingFang TC", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #1A2320; --grid: rgba(200,230,210,.08); --ink: #E6EDE8; --ink-soft: #A9BAB1;
+    --card: #24302C; --accent: #3BC9DB; --on-accent: #10221F; --who: #8A7A2A; --see: #2B6A74; --may: #7A3F57;
+    --wrong: #FF8A7E; --ok: #7FD3A1; --line: #5E7268; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #1A2320; --grid: rgba(200,230,210,.08); --ink: #E6EDE8; --ink-soft: #A9BAB1;
+  --card: #24302C; --accent: #3BC9DB; --on-accent: #10221F; --who: #8A7A2A; --see: #2B6A74; --may: #7A3F57;
+  --wrong: #FF8A7E; --ok: #7FD3A1; --line: #5E7268; color-scheme: dark;
+}
+body {
+  background-color: var(--paper);
+  background-image: linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 22px 22px;
+  color: var(--ink);
+  font-family: var(--font-hand);
+  font-size: 17px;
+  line-height: 1.75;
+}
+.band { background: var(--accent); color: var(--on-accent); padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 22px 18px; }
+.band > div { max-width: 760px; margin: 0 auto; display: grid; gap: 8px; }
+.band a { color: inherit; }
+.page { max-width: 760px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 28px 64px; display: grid; gap: 36px; }
+h1, h2, h3 { text-wrap: balance; line-height: 1.3; margin: 0; }
+h1 { font-size: 2.1rem; }
+h2 { font-size: 1.4rem; display: flex; flex-wrap: wrap; align-items: baseline; gap: 10px; }
+h2 .badge { font-family: var(--font-mono); font-size: .78rem; background: var(--accent); color: var(--on-accent); padding: 1px 8px; border-radius: 3px; }
+h2 .time { font-family: var(--font-mono); font-size: .74rem; color: var(--ink-soft); letter-spacing: .04em; }
+p { margin: 0; }
+section { display: grid; gap: 14px; min-width: 0; }
+.sub { font-size: .95rem; opacity: .9; }
+.lead { font-size: 1.12rem; font-weight: 700; }
+.progress { display: flex; flex-wrap: wrap; gap: 6px 12px; font-family: var(--font-mono); font-size: .8rem; }
+.progress a { color: inherit; text-decoration: none; }
+mark { background: linear-gradient(transparent 52%, var(--who) 52%); color: inherit; padding: 0 2px; }
+mark.see { background: linear-gradient(transparent 52%, var(--see) 52%); }
+mark.may { background: linear-gradient(transparent 52%, var(--may) 52%); }
+code { font-family: var(--font-mono); font-size: .86em; background: color-mix(in srgb, var(--line) 22%, transparent); padding: 1px 5px; border-radius: 3px; }
+.card { position: relative; background: var(--card); padding: 22px 16px 14px; box-shadow: 0 1px 3px rgba(0,0,0,.12); min-width: 0; }
+.card::before { content: ""; position: absolute; top: -9px; left: 50%; width: 92px; height: 20px; transform: translateX(-50%) rotate(-2deg); background: var(--tape); }
+.scroll { overflow-x: auto; }
+svg.fig { display: block; min-width: 600px; width: 100%; height: auto; }
+svg text { font-family: var(--font-mono); fill: var(--ink); }
+svg .hand { font-family: var(--font-hand); }
+.rule { border-left: 4px solid var(--accent); padding: 6px 12px; font-size: 1.05rem; }
+.wrong { border-left: 4px solid var(--wrong); padding: 4px 12px; display: grid; gap: 2px; }
+.wrong b { color: var(--wrong); font-size: .85rem; letter-spacing: .05em; }
+.fix { border-left: 4px solid var(--ok); padding: 4px 12px; }
+.panels { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 14px; }
+.panel { border: 2px solid var(--ink); background: var(--card); padding: 10px; display: grid; gap: 6px; min-width: 0; align-content: start; }
+.panel h3 { font-size: 1rem; font-family: var(--font-mono); }
+.panel p { font-size: .92rem; }
+.panel svg { width: 100%; height: auto; display: block; }
+@media (max-width: 560px) { .panels { grid-template-columns: 1fr; } }
+table { border-collapse: collapse; width: 100%; font-size: .95rem; font-variant-numeric: tabular-nums; }
+th, td { border-bottom: 1px dashed var(--line); padding: 8px 6px; text-align: left; vertical-align: top; }
+th { font-family: var(--font-mono); font-size: .78rem; letter-spacing: .05em; color: var(--ink-soft); font-weight: 600; }
+ol, ul { margin: 0; padding-left: 1.3em; display: grid; gap: 6px; }
+details { background: var(--card); border: 2px dashed var(--line); padding: 10px 14px; }
+details[open] { border-style: solid; }
+details summary { cursor: pointer; font-weight: 700; }
+details > div { display: grid; gap: 10px; margin-top: 10px; }
+.two { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 14px; }
+@media (max-width: 560px) { .two { grid-template-columns: 1fr; } }
+.en { font-family: var(--font-mono); font-size: .88rem; color: var(--ink-soft); }
+pre { margin: 0; font-family: var(--font-mono); font-size: .82rem; line-height: 1.5; background: var(--card); border: 1px solid var(--line); padding: 10px 12px; overflow-x: auto; }
+.next { border: 3px solid var(--accent); background: var(--card); padding: 14px 16px; display: grid; gap: 6px; }
+a { color: var(--accent); text-underline-offset: 3px; }
+a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+</style>
+
+<header class="band">
+  <div>
+    <p class="sub">sd 課程 · P1 Building Blocks · Day 14 · S19-S21 教學，S45 術語複測</p>
+    <h1>Security and Auth</h1>
+    <p>讀完這頁你能：把每一層機制對到它擋的威脅，講出 JWT 為什麼不用查 DB、為什麼很難撤銷，在三種情境裡選 Session 或 JWT，並講出 OAuth 四個角色和 code 為什麼要繞一圈。</p>
+    <nav class="progress" aria-label="layers"><a href="#l0">L0 ✓</a><a href="#l1">L1 ✓</a><a href="#l2">L2 ✓</a><a href="#l3">L3 ✓</a><a href="#l4">L4 ✓</a><a href="#l5">L5 ✓</a><a href="#l6">L6 ✓</a><a href="#l7">L7 ✓</a><a href="#trail">錯題</a></nav>
+  </div>
+</header>
+
+<main class="page">
+
+  <p class="sub">S45 判定：機制全通，術語撈不出來（access token 講成「憑證」、scope 講成「權限」、四個角色忘了）。deny list 為什麼不會膨脹也卡了兩輪。這頁 L2 和 L3 各有一張圖對付這兩件事。</p>
+
+  <section id="l0">
+    <h2><span class="badge">L0</span>一張圖<span class="time">讀 1 分鐘</span></h2>
+    <p class="lead">飯店：入住時櫃台看一次證件（密碼），發一張有期限的房卡（token）。房卡只開你那間（scope），掉了打給櫃台掛失（revocation）。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 680 180" role="img" aria-label="Hotel. At check-in the front desk checks your ID once, the password. It issues a key card with an expiry date, the token. The card only opens your room, the scope. Door locks check the card by themselves without calling the front desk, which is why a lost card keeps working until it expires unless the desk blocks it.">
+        <rect x="20" y="50" width="130" height="70" fill="var(--who)" stroke="var(--ink)" stroke-width="2"/><text x="85" y="78" text-anchor="middle" font-size="11" class="hand">櫃台</text><text x="85" y="98" text-anchor="middle" font-size="9">看一次證件（密碼）</text>
+        <rect x="210" y="60" width="120" height="50" fill="var(--may)" stroke="var(--ink)" stroke-width="1.5" rx="6"/><text x="270" y="82" text-anchor="middle" font-size="11" class="hand">房卡（token）</text><text x="270" y="98" text-anchor="middle" font-size="8">期限 + 防偽印</text>
+        <g fill="var(--card)" stroke="var(--ink)"><rect x="400" y="20" width="110" height="40"/><rect x="400" y="70" width="110" height="40" stroke="var(--ok)" stroke-width="2.5"/><rect x="400" y="120" width="110" height="40"/></g>
+        <g font-size="9" text-anchor="middle"><text x="455" y="44" fill="var(--ink-soft)">別人的房間 ✕</text><text x="455" y="94">你的房間 ✓（scope）</text><text x="455" y="144" fill="var(--ink-soft)">健身房 ✕</text></g>
+        <g stroke="var(--ink)" stroke-width="1.5"><line x1="150" y1="85" x2="210" y2="85"/><line x1="330" y1="85" x2="400" y2="90"/></g>
+        <text x="595" y="80" text-anchor="middle" font-size="9">門鎖自己驗房卡，</text><text x="595" y="96" text-anchor="middle" font-size="9">不打給櫃台</text><text x="595" y="118" text-anchor="middle" font-size="9" fill="var(--wrong)">所以掉了的卡</text><text x="595" y="134" text-anchor="middle" font-size="9" fill="var(--wrong)">到期前都還能用</text>
+      </svg>
+    </div>
+  </section>
+
+  <section id="l1">
+    <h2><span class="badge">L1</span>第一性原理<span class="time">讀 3 分鐘</span></h2>
+    <p class="lead">Security 不是一張 best practice 清單。每一層機制都在擋一個具體的威脅，順著威脅推，整條鏈自己長出來。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 680 230" role="img" aria-label="Threat chain. Public WiFi sniffing, solved by HTTPS. Database breach, solved by bcrypt with salt. Sending the password on every request is slow and exposes it, solved by tokens. A stolen long-lived token cannot be revoked, solved by short access tokens plus refresh tokens. Giving your password to a third-party app, solved by OAuth.">
+        <g fill="var(--card)" stroke="var(--wrong)" stroke-width="1.5"><rect x="20" y="20" width="190" height="34"/><rect x="20" y="64" width="190" height="34"/><rect x="20" y="108" width="190" height="34"/><rect x="20" y="152" width="190" height="34"/><rect x="20" y="196" width="190" height="30"/></g>
+        <g font-size="9"><text x="30" y="41">公共 WiFi 被竊聽（MITM）</text><text x="30" y="85">DB 被偷走</text><text x="30" y="129">每個 request 都送密碼</text><text x="30" y="173">token 被偷、7 天都有效</text><text x="30" y="215">把密碼交給第三方 app</text></g>
+        <g fill="var(--who)" stroke="var(--ink)" stroke-width="1.5"><rect x="280" y="20" width="200" height="34"/><rect x="280" y="64" width="200" height="34"/><rect x="280" y="108" width="200" height="34"/><rect x="280" y="152" width="200" height="34"/><rect x="280" y="196" width="200" height="30"/></g>
+        <g font-size="9"><text x="290" y="41">HTTPS（TLS：加密 + 驗身 + 防竄改）</text><text x="290" y="85">bcrypt + 每人一個 salt</text><text x="290" y="129">登入換 token（JWT）</text><text x="290" y="173">短 access token + refresh token</text><text x="290" y="215">OAuth：委託有限的權限</text></g>
+        <g stroke="var(--ink)"><line x1="210" y1="37" x2="280" y2="37"/><line x1="210" y1="81" x2="280" y2="81"/><line x1="210" y1="125" x2="280" y2="125"/><line x1="210" y1="169" x2="280" y2="169"/><line x1="210" y1="211" x2="280" y2="211"/></g>
+        <text x="575" y="80" text-anchor="middle" font-size="10" class="hand">威脅</text><text x="575" y="96" text-anchor="middle" font-size="10" class="hand">→ 機制</text>
+        <text x="575" y="130" text-anchor="middle" font-size="9" fill="var(--ink-soft)">面試時順著這條講，</text><text x="575" y="144" text-anchor="middle" font-size="9" fill="var(--ink-soft)">每一層都講得出 WHY</text>
+      </svg>
+    </div>
+    <p>反直覺的一點：<mark>密碼 hash 越慢越好</mark>。GPU 跑 SHA-256 一秒約 100 億次，弱密碼幾秒就破。bcrypt 一次約 100 ms：使用者登入感覺不到，攻擊者試 10 億組要約 3 年。這叫 asymmetric cost〔不對稱成本〕。</p>
+  </section>
+
+  <section id="l2">
+    <h2><span class="badge">L2</span>機制<span class="time">讀 5 分鐘</span></h2>
+    <p class="lead">server 信任 JWT 不用查 DB，靠的是三步邏輯：要做出有效的簽章需要 secret → 只有真的 server 有 secret → 簽章驗得過，就是真的 server 發的。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 680 190" role="img" aria-label="JWT is three base64 parts joined by dots: header with alg RS256, payload with sub user 42, exp and role, and the signature computed over header and payload with the private key. An attacker who changes role to admin cannot recompute the signature without the key, so verification fails.">
+        <rect x="20" y="30" width="170" height="80" fill="var(--see)" stroke="var(--ink)" stroke-width="1.5"/><text x="105" y="52" text-anchor="middle" font-size="11" class="hand">HEADER</text><text x="105" y="74" text-anchor="middle" font-size="9">alg: RS256</text><text x="105" y="90" text-anchor="middle" font-size="9">kid: key-2026-10</text>
+        <text x="200" y="74" font-size="16">.</text>
+        <rect x="215" y="30" width="200" height="80" fill="var(--who)" stroke="var(--ink)" stroke-width="1.5"/><text x="315" y="52" text-anchor="middle" font-size="11" class="hand">PAYLOAD（claims）</text><text x="315" y="72" text-anchor="middle" font-size="9">sub: user_42　role: customer</text><text x="315" y="88" text-anchor="middle" font-size="9">exp: 15 分鐘後</text>
+        <text x="425" y="74" font-size="16">.</text>
+        <rect x="440" y="30" width="220" height="80" fill="var(--may)" stroke="var(--ink)" stroke-width="1.5"/><text x="550" y="52" text-anchor="middle" font-size="11" class="hand">SIGNATURE</text><text x="550" y="72" text-anchor="middle" font-size="9">sign(header.payload, private key)</text><text x="550" y="88" text-anchor="middle" font-size="9">只有 auth server 有這把 key</text>
+        <rect x="215" y="130" width="200" height="44" fill="var(--card)" stroke="var(--wrong)" stroke-width="2"/><text x="315" y="150" text-anchor="middle" font-size="9" fill="var(--wrong)">攻擊者把 role 改成 admin</text><text x="315" y="166" text-anchor="middle" font-size="9" fill="var(--wrong)">算不出新簽章 → 驗證失敗</text>
+        <text x="550" y="150" text-anchor="middle" font-size="9" fill="var(--ink-soft)">payload 只是 base64，誰都看得到</text><text x="550" y="166" text-anchor="middle" font-size="9" fill="var(--ink-soft)">不要放密碼或個資</text>
+      </svg>
+    </div>
+    <p class="lead">HS256 是一把共用的 secret，簽和驗是同一把。RS256 拆成兩把：private key 只在 auth server，其他服務只拿 public key，只能驗、不能簽。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 680 170" role="img" aria-label="HS256: ten services all hold the same secret, so hacking any one of them lets the attacker forge tokens for anyone; 10 attack surfaces. RS256: only the auth server holds the private key; the ten services hold only the public key from the JWKS endpoint, so a hacked service can verify but not forge; 1 attack surface.">
+        <text x="170" y="22" text-anchor="middle" font-size="11" class="hand">HS256：共用一把 secret</text>
+        <g fill="var(--wrong)" opacity=".75" stroke="var(--ink)"><rect x="30" y="40" width="50" height="30"/><rect x="90" y="40" width="50" height="30"/><rect x="150" y="40" width="50" height="30"/><rect x="210" y="40" width="50" height="30"/><rect x="270" y="40" width="50" height="30"/></g>
+        <g font-size="8" text-anchor="middle" fill="var(--card)"><text x="55" y="59">svc + key</text><text x="115" y="59">svc + key</text><text x="175" y="59">svc + key</text><text x="235" y="59">svc + key</text><text x="295" y="59">svc + key</text></g>
+        <text x="170" y="96" text-anchor="middle" font-size="9" fill="var(--wrong)">任何一台被打下 → 能幫任何人簽假 token</text><text x="170" y="112" text-anchor="middle" font-size="9" fill="var(--wrong)">攻擊面 = 10</text>
+        <line x1="340" y1="20" x2="340" y2="160" stroke="var(--line)" stroke-dasharray="4 4"/>
+        <text x="510" y="22" text-anchor="middle" font-size="11" class="hand">RS256：兩把 key</text>
+        <rect x="370" y="40" width="100" height="40" fill="var(--may)" stroke="var(--ink)" stroke-width="2"/><text x="420" y="58" text-anchor="middle" font-size="9">auth server</text><text x="420" y="72" text-anchor="middle" font-size="8">private key（簽）</text>
+        <g fill="var(--see)" stroke="var(--ink)"><rect x="500" y="34" width="70" height="24"/><rect x="580" y="34" width="70" height="24"/><rect x="500" y="66" width="70" height="24"/><rect x="580" y="66" width="70" height="24"/></g>
+        <g font-size="8" text-anchor="middle"><text x="535" y="50">svc public</text><text x="615" y="50">svc public</text><text x="535" y="82">svc public</text><text x="615" y="82">svc public</text></g>
+        <line x1="470" y1="60" x2="500" y2="60" stroke="var(--ink)" stroke-dasharray="4 3"/>
+        <text x="510" y="112" text-anchor="middle" font-size="9">服務被打下只能「驗」不能「簽」</text><text x="510" y="128" text-anchor="middle" font-size="9" fill="var(--ok)">攻擊面縮回 1（least privilege）</text>
+        <text x="510" y="150" text-anchor="middle" font-size="8" fill="var(--ink-soft)">public key 從 JWKS endpoint 拉</text>
+      </svg>
+    </div>
+    <p class="lead">OAuth 四個角色，加上 Authorization Code Flow：token 不經過 browser，browser 只拿到一張一次性的 code。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 680 270" role="img" aria-label="Sequence with four lanes: Resource Owner the user in a browser, Client the ScaleUp app server, Authorization Server Google login, Resource Server Drive API. 1, user clicks connect Drive. 2, client redirects the browser to the authorization server with scope and state. 3, user logs in and approves the scope there; the password never reaches the client. 4, the authorization server redirects back with a short-lived code. 5, the client server posts the code plus client secret to the authorization server, server to server. 6, it receives the access token and refresh token. 7, the client calls the Drive API with the access token.">
+        <g font-size="10" text-anchor="middle" class="hand"><text x="90" y="22">Resource Owner</text><text x="260" y="22">Client</text><text x="430" y="22">Authorization Server</text><text x="590" y="22">Resource Server</text></g>
+        <g font-size="8" text-anchor="middle" fill="var(--ink-soft)"><text x="90" y="36">user（browser）</text><text x="260" y="36">ScaleUp 後端</text><text x="430" y="36">Google 登入 + 同意頁</text><text x="590" y="36">Drive API</text></g>
+        <g stroke="var(--line)" stroke-width="2"><line x1="90" y1="44" x2="90" y2="260"/><line x1="260" y1="44" x2="260" y2="260"/><line x1="430" y1="44" x2="430" y2="260"/><line x1="590" y1="44" x2="590" y2="260"/></g>
+        <g stroke="var(--ink)" stroke-width="1.5">
+          <line x1="90" y1="64" x2="260" y2="64"/><line x1="260" y1="90" x2="90" y2="90"/><line x1="90" y1="116" x2="430" y2="116"/><line x1="430" y1="142" x2="90" y2="142"/><line x1="90" y1="160" x2="260" y2="160"/>
+        </g>
+        <line x1="260" y1="192" x2="430" y2="192" stroke="var(--ok)" stroke-width="2.5"/><line x1="430" y1="214" x2="260" y2="214" stroke="var(--ok)" stroke-width="2.5"/><line x1="260" y1="240" x2="590" y2="240" stroke="var(--accent)" stroke-width="2"/>
+        <g font-size="8"><text x="100" y="60">① 按「連接 Drive」</text><text x="100" y="86">② 302 → Google（scope、state）</text><text x="100" y="112">③ 在 Google 登入、核准 scope（密碼只在這裡）</text><text x="100" y="138">④ 302 回來 ?code=一次性</text><text x="100" y="156">（browser 把 code 交給 client）</text><text x="268" y="188" fill="var(--ok)">⑤ code + client_secret（server 對 server）</text><text x="268" y="210" fill="var(--ok)">⑥ access + refresh token</text><text x="268" y="236">⑦ 帶 access token 呼叫 Drive API</text></g>
+        <rect x="20" y="170" width="140" height="44" fill="var(--card)" stroke="var(--wrong)" stroke-dasharray="4 3"/><text x="90" y="188" text-anchor="middle" font-size="8" fill="var(--wrong)">browser 是敵區：history、</text><text x="90" y="202" text-anchor="middle" font-size="8" fill="var(--wrong)">referrer、extension 都看得到</text>
+      </svg>
+    </div>
+    <p>通用原則：<mark>貴重的東西要經過你控制不了的通道時，不要傳東西本身，傳一張只能在安全通道兌換的憑證</mark>。code 單獨拿到沒用，要配 client_secret 才換得到 token。</p>
+  </section>
+
+  <section id="l3">
+    <h2><span class="badge">L3</span>取捨<span class="time">讀 4 分鐘</span></h2>
+    <p class="lead">JWT 的超能力（不查 DB）和詛咒（撤銷不了）是同一件事。解法是把 credential 拆成兩種生命週期。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 680 210" role="img" aria-label="Two lifetimes on a 30 day timeline. Access tokens are short, 15 minutes each, drawn as many small blocks; services verify them locally with no DB call. The refresh token is one long 30 day bar stored in the database; using it to get a new access token hits the DB once every 15 minutes. When a laptop is stolen, deleting the refresh token ends access within at most 15 minutes. A deny list only needs entries for tokens younger than 15 minutes, so it stays small.">
+        <line x1="60" y1="150" x2="640" y2="150" stroke="var(--ink)" stroke-width="2"/>
+        <text x="30" y="70" font-size="10">access</text><text x="30" y="124" font-size="10">refresh</text>
+        <g fill="var(--who)" stroke="var(--ink)"><rect x="70" y="54" width="30" height="26"/><rect x="104" y="54" width="30" height="26"/><rect x="138" y="54" width="30" height="26"/><rect x="172" y="54" width="30" height="26"/><rect x="206" y="54" width="30" height="26"/><rect x="240" y="54" width="30" height="26"/></g>
+        <text x="300" y="72" font-size="9">⋯ 每 15 分鐘一張，本地驗、不查 DB</text>
+        <rect x="70" y="108" width="560" height="26" fill="var(--may)" stroke="var(--ink)"/><text x="350" y="126" text-anchor="middle" font-size="9">一張 30 天，存在 DB（stateful，可刪）</text>
+        <line x1="420" y1="30" x2="420" y2="160" stroke="var(--wrong)" stroke-width="2" stroke-dasharray="5 3"/><text x="420" y="24" text-anchor="middle" font-size="9" fill="var(--wrong)">筆電被偷 → 刪 refresh token</text>
+        <rect x="420" y="54" width="30" height="26" fill="var(--wrong)" opacity=".6" stroke="var(--ink)"/><text x="460" y="96" font-size="9" fill="var(--wrong)">手上那張最多再活 15 分鐘</text>
+        <rect x="70" y="170" width="560" height="34" fill="var(--card)" stroke="var(--ink)"/><text x="350" y="186" text-anchor="middle" font-size="9">要立刻擋：加 deny list。但它只需要記「還沒過期」的 token，</text><text x="350" y="199" text-anchor="middle" font-size="9">超過 15 分鐘的自動刪掉 → 表的大小 ≈ 最近 15 分鐘的掛失量，不會膨脹</text>
+      </svg>
+    </div>
+    <div class="scroll">
+      <table>
+        <tr><th>情境</th><th>選</th><th>為什麼</th></tr>
+        <tr><td>銀行 monolith，法規要 1 秒內踢人</td><td>Session</td><td>只有 stateful store 能立刻刪。代價：每 request 多 1 ms + 要顧 Redis 的 HA、備份</td></tr>
+        <tr><td>10 個 microservice、多種語言</td><td>JWT（RS256）+ refresh</td><td>Session 會讓所有服務綁同一個 Redis：SPOF、耦合、延遲疊加</td></tr>
+        <tr><td>個人 blog，一天 100 人</td><td>Session（cookie + Postgres）</td><td>JWT 的三個賣點這裡都不存在。KISS、YAGNI</td></tr>
+      </table>
+    </div>
+    <div class="fix"><b>先看問題，不看 buzzword</b>：JWT 解三個問題：不打中央 store、跨服務互信、auth 掛了不全掛。拿情境去對這三個，對不上就用 Session。</div>
+  </section>
+
+  <section id="l4">
+    <h2><span class="badge">L4</span>AWS 怎麼做<span class="time">讀 4 分鐘</span></h2>
+    <p class="lead">Cognito 當 Authorization Server，API Gateway 在入口集中驗 JWT，各服務只拿 public key。密碼和 key 交給 Secrets Manager、KMS、ACM。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 680 230" role="img" aria-label="Client logs in through a Cognito user pool, which issues ID, access and refresh tokens and publishes public keys at its JWKS URL. Requests go through API Gateway with a JWT authorizer that checks signature, issuer, audience and expiry using the JWKS. Backend services on EKS read the claims. Secrets Manager rotates the DB password, ACM provides TLS certificates on the edge.">
+        <rect x="10" y="90" width="80" height="44" fill="var(--card)" stroke="var(--ink)"/><text x="50" y="116" text-anchor="middle" font-size="10">client</text>
+        <rect x="130" y="20" width="160" height="60" fill="var(--may)" stroke="var(--ink)" stroke-width="1.5"/><text x="210" y="42" text-anchor="middle" font-size="10">Cognito user pool</text><text x="210" y="58" text-anchor="middle" font-size="8">發 id / access / refresh</text><text x="210" y="72" text-anchor="middle" font-size="8">JWKS：/.well-known/jwks.json</text>
+        <rect x="130" y="110" width="160" height="60" fill="var(--who)" stroke="var(--ink)" stroke-width="2"/><text x="210" y="132" text-anchor="middle" font-size="10">API Gateway</text><text x="210" y="148" text-anchor="middle" font-size="8">JWT authorizer</text><text x="210" y="162" text-anchor="middle" font-size="8">驗簽章、iss、aud、exp</text>
+        <rect x="340" y="110" width="160" height="60" fill="var(--card)" stroke="var(--accent)" stroke-width="2"/><text x="420" y="134" text-anchor="middle" font-size="10">services（EKS）</text><text x="420" y="152" text-anchor="middle" font-size="8">讀 claims，不碰密碼</text>
+        <rect x="540" y="100" width="130" height="34" fill="var(--see)" stroke="var(--ink)"/><text x="605" y="121" text-anchor="middle" font-size="9">Secrets Manager</text>
+        <rect x="540" y="144" width="130" height="34" fill="var(--see)" stroke="var(--ink)"/><text x="605" y="165" text-anchor="middle" font-size="9">RDS（密碼自動 rotate）</text>
+        <rect x="130" y="190" width="160" height="30" fill="var(--card)" stroke="var(--ink)" stroke-dasharray="4 3"/><text x="210" y="209" text-anchor="middle" font-size="8">ACM 憑證（TLS）</text>
+        <g stroke="var(--ink)"><line x1="90" y1="105" x2="130" y2="55"/><line x1="90" y1="120" x2="130" y2="140"/><line x1="290" y1="140" x2="340" y2="140"/><line x1="500" y1="130" x2="540" y2="117"/><line x1="500" y1="150" x2="540" y2="161"/></g>
+        <line x1="210" y1="80" x2="210" y2="110" stroke="var(--ink)" stroke-dasharray="4 3"/><text x="218" y="98" font-size="8">拉 public key</text>
+      </svg>
+    </div>
+    <div class="scroll">
+      <table>
+        <tr><th>服務</th><th>用在哪</th><th>陷阱</th></tr>
+        <tr><td>Cognito token</td><td>auth server</td><td>access / ID token 預設 1 小時、refresh 預設 30 天。<code>GlobalSignOut</code> 會撤 refresh，但已發出的 access token 對「本地驗簽」的服務來說到期前照樣有效。要快就把 access TTL 調短。</td></tr>
+        <tr><td>API Gateway JWT authorizer</td><td>入口集中驗</td><td>要設對 issuer 和 audience。只驗簽章不驗 <code>aud</code>，別的 app 發的合法 token 也能進來。</td></tr>
+        <tr><td>ALB <code>authenticate-oidc</code></td><td>讓 ALB 做登入</td><td>ALB 把使用者資訊放在 <code>x-amzn-oidc-data</code> header 傳給後端。後端要驗那個 header 的簽章，而且 security group 只開給 ALB，不然誰都能偽造 header。</td></tr>
+        <tr><td>Secrets Manager rotation</td><td>DB 密碼、client_secret</td><td>app 啟動時讀一次就 cache 到死，rotate 之後新連線全部認證失敗。要在認證失敗時重讀。</td></tr>
+        <tr><td>ACM 憑證</td><td>TLS</td><td>DNS validation 的 CNAME 被刪掉，就不會自動續約。email validation 要人工點信。</td></tr>
+      </table>
+    </div>
+    <p class="sub">誰會吵：資安要 access token 5 分鐘，前端嫌一直 refresh。design review 會問：「使用者被停權，最多多久之後才真的進不來？」</p>
+  </section>
+
+  <section id="l5">
+    <h2><span class="badge">L5</span>規模化<span class="time">讀 3 分鐘</span></h2>
+    <p class="lead">每一級都在減少「每個 request 要去問中央」的次數，同時把「能發 credential 的東西」收得更窄。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 680 230" role="img" aria-label="Evolution ladder. Step 1 single server with a sessions table and an HttpOnly cookie. Step 2 several servers sharing a Redis session store. Step 3 JWT signed with RS256, refresh tokens, JWKS, and validation at the API gateway. Step 4 a managed identity provider with OIDC single sign-on, service to service mTLS, and short-lived credentials everywhere such as IRSA instead of long-lived keys.">
+        <rect x="20" y="170" width="150" height="50" fill="var(--card)" stroke="var(--ink)" stroke-width="1.5"/>
+        <text x="30" y="190" font-size="11" class="hand">① session 表</text><text x="30" y="208" font-size="9">單機 + HttpOnly cookie</text>
+        <rect x="180" y="130" width="150" height="90" fill="var(--see)" stroke="var(--ink)" stroke-width="1.5"/>
+        <text x="190" y="150" font-size="11" class="hand">② Redis session</text><text x="190" y="170" font-size="9">多台共用</text><text x="190" y="186" font-size="9">Redis 變中央依賴</text>
+        <rect x="340" y="80" width="150" height="140" fill="var(--who)" stroke="var(--ink)" stroke-width="1.5"/>
+        <text x="350" y="100" font-size="11" class="hand">③ JWT RS256</text><text x="350" y="120" font-size="9">refresh + JWKS</text><text x="350" y="136" font-size="9">API Gateway 集中驗</text>
+        <rect x="500" y="30" width="160" height="190" fill="var(--may)" stroke="var(--ink)" stroke-width="1.5"/>
+        <text x="510" y="50" font-size="11" class="hand">④ 代管 IdP</text><text x="510" y="70" font-size="9">Cognito / Okta</text><text x="510" y="86" font-size="9">OIDC SSO</text><text x="510" y="102" font-size="9">服務之間 mTLS</text><text x="510" y="118" font-size="9">到處短期 credential</text><text x="510" y="134" font-size="9">（IRSA，不放長期 key）</text>
+        <text x="95" y="160" text-anchor="middle" font-size="9" fill="var(--ink-soft)">換掉：綁單機</text>
+        <text x="255" y="120" text-anchor="middle" font-size="9" fill="var(--ink-soft)">換掉：每 request 查中央</text>
+        <text x="415" y="70" text-anchor="middle" font-size="9" fill="var(--ink-soft)">換掉：自己管 key</text>
+      </svg>
+    </div>
+    <div class="scroll">
+      <table>
+        <tr><th>路線</th><th>例子</th><th>好處</th><th>代價</th></tr>
+        <tr><td>自建 auth server</td><td>自己簽 JWT、自己管 key</td><td>完全掌控 claim 和流程</td><td>key rotation、JWKS、MFA、帳號鎖定全部自己做，出錯就是資安事件</td></tr>
+        <tr><td>代管 IdP</td><td>Cognito、Okta、Auth0</td><td>MFA、SSO、rotation 現成</td><td>綁廠商；客製流程受限；按 MAU 收費</td></tr>
+      </table>
+    </div>
+  </section>
+
+  <section id="l6">
+    <h2><span class="badge">L6</span>故障與 on-call<span class="time">讀 4 分鐘</span></h2>
+    <p class="lead">auth 的告警要同時看兩個方向：失敗率太高（被攻擊）和失敗率突然變 0（auth 本身死了）。兩種在某些圖上長得一樣。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 680 160" role="img" aria-label="Failed login rate over a day. Normal sits around 2 percent. A spike above 5 percent for 5 minutes means brute force or credential stuffing. A flat line at exactly 0 means nobody can even reach the login, which is an outage that looks like a quiet day. Both need alerts.">
+        <line x1="60" y1="130" x2="640" y2="130" stroke="var(--ink)" stroke-width="2"/>
+        <line x1="60" y1="70" x2="640" y2="70" stroke="var(--wrong)" stroke-dasharray="4 3"/><text x="636" y="64" text-anchor="end" font-size="9" fill="var(--wrong)">5% 告警線</text>
+        <path d="M 60 110 L 180 108 L 200 40 L 240 38 L 260 108 L 400 110 L 420 130 L 560 130 L 580 110 L 640 110" fill="none" stroke="var(--accent)" stroke-width="2.5"/>
+        <text x="220" y="30" text-anchor="middle" font-size="9" fill="var(--wrong)">暴力破解 / 撞庫</text>
+        <rect x="420" y="118" width="140" height="12" fill="var(--wrong)" opacity=".3"/><text x="490" y="150" text-anchor="middle" font-size="9" fill="var(--wrong)">剛好 0%：auth 掛了，不是很安靜</text>
+        <text x="110" y="100" font-size="9">平常 ~2%</text>
+      </svg>
+    </div>
+    <div class="panels">
+      <div class="panel"><h3>A · key rotation 出事</h3><p>換了簽章 key，有服務的 JWKS cache 還是舊的，找不到新的 <code>kid</code>。JWT validation error 一次暴增。</p></div>
+      <div class="panel"><h3>B · 撞庫攻擊</h3><p>失敗登入率 5 分鐘內 &gt; 5%，來源 IP 分散。帳號鎖定 + rate limit + WAF。</p></div>
+      <div class="panel"><h3>C · 時鐘不準</h3><p>某台 server 時鐘快了幾分鐘，剛發的 token 被判過期。驗 <code>exp</code> 時留一點 leeway。</p></div>
+      <div class="panel"><h3>D · 筆電被偷</h3><p>撤 refresh token（Cognito 用 global sign-out）。手上的 access token 還有最多一個 TTL 的時間，要更快就加 deny list。</p></div>
+    </div>
+    <div class="scroll">
+      <table>
+        <tr><th>看什麼</th><th>出事長相</th></tr>
+        <tr><td>failed login rate</td><td>&gt; 5% 是攻擊；= 0 是 auth 掛了</td></tr>
+        <tr><td>JWT validation error 數</td><td>突然暴增 = key rotation 或 JWKS cache 問題</td></tr>
+        <tr><td>token issuance rate</td><td>異常暴增 = refresh token 被盜用</td></tr>
+        <tr><td>token 驗證 P99</td><td>&gt; 50 ms = 有人每次都在遠端驗（沒 cache JWKS）</td></tr>
+      </table>
+    </div>
+    <p>第一個指令（看一張 token 裡的 claims，確認 exp、aud、kid）：</p>
+    <pre>python3 -c 'import sys,base64,json;p=sys.argv[1].split(".")[1];print(json.dumps(json.loads(base64.urlsafe_b64decode(p+"="*(-len(p)%4))),indent=1))' "$TOKEN"</pre>
+    <p class="sub">只是解碼，不是驗證。payload 誰都讀得到，這也證明了 JWT 裡不能放秘密。</p>
+  </section>
+
+  <section id="l7">
+    <h2><span class="badge">L7</span>面試<span class="time">讀 3 分鐘</span></h2>
+    <p class="lead">題目：「ScaleUp 有 10 個 microservice。使用者要登入，也要讓 ScaleUp 把檔案寫進他的 Google Drive。設計 auth。使用者回報筆電被偷，要怎麼處理？」</p>
+    <p>先自己講：密碼怎麼存、Session 還 JWT、HS256 還 RS256、怎麼拿到 Drive 權限、筆電被偷之後最多多久會失效。再打開。</p>
+    <details>
+      <summary>L4 vs L6 對照</summary>
+      <div>
+        <div class="wrong"><b>L4</b>「用 JWT 登入，讓使用者輸入 Google 帳密給我們存起來去寫 Drive。」<br>問題：存別人的密碼 = 全權、撤不掉、我們被駭就連 Google 一起淪陷；JWT 沒講 TTL 和撤銷。</div>
+        <div class="fix"><b>L6</b> 多了四件事：</div>
+        <ol>
+          <li>密碼：HTTPS 傳，bcrypt + salt 存。慢是故意的。</li>
+          <li>10 個服務：JWT 用 RS256，只有 auth service 有 private key，其他服務從 JWKS 拿 public key 本地驗。access 15 分鐘 + refresh 30 天存 DB。</li>
+          <li>Drive：OAuth Authorization Code Flow，只要 <code>drive.file</code> scope。我們永遠看不到 Google 密碼。</li>
+          <li>筆電被偷：刪 refresh token，最多 15 分鐘後完全失效；要立刻就加只存 15 分鐘的 deny list。監控 failed login rate 的兩個方向和 JWT validation error。</li>
+        </ol>
+        <p class="en">"Passwords go over HTTPS and get stored with bcrypt and a per-user salt. bcrypt is slow on purpose, so brute force stays expensive. Since we have ten services, a shared session store would turn Redis into a single point of failure. So I'd issue JWTs signed with RS256. Only the auth service holds the private key, and every other service verifies locally with the public key from a JWKS endpoint. A compromised service can verify tokens but can't forge them. Access tokens live for fifteen minutes, and refresh tokens live for thirty days in the database, so they can be revoked. For Google Drive, we use OAuth with the authorization code flow and ask only for the drive.file scope. We never see the user's Google password. If a laptop is stolen, we delete its refresh token, and access ends within fifteen minutes. If that's too slow, we add a deny list that only has to remember the last fifteen minutes. I'd alert on failed logins spiking and on failed logins dropping to zero."</p>
+      </div>
+    </details>
+  </section>
+
+  <section id="trail">
+    <h2><span class="badge">錯題</span>這次的釐清<span class="time">讀 2 分鐘</span></h2>
+    <div class="wrong"><b>我錯在這</b>✗ S45：access token 講成「憑證」、scope 講成「權限」、四個角色喊忘<br>✓ Resource Owner（user）、Client（app）、Authorization Server（發 token）、Resource Server（放資料）<br>→ 為什麼搞混：機制全通，但術語沒綁上去。L2 最後那張圖四條泳道就是四個角色，名字寫在最上面。</div>
+    <div class="wrong"><b>我錯在這</b>✗ S45：deny list 為什麼不會膨脹，卡兩輪<br>✓ 它只需要記還沒過期的 token。access TTL 15 分鐘，表的大小 ≈ 最近 15 分鐘的掛失量<br>→ 為什麼搞混：沒把「短 TTL」和「deny list 大小」連成一條鏈。L3 那張時間線最下面就是這條鏈。</div>
+    <div class="wrong"><b>我錯在這</b>✗ S20：Auth Server 和 Resource Server 分開是因為「不同 api」<br>✓ 是 signing capability isolation：能簽 token 的被打下 = 能假冒任何人；只能驗的被打下 = 只漏那個服務的資料<br>→ 為什麼搞混：描述了現象，沒講設計的理由。</div>
+    <div class="wrong"><b>我錯在這</b>✗ WR2 老問題：直接答「JWT 簽章」，沒先講為什麼不能每個 request 都驗密碼<br>✓ 先講兩個痛點（bcrypt 太慢、密碼重複曝光），再導出 token<br>→ 為什麼搞混：WHAT 知道，WHY 跳過。L1 的威脅鏈就是 WHY 的順序。</div>
+  </section>
+
+  <div class="next">
+    <b>下一步（2 分鐘）</b>
+    <p>不看這頁，寫出 OAuth 四個角色的英文名，各配一個 ScaleUp 例子裡的東西。</p>
+  </div>
+
+</main>

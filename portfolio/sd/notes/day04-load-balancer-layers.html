@@ -1,0 +1,347 @@
+<title>Load Balancer</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC:wght@400;700&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: one notebook column on graph paper; teal sd accent band; figures on taped cards, failure cases as comic panels */
+:root {
+  --paper: #F6F8FA;
+  --grid: rgba(90,130,170,.16);
+  --ink: #23313E;
+  --ink-soft: #55677A;
+  --card: #FFFFFF;
+  --accent: #0B7285;
+  --on-accent: #FFFFFF;
+  --tape: color-mix(in srgb, var(--accent) 35%, transparent);
+  --who: #FFE98A;
+  --see: #BDEEF6;
+  --may: #F9CDE0;
+  --wrong: #D2453A;
+  --ok: #2F8F5B;
+  --line: #9DB0C2;
+  --font-hand: "LXGW WenKai TC", "Noto Sans TC", "PingFang TC", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #1A2320; --grid: rgba(200,230,210,.08); --ink: #E6EDE8; --ink-soft: #A9BAB1;
+    --card: #24302C; --accent: #3BC9DB; --on-accent: #10221F; --who: #8A7A2A; --see: #2B6A74; --may: #7A3F57;
+    --wrong: #FF8A7E; --ok: #7FD3A1; --line: #5E7268; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #1A2320; --grid: rgba(200,230,210,.08); --ink: #E6EDE8; --ink-soft: #A9BAB1;
+  --card: #24302C; --accent: #3BC9DB; --on-accent: #10221F; --who: #8A7A2A; --see: #2B6A74; --may: #7A3F57;
+  --wrong: #FF8A7E; --ok: #7FD3A1; --line: #5E7268; color-scheme: dark;
+}
+body {
+  background-color: var(--paper);
+  background-image: linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 22px 22px;
+  color: var(--ink);
+  font-family: var(--font-hand);
+  font-size: 17px;
+  line-height: 1.75;
+}
+.band { background: var(--accent); color: var(--on-accent); padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 22px 18px; }
+.band > div { max-width: 760px; margin: 0 auto; display: grid; gap: 8px; }
+.band a { color: inherit; }
+.page { max-width: 760px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 28px 64px; display: grid; gap: 36px; }
+h1, h2, h3 { text-wrap: balance; line-height: 1.3; margin: 0; }
+h1 { font-size: 2.1rem; }
+h2 { font-size: 1.4rem; display: flex; flex-wrap: wrap; align-items: baseline; gap: 10px; }
+h2 .badge { font-family: var(--font-mono); font-size: .78rem; background: var(--accent); color: var(--on-accent); padding: 1px 8px; border-radius: 3px; }
+h2 .time { font-family: var(--font-mono); font-size: .74rem; color: var(--ink-soft); letter-spacing: .04em; }
+p { margin: 0; }
+section { display: grid; gap: 14px; min-width: 0; }
+.sub { font-size: .95rem; opacity: .9; }
+.lead { font-size: 1.12rem; font-weight: 700; }
+.progress { display: flex; flex-wrap: wrap; gap: 6px 12px; font-family: var(--font-mono); font-size: .8rem; }
+.progress a { color: inherit; text-decoration: none; }
+mark { background: linear-gradient(transparent 52%, var(--who) 52%); color: inherit; padding: 0 2px; }
+mark.see { background: linear-gradient(transparent 52%, var(--see) 52%); }
+mark.may { background: linear-gradient(transparent 52%, var(--may) 52%); }
+code { font-family: var(--font-mono); font-size: .86em; background: color-mix(in srgb, var(--line) 22%, transparent); padding: 1px 5px; border-radius: 3px; }
+.card { position: relative; background: var(--card); padding: 22px 16px 14px; box-shadow: 0 1px 3px rgba(0,0,0,.12); min-width: 0; }
+.card::before { content: ""; position: absolute; top: -9px; left: 50%; width: 92px; height: 20px; transform: translateX(-50%) rotate(-2deg); background: var(--tape); }
+.scroll { overflow-x: auto; }
+svg.fig { display: block; min-width: 600px; width: 100%; height: auto; }
+svg text { font-family: var(--font-mono); fill: var(--ink); }
+svg .hand { font-family: var(--font-hand); }
+.rule { border-left: 4px solid var(--accent); padding: 6px 12px; font-size: 1.05rem; }
+.wrong { border-left: 4px solid var(--wrong); padding: 4px 12px; display: grid; gap: 2px; }
+.wrong b { color: var(--wrong); font-size: .85rem; letter-spacing: .05em; }
+.fix { border-left: 4px solid var(--ok); padding: 4px 12px; }
+.panels { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 14px; }
+.panel { border: 2px solid var(--ink); background: var(--card); padding: 10px; display: grid; gap: 6px; min-width: 0; align-content: start; }
+.panel h3 { font-size: 1rem; font-family: var(--font-mono); }
+.panel p { font-size: .92rem; }
+.panel svg { width: 100%; height: auto; display: block; }
+@media (max-width: 560px) { .panels { grid-template-columns: 1fr; } }
+table { border-collapse: collapse; width: 100%; font-size: .95rem; font-variant-numeric: tabular-nums; }
+th, td { border-bottom: 1px dashed var(--line); padding: 8px 6px; text-align: left; vertical-align: top; }
+th { font-family: var(--font-mono); font-size: .78rem; letter-spacing: .05em; color: var(--ink-soft); font-weight: 600; }
+ol, ul { margin: 0; padding-left: 1.3em; display: grid; gap: 6px; }
+details { background: var(--card); border: 2px dashed var(--line); padding: 10px 14px; }
+details[open] { border-style: solid; }
+details summary { cursor: pointer; font-weight: 700; }
+details > div { display: grid; gap: 10px; margin-top: 10px; }
+.two { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 14px; }
+@media (max-width: 560px) { .two { grid-template-columns: 1fr; } }
+.en { font-family: var(--font-mono); font-size: .88rem; color: var(--ink-soft); }
+pre { margin: 0; font-family: var(--font-mono); font-size: .82rem; line-height: 1.5; background: var(--card); border: 1px solid var(--line); padding: 10px 12px; overflow-x: auto; }
+.next { border: 3px solid var(--accent); background: var(--card); padding: 14px 16px; display: grid; gap: 6px; }
+a { color: var(--accent); text-underline-offset: 3px; }
+a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+</style>
+
+<header class="band">
+  <div>
+    <p class="sub">sd 課程 · P1 Building Blocks · Day 4-5 · S4 教學，S40 重錨，S50-S52 術語複測</p>
+    <h1>Load Balancer</h1>
+    <p>讀完這頁你能：說出 L4 和 L7 各看什麼、四個演算法各配哪個情境，分清 sticky session 和 external store 是方向相反的兩招，並講出 slow start 和 deregistration delay 各管上線端還是下線端。</p>
+    <nav class="progress" aria-label="layers"><a href="#l0">L0 ✓</a><a href="#l1">L1 ✓</a><a href="#l2">L2 ✓</a><a href="#l3">L3 ✓</a><a href="#l4">L4 ✓</a><a href="#l5">L5 ✓</a><a href="#l6">L6 ✓</a><a href="#l7">L7 ✓</a><a href="#trail">錯題</a></nav>
+  </div>
+</header>
+
+<main class="page">
+
+  <p class="sub">這題的錯幾乎都是「名字沒綁上機制」：Least Connections 在 S4 被講成 "least robin"，33 天後 S40 又掉一次；deregistration delay 在 S50 到 S52 連掉三場。這頁每個名字旁邊都配一張圖。</p>
+
+  <section id="l0">
+    <h2><span class="badge">L0</span>一張圖<span class="time">讀 1 分鐘</span></h2>
+    <p class="lead">餐廳帶位員：客人不用知道哪張桌子空著，帶位員看哪桌最閒就帶過去。有一桌壞了，就不再帶人過去。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 680 180" role="img" aria-label="Guests arrive at a host stand. The host looks at three tables: table 1 has 3 guests, table 2 has 1 guest, table 3 is broken. The host seats the next guest at table 2, the least busy one, and never sends anyone to the broken table.">
+        <g fill="var(--see)" stroke="var(--ink)"><circle cx="40" cy="70" r="10"/><circle cx="40" cy="100" r="10"/><circle cx="40" cy="130" r="10"/></g>
+        <text x="40" y="160" text-anchor="middle" font-size="10">客人</text>
+        <rect x="110" y="70" width="110" height="60" fill="var(--who)" stroke="var(--ink)" stroke-width="2"/><text x="165" y="96" text-anchor="middle" font-size="11" class="hand">帶位員（LB）</text><text x="165" y="114" text-anchor="middle" font-size="9">看哪桌最閒</text>
+        <g fill="var(--card)" stroke="var(--ink)" stroke-width="1.5"><rect x="320" y="20" width="150" height="40"/><rect x="320" y="80" width="150" height="40" stroke="var(--ok)" stroke-width="2.5"/><rect x="320" y="140" width="150" height="40" stroke-dasharray="5 3"/></g>
+        <g font-size="10"><text x="330" y="44">桌 1：3 位客人</text><text x="330" y="104">桌 2：1 位 ← 帶來這</text><text x="330" y="164" fill="var(--wrong)">桌 3：壞了（不帶人）</text></g>
+        <g stroke="var(--ink)"><line x1="50" y1="100" x2="110" y2="100"/><line x1="220" y1="100" x2="320" y2="100" stroke="var(--ok)" stroke-width="2.5"/><line x1="220" y1="90" x2="320" y2="40"/></g>
+        <text x="575" y="96" text-anchor="middle" font-size="10">客人只看到門口，</text><text x="575" y="112" text-anchor="middle" font-size="10">不用知道有幾張桌子</text>
+      </svg>
+    </div>
+  </section>
+
+  <section id="l1">
+    <h2><span class="badge">L1</span>第一性原理<span class="time">讀 3 分鐘</span></h2>
+    <p class="lead">一台 server 有三個逃不掉的問題：它會壞、它有上限、換版要停機。LB 讓 client 只認一個入口，後面要換幾台都可以。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 680 190" role="img" aria-label="Three problems of one server and how a load balancer solves each. One server dies, everything dies; with a load balancer, traffic goes to the healthy ones. Vertical scaling hits a ceiling; with a load balancer, add more servers. Deploying means downtime; with a load balancer, take servers out one at a time and drain their connections.">
+        <g fill="var(--card)" stroke="var(--ink)" stroke-width="1.5"><rect x="20" y="20" width="200" height="60"/><rect x="240" y="20" width="200" height="60"/><rect x="460" y="20" width="200" height="60"/></g>
+        <g font-size="10" text-anchor="middle"><text x="120" y="44">一台壞 = 全部壞</text><text x="120" y="62" fill="var(--wrong)">SPOF</text><text x="340" y="44">升級規格有天花板</text><text x="340" y="62" fill="var(--wrong)">vertical 上限</text><text x="560" y="44">換版 = 停機</text><text x="560" y="62" fill="var(--wrong)">deploy downtime</text></g>
+        <g fill="var(--who)" stroke="var(--ink)" stroke-width="1.5"><rect x="20" y="110" width="200" height="60"/><rect x="240" y="110" width="200" height="60"/><rect x="460" y="110" width="200" height="60"/></g>
+        <g font-size="10" text-anchor="middle"><text x="120" y="134">health check</text><text x="120" y="152">只送給健康的</text><text x="340" y="134">horizontal scaling</text><text x="340" y="152">加台數就好</text><text x="560" y="134">rolling update</text><text x="560" y="152">一台一台拿下來、先排空</text></g>
+        <g stroke="var(--ink)"><line x1="120" y1="80" x2="120" y2="110"/><line x1="340" y1="80" x2="340" y2="110"/><line x1="560" y1="80" x2="560" y2="110"/></g>
+      </svg>
+    </div>
+    <p>LB 是 reverse proxy 的一種功能：站在 server 前面、保護 server。forward proxy（VPN、公司 proxy）站在 client 前面、保護 client。</p>
+  </section>
+
+  <section id="l2">
+    <h2><span class="badge">L2</span>機制<span class="time">讀 5 分鐘</span></h2>
+    <p class="lead">L4 只看 IP 和 port，L7 會拆開 HTTP 看 path 和 header。拆得越多，能做的路由越多，也越慢。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 680 190" role="img" aria-label="A packet drawn as nested envelopes: IP and TCP port on the outside, HTTP headers, path and cookies inside. L4 reads only the outer envelope and forwards the connection, measured about 4,465 requests per second in the PoC. L7 opens the envelope to read the path, for example slash api goes to the API service, measured about 2,317 requests per second.">
+        <rect x="30" y="30" width="300" height="130" fill="var(--see)" stroke="var(--ink)" stroke-width="2"/><text x="45" y="50" font-size="10">外層：IP + TCP port</text>
+        <rect x="60" y="62" width="250" height="84" fill="var(--who)" stroke="var(--ink)"/><text x="75" y="82" font-size="10">內層：HTTP</text><text x="75" y="102" font-size="9">Host、path（/api）、header</text><text x="75" y="120" font-size="9">cookie</text>
+        <rect x="380" y="30" width="270" height="56" fill="var(--card)" stroke="var(--ink)" stroke-width="1.5"/><text x="395" y="52" font-size="11" class="hand">L4（NLB、Nginx stream）</text><text x="395" y="72" font-size="9">只看外層 → 轉整條連線。PoC：~4,465 req/s</text>
+        <rect x="380" y="104" width="270" height="56" fill="var(--card)" stroke="var(--accent)" stroke-width="2"/><text x="395" y="126" font-size="11" class="hand">L7（ALB、Nginx http）</text><text x="395" y="146" font-size="9">拆開看 path → /api 送 API 服務。PoC：~2,317 req/s</text>
+        <line x1="330" y1="58" x2="380" y2="58" stroke="var(--ink)"/><line x1="310" y1="104" x2="380" y2="130" stroke="var(--ink)"/>
+        <text x="340" y="182" text-anchor="middle" font-size="10">PoC 也證明：L4 打 /api 拿不到 X-Route header，因為它根本沒讀 path</text>
+      </svg>
+    </div>
+    <p class="lead">四個演算法，記法 RWLI。關鍵是分清「server 不一樣」（靜態，用 Weighted）和「request 不一樣」（動態，用 Least Connections）。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 680 210" role="img" aria-label="Round robin versus least connections when requests vary. Round robin sends requests in turn: server A gets a 30 second report plus more, piling up 4 open connections while server B finishes quick ones and sits with 0. Least connections looks at open connections right now and sends the next request to B.">
+        <text x="20" y="30" font-size="11" class="hand">Round Robin：輪流，不看現在多忙</text>
+        <rect x="40" y="44" width="260" height="30" fill="var(--wrong)" opacity=".75" stroke="var(--ink)"/><text x="50" y="64" font-size="9" fill="var(--card)">A：30 秒報表 + 3 個排隊 = 4 條連線</text>
+        <rect x="40" y="80" width="40" height="30" fill="var(--ok)" stroke="var(--ink)"/><text x="90" y="100" font-size="9">B：快的都做完了 = 0 條（閒著）</text>
+        <text x="320" y="72" font-size="9" fill="var(--wrong)">下一個還是可能輪到 A</text>
+        <line x1="20" y1="124" x2="660" y2="124" stroke="var(--line)" stroke-dasharray="4 4"/>
+        <text x="20" y="148" font-size="11" class="hand">Least Connections：看「現在」誰的連線最少</text>
+        <rect x="40" y="160" width="260" height="30" fill="var(--may)" stroke="var(--ink)"/><text x="50" y="180" font-size="9">A：4 條</text>
+        <rect x="320" y="160" width="40" height="30" fill="var(--ok)" stroke="var(--ink)" stroke-width="2.5"/><text x="370" y="180" font-size="9" fill="var(--ok)">B：0 條 ← 下一個給 B</text>
+      </svg>
+    </div>
+    <div class="scroll">
+      <table>
+        <tr><th>演算法</th><th>怎麼分</th><th>用在</th></tr>
+        <tr><td><b>R</b>ound Robin</td><td>輪流</td><td>server 一樣、request 差不多</td></tr>
+        <tr><td><b>W</b>eighted RR</td><td>按權重輪流（靜態）</td><td>server 規格不同</td></tr>
+        <tr><td><b>L</b>east Connections</td><td>看當下最少連線（動態）</td><td>request 處理時間差很多</td></tr>
+        <tr><td><b>I</b>P Hash</td><td>hash(client IP) 固定一台</td><td>要 session affinity</td></tr>
+      </table>
+    </div>
+    <p class="lead">一台 server 的生命週期有兩端：上線端怕「一上來就被打爆」，下線端怕「砍掉時切斷進行中的 request」。兩端各有一個設定。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 680 200" role="img" aria-label="Lifecycle of one target. On the way in, slow start ramps its share of traffic from 0 to full over, for example, 60 seconds, so cold caches and JIT can warm up. In the middle it serves normally and health checks keep watching. On the way out, deregistration delay stops new requests but lets in-flight ones finish for up to 300 seconds by default, then cuts whatever is left.">
+        <line x1="40" y1="150" x2="640" y2="150" stroke="var(--ink)" stroke-width="2"/>
+        <path d="M 60 150 L 180 60 L 470 60 L 470 60" fill="none" stroke="var(--ok)" stroke-width="3"/>
+        <path d="M 470 60 L 470 150" fill="none" stroke="var(--ink)" stroke-dasharray="4 3"/>
+        <rect x="470" y="60" width="150" height="90" fill="var(--may)" opacity=".45" stroke="var(--ink)" stroke-dasharray="5 3"/>
+        <text x="120" y="40" text-anchor="middle" font-size="11" class="hand">上線端：slow start</text><text x="120" y="176" text-anchor="middle" font-size="9">流量從 0 慢慢加（例 60s）</text><text x="120" y="190" text-anchor="middle" font-size="9">讓 cache、JIT 暖起來</text>
+        <text x="325" y="50" text-anchor="middle" font-size="10">正常服務，health check 一直盯著</text>
+        <text x="545" y="40" text-anchor="middle" font-size="11" class="hand">下線端：deregistration delay</text><text x="545" y="96" text-anchor="middle" font-size="9">不收新 request</text><text x="545" y="112" text-anchor="middle" font-size="9">舊的做完再走</text><text x="545" y="176" text-anchor="middle" font-size="9">ALB 預設 300s，時間到還沒走完就切</text>
+      </svg>
+    </div>
+    <p>S52 你把兩端混在一起（把 draining 講成「啟動時先 test」）。記法：<mark>slow start = 慢慢放人進來</mark>，<mark>deregistration delay = 分批送人走</mark>。另一個名字 connection draining 指的是同一件事。</p>
+  </section>
+
+  <section id="l3">
+    <h2><span class="badge">L3</span>取捨<span class="time">讀 4 分鐘</span></h2>
+    <p class="lead">「換台就被登出」有兩個方向相反的解法：sticky 把 user 往內壓（綁住同一台），external store 把狀態往外拉（server 變成可以隨便換）。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 680 200" role="img" aria-label="Two opposite fixes. Sticky session: a cookie pins user Alice to server A, and her session lives inside A. If A dies her session is lost, and heavy users pinned to A make it overloaded. External store: sessions live in Redis; any server can serve Alice, so servers are stateless, at the cost of a Redis hop and running Redis.">
+        <text x="170" y="22" text-anchor="middle" font-size="12" class="hand">Sticky：往內壓</text>
+        <circle cx="40" cy="90" r="14" fill="var(--see)" stroke="var(--ink)"/><text x="40" y="94" text-anchor="middle" font-size="8">Alice</text>
+        <rect x="120" y="50" width="110" height="40" fill="var(--who)" stroke="var(--ink)" stroke-width="2"/><text x="175" y="68" text-anchor="middle" font-size="9">server A</text><text x="175" y="82" text-anchor="middle" font-size="8">session 在這台裡</text>
+        <rect x="120" y="110" width="110" height="40" fill="var(--card)" stroke="var(--ink)"/><text x="175" y="134" text-anchor="middle" font-size="9">server B（用不到）</text>
+        <line x1="54" y1="86" x2="120" y2="70" stroke="var(--accent)" stroke-width="2.5"/><text x="70" y="62" font-size="8">cookie 綁死</text>
+        <text x="170" y="176" text-anchor="middle" font-size="9" fill="var(--wrong)">A 掛 = session 全丟；重度 user 擠在 A = 不均</text>
+        <line x1="340" y1="20" x2="340" y2="190" stroke="var(--line)" stroke-dasharray="4 4"/>
+        <text x="510" y="22" text-anchor="middle" font-size="12" class="hand">External store：往外拉</text>
+        <circle cx="380" cy="90" r="14" fill="var(--see)" stroke="var(--ink)"/><text x="380" y="94" text-anchor="middle" font-size="8">Alice</text>
+        <rect x="440" y="50" width="90" height="40" fill="var(--card)" stroke="var(--ink)"/><text x="485" y="74" text-anchor="middle" font-size="9">server A</text>
+        <rect x="440" y="110" width="90" height="40" fill="var(--card)" stroke="var(--ink)"/><text x="485" y="134" text-anchor="middle" font-size="9">server B</text>
+        <rect x="570" y="76" width="90" height="48" fill="var(--who)" stroke="var(--ink)" stroke-width="2"/><text x="615" y="98" text-anchor="middle" font-size="9">Redis</text><text x="615" y="112" text-anchor="middle" font-size="8">session 在這</text>
+        <g stroke="var(--ink)"><line x1="394" y1="86" x2="440" y2="70"/><line x1="394" y1="94" x2="440" y2="130"/><line x1="530" y1="70" x2="570" y2="94"/><line x1="530" y1="130" x2="570" y2="106"/></g>
+        <text x="510" y="176" text-anchor="middle" font-size="9">誰都能接 Alice；代價：多一跳 + 要顧 Redis</text>
+      </svg>
+    </div>
+    <div class="scroll">
+      <table>
+        <tr><th>選擇</th><th>選 A 的理由</th><th>代價</th></tr>
+        <tr><td>L7 vs L4</td><td>microservices 要 path routing → L7</td><td>多 parse HTTP，PoC 慢約 2 倍</td></tr>
+        <tr><td>L4 vs L7</td><td>遊戲、百萬條 TCP、要固定 IP → L4</td><td>不能看 path、不能依 cookie 路由</td></tr>
+        <tr><td>DNS LB（Route 53）</td><td>跨 region 分流、canary（weighted 90/10）</td><td>client 會快取 IP 到 TTL 結束，不能即時摘掉壞的</td></tr>
+      </table>
+    </div>
+    <p>面試標準開法：<mark>先講 Round Robin 夠用，request 時間差很多再換 Least Connections</mark>。先給簡單的、再說何時升級，就是在展示取捨。</p>
+  </section>
+
+  <section id="l4">
+    <h2><span class="badge">L4</span>AWS 怎麼做<span class="time">讀 4 分鐘</span></h2>
+    <p class="lead">兩層：Route 53 決定去哪個 region，ALB 決定去哪個服務、哪一台。要固定 IP 或純 TCP 才換 NLB。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 680 230" role="img" aria-label="Route 53 with latency based routing sends users to the closest region. In each region an ALB routes by path: slash users to the user service target group and slash orders to the order service target group, each across two AZs with health checks. An NLB with an Elastic IP is shown separately for a TCP game server that needs a fixed IP.">
+        <rect x="10" y="90" width="100" height="50" fill="var(--may)" stroke="var(--ink)" stroke-width="1.5"/><text x="60" y="110" text-anchor="middle" font-size="10">Route 53</text><text x="60" y="126" text-anchor="middle" font-size="8">latency / weighted</text>
+        <rect x="140" y="20" width="390" height="140" fill="none" stroke="var(--ink-soft)" stroke-dasharray="5 4"/><text x="150" y="36" font-size="10">region ap-northeast-1</text>
+        <rect x="160" y="70" width="100" height="60" fill="var(--who)" stroke="var(--ink)" stroke-width="2"/><text x="210" y="94" text-anchor="middle" font-size="10">ALB</text><text x="210" y="110" text-anchor="middle" font-size="8">path routing</text>
+        <rect x="300" y="46" width="210" height="44" fill="var(--card)" stroke="var(--ink)"/><text x="405" y="64" text-anchor="middle" font-size="9">/users → TG users</text><text x="405" y="80" text-anchor="middle" font-size="8">AZ-a ×2、AZ-c ×2</text>
+        <rect x="300" y="104" width="210" height="44" fill="var(--card)" stroke="var(--ink)"/><text x="405" y="122" text-anchor="middle" font-size="9">/orders → TG orders</text><text x="405" y="138" text-anchor="middle" font-size="8">health check /health</text>
+        <g stroke="var(--ink)"><line x1="110" y1="110" x2="160" y2="100"/><line x1="260" y1="92" x2="300" y2="68"/><line x1="260" y1="108" x2="300" y2="126"/></g>
+        <rect x="140" y="176" width="390" height="44" fill="var(--card)" stroke="var(--line)" stroke-dasharray="5 3"/><text x="335" y="196" text-anchor="middle" font-size="9">另一路：NLB + Elastic IP → TCP 遊戲 server</text><text x="335" y="210" text-anchor="middle" font-size="8">固定 IP、保留 client IP、不拆 HTTP</text>
+        <rect x="560" y="70" width="110" height="60" fill="var(--card)" stroke="var(--ink-soft)" stroke-dasharray="5 4"/><text x="615" y="96" text-anchor="middle" font-size="9">另一個 region</text><text x="615" y="112" text-anchor="middle" font-size="8">同樣一套</text>
+        <line x1="110" y1="100" x2="560" y2="96" stroke="var(--ink)" stroke-dasharray="3 3" opacity=".5"/>
+      </svg>
+    </div>
+    <div class="scroll">
+      <table>
+        <tr><th>設定</th><th>用在哪</th><th>陷阱</th></tr>
+        <tr><td>ALB 演算法</td><td>target group 屬性</td><td>只有 <code>round_robin</code>、<code>least_outstanding_requests</code>、<code>weighted_random</code>。ALB 版的 Least Connections 叫 least outstanding requests，看的是「還沒回的 request」。</td></tr>
+        <tr><td><code>deregistration_delay.timeout_seconds</code></td><td>下線排空</td><td>預設 300s。API 都在 5 秒內回，設 30s 就夠，不然每次 deploy 白等 5 分鐘。WebSocket 長連線則是 300s 到了一次全切，2 萬條同時重連。</td></tr>
+        <tr><td><code>slow_start.duration_seconds</code></td><td>上線暖機</td><td>預設 0（關）。新 task 一註冊就吃滿流量，JIT 和 cache 還是冷的，前幾十秒 5xx 和延遲都高。</td></tr>
+        <tr><td>Health check</td><td>摘掉壞的 target</td><td>ALB 預設 interval 30s、unhealthy threshold 2，最慢約 1 分鐘才摘。<code>/health</code> 如果去查 DB，DB 一抖所有 target 同時不健康，ALB 會 fail open 全部照送。</td></tr>
+        <tr><td>Stickiness</td><td>session affinity</td><td>ALB cookie <code>AWSALB</code> 預設綁 1 天。重度 user 卡在同一台，scale out 之後新機器也分不到他們。</td></tr>
+      </table>
+    </div>
+    <p class="sub">誰會吵：後端說「deploy 時有 502」，SRE 查到是 deregistration delay 比 app 的 graceful shutdown 還短。design review 會問：「這個服務的 request 最長跑多久？draining 設多少？」</p>
+  </section>
+
+  <section id="l5">
+    <h2><span class="badge">L5</span>規模化<span class="time">讀 3 分鐘</span></h2>
+    <p class="lead">每一級都把「入口」往外推一層：一台 → 一個 region 內 → 全球。超過 10K QPS 加上 microservices，通常就是 DNS + ALB 兩層。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 680 230" role="img" aria-label="Evolution ladder. Step 1 one server with a public IP. Step 2 Nginx reverse proxy in front of 2 or 3 servers. Step 3 ALB with an auto scaling group, health checks, draining and slow start. Step 4 Route 53 latency routing or Global Accelerator across regions, an ALB per region, and a service mesh for service to service traffic.">
+        <rect x="20" y="170" width="150" height="50" fill="var(--card)" stroke="var(--ink)" stroke-width="1.5"/>
+        <text x="30" y="190" font-size="11" class="hand">① 一台 + 公網 IP</text><text x="30" y="208" font-size="9">壞了就停</text>
+        <rect x="180" y="130" width="150" height="90" fill="var(--see)" stroke="var(--ink)" stroke-width="1.5"/>
+        <text x="190" y="150" font-size="11" class="hand">② Nginx + 3 台</text><text x="190" y="170" font-size="9">預設只看 TCP 活著</text><text x="190" y="186" font-size="9">PoC：回 500 照送</text>
+        <rect x="340" y="80" width="150" height="140" fill="var(--who)" stroke="var(--ink)" stroke-width="1.5"/>
+        <text x="350" y="100" font-size="11" class="hand">③ ALB + ASG</text><text x="350" y="120" font-size="9">HTTP health check</text><text x="350" y="136" font-size="9">draining、slow start</text><text x="350" y="152" font-size="9">自動加減台數</text>
+        <rect x="500" y="30" width="160" height="190" fill="var(--may)" stroke="var(--ink)" stroke-width="1.5"/>
+        <text x="510" y="50" font-size="11" class="hand">④ 全球</text><text x="510" y="70" font-size="9">Route 53 latency</text><text x="510" y="86" font-size="9">或 Global Accelerator</text><text x="510" y="102" font-size="9">每個 region 一個 ALB</text><text x="510" y="118" font-size="9">服務之間走 mesh</text>
+        <text x="95" y="160" text-anchor="middle" font-size="9" fill="var(--ink-soft)">換掉：單點</text>
+        <text x="255" y="120" text-anchor="middle" font-size="9" fill="var(--ink-soft)">換掉：手動 + TCP 檢查</text>
+        <text x="415" y="70" text-anchor="middle" font-size="9" fill="var(--ink-soft)">換掉：單一 region</text>
+      </svg>
+    </div>
+    <div class="scroll">
+      <table>
+        <tr><th>跨 region 入口</th><th>做法</th><th>好處</th><th>代價</th></tr>
+        <tr><td>Route 53 latency / failover</td><td>DNS 回最近 region 的 IP</td><td>便宜、設定簡單</td><td>切換要等 client 的 DNS 快取過期</td></tr>
+        <tr><td>Global Accelerator</td><td>兩個固定 anycast IP，走 AWS 骨幹</td><td>不靠 DNS，切 region 很快</td><td>另外收費</td></tr>
+      </table>
+    </div>
+  </section>
+
+  <section id="l6">
+    <h2><span class="badge">L6</span>故障與 on-call<span class="time">讀 4 分鐘</span></h2>
+    <p class="lead">LB 很少自己壞。出事多半是設定和 app 對不上：health check 太深、draining 太短、新機器太冷。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 680 160" role="img" aria-label="Deep health check trap. Four targets each check the shared DB in their health endpoint. The DB has a 10 second blip. All four health checks fail at once, all targets are marked unhealthy, and the ALB fails open, sending traffic to all of them anyway. A shallow health check that only verifies the process is alive would have kept routing normal.">
+        <g fill="var(--card)" stroke="var(--wrong)" stroke-width="2"><rect x="30" y="30" width="90" height="34"/><rect x="30" y="74" width="90" height="34"/><rect x="140" y="30" width="90" height="34"/><rect x="140" y="74" width="90" height="34"/></g>
+        <g font-size="9" text-anchor="middle" fill="var(--wrong)"><text x="75" y="51">unhealthy</text><text x="75" y="95">unhealthy</text><text x="185" y="51">unhealthy</text><text x="185" y="95">unhealthy</text></g>
+        <rect x="300" y="50" width="100" height="40" fill="var(--may)" stroke="var(--ink)"/><text x="350" y="68" text-anchor="middle" font-size="9">共用 DB</text><text x="350" y="82" text-anchor="middle" font-size="8">抖了 10 秒</text>
+        <g stroke="var(--ink)" stroke-dasharray="4 3"><line x1="230" y1="47" x2="300" y2="65"/><line x1="230" y1="91" x2="300" y2="75"/></g>
+        <text x="130" y="132" text-anchor="middle" font-size="10">/health 去查 DB → 4 台同時判死</text>
+        <rect x="440" y="30" width="220" height="80" fill="var(--card)" stroke="var(--ink)"/><text x="550" y="54" text-anchor="middle" font-size="10" class="hand">全部不健康</text><text x="550" y="72" text-anchor="middle" font-size="9">ALB fail open：照樣全部送</text><text x="550" y="90" text-anchor="middle" font-size="9">health check 等於沒用</text>
+        <text x="340" y="152" text-anchor="middle" font-size="10" fill="var(--ink-soft)">解法：liveness 只檢查自己活著；依賴出事交給 circuit breaker</text>
+      </svg>
+    </div>
+    <div class="panels">
+      <div class="panel"><h3>A · health check 太深</h3><p>見上圖。共用依賴一抖，全部 target 一起被摘。</p></div>
+      <div class="panel"><h3>B · deploy 時 502</h3><p>deregistration delay 比 app 收到 SIGTERM 後的處理時間短，進行中的 request 被切。</p></div>
+      <div class="panel"><h3>C · 重連風暴</h3><p>長連線服務 draining 到期一次切光，所有 client 同時重連，auth 和 DB 先倒。client 端要 backoff + jitter。</p></div>
+      <div class="panel"><h3>D · 新機器太冷</h3><p>scale out 加的 task 一上來吃滿流量，前幾十秒 P99 飆高。開 slow start。</p></div>
+    </div>
+    <div class="scroll">
+      <table>
+        <tr><th>看什麼（ALB metric）</th><th>出事長相</th></tr>
+        <tr><td><code>UnHealthyHostCount</code></td><td>全部同時變不健康 = 共用依賴出事，不是 target 本身</td></tr>
+        <tr><td><code>HTTPCode_ELB_502_Count</code></td><td>只在 deploy 時出現 = draining 設定和 shutdown 不合</td></tr>
+        <tr><td><code>TargetResponseTime</code> P99</td><td>scale out 後先升再降 = 新機器冷</td></tr>
+        <tr><td><code>RequestCountPerTarget</code></td><td>各台差很多 = sticky 或長連線造成不均</td></tr>
+      </table>
+    </div>
+    <p>第一個指令（每台 target 現在的健康狀態和原因）：</p>
+    <pre>aws elbv2 describe-target-health --target-group-arn arn:aws:elasticloadbalancing:ap-northeast-1:123456789012:targetgroup/orders/abc123</pre>
+  </section>
+
+  <section id="l7">
+    <h2><span class="badge">L7</span>面試<span class="time">讀 3 分鐘</span></h2>
+    <p class="lead">題目：「電商 API 要從 3 台擴到 30 台，拆成 users、orders 兩個服務。有些報表 request 要跑 30 秒。deploy 不能掉 request，user 也不能被登出。你怎麼設計 LB？」</p>
+    <p>先自己講：L4 還 L7、哪個演算法、登入狀態放哪、deploy 時兩端怎麼處理、要監控什麼。再打開。</p>
+    <details>
+      <summary>L4 vs L6 對照</summary>
+      <div>
+        <div class="wrong"><b>L4</b>「用 ALB 做 round robin，開 sticky session 避免登出。」<br>問題：30 秒報表會讓 round robin 不均；sticky 換台還是丟 session；沒講 deploy。</div>
+        <div class="fix"><b>L6</b> 多了四件事：</div>
+        <ol>
+          <li>L7 ALB 做 path routing：<code>/users</code>、<code>/orders</code> 各一個 target group。</li>
+          <li>request 時間差很多，用 least outstanding requests（Least Connections），不用 round robin。</li>
+          <li>登入狀態搬到 Redis，server 變 stateless，不用 sticky。</li>
+          <li>deploy：deregistration delay 設得比最長 request 長一點（例 45s），新 task 開 slow start；health check 只查自己活著。監控 502、UnHealthyHostCount、P99。</li>
+        </ol>
+        <p class="en">"I'd put an ALB in front and route by path, so users and orders each get their own target group. Some report requests take thirty seconds, so round robin would pile them up on a few targets. I'd use least outstanding requests instead, which sends each request to the target with the fewest in flight. Sessions go in Redis, which keeps the servers stateless. Any target can serve any user, and nobody gets logged out when a target goes away. For deploys, I'd set the deregistration delay a bit longer than the slowest request, say 45 seconds, so in-flight requests can finish. New targets get slow start so they warm up before taking full traffic. The health check only verifies the process is alive, not the database. Otherwise one DB blip takes every target out at once. I'd watch 502s during deploys, unhealthy host count, and P99 response time."</p>
+      </div>
+    </details>
+  </section>
+
+  <section id="trail">
+    <h2><span class="badge">錯題</span>這次的釐清<span class="time">讀 2 分鐘</span></h2>
+    <div class="wrong"><b>我錯在這</b>✗ S4 講成 "least robin"；S40 該用 Least Connections 卻選了 latency，名字也想不起來<br>✓ Round Robin 和 Least Connections 是兩個演算法。後者看「現在」誰的連線最少<br>→ 為什麼搞混：兩個名字發音接近，行為沒綁上名字。L2 第二張圖就是它的行為。</div>
+    <div class="wrong"><b>我錯在這</b>✗ request 處理時間不同 → 用 Weighted RR<br>✓ Weighted 是給「server 規格不同」（靜態）。request 不同要用 Least Connections（動態）<br>→ 為什麼搞混：「server 不一樣」和「request 不一樣」是兩個軸。</div>
+    <div class="wrong"><b>我錯在這</b>✗ sticky session 和 Redis 是同一招；sticky 的風險只有 server 掛掉<br>✓ 方向相反：sticky 往內壓，Redis 往外拉。sticky 還有負載不均<br>→ 為什麼搞混：兩個都在解「換台被登出」，就以為是同一招。</div>
+    <div class="wrong"><b>我錯在這</b>✗ S50-S52：「ALB 摘掉 target 後保留舊連線多久」答成 timeout，S52 又講成「啟動時先 test」<br>✓ 叫 deregistration delay（connection draining），管下線端，ALB 預設 300s。「啟動時慢慢放」是 slow start，管上線端<br>→ 為什麼搞混：上線端劫持下線端。L2 第三張生命週期圖把兩端畫在同一條線上。</div>
+  </section>
+
+  <div class="next">
+    <b>下一步（2 分鐘）</b>
+    <p>不看這頁，畫一條 target 的生命週期，在兩端各寫上設定名稱和 ALB 預設值。</p>
+  </div>
+
+</main>

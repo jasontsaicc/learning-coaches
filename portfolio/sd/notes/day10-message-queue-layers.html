@@ -1,0 +1,368 @@
+<title>Message Queue</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC:wght@400;700&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: one notebook column on graph paper; teal sd accent band; figures on taped cards, failure cases as comic panels */
+:root {
+  --paper: #F6F8FA;
+  --grid: rgba(90,130,170,.16);
+  --ink: #23313E;
+  --ink-soft: #55677A;
+  --card: #FFFFFF;
+  --accent: #0B7285;
+  --on-accent: #FFFFFF;
+  --tape: color-mix(in srgb, var(--accent) 35%, transparent);
+  --who: #FFE98A;
+  --see: #BDEEF6;
+  --may: #F9CDE0;
+  --wrong: #D2453A;
+  --ok: #2F8F5B;
+  --line: #9DB0C2;
+  --font-hand: "LXGW WenKai TC", "Noto Sans TC", "PingFang TC", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #1A2320; --grid: rgba(200,230,210,.08); --ink: #E6EDE8; --ink-soft: #A9BAB1;
+    --card: #24302C; --accent: #3BC9DB; --on-accent: #10221F; --who: #8A7A2A; --see: #2B6A74; --may: #7A3F57;
+    --wrong: #FF8A7E; --ok: #7FD3A1; --line: #5E7268; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #1A2320; --grid: rgba(200,230,210,.08); --ink: #E6EDE8; --ink-soft: #A9BAB1;
+  --card: #24302C; --accent: #3BC9DB; --on-accent: #10221F; --who: #8A7A2A; --see: #2B6A74; --may: #7A3F57;
+  --wrong: #FF8A7E; --ok: #7FD3A1; --line: #5E7268; color-scheme: dark;
+}
+body {
+  background-color: var(--paper);
+  background-image: linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 22px 22px;
+  color: var(--ink);
+  font-family: var(--font-hand);
+  font-size: 17px;
+  line-height: 1.75;
+}
+.band { background: var(--accent); color: var(--on-accent); padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 22px 18px; }
+.band > div { max-width: 760px; margin: 0 auto; display: grid; gap: 8px; }
+.band a { color: inherit; }
+.page { max-width: 760px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 28px 64px; display: grid; gap: 36px; }
+h1, h2, h3 { text-wrap: balance; line-height: 1.3; margin: 0; }
+h1 { font-size: 2.1rem; }
+h2 { font-size: 1.4rem; display: flex; flex-wrap: wrap; align-items: baseline; gap: 10px; }
+h2 .badge { font-family: var(--font-mono); font-size: .78rem; background: var(--accent); color: var(--on-accent); padding: 1px 8px; border-radius: 3px; }
+h2 .time { font-family: var(--font-mono); font-size: .74rem; color: var(--ink-soft); letter-spacing: .04em; }
+p { margin: 0; }
+section { display: grid; gap: 14px; min-width: 0; }
+.sub { font-size: .95rem; opacity: .9; }
+.lead { font-size: 1.12rem; font-weight: 700; }
+.progress { display: flex; flex-wrap: wrap; gap: 6px 12px; font-family: var(--font-mono); font-size: .8rem; }
+.progress a { color: inherit; text-decoration: none; }
+mark { background: linear-gradient(transparent 52%, var(--who) 52%); color: inherit; padding: 0 2px; }
+mark.see { background: linear-gradient(transparent 52%, var(--see) 52%); }
+mark.may { background: linear-gradient(transparent 52%, var(--may) 52%); }
+code { font-family: var(--font-mono); font-size: .86em; background: color-mix(in srgb, var(--line) 22%, transparent); padding: 1px 5px; border-radius: 3px; }
+.card { position: relative; background: var(--card); padding: 22px 16px 14px; box-shadow: 0 1px 3px rgba(0,0,0,.12); min-width: 0; }
+.card::before { content: ""; position: absolute; top: -9px; left: 50%; width: 92px; height: 20px; transform: translateX(-50%) rotate(-2deg); background: var(--tape); }
+.scroll { overflow-x: auto; }
+svg.fig { display: block; min-width: 600px; width: 100%; height: auto; }
+svg text { font-family: var(--font-mono); fill: var(--ink); }
+svg .hand { font-family: var(--font-hand); }
+.rule { border-left: 4px solid var(--accent); padding: 6px 12px; font-size: 1.05rem; }
+.wrong { border-left: 4px solid var(--wrong); padding: 4px 12px; display: grid; gap: 2px; }
+.wrong b { color: var(--wrong); font-size: .85rem; letter-spacing: .05em; }
+.fix { border-left: 4px solid var(--ok); padding: 4px 12px; }
+.panels { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 14px; }
+.panel { border: 2px solid var(--ink); background: var(--card); padding: 10px; display: grid; gap: 6px; min-width: 0; align-content: start; }
+.panel h3 { font-size: 1rem; font-family: var(--font-mono); }
+.panel p { font-size: .92rem; }
+.panel svg { width: 100%; height: auto; display: block; }
+@media (max-width: 560px) { .panels { grid-template-columns: 1fr; } }
+table { border-collapse: collapse; width: 100%; font-size: .95rem; font-variant-numeric: tabular-nums; }
+th, td { border-bottom: 1px dashed var(--line); padding: 8px 6px; text-align: left; vertical-align: top; }
+th { font-family: var(--font-mono); font-size: .78rem; letter-spacing: .05em; color: var(--ink-soft); font-weight: 600; }
+ol, ul { margin: 0; padding-left: 1.3em; display: grid; gap: 6px; }
+details { background: var(--card); border: 2px dashed var(--line); padding: 10px 14px; }
+details[open] { border-style: solid; }
+details summary { cursor: pointer; font-weight: 700; }
+details > div { display: grid; gap: 10px; margin-top: 10px; }
+.two { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 14px; }
+@media (max-width: 560px) { .two { grid-template-columns: 1fr; } }
+.en { font-family: var(--font-mono); font-size: .88rem; color: var(--ink-soft); }
+pre { margin: 0; font-family: var(--font-mono); font-size: .82rem; line-height: 1.5; background: var(--card); border: 1px solid var(--line); padding: 10px 12px; overflow-x: auto; }
+.next { border: 3px solid var(--accent); background: var(--card); padding: 14px 16px; display: grid; gap: 6px; }
+a { color: var(--accent); text-underline-offset: 3px; }
+a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+</style>
+
+<header class="band">
+  <div>
+    <p class="sub">sd 課程 · P1 Building Blocks · Day 10-11 · S11-S13，step G 3/3</p>
+    <h1>Message Queue</h1>
+    <p>讀完這頁你能：說出 async 的三個好處、畫出 ACK 掉了為什麼會重複、把 idempotency 放在對的位置並寫成同一個 transaction，並在 3AM queue 堆積時照決策樹查下去。</p>
+    <nav class="progress" aria-label="layers"><a href="#l0">L0 ✓</a><a href="#l1">L1 ✓</a><a href="#l2">L2 ✓</a><a href="#l3">L3 ✓</a><a href="#l4">L4 ✓</a><a href="#l5">L5 ✓</a><a href="#l6">L6 ✓</a><a href="#l7">L7 ✓</a><a href="#trail">錯題</a></nav>
+  </div>
+</header>
+
+<main class="page">
+
+  <p class="sub">S13 Flash Sale drill 拿 3/3，但有兩筆錯還沒結：idempotency 被當成獨立 service、Redis DECR 和 idempotency check 混在一起。L3 用一張「時間點」圖把兩者拆開。</p>
+
+  <section id="l0">
+    <h2><span class="badge">L0</span>一張圖<span class="time">讀 1 分鐘</span></h2>
+    <p class="lead">餐廳的點菜單夾：服務生把單子夾上去就回去招呼客人，廚師照自己的速度一張一張拿。尖峰時單子變長，但沒有人被擋在門外。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 680 180" role="img" aria-label="A waiter clips order slips onto a rail and goes back to the dining room at once. The rail holds six slips during a rush. Two cooks take slips one at a time at their own pace. If a cook steps away, the slips wait on the rail and are not lost.">
+        <rect x="20" y="60" width="110" height="60" fill="var(--card)" stroke="var(--ink)" stroke-width="1.5"/><text x="75" y="86" text-anchor="middle" font-size="11" class="hand">服務生</text><text x="75" y="104" text-anchor="middle" font-size="9">夾上就走（producer）</text>
+        <line x1="170" y1="50" x2="450" y2="50" stroke="var(--ink)" stroke-width="3"/>
+        <g fill="var(--who)" stroke="var(--ink)"><rect x="185" y="54" width="34" height="44"/><rect x="229" y="54" width="34" height="44"/><rect x="273" y="54" width="34" height="44"/><rect x="317" y="54" width="34" height="44"/><rect x="361" y="54" width="34" height="44"/><rect x="405" y="54" width="34" height="44"/></g>
+        <text x="310" y="122" text-anchor="middle" font-size="11" class="hand">點菜單夾（queue）</text><text x="310" y="140" text-anchor="middle" font-size="9">尖峰時變長，吸收高峰</text>
+        <g fill="var(--see)" stroke="var(--ink)" stroke-width="1.5"><rect x="510" y="30" width="140" height="44"/><rect x="510" y="96" width="140" height="44"/></g>
+        <g font-size="10" text-anchor="middle"><text x="580" y="56">廚師 1（consumer）</text><text x="580" y="122">廚師 2</text></g>
+        <g stroke="var(--ink)"><line x1="130" y1="90" x2="185" y2="76"/><line x1="439" y1="70" x2="510" y2="52"/><line x1="439" y1="80" x2="510" y2="118"/></g>
+        <text x="580" y="164" text-anchor="middle" font-size="9" fill="var(--ink-soft)">廚師離開一下，單子還在夾子上</text>
+      </svg>
+    </div>
+  </section>
+
+  <section id="l1">
+    <h2><span class="badge">L1</span>第一性原理<span class="time">讀 3 分鐘</span></h2>
+    <p class="lead">同步呼叫串起來，延遲是相加的，可用性是相乘的。串越多，越慢也越容易壞。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 680 210" role="img" aria-label="Synchronous chain: order service calls payment 200 milliseconds, inventory 100, email 300, so the user waits 600 milliseconds, and if each is 99.9 percent available the chain is about 99.7 percent. With a queue, the order service writes one message and replies in about 20 milliseconds; the other services read from the queue on their own time, and a slow email service no longer affects the user.">
+        <text x="20" y="28" font-size="11" class="hand">同步：全部等完才回</text>
+        <g fill="var(--card)" stroke="var(--ink)"><rect x="20" y="40" width="90" height="34"/><rect x="130" y="40" width="110" height="34"/><rect x="260" y="40" width="110" height="34"/><rect x="390" y="40" width="110" height="34"/></g>
+        <g font-size="9" text-anchor="middle"><text x="65" y="61">order</text><text x="185" y="61">payment 200ms</text><text x="315" y="61">inventory 100ms</text><text x="445" y="61">email 300ms</text></g>
+        <g stroke="var(--ink)"><line x1="110" y1="57" x2="130" y2="57"/><line x1="240" y1="57" x2="260" y2="57"/><line x1="370" y1="57" x2="390" y2="57"/></g>
+        <text x="520" y="52" font-size="9" fill="var(--wrong)">user 等 600 ms</text><text x="520" y="68" font-size="9" fill="var(--wrong)">0.999³ ≈ 99.7%</text>
+        <line x1="20" y1="96" x2="660" y2="96" stroke="var(--line)" stroke-dasharray="4 4"/>
+        <text x="20" y="124" font-size="11" class="hand">Async：丟進 queue 就回</text>
+        <rect x="20" y="140" width="90" height="34" fill="var(--card)" stroke="var(--ink)"/><text x="65" y="161" text-anchor="middle" font-size="9">order</text>
+        <rect x="150" y="140" width="110" height="34" fill="var(--who)" stroke="var(--ink)" stroke-width="2"/><text x="205" y="161" text-anchor="middle" font-size="9">queue</text>
+        <g fill="var(--see)" stroke="var(--ink)"><rect x="320" y="120" width="100" height="26"/><rect x="320" y="152" width="100" height="26"/><rect x="320" y="184" width="100" height="20"/></g>
+        <g font-size="8" text-anchor="middle"><text x="370" y="137">payment</text><text x="370" y="169">inventory</text><text x="370" y="198">email（慢也沒差）</text></g>
+        <g stroke="var(--ink)"><line x1="110" y1="157" x2="150" y2="157"/><line x1="260" y1="157" x2="320" y2="133"/><line x1="260" y1="157" x2="320" y2="165"/><line x1="260" y1="157" x2="320" y2="194"/></g>
+        <text x="450" y="152" font-size="9" fill="var(--ok)">user 約 20 ms 拿到「已收單」</text><text x="450" y="168" font-size="9" fill="var(--ok)">下游壞了，訊息在 queue 等</text>
+      </svg>
+    </div>
+    <div class="scroll">
+      <table>
+        <tr><th>好處</th><th>解決什麼</th></tr>
+        <tr><td>Decoupling</td><td>producer 不用知道有誰在聽，加新 consumer 不改 producer</td></tr>
+        <tr><td>Buffering</td><td>queue 吸收尖峰，consumer 照自己速度做（peak shaving〔削峰〕）</td></tr>
+        <tr><td>Resilience</td><td>consumer 掛了，訊息在 queue 等，不會丟</td></tr>
+      </table>
+    </div>
+  </section>
+
+  <section id="l2">
+    <h2><span class="badge">L2</span>機制<span class="time">讀 5 分鐘</span></h2>
+    <p class="lead">Point-to-Point：一則訊息只給一個 consumer。Pub/Sub：每個訂閱者各拿一份。好幾個服務都要同一件事時用 Pub/Sub，不然 producer 要自己一個一個送，又耦合回去了。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 680 170" role="img" aria-label="Left: point to point. One queue, three workers; each message goes to exactly one worker, good for job processing. Right: pub sub. One topic, three subscribers, payment, inventory and notification; each gets its own copy of every order placed event.">
+        <text x="170" y="22" text-anchor="middle" font-size="11" class="hand">Point-to-Point</text>
+        <rect x="30" y="60" width="90" height="40" fill="var(--who)" stroke="var(--ink)"/><text x="75" y="84" text-anchor="middle" font-size="9">queue</text>
+        <g fill="var(--card)" stroke="var(--ink)"><rect x="200" y="30" width="90" height="28"/><rect x="200" y="66" width="90" height="28"/><rect x="200" y="102" width="90" height="28"/></g>
+        <g font-size="9" text-anchor="middle"><text x="245" y="48">worker 1：msg 1</text><text x="245" y="84">worker 2：msg 2</text><text x="245" y="120">worker 3：msg 3</text></g>
+        <g stroke="var(--ink)"><line x1="120" y1="74" x2="200" y2="44"/><line x1="120" y1="80" x2="200" y2="80"/><line x1="120" y1="86" x2="200" y2="116"/></g>
+        <text x="170" y="156" text-anchor="middle" font-size="9">每則只有一個人拿 → job 處理</text>
+        <line x1="340" y1="20" x2="340" y2="160" stroke="var(--line)" stroke-dasharray="4 4"/>
+        <text x="510" y="22" text-anchor="middle" font-size="11" class="hand">Pub/Sub</text>
+        <rect x="370" y="60" width="90" height="40" fill="var(--may)" stroke="var(--ink)"/><text x="415" y="78" text-anchor="middle" font-size="9">topic</text><text x="415" y="92" text-anchor="middle" font-size="8">OrderPlaced</text>
+        <g fill="var(--card)" stroke="var(--ink)"><rect x="540" y="30" width="120" height="28"/><rect x="540" y="66" width="120" height="28"/><rect x="540" y="102" width="120" height="28"/></g>
+        <g font-size="9" text-anchor="middle"><text x="600" y="48">payment：一份</text><text x="600" y="84">inventory：一份</text><text x="600" y="120">notification：一份</text></g>
+        <g stroke="var(--ink)"><line x1="460" y1="74" x2="540" y2="44"/><line x1="460" y1="80" x2="540" y2="80"/><line x1="460" y1="86" x2="540" y2="116"/></g>
+        <text x="510" y="156" text-anchor="middle" font-size="9">每個訂閱者都拿到 → 事件廣播</text>
+      </svg>
+    </div>
+    <p class="lead">At-least-once 為什麼會重複：broker 分不出「做完了但 ACK 掉了」和「做到一半 crash」，只好再送一次。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 680 210" role="img" aria-label="Duplicate delivery timeline. The broker delivers message 42. The consumer charges the card and writes the DB, then sends ACK, but the network drops it. The broker never sees the ACK, waits, and delivers message 42 again. Without idempotency the consumer charges the card a second time.">
+        <line x1="120" y1="50" x2="650" y2="50" stroke="var(--line)" stroke-width="2"/><line x1="120" y1="150" x2="650" y2="150" stroke="var(--line)" stroke-width="2"/>
+        <text x="20" y="54" font-size="11" class="hand">broker</text><text x="20" y="154" font-size="11" class="hand">consumer</text>
+        <line x1="150" y1="50" x2="200" y2="150" stroke="var(--ink)" stroke-width="1.5"/><text x="140" y="40" font-size="9">送 msg 42</text>
+        <rect x="200" y="134" width="130" height="32" fill="var(--who)" stroke="var(--ink)"/><text x="265" y="154" text-anchor="middle" font-size="9">扣款 + 寫 DB ✓</text>
+        <line x1="330" y1="150" x2="380" y2="96" stroke="var(--wrong)" stroke-width="2" stroke-dasharray="5 3"/><text x="372" y="92" font-size="14" fill="var(--wrong)">✕</text><text x="392" y="96" font-size="9" fill="var(--wrong)">ACK 在網路上掉了</text>
+        <rect x="390" y="34" width="120" height="30" fill="var(--card)" stroke="var(--line)" stroke-dasharray="5 3"/><text x="450" y="53" text-anchor="middle" font-size="9" fill="var(--ink-soft)">沒收到 ACK，等…</text>
+        <line x1="520" y1="50" x2="560" y2="150" stroke="var(--ink)" stroke-width="1.5"/><text x="530" y="40" font-size="9">再送 msg 42</text>
+        <rect x="560" y="134" width="100" height="32" fill="var(--wrong)" opacity=".8" stroke="var(--ink)"/><text x="610" y="154" text-anchor="middle" font-size="9" fill="var(--card)">又扣一次款</text>
+        <text x="340" y="196" text-anchor="middle" font-size="10" class="hand">broker 看到的兩種情況長得一樣：「做完但 ACK 掉了」=「做到一半 crash」</text>
+      </svg>
+    </div>
+    <div class="scroll">
+      <table>
+        <tr><th>語意</th><th>風險</th><th>用在</th></tr>
+        <tr><td>At-most-once</td><td>會丟</td><td>log、metrics</td></tr>
+        <tr><td>At-least-once</td><td>會重複</td><td>大多數 production（重複能補救，丟了不能）</td></tr>
+        <tr><td>Exactly-once</td><td>分散式下做不到真正的</td><td>實務是 at-least-once + idempotency = effectively-once</td></tr>
+      </table>
+    </div>
+  </section>
+
+  <section id="l3">
+    <h2><span class="badge">L3</span>取捨<span class="time">讀 4 分鐘</span></h2>
+    <p class="lead">Idempotency 的 check 和業務動作一定要在同一個 transaction。分兩步做，中間 crash 就會重複。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 680 190" role="img" aria-label="Two designs. Wrong: step 1 charge the card, step 2 set processed true; a crash between them leaves no flag, so the retry charges again. Right: one transaction inserts the idempotency key with a unique constraint and updates the balance; on a duplicate, the insert fails and the whole transaction rolls back, so nothing is charged twice.">
+        <text x="170" y="22" text-anchor="middle" font-size="11" class="hand" fill="var(--wrong)">✗ 分兩步</text>
+        <rect x="30" y="40" width="110" height="36" fill="var(--card)" stroke="var(--ink)"/><text x="85" y="62" text-anchor="middle" font-size="9">① 扣款</text>
+        <rect x="200" y="40" width="110" height="36" fill="var(--card)" stroke="var(--line)" stroke-dasharray="5 3"/><text x="255" y="62" text-anchor="middle" font-size="9" fill="var(--ink-soft)">② processed=true</text>
+        <text x="170" y="64" text-anchor="middle" font-size="14" fill="var(--wrong)">✕</text><text x="170" y="96" text-anchor="middle" font-size="9" fill="var(--wrong)">中間 crash：沒有旗子</text><text x="170" y="112" text-anchor="middle" font-size="9" fill="var(--wrong)">重送 → 再扣一次</text>
+        <line x1="340" y1="20" x2="340" y2="180" stroke="var(--line)" stroke-dasharray="4 4"/>
+        <text x="510" y="22" text-anchor="middle" font-size="11" class="hand" fill="var(--ok)">✓ 同一個 transaction</text>
+        <rect x="370" y="36" width="280" height="96" fill="var(--who)" stroke="var(--ink)" stroke-width="2"/>
+        <text x="385" y="56" font-size="9">BEGIN</text>
+        <text x="385" y="74" font-size="9">INSERT processed(key='order-123') ← unique</text>
+        <text x="385" y="92" font-size="9">UPDATE account SET balance = balance − 100</text>
+        <text x="385" y="110" font-size="9">COMMIT</text>
+        <text x="510" y="152" text-anchor="middle" font-size="9">重複的 key → INSERT 失敗 → 整包 rollback</text><text x="510" y="168" text-anchor="middle" font-size="9">一起成功或一起不做</text>
+      </svg>
+    </div>
+    <p class="lead">Flash sale 裡有兩個 Redis 動作，它們在不同時間點、解不同問題：DECR 在 queue 之前防賣超，idempotency 在 queue 之後防重複扣款。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 680 160" role="img" aria-label="Flash sale timeline. User clicks buy. Before the queue, API server runs Redis DECR on inventory: if below zero, reply sold out immediately; this prevents overselling. Then the order goes into the queue and the user gets order received. After the queue, inside the order service, the idempotency check prevents a duplicate charge from a redelivered message. These are two different problems at two different times.">
+        <g fill="var(--card)" stroke="var(--ink)" stroke-width="1.5"><rect x="10" y="50" width="80" height="40"/><rect x="120" y="40" width="150" height="60" fill="var(--may)"/><rect x="300" y="50" width="90" height="40" fill="var(--who)"/><rect x="420" y="40" width="250" height="60" fill="var(--see)"/></g>
+        <g font-size="9" text-anchor="middle"><text x="50" y="74">按「購買」</text><text x="195" y="62">Redis DECR 庫存</text><text x="195" y="78">&lt; 0 → 立刻回「賣完」</text><text x="345" y="74">queue</text><text x="545" y="58">order service 裡面</text><text x="545" y="74">① idempotency check</text><text x="545" y="90">② 扣款 + 寫 DB（同一 transaction）</text></g>
+        <g stroke="var(--ink)"><line x1="90" y1="70" x2="120" y2="70"/><line x1="270" y1="70" x2="300" y2="70"/><line x1="390" y1="70" x2="420" y2="70"/></g>
+        <text x="195" y="124" text-anchor="middle" font-size="10" class="hand">queue 之前：防賣超</text>
+        <text x="545" y="124" text-anchor="middle" font-size="10" class="hand">queue 之後：防重複扣款</text>
+        <text x="340" y="150" text-anchor="middle" font-size="9" fill="var(--ink-soft)">idempotency 是 order service 裡的一個「步驟」，不是另一個 service</text>
+      </svg>
+    </div>
+    <div class="scroll">
+      <table>
+        <tr><th></th><th>SQS</th><th>Kafka</th><th>RabbitMQ</th></tr>
+        <tr><td>本質</td><td>managed queue</td><td>distributed log</td><td>傳統 broker</td></tr>
+        <tr><td>消費後</td><td>刪除</td><td>保留，可 replay</td><td>刪除</td></tr>
+        <tr><td>選它的理由</td><td>簡單 job、小團隊、低維運</td><td>高吞吐、replay、多個 consumer group</td><td>複雜 routing、priority</td></tr>
+      </table>
+    </div>
+  </section>
+
+  <section id="l4">
+    <h2><span class="badge">L4</span>AWS 怎麼做<span class="time">讀 4 分鐘</span></h2>
+    <p class="lead">預設從 SNS + SQS 開始：SNS 做 pub/sub 扇出，每個服務一條自己的 SQS 加 DLQ。真的要 replay 才上 MSK。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 680 230" role="img" aria-label="Order API publishes OrderPlaced to an SNS topic. SNS fans out to three SQS queues, one per service: payment, inventory, notification. Each queue has a dead letter queue attached through a redrive policy with maxReceiveCount 5. Workers on ECS or Lambda poll their own queue and write to RDS. MSK is shown as an alternative when events must be replayed.">
+        <rect x="10" y="90" width="90" height="50" fill="var(--card)" stroke="var(--accent)" stroke-width="2"/><text x="55" y="112" text-anchor="middle" font-size="10">order API</text><text x="55" y="128" text-anchor="middle" font-size="8">回「已收單」</text>
+        <rect x="130" y="90" width="90" height="50" fill="var(--may)" stroke="var(--ink)" stroke-width="1.5"/><text x="175" y="112" text-anchor="middle" font-size="10">SNS topic</text><text x="175" y="128" text-anchor="middle" font-size="8">OrderPlaced</text>
+        <g fill="var(--who)" stroke="var(--ink)"><rect x="260" y="30" width="120" height="40"/><rect x="260" y="95" width="120" height="40"/><rect x="260" y="160" width="120" height="40"/></g>
+        <g font-size="9" text-anchor="middle"><text x="320" y="54">SQS payment</text><text x="320" y="119">SQS inventory</text><text x="320" y="184">SQS notification</text></g>
+        <g fill="var(--card)" stroke="var(--wrong)" stroke-dasharray="4 3"><rect x="400" y="36" width="60" height="28"/><rect x="400" y="101" width="60" height="28"/><rect x="400" y="166" width="60" height="28"/></g>
+        <g font-size="8" text-anchor="middle" fill="var(--wrong)"><text x="430" y="54">DLQ</text><text x="430" y="119">DLQ</text><text x="430" y="184">DLQ</text></g>
+        <g fill="var(--see)" stroke="var(--ink)"><rect x="490" y="30" width="90" height="40"/><rect x="490" y="95" width="90" height="40"/><rect x="490" y="160" width="90" height="40"/></g>
+        <g font-size="8" text-anchor="middle"><text x="535" y="54">worker（ECS）</text><text x="535" y="119">worker</text><text x="535" y="184">Lambda</text></g>
+        <rect x="600" y="95" width="70" height="40" fill="var(--card)" stroke="var(--ink)"/><text x="635" y="119" text-anchor="middle" font-size="9">RDS</text>
+        <g stroke="var(--ink)"><line x1="100" y1="115" x2="130" y2="115"/><line x1="220" y1="108" x2="260" y2="50"/><line x1="220" y1="115" x2="260" y2="115"/><line x1="220" y1="122" x2="260" y2="180"/><line x1="380" y1="50" x2="490" y2="50"/><line x1="380" y1="115" x2="490" y2="115"/><line x1="380" y1="180" x2="490" y2="180"/><line x1="580" y1="50" x2="600" y2="108"/><line x1="580" y1="115" x2="600" y2="115"/></g>
+        <text x="430" y="222" text-anchor="middle" font-size="8" fill="var(--ink-soft)">redrive：收 5 次還失敗 → 進 DLQ</text>
+      </svg>
+    </div>
+    <div class="scroll">
+      <table>
+        <tr><th>設定</th><th>用在哪</th><th>陷阱</th></tr>
+        <tr><td>SQS visibility timeout</td><td>處理中的訊息先藏起來</td><td>預設 30 秒。處理超過 30 秒，訊息會重新出現、被別的 worker 拿到 = 重複。用 Lambda 時，AWS 建議設成 function timeout 的 6 倍以上。</td></tr>
+        <tr><td>SQS retention + DLQ</td><td>保留期限</td><td>預設 4 天、最長 14 天。訊息進 DLQ 後還是照「原本進 queue 的時間」算過期，所以 DLQ 的 retention 要設得比來源 queue 長，不然還沒查就消失。</td></tr>
+        <tr><td>SQS FIFO</td><td>要順序、要去重</td><td>去重只在 5 分鐘窗口內有效，超過還是要自己做 idempotency。吞吐比 standard 低很多。</td></tr>
+        <tr><td>Lambda + SQS batch</td><td>serverless consumer</td><td>一批 10 則裡有 1 則失敗，預設整批重送，另外 9 則就重複了。要開 <code>ReportBatchItemFailures</code> 只回報失敗的那幾則。</td></tr>
+        <tr><td>Amazon MSK</td><td>要 replay、多個 consumer group</td><td>要自己管 partition 數和 consumer lag。consumer 數超過 partition 數，多出來的 consumer 是閒著的。</td></tr>
+      </table>
+    </div>
+    <p class="sub">誰會吵：後端說「SQS 會重複送是 bug」，SRE 回「這是 at-least-once 的合約，consumer 要 idempotent」。design review 會問：「這則訊息被處理兩次會怎樣？」</p>
+  </section>
+
+  <section id="l5">
+    <h2><span class="badge">L5</span>規模化<span class="time">讀 3 分鐘</span></h2>
+    <p class="lead">小團隊先用 SQS，有 replay 需求再升 Kafka。每一級都在把「誰負責不丟、不重複」講得更清楚。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 680 230" role="img" aria-label="Evolution ladder. Step 1 synchronous calls, one slow service slows everyone. Step 2 a DB table or Redis list used as a queue, polling and locking by hand. Step 3 SQS with DLQ and idempotent workers, autoscaling on queue depth. Step 4 Kafka or MSK event streaming with replay, many consumer groups, and the outbox pattern so the DB write and the event publish cannot disagree.">
+        <rect x="20" y="170" width="150" height="50" fill="var(--card)" stroke="var(--ink)" stroke-width="1.5"/>
+        <text x="30" y="190" font-size="11" class="hand">① 全部同步</text><text x="30" y="208" font-size="9">一個慢，全部慢</text>
+        <rect x="180" y="130" width="150" height="90" fill="var(--see)" stroke="var(--ink)" stroke-width="1.5"/>
+        <text x="190" y="150" font-size="11" class="hand">② DB 表當 queue</text><text x="190" y="170" font-size="9">自己 poll、自己鎖</text><text x="190" y="186" font-size="9">量一大 DB 先倒</text>
+        <rect x="340" y="80" width="150" height="140" fill="var(--who)" stroke="var(--ink)" stroke-width="1.5"/>
+        <text x="350" y="100" font-size="11" class="hand">③ SQS + DLQ</text><text x="350" y="120" font-size="9">idempotent worker</text><text x="350" y="136" font-size="9">依 queue 深度擴縮</text><text x="350" y="152" font-size="9">SNS 扇出</text>
+        <rect x="500" y="30" width="160" height="190" fill="var(--may)" stroke="var(--ink)" stroke-width="1.5"/>
+        <text x="510" y="50" font-size="11" class="hand">④ event streaming</text><text x="510" y="70" font-size="9">Kafka / MSK</text><text x="510" y="86" font-size="9">replay、多 consumer group</text><text x="510" y="106" font-size="9">outbox pattern：</text><text x="510" y="122" font-size="9">寫 DB 和發事件</text><text x="510" y="138" font-size="9">不會一邊成功一邊失敗</text>
+        <text x="95" y="160" text-anchor="middle" font-size="9" fill="var(--ink-soft)">換掉：串聯等待</text>
+        <text x="255" y="120" text-anchor="middle" font-size="9" fill="var(--ink-soft)">換掉：自己造輪子</text>
+        <text x="415" y="70" text-anchor="middle" font-size="9" fill="var(--ink-soft)">換掉：讀完就刪</text>
+      </svg>
+    </div>
+    <div class="scroll">
+      <table>
+        <tr><th>路線</th><th>例子</th><th>好處</th><th>代價</th></tr>
+        <tr><td>Queue（讀完就刪）</td><td>SQS、RabbitMQ</td><td>簡單，per-message 重試和 DLQ 現成</td><td>不能回頭重讀；新服務拿不到過去的事件</td></tr>
+        <tr><td>Log（保留）</td><td>Kafka、Kinesis</td><td>replay、多個 consumer 各讀各的 offset</td><td>partition 和 lag 要管；壞訊息會卡住整個 partition</td></tr>
+      </table>
+    </div>
+  </section>
+
+  <section id="l6">
+    <h2><span class="badge">L6</span>故障與 on-call<span class="time">讀 4 分鐘</span></h2>
+    <p class="lead">3AM 收到 queue depth 告警：先分「進來變多」還是「出去變少」，再往下拆。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 680 230" role="img" aria-label="Decision tree. Queue depth growing. Branch 1: producer rate spiked, a traffic surge, so scale consumers. Branch 2: consumer rate dropped. Sub-branches: consumer errors up, check the DLQ and roll back; consumer latency up, the downstream DB or API is slow; consumers crashed, check the task or pod count. Branch 3: both rates normal, look at partition imbalance in Kafka or visibility timeout in SQS.">
+        <rect x="260" y="10" width="160" height="34" fill="var(--wrong)" opacity=".8" stroke="var(--ink)"/><text x="340" y="31" text-anchor="middle" font-size="10" fill="var(--card)">queue depth 一直漲</text>
+        <g fill="var(--card)" stroke="var(--ink)" stroke-width="1.5"><rect x="20" y="70" width="180" height="44"/><rect x="250" y="70" width="180" height="44"/><rect x="480" y="70" width="180" height="44"/></g>
+        <g font-size="9" text-anchor="middle"><text x="110" y="88">進來變多？</text><text x="110" y="104">流量暴增 → 加 consumer</text><text x="340" y="88">出去變少？</text><text x="340" y="104">往下拆三種</text><text x="570" y="88">兩邊都正常？</text><text x="570" y="104">partition 不均 / visibility timeout</text></g>
+        <g stroke="var(--ink)"><line x1="300" y1="44" x2="110" y2="70"/><line x1="340" y1="44" x2="340" y2="70"/><line x1="380" y1="44" x2="570" y2="70"/></g>
+        <g fill="var(--may)" stroke="var(--ink)"><rect x="150" y="150" width="140" height="56"/><rect x="300" y="150" width="140" height="56"/><rect x="450" y="150" width="140" height="56"/></g>
+        <g font-size="9" text-anchor="middle"><text x="220" y="172">consumer 錯誤 ↑</text><text x="220" y="190">看 DLQ → 修 / rollback</text><text x="370" y="172">consumer 延遲 ↑</text><text x="370" y="190">下游 DB / API 慢</text><text x="520" y="172">consumer 死了</text><text x="520" y="190">看 task / pod 數</text></g>
+        <g stroke="var(--ink)"><line x1="310" y1="114" x2="220" y2="150"/><line x1="340" y1="114" x2="370" y2="150"/><line x1="370" y1="114" x2="520" y2="150"/></g>
+      </svg>
+    </div>
+    <div class="panels">
+      <div class="panel"><h3>A · poison message</h3><p>一則格式壞掉的訊息一直失敗、一直被重送，吃掉 worker。DLQ 就是為它設的。</p></div>
+      <div class="panel"><h3>B · 處理比 timeout 久</h3><p>visibility timeout 30 秒，處理要 45 秒。每則都被做兩次，DB 寫入翻倍。</p></div>
+      <div class="panel"><h3>C · DLQ 沒人看</h3><p>DLQ 一直在長但沒告警。等發現時，訊息已經照原始時間過期了。</p></div>
+      <div class="panel"><h3>D · 重送時重複扣款</h3><p>consumer 沒做 idempotency，或 check 和扣款不在同一個 transaction。</p></div>
+    </div>
+    <div class="scroll">
+      <table>
+        <tr><th>看什麼（SQS metric）</th><th>出事長相</th></tr>
+        <tr><td><code>ApproximateAgeOfOldestMessage</code></td><td>SQS 版的 consumer lag。持續上升 = consumer 跟不上</td></tr>
+        <tr><td><code>ApproximateNumberOfMessagesVisible</code></td><td>持續漲 5 分鐘以上告警</td></tr>
+        <tr><td><code>NumberOfMessagesSent</code> vs <code>NumberOfMessagesDeleted</code></td><td>分辨「進來變多」還是「出去變少」</td></tr>
+        <tr><td>DLQ 的 visible 數</td><td>&gt; 0 就告警</td></tr>
+      </table>
+    </div>
+    <p>第一個指令（現在排隊的和處理中的各有多少）：</p>
+    <pre>aws sqs get-queue-attributes --queue-url https://sqs.ap-northeast-1.amazonaws.com/123456789012/orders --attribute-names ApproximateNumberOfMessages ApproximateNumberOfMessagesNotVisible</pre>
+    <p class="sub">SLO 範例（S13 定的）：下單確認 &lt; 2s，端到端處理 &lt; 30s，consumer lag P99 &lt; 30s。</p>
+  </section>
+
+  <section id="l7">
+    <h2><span class="badge">L7</span>面試<span class="time">讀 3 分鐘</span></h2>
+    <p class="lead">題目：「限量搶購，10 萬人同時按購買，只有 500 件。怎麼設計下單流程，不賣超、不重複扣款？」</p>
+    <p>先自己講：先 clarify 什麼、庫存在哪擋、為什麼要 queue、選哪種 delivery 語意、idempotency 放哪、要監控什麼。再打開。</p>
+    <details>
+      <summary>L4 vs L6 對照</summary>
+      <div>
+        <div class="wrong"><b>L4</b>「用 Kafka exactly-once，訂單丟進 queue 慢慢處理。」<br>問題：exactly-once 不是真的；庫存放 queue 後面，9 萬多人排隊半天才知道沒貨；沒講 idempotency 在哪。</div>
+        <div class="fix"><b>L6</b> 多了四件事：</div>
+        <ol>
+          <li>queue 之前擋庫存：Redis <code>DECR</code> 是原子的，&lt; 0 就立刻回賣完（再 INCR 回去）。99,500 人馬上知道結果。</li>
+          <li>queue 削峰：搶到的 500 人丟 queue、回「處理中」，order service 照自己速度做。</li>
+          <li>At-least-once + idempotency：order service 用 order_id 當 key，check 和扣款同一個 transaction。</li>
+          <li>監控 queue 深度、oldest message age、DLQ 數；依 queue 深度自動擴 consumer。</li>
+        </ol>
+        <p class="en">"The first job is to turn away the 99,500 people who won't get an item, fast. So before anything hits a queue, the API does an atomic Redis DECR on inventory. If it goes below zero, we reply sold out right away and increment it back. The 500 winners get queued, and they immediately see order received. The order service then works through them at its own pace, so the spike never reaches the payment system. The queue is at-least-once, so the same message can arrive twice. The order service uses the order ID as an idempotency key. Inserting that key and charging the card happen in one transaction, so a duplicate fails the insert and nothing is charged twice. I'd watch queue depth, the age of the oldest message, and the DLQ count, and scale consumers on queue depth."</p>
+      </div>
+    </details>
+  </section>
+
+  <section id="trail">
+    <h2><span class="badge">錯題</span>這次的釐清<span class="time">讀 2 分鐘</span></h2>
+    <div class="wrong"><b>我錯在這</b>✗ S13：idempotency 是一個獨立的 service<br>✓ 它是 order service 裡面的一個步驟（收到重複訊息的人才需要擋）<br>→ 為什麼搞混：把「邏輯」和「部署單元」混在一起。像洗米是廚房裡的一個步驟，不是另一間廚房。</div>
+    <div class="wrong"><b>我錯在這</b>✗ S13：Redis DECR 和 idempotency check 是同一件事<br>✓ DECR 在 queue 之前防賣超；idempotency 在 queue 之後防重複扣款<br>→ 為什麼搞混：兩個都用 Redis、都在「防」東西。L3 第二張圖把時間點分開了。</div>
+    <div class="wrong"><b>我錯在這</b>✗ at-least-once 是解決重複扣款的方法<br>✓ at-least-once 是重複的「來源」，idempotency 才是解法<br>→ 為什麼搞混：把「保證不丟」當成「保證正確」。</div>
+    <div class="wrong"><b>我錯在這</b>✗ S12：設計題不知道怎麼起手<br>✓ 拆成小問題一個一個推：sync 還 async → 用哪種 queue → 重複怎麼辦 → 放哪<br>→ 為什麼搞混：想一次畫完整張圖。面試可以一步一步推。</div>
+  </section>
+
+  <div class="next">
+    <b>下一步（2 分鐘）</b>
+    <p>不看這頁，畫 flash sale 的那條時間線，標出 DECR 和 idempotency check 各在 queue 的哪一邊。</p>
+  </div>
+
+</main>
