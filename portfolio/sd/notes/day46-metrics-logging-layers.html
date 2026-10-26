@@ -1,0 +1,432 @@
+<title>Metrics & Logging System</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC:wght@400;700&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: one notebook column on graph paper; teal sd accent band; figures on taped cards, failure cases as comic panels */
+:root {
+  --paper: #F6F8FA;
+  --grid: rgba(90,130,170,.16);
+  --ink: #23313E;
+  --ink-soft: #55677A;
+  --card: #FFFFFF;
+  --accent: #0B7285;
+  --on-accent: #FFFFFF;
+  --tape: color-mix(in srgb, var(--accent) 35%, transparent);
+  --who: #FFE98A;
+  --see: #BDEEF6;
+  --may: #F9CDE0;
+  --wrong: #D2453A;
+  --ok: #2F8F5B;
+  --line: #9DB0C2;
+  --font-hand: "LXGW WenKai TC", "Noto Sans TC", "PingFang TC", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #1A2320; --grid: rgba(200,230,210,.08); --ink: #E6EDE8; --ink-soft: #A9BAB1;
+    --card: #24302C; --accent: #3BC9DB; --on-accent: #10221F; --who: #8A7A2A; --see: #2B6A74; --may: #7A3F57;
+    --wrong: #FF8A7E; --ok: #7FD3A1; --line: #5E7268; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #1A2320; --grid: rgba(200,230,210,.08); --ink: #E6EDE8; --ink-soft: #A9BAB1;
+  --card: #24302C; --accent: #3BC9DB; --on-accent: #10221F; --who: #8A7A2A; --see: #2B6A74; --may: #7A3F57;
+  --wrong: #FF8A7E; --ok: #7FD3A1; --line: #5E7268; color-scheme: dark;
+}
+body {
+  background-color: var(--paper);
+  background-image: linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 22px 22px;
+  color: var(--ink);
+  font-family: var(--font-hand);
+  font-size: 17px;
+  line-height: 1.75;
+}
+.band { background: var(--accent); color: var(--on-accent); padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 22px 18px; }
+.band > div { max-width: 760px; margin: 0 auto; display: grid; gap: 8px; }
+.band a { color: inherit; }
+.page { max-width: 760px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 28px 64px; display: grid; gap: 36px; }
+h1, h2, h3 { text-wrap: balance; line-height: 1.3; margin: 0; }
+h1 { font-size: 2.1rem; }
+h2 { font-size: 1.4rem; display: flex; flex-wrap: wrap; align-items: baseline; gap: 10px; }
+h2 .badge { font-family: var(--font-mono); font-size: .78rem; background: var(--accent); color: var(--on-accent); padding: 1px 8px; border-radius: 3px; }
+h2 .time { font-family: var(--font-mono); font-size: .74rem; color: var(--ink-soft); letter-spacing: .04em; }
+p { margin: 0; }
+section { display: grid; gap: 14px; min-width: 0; }
+.sub { font-size: .95rem; opacity: .9; }
+.lead { font-size: 1.12rem; font-weight: 700; }
+.progress { display: flex; flex-wrap: wrap; gap: 6px 12px; font-family: var(--font-mono); font-size: .8rem; }
+.progress a { color: inherit; text-decoration: none; }
+mark { background: linear-gradient(transparent 52%, var(--who) 52%); color: inherit; padding: 0 2px; }
+mark.see { background: linear-gradient(transparent 52%, var(--see) 52%); }
+mark.may { background: linear-gradient(transparent 52%, var(--may) 52%); }
+code { font-family: var(--font-mono); font-size: .86em; background: color-mix(in srgb, var(--line) 22%, transparent); padding: 1px 5px; border-radius: 3px; }
+.card { position: relative; background: var(--card); padding: 22px 16px 14px; box-shadow: 0 1px 3px rgba(0,0,0,.12); min-width: 0; }
+.card::before { content: ""; position: absolute; top: -9px; left: 50%; width: 92px; height: 20px; transform: translateX(-50%) rotate(-2deg); background: var(--tape); }
+.scroll { overflow-x: auto; }
+svg.fig { display: block; min-width: 600px; width: 100%; height: auto; }
+svg text { font-family: var(--font-mono); fill: var(--ink); }
+svg .hand { font-family: var(--font-hand); }
+.rule { border-left: 4px solid var(--accent); padding: 6px 12px; font-size: 1.05rem; }
+.wrong { border-left: 4px solid var(--wrong); padding: 4px 12px; display: grid; gap: 2px; }
+.wrong b { color: var(--wrong); font-size: .85rem; letter-spacing: .05em; }
+.fix { border-left: 4px solid var(--ok); padding: 4px 12px; }
+.panels { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 14px; }
+.panel { border: 2px solid var(--ink); background: var(--card); padding: 10px; display: grid; gap: 6px; min-width: 0; align-content: start; }
+.panel h3 { font-size: 1rem; font-family: var(--font-mono); }
+.panel p { font-size: .92rem; }
+.panel svg { width: 100%; height: auto; display: block; }
+@media (max-width: 560px) { .panels { grid-template-columns: 1fr; } }
+table { border-collapse: collapse; width: 100%; font-size: .95rem; font-variant-numeric: tabular-nums; }
+th, td { border-bottom: 1px dashed var(--line); padding: 8px 6px; text-align: left; vertical-align: top; }
+th { font-family: var(--font-mono); font-size: .78rem; letter-spacing: .05em; color: var(--ink-soft); font-weight: 600; }
+ol, ul { margin: 0; padding-left: 1.3em; display: grid; gap: 6px; }
+details { background: var(--card); border: 2px dashed var(--line); padding: 10px 14px; }
+details[open] { border-style: solid; }
+details summary { cursor: pointer; font-weight: 700; }
+details > div { display: grid; gap: 10px; margin-top: 10px; }
+.two { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 14px; }
+@media (max-width: 560px) { .two { grid-template-columns: 1fr; } }
+.en { font-family: var(--font-mono); font-size: .88rem; color: var(--ink-soft); }
+pre { margin: 0; font-family: var(--font-mono); font-size: .82rem; line-height: 1.5; background: var(--card); border: 1px solid var(--line); padding: 10px 12px; overflow-x: auto; }
+.next { border: 3px solid var(--accent); background: var(--card); padding: 14px 16px; display: grid; gap: 6px; }
+a { color: var(--accent); text-underline-offset: 3px; }
+a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+</style>
+
+<header class="band">
+  <div>
+    <p class="sub">sd 課程 · P3 經典題 · Day 46-47 · 預習版（還沒上課）</p>
+    <h1>Metrics &amp; Logging System</h1>
+    <p>讀完這頁你能：算出每秒百萬筆 metrics 要多少儲存，說出為什麼 time-series DB 不用 MySQL，並指出 cardinality 是這題最常爆的地方。</p>
+    <nav class="progress" aria-label="layers"><a href="#l0">L0 ✓</a><a href="#l1">L1 ✓</a><a href="#l2">L2 ✓</a><a href="#l3">L3 ✓</a><a href="#l4">L4 ✓</a><a href="#l5">L5 ✓</a><a href="#l6">L6 ✓</a><a href="#l7">L7 ✓</a><a href="#guess">先猜</a></nav>
+  </div>
+</header>
+
+<main class="page">
+
+  <p class="sub">預習版：上課前先讀 L0 到 L2，做完頁尾的「先猜」。L3 之後可以上完課再讀。上完課這頁會換成含錯題的正式版。Day 25 Observability 講的是「怎麼用」三根支柱，這題講的是「怎麼蓋」存 metrics 和 log 的平台。</p>
+
+  <section id="l0">
+    <h2><span class="badge">L0</span>一張圖<span class="time">讀 1 分鐘</span></h2>
+    <p class="lead">氣象站：每台儀器每 15 秒抄一次溫度。昨天的資料要每一筆都留，去年的只留每小時平均就夠了。Log 則是值班日誌：量大、很少翻，但出事那天要能馬上翻到那一頁。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 680 200" role="img" aria-label="Three shelves of the same temperature data. Today: every 15 second reading kept, 5760 points per sensor per day. Last month: 5 minute averages, 288 points per day. Last year: 1 hour averages, 24 points per day. Older data is smaller because it is averaged.">
+        <text x="340" y="22" text-anchor="middle" font-size="12" class="hand">同一支溫度計，越舊存得越粗</text>
+        <rect x="30" y="40" width="200" height="120" fill="var(--see)" stroke="var(--ink)" stroke-width="1.5"/>
+        <text x="130" y="60" text-anchor="middle" font-size="11" class="hand">今天：原始</text>
+        <g stroke="var(--ink)">
+          <line x1="45" y1="120" x2="45" y2="100"/><line x1="55" y1="120" x2="55" y2="95"/><line x1="65" y1="120" x2="65" y2="105"/><line x1="75" y1="120" x2="75" y2="92"/><line x1="85" y1="120" x2="85" y2="98"/><line x1="95" y1="120" x2="95" y2="102"/><line x1="105" y1="120" x2="105" y2="90"/><line x1="115" y1="120" x2="115" y2="97"/><line x1="125" y1="120" x2="125" y2="104"/><line x1="135" y1="120" x2="135" y2="93"/><line x1="145" y1="120" x2="145" y2="99"/><line x1="155" y1="120" x2="155" y2="101"/><line x1="165" y1="120" x2="165" y2="94"/><line x1="175" y1="120" x2="175" y2="100"/><line x1="185" y1="120" x2="185" y2="96"/><line x1="195" y1="120" x2="195" y2="103"/><line x1="205" y1="120" x2="205" y2="91"/><line x1="215" y1="120" x2="215" y2="98"/>
+        </g>
+        <text x="130" y="145" text-anchor="middle" font-size="9">每 15 秒一點 = 5,760 點/天</text>
+        <rect x="250" y="40" width="190" height="120" fill="var(--who)" stroke="var(--ink)" stroke-width="1.5"/>
+        <text x="345" y="60" text-anchor="middle" font-size="11" class="hand">上個月：5 分鐘平均</text>
+        <g stroke="var(--ink)" stroke-width="3"><line x1="280" y1="120" x2="280" y2="98"/><line x1="310" y1="120" x2="310" y2="95"/><line x1="340" y1="120" x2="340" y2="100"/><line x1="370" y1="120" x2="370" y2="94"/><line x1="400" y1="120" x2="400" y2="99"/></g>
+        <text x="345" y="145" text-anchor="middle" font-size="9">288 點/天（少 20 倍）</text>
+        <rect x="460" y="40" width="190" height="120" fill="var(--may)" stroke="var(--ink)" stroke-width="1.5"/>
+        <text x="555" y="60" text-anchor="middle" font-size="11" class="hand">去年：1 小時平均</text>
+        <g stroke="var(--ink)" stroke-width="6"><line x1="520" y1="120" x2="520" y2="97"/><line x1="590" y1="120" x2="590" y2="96"/></g>
+        <text x="555" y="145" text-anchor="middle" font-size="9">24 點/天（少 240 倍）</text>
+        <text x="340" y="190" text-anchor="middle" font-size="10" fill="var(--ink-soft)">這個動作叫 downsampling：資料價值隨時間下降，儲存成本跟著降</text>
+      </svg>
+    </div>
+  </section>
+
+  <section id="l1">
+    <h2><span class="badge">L1</span>第一性原理<span class="time">讀 3 分鐘</span></h2>
+    <p class="lead">這是一個「寫極多、讀極少、越舊越沒人看」的系統。三個不能迴避的限制：寫入量、儲存成本、label 組合數。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 680 230" role="img" aria-label="Capacity math. 1 million samples per second. Uncompressed each sample is 16 bytes, 8 for timestamp and 8 for value, so 16 megabytes per second, 1.4 terabytes per day. With Gorilla compression about 1.37 bytes per sample, 1.4 megabytes per second, about 120 gigabytes per day, 1.8 terabytes for 15 days. Compression is more than 10 times.">
+        <text x="340" y="22" text-anchor="middle" font-size="12" class="hand">每秒 1,000,000 個 sample，存 15 天要多少？</text>
+        <rect x="30" y="45" width="300" height="150" fill="var(--card)" stroke="var(--wrong)" stroke-width="2"/>
+        <text x="180" y="68" text-anchor="middle" font-size="11" class="hand">不壓縮</text>
+        <g font-size="10"><text x="45" y="92">1 sample = 8 B timestamp + 8 B value = 16 B</text><text x="45" y="114">× 1M/s = 16 MB/s</text><text x="45" y="136">× 86,400 s ≈ 1.4 TB/天</text><text x="45" y="158">× 15 天 ≈ 21 TB</text></g>
+        <text x="180" y="184" text-anchor="middle" font-size="9" fill="var(--wrong)">還沒算 label 和 index</text>
+        <rect x="350" y="45" width="300" height="150" fill="var(--see)" stroke="var(--ok)" stroke-width="2"/>
+        <text x="500" y="68" text-anchor="middle" font-size="11" class="hand">Gorilla 壓縮</text>
+        <g font-size="10"><text x="365" y="92">1 sample ≈ 1.37 B（論文實測）</text><text x="365" y="114">× 1M/s ≈ 1.4 MB/s</text><text x="365" y="136">× 86,400 s ≈ 120 GB/天</text><text x="365" y="158">× 15 天 ≈ 1.8 TB</text></g>
+        <text x="500" y="184" text-anchor="middle" font-size="9" fill="var(--ok)">一台機器的 SSD 裝得下</text>
+        <text x="340" y="220" text-anchor="middle" font-size="10" class="hand">壓縮比 &gt; 10 倍，這就是 time-series DB 存在的第一個理由</text>
+      </svg>
+    </div>
+    <p class="lead">第二個限制藏在 label 裡：一條 time series = metric 名稱 + 一組 label 值。label 的值互相相乘。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 680 180" role="img" aria-label="Cardinality multiplication. http_requests_total with service 50 values, times endpoint 20, times status 5, times pod 200, equals 1 million series. Adding user_id with 1 million values multiplies to 1 trillion series, which no system can hold.">
+        <text x="20" y="30" font-size="11" class="hand">http_requests_total{service, endpoint, status, pod}</text>
+        <g font-size="11">
+          <rect x="20" y="50" width="90" height="40" fill="var(--who)" stroke="var(--ink)"/><text x="65" y="75" text-anchor="middle">service 50</text>
+          <text x="122" y="75" text-anchor="middle">×</text>
+          <rect x="135" y="50" width="100" height="40" fill="var(--who)" stroke="var(--ink)"/><text x="185" y="75" text-anchor="middle">endpoint 20</text>
+          <text x="247" y="75" text-anchor="middle">×</text>
+          <rect x="260" y="50" width="80" height="40" fill="var(--who)" stroke="var(--ink)"/><text x="300" y="75" text-anchor="middle">status 5</text>
+          <text x="352" y="75" text-anchor="middle">×</text>
+          <rect x="365" y="50" width="80" height="40" fill="var(--who)" stroke="var(--ink)"/><text x="405" y="75" text-anchor="middle">pod 200</text>
+          <text x="460" y="75">=</text>
+          <rect x="480" y="50" width="180" height="40" fill="var(--see)" stroke="var(--ok)" stroke-width="2"/><text x="570" y="75" text-anchor="middle">1,000,000 series</text>
+        </g>
+        <rect x="365" y="110" width="80" height="40" fill="var(--card)" stroke="var(--wrong)" stroke-width="2" stroke-dasharray="5 3"/><text x="405" y="128" text-anchor="middle" font-size="10" fill="var(--wrong)">+ user_id</text><text x="405" y="143" text-anchor="middle" font-size="9" fill="var(--wrong)">× 1,000,000</text>
+        <text x="460" y="135">=</text>
+        <rect x="480" y="110" width="180" height="40" fill="var(--wrong)" opacity=".85" stroke="var(--ink)"/><text x="570" y="135" text-anchor="middle" font-size="11" fill="var(--card)">10¹² series：爆</text>
+        <text x="20" y="172" font-size="10" fill="var(--ink-soft)">每條 series 都要一份 index 和記憶體。高 cardinality 的值（user_id、request_id）放 log 或 trace，不放 metric label。</text>
+      </svg>
+    </div>
+    <p>拿掉這個平台會怎樣：只剩 CloudWatch 或 ssh grep。故事裡小球的痛就是這個：custom metric 按條收費，查詢慢，而且越大越貴。</p>
+  </section>
+
+  <section id="l2">
+    <h2><span class="badge">L2</span>機制<span class="time">讀 5 分鐘</span></h2>
+    <p class="lead">整條 pipeline 是 agent → collector → buffer → storage → query。中間那個 buffer（Kafka / Kinesis）讓尖峰流量和儲存端的速度脫鉤。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 680 250" role="img" aria-label="Ingestion pipeline. On each host an agent collects metrics and logs. Agents send to a collector tier, which batches, drops bad labels, and samples debug logs. The collector writes into Kafka partitioned by series hash. Metrics consumers write to a time-series database. Log consumers write to a search index for 7 hot days and to S3 for cold storage. Grafana queries the TSDB, and a log UI queries the index. An alert engine evaluates rules against the TSDB.">
+        <g fill="var(--card)" stroke="var(--ink)" stroke-width="1.5">
+          <rect x="15" y="40" width="90" height="36"/><rect x="15" y="90" width="90" height="36"/><rect x="15" y="140" width="90" height="36"/>
+        </g>
+        <g font-size="9" text-anchor="middle"><text x="60" y="62">host + agent</text><text x="60" y="112">host + agent</text><text x="60" y="162">⋯ 5,000 台</text></g>
+        <rect x="140" y="70" width="110" height="80" fill="var(--who)" stroke="var(--ink)" stroke-width="1.5"/>
+        <text x="195" y="90" text-anchor="middle" font-size="10">collector</text><text x="195" y="106" text-anchor="middle" font-size="8">batch、壓縮</text><text x="195" y="120" text-anchor="middle" font-size="8">丟掉禁用 label</text><text x="195" y="134" text-anchor="middle" font-size="8">debug log 抽樣</text>
+        <g stroke="var(--ink)"><line x1="105" y1="58" x2="140" y2="95"/><line x1="105" y1="108" x2="140" y2="110"/><line x1="105" y1="158" x2="140" y2="125"/></g>
+        <rect x="285" y="60" width="100" height="100" fill="var(--may)" stroke="var(--ink)" stroke-width="1.5"/>
+        <text x="335" y="82" text-anchor="middle" font-size="10">Kafka</text>
+        <g fill="var(--card)" stroke="var(--ink)"><rect x="297" y="92" width="76" height="14"/><rect x="297" y="110" width="76" height="14"/><rect x="297" y="128" width="76" height="14"/></g>
+        <g font-size="8" text-anchor="middle"><text x="335" y="103">partition 0</text><text x="335" y="121">partition 1</text><text x="335" y="139">⋯</text></g>
+        <line x1="250" y1="110" x2="285" y2="110" stroke="var(--ink)"/>
+        <rect x="420" y="30" width="120" height="50" fill="var(--see)" stroke="var(--ink)" stroke-width="1.5"/><text x="480" y="52" text-anchor="middle" font-size="10">TSDB</text><text x="480" y="68" text-anchor="middle" font-size="8">metrics，15 天原始</text>
+        <rect x="420" y="105" width="120" height="44" fill="var(--see)" stroke="var(--ink)" stroke-width="1.5"/><text x="480" y="124" text-anchor="middle" font-size="10">log index</text><text x="480" y="139" text-anchor="middle" font-size="8">hot 7 天</text>
+        <rect x="420" y="170" width="120" height="44" fill="var(--card)" stroke="var(--ink)" stroke-dasharray="5 3"/><text x="480" y="189" text-anchor="middle" font-size="10">S3</text><text x="480" y="204" text-anchor="middle" font-size="8">cold，1 年，便宜</text>
+        <g stroke="var(--ink)"><line x1="385" y1="95" x2="420" y2="55"/><line x1="385" y1="120" x2="420" y2="127"/><line x1="385" y1="145" x2="420" y2="192"/></g>
+        <rect x="575" y="30" width="95" height="50" fill="var(--card)" stroke="var(--accent)" stroke-width="2"/><text x="622" y="52" text-anchor="middle" font-size="10">Grafana</text><text x="622" y="68" text-anchor="middle" font-size="8">+ alert rules</text>
+        <rect x="575" y="105" width="95" height="44" fill="var(--card)" stroke="var(--accent)" stroke-width="2"/><text x="622" y="131" text-anchor="middle" font-size="10">log UI</text>
+        <g stroke="var(--accent)" stroke-width="2"><line x1="540" y1="55" x2="575" y2="55"/><line x1="540" y1="127" x2="575" y2="127"/></g>
+        <text x="335" y="185" text-anchor="middle" font-size="9" class="hand">buffer：儲存端慢了</text><text x="335" y="199" text-anchor="middle" font-size="9" class="hand">資料在這排隊，不會掉</text>
+        <text x="340" y="240" text-anchor="middle" font-size="10" fill="var(--ink-soft)">寫入路徑（左到右）和查詢路徑（右邊）分開擴展</text>
+      </svg>
+    </div>
+    <p class="lead">TSDB 內部（以 Prometheus 為例）：最近約 2 小時在記憶體的 head block，靠 WAL 防當機，之後切成不可變的 block 落盤。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 680 230" role="img" aria-label="Prometheus TSDB layout on a timeline. Old immutable blocks on disk, each covering 2 hours, get compacted into larger blocks. The head block in memory holds the newest roughly 2 hours. Every sample written to the head is first appended to the write ahead log on disk. If the process crashes, the head is rebuilt by replaying the WAL. Each block has its own inverted index from label to series IDs.">
+        <line x1="20" y1="200" x2="660" y2="200" stroke="var(--ink)" stroke-width="2"/><text x="20" y="218" font-size="9">舊</text><text x="650" y="218" font-size="9">現在</text>
+        <rect x="30" y="110" width="200" height="70" fill="var(--card)" stroke="var(--ink)" stroke-width="1.5"/><text x="130" y="135" text-anchor="middle" font-size="10">compacted block</text><text x="130" y="152" text-anchor="middle" font-size="9">合併後的大 block（磁碟）</text><text x="130" y="168" text-anchor="middle" font-size="8">chunks + index + meta</text>
+        <rect x="245" y="110" width="110" height="70" fill="var(--card)" stroke="var(--ink)" stroke-width="1.5"/><text x="300" y="140" text-anchor="middle" font-size="10">block 2h</text><text x="300" y="158" text-anchor="middle" font-size="8">不可變</text>
+        <rect x="370" y="110" width="110" height="70" fill="var(--card)" stroke="var(--ink)" stroke-width="1.5"/><text x="425" y="140" text-anchor="middle" font-size="10">block 2h</text><text x="425" y="158" text-anchor="middle" font-size="8">不可變</text>
+        <rect x="495" y="100" width="160" height="80" fill="var(--may)" stroke="var(--accent)" stroke-width="2.5"/><text x="575" y="122" text-anchor="middle" font-size="11" class="hand">head block</text><text x="575" y="140" text-anchor="middle" font-size="9">記憶體，正在寫</text><text x="575" y="156" text-anchor="middle" font-size="9">最近約 2 小時</text>
+        <rect x="495" y="30" width="160" height="40" fill="var(--card)" stroke="var(--ink)" stroke-dasharray="5 3"/><text x="575" y="48" text-anchor="middle" font-size="10">WAL（磁碟）</text><text x="575" y="62" text-anchor="middle" font-size="8">每筆先 append 這裡</text>
+        <line x1="575" y1="70" x2="575" y2="100" stroke="var(--ink)" stroke-width="1.5"/><text x="582" y="90" font-size="8">當機 → replay 重建 head</text>
+        <path d="M 230 105 Q 300 70 370 105" fill="none" stroke="var(--ink-soft)" stroke-dasharray="4 3"/><text x="300" y="80" text-anchor="middle" font-size="9" fill="var(--ink-soft)">compaction：小 block 併成大 block</text>
+        <text x="200" y="40" text-anchor="middle" font-size="10">每個 block 都有 inverted index：</text><text x="200" y="56" text-anchor="middle" font-size="9">{service="cart"} → series 17, 42, 88</text>
+      </svg>
+    </div>
+    <p class="lead">壓縮靠的是「相鄰 sample 很像」。Gorilla 的做法：時間戳存 delta-of-delta，數值存和前一個的 XOR。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 680 190" role="img" aria-label="Delta of delta encoding. Timestamps 1000, 1015, 1030, 1045, 1061. Deltas are 15, 15, 15, 16. Delta of delta is 0, 0, 1. A zero costs only 1 bit. Values 42.0, 42.0, 42.5: XOR with the previous value is zero for repeats, which also costs 1 bit, so a regular scrape stores almost nothing per sample.">
+        <text x="20" y="28" font-size="11" class="hand">時間戳（scrape 每 15 秒）</text>
+        <g font-size="10" text-anchor="middle">
+          <g fill="var(--card)" stroke="var(--ink)"><rect x="20" y="40" width="80" height="28"/><rect x="110" y="40" width="80" height="28"/><rect x="200" y="40" width="80" height="28"/><rect x="290" y="40" width="80" height="28"/><rect x="380" y="40" width="80" height="28"/></g>
+          <text x="60" y="58">1000</text><text x="150" y="58">1015</text><text x="240" y="58">1030</text><text x="330" y="58">1045</text><text x="420" y="58">1061</text>
+          <text x="10" y="92" text-anchor="start" font-size="9">delta</text><text x="150" y="92">15</text><text x="240" y="92">15</text><text x="330" y="92">15</text><text x="420" y="92">16</text>
+          <text x="10" y="116" text-anchor="start" font-size="9">Δ of Δ</text><text x="240" y="116" fill="var(--ok)">0</text><text x="330" y="116" fill="var(--ok)">0</text><text x="420" y="116" fill="var(--wrong)">1</text>
+        </g>
+        <text x="480" y="100" font-size="10">0 只要 1 bit</text><text x="480" y="116" font-size="10">偶爾抖 1 秒才多花幾 bit</text>
+        <text x="20" y="150" font-size="11" class="hand">數值：42.0 → 42.0 → 42.5</text>
+        <text x="20" y="172" font-size="10">和前一個 XOR：相同 = 0（1 bit）；不同才存有差異的那幾個 bit</text>
+        <text x="480" y="160" font-size="9" fill="var(--ink-soft)">16 B → 平均約 1.37 B</text>
+      </svg>
+    </div>
+    <details>
+      <summary>之後再看：push vs pull 收集模型</summary>
+      <div>
+        <p>Prometheus 是 pull：server 依 service discovery 去 scrape 每個 target 的 <code>/metrics</code>。好處是 server 知道誰沒回（<code>up == 0</code>），而且 target 不會把 server 打爆。代價是短命的 job（跑 10 秒的 batch）可能來不及被 scrape，要另外用 Pushgateway。</p>
+        <p>CloudWatch agent、StatsD、OTLP 是 push：agent 主動送。適合 serverless、短命工作、跨網段。代價是 server 端要自己擋流量，而且「沒收到」分不出是掛了還是沒事。</p>
+        <p>Prometheus 的全域 <code>scrape_interval</code> 預設是 1 分鐘，實務上多半設 15 秒。local 儲存預設 retention 是 15 天（<code>--storage.tsdb.retention.time</code>）。</p>
+      </div>
+    </details>
+  </section>
+
+  <section id="l3">
+    <h2><span class="badge">L3</span>取捨<span class="time">讀 4 分鐘</span></h2>
+    <p class="lead">因為 L1 的寫入量和壓縮需求，通用 OLTP 資料庫輸在每一個面向。</p>
+    <div class="scroll">
+      <table>
+        <tr><th>面向</th><th>MySQL / Postgres（OLTP）</th><th>TSDB</th></tr>
+        <tr><td>寫入</td><td>每筆一列，B-tree index 隨機寫，百萬/秒撐不住</td><td>append-only，照時間順序寫，先進記憶體再批次落盤</td></tr>
+        <tr><td>每筆大小</td><td>一列加 index 輕易 50 B 以上</td><td>壓縮後約 1.4 B</td></tr>
+        <tr><td>查詢</td><td>擅長「找某一筆」</td><td>擅長「某段時間、某組 label 的聚合」</td></tr>
+        <tr><td>刪舊資料</td><td>DELETE 大量列，產生碎片</td><td>整個 block 刪掉，幾乎免費</td></tr>
+        <tr><td>update</td><td>支援</td><td>不支援，也不需要（sample 寫了就不改）</td></tr>
+      </table>
+    </div>
+    <p class="lead">Metrics 和 logs 的儲存選擇不同，因為 log 查詢是「找字」，metrics 查詢是「算數」。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 680 190" role="img" aria-label="Two ways to index logs. Full text index, like OpenSearch, indexes every word, so any search is fast, but the index can be as big as the data and costs a lot. Label only index, like Loki, indexes only a few labels such as service and level, stores raw log chunks compressed in S3, and greps through them at query time, so storage is cheap but broad searches are slow.">
+        <rect x="20" y="30" width="310" height="140" fill="var(--card)" stroke="var(--ink)" stroke-width="1.5"/>
+        <text x="175" y="52" text-anchor="middle" font-size="11" class="hand">全文 index（OpenSearch）</text>
+        <g font-size="9"><text x="35" y="76">"timeout" → doc 3, 9, 41</text><text x="35" y="92">"user=88" → doc 9</text><text x="35" y="108">每個字都進 index</text></g>
+        <rect x="35" y="120" width="130" height="14" fill="var(--see)" stroke="var(--ink)"/><text x="170" y="131" font-size="8">原始資料</text>
+        <rect x="35" y="138" width="120" height="14" fill="var(--wrong)" opacity=".6" stroke="var(--ink)"/><text x="160" y="149" font-size="8">index 差不多一樣大</text>
+        <text x="175" y="166" text-anchor="middle" font-size="9">查什麼都快，但貴</text>
+        <rect x="350" y="30" width="310" height="140" fill="var(--card)" stroke="var(--ink)" stroke-width="1.5"/>
+        <text x="505" y="52" text-anchor="middle" font-size="11" class="hand">只 index label（Loki）</text>
+        <g font-size="9"><text x="365" y="76">{service="cart", level="error"} → chunk 7</text><text x="365" y="92">chunk 壓縮後丟 S3</text><text x="365" y="108">查詢時才 grep chunk 內容</text></g>
+        <rect x="365" y="120" width="130" height="14" fill="var(--see)" stroke="var(--ink)"/><text x="500" y="131" font-size="8">原始資料（壓縮）</text>
+        <rect x="365" y="138" width="12" height="14" fill="var(--ok)" stroke="var(--ink)"/><text x="382" y="149" font-size="8">index 很小</text>
+        <text x="505" y="166" text-anchor="middle" font-size="9">便宜，但大範圍搜尋慢</text>
+      </svg>
+    </div>
+    <div class="scroll">
+      <table>
+        <tr><th>取捨</th><th>選 A 的代價</th><th>選 B 的代價</th></tr>
+        <tr><td>pull vs push</td><td>pull：短命 job 收不到</td><td>push：分不出「掛了」和「沒事」，server 要自己擋流量</td></tr>
+        <tr><td>log 全收 vs 抽樣</td><td>全收：ingest 費跟流量一起漲</td><td>抽樣：剛好丟掉出事那一筆。所以 error 一律全收，只抽 debug / info</td></tr>
+        <tr><td>downsampling 提早 vs 晚</td><td>早：舊資料看不到尖峰（平均把 spike 抹平）</td><td>晚：儲存費高。實務上 downsample 同時存 min / max / sum / count</td></tr>
+        <tr><td>中間放 Kafka vs 直寫</td><td>放：多一套要顧的叢集，多幾秒延遲</td><td>直寫：儲存端一慢，agent 端開始丟資料</td></tr>
+      </table>
+    </div>
+  </section>
+
+  <section id="l4">
+    <h2><span class="badge">L4</span>AWS 怎麼做<span class="time">讀 4 分鐘</span></h2>
+    <p class="lead">因為 L3 決定 metrics 和 logs 分開存，AWS 上也分兩條路：metrics 走 Prometheus 相容的 AMP，logs 走 Firehose 落 S3，熱的那段才進 OpenSearch。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 680 250" role="img" aria-label="AWS architecture. EKS and EC2 workloads run an ADOT collector for metrics and Fluent Bit for logs. Metrics go by Prometheus remote write to Amazon Managed Service for Prometheus, queried by Amazon Managed Grafana. Logs go to Amazon Data Firehose, which batches to S3 by default every 5 MiB or 300 seconds. S3 is queried with Athena. A copy of recent logs goes to OpenSearch Service for 7 days of fast search. CloudWatch stays for AWS service metrics and alarms.">
+        <rect x="15" y="60" width="140" height="130" fill="var(--card)" stroke="var(--accent)" stroke-width="2"/>
+        <text x="85" y="80" text-anchor="middle" font-size="10">EKS / EC2</text>
+        <rect x="28" y="92" width="114" height="34" fill="var(--who)" stroke="var(--ink)"/><text x="85" y="113" text-anchor="middle" font-size="9">ADOT collector</text>
+        <rect x="28" y="140" width="114" height="34" fill="var(--who)" stroke="var(--ink)"/><text x="85" y="161" text-anchor="middle" font-size="9">Fluent Bit</text>
+        <rect x="210" y="40" width="150" height="50" fill="var(--see)" stroke="var(--ink)" stroke-width="1.5"/><text x="285" y="62" text-anchor="middle" font-size="10">AMP</text><text x="285" y="78" text-anchor="middle" font-size="8">remote_write</text>
+        <rect x="420" y="40" width="130" height="50" fill="var(--card)" stroke="var(--ink)" stroke-width="1.5"/><text x="485" y="62" text-anchor="middle" font-size="10">Managed Grafana</text><text x="485" y="78" text-anchor="middle" font-size="8">dashboard + alert</text>
+        <rect x="210" y="140" width="150" height="50" fill="var(--may)" stroke="var(--ink)" stroke-width="1.5"/><text x="285" y="160" text-anchor="middle" font-size="10">Data Firehose</text><text x="285" y="176" text-anchor="middle" font-size="8">5 MiB / 300 s 批次</text>
+        <rect x="420" y="120" width="130" height="44" fill="var(--see)" stroke="var(--ink)" stroke-width="1.5"/><text x="485" y="140" text-anchor="middle" font-size="10">OpenSearch</text><text x="485" y="155" text-anchor="middle" font-size="8">hot 7 天</text>
+        <rect x="420" y="180" width="130" height="44" fill="var(--card)" stroke="var(--ink)" stroke-dasharray="5 3"/><text x="485" y="200" text-anchor="middle" font-size="10">S3</text><text x="485" y="215" text-anchor="middle" font-size="8">lifecycle → Glacier</text>
+        <rect x="580" y="180" width="90" height="44" fill="var(--card)" stroke="var(--ink)"/><text x="625" y="206" text-anchor="middle" font-size="10">Athena</text>
+        <g stroke="var(--ink)"><line x1="142" y1="109" x2="210" y2="65"/><line x1="142" y1="157" x2="210" y2="165"/><line x1="360" y1="65" x2="420" y2="65"/><line x1="360" y1="160" x2="420" y2="142"/><line x1="360" y1="172" x2="420" y2="200"/><line x1="550" y1="202" x2="580" y2="202"/></g>
+        <rect x="580" y="110" width="90" height="50" fill="var(--card)" stroke="var(--line)"/><text x="625" y="130" text-anchor="middle" font-size="9">CloudWatch</text><text x="625" y="146" text-anchor="middle" font-size="8">AWS 服務 metric</text>
+        <text x="340" y="242" text-anchor="middle" font-size="10" fill="var(--ink-soft)">Timestream for LiveAnalytics 2025-06-20 起不收新客戶，新案別選它</text>
+      </svg>
+    </div>
+    <div class="scroll">
+      <table>
+        <tr><th>服務</th><th>用在哪</th><th>陷阱</th></tr>
+        <tr><td>Amazon Managed Service for Prometheus</td><td>metrics 儲存與 PromQL</td><td>按 sample 寫入量和查詢量收費。預設 active series 上限是每 workspace 5,000 萬（可調），高 cardinality 一樣會撞到。retention 要自己設，最長 1,095 天。</td></tr>
+        <tr><td>CloudWatch custom metrics</td><td>少量業務指標</td><td>每個 dimension 組合算一條 metric、分別收費。舊資料會自動變粗：1 分鐘精度留 15 天，之後 5 分鐘留 63 天，1 小時留 455 天。</td></tr>
+        <tr><td>Amazon Data Firehose</td><td>log 落 S3</td><td>S3 destination 預設 buffer 是 5 MiB 或 300 秒，先到先送。所以 S3 上的 log 最多晚 5 分鐘，不能拿來做即時告警。</td></tr>
+        <tr><td>OpenSearch Service</td><td>近期 log 全文搜尋</td><td>每天每個 service 開一個 index，會產生大量小 shard，cluster state 被拖垮。AWS 建議 log 類 shard 大小 30 到 50 GB。</td></tr>
+        <tr><td>CloudWatch Logs</td><td>不想自建時</td><td>新 log group 預設 Never expire。Logs Insights 按掃描量收費，查一個月的資料很貴。</td></tr>
+      </table>
+    </div>
+    <p class="sub">誰會吵：財務問為什麼監控費比 app 本身還貴。SRE 想全收，app team 不想改 label。design review 會問：「這個 label 有幾個可能值？」</p>
+  </section>
+
+  <section id="l5">
+    <h2><span class="badge">L5</span>規模化<span class="time">讀 3 分鐘</span></h2>
+    <p class="lead">每一級換掉的都是上一級的單點：先是單台 Prometheus 的容量，再是它的保存期限，最後是跨區查詢。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 680 240" role="img" aria-label="Evolution ladder. Step 1 CloudWatch only, fine for a few services. Step 2 a single Prometheus with Grafana and Loki, local disk 15 days. Step 3 two Prometheus replicas per cluster for HA, plus Thanos or Mimir uploading blocks to S3 for long retention, with downsampling to 5 minutes and 1 hour. Step 4 big tech in-house systems such as Google Monarch, Meta Gorilla, Uber M3, with a global query layer and in-memory recent data.">
+        <rect x="20" y="180" width="150" height="50" fill="var(--card)" stroke="var(--ink)" stroke-width="1.5"/>
+        <text x="30" y="200" font-size="11" class="hand">① 只用 CloudWatch</text><text x="30" y="218" font-size="9">10 個 service 以內</text>
+        <rect x="180" y="135" width="150" height="95" fill="var(--see)" stroke="var(--ink)" stroke-width="1.5"/>
+        <text x="190" y="155" font-size="11" class="hand">② 單台 Prometheus</text><text x="190" y="175" font-size="9">+ Grafana + Loki</text><text x="190" y="191" font-size="9">本機碟 15 天</text><text x="190" y="207" font-size="9">掛了就瞎</text>
+        <rect x="340" y="85" width="150" height="145" fill="var(--who)" stroke="var(--ink)" stroke-width="1.5"/>
+        <text x="350" y="105" font-size="11" class="hand">③ HA + 長期儲存</text><text x="350" y="125" font-size="9">每 cluster 2 台 Prometheus</text><text x="350" y="141" font-size="9">Thanos / Mimir 把</text><text x="350" y="157" font-size="9">block 傳 S3</text><text x="350" y="173" font-size="9">downsample 5m、1h</text><text x="350" y="189" font-size="9">跨 cluster 查詢</text>
+        <rect x="500" y="35" width="160" height="195" fill="var(--may)" stroke="var(--ink)" stroke-width="1.5"/>
+        <text x="510" y="55" font-size="11" class="hand">④ 大廠自建</text><text x="510" y="75" font-size="9">Google Monarch</text><text x="510" y="91" font-size="9">Meta Gorilla</text><text x="510" y="107" font-size="9">Uber M3</text><text x="510" y="127" font-size="9">近期資料全放記憶體</text><text x="510" y="143" font-size="9">全球查詢層</text><text x="510" y="159" font-size="9">每 team 有 cardinality</text><text x="510" y="175" font-size="9">配額</text>
+        <text x="95" y="170" text-anchor="middle" font-size="9" fill="var(--ink-soft)">換掉：按條付費</text>
+        <text x="255" y="125" text-anchor="middle" font-size="9" fill="var(--ink-soft)">換掉：單點、15 天</text>
+        <text x="415" y="75" text-anchor="middle" font-size="9" fill="var(--ink-soft)">換掉：通用架構</text>
+      </svg>
+    </div>
+    <div class="scroll">
+      <table>
+        <tr><th>路線</th><th>例子</th><th>好處</th><th>代價</th></tr>
+        <tr><td>託管</td><td>AMP + Managed Grafana，或 Datadog</td><td>不用顧叢集，馬上能用</td><td>按量收費，量大後最貴；cardinality 配額由廠商定</td></tr>
+        <tr><td>自建</td><td>Mimir 或 Thanos 加 S3</td><td>單位成本低，可以自己調 retention 和 downsampling</td><td>要一個 team 專門顧，監控系統本身也要被監控</td></tr>
+      </table>
+    </div>
+    <details>
+      <summary>之後再看：Thanos 的 downsampling 規則</summary>
+      <div><p>Thanos compactor 對超過 40 小時的 block 產生 5 分鐘解析度，超過 10 天的產生 1 小時解析度。每個 downsampled 點存 min、max、sum、count 和 counter，所以查舊資料時還看得到尖峰。</p></div>
+    </details>
+  </section>
+
+  <section id="l6">
+    <h2><span class="badge">L6</span>故障與 on-call<span class="time">讀 4 分鐘</span></h2>
+    <p class="lead">監控平台最危險的故障是「它自己壞了，但沒人知道」。prod 出事時你看到的是一片安靜，不是紅燈。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 680 190" role="img" aria-label="Dead man's switch. A Watchdog alert is designed to always fire, every minute, from Prometheus through Alertmanager to an external service. As long as the heartbeat arrives, the external service stays quiet. When the monitoring pipeline breaks, the heartbeat stops, drawn as a dashed gap, and the external service pages on-call because the silence itself is the signal.">
+        <text x="340" y="22" text-anchor="middle" font-size="12" class="hand">dead man's switch：故意一直響的告警</text>
+        <rect x="20" y="50" width="120" height="44" fill="var(--see)" stroke="var(--ink)" stroke-width="1.5"/><text x="80" y="70" text-anchor="middle" font-size="10">Prometheus</text><text x="80" y="85" text-anchor="middle" font-size="8">Watchdog 規則恆為真</text>
+        <rect x="190" y="50" width="120" height="44" fill="var(--who)" stroke="var(--ink)" stroke-width="1.5"/><text x="250" y="76" text-anchor="middle" font-size="10">Alertmanager</text>
+        <rect x="460" y="50" width="200" height="44" fill="var(--card)" stroke="var(--accent)" stroke-width="2"/><text x="560" y="70" text-anchor="middle" font-size="10">外部服務（不同帳號 / 不同雲）</text><text x="560" y="85" text-anchor="middle" font-size="8">收到心跳 = 沒事</text>
+        <line x1="140" y1="72" x2="190" y2="72" stroke="var(--ink)" stroke-width="1.5"/>
+        <g fill="var(--ok)"><circle cx="340" cy="72" r="5"/><circle cx="370" cy="72" r="5"/><circle cx="400" cy="72" r="5"/><circle cx="430" cy="72" r="5"/></g>
+        <text x="385" y="56" text-anchor="middle" font-size="8">每分鐘一次</text>
+        <line x1="20" y1="130" x2="660" y2="130" stroke="var(--line)"/>
+        <text x="20" y="150" font-size="10">pipeline 壞掉之後：</text>
+        <g fill="var(--ok)"><circle cx="190" cy="160" r="5"/><circle cx="220" cy="160" r="5"/></g>
+        <line x1="235" y1="160" x2="430" y2="160" stroke="var(--wrong)" stroke-width="2" stroke-dasharray="5 4"/><text x="330" y="152" text-anchor="middle" font-size="9" fill="var(--wrong)">沒有心跳</text>
+        <rect x="460" y="142" width="200" height="36" fill="var(--wrong)" opacity=".85" stroke="var(--ink)"/><text x="560" y="165" text-anchor="middle" font-size="10" fill="var(--card)">安靜本身就是訊號 → page</text>
+      </svg>
+    </div>
+    <div class="panels">
+      <div class="panel"><h3>A · cardinality 爆炸</h3><p>某次 deploy 把 request_id 放進 label。<code>prometheus_tsdb_head_series</code> 幾分鐘內翻倍，Prometheus OOM 重啟，重啟時 replay WAL 又吃滿記憶體。</p></div>
+      <div class="panel"><h3>B · ingestion 落後</h3><p>Kafka consumer lag 一直長。dashboard 看起來平穩，其實是 10 分鐘前的資料；告警拿舊資料評估，晚了才響。</p></div>
+      <div class="panel"><h3>C · log 風暴</h3><p>一個 service crash loop，log 量變 100 倍，把共用 pipeline 塞滿，別的 team 的 log 被丟。要有 per-tenant 的速率上限。</p></div>
+      <div class="panel"><h3>D · 和 prod 同生共死</h3><p>監控跑在同一個 cluster、同一個 AZ。prod 掛的時候監控一起掛，剛好在最需要的時候看不到。</p></div>
+    </div>
+    <div class="scroll">
+      <table>
+        <tr><th>看什麼</th><th>出事長相</th></tr>
+        <tr><td><code>prometheus_tsdb_head_series</code></td><td>突然倍增 = 有人加了高 cardinality label</td></tr>
+        <tr><td>consumer lag（Kafka）或 IteratorAge（Kinesis）</td><td>持續往上 = 儲存端寫不過來</td></tr>
+        <tr><td>資料新鮮度（最新 sample 的時間戳和現在的差）</td><td>超過 1 到 2 個 scrape interval = 管線卡住</td></tr>
+        <tr><td>每個 tenant 的 ingest 量</td><td>某一個暴增 = log 風暴來源</td></tr>
+      </table>
+    </div>
+    <p>第一個指令（找出是哪個 metric 名稱吃掉最多 series）：</p>
+    <pre>curl -s http://localhost:9090/api/v1/status/tsdb | jq '.data.seriesCountByMetricName[:5]'</pre>
+    <p class="sub">止血：用 <code>metric_relabel_configs</code> 把那個 label drop 掉，先讓 Prometheus 活下來，再回頭找改 code 的 team。平台自己的 SLO 可以定成「99% 的 sample 在寫入後 60 秒內查得到」。</p>
+  </section>
+
+  <section id="l7">
+    <h2><span class="badge">L7</span>面試<span class="time">讀 3 分鐘</span></h2>
+    <p class="lead">題目：「設計一個 metrics 平台：5,000 台主機，每台每 15 秒回報 3,000 條 series。要保留 1 年，dashboard 查最近 1 小時要在 2 秒內回來。」</p>
+    <p>先自己算：每秒多少 sample、存 15 天原始要多大、一年怎麼省。再打開。</p>
+    <details>
+      <summary>L4 vs L6 對照</summary>
+      <div>
+        <div class="wrong"><b>L4</b>「用 Prometheus 加 Grafana，資料存在 Prometheus 裡。」<br>問題：沒算量；單台 Prometheus 撐不住也存不了 1 年；沒提 cardinality；沒講監控自己壞了怎麼辦。</div>
+        <div class="fix"><b>L6</b> 多了四件事：</div>
+        <ol>
+          <li>先算：5,000 × 3,000 = 1,500 萬 active series，除以 15 秒 = 每秒 100 萬 sample。壓縮後約 1.4 MB/s，原始 15 天約 1.8 TB。</li>
+          <li>拆寫入和查詢：agent → Kafka 緩衝 → 依 series hash 分片的 TSDB；查詢層獨立擴展，最近 2 小時在記憶體，所以 1 小時查詢能 2 秒內回來。</li>
+          <li>一年靠分層：15 天原始，之後 downsample 成 5 分鐘和 1 小時存 S3，存 min / max / sum / count 免得抹掉尖峰。</li>
+          <li>故障模式：cardinality 配額（每 team 上限，超過就 drop），consumer lag 告警，dead man's switch 放在另一個帳號。</li>
+        </ol>
+        <p class="en">"Let me size it first. Five thousand hosts times three thousand series is fifteen million active series. At a fifteen-second interval, that's about a million samples per second. With Gorilla-style compression we're at roughly one and a half bytes per sample, so about a hundred and twenty gigs a day raw. I'd put Kafka in front so ingestion spikes don't hit storage directly, then shard the TSDB by series hash. Recent data stays in memory, which is how we hit the two-second dashboard target. For the one-year retention, I'd keep raw data for fifteen days and downsample to five-minute and one-hour resolution in S3, keeping min and max so we don't lose spikes. The thing most likely to take this down is cardinality, so each team gets a series quota. And since a broken monitoring system just looks quiet, I'd add a dead man's switch that pages from a separate account."</p>
+      </div>
+    </details>
+  </section>
+
+  <section id="guess">
+    <h2><span class="badge">先猜</span>上課前先答<span class="time">讀 2 分鐘</span></h2>
+    <p class="lead">每題先用一句話寫下你的答案，再打開對照。答錯沒關係，上課時那裡就是重點。</p>
+    <details>
+      <summary>1. 存 metrics 時，為什麼「刪掉 30 天前的資料」在 TSDB 幾乎免費，在 MySQL 卻很痛？</summary>
+      <div><p>TSDB 照時間切 block，30 天前的資料剛好整個 block 都過期，直接刪目錄。MySQL 要 DELETE 幾十億列，每列都動 index，還留下碎片。（L2、L3）</p></div>
+    </details>
+    <details>
+      <summary>2. 有人想在 metric 加 <code>customer_id</code> label（20 萬個客戶），你在 review 會怎麼回？</summary>
+      <div><p>series 數直接乘 20 萬，平台會爆。要看單一客戶，用 log 或 trace（它們按事件存，不按組合存）；或只對前 100 大客戶做一個獨立 metric。（L1）</p></div>
+    </details>
+    <details>
+      <summary>3. 用 Firehose 把 log 寫進 S3，再用 Athena 查 error 數來觸發告警。哪裡會出問題？</summary>
+      <div><p>Firehose 預設最多 buffer 300 秒才寫 S3，加上 Athena 查詢時間，告警會晚 5 分鐘以上。告警要走 metrics 那條路（或在 collector 端先算 error rate）。S3 那條留給事後查。（L4）</p></div>
+    </details>
+  </section>
+
+  <div class="next">
+    <b>下一步（2 分鐘）</b>
+    <p>不看這頁，在紙上算一次：每秒 100 萬 sample、每筆 1.4 B，一天多少 GB？</p>
+  </div>
+
+</main>

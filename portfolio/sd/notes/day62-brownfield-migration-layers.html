@@ -1,0 +1,390 @@
+<title>Brownfield Migration</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC:wght@400;700&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: one notebook column on graph paper; teal sd accent band; figures on taped cards, failure cases as comic panels */
+:root {
+  --paper: #F6F8FA;
+  --grid: rgba(90,130,170,.16);
+  --ink: #23313E;
+  --ink-soft: #55677A;
+  --card: #FFFFFF;
+  --accent: #0B7285;
+  --on-accent: #FFFFFF;
+  --tape: color-mix(in srgb, var(--accent) 35%, transparent);
+  --who: #FFE98A;
+  --see: #BDEEF6;
+  --may: #F9CDE0;
+  --wrong: #D2453A;
+  --ok: #2F8F5B;
+  --line: #9DB0C2;
+  --font-hand: "LXGW WenKai TC", "Noto Sans TC", "PingFang TC", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #1A2320; --grid: rgba(200,230,210,.08); --ink: #E6EDE8; --ink-soft: #A9BAB1;
+    --card: #24302C; --accent: #3BC9DB; --on-accent: #10221F; --who: #8A7A2A; --see: #2B6A74; --may: #7A3F57;
+    --wrong: #FF8A7E; --ok: #7FD3A1; --line: #5E7268; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #1A2320; --grid: rgba(200,230,210,.08); --ink: #E6EDE8; --ink-soft: #A9BAB1;
+  --card: #24302C; --accent: #3BC9DB; --on-accent: #10221F; --who: #8A7A2A; --see: #2B6A74; --may: #7A3F57;
+  --wrong: #FF8A7E; --ok: #7FD3A1; --line: #5E7268; color-scheme: dark;
+}
+body {
+  background-color: var(--paper);
+  background-image: linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 22px 22px;
+  color: var(--ink);
+  font-family: var(--font-hand);
+  font-size: 17px;
+  line-height: 1.75;
+}
+.band { background: var(--accent); color: var(--on-accent); padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 22px 18px; }
+.band > div { max-width: 760px; margin: 0 auto; display: grid; gap: 8px; }
+.band a { color: inherit; }
+.page { max-width: 760px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 28px 64px; display: grid; gap: 36px; }
+h1, h2, h3 { text-wrap: balance; line-height: 1.3; margin: 0; }
+h1 { font-size: 2.1rem; }
+h2 { font-size: 1.4rem; display: flex; flex-wrap: wrap; align-items: baseline; gap: 10px; }
+h2 .badge { font-family: var(--font-mono); font-size: .78rem; background: var(--accent); color: var(--on-accent); padding: 1px 8px; border-radius: 3px; }
+h2 .time { font-family: var(--font-mono); font-size: .74rem; color: var(--ink-soft); letter-spacing: .04em; }
+p { margin: 0; }
+section { display: grid; gap: 14px; min-width: 0; }
+.sub { font-size: .95rem; opacity: .9; }
+.lead { font-size: 1.12rem; font-weight: 700; }
+.progress { display: flex; flex-wrap: wrap; gap: 6px 12px; font-family: var(--font-mono); font-size: .8rem; }
+.progress a { color: inherit; text-decoration: none; }
+mark { background: linear-gradient(transparent 52%, var(--who) 52%); color: inherit; padding: 0 2px; }
+mark.see { background: linear-gradient(transparent 52%, var(--see) 52%); }
+mark.may { background: linear-gradient(transparent 52%, var(--may) 52%); }
+code { font-family: var(--font-mono); font-size: .86em; background: color-mix(in srgb, var(--line) 22%, transparent); padding: 1px 5px; border-radius: 3px; }
+.card { position: relative; background: var(--card); padding: 22px 16px 14px; box-shadow: 0 1px 3px rgba(0,0,0,.12); min-width: 0; }
+.card::before { content: ""; position: absolute; top: -9px; left: 50%; width: 92px; height: 20px; transform: translateX(-50%) rotate(-2deg); background: var(--tape); }
+.scroll { overflow-x: auto; }
+svg.fig { display: block; min-width: 600px; width: 100%; height: auto; }
+svg text { font-family: var(--font-mono); fill: var(--ink); }
+svg .hand { font-family: var(--font-hand); }
+.rule { border-left: 4px solid var(--accent); padding: 6px 12px; font-size: 1.05rem; }
+.wrong { border-left: 4px solid var(--wrong); padding: 4px 12px; display: grid; gap: 2px; }
+.wrong b { color: var(--wrong); font-size: .85rem; letter-spacing: .05em; }
+.fix { border-left: 4px solid var(--ok); padding: 4px 12px; }
+.panels { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 14px; }
+.panel { border: 2px solid var(--ink); background: var(--card); padding: 10px; display: grid; gap: 6px; min-width: 0; align-content: start; }
+.panel h3 { font-size: 1rem; font-family: var(--font-mono); }
+.panel p { font-size: .92rem; }
+.panel svg { width: 100%; height: auto; display: block; }
+@media (max-width: 560px) { .panels { grid-template-columns: 1fr; } }
+table { border-collapse: collapse; width: 100%; font-size: .95rem; font-variant-numeric: tabular-nums; }
+th, td { border-bottom: 1px dashed var(--line); padding: 8px 6px; text-align: left; vertical-align: top; }
+th { font-family: var(--font-mono); font-size: .78rem; letter-spacing: .05em; color: var(--ink-soft); font-weight: 600; }
+ol, ul { margin: 0; padding-left: 1.3em; display: grid; gap: 6px; }
+details { background: var(--card); border: 2px dashed var(--line); padding: 10px 14px; }
+details[open] { border-style: solid; }
+details summary { cursor: pointer; font-weight: 700; }
+details > div { display: grid; gap: 10px; margin-top: 10px; }
+.two { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 14px; }
+@media (max-width: 560px) { .two { grid-template-columns: 1fr; } }
+.en { font-family: var(--font-mono); font-size: .88rem; color: var(--ink-soft); }
+pre { margin: 0; font-family: var(--font-mono); font-size: .82rem; line-height: 1.5; background: var(--card); border: 1px solid var(--line); padding: 10px 12px; overflow-x: auto; }
+.next { border: 3px solid var(--accent); background: var(--card); padding: 14px 16px; display: grid; gap: 6px; }
+a { color: var(--accent); text-underline-offset: 3px; }
+a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+</style>
+
+<header class="band">
+  <div>
+    <p class="sub">sd 課程 · P4 進階 · Day 62-63 · 預習版（還沒上課）</p>
+    <h1>Brownfield / Legacy Migration</h1>
+    <p>讀完這頁你能：畫出 strangler proxy → CDC → backfill → shadow → cutover → decommission 六個階段，說出每一段怎麼 roll back，並指出「不能回頭的那一刻」在哪。</p>
+    <nav class="progress" aria-label="layers"><a href="#l0">L0 ✓</a><a href="#l1">L1 ✓</a><a href="#l2">L2 ✓</a><a href="#l3">L3 ✓</a><a href="#l4">L4 ✓</a><a href="#l5">L5 ✓</a><a href="#l6">L6 ✓</a><a href="#l7">L7 ✓</a><a href="#guess">先猜</a></nav>
+  </div>
+</header>
+
+<main class="page">
+
+  <p class="sub">預習版：上課前先讀 L0 到 L2，做完頁尾的「先猜」。上完課這頁會換成含錯題的正式版。這題會用到 Day 10 的 idempotency、Day 21 的 replication lag、Day 25 的 observability。</p>
+
+  <section id="l0">
+    <h2><span class="badge">L0</span>一張圖<span class="time">讀 1 分鐘</span></h2>
+    <p class="lead">換橋：車流不能停，所以在舊橋旁邊蓋新橋，一條車道一條車道改過去。最後一台車離開舊橋後，才拆舊橋。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 680 200" role="img" aria-label="Four snapshots of traffic moving from an old bridge to a new bridge. First 100 percent old. Then 95 percent old and 5 percent new. Then 50 and 50. Finally 0 percent old and 100 percent new, and the old bridge is drawn dashed because it is removed only after it carries no traffic.">
+        <g font-size="10" text-anchor="middle">
+          <text x="85" y="24" class="hand">① 開始</text><text x="250" y="24" class="hand">② canary</text><text x="420" y="24" class="hand">③ 一半</text><text x="590" y="24" class="hand">④ 拆舊橋</text>
+        </g>
+        <g stroke="var(--ink)" stroke-width="1.5">
+          <rect x="20" y="50" width="130" height="34" fill="var(--may)"/><rect x="20" y="120" width="130" height="34" fill="var(--card)" stroke-dasharray="5 3"/>
+          <rect x="185" y="50" width="130" height="34" fill="var(--may)"/><rect x="185" y="120" width="130" height="34" fill="var(--see)"/>
+          <rect x="355" y="50" width="130" height="34" fill="var(--may)"/><rect x="355" y="120" width="130" height="34" fill="var(--see)"/>
+          <rect x="525" y="50" width="130" height="34" fill="var(--card)" stroke-dasharray="5 3"/><rect x="525" y="120" width="130" height="34" fill="var(--see)"/>
+        </g>
+        <g font-size="10" text-anchor="middle">
+          <text x="85" y="72">舊橋 100%</text><text x="85" y="142" fill="var(--ink-soft)">新橋 施工中</text>
+          <text x="250" y="72">舊橋 95%</text><text x="250" y="142">新橋 5%</text>
+          <text x="420" y="72">舊橋 50%</text><text x="420" y="142">新橋 50%</text>
+          <text x="590" y="72" fill="var(--ink-soft)">舊橋 0%：才拆</text><text x="590" y="142">新橋 100%</text>
+        </g>
+        <text x="340" y="185" text-anchor="middle" font-size="10" fill="var(--ink-soft)">任何一步出事，車流都還能退回舊橋，前提是舊橋還在、還通</text>
+      </svg>
+    </div>
+  </section>
+
+  <section id="l1">
+    <h2><span class="badge">L1</span>第一性原理<span class="time">讀 3 分鐘</span></h2>
+    <p class="lead">搬家最難的不是搬，是「搬的過程中，資料還在一直變」。copy 開始的那一刻起，舊庫的每一筆新寫入都在拉大差距。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 680 220" role="img" aria-label="Timeline of a naive copy. At T0 a snapshot of the old database starts copying, which takes 6 hours. During those 6 hours the old database keeps receiving writes: order 101 created, order 57 updated, order 12 deleted. The new database only has the T0 snapshot, so those three changes are missing, drawn as dashed empty boxes. Copying is not enough; the changes after T0 must also be captured.">
+        <line x1="40" y1="60" x2="640" y2="60" stroke="var(--ink)" stroke-width="2"/>
+        <text x="20" y="64" font-size="10">舊庫</text>
+        <circle cx="100" cy="60" r="6" fill="var(--accent)"/><text x="100" y="44" text-anchor="middle" font-size="10" class="hand">T0 snapshot</text>
+        <g fill="var(--may)" stroke="var(--ink)"><rect x="220" y="68" width="100" height="22"/><rect x="350" y="68" width="100" height="22"/><rect x="480" y="68" width="100" height="22"/></g>
+        <g font-size="9" text-anchor="middle"><text x="270" y="83">新增 order 101</text><text x="400" y="83">修改 order 57</text><text x="530" y="83">刪除 order 12</text></g>
+        <line x1="40" y1="160" x2="640" y2="160" stroke="var(--ink)" stroke-width="2"/>
+        <text x="20" y="164" font-size="10">新庫</text>
+        <rect x="100" y="120" width="500" height="20" fill="var(--see)" stroke="var(--ink)"/><text x="350" y="134" text-anchor="middle" font-size="9">copy T0 的資料中（6 小時）</text>
+        <g fill="var(--card)" stroke="var(--wrong)" stroke-dasharray="5 3"><rect x="220" y="168" width="100" height="22"/><rect x="350" y="168" width="100" height="22"/><rect x="480" y="168" width="100" height="22"/></g>
+        <g font-size="9" text-anchor="middle" fill="var(--wrong)"><text x="270" y="183">沒有 101</text><text x="400" y="183">57 是舊值</text><text x="530" y="183">12 還活著</text></g>
+        <text x="340" y="212" text-anchor="middle" font-size="10" class="hand">所以一定要同時抓 T0 之後的變更（CDC），copy 只解決一半</text>
+      </svg>
+    </div>
+    <p>四個不能迴避的限制：</p>
+    <ol>
+      <li>不能停機：訂單系統停 1 小時，業務算得出損失多少錢。</li>
+      <li>資料一直在變：上圖那段空白。</li>
+      <li>呼叫方不明：十年的系統，總有人在你不知道的地方呼叫它（報表 cron、別 team 的 script）。</li>
+      <li>要能退回：新系統出錯時，必須有一條路回到舊系統，而且不丟資料。</li>
+    </ol>
+  </section>
+
+  <section id="l2">
+    <h2><span class="badge">L2</span>機制<span class="time">讀 6 分鐘</span></h2>
+    <p class="lead">六個階段，每段都有一個「過關條件」和一條「退回路線」。最後一段之前，舊系統一直是 source of truth。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 680 270" role="img" aria-label="Six migration phases left to right. 1 strangler proxy in front of the monolith, all traffic still to old. 2 CDC captures every change from the old database binlog. 3 backfill copies history. 4 shadow: reads are mirrored to the new service and results compared, new results discarded. 5 cutover by canary percentage 1, 10, 50, 100, with reverse replication from new to old. 6 decommission after 30 days of zero traffic on old. Each of phases 1 to 5 has a rollback arrow back to old. A red line between phase 5 and 6 marks the point of no return.">
+        <g stroke="var(--ink)" stroke-width="1.5">
+          <rect x="10" y="40" width="100" height="90" fill="var(--card)"/><rect x="120" y="40" width="100" height="90" fill="var(--card)"/><rect x="230" y="40" width="100" height="90" fill="var(--card)"/><rect x="340" y="40" width="100" height="90" fill="var(--who)"/><rect x="450" y="40" width="100" height="90" fill="var(--may)"/><rect x="580" y="40" width="90" height="90" fill="var(--see)"/>
+        </g>
+        <g font-size="10" text-anchor="middle" class="hand"><text x="60" y="60">① proxy</text><text x="170" y="60">② CDC</text><text x="280" y="60">③ backfill</text><text x="390" y="60">④ shadow</text><text x="500" y="60">⑤ cutover</text><text x="625" y="60">⑥ 拆除</text></g>
+        <g font-size="8" text-anchor="middle">
+          <text x="60" y="80">monolith 前</text><text x="60" y="93">加一層 router</text><text x="60" y="106">流量 100% 舊</text>
+          <text x="170" y="80">讀舊庫 binlog</text><text x="170" y="93">每筆變更送新庫</text><text x="170" y="106">先開，再 backfill</text>
+          <text x="280" y="80">搬歷史資料</text><text x="280" y="93">從 CDC 起點</text><text x="280" y="106">之前的那些</text>
+          <text x="390" y="80">讀請求複製一份</text><text x="390" y="93">給新系統，比對</text><text x="390" y="106">結果丟掉不回給 user</text>
+          <text x="500" y="80">1% → 10%</text><text x="500" y="93">→ 50% → 100%</text><text x="500" y="106">新寫回舊（反向同步）</text>
+          <text x="625" y="80">舊系統 0 流量</text><text x="625" y="93">滿 30 天</text><text x="625" y="106">才關</text>
+        </g>
+        <g font-size="8" text-anchor="middle" fill="var(--ok)">
+          <text x="60" y="122">過關：延遲沒變</text><text x="170" y="122">過關：lag &lt; 5 s</text><text x="280" y="122">過關：筆數吻合</text><text x="390" y="122">過關：diff 率 ≈ 0</text><text x="500" y="122">過關：SLO 守住</text>
+        </g>
+        <g stroke="var(--ink)"><line x1="110" y1="85" x2="120" y2="85"/><line x1="220" y1="85" x2="230" y2="85"/><line x1="330" y1="85" x2="340" y2="85"/><line x1="440" y1="85" x2="450" y2="85"/><line x1="550" y1="85" x2="580" y2="85"/></g>
+        <line x1="565" y1="30" x2="565" y2="230" stroke="var(--wrong)" stroke-width="2.5"/><text x="565" y="248" text-anchor="middle" font-size="10" fill="var(--wrong)">point of no return</text>
+        <path d="M 500 135 Q 280 220 60 135" fill="none" stroke="var(--accent)" stroke-width="2" stroke-dasharray="6 4"/>
+        <text x="280" y="200" text-anchor="middle" font-size="10" class="hand">① 到 ⑤ 都能退：router 把流量指回舊系統</text>
+        <text x="280" y="214" text-anchor="middle" font-size="9" fill="var(--ink-soft)">⑤ 能退的前提：新系統的寫入有同步回舊庫</text>
+      </svg>
+    </div>
+    <p class="lead">最常見的錯：在 app 裡同時寫兩個庫（dual-write）。兩個 DB 沒有共同的 transaction，寫一半失敗就分岔，而且沒人知道。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 680 220" role="img" aria-label="Dual write failure timeline. The app writes order 57 status paid to the old database, which succeeds. It then writes to the new database, which times out. The app logs an error and moves on. The old database says paid, the new database still says pending. Nobody notices until cutover, when users of the new system see unpaid orders. Below, the CDC alternative: the app writes only to the old database, and a CDC reader tails the binlog and applies the change to the new database, retrying until it succeeds, so the two converge.">
+        <text x="20" y="22" font-size="11" class="hand" fill="var(--wrong)">✕ app 層 dual-write</text>
+        <rect x="20" y="35" width="90" height="36" fill="var(--who)" stroke="var(--ink)"/><text x="65" y="57" text-anchor="middle" font-size="10">app</text>
+        <rect x="200" y="30" width="130" height="24" fill="var(--may)" stroke="var(--ink)"/><text x="265" y="46" text-anchor="middle" font-size="9">舊庫：57 = paid ✓</text>
+        <rect x="200" y="62" width="130" height="24" fill="var(--card)" stroke="var(--wrong)" stroke-dasharray="5 3"/><text x="265" y="78" text-anchor="middle" font-size="9" fill="var(--wrong)">新庫：timeout ✕</text>
+        <g stroke="var(--ink)"><line x1="110" y1="50" x2="200" y2="42"/><line x1="110" y1="58" x2="200" y2="74" stroke-dasharray="4 3"/></g>
+        <text x="350" y="46" font-size="9">app 記一行 error 就繼續了</text>
+        <text x="350" y="78" font-size="9" fill="var(--wrong)">新庫 57 還是 pending，分岔了，沒人知道</text>
+        <line x1="20" y1="110" x2="660" y2="110" stroke="var(--line)"/>
+        <text x="20" y="134" font-size="11" class="hand" fill="var(--ok)">✓ CDC：只寫一個庫，變更從 log 追</text>
+        <rect x="20" y="150" width="90" height="36" fill="var(--who)" stroke="var(--ink)"/><text x="65" y="172" text-anchor="middle" font-size="10">app</text>
+        <rect x="150" y="150" width="110" height="36" fill="var(--may)" stroke="var(--ink)"/><text x="205" y="166" text-anchor="middle" font-size="9">舊庫</text><text x="205" y="179" text-anchor="middle" font-size="8">binlog 記每筆變更</text>
+        <rect x="300" y="150" width="130" height="36" fill="var(--card)" stroke="var(--ink)" stroke-width="1.5"/><text x="365" y="166" text-anchor="middle" font-size="9">CDC reader</text><text x="365" y="179" text-anchor="middle" font-size="8">DMS / Debezium</text>
+        <rect x="470" y="150" width="110" height="36" fill="var(--see)" stroke="var(--ink)"/><text x="525" y="172" text-anchor="middle" font-size="9">新庫</text>
+        <g stroke="var(--ink)"><line x1="110" y1="168" x2="150" y2="168"/><line x1="260" y1="168" x2="300" y2="168"/><line x1="430" y1="168" x2="470" y2="168"/></g>
+        <text x="365" y="206" text-anchor="middle" font-size="9">失敗就從 binlog 的 position 重試，最後一定追上（需要 apply 是 idempotent）</text>
+      </svg>
+    </div>
+    <p class="lead">順序很重要：先開 CDC 記下起點，再做 backfill。反過來做，中間那段變更就永遠漏掉。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 680 170" role="img" aria-label="Correct order. Step 1 start CDC and record binlog position P. Step 2 take a snapshot consistent at position P and backfill it. Step 3 apply CDC changes from P onward. Changes that happen during backfill are queued by CDC and applied after. Wrong order: snapshot first, CDC later, leaves a gap between the snapshot time and CDC start, drawn as a red dashed gap.">
+        <text x="20" y="22" font-size="11" class="hand" fill="var(--ok)">✓ 對的順序</text>
+        <line x1="40" y1="55" x2="640" y2="55" stroke="var(--ink)" stroke-width="2"/>
+        <circle cx="120" cy="55" r="6" fill="var(--accent)"/><text x="120" y="42" text-anchor="middle" font-size="9">開 CDC，記下 position P</text>
+        <rect x="120" y="62" width="250" height="18" fill="var(--see)" stroke="var(--ink)"/><text x="245" y="75" text-anchor="middle" font-size="8">backfill：P 那一刻的 snapshot</text>
+        <rect x="370" y="62" width="270" height="18" fill="var(--may)" stroke="var(--ink)"/><text x="505" y="75" text-anchor="middle" font-size="8">從 P 開始套 CDC 排隊的變更</text>
+        <text x="20" y="115" font-size="11" class="hand" fill="var(--wrong)">✕ 反過來</text>
+        <line x1="40" y1="145" x2="640" y2="145" stroke="var(--ink)" stroke-width="2"/>
+        <circle cx="120" cy="145" r="6" fill="var(--ink)"/><text x="120" y="132" text-anchor="middle" font-size="9">先 snapshot</text>
+        <rect x="120" y="152" width="250" height="14" fill="var(--card)" stroke="var(--wrong)" stroke-dasharray="5 3"/><text x="245" y="163" text-anchor="middle" font-size="8" fill="var(--wrong)">這段的變更：沒人記</text>
+        <circle cx="370" cy="145" r="6" fill="var(--accent)"/><text x="370" y="132" text-anchor="middle" font-size="9">才開 CDC</text>
+      </svg>
+    </div>
+    <details>
+      <summary>之後再看：shadow traffic 為什麼只複製讀</summary>
+      <div><p>寫請求複製一份給新系統，新系統可能真的寄 email、扣款、呼叫第三方。user 會收到兩封信。所以 shadow 階段只複製讀，寫入一致性交給 CDC 處理；比對的是「同一個讀請求，新舊回的結果一樣嗎」。要測寫，就讓新系統在 dry-run 模式下跑，所有對外副作用都關掉。</p></div>
+    </details>
+  </section>
+
+  <section id="l3">
+    <h2><span class="badge">L3</span>取捨<span class="time">讀 4 分鐘</span></h2>
+    <p class="lead">因為 L1 的「不能停、不能丟」，大爆炸式重寫（big bang）幾乎總是輸。代價是遷移期間兩套系統要同時養。</p>
+    <div class="scroll">
+      <table>
+        <tr><th>取捨</th><th>選 A 的代價</th><th>選 B 的代價</th></tr>
+        <tr><td>big bang 重寫 vs strangler</td><td>big bang：一次切換，出錯沒有退路；重寫期間舊系統還在長新功能</td><td>strangler：要養兩套系統好幾個月，router 多一跳延遲</td></tr>
+        <tr><td>app dual-write vs CDC</td><td>dual-write：簡單，但部分失敗會默默分岔</td><td>CDC：多一套 pipeline 要顧，有 lag（新庫永遠晚幾秒）</td></tr>
+        <tr><td>按 user 切 vs 按請求切</td><td>按 user（hash user_id）：同一人一直在同一邊，體驗一致；但壞了影響那群人全部</td><td>按請求隨機：分散風險；但同一個 user 一下新一下舊，看到不一致</td></tr>
+        <tr><td>保留反向同步 vs 不保留</td><td>保留：cutover 後還能退，但多一條 pipeline，要防迴圈（A 寫 B、B 又寫回 A）</td><td>不保留：簡單，但 cutover 那一刻就是 point of no return</td></tr>
+      </table>
+    </div>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 680 160" role="img" aria-label="The migration that stops at 90 percent. A bar shows progress from 0 to 100. The first 90 percent of endpoints move quickly in 3 months. The last 10 percent, the strange edge cases and unknown callers, take longer than all the rest, and many teams stop there and run two systems forever, which is the worst outcome because the cost of both stays.">
+        <rect x="40" y="50" width="540" height="34" fill="var(--see)" stroke="var(--ink)"/><text x="310" y="72" text-anchor="middle" font-size="10">前 90%：常見 endpoint，3 個月</text>
+        <rect x="580" y="50" width="60" height="34" fill="var(--wrong)" opacity=".75" stroke="var(--ink)"/><text x="610" y="72" text-anchor="middle" font-size="9" fill="var(--card)">10%</text>
+        <text x="610" y="104" text-anchor="middle" font-size="9" fill="var(--wrong)">怪 case、不明呼叫方</text><text x="610" y="118" text-anchor="middle" font-size="9" fill="var(--wrong)">比前面全部還久</text>
+        <text x="340" y="30" text-anchor="middle" font-size="11" class="hand">最差的結局：停在 90%，兩套系統永遠一起養</text>
+        <text x="340" y="148" text-anchor="middle" font-size="10" fill="var(--ink-soft)">所以 design doc 要寫「⑥ 拆除」的日期和負責人，不只寫「新系統上線」</text>
+      </svg>
+    </div>
+  </section>
+
+  <section id="l4">
+    <h2><span class="badge">L4</span>AWS 怎麼做<span class="time">讀 4 分鐘</span></h2>
+    <p class="lead">因為 L2 要一個能調比例的 router 和一條 CDC pipeline，AWS 上對應的是 ALB weighted target groups 和 DMS full load + CDC。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 680 250" role="img" aria-label="AWS strangler architecture. Users hit an ALB. A listener rule for path /orders forwards to two weighted target groups: the monolith on EC2 with weight 90 and the new Order Service on ECS or EKS with weight 10. Other paths go only to the monolith. The monolith writes to RDS MySQL with binlog in ROW format. AWS DMS runs a full load plus CDC task from RDS to the new service's Aurora or DynamoDB. AppConfig holds feature flags. CloudWatch dashboards show old and new side by side.">
+        <rect x="15" y="105" width="70" height="40" fill="var(--card)" stroke="var(--ink)"/><text x="50" y="129" text-anchor="middle" font-size="10">users</text>
+        <rect x="120" y="90" width="120" height="70" fill="var(--who)" stroke="var(--ink)" stroke-width="1.5"/><text x="180" y="110" text-anchor="middle" font-size="10">ALB</text><text x="180" y="126" text-anchor="middle" font-size="8">rule: /orders*</text><text x="180" y="140" text-anchor="middle" font-size="8">weighted forward</text>
+        <rect x="290" y="40" width="150" height="50" fill="var(--may)" stroke="var(--ink)" stroke-width="1.5"/><text x="365" y="62" text-anchor="middle" font-size="10">monolith（EC2）</text><text x="365" y="78" text-anchor="middle" font-size="8">weight 90 + 其他所有 path</text>
+        <rect x="290" y="160" width="150" height="50" fill="var(--see)" stroke="var(--ink)" stroke-width="1.5"/><text x="365" y="182" text-anchor="middle" font-size="10">Order Service（ECS）</text><text x="365" y="198" text-anchor="middle" font-size="8">weight 10</text>
+        <rect x="490" y="40" width="160" height="50" fill="var(--may)" stroke="var(--ink)"/><text x="570" y="62" text-anchor="middle" font-size="10">RDS MySQL</text><text x="570" y="78" text-anchor="middle" font-size="8">binlog_format = ROW</text>
+        <rect x="490" y="160" width="160" height="50" fill="var(--see)" stroke="var(--ink)"/><text x="570" y="182" text-anchor="middle" font-size="10">Aurora / DynamoDB</text><text x="570" y="198" text-anchor="middle" font-size="8">新的訂單庫</text>
+        <rect x="520" y="105" width="100" height="36" fill="var(--card)" stroke="var(--accent)" stroke-width="2"/><text x="570" y="122" text-anchor="middle" font-size="9">AWS DMS</text><text x="570" y="134" text-anchor="middle" font-size="8">full load + CDC</text>
+        <g stroke="var(--ink)"><line x1="85" y1="125" x2="120" y2="125"/><line x1="240" y1="110" x2="290" y2="65"/><line x1="240" y1="140" x2="290" y2="185"/><line x1="440" y1="65" x2="490" y2="65"/><line x1="440" y1="185" x2="490" y2="185"/><line x1="570" y1="90" x2="570" y2="105"/><line x1="570" y1="141" x2="570" y2="160"/></g>
+        <rect x="120" y="200" width="120" height="36" fill="var(--card)" stroke="var(--line)"/><text x="180" y="222" text-anchor="middle" font-size="9">AppConfig flag</text>
+        <text x="365" y="238" text-anchor="middle" font-size="9" fill="var(--ink-soft)">CloudWatch：新舊兩邊的 latency、error 並排看</text>
+      </svg>
+    </div>
+    <div class="scroll">
+      <table>
+        <tr><th>服務</th><th>用在哪</th><th>陷阱</th></tr>
+        <tr><td>ALB weighted target groups</td><td>按比例切流量（weight 0 到 999）</td><td>沒開 target group stickiness，同一個 user 會在新舊間跳來跳去。開了之後（預設 1 小時），一邊壞掉 ALB 不會自動 failover 到另一邊，黏住的 user 會一直拿 503。</td></tr>
+        <tr><td>AWS DMS（full load + CDC）</td><td>backfill 加持續同步</td><td>Limited LOB mode 下，超過 Max LOB size 的欄位會被截斷，只在 task log 留 warning。上線前要查來源最大的 LOB 有多大。</td></tr>
+        <tr><td>RDS MySQL binlog</td><td>CDC 的來源</td><td>RDS 預設 <code>binlog retention hours</code> 是 NULL，binlog 很快就被清掉。DMS task 停一下再起來，position 已經不見，CDC 斷掉只能重新 full load。</td></tr>
+        <tr><td>Route 53 weighted records</td><td>跨 region 或跨帳號切流量</td><td>client 和 resolver 會快取 DNS，退回不是即時的。要快速 rollback 用 ALB 層切，不要用 DNS。</td></tr>
+        <tr><td>Migration Hub Refactor Spaces</td><td>AWS 曾經的託管 strangler 工具</td><td>2025-11-07 起不收新客戶，新案別規劃在上面。</td></tr>
+      </table>
+    </div>
+    <pre>CALL mysql.rds_set_configuration('binlog retention hours', 24);</pre>
+    <p class="sub">誰會吵：PM 要遷移期間繼續出新功能（每個新功能都要做兩次）；舊系統的 owner 不想配合加 CDC；財務看到兩套系統一起付錢。design review 會問：「rollback 計畫是什麼？最晚哪一步還能退？」</p>
+  </section>
+
+  <section id="l5">
+    <h2><span class="badge">L5</span>規模化<span class="time">讀 3 分鐘</span></h2>
+    <p class="lead">每一級都在把「人工確認一致」換成「機器持續證明一致」，讓切換的膽子可以更大、退回可以更快。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 680 230" role="img" aria-label="Evolution ladder. Step 1 small team: weekend maintenance window, stop writes, dump and restore, switch. Step 2 growing: ALB path routing for strangler, app dual-write, manual spot checks. Step 3 mature: CDC with DMS or Debezium and Kafka, shadow reads with automated diff, canary percentages tied to SLO, automatic rollback. Step 4 big tech: migration as a platform, reusable online migration tooling such as GitHub gh-ost for schema changes and Stripe's four-step dual write pattern, with reconciliation jobs running continuously.">
+        <rect x="20" y="170" width="150" height="50" fill="var(--card)" stroke="var(--ink)" stroke-width="1.5"/>
+        <text x="30" y="190" font-size="11" class="hand">① 停機維護</text><text x="30" y="208" font-size="9">週末停寫、dump、切換</text>
+        <rect x="180" y="125" width="150" height="95" fill="var(--see)" stroke="var(--ink)" stroke-width="1.5"/>
+        <text x="190" y="145" font-size="11" class="hand">② 手動 strangler</text><text x="190" y="165" font-size="9">ALB path 分流</text><text x="190" y="181" font-size="9">app dual-write</text><text x="190" y="197" font-size="9">人工抽查資料</text>
+        <rect x="340" y="75" width="150" height="145" fill="var(--who)" stroke="var(--ink)" stroke-width="1.5"/>
+        <text x="350" y="95" font-size="11" class="hand">③ CDC + 自動比對</text><text x="350" y="115" font-size="9">DMS 或 Debezium + Kafka</text><text x="350" y="131" font-size="9">shadow read 自動 diff</text><text x="350" y="147" font-size="9">canary % 綁 SLO</text><text x="350" y="163" font-size="9">SLO 破就自動退回</text>
+        <rect x="500" y="30" width="160" height="190" fill="var(--may)" stroke="var(--ink)" stroke-width="1.5"/>
+        <text x="510" y="50" font-size="11" class="hand">④ 遷移是平台</text><text x="510" y="70" font-size="9">共用的 online</text><text x="510" y="86" font-size="9">migration 工具</text><text x="510" y="106" font-size="9">reconciliation job</text><text x="510" y="122" font-size="9">一直在跑</text><text x="510" y="142" font-size="9">每次遷移都有</text><text x="510" y="158" font-size="9">拆除日期和 owner</text>
+        <text x="95" y="160" text-anchor="middle" font-size="9" fill="var(--ink-soft)">換掉：停機</text>
+        <text x="255" y="115" text-anchor="middle" font-size="9" fill="var(--ink-soft)">換掉：默默分岔</text>
+        <text x="415" y="65" text-anchor="middle" font-size="9" fill="var(--ink-soft)">換掉：每次從零做</text>
+      </svg>
+    </div>
+    <div class="scroll">
+      <table>
+        <tr><th>路線</th><th>例子</th><th>好處</th><th>代價</th></tr>
+        <tr><td>app 層遷移</td><td>Stripe 的四步：dual-write → 改讀新 → 改寫新 → 移除舊</td><td>邏輯在 code 裡，可以做欄位轉換</td><td>每個寫入點都要改 code，漏一個就分岔</td></tr>
+        <tr><td>log 層遷移（CDC）</td><td>DMS、Debezium 讀 binlog / WAL</td><td>app 不用改，所有寫入都抓得到</td><td>schema 轉換能力有限，多一條 pipeline 要監控 lag</td></tr>
+      </table>
+    </div>
+    <p class="sub">Stripe 的四步出自 <a href="https://stripe.com/blog/online-migrations">Stripe Engineering：Online migrations at scale</a>。</p>
+  </section>
+
+  <section id="l6">
+    <h2><span class="badge">L6</span>故障與 on-call<span class="time">讀 4 分鐘</span></h2>
+    <p class="lead">遷移出事最可怕的不是報錯，是「兩邊資料默默不一樣」。所以要有一個一直在跑的 reconciliation job 去主動找差異。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 680 190" role="img" aria-label="Reconciliation job. Every hour it takes the orders of one day bucket from both databases, computes a count and a checksum for each. Old: 48210 rows, checksum a91f. New: 48207 rows, checksum 3c02. The mismatch of 3 rows raises an alert and lists the three order IDs, so the gap is found before cutover instead of by users.">
+        <rect x="20" y="40" width="200" height="60" fill="var(--may)" stroke="var(--ink)" stroke-width="1.5"/><text x="120" y="62" text-anchor="middle" font-size="10">舊庫 2026-10-20 的訂單</text><text x="120" y="80" text-anchor="middle" font-size="9">48,210 筆 · checksum a91f</text>
+        <rect x="20" y="115" width="200" height="60" fill="var(--see)" stroke="var(--ink)" stroke-width="1.5"/><text x="120" y="137" text-anchor="middle" font-size="10">新庫 2026-10-20 的訂單</text><text x="120" y="155" text-anchor="middle" font-size="9">48,207 筆 · checksum 3c02</text>
+        <rect x="280" y="75" width="150" height="60" fill="var(--card)" stroke="var(--accent)" stroke-width="2"/><text x="355" y="98" text-anchor="middle" font-size="10">reconciliation job</text><text x="355" y="116" text-anchor="middle" font-size="9">每小時比一個日期桶</text>
+        <g stroke="var(--ink)"><line x1="220" y1="70" x2="280" y2="95"/><line x1="220" y1="145" x2="280" y2="115"/></g>
+        <rect x="480" y="75" width="180" height="60" fill="var(--wrong)" opacity=".85" stroke="var(--ink)"/><text x="570" y="98" text-anchor="middle" font-size="10" fill="var(--card)">差 3 筆 → alert</text><text x="570" y="116" text-anchor="middle" font-size="9" fill="var(--card)">列出 order 101、233、870</text>
+        <line x1="430" y1="105" x2="480" y2="105" stroke="var(--ink)"/>
+        <text x="340" y="182" text-anchor="middle" font-size="10" class="hand">在 cutover 前被 job 抓到，不是被 user 抓到</text>
+      </svg>
+    </div>
+    <div class="panels">
+      <div class="panel"><h3>A · 默默分岔</h3><p>dual-write 部分失敗，或 CDC 漏了某張表。reconciliation job 的差異數不是 0。</p></div>
+      <div class="panel"><h3>B · CDC lag</h3><p>cutover 後 user 剛下單，馬上查卻查不到，因為新庫還差 30 秒。看 DMS 的 <code>CDCLatencySource</code> 和 <code>CDCLatencyTarget</code>。</p></div>
+      <div class="panel"><h3>C · 退不回去</h3><p>cutover 後新系統收了 2 小時的寫入，沒有反向同步。退回舊系統等於丟掉這 2 小時的訂單。</p></div>
+      <div class="panel"><h3>D · 拆掉才發現有人在用</h3><p>關掉舊 endpoint 隔天，財務的月報 cron 壞了。拆除前要看 30 天的 access log，確認是 0。</p></div>
+    </div>
+    <div class="scroll">
+      <table>
+        <tr><th>看什麼</th><th>出事長相</th></tr>
+        <tr><td>reconciliation 差異數</td><td>不是 0 = 有分岔，cutover 暫停</td></tr>
+        <tr><td>DMS <code>CDCLatencyTarget</code></td><td>持續上升 = 新庫越來越舊</td></tr>
+        <tr><td>新舊兩邊的 P99 和 error rate 並排</td><td>新的比舊的差 = 停在目前比例，不要往上加</td></tr>
+        <tr><td>舊系統的 request count（按 caller 拆）</td><td>拆除前還有非 0 的 caller = 有人沒搬</td></tr>
+      </table>
+    </div>
+    <p>第一個指令（DMS 每張表同步了多少、有沒有錯）：</p>
+    <pre>aws dms describe-table-statistics --replication-task-arn arn:aws:dms:ap-northeast-1:123456789012:task:ORDERS-CDC --query 'TableStatistics[].[TableName,FullLoadRows,Inserts,Updates,Deletes,TableState]' --output table</pre>
+    <p class="sub">止血：把 ALB weight 調回 100 / 0，流量全部回舊系統。這一步要在 5 分鐘內做得完，所以事先寫好 runbook 和指令。SLO 可以定成「cutover 前連續 7 天 reconciliation 差異 = 0」。</p>
+  </section>
+
+  <section id="l7">
+    <h2><span class="badge">L7</span>面試<span class="time">讀 3 分鐘</span></h2>
+    <p class="lead">題目：「我們有一個 10 年的 monolith，訂單模組每秒 2,000 筆寫入，資料 3 TB。要拆成獨立的 Order Service，不能停機。你怎麼做？」</p>
+    <p>先自己講：分幾個階段、每段怎麼驗證、最晚哪一步還能退。再打開。</p>
+    <details>
+      <summary>L4 vs L6 對照</summary>
+      <div>
+        <div class="wrong"><b>L4</b>「先寫新的 service，把資料 copy 過去，然後切 DNS。」<br>問題：copy 期間的變更會漏；DNS 退回不即時；沒說怎麼驗證一致；沒有 rollback 計畫。</div>
+        <div class="fix"><b>L6</b> 多了四件事：</div>
+        <ol>
+          <li>先問清楚：有哪些呼叫方（看 30 天 access log），能接受多少秒的不一致，要不要同時改 schema。</li>
+          <li>六階段：ALB 前面加 strangler 規則 → 開 CDC 記起點 → 從起點 backfill 3 TB → shadow read 比對 → canary 1%、10%、50%、100% → 舊系統 0 流量 30 天後拆。</li>
+          <li>每段有過關條件：CDC lag 小於 5 秒、reconciliation 差異為 0、新系統 P99 不比舊的差。</li>
+          <li>點出 point of no return：cutover 後新寫入不在舊庫。要嘛做反向同步，要嘛明說「過了這一步只能往前修」，並讓業務方簽字。</li>
+        </ol>
+        <p class="en">"Before anything else, I'd find every caller of the order module. Thirty days of access logs usually turns up a cron job nobody remembers. Then I'd put a strangler rule on the ALB so /orders can be split by weight. For data, I'd avoid dual-writes in the app, because a partial failure silently forks the two databases. Instead I'd start CDC off the binlog first, note the position, and backfill the three terabytes from that point. Next comes shadow reads with an automated diff, then a canary at one, ten, fifty, and a hundred percent. Each step has a gate: CDC lag under five seconds, zero reconciliation diffs, and P99 no worse than the old system. The key risk is the point of no return. Once the new service takes writes, rolling back loses them unless we replicate back to the old database. So I'd either build that reverse sync or get the business to sign off on fix-forward."</p>
+      </div>
+    </details>
+  </section>
+
+  <section id="guess">
+    <h2><span class="badge">先猜</span>上課前先答<span class="time">讀 2 分鐘</span></h2>
+    <p class="lead">每題先用一句話寫下你的答案，再打開對照。答錯沒關係，上課時那裡就是重點。</p>
+    <details>
+      <summary>1. 為什麼「先 backfill，再開 CDC」會丟資料？</summary>
+      <div><p>backfill 的 snapshot 拍完到 CDC 開始之間的變更，沒有任何人記錄。要先開 CDC 記下 position，再做那個 position 的 snapshot。（L2）</p></div>
+    </details>
+    <details>
+      <summary>2. shadow traffic 階段，為什麼不把寫請求也複製給新系統？</summary>
+      <div><p>新系統會真的產生副作用：寄信、扣款、呼叫第三方。user 收到兩次。shadow 只複製讀，寫入一致性交給 CDC。（L2）</p></div>
+    </details>
+    <details>
+      <summary>3. 切到 100% 新系統後一小時發現 bug，直接把 ALB weight 調回舊系統，會發生什麼事？</summary>
+      <div><p>這一小時寫進新庫的訂單，舊庫沒有。除非有反向同步，否則退回就是丟資料。這就是 point of no return。（L3、L6）</p></div>
+    </details>
+  </section>
+
+  <div class="next">
+    <b>下一步（2 分鐘）</b>
+    <p>不看這頁，在紙上畫六個格子，寫出每個階段的名字和它的過關條件。</p>
+  </div>
+
+</main>
