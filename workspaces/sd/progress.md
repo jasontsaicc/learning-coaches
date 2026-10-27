@@ -11,9 +11,9 @@
 
 ## Meta
 
-- session_count: 54
+- session_count: 55
 - last_weekly_review: 50 — WR5 於 S50 收帳(Topic 1 @S42 / Topic 2 @S45 / **Topic 3 @S50 學生選「收」**;過期卡 sweep 以 S50 倒帳形式完成:14 → 7 張 + 7 封存)。⚠️ **artifact audit 未跑**(engine WR flow 第 6 步),掛在下一次 WR
-- last_session_date: 2026-10-25
+- last_session_date: 2026-10-27
 - warm_up_classification: (standalone 時期未記錄;學員已 P3,Step 0 模式預設 Exploration)
 
 ## Current Session breakpoint
@@ -29,7 +29,13 @@ P3 / Chat System(Day 36)/ chunk 1 group fan-out ✅(S53 2026-10-14,supported):Re
 
 P3 / Chat System(Day 36)/ chunk 2 Presence heartbeat ✅(S54 2026-10-25,supported,最小單位):暖身 catch-up 冷測 last_message_id + 不用 timestamp ✅、clock skew 後果「以為收到其實漏」自產;scope 答 user_id ❌ → 反例後「group id 嗎」→ 圖後自講 conversation 單位 + DB 原子 +1(supported)。heartbeat:10 萬/s 自算 ✅;耗電由 coach 給;太長=誤判在線不走推播自產;interval 選擇未 commit(30s + 2-3× timeout 由 coach 給)。學生兩次要求全貌圖(圖先行有效)。
 
-下一場 resume:Day 36 chunk 2 後半 status propagation(在線狀態怎麼推給關心的人、fan-out 量)→ chunk 3 Read Receipts → F/G。3AM page + cost 雙問併入 Day 36 G。
+P3 / Chat System(Day 36)/ chunk 2b status propagation ✅(S55 2026-10-27,supported):暖身 s54 interval 條目:兩邊代價重講、未 commit → 改判準「訊息不會漏(DB=truth),壞的是 push 延遲 ≤T」(push 被跳過由 coach 給,學生忘)→ commit N=5s 但理由 30s 也滿足、代價寫成對面那邊 → 第三輪自講 QPS + 15s stale window(學生喊「夠了吧」,coach 停追)。fan-out:拆步後自算 ~2.5k changes/s × 200 = 500k/s ✅;(a)(b)(c) 分類答不出 = coach 先考未教機制(coach 失誤),改 worked example 教 subscribe-on-view(GET snapshot → SUBSCRIBE delta → 離開畫面 UNSUB,接 K8s LIST+WATCH)。Recall 自講 GET→SUB 順序 ✅,但「離線就取消訂閱」❌(應為離開畫面)→ 自己用 LINE 未點開群組類比修正(Transfer,問句收尾)。本場兩次「不會/不知道」= slow-down 訊號。
+
+P3 / Chat System(Day 36)/ chunk 3 Read Receipts ✅(S55 2026-10-27,supported):coach 先教 per-message row vs per-(conv, reader) last_read_seq watermark;msg 57 誰讀過 ✅、「已讀 N 人」= last_read_seq ≥ 57 的成員數 ✅ 一句直述。學生問「是否教太細」→ coach 給 4 積木壓縮圖(seq / store-then-deliver / pub/sub / heartbeat)。
+
+P3 / Chat System(Day 36)/ F Teach Yuki ✅(S55,volley 3 題):monologue presence(heartbeat + pub/sub、view 訂閱、GET 後 SUB)+ read receipts(seq + 計數);漏 timeout T、漏 watermark 怎麼存。Q1 bait「一次沒收到就 offline」抓到 ✅(用詞 retry 修成 tolerate missed heartbeats);Q2 snapshot vs catch-up 表格縮小後填對 ✅;Q3 per-message list 卡住 → 見 s55 registry。
+
+下一場 resume:Day 36 G(含 3AM page + cost 雙問)→ H 收帳。
 
 ## Phase status
 
@@ -107,7 +113,8 @@ Weak-topic flags: 無(至今沒有帶 flag 過 gate 的紀錄)。
 
 ### Live(unresolved,48 筆)
 
-- (s54) | Chat System(heartbeat interval) | trade-off 兩邊代價講出,但沒 commit 選擇;「60 秒嗎」問句 | 頭號主線 commit 缺席(s38 家族)| unresolved | 3 | 2026-10-28 | 0
+- (s55) | Chat System(read receipts 論證) | F Yuki 故意錯建議「每則訊息存已讀 user_id list」卡住;縮成「Bob 滑過 50 則,A/B 各寫幾次」仍只答原則「每人只記讀到哪」,50 writes vs 1 未算出 | 機制在、反方案的代價論證缺(RP3:有結論無論證);當堂剛教 (A)/(B) 對照圖仍撈不出 | unresolved | 3 | 2026-10-30 | 0
+- (s54) | Chat System(heartbeat interval) | trade-off 兩邊代價講出,但沒 commit 選擇;「60 秒嗎」問句 | 頭號主線 commit 缺席(s38 家族)| unresolved | 3 | 2026-10-30 | 0 S55 暖身 fail(reset):三輪才 commit N=5s,且靠句型填空;判準先講「漏訊息」,S54 自產的「誤判在線→跳過 push」忘記由 coach 給;理由(ALB 60s、3×)30s 也滿足;代價先寫成對面那邊,第三輪才自講 QPS + 15s stale window。
 
 - (s53) | Chat System(group fan-out) | server 訂閱 group 後說「省掉查 group 有多少 member」;問 chat-2 怎麼決定訂閱哪些 group 只答「group ID 吧」 | 「移走」當「刪除」:成員查詢從每則訊息移到連線時/成員異動時,沒消失(RP2 causal chain 少一環)。connection map 省掉那點對,但 why(server 自知身上連了誰)未自產 | unresolved | 3 | 2026-10-17 | 0
 - (s52 G) | Chat System(ordering 留存) [S54 冷測:scope 仍答 user_id,反例+圖後 supported;interval 維持 3,next 2026-10-28] | 換皮 G:B 路徑 catch-up 答「查該客戶 ID 最後收到的訊息時間戳」;clock skew 圖戳後修法撈回「NTP 不準、只往前、原子 +1」,但 counter 的 scope(per conversation)要縮題才出、owner 選 Redis INCR(S51 定案是 DB 欄位) | 強先驗劫持:時間戳 = 舊 DevOps 直覺,chunk 4(S51)教過仍回退;scope 格 S51 已漏一次 = 同格重犯(RP5 cold transfer) | unresolved | 3 | 2026-10-16 | 0

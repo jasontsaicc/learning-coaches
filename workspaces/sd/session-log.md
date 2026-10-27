@@ -13,6 +13,12 @@
      - docs/curriculum-roadmap.md、docs/planning-review.md → workspaces/sd/archive/pre-migration/
      - sd-coach skill 本體         → skills/sd-coach/(curriculum 詳文=references/curriculum-detail.md) -->
 
+## S55(2026-10-27,Day 36 chunk 2b + chunk 3 + F;G 前停)
+
+- 學到:status fan-out 500k/s(拆步後自算)→ subscribe-on-view(GET snapshot → SUB delta → 離開畫面 UNSUB,接 K8s LIST+WATCH);read receipts = per-(conv, reader) last_read_seq watermark,「已讀 N 人」自答。
+- 卡住:暖身 heartbeat interval 三輪+句型才 commit(s54 條目 reset);(a)(b)(c) 分類是 coach 先考未教機制;F Yuki per-message list 反方案講不出代價數字(s55 新條目)。學生喊「夠了吧」、問「是否教太細」→ coach 給 4 積木壓縮圖。
+- 下一場:Day 36 G(含 3AM page + cost 雙問)→ H 收帳。
+
 ## S53(2026-10-14,Day 36 chunk 1 group fan-out;停)
 
 - 接 S52 G 後直進 Day 36。Q1「照 1v1 做法 PUBLISH 幾次」→ 答 50(直接跳到 per-server channel,其實是更好的設計)。coach 用兩段式 probe 追問 channel 名 → 學生爆氣「你在講什麼」。coach 錯:答案對卻沒直說,一次塞兩問。改直講 A=500 / B=50。

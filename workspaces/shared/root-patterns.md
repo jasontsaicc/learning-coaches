@@ -32,11 +32,11 @@ mistake 時才納入此數字。
 - RP6（1）：判準給完當場套用不上。
 - RP7（0）：尚未形成獨立的 canonical mistake；由能力矩陣追蹤缺證據。
 
-### System Design（40）
+### System Design（41）
 
 - RP1（5）：LB 狀態留在 server vs 搬出、MQ 邏輯歸屬 vs 部署單元、兩個 Redis 用途、API breaking vs non-breaking、Chat online vs background 最後一段路徑摺疊（s52 續）。
 - RP2（7）：OAuth deny-list/TTL 組裝、Step 1 流程、拆小問題起手式、API mechanism、Session Revocation 組裝、工具選擇流程、capacity 場景轉算式。
-- RP3（6）：trade-off 反面、循環論證、LB happy-path-only、DB selection、開放題 trade-off、先估量級再選工具。
+- RP3（7）：trade-off 反面、循環論證、LB happy-path-only、DB selection、開放題 trade-off、先估量級再選工具、read receipts 反方案代價論證（s55）。
 - RP4（0）：目前沒有 canonical incident-action evidence。
 - RP5（7）：deregistration delay、bulkhead、SSE vs push、LB 演算法名稱、LB trivia、OAuth 名稱、Observability 術語留存。
 - RP6（8）：質疑題目正當性、跳題、棄權三筆、capacity freeze 兩筆、英文 retrieval、壓力下啟動能量。
