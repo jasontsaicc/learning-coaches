@@ -329,3 +329,9 @@ EKS lab 仍遵守安全規則:公司 `eks` context 不當教材；需雲端實�
 
 - 主目標收斂為 AWS ProServe + 台廠資深 SRE/DevOps;NVIDIA Pre-Prod 降為 stretch。學員理由:先把基礎打穩,後面再加強。
 - §12.2 順序不動。GPU 模組維持在 P5 之後,改標 [FLEX],與 controller 選修同級;進度掉了先砍這兩項。
+
+### 12.6 C-3b KEDA 插入(2026-10-28 s51,學員拍板)
+
+- 順序:C-4 VPA → **C-3b KEDA**(1 堂)→ C-5。學員理由:公司 dev 環境已用 ScaledObject 做下班縮減,但不了解機制。
+- 內容:kubeadm lab 用 cron scaler 重做「下班縮到 0」;觀察 KEDA 產生的 HPA(0↔1 由 operator、1↔N 由 HPA,回扣 C-3 公式與窗口);SQS queue 長度 scaler 只給圖 + 情境題。
+- 實務錨點:公司 ScaledObject 的 trigger 種類待學員確認(唯讀 `kubectl get scaledobjects -A`)。

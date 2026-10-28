@@ -15,7 +15,7 @@
 
 ## Current Session breakpoint
 
-無(s51 正常收工)。下一堂:P3 C-4 VPA(圖+情境題,無 lab);P2a/P2b Phase Gate 仍待考,學員挑時機;registry 超過 15 張上限,開場先 triage;每堂無 G(§12.4)。
+無(s51 正常收工)。下一堂:P3 C-4 VPA(圖+情境題,無 lab,預習頁 s52-vpa-layers.html 已出)→ 再下一堂 C-3b KEDA lab(curriculum-plan §12.6);P2a/P2b Phase Gate 仍待考,學員挑時機;registry 超過 15 張上限,開場先 triage;每堂無 G(§12.4)。
 
 <!-- schema §3 = 恰好一行。敘事與次要待辦寫 session-log.md,長效教練紀律寫 session-log.md
      「教練執行紀律」,不要在這裡疊舊堂。s32 及更早斷點原文見 session-log.md 對應堂,
