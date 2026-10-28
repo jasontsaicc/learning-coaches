@@ -125,7 +125,7 @@ footer.next strong { color: var(--accent); }
   <h1>HPA 水平自動擴容 (P3 C-3)</h1>
   <p class="goal">讀完這頁你能:手算 HPA 要開幾顆 Pod,並說出它為什麼總是慢半拍。</p>
   <div class="progress" aria-label="閱讀進度">
-    <span class="done">Layer 0 ✓</span><span class="done">1 ✓</span><span class="done">2 ✓</span><span>3 ○</span><span>4 ○</span><span>5 ○</span><span>6 ○</span><span>7 ○</span>
+    <span class="done">Layer 0 ✓</span><span class="done">1 ✓</span><span class="done">2 ✓</span><span class="done">實測 ✓</span><span class="done">3 ✓</span><span class="done">4 ✓</span><span class="done">5 ✓</span><span class="done">6 ✓</span><span class="done">7 ✓</span><span class="done">釐清 ✓</span>
   </div>
 </header>
 
@@ -426,8 +426,254 @@ footer.next strong { color: var(--accent); }
   </details>
 </section>
 
+<!-- ===================== LAB ===================== -->
+<section class="layer" id="lab">
+  <div class="layer-head"><span class="badge">s51 實測</span><h2>今天在 kubeadm 叢集看到的數字</h2><span class="time">讀 2 分鐘</span></div>
+  <p class="lead">流量進來 45 秒後 HPA 才擴;流量停掉 5 分鐘後才縮。兩個數字都是自己量到的。</p>
+  <div class="tbl">
+    <table>
+      <thead><tr><th>時間</th><th>TARGETS</th><th class="num">REPLICAS</th><th>對應哪一段</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">08:33:03</td><td>開始壓測</td><td class="num">1</td><td>t = 0</td></tr>
+        <tr><td class="mono">08:33:33</td><td class="mono">135%</td><td class="num">1</td><td>+30s 盲區(2c)</td></tr>
+        <tr><td class="mono">08:33:48</td><td class="mono">250%</td><td class="num">3</td><td>+45s 按比例跳,不是 +1(2a)</td></tr>
+        <tr><td class="mono">08:34:03</td><td class="mono">137%</td><td class="num">5</td><td>新 Pod 開始分攤</td></tr>
+        <tr><td class="mono">08:39:03</td><td class="mono">45%</td><td class="num">7</td><td>窗口裡最後一個 desired = 7</td></tr>
+        <tr><td class="mono">08:39:33</td><td class="mono">0%</td><td class="num">7</td><td>壓測已停,replicas 不動(2d)</td></tr>
+        <tr><td class="mono">08:44:18</td><td class="mono">0%</td><td class="num">4</td><td>7 那幾輪離開 300s 窗口</td></tr>
+        <tr><td class="mono">08:44:33</td><td class="mono">0%</td><td class="num">1</td><td>4 那一輪也離開窗口</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p><mark>250% 是天花板</mark>:limit 500m ÷ request 200m = 250%。單顆 Pod 被 limit 擋住,百分比不可能再高。</p>
+  <p><mark class="see">HPA 的 % 和 top nodes 的 % 不能比</mark>:HPA 的分母是每顆 Pod 的 requests,<code>kubectl top nodes</code> 的分母是整台 node 的 CPU。</p>
+</section>
+
+<!-- ===================== LAYER 3 ===================== -->
+<section class="layer" id="l3">
+  <div class="layer-head"><span class="badge">LAYER 3</span><h2>取捨:為什麼長這樣</h2><span class="time">讀 3 分鐘</span></div>
+  <p class="lead">因為 Layer 1 的量測延遲和啟動延遲拿不掉,HPA 選擇「事後反應 + 往多的方向偏」,用多花一點錢換不掉請求。</p>
+  <div class="tbl">
+    <table>
+      <thead><tr><th>設計選擇</th><th>沒選的做法</th><th>沒選的原因</th><th>付出的代價</th></tr></thead>
+      <tbody>
+        <tr><td>按比例 <code>ceil</code>,一次跳到位</td><td>每輪 +1 顆</td><td>流量翻 3 倍要等好幾輪,每輪 15 秒</td><td>偶爾多開 1 顆</td></tr>
+        <tr><td>無條件進位</td><td>四捨五入</td><td>2.4 變 2 會繼續超標</td><td>同上</td></tr>
+        <tr><td>看平均 CPU</td><td>看最忙那顆</td><td>一顆壞掉的 Pod 會讓整組亂擴</td><td>流量不平均時,最忙那顆可能先爆</td></tr>
+        <tr><td>擴容 0s、縮容 300s 窗口</td><td>兩邊一樣快</td><td>流量鋸齒狀時會 flapping</td><td>尖峰後多付 5 分鐘的 Pod 錢</td></tr>
+        <tr><td>事後反應(reactive)</td><td>預測式(predictive)</td><td>通用 controller 不知道你的業務日曆</td><td>可預期的尖峰要自己排程拉高 minReplicas</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>誰會為這件事吵架:SRE 要 target 壓低(多留緩衝),財務要 target 拉高(少開 Pod)。<code>target = C / (1 + G)</code> 是把這個爭論變成可以算的數字。</p>
+  <details>
+    <summary>之後再看:HPA、VPA、Cluster Autoscaler 三個軸</summary>
+    <div class="tbl">
+      <table>
+        <thead><tr><th>工具</th><th>改什麼</th><th>反應時間</th><th>課程位置</th></tr></thead>
+        <tbody>
+          <tr><td>HPA</td><td>Pod 數量</td><td>約 1 分鐘</td><td>C-3(今天)</td></tr>
+          <tr><td>VPA</td><td>每顆 Pod 的 requests</td><td>要重建 Pod 或 in-place resize</td><td>C-4</td></tr>
+          <tr><td>Cluster Autoscaler / Karpenter</td><td>node 數量</td><td>1 到 5 分鐘</td><td>C-5</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>HPA 和 VPA 不要同時用 CPU 當依據:VPA 改 requests 會改掉 HPA 的分母,兩個 controller 互相干擾。</p>
+  </details>
+</section>
+
+<!-- ===================== LAYER 4 ===================== -->
+<section class="layer" id="l4">
+  <div class="layer-head"><span class="badge">LAYER 4</span><h2>AWS 上怎麼做</h2><span class="time">讀 4 分鐘</span></div>
+  <p class="lead">EKS 上 HPA 的邏輯跟今天的 lab 一樣,只是多了兩件事:metrics-server 要自己裝,node 不夠時要靠 Karpenter 開 EC2。</p>
+  <div class="card fig">
+    <svg viewBox="0 0 370 470" width="370" role="img" aria-label="EKS 上的擴容架構:HPA 改 replicas,Pod Pending 時 Karpenter 開 EC2;KEDA 讀 SQS 長度">
+      <defs>
+        <marker id="ar2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="f-acc"/></marker>
+      </defs>
+      <!-- AWS managed control plane -->
+      <rect x="10" y="10" width="350" height="78" class="f-accsoft s-acc" stroke-width="1.5" stroke-dasharray="6 4"/>
+      <text x="20" y="28" class="t-acc" font-size="12" font-weight="700">EKS control plane(AWS 管)</text>
+      <rect x="22" y="38" width="150" height="40" class="f-card s-ink" stroke-width="1.2"/>
+      <text x="97" y="63" class="t-ink" font-size="13" text-anchor="middle">API Server</text>
+      <rect x="198" y="38" width="150" height="40" class="f-card s-ink" stroke-width="1.2"/>
+      <text x="273" y="56" class="t-ink" font-size="12.5" text-anchor="middle">controller-manager</text>
+      <text x="273" y="71" class="t-mut" font-size="11" text-anchor="middle">HPA 在這裡</text>
+      <!-- data plane -->
+      <rect x="10" y="110" width="350" height="190" class="s-line" stroke-width="1.5"/>
+      <text x="20" y="128" class="t-mut" font-size="12" font-weight="700">你的 node(EC2,你管)</text>
+      <rect x="22" y="138" width="150" height="44" class="f-card s-ink" stroke-width="1.2"/>
+      <text x="97" y="157" class="t-ink" font-size="12.5" text-anchor="middle">metrics-server</text>
+      <text x="97" y="173" class="t-bad" font-size="11" text-anchor="middle">預設沒裝</text>
+      <rect x="198" y="138" width="150" height="44" class="f-card s-ink" stroke-width="1.2"/>
+      <text x="273" y="157" class="t-ink" font-size="12.5" text-anchor="middle">KEDA(選用)</text>
+      <text x="273" y="173" class="t-mut" font-size="11" text-anchor="middle">讀 queue 長度</text>
+      <rect x="22" y="200" width="326" height="44" class="f-card s-ink" stroke-width="1.2"/>
+      <text x="185" y="219" class="t-ink" font-size="12.5" text-anchor="middle">billing-api Pods(HPA 管數量)</text>
+      <text x="185" y="235" class="t-mut" font-size="11" text-anchor="middle">新 Pod 放不下 → Pending</text>
+      <rect x="22" y="252" width="326" height="38" class="f-card s-ink" stroke-width="1.2"/>
+      <text x="185" y="276" class="t-ink" font-size="12.5" text-anchor="middle">Karpenter:看到 Pending 就開 EC2</text>
+      <!-- AWS services -->
+      <rect x="22" y="330" width="100" height="44" class="f-card s-ink" stroke-width="1.2"/>
+      <text x="72" y="357" class="t-ink" font-size="12.5" text-anchor="middle">EC2</text>
+      <rect x="135" y="330" width="100" height="44" class="f-card s-ink" stroke-width="1.2"/>
+      <text x="185" y="357" class="t-ink" font-size="12.5" text-anchor="middle">SQS</text>
+      <rect x="248" y="330" width="100" height="44" class="f-card s-ink" stroke-width="1.2"/>
+      <text x="298" y="350" class="t-ink" font-size="11.5" text-anchor="middle">CloudWatch /</text>
+      <text x="298" y="365" class="t-ink" font-size="11.5" text-anchor="middle">Managed Prometheus</text>
+      <!-- arrows -->
+      <path d="M97,138 V80" class="s-acc" stroke-width="1.6" marker-end="url(#ar2)"/>
+      <path d="M273,138 V80" class="s-acc" stroke-width="1.6" marker-end="url(#ar2)"/>
+      <path d="M72,290 V328" class="s-acc" stroke-width="1.6" marker-end="url(#ar2)"/>
+      <path d="M185,330 C185,310 250,300 260,184" class="s-acc" stroke-width="1.4" stroke-dasharray="4 3" marker-end="url(#ar2)"/>
+      <text x="80" y="314" class="t-acc" font-size="11">開機 1 到 5 分</text>
+      <text x="215" y="318" class="t-acc" font-size="11">queue 長度</text>
+      <text x="185" y="400" class="t-mut" font-size="11.5" text-anchor="middle">KEDA 讀 SQS 要 IRSA 權限:sqs:GetQueueAttributes</text>
+      <text x="185" y="420" class="t-mut" font-size="11.5" text-anchor="middle">CloudWatch Container Insights 看長期趨勢,不給 HPA 用</text>
+      <text x="185" y="448" class="t-ink" font-size="12" font-weight="700" text-anchor="middle">HPA 管 Pod 數量,Karpenter 管 node 數量</text>
+    </svg>
+  </div>
+  <div class="tbl">
+    <table>
+      <thead><tr><th>服務 / 元件</th><th>常見陷阱</th></tr></thead>
+      <tbody>
+        <tr><td>metrics-server</td><td>EKS 預設沒裝,HPA 會一直 <code>&lt;unknown&gt;</code>。用 Helm 或 EKS add-on 裝(add-on 名稱與支援版本需確認)</td></tr>
+        <tr><td>HPA</td><td>Deployment 沒設 <code>requests.cpu</code> → <code>FailedGetResourceMetric</code>,完全不擴</td></tr>
+        <tr><td>Karpenter</td><td>NodePool 的 <code>limits.cpu</code> 到頂,Pod 永遠 Pending,HPA 看起來有擴其實沒容量</td></tr>
+        <tr><td>KEDA + SQS</td><td>ServiceAccount 沒綁 IRSA,KEDA 讀不到 queue 長度,scaler 報錯不擴</td></tr>
+        <tr><td>RDS</td><td>HPA 擴太多,連線數超過 <code>max_connections</code>,新 Pod 一起出 5xx</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <details>
+    <summary>之後再看:跟 ECS Service Auto Scaling 對照(你工作上在用的)</summary>
+    <div class="tbl">
+      <table>
+        <thead><tr><th></th><th>K8s HPA</th><th>ECS target tracking</th></tr></thead>
+        <tbody>
+          <tr><td>CPU % 的分母</td><td>Pod 的 <code>requests.cpu</code></td><td>task 定義的 CPU 保留值,同一個概念</td></tr>
+          <tr><td>量測來源</td><td>metrics-server,15 秒</td><td>CloudWatch,1 分鐘資料點</td></tr>
+          <tr><td>防抖動</td><td><code>stabilizationWindowSeconds</code></td><td>scale-in / scale-out cooldown</td></tr>
+          <tr><td>反應速度</td><td>今天實測 45 秒</td><td>通常要幾分鐘(alarm 要連續幾個資料點,確切值需確認)</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </details>
+</section>
+
+<!-- ===================== LAYER 5 ===================== -->
+<section class="layer" id="l5">
+  <div class="layer-head"><span class="badge">LAYER 5</span><h2>規模化:團隊長大後換掉什麼</h2><span class="time">讀 3 分鐘</span></div>
+  <p class="lead">規模越大,越不靠 CPU 事後反應,改成「領先指標 + 提前排程」。</p>
+  <div class="card fig">
+    <svg viewBox="0 0 370 300" width="370" role="img" aria-label="三級階梯:小團隊用 CPU HPA,成長期加上量測調 requests 與排程,大廠用領先指標與預測">
+      <!-- steps -->
+      <rect x="20" y="200" width="110" height="80" class="f-card s-ink" stroke-width="1.4"/>
+      <rect x="130" y="130" width="110" height="150" class="f-card s-ink" stroke-width="1.4"/>
+      <rect x="240" y="60" width="110" height="220" class="f-accsoft s-acc" stroke-width="1.8"/>
+      <text x="75" y="220" class="t-ink" font-size="13" font-weight="700" text-anchor="middle">小團隊</text>
+      <text x="75" y="240" class="t-mut" font-size="11" text-anchor="middle">CPU HPA</text>
+      <text x="75" y="256" class="t-mut" font-size="11" text-anchor="middle">target 50%</text>
+      <text x="75" y="272" class="t-mut" font-size="11" text-anchor="middle">min 2</text>
+      <text x="185" y="150" class="t-ink" font-size="13" font-weight="700" text-anchor="middle">成長期</text>
+      <text x="185" y="170" class="t-mut" font-size="11" text-anchor="middle">VPA 建議調 requests</text>
+      <text x="185" y="186" class="t-mut" font-size="11" text-anchor="middle">排程拉高 min</text>
+      <text x="185" y="202" class="t-mut" font-size="11" text-anchor="middle">Karpenter</text>
+      <text x="185" y="218" class="t-mut" font-size="11" text-anchor="middle">target = C/(1+G)</text>
+      <text x="295" y="80" class="t-ink" font-size="13" font-weight="700" text-anchor="middle">大廠</text>
+      <text x="295" y="100" class="t-mut" font-size="11" text-anchor="middle">RPS / queue 長度</text>
+      <text x="295" y="116" class="t-mut" font-size="11" text-anchor="middle">KEDA 或 Adapter</text>
+      <text x="295" y="132" class="t-mut" font-size="11" text-anchor="middle">預測式擴容</text>
+      <text x="295" y="148" class="t-mut" font-size="11" text-anchor="middle">容量規劃 + 壓測</text>
+      <text x="295" y="164" class="t-mut" font-size="11" text-anchor="middle">常態 headroom</text>
+      <text x="185" y="34" class="t-mut" font-size="11.5" text-anchor="middle">往右:越早知道尖峰,越少靠事後反應</text>
+    </svg>
+  </div>
+  <div class="tbl">
+    <table>
+      <thead><tr><th>級別</th><th>換掉什麼</th><th>為什麼換</th></tr></thead>
+      <tbody>
+        <tr><td>小團隊 → 成長期</td><td>用猜的 requests</td><td>分母歪掉,HPA 不準(小林那題)</td></tr>
+        <tr><td>成長期 → 大廠</td><td>只看 CPU</td><td>CPU 是落後指標,queue 長度會先漲</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>業界兩條常見路線:</p>
+  <div class="tbl">
+    <table>
+      <thead><tr><th></th><th>KEDA</th><th>Prometheus Adapter</th></tr></thead>
+      <tbody>
+        <tr><td>做法</td><td>自己建 HPA,接 60 多種事件來源(SQS、Kafka、cron)</td><td>把 Prometheus 查詢結果註冊成 custom metrics API</td></tr>
+        <tr><td>強項</td><td>可以縮到 0;內建 cron 排程</td><td>已經有 Prometheus 的團隊,不用多一套</td></tr>
+        <tr><td>弱點</td><td>多一個 operator 要維運</td><td>設定 PromQL 規則很難除錯,不能縮到 0</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ===================== LAYER 6 ===================== -->
+<section class="layer" id="l6">
+  <div class="layer-head"><span class="badge">LAYER 6</span><h2>故障與 on-call</h2><span class="time">讀 3 分鐘</span></div>
+  <p class="lead">HPA 出事時,第一個指令永遠是 <code>kubectl describe hpa</code>,看 Conditions 三行。</p>
+  <div class="formula">kubectl describe hpa billing-api</div>
+  <div class="tbl">
+    <table>
+      <thead><tr><th>Condition</th><th>False 代表</th><th>下一步</th></tr></thead>
+      <tbody>
+        <tr><td><code>AbleToScale</code></td><td>HPA 改不了 replicas(還在冷卻或拿不到 /scale)</td><td>看 Events 原因</td></tr>
+        <tr><td><code>ScalingActive</code></td><td>拿不到 metric,HPA 停擺</td><td><code>kubectl get apiservice v1beta1.metrics.k8s.io</code>;檢查 requests 有沒有設</td></tr>
+        <tr><td><code>ScalingLimited</code>(True 才要注意)</td><td>已經頂到 min 或 max</td><td>先看下游撐不撐得住,再決定要不要加 max</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="tbl">
+    <table>
+      <thead><tr><th>症狀</th><th>最可能的原因</th></tr></thead>
+      <tbody>
+        <tr><td>TARGETS 一直 <code>&lt;unknown&gt;</code></td><td>metrics-server 掛了,或沒設 requests</td></tr>
+        <tr><td>CPU 很高但 replicas 不動</td><td>已經頂到 maxReplicas</td></tr>
+        <tr><td>replicas 變大但服務還是 5xx</td><td>新 Pod Pending(node 不夠),或還沒通過 readiness</td></tr>
+        <tr><td>replicas 一直上上下下</td><td>flapping,scaleDown 窗口太短</td></tr>
+        <tr><td>擴完 DB 開始報錯</td><td>連線數超過 <code>max_connections</code></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p><mark class="may">止血</mark>:直接把 HPA 的 <code>minReplicas</code> 拉高。不要去改 Deployment 的 <code>replicas</code>,下一輪 HPA 會把它改回去。</p>
+  <div class="formula">kubectl patch hpa billing-api -p '{"spec":{"minReplicas":10}}'</div>
+  <p>SLO 怎麼定:看服務本身的可用率和 p99 latency,不要看 CPU。CPU 只是 HPA 用來擴容的訊號,使用者感受不到。</p>
+</section>
+
+<!-- ===================== LAYER 7 ===================== -->
+<section class="layer" id="l7">
+  <div class="layer-head"><span class="badge">LAYER 7</span><h2>面試</h2><span class="time">讀 3 分鐘</span></div>
+  <p class="lead">題目:Walk me through how HPA decides the replica count. Why does CPU-based HPA respond poorly to traffic spikes, and what would you do about it?</p>
+  <p>先自己用 3 句話回答,再打開下面的對照。</p>
+  <details>
+    <summary>L4 的回答</summary>
+    <p>HPA 看 CPU,超過 target 就加 Pod。它會慢是因為要等 metrics。可以把 target 調低一點讓它早點擴。</p>
+    <p class="wrong">問題:「調低 target 讓它早點擴」把延遲和緩衝混在一起;沒有數字;沒有講下游與 node 層。</p>
+  </details>
+  <details>
+    <summary>L6 的回答</summary>
+    <p><b>1. 機制:</b>desired = ceil(current × current/target),CPU% 的分母是 requests,所以第一步是確認 requests 是量出來的。</p>
+    <p><b>2. 延遲帳單:</b>metrics-server 15 秒 + HPA 同步 15 秒 + Pod 啟動與 readiness,node 不夠還要加 1 到 5 分鐘。我在 kubeadm lab 實測從壓測開始到擴容是 45 秒。這是結構性延遲,調參數拿不掉。</p>
+    <p><b>3. 做法分三層:</b>HPA 管趨勢;常態 headroom 吃突刺,target 用 C/(1+G) 算;可預期的尖峰(例如月底出帳)提前排程拉高 minReplicas。能的話改用 queue 長度這種領先指標。</p>
+    <p><b>4. 邊界:</b>maxReplicas 看下游,例如 RDS 連線數;縮容保留 300 秒窗口防 flapping。</p>
+  </details>
+  <p>L6 多了什麼:分母、實測數字、三層做法,和下游的限制。</p>
+</section>
+
+<!-- ===================== CLARIFICATIONS ===================== -->
+<section class="layer" id="clar">
+  <div class="layer-head"><span class="badge">這次的釐清</span><h2>s51 我答錯或不確定的地方</h2><span class="time">讀 2 分鐘</span></div>
+  <div class="wrong"><b>✗ 我以為</b>:CPU 超標,HPA 就多建 1 顆。<br><b>✓ 其實是</b>:按比例一次跳到需要的顆數。1 顆、125%、target 50% → 超標 2.5 倍 → ceil(2.5) = 3。lab 實測 1 → 3 → 5 → 7。<br><b>→ 為什麼會搞混</b>:把 HPA 想成每輪加一點的計數器,沒有看公式裡的比值。</div>
+  <div class="wrong"><b>✗ 我以為</b>:requests 設大一點比較安全,HPA 會比較早擴。<br><b>✓ 其實是</b>:requests 2 核、用量 100m = 5%。流量漲到 10 倍才剛好到 50%,幾乎永遠不擴。<br><b>→ 為什麼會搞混</b>:只想到「資源多比較安全」,沒想到 requests 也是 HPA 的分母。</div>
+  <div class="wrong"><b>✗ 我以為</b>:target 從 50% 調到 30%,前 1 分鐘的 5xx 就解決了。<br><b>✓ 其實是</b>:盲區每一段的時間都沒變。調低 target 只是平常多開 Pod,用錢買緩衝。<br><b>→ 為什麼會搞混</b>:把「多久才反應」(延遲)和「反應前能撐多久」(緩衝)當成同一件事。</div>
+  <div class="wrong"><b>✗ 我不確定</b>:要 6 顆平均分到 3 個 AZ 用什麼。<br><b>✓ 其實是</b>:<code>topologySpreadConstraints</code> 加 <code>maxSkew: 1</code>。required antiAffinity 只判斷「有沒有」,每個 zone 最多 1 顆,其他 3 顆 Pending。<br><b>→ 為什麼會搞混</b>:兩個都有 <code>topologyKey</code>,但只有 topologySpread 有填數字的欄位。</div>
+</section>
+
 <footer class="next">
-  <strong>下一步(2 分鐘):</strong>回 chat 用一句話講:replicas 寫死,為什麼一定會出事?(Layer 1)
+  <strong>下一步(2 分鐘):</strong>不看頁面,用 3 句話回答 Layer 7 的面試題,再打開 L6 對照。
 </footer>
 
 </div>

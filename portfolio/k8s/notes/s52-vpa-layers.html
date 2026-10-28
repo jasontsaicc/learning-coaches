@@ -1,0 +1,351 @@
+<title>VPA 垂直調整</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC:wght@400;700&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<style>
+/* layout: one narrow notebook column on graph paper; each layer = header badge + taped figure card */
+:root {
+  --bg: #F6F8FA;
+  --grid: rgba(90,130,170,.16);
+  --ink: #23313E;
+  --muted: #5B6B7A;
+  --card: #FFFFFF;
+  --line: #C9D3DD;
+  --accent: #326CE5;
+  --accent-soft: rgba(50,108,229,.12);
+  --tape: rgba(50,108,229,.28);
+  --bad: #C92A2A;
+  --bad-soft: rgba(201,42,42,.18);
+  --waste: rgba(91,107,122,.22);
+  --hl-who: #FFE98A;
+  --hl-see: #BDEEF6;
+  --hl-may: #F9CDE0;
+  --font-body: "LXGW WenKai TC", "Noto Sans TC", "PingFang TC", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #1A2320; --grid: rgba(200,230,215,.07); --ink: #E4ECE7; --muted: #A3B3AA;
+    --card: #24302B; --line: #3D4D46; --accent: #74A0F0; --accent-soft: rgba(116,160,240,.16);
+    --tape: rgba(116,160,240,.35); --bad: #FF8787; --bad-soft: rgba(255,135,135,.2);
+    --waste: rgba(163,179,170,.22); --hl-who: rgba(255,233,138,.38); --hl-see: rgba(189,238,246,.3);
+    --hl-may: rgba(249,205,224,.3); color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #1A2320; --grid: rgba(200,230,215,.07); --ink: #E4ECE7; --muted: #A3B3AA;
+  --card: #24302B; --line: #3D4D46; --accent: #74A0F0; --accent-soft: rgba(116,160,240,.16);
+  --tape: rgba(116,160,240,.35); --bad: #FF8787; --bad-soft: rgba(255,135,135,.2);
+  --waste: rgba(163,179,170,.22); --hl-who: rgba(255,233,138,.38); --hl-see: rgba(189,238,246,.3);
+  --hl-may: rgba(249,205,224,.3); color-scheme: dark;
+}
+body {
+  background-color: var(--bg);
+  background-image: linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 22px 22px;
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 17px;
+  line-height: 1.75;
+}
+.page { max-width: 760px; margin: 0 auto; padding-block: 24px 64px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: flex; flex-direction: column; gap: 36px; }
+header.top { background: var(--accent); color: #fff; border-radius: 4px; padding: 18px 20px; display: flex; flex-direction: column; gap: 8px; }
+header.top h1 { margin: 0; font-size: 1.7rem; line-height: 1.3; text-wrap: balance; }
+header.top .goal { margin: 0; font-size: 1rem; }
+.progress { font-family: var(--font-mono); font-size: .85rem; display: flex; flex-wrap: wrap; gap: 6px; }
+.progress span { background: rgba(255,255,255,.18); padding: 2px 8px; border-radius: 3px; }
+.progress span.done { background: #fff; color: #1F4FB8; font-weight: 600; }
+section.layer { display: flex; flex-direction: column; gap: 14px; }
+.layer-head { display: flex; align-items: baseline; flex-wrap: wrap; gap: 10px; }
+.badge { font-family: var(--font-mono); font-size: .8rem; background: var(--accent); color: #fff; padding: 2px 8px; border-radius: 3px; letter-spacing: .04em; }
+.layer-head h2 { margin: 0; font-size: 1.35rem; text-wrap: balance; }
+.time { font-family: var(--font-mono); font-size: .78rem; color: var(--muted); }
+h3 { margin: 10px 0 0; font-size: 1.12rem; }
+p { margin: 0; }
+.lead { font-size: 1.08rem; font-weight: 700; }
+mark { color: inherit; padding: 0 2px; background: linear-gradient(transparent 50%, var(--hl-who) 50%); }
+mark.see { background: linear-gradient(transparent 50%, var(--hl-see) 50%); }
+mark.may { background: linear-gradient(transparent 50%, var(--hl-may) 50%); }
+code, .mono { font-family: var(--font-mono); font-size: .88em; }
+.card { position: relative; background: var(--card); border: 1px solid var(--line); padding: 22px 14px 14px; margin-top: 8px; }
+.card::before { content: ""; position: absolute; top: -9px; left: 50%; width: 92px; height: 18px; transform: translateX(-50%) rotate(-2deg); background: var(--tape); }
+.fig { overflow-x: auto; }
+.fig svg { display: block; margin: 0 auto; max-width: 100%; height: auto; }
+.caption { font-size: .9rem; color: var(--muted); text-align: center; margin-top: 6px; }
+.formula { font-family: var(--font-mono); font-size: 1rem; background: var(--accent-soft); border-left: 3px solid var(--accent); padding: 10px 12px; overflow-x: auto; white-space: pre; }
+.tbl { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-size: .95rem; background: var(--card); }
+th, td { border: 1px solid var(--line); padding: 6px 10px; text-align: left; vertical-align: top; }
+th { background: var(--accent-soft); }
+td.num, th.num { font-family: var(--font-mono); font-variant-numeric: tabular-nums; text-align: right; }
+.panels { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.panel { background: var(--card); border: 1px solid var(--line); padding: 10px; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.panel .t { font-weight: 700; font-size: .95rem; }
+.panel .r { font-size: .88rem; }
+.panel.bad { border-left: 4px solid var(--bad); }
+.panel.good { border-left: 4px solid var(--accent); }
+@media (max-width: 560px) { .panels { grid-template-columns: minmax(0, 1fr); } }
+.timeline { list-style: none; margin: 0; padding: 0 0 0 4px; display: flex; flex-direction: column; }
+.timeline li { position: relative; display: grid; grid-template-columns: 112px minmax(0, 1fr); gap: 12px; padding: 0 0 14px; }
+.timeline li::before { content: ""; position: absolute; left: 105px; top: 10px; bottom: -4px; width: 2px; background: var(--line); }
+.timeline li:last-child::before { display: none; }
+.timeline .when { font-family: var(--font-mono); font-size: .82rem; text-align: right; padding-right: 14px; color: var(--accent); font-weight: 600; }
+.timeline .what { position: relative; }
+.timeline .what::before { content: ""; position: absolute; left: -18px; top: 9px; width: 10px; height: 10px; border-radius: 50%; background: var(--accent); }
+.timeline li.blind .what { background: var(--bad-soft); padding: 2px 8px; }
+.timeline li.blind .what::before { background: var(--bad); }
+.timeline .sub { font-size: .88rem; color: var(--muted); }
+.wrong { border-left: 4px solid var(--bad); background: var(--bad-soft); padding: 8px 12px; }
+details { background: var(--card); border: 1px dashed var(--line); padding: 8px 12px; }
+details summary { cursor: pointer; font-weight: 700; }
+details summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+details > *:not(summary) { margin-top: 8px; }
+pre.yaml { font-family: var(--font-mono); font-size: .85rem; background: var(--accent-soft); padding: 10px 12px; overflow-x: auto; margin: 8px 0 0; }
+footer.next { background: var(--card); border: 2px solid var(--accent); padding: 14px 16px; }
+footer.next strong { color: var(--accent); }
+/* svg tokens */
+.s-ink { stroke: var(--ink); fill: none; }
+.s-line { stroke: var(--line); fill: none; }
+.s-acc { stroke: var(--accent); fill: none; }
+.f-card { fill: var(--card); }
+.f-acc { fill: var(--accent); }
+.f-accsoft { fill: var(--accent-soft); }
+.f-bad { fill: var(--bad-soft); }
+.f-waste { fill: var(--waste); }
+.t-ink { fill: var(--ink); font-family: var(--font-body); }
+.t-mut { fill: var(--muted); font-family: var(--font-body); }
+.t-acc { fill: var(--accent); font-family: var(--font-body); }
+.t-bad { fill: var(--bad); font-family: var(--font-body); }
+.t-mono { font-family: var(--font-mono); }
+</style>
+<div class="page">
+
+<header class="top">
+  <h1>VPA 垂直調整 (P3 C-4)</h1>
+  <p class="goal">讀完這頁你能:說出 VPA 改的是哪個數字、為什麼生產環境大多只開建議模式、為什麼 HPA 和 VPA 不能看同一個 CPU。</p>
+  <div class="progress" aria-label="閱讀進度">
+    <span class="done">Layer 0 ✓</span><span class="done">1 ✓</span><span class="done">2 ✓</span><span>3 ○</span><span>4 ○</span><span>5 ○</span><span>6 ○</span><span>7 ○</span>
+  </div>
+</header>
+
+<!-- ===================== LAYER 0 ===================== -->
+<section class="layer" id="l0">
+  <div class="layer-head"><span class="badge">LAYER 0</span><h2>一張圖</h2><span class="time">讀 1 分鐘</span></div>
+  <p class="lead">HPA 改 Pod 的<b>數量</b>(replicas)。VPA 改每顆 Pod 的<b>大小</b>(requests / limits)。</p>
+  <div class="card fig">
+    <svg viewBox="0 0 370 250" width="370" role="img" aria-label="左邊 HPA:2 顆 200m 變 4 顆 200m;右邊 VPA:2 顆 200m 變 2 顆 400m">
+      <text x="92" y="22" class="t-ink" font-size="14" font-weight="700" text-anchor="middle">HPA:改數量</text>
+      <text x="278" y="22" class="t-ink" font-size="14" font-weight="700" text-anchor="middle">VPA:改大小</text>
+      <line x1="185" y1="10" x2="185" y2="240" class="s-line" stroke-width="1.2" stroke-dasharray="4 4"/>
+      <!-- HPA before -->
+      <text x="20" y="48" class="t-mut" font-size="11.5">之前</text>
+      <rect x="40" y="56" width="40" height="40" class="f-accsoft s-acc" stroke-width="1.4"/>
+      <rect x="90" y="56" width="40" height="40" class="f-accsoft s-acc" stroke-width="1.4"/>
+      <text x="60" y="80" class="t-ink t-mono" font-size="10" text-anchor="middle">200m</text>
+      <text x="110" y="80" class="t-ink t-mono" font-size="10" text-anchor="middle">200m</text>
+      <text x="92" y="126" class="t-acc" font-size="18" text-anchor="middle">↓</text>
+      <!-- HPA after -->
+      <text x="20" y="150" class="t-mut" font-size="11.5">之後</text>
+      <rect x="20" y="158" width="36" height="40" class="f-accsoft s-acc" stroke-width="1.4"/>
+      <rect x="62" y="158" width="36" height="40" class="f-accsoft s-acc" stroke-width="1.4"/>
+      <rect x="104" y="158" width="36" height="40" class="f-accsoft s-acc" stroke-width="1.4"/>
+      <rect x="146" y="158" width="36" height="40" class="f-accsoft s-acc" stroke-width="1.4"/>
+      <text x="92" y="222" class="t-mut" font-size="11.5" text-anchor="middle">replicas 2 → 4,每顆一樣大</text>
+      <!-- VPA before -->
+      <text x="200" y="48" class="t-mut" font-size="11.5">之前</text>
+      <rect x="226" y="56" width="40" height="40" class="f-accsoft s-acc" stroke-width="1.4"/>
+      <rect x="290" y="56" width="40" height="40" class="f-accsoft s-acc" stroke-width="1.4"/>
+      <text x="246" y="80" class="t-ink t-mono" font-size="10" text-anchor="middle">200m</text>
+      <text x="310" y="80" class="t-ink t-mono" font-size="10" text-anchor="middle">200m</text>
+      <text x="278" y="126" class="t-acc" font-size="18" text-anchor="middle">↓</text>
+      <!-- VPA after -->
+      <text x="200" y="150" class="t-mut" font-size="11.5">之後</text>
+      <rect x="216" y="142" width="56" height="56" class="f-accsoft s-acc" stroke-width="1.4"/>
+      <rect x="284" y="142" width="56" height="56" class="f-accsoft s-acc" stroke-width="1.4"/>
+      <text x="244" y="174" class="t-ink t-mono" font-size="10" text-anchor="middle">400m</text>
+      <text x="312" y="174" class="t-ink t-mono" font-size="10" text-anchor="middle">400m</text>
+      <text x="278" y="222" class="t-mut" font-size="11.5" text-anchor="middle">replicas 不變,requests 200m → 400m</text>
+    </svg>
+    <p class="caption">VPA 不是內建的。它是另外安裝的 CRD + 3 個元件,跟 metrics-server 一樣要自己裝。</p>
+  </div>
+</section>
+
+<!-- ===================== LAYER 1 ===================== -->
+<section class="layer" id="l1">
+  <div class="layer-head"><span class="badge">LAYER 1</span><h2>第一性原理:為什麼需要它</h2><span class="time">讀 2 分鐘</span></div>
+  <p class="lead">requests 大多是猜的。猜錯了,scheduler 排錯、HPA 算錯,但沒有人有時間每個服務都去量。</p>
+  <p>昨天小林那題就是例子:requests 2 核、實際只用 100m。這種錯會造成兩個問題:</p>
+  <div class="tbl">
+    <table>
+      <thead><tr><th>requests 猜錯</th><th>scheduler 的結果</th><th>HPA 的結果</th></tr></thead>
+      <tbody>
+        <tr><td>猜太大</td><td>node 被保留但沒用到,要多買機器</td><td>百分比太低,不擴</td></tr>
+        <tr><td>猜太小</td><td>太多 Pod 塞進同一台 node,搶 CPU、OOM</td><td>百分比太高,亂擴</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>還有一種 workload 根本不能水平擴:單一實例的服務、自己有狀態的 DB、一次只能跑一個的 job。它們流量變大,只能把單顆 Pod 變大。</p>
+  <div class="tbl">
+    <table>
+      <thead><tr><th>限制</th><th>從哪來</th><th>所以 VPA 的設計是</th></tr></thead>
+      <tbody>
+        <tr><td>人量不完所有服務</td><td>服務數量多,用量一直在變</td><td>controller 自動看歷史用量,算出建議值</td></tr>
+        <tr><td>requests 在 Pod 建立時寫進 cgroup</td><td>P1:requests / limits 底下就是 cgroup 數字</td><td>傳統做法要砍掉 Pod 重建,新 Pod 帶新數字</td></tr>
+        <tr><td>memory 不能被壓縮</td><td>已經用掉的記憶體收不回來</td><td>memory 往下調永遠有風險</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ===================== LAYER 2 ===================== -->
+<section class="layer" id="l2">
+  <div class="layer-head"><span class="badge">LAYER 2</span><h2>機制:3 個元件、4 種模式、in-place、跟 HPA 打架</h2><span class="time">讀 6 分鐘</span></div>
+
+  <h3>2a. 3 個元件</h3>
+  <p class="lead">Recommender 算建議值,Admission Controller 在 Pod 建立時把建議值寫進去,Updater 把差太多的 Pod 砍掉重建。</p>
+  <div class="card fig">
+    <svg viewBox="0 0 370 420" width="370" role="img" aria-label="VPA 三個元件:Recommender 讀 metrics 寫建議到 VPA 物件;Updater 驅逐 Pod;Admission Controller 在新 Pod 建立時改 requests">
+      <defs>
+        <marker id="ar3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="f-acc"/></marker>
+      </defs>
+      <rect x="40" y="10" width="290" height="46" class="f-card s-ink" stroke-width="1.4"/>
+      <text x="185" y="30" class="t-ink t-mono" font-size="13" text-anchor="middle" font-weight="600">metrics.k8s.io(+ 選用 Prometheus)</text>
+      <text x="185" y="47" class="t-mut" font-size="11.5" text-anchor="middle">昨天裝的 metrics-server</text>
+      <path d="M185,56 V78" class="s-acc" stroke-width="1.6" marker-end="url(#ar3)"/>
+      <rect x="40" y="80" width="290" height="52" class="f-accsoft s-acc" stroke-width="2"/>
+      <text x="185" y="102" class="t-ink" font-size="14" text-anchor="middle" font-weight="700">① Recommender</text>
+      <text x="185" y="122" class="t-mut" font-size="11.5" text-anchor="middle">看歷史用量,算出建議的 requests</text>
+      <path d="M185,132 V154" class="s-acc" stroke-width="1.6" marker-end="url(#ar3)"/>
+      <rect x="40" y="156" width="290" height="60" class="f-card s-ink" stroke-width="1.4"/>
+      <text x="185" y="176" class="t-ink t-mono" font-size="12.5" text-anchor="middle" font-weight="600">VPA 物件 .status.recommendation</text>
+      <text x="185" y="195" class="t-mut t-mono" font-size="11" text-anchor="middle">lowerBound / target / upperBound</text>
+      <text x="185" y="209" class="t-mut" font-size="11" text-anchor="middle">updateMode: "Off" 就停在這裡,只看不改</text>
+      <path d="M185,216 V238" class="s-acc" stroke-width="1.6" marker-end="url(#ar3)"/>
+      <rect x="40" y="240" width="290" height="52" class="f-card s-ink" stroke-width="1.4"/>
+      <text x="185" y="262" class="t-ink" font-size="14" text-anchor="middle" font-weight="700">② Updater</text>
+      <text x="185" y="282" class="t-mut" font-size="11.5" text-anchor="middle">現在的 requests 超出範圍 → 驅逐這顆 Pod</text>
+      <path d="M185,292 V314" class="s-acc" stroke-width="1.6" marker-end="url(#ar3)"/>
+      <rect x="40" y="316" width="290" height="52" class="f-card s-ink" stroke-width="1.4"/>
+      <text x="185" y="338" class="t-ink" font-size="14" text-anchor="middle" font-weight="700">③ Admission Controller</text>
+      <text x="185" y="358" class="t-mut" font-size="11.5" text-anchor="middle">ReplicaSet 補新 Pod 時,把 target 寫進 spec</text>
+      <text x="185" y="396" class="t-bad" font-size="12" text-anchor="middle" font-weight="700">注意:Deployment YAML 裡的數字不會變</text>
+      <text x="185" y="413" class="t-mut" font-size="11" text-anchor="middle">VPA 改的是 Pod,不是 Deployment</text>
+    </svg>
+  </div>
+
+  <h3>2b. 4 種模式(updateMode)</h3>
+  <p class="lead">生產環境最常用的是 <code>Off</code>:只出建議,由人決定要不要改。</p>
+  <div class="tbl">
+    <table>
+      <thead><tr><th>updateMode</th><th>做什麼</th><th>會不會砍 Pod</th><th>什麼時候用</th></tr></thead>
+      <tbody>
+        <tr><td><code>Off</code></td><td>只算建議,寫在 VPA 物件裡</td><td>不會</td><td>全叢集鋪開,拿數字來調 requests</td></tr>
+        <tr><td><code>Initial</code></td><td>只在 Pod 建立時套用</td><td>不會主動砍</td><td>不想被中途重啟的服務</td></tr>
+        <tr><td><code>Recreate</code></td><td>差太多就砍掉重建</td><td>會</td><td>能接受隨時重啟的服務</td></tr>
+        <tr><td><code>Auto</code></td><td>目前行為跟 Recreate 一樣</td><td>會</td><td>同上</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="wrong"><b>真實踩坑</b>:VPA 開 Auto,半夜流量低,建議值變小,Pod 被重建成小規格。隔天早上流量一來,Pod 太小,VPA 又再重建一輪。結果在一天最脆弱的時段,服務自己重啟了兩次。</div>
+
+  <h3>2c. In-place resize:不重建也能改</h3>
+  <p class="lead">requests / limits 底下就是 cgroup 的數字。kubelet 可以直接改執行中容器的 cgroup,不用砍掉 Pod。(1.33 beta,1.35 GA;你的 kubeadm 叢集是 1.36)</p>
+  <div class="card fig">
+    <svg viewBox="0 0 370 220" width="370" role="img" aria-label="CPU 上限往上往下都安全;memory 上限往上安全,往下調到比已用量還小會失敗或 OOM">
+      <text x="92" y="20" class="t-ink" font-size="13.5" font-weight="700" text-anchor="middle">CPU limit 500m → 300m</text>
+      <text x="278" y="20" class="t-ink" font-size="13.5" font-weight="700" text-anchor="middle">memory limit 512Mi → 256Mi</text>
+      <line x1="185" y1="8" x2="185" y2="210" class="s-line" stroke-width="1.2" stroke-dasharray="4 4"/>
+      <!-- CPU -->
+      <rect x="62" y="40" width="60" height="140" class="s-ink" stroke-width="1.2" stroke-dasharray="4 3"/>
+      <text x="128" y="44" class="t-mut t-mono" font-size="10">500m</text>
+      <line x1="56" y1="96" x2="128" y2="96" stroke="var(--accent)" stroke-width="2"/>
+      <text x="132" y="100" class="t-acc t-mono" font-size="10">300m</text>
+      <rect x="62" y="110" width="60" height="70" class="f-acc" opacity=".75"/>
+      <text x="92" y="150" class="t-mono" fill="var(--card)" font-size="10" text-anchor="middle">250m</text>
+      <text x="92" y="200" class="t-ink" font-size="11.5" text-anchor="middle">超過只會被 throttle,不會死</text>
+      <!-- memory -->
+      <rect x="248" y="40" width="60" height="140" class="s-ink" stroke-width="1.2" stroke-dasharray="4 3"/>
+      <text x="314" y="44" class="t-mut t-mono" font-size="10">512Mi</text>
+      <rect x="248" y="68" width="60" height="112" class="f-acc" opacity=".75"/>
+      <text x="278" y="130" class="t-mono" fill="var(--card)" font-size="10" text-anchor="middle">400Mi</text>
+      <line x1="242" y1="110" x2="314" y2="110" stroke="var(--bad)" stroke-width="2.2"/>
+      <text x="316" y="114" class="t-bad t-mono" font-size="10">256Mi</text>
+      <rect x="248" y="68" width="60" height="42" class="f-bad"/>
+      <text x="278" y="200" class="t-bad" font-size="11.5" text-anchor="middle">已經用掉 400Mi,收不回來</text>
+    </svg>
+  </div>
+  <div class="tbl">
+    <table>
+      <thead><tr><th>調整方向</th><th>CPU</th><th>memory</th></tr></thead>
+      <tbody>
+        <tr><td>往上</td><td>安全</td><td>安全</td></tr>
+        <tr><td>往下</td><td>安全,最多被 throttle</td><td>危險:新上限比已用量小,resize 失敗或 OOMKilled</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>2d. HPA 和 VPA 看同一個 CPU 會打架</h3>
+  <p class="lead">兩個 controller 讀同一個 CPU 數字、改同一個 workload,會互相抵消,replicas 和 requests 一直上下跳。</p>
+  <div class="card fig">
+    <svg viewBox="0 0 370 330" width="370" role="img" aria-label="震盪迴圈:VPA 加大 requests,HPA 算出的百分比下降,HPA 減少 replicas,每顆 Pod 負載上升,VPA 又加大">
+      <defs>
+        <marker id="ar4" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="f-acc"/></marker>
+      </defs>
+      <rect x="40" y="10" width="270" height="50" class="f-card s-ink" stroke-width="1.4"/>
+      <text x="175" y="31" class="t-ink" font-size="13.5" text-anchor="middle" font-weight="700">每顆 Pod CPU 用量高</text>
+      <text x="175" y="50" class="t-mut" font-size="11.5" text-anchor="middle">VPA 看到 → 加大 requests 200m → 400m</text>
+      <path d="M175,60 V82" class="s-acc" stroke-width="1.6" marker-end="url(#ar4)"/>
+      <rect x="40" y="84" width="270" height="50" class="f-card s-ink" stroke-width="1.4"/>
+      <text x="175" y="105" class="t-ink" font-size="13.5" text-anchor="middle" font-weight="700">HPA 的分母變大</text>
+      <text x="175" y="124" class="t-mut" font-size="11.5" text-anchor="middle">同樣用量,百分比從 80% 掉到 40%</text>
+      <path d="M175,134 V156" class="s-acc" stroke-width="1.6" marker-end="url(#ar4)"/>
+      <rect x="40" y="158" width="270" height="50" class="f-card s-ink" stroke-width="1.4"/>
+      <text x="175" y="179" class="t-ink" font-size="13.5" text-anchor="middle" font-weight="700">HPA 縮 replicas</text>
+      <text x="175" y="198" class="t-mut" font-size="11.5" text-anchor="middle">低於 target → 減少 Pod 數量</text>
+      <path d="M175,208 V230" class="s-acc" stroke-width="1.6" marker-end="url(#ar4)"/>
+      <rect x="40" y="232" width="270" height="50" class="f-card s-ink" stroke-width="1.4"/>
+      <text x="175" y="253" class="t-ink" font-size="13.5" text-anchor="middle" font-weight="700">剩下的 Pod 分到更多流量</text>
+      <text x="175" y="272" class="t-mut" font-size="11.5" text-anchor="middle">每顆 CPU 又升高</text>
+      <path d="M310,257 H345 V35 H316" class="s-acc" stroke-width="2" stroke-dasharray="5 4" marker-end="url(#ar4)"/>
+      <text x="175" y="312" class="t-bad" font-size="12.5" text-anchor="middle" font-weight="700">回到第一格,一直轉下去</text>
+    </svg>
+  </div>
+  <p><mark>規則</mark>:同一個 metric 不能同時給兩個 controller 用。可以一起用的方式:</p>
+  <div class="tbl">
+    <table>
+      <thead><tr><th>組合</th><th>HPA 看</th><th>VPA 做</th><th>可不可以</th></tr></thead>
+      <tbody>
+        <tr><td>都看 CPU</td><td>CPU</td><td>改 CPU requests</td><td>❌ 會打架</td></tr>
+        <tr><td>訊號分開</td><td>RPS 或 queue 長度</td><td>改 CPU / memory requests</td><td>✅</td></tr>
+        <tr><td>VPA 只建議</td><td>CPU</td><td><code>Off</code>,人看數字調</td><td>✅ 最常見</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <details>
+    <summary>之後再看:VPA YAML 長怎樣</summary>
+<pre class="yaml">apiVersion: autoscaling.k8s.io/v1
+kind: VerticalPodAutoscaler
+metadata:
+  name: billing-api
+spec:
+  targetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: billing-api
+  updatePolicy:
+    updateMode: "Off"        # recommend only
+  resourcePolicy:
+    containerPolicies:
+    - containerName: "*"
+      minAllowed: {cpu: 100m, memory: 128Mi}
+      maxAllowed: {cpu: "2", memory: 2Gi}</pre>
+    <p>看建議值:<code>kubectl describe vpa billing-api</code>,找 <code>Recommendation</code> 底下的 <code>Target</code>。</p>
+  </details>
+</section>
+
+<footer class="next">
+  <strong>下一步(2 分鐘):</strong>上課前,用一句話回答:為什麼生產環境大多只開 <code>updateMode: "Off"</code>?
+</footer>
+
+</div>
