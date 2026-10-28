@@ -1,0 +1,433 @@
+<title>HPA 自動擴容</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC:wght@400;700&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<style>
+/* layout: one narrow notebook column on graph paper; each layer = header badge + taped figure card */
+:root {
+  --bg: #F6F8FA;
+  --grid: rgba(90,130,170,.16);
+  --ink: #23313E;
+  --muted: #5B6B7A;
+  --card: #FFFFFF;
+  --line: #C9D3DD;
+  --accent: #326CE5;
+  --accent-soft: rgba(50,108,229,.12);
+  --tape: rgba(50,108,229,.28);
+  --bad: #C92A2A;
+  --bad-soft: rgba(201,42,42,.18);
+  --waste: rgba(91,107,122,.22);
+  --hl-who: #FFE98A;
+  --hl-see: #BDEEF6;
+  --hl-may: #F9CDE0;
+  --font-body: "LXGW WenKai TC", "Noto Sans TC", "PingFang TC", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #1A2320; --grid: rgba(200,230,215,.07); --ink: #E4ECE7; --muted: #A3B3AA;
+    --card: #24302B; --line: #3D4D46; --accent: #74A0F0; --accent-soft: rgba(116,160,240,.16);
+    --tape: rgba(116,160,240,.35); --bad: #FF8787; --bad-soft: rgba(255,135,135,.2);
+    --waste: rgba(163,179,170,.22); --hl-who: rgba(255,233,138,.38); --hl-see: rgba(189,238,246,.3);
+    --hl-may: rgba(249,205,224,.3); color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #1A2320; --grid: rgba(200,230,215,.07); --ink: #E4ECE7; --muted: #A3B3AA;
+  --card: #24302B; --line: #3D4D46; --accent: #74A0F0; --accent-soft: rgba(116,160,240,.16);
+  --tape: rgba(116,160,240,.35); --bad: #FF8787; --bad-soft: rgba(255,135,135,.2);
+  --waste: rgba(163,179,170,.22); --hl-who: rgba(255,233,138,.38); --hl-see: rgba(189,238,246,.3);
+  --hl-may: rgba(249,205,224,.3); color-scheme: dark;
+}
+body {
+  background-color: var(--bg);
+  background-image: linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 22px 22px;
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 17px;
+  line-height: 1.75;
+}
+.page { max-width: 760px; margin: 0 auto; padding-block: 24px 64px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: flex; flex-direction: column; gap: 36px; }
+header.top { background: var(--accent); color: #fff; border-radius: 4px; padding: 18px 20px; display: flex; flex-direction: column; gap: 8px; }
+header.top h1 { margin: 0; font-size: 1.7rem; line-height: 1.3; text-wrap: balance; }
+header.top .goal { margin: 0; font-size: 1rem; }
+.progress { font-family: var(--font-mono); font-size: .85rem; display: flex; flex-wrap: wrap; gap: 6px; }
+.progress span { background: rgba(255,255,255,.18); padding: 2px 8px; border-radius: 3px; }
+.progress span.done { background: #fff; color: #1F4FB8; font-weight: 600; }
+section.layer { display: flex; flex-direction: column; gap: 14px; }
+.layer-head { display: flex; align-items: baseline; flex-wrap: wrap; gap: 10px; }
+.badge { font-family: var(--font-mono); font-size: .8rem; background: var(--accent); color: #fff; padding: 2px 8px; border-radius: 3px; letter-spacing: .04em; }
+.layer-head h2 { margin: 0; font-size: 1.35rem; text-wrap: balance; }
+.time { font-family: var(--font-mono); font-size: .78rem; color: var(--muted); }
+h3 { margin: 10px 0 0; font-size: 1.12rem; }
+p { margin: 0; }
+.lead { font-size: 1.08rem; font-weight: 700; }
+mark { color: inherit; padding: 0 2px; background: linear-gradient(transparent 50%, var(--hl-who) 50%); }
+mark.see { background: linear-gradient(transparent 50%, var(--hl-see) 50%); }
+mark.may { background: linear-gradient(transparent 50%, var(--hl-may) 50%); }
+code, .mono { font-family: var(--font-mono); font-size: .88em; }
+.card { position: relative; background: var(--card); border: 1px solid var(--line); padding: 22px 14px 14px; margin-top: 8px; }
+.card::before { content: ""; position: absolute; top: -9px; left: 50%; width: 92px; height: 18px; transform: translateX(-50%) rotate(-2deg); background: var(--tape); }
+.fig { overflow-x: auto; }
+.fig svg { display: block; margin: 0 auto; max-width: 100%; height: auto; }
+.caption { font-size: .9rem; color: var(--muted); text-align: center; margin-top: 6px; }
+.formula { font-family: var(--font-mono); font-size: 1rem; background: var(--accent-soft); border-left: 3px solid var(--accent); padding: 10px 12px; overflow-x: auto; white-space: pre; }
+.tbl { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-size: .95rem; background: var(--card); }
+th, td { border: 1px solid var(--line); padding: 6px 10px; text-align: left; vertical-align: top; }
+th { background: var(--accent-soft); }
+td.num, th.num { font-family: var(--font-mono); font-variant-numeric: tabular-nums; text-align: right; }
+.panels { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.panel { background: var(--card); border: 1px solid var(--line); padding: 10px; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.panel .t { font-weight: 700; font-size: .95rem; }
+.panel .r { font-size: .88rem; }
+.panel.bad { border-left: 4px solid var(--bad); }
+.panel.good { border-left: 4px solid var(--accent); }
+@media (max-width: 560px) { .panels { grid-template-columns: minmax(0, 1fr); } }
+.timeline { list-style: none; margin: 0; padding: 0 0 0 4px; display: flex; flex-direction: column; }
+.timeline li { position: relative; display: grid; grid-template-columns: 112px minmax(0, 1fr); gap: 12px; padding: 0 0 14px; }
+.timeline li::before { content: ""; position: absolute; left: 105px; top: 10px; bottom: -4px; width: 2px; background: var(--line); }
+.timeline li:last-child::before { display: none; }
+.timeline .when { font-family: var(--font-mono); font-size: .82rem; text-align: right; padding-right: 14px; color: var(--accent); font-weight: 600; }
+.timeline .what { position: relative; }
+.timeline .what::before { content: ""; position: absolute; left: -18px; top: 9px; width: 10px; height: 10px; border-radius: 50%; background: var(--accent); }
+.timeline li.blind .what { background: var(--bad-soft); padding: 2px 8px; }
+.timeline li.blind .what::before { background: var(--bad); }
+.timeline .sub { font-size: .88rem; color: var(--muted); }
+.wrong { border-left: 4px solid var(--bad); background: var(--bad-soft); padding: 8px 12px; }
+details { background: var(--card); border: 1px dashed var(--line); padding: 8px 12px; }
+details summary { cursor: pointer; font-weight: 700; }
+details summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+details > *:not(summary) { margin-top: 8px; }
+pre.yaml { font-family: var(--font-mono); font-size: .85rem; background: var(--accent-soft); padding: 10px 12px; overflow-x: auto; margin: 8px 0 0; }
+footer.next { background: var(--card); border: 2px solid var(--accent); padding: 14px 16px; }
+footer.next strong { color: var(--accent); }
+/* svg tokens */
+.s-ink { stroke: var(--ink); fill: none; }
+.s-line { stroke: var(--line); fill: none; }
+.s-acc { stroke: var(--accent); fill: none; }
+.f-card { fill: var(--card); }
+.f-acc { fill: var(--accent); }
+.f-accsoft { fill: var(--accent-soft); }
+.f-bad { fill: var(--bad-soft); }
+.f-waste { fill: var(--waste); }
+.t-ink { fill: var(--ink); font-family: var(--font-body); }
+.t-mut { fill: var(--muted); font-family: var(--font-body); }
+.t-acc { fill: var(--accent); font-family: var(--font-body); }
+.t-bad { fill: var(--bad); font-family: var(--font-body); }
+.t-mono { font-family: var(--font-mono); }
+</style>
+
+<div class="page">
+
+<header class="top">
+  <h1>HPA 水平自動擴容 (P3 C-3)</h1>
+  <p class="goal">讀完這頁你能:手算 HPA 要開幾顆 Pod,並說出它為什麼總是慢半拍。</p>
+  <div class="progress" aria-label="閱讀進度">
+    <span class="done">Layer 0 ✓</span><span class="done">1 ✓</span><span class="done">2 ✓</span><span>3 ○</span><span>4 ○</span><span>5 ○</span><span>6 ○</span><span>7 ○</span>
+  </div>
+</header>
+
+<!-- ===================== LAYER 0 ===================== -->
+<section class="layer" id="l0">
+  <div class="layer-head"><span class="badge">LAYER 0</span><h2>一張圖</h2><span class="time">讀 1 分鐘</span></div>
+  <p class="lead">HPA 是 kube-controller-manager 裡的一個 controller。它每 15 秒讀一次平均 CPU,算出要幾顆 Pod,寫進 Deployment 的 <code>replicas</code>。</p>
+  <div class="card fig">
+    <svg viewBox="0 0 370 530" width="370" role="img" aria-label="HPA 迴圈:cgroup 用量經 kubelet、metrics-server、metrics API 到 HPA,HPA 改 replicas,新 Pod 接流量後用量下降">
+      <defs>
+        <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="f-acc"/></marker>
+      </defs>
+      <!-- boxes -->
+      <g>
+        <rect x="20" y="10" width="290" height="52" class="f-card s-ink" stroke-width="1.5"/>
+        <text x="34" y="32" class="t-ink" font-size="15" font-weight="700">Pod 的 cgroup</text>
+        <text x="34" y="52" class="t-mut" font-size="13">CPU 實際用量,例:180m</text>
+
+        <text x="40" y="85" class="t-acc" font-size="12.5">↓ kubelet 內建 cAdvisor 讀 cgroup</text>
+
+        <rect x="20" y="98" width="290" height="52" class="f-card s-ink" stroke-width="1.5"/>
+        <text x="34" y="120" class="t-ink t-mono" font-size="13.5" font-weight="600">kubelet /metrics/resource</text>
+        <text x="34" y="140" class="t-mut" font-size="13">每台 node 各自一份</text>
+
+        <text x="40" y="173" class="t-acc" font-size="12.5">↓ metrics-server 每 15 秒抓一輪</text>
+
+        <rect x="20" y="186" width="290" height="52" class="f-card s-ink" stroke-width="1.5"/>
+        <text x="34" y="208" class="t-ink t-mono" font-size="13.5" font-weight="600">metrics.k8s.io API</text>
+        <text x="34" y="228" class="t-mut" font-size="13">經 API Server 轉接;kubectl top 也讀這裡</text>
+
+        <text x="40" y="261" class="t-acc" font-size="12.5">↓ HPA controller 每 15 秒讀一次</text>
+
+        <rect x="20" y="274" width="290" height="52" class="f-accsoft s-acc" stroke-width="2"/>
+        <text x="34" y="296" class="t-ink" font-size="15" font-weight="700">HPA controller</text>
+        <text x="34" y="316" class="t-mut" font-size="13">套公式,算出 desiredReplicas = 6</text>
+
+        <text x="40" y="349" class="t-acc" font-size="12.5">↓ 寫 Deployment 的 /scale</text>
+
+        <rect x="20" y="362" width="290" height="52" class="f-card s-ink" stroke-width="1.5"/>
+        <text x="34" y="384" class="t-ink t-mono" font-size="13.5" font-weight="600">Deployment.spec.replicas</text>
+        <text x="34" y="404" class="t-mut" font-size="13">4 → 6(只有 spec 改了,Pod 還沒出現)</text>
+
+        <text x="40" y="437" class="t-acc" font-size="12.5">↓ ReplicaSet → scheduler → kubelet(P0 五棒)</text>
+
+        <rect x="20" y="450" width="290" height="52" class="f-card s-ink" stroke-width="1.5"/>
+        <text x="34" y="472" class="t-ink" font-size="15" font-weight="700">新 Pod Ready</text>
+        <text x="34" y="492" class="t-mut" font-size="13">進 Endpoints,開始分攤流量</text>
+      </g>
+      <!-- loop back -->
+      <path d="M310,476 H345 V36 H316" class="s-acc" stroke-width="2" stroke-dasharray="5 4" marker-end="url(#ar)"/>
+      <text x="358" y="256" class="t-acc" font-size="12" transform="rotate(90 358 256)" text-anchor="middle">流量被分攤,平均 CPU 下降,再量一次</text>
+    </svg>
+    <p class="caption">整條是一個 reconcile loop:desired 是「平均 CPU 維持在 target」,動手的方式是改 replicas。</p>
+  </div>
+</section>
+
+<!-- ===================== LAYER 1 ===================== -->
+<section class="layer" id="l1">
+  <div class="layer-head"><span class="badge">LAYER 1</span><h2>第一性原理:為什麼一定要有它</h2><span class="time">讀 2 分鐘</span></div>
+  <p class="lead">流量一天到晚在變,但一顆 Pod 能吃的 CPU 是固定的。replicas 寫死,結果只有兩種:浪費錢,或掉請求。</p>
+  <div class="card fig">
+    <svg viewBox="0 0 370 230" width="370" role="img" aria-label="一天的流量曲線與固定 5 顆 Pod 的容量線:曲線高於線的部分是掉請求,低於線的部分是浪費">
+      <defs>
+        <clipPath id="above5"><rect x="40" y="30" width="300" height="80"/></clipPath>
+        <clipPath id="below5"><rect x="40" y="110" width="300" height="80"/></clipPath>
+      </defs>
+      <!-- axes -->
+      <line x1="40" y1="190" x2="340" y2="190" class="s-ink" stroke-width="1.2"/>
+      <line x1="40" y1="30" x2="40" y2="190" class="s-ink" stroke-width="1.2"/>
+      <!-- red: demand above fixed capacity -->
+      <polygon clip-path="url(#above5)" class="f-bad" points="40,158 77.5,166 115,158 152.5,110 190,78 215,46 240,94 277.5,62 302.5,110 340,158 340,190 40,190"/>
+      <!-- gray: capacity above demand -->
+      <polygon clip-path="url(#below5)" class="f-waste" points="40,158 77.5,166 115,158 152.5,110 190,78 215,46 240,94 277.5,62 302.5,110 340,158 340,30 40,30"/>
+      <!-- demand curve -->
+      <polyline points="40,158 77.5,166 115,158 152.5,110 190,78 215,46 240,94 277.5,62 302.5,110 340,158" class="s-ink" stroke-width="2.2"/>
+      <!-- fixed capacity -->
+      <line x1="40" y1="110" x2="340" y2="110" class="s-acc" stroke-width="2" stroke-dasharray="6 4"/>
+      <text x="344" y="106" class="t-acc" font-size="11.5" text-anchor="end">replicas 寫死 = 5</text>
+      <!-- labels -->
+      <text x="212" y="96" class="t-bad" font-size="13" font-weight="700" text-anchor="middle">掉請求</text>
+      <text x="85" y="140" class="t-mut" font-size="13" font-weight="700" text-anchor="middle">浪費錢</text>
+      <text x="44" y="24" class="t-mut" font-size="11.5">需要的 Pod 數</text>
+      <!-- y ticks -->
+      <text x="34" y="194" class="t-mut t-mono" font-size="10.5" text-anchor="end">0</text>
+      <text x="34" y="114" class="t-mut t-mono" font-size="10.5" text-anchor="end">5</text>
+      <text x="34" y="34" class="t-mut t-mono" font-size="10.5" text-anchor="end">10</text>
+      <!-- x ticks -->
+      <text x="40" y="206" class="t-mut t-mono" font-size="10.5" text-anchor="middle">0h</text>
+      <text x="115" y="206" class="t-mut t-mono" font-size="10.5" text-anchor="middle">6h</text>
+      <text x="190" y="206" class="t-mut t-mono" font-size="10.5" text-anchor="middle">12h</text>
+      <text x="265" y="206" class="t-mut t-mono" font-size="10.5" text-anchor="middle">18h</text>
+      <text x="340" y="206" class="t-mut t-mono" font-size="10.5" text-anchor="middle">24h</text>
+      <text x="190" y="224" class="t-mut" font-size="11.5" text-anchor="middle">一天的時間</text>
+    </svg>
+    <p class="caption">黑線 = 流量需要的 Pod 數。藍虛線 = 寫死的 5 顆。</p>
+  </div>
+  <p>擴容要跟著流量走,但有三個繞不開的限制,它們決定了 HPA 長什麼樣:</p>
+  <div class="tbl">
+    <table>
+      <thead><tr><th>限制</th><th>從哪來</th><th>所以 HPA 的設計是</th></tr></thead>
+      <tbody>
+        <tr><td>一顆 Pod 的 CPU 有上限</td><td><code>limits</code> 和 node 大小</td><td>加 Pod 數量(水平),不是把 Pod 變大</td></tr>
+        <tr><td>量測一定有延遲</td><td>要抽樣才有數字</td><td>HPA 看到的永遠是 15 到 30 秒前的狀態</td></tr>
+        <tr><td>新 Pod 要時間才能接流量</td><td>排程 + 拉 image + readiness</td><td>改了 replicas,容量要晚一段時間才到</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>拿掉 HPA 的兩條路:人半夜手動改 replicas(人會睡著),或常態開到尖峰量(錢會燒掉)。</p>
+</section>
+
+<!-- ===================== LAYER 2 ===================== -->
+<section class="layer" id="l2">
+  <div class="layer-head"><span class="badge">LAYER 2</span><h2>機制:公式、分母、延遲、防抖動</h2><span class="time">讀 6 分鐘</span></div>
+
+  <h3>2a. 公式(chunk 1)</h3>
+  <p class="lead">HPA 只做一件事:用「現在幾顆」乘上「超標幾倍」,無條件進位。</p>
+  <div class="formula">desiredReplicas = ceil( currentReplicas × currentMetric / targetMetric )</div>
+  <div class="card fig">
+    <svg viewBox="0 0 370 220" width="370" role="img" aria-label="4 顆 Pod,requests 都是 200m,用量 180m、160m、140m、120m,換算成 90%、80%、70%、60%,target 50% 在 100m">
+      <!-- base -->
+      <line x1="30" y1="170" x2="350" y2="170" class="s-ink" stroke-width="1.2"/>
+      <!-- request outlines (200m = 120px) -->
+      <g stroke-dasharray="4 3">
+        <rect x="50" y="50" width="50" height="120" class="s-ink" stroke-width="1.2"/>
+        <rect x="125" y="50" width="50" height="120" class="s-ink" stroke-width="1.2"/>
+        <rect x="200" y="50" width="50" height="120" class="s-ink" stroke-width="1.2"/>
+        <rect x="275" y="50" width="50" height="120" class="s-ink" stroke-width="1.2"/>
+      </g>
+      <!-- usage -->
+      <rect x="50" y="62" width="50" height="108" class="f-acc" opacity=".75"/>
+      <rect x="125" y="74" width="50" height="96" class="f-acc" opacity=".75"/>
+      <rect x="200" y="86" width="50" height="84" class="f-acc" opacity=".75"/>
+      <rect x="275" y="98" width="50" height="72" class="f-acc" opacity=".75"/>
+      <!-- target line at 100m -->
+      <line x1="30" y1="110" x2="350" y2="110" stroke="var(--bad)" fill="none" stroke-width="1.8" stroke-dasharray="7 4"/>
+      <text x="350" y="104" class="t-bad" font-size="11.5" text-anchor="end">target 50% = 100m</text>
+      <!-- labels -->
+      <text x="75" y="44" class="t-ink t-mono" font-size="12" text-anchor="middle">90%</text>
+      <text x="150" y="44" class="t-ink t-mono" font-size="12" text-anchor="middle">80%</text>
+      <text x="225" y="44" class="t-ink t-mono" font-size="12" text-anchor="middle">70%</text>
+      <text x="300" y="44" class="t-ink t-mono" font-size="12" text-anchor="middle">60%</text>
+      <text x="75" y="186" class="t-mut t-mono" font-size="11" text-anchor="middle">180m</text>
+      <text x="150" y="186" class="t-mut t-mono" font-size="11" text-anchor="middle">160m</text>
+      <text x="225" y="186" class="t-mut t-mono" font-size="11" text-anchor="middle">140m</text>
+      <text x="300" y="186" class="t-mut t-mono" font-size="11" text-anchor="middle">120m</text>
+      <text x="190" y="208" class="t-mut" font-size="11.5" text-anchor="middle">虛線框 = requests.cpu 200m;實心 = 實際用量</text>
+      <text x="30" y="20" class="t-mut" font-size="11.5">4 顆 Pod 現在的狀態</text>
+    </svg>
+  </div>
+  <div class="tbl">
+    <table>
+      <thead><tr><th>步驟</th><th>算式</th><th class="num">結果</th></tr></thead>
+      <tbody>
+        <tr><td>每顆用量 ÷ requests</td><td>180/200, 160/200, 140/200, 120/200</td><td class="num">90, 80, 70, 60%</td></tr>
+        <tr><td>取平均 = currentMetric</td><td>(90+80+70+60) / 4</td><td class="num">75%</td></tr>
+        <tr><td>超標幾倍</td><td>75 / 50</td><td class="num">1.5</td></tr>
+        <tr><td>desiredReplicas</td><td>ceil(4 × 1.5)</td><td class="num">6</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p><mark>tolerance 規則</mark>:比值落在 0.9 到 1.1 之間,HPA 不動。例:平均 53%,比值 1.06,replicas 維持 4。為了 3% 的誤差加減 Pod,得不償失。</p>
+
+  <h3>2b. 分母是 requests,不是 limits,也不是 node 大小(chunk 1)</h3>
+  <p class="lead">CPU 百分比 = 用量 ÷ <code>requests.cpu</code>。requests 設歪,HPA 算出來的數字就歪。</p>
+  <div class="panels">
+    <div class="panel bad">
+      <svg viewBox="0 0 150 110" role="img" aria-label="requests 2000m 的大框,用量只有 100m 的薄薄一層">
+        <rect x="35" y="8" width="80" height="90" class="s-ink" stroke-width="1.2" stroke-dasharray="4 3"/>
+        <rect x="35" y="93.5" width="80" height="4.5" class="f-acc"/>
+        <text x="75" y="56" class="t-mut t-mono" font-size="11" text-anchor="middle">2000m</text>
+        <text x="122" y="98" class="t-acc t-mono" font-size="10">100m</text>
+      </svg>
+      <div class="t">requests 太大</div>
+      <div class="r">100 / 2000 = <b>5%</b>。永遠不超過 50%,HPA 永遠不擴,尖峰直接打掛。</div>
+    </div>
+    <div class="panel bad">
+      <svg viewBox="0 0 150 110" role="img" aria-label="沒有 requests 框,只有用量,分母不存在">
+        <rect x="35" y="60" width="80" height="38" class="f-acc" opacity=".75"/>
+        <text x="75" y="38" class="t-bad" font-size="26" font-weight="700" text-anchor="middle">?</text>
+        <text x="75" y="84" class="t-ink t-mono" font-size="11" text-anchor="middle">180m ÷ ?</text>
+      </svg>
+      <div class="t">沒設 requests</div>
+      <div class="r">分母不存在。TARGETS 顯示 <code>&lt;unknown&gt;</code>,describe 看到 <code>FailedGetResourceMetric</code>,HPA 不動。</div>
+    </div>
+    <div class="panel good">
+      <svg viewBox="0 0 150 110" role="img" aria-label="requests 200m,用量 180m 接近填滿">
+        <rect x="35" y="8" width="80" height="90" class="s-ink" stroke-width="1.2" stroke-dasharray="4 3"/>
+        <rect x="35" y="17" width="80" height="81" class="f-acc" opacity=".75"/>
+        <text x="75" y="62" class="t-mono" fill="var(--card)" font-size="11" text-anchor="middle">180m</text>
+        <text x="122" y="14" class="t-mut t-mono" font-size="10">200m</text>
+      </svg>
+      <div class="t">requests 貼近真實用量</div>
+      <div class="r">180 / 200 = <b>90%</b>。數字反映真實負載,HPA 正常擴。</div>
+    </div>
+  </div>
+
+  <h3>2c. 為什麼 HPA 總是慢半拍(chunk 2)</h3>
+  <p class="lead">從流量暴增到新 Pod 真的接到流量,中間每一段都在排隊。加起來常見 1 到 3 分鐘。</p>
+  <div class="card">
+    <ol class="timeline">
+      <li><span class="when">t = 0</span><div class="what"><b>流量暴增</b><div class="sub">現有 Pod 開始排隊,latency 上升</div></div></li>
+      <li class="blind"><span class="when">+0 ~ 15s</span><div class="what"><b>metrics-server 還沒抓下一輪</b><div class="sub">metrics API 裡還是舊數字</div></div></li>
+      <li class="blind"><span class="when">+0 ~ 15s</span><div class="what"><b>HPA 還沒到下一次同步</b><div class="sub">看不到新數字就不會算</div></div></li>
+      <li><span class="when">此刻</span><div class="what"><b>replicas 4 → 6</b><div class="sub">只改了 spec,一顆新 Pod 都還沒有</div></div></li>
+      <li class="blind"><span class="when">+秒 ~ 分鐘</span><div class="what"><b>排程、拉 image、容器啟動、readiness 通過</b><div class="sub">P1 學過的整條啟動流程</div></div></li>
+      <li class="blind"><span class="when">+1 ~ 5 分</span><div class="what"><b>(node 不夠時)等新 node 開機</b><div class="sub">C-5 Cluster Autoscaler / Karpenter 的範圍</div></div></li>
+      <li><span class="when">終於</span><div class="what"><b>新 Pod 進 Endpoints,開始分攤</b></div></li>
+    </ol>
+    <p class="caption">紅底 = 盲區。這段時間舊 Pod 一直在超載,HPA 什麼都改不了。</p>
+  </div>
+  <p>再加一點:CPU 是<mark class="may">落後指標</mark>。CPU 飆高的時候,請求已經在排隊了。所以 HPA 適合跟長時間的趨勢,短時間的突刺要靠平時多留的空間(headroom)來吃。C-7 會再收這一題。</p>
+
+  <h3>2d. 縮容為什麼故意慢(chunk 3)</h3>
+  <p class="lead">縮容時,HPA 回看過去 300 秒內算出的所有 desired 值,取最大的那個。所以壓測停了,replicas 要等 5 分鐘才掉。</p>
+  <div class="card fig">
+    <svg viewBox="0 0 370 230" width="370" role="img" aria-label="停止壓測後每 30 秒的建議值都是 1,但實際 replicas 維持 6 到第 5 分鐘才掉到 1">
+      <!-- axes: x -1..6 min -> 40..340 (42.857/min); y 0..7 -> 170..30 (20/unit) -->
+      <line x1="40" y1="170" x2="340" y2="170" class="s-ink" stroke-width="1.2"/>
+      <line x1="40" y1="30" x2="40" y2="170" class="s-ink" stroke-width="1.2"/>
+      <!-- window shading from 0 to 5 min -->
+      <rect x="82.9" y="30" width="214.3" height="140" class="f-accsoft"/>
+      <text x="190" y="44" class="t-acc" font-size="12" text-anchor="middle">300 秒窗口:取這段最大值</text>
+      <!-- stop line -->
+      <line x1="82.9" y1="30" x2="82.9" y2="170" class="s-ink" stroke-width="1.2" stroke-dasharray="3 3"/>
+      <text x="86" y="186" class="t-ink" font-size="11" font-weight="700">停止壓測</text>
+      <!-- actual replicas -->
+      <polyline points="40,50 297.1,50 297.1,150 340,150" class="s-acc" stroke-width="3"/>
+      <text x="300" y="66" class="t-acc" font-size="11.5" text-anchor="end">實際 replicas = 6</text>
+      <text x="338" y="142" class="t-acc" font-size="11.5" text-anchor="end">掉到 1</text>
+      <!-- recommendation dots every 30s -->
+      <g class="t-ink">
+        <circle cx="40" cy="50" r="3.5" fill="var(--ink)"/>
+        <circle cx="61.4" cy="50" r="3.5" fill="var(--ink)"/>
+        <circle cx="82.9" cy="150" r="3.5" fill="var(--ink)"/>
+        <circle cx="104.3" cy="150" r="3.5" fill="var(--ink)"/>
+        <circle cx="125.7" cy="150" r="3.5" fill="var(--ink)"/>
+        <circle cx="147.1" cy="150" r="3.5" fill="var(--ink)"/>
+        <circle cx="168.6" cy="150" r="3.5" fill="var(--ink)"/>
+        <circle cx="190" cy="150" r="3.5" fill="var(--ink)"/>
+        <circle cx="211.4" cy="150" r="3.5" fill="var(--ink)"/>
+        <circle cx="232.9" cy="150" r="3.5" fill="var(--ink)"/>
+        <circle cx="254.3" cy="150" r="3.5" fill="var(--ink)"/>
+        <circle cx="275.7" cy="150" r="3.5" fill="var(--ink)"/>
+        <circle cx="297.1" cy="150" r="3.5" fill="var(--ink)"/>
+        <circle cx="318.6" cy="150" r="3.5" fill="var(--ink)"/>
+        <circle cx="340" cy="150" r="3.5" fill="var(--ink)"/>
+      </g>
+      <text x="190" y="140" class="t-ink" font-size="11.5" text-anchor="middle">黑點 = 每輪算出的 desired:都是 1</text>
+      <!-- y ticks -->
+      <text x="34" y="174" class="t-mut t-mono" font-size="10.5" text-anchor="end">0</text>
+      <text x="34" y="154" class="t-mut t-mono" font-size="10.5" text-anchor="end">1</text>
+      <text x="34" y="54" class="t-mut t-mono" font-size="10.5" text-anchor="end">6</text>
+      <!-- x ticks -->
+      <text x="82.9" y="202" class="t-mut t-mono" font-size="10.5" text-anchor="middle">0</text>
+      <text x="190" y="202" class="t-mut t-mono" font-size="10.5" text-anchor="middle">2.5 分</text>
+      <text x="297.1" y="202" class="t-mut t-mono" font-size="10.5" text-anchor="middle">5 分</text>
+      <text x="190" y="222" class="t-mut" font-size="11.5" text-anchor="middle">停止壓測後的時間</text>
+    </svg>
+  </div>
+  <p>沒有這個窗口,流量鋸齒狀時 metric 在 target 上下來回穿,HPA 會加了又刪、刪了又加(<mark class="see">flapping</mark>)。每加一次都要重付 2c 那整條啟動時間。</p>
+  <div class="tbl">
+    <table>
+      <thead><tr><th></th><th>擴容 scaleUp</th><th>縮容 scaleDown</th></tr></thead>
+      <tbody>
+        <tr><td>預設窗口</td><td class="mono">0 秒</td><td class="mono">300 秒</td></tr>
+        <tr><td>做錯的代價</td><td>少擴 = 掉請求</td><td>少縮 = 多付幾分鐘的錢</td></tr>
+        <tr><td>所以</td><td>要快</td><td>可以慢</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <details>
+    <summary>之後再看:behavior 欄位長怎樣</summary>
+    <p><code>autoscaling/v2</code> 的 HPA 可以改窗口與速度限制。下面是預設值寫出來的樣子:</p>
+<pre class="yaml">behavior:
+  scaleUp:
+    stabilizationWindowSeconds: 0
+    selectPolicy: Max          # two policies, take the larger
+    policies:
+    - type: Percent
+      value: 100               # at most double
+      periodSeconds: 15
+    - type: Pods
+      value: 4                 # or +4 Pods
+      periodSeconds: 15
+  scaleDown:
+    stabilizationWindowSeconds: 300
+    policies:
+    - type: Percent
+      value: 100
+      periodSeconds: 15</pre>
+  </details>
+  <details>
+    <summary>之後再看:有 Pod 沒數字、多個 metric 時怎麼算</summary>
+    <p>有 Pod 還沒有 metrics 時,HPA 算得保守:要縮容時把它當 100%,要擴容時把它當 0%。CPU 還在暖機、還沒 Ready 的 Pod 擴容時也當 0%。目的是不讓暖機中的數字騙它多擴或多縮。</p>
+    <p>同一個 HPA 設了多個 metric(例:CPU + RPS),每個各算一次 desired,取最大值。</p>
+    <p>HPA 改的是 Deployment 的 <code>/scale</code> subresource,只碰 replicas 一個欄位,不會蓋掉你的 Pod template。</p>
+  </details>
+</section>
+
+<footer class="next">
+  <strong>下一步(2 分鐘):</strong>回 chat 用一句話講:replicas 寫死,為什麼一定會出事?(Layer 1)
+</footer>
+
+</div>

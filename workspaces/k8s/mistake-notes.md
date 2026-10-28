@@ -457,8 +457,20 @@
 - 判準:required podAntiAffinity 只問「這個 domain 已有同 label Pod 嗎」,每 domain 最多 1 顆,沒有數字欄位。要數量/平均只能 topologySpread maxSkew。
 - s50:Q6(hostname、5 node、7 副本 → 2 Pending)教完當場 ✅ 帶因為。
 - 下次抽考:6 副本跨 3 AZ 平均,同事寫 required antiAffinity key=zone,上線後 `get pods` 會看到什麼?
+- s51 重測:答 B(3 Running + 3 Pending)✅,因為講成「topologyKey 代表每 zone 1 個」(實為 antiAffinity 是非判斷);追問改用什麼 → 「不確定」,直給 topologySpread maxSkew:1。partial → 重置 3 天。下次抽考:要每 AZ 2 顆,改哪個欄位、填什麼值?
 
 ## 2026-10-20 | FailedScheduling 行對應修法
 - 判準:照訊息關鍵字分類,不用比喻。`untolerated taint` → Pod 加 toleration;`didn't match Pod's node affinity/selector` → node 加 label 或改 Pod selector;`Insufficient cpu/memory` → 加 node 或降 request。
 - s49 affinity/selector 行答成 taint;s50 兩向皆反(affinity 行答 toleration、taint 行答 label)。學員明確拒絕推力/拉力比喻。
 - 下次抽考:直接貼一則 FailedScheduling,問每一行要改 Pod 還是改 node,改哪個欄位。
+- s51 重測 ✅:taint 行 → Pod 加 tolerations(學員自稱「通行證」),affinity/selector 行 → node 沒有 Pod 要的 label,兩行都帶因為。升 7 天。下次抽考:換成三行訊息(加 Insufficient memory)。
+
+## 2026-10-28 | HPA 超標就 +1 顆
+- 判準:desired = ceil(current × current/target),按比例一次跳到需要的顆數,不是 +1。1 顆 250m/requests 200m/target 50% → 125%/50% = 2.5 → 3。
+- s51:連答「2 顆」「超過就多建立一 pod」,直給後學員拒絕手算換皮;lab 實測 1→3→5→7 當證據。
+- 下次抽考(不用算數):replicas 2,CPU 突然變 target 的 3 倍,下一輪 HPA 會到 3 顆還是 6 顆?為什麼?
+
+## 2026-10-28 | 調低 target 讓 HPA 變快
+- 判準:延遲(metrics 抓取 + HPA 同步 + Pod 啟動)跟 target 無關;調低 target 只是平常多開 Pod,用錢買緩衝。可預期尖峰用排程拉高 minReplicas。
+- s51:F 誘答答「應該算對」;二選一「盲區哪段變短」答 B 沒有 ✅ 後直給。
+- 下次抽考:老闆說「把 target 從 70% 降到 40%,HPA 反應就快一倍」,哪裡錯?他真正買到了什麼?

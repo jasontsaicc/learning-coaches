@@ -7,15 +7,15 @@
 
 ## Meta
 
-- session_count: 50
+- session_count: 51
 - last_weekly_review: 49(WR10 於 s49 課尾壓縮版:NetworkPolicy DNS supported / RBAC watch 結論對判準錯 / Secret 分層冷測過)
-- last_session_date: 2026-10-20
+- last_session_date: 2026-10-28
 - warm_up_classification: mid
 - target_role: 雙目標 NVIDIA Pre-Production Engineer + AWS ProServe DC Cloud Architect,兼顧台廠資深 SRE(2026-09-30,curriculum-plan §12);投遞最快 2027-01
 
 ## Current Session breakpoint
 
-無(s50 提前收工,學員對推力/拉力比喻與追問煩躁)。下一堂:P2a/P2b Phase Gate 集中考 → P3 C-3 HPA lab;C-2 兩張新卡(FailedScheduling 行→修法、antiAffinity 無數量)排課尾;每堂無 G(§12.4)。
+無(s51 正常收工)。下一堂:P3 C-4 VPA(圖+情境題,無 lab);P2a/P2b Phase Gate 仍待考,學員挑時機;registry 超過 15 張上限,開場先 triage;每堂無 G(§12.4)。
 
 <!-- schema §3 = 恰好一行。敘事與次要待辦寫 session-log.md,長效教練紀律寫 session-log.md
      「教練執行紀律」,不要在這裡疊舊堂。s32 及更早斷點原文見 session-log.md 對應堂,
@@ -74,6 +74,7 @@ weak-topic flags(2026-08-03 啟用,P2a 帶 flag 前進、gate 未考,學員決�
 - P3 bootstrap 元件不依賴自己(static pod / calico-node hostNetwork): low(supported) (s45)
 - P3 C-1 scheduler(邊界 / FailedScheduling 判準 / preemption): low-med (s49)
 - P3 C-2 調度約束(taint/affinity 專用節點、antiAffinity vs topologySpread、rollout 卡死): low(supported) (s50)
+- P3 C-3 HPA(按比例擴 / 分母 requests / 盲區 / scaleDown 300s 窗口): low-med (s51)
 - P1 kubectl debug / ephemeral container: low (2026-09-01,ad hoc 非主線,未經 gate)
 
 ## Scorecard history
@@ -181,8 +182,10 @@ weak-topic flags(2026-08-03 啟用,P2a 帶 flag 前進、gate 未考,學員決�
 - 2026-10-16 | NetworkPolicy stateful:回程封包靠 conntrack 放行 | prometheus 被 Ingress 全擋,預測它 curl web 拿不到 response(timeout),實測 200 | 把 policy 當成逐封包過濾,不知規則只檢查連線第一個封包 | unresolved | 3 | 2026-10-19 | 0
 - 2026-10-20 | nodeAffinity 只有軟性 | 以為 nodeAffinity 沒對到就去別台、nodeSelector 才硬;F teach-back 又講成「Score 加分」,追問後改口 required | required=Filter 硬擋 Pending、preferred=Score;nodeSelector=required 簡化版 | unresolved | 3 | 2026-10-23 | 0
 - 2026-10-20 | maxUnavailable 讀成不能砍 | surge=0/unavailable=1 答「跑不動,不能新增也不能砍」;填空答最少剩 1 顆(應 2) | maxUnavailable=可少幾顆,最少在跑 = replicas − maxUnavailable | unresolved | 3 | 2026-10-23 | 0
-- 2026-10-20 | antiAffinity 能表達數量 | F 誘答「required antiAffinity zone 可把 6 副本平均 3 AZ」答「也行」,反證後想改成「no 3 pods」 | required antiAffinity 只有是非(每 domain 最多 1),數量只能 topologySpread maxSkew | unresolved | 3 | 2026-10-23 | 0
-- 2026-10-20 | FailedScheduling 行對應修法 | `didn't match affinity/selector` 答修 toleration;`untolerated taint` 答加 label(兩向皆反,s49 同錯) | 照訊息關鍵字:taint 行→Pod 加 toleration;affinity/selector 行→node 加 label 或改 selector;Insufficient→容量 | unresolved | 3 | 2026-10-23 | 1
+- 2026-10-20 | antiAffinity 能表達數量 | F 誘答「required antiAffinity zone 可把 6 副本平均 3 AZ」答「也行」,反證後想改成「no 3 pods」 | required antiAffinity 只有是非(每 domain 最多 1),數量只能 topologySpread maxSkew | unresolved | 3 | 2026-10-31 | 0
+- 2026-10-20 | FailedScheduling 行對應修法 | `didn't match affinity/selector` 答修 toleration;`untolerated taint` 答加 label(兩向皆反,s49 同錯) | 照訊息關鍵字:taint 行→Pod 加 toleration;affinity/selector 行→node 加 label 或改 selector;Insufficient→容量 | unresolved | 7 | 2026-11-04 | 1
+- 2026-10-28 | HPA 超標就 +1 顆 | 1 顆 250m/requests 200m/target 50% 預測連答「2 顆」「超過就多建立一 pod」 | HPA 按比例 ceil(current×current/target) 一次跳到需要的顆數(lab 實測 1→3→5) | unresolved | 3 | 2026-10-31 | 0
+- 2026-10-28 | 調低 target 讓 HPA 變快 | F 誘答「target 50%→30% 解決前 1 分鐘 5xx」答「應該算對」 | 盲區延遲不變;調低 target 只是平常多開 Pod 買緩衝(延遲 vs 緩衝兩個變數) | unresolved | 3 | 2026-10-31 | 0
 
 ## Spaced-repetition queue
 
@@ -256,8 +259,11 @@ weak-topic flags(2026-08-03 啟用,P2a 帶 flag 前進、gate 未考,學員決�
 - topic:P3-C2-調度約束 | topic | 3 | 2026-10-23 | active
 - mistake:nodeAffinity只有軟性 | mistake | 3 | 2026-10-23 | active
 - mistake:maxUnavailable讀成不能砍 | mistake | 3 | 2026-10-23 | active
-- mistake:antiAffinity能表達數量 | mistake | 3 | 2026-10-23 | active
-- mistake:FailedScheduling行對應修法 | mistake | 3 | 2026-10-23 | active
+- mistake:antiAffinity能表達數量 | mistake | 3 | 2026-10-31 | active
+- mistake:FailedScheduling行對應修法 | mistake | 7 | 2026-11-04 | active
+- topic:P3-C3-HPA | topic | 3 | 2026-10-31 | active
+- mistake:HPA超標就+1顆 | mistake | 3 | 2026-10-31 | active
+- mistake:調低target讓HPA變快 | mistake | 3 | 2026-10-31 | active
 
 ## Curiosity branch
 
