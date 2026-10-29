@@ -7,7 +7,7 @@
 
 ## Meta
 
-- session_count: 52
+- session_count: 53
 - last_weekly_review: 49(WR10 於 s49 課尾壓縮版:NetworkPolicy DNS supported / RBAC watch 結論對判準錯 / Secret 分層冷測過)
 - last_session_date: 2026-10-29
 - warm_up_classification: mid
@@ -15,7 +15,7 @@
 
 ## Current Session breakpoint
 
-無(s52 正常收工)。下一堂:P3 C-3b KEDA lab(curriculum-plan §12.6,預習頁 s53-keda-layers.html Layer 0-2 已出 https://claude.ai/artifact/DLLVyRhGNuV9CQ6mizkqkc);P2a/P2b Phase Gate 仍待考,學員挑時機;registry 16 張(s52 triage 到 15 後,學員選擇多留 5xx 卡);每堂無 G(§12.4)。
+s53 Gap stop(2026-10-29,家用 VM kind-k8s-coach-p2a):P3 C-3b KEDA chunk 1 ✅ supported;下一步 = chunk 2 cron lab 開頭,先問預測題「沒 metrics-server 的 kind 裝完 KEDA v2.17.2,`kubectl get apiservice | grep metrics` 會出現哪幾個、因為?」再讓學員 `kubectl apply --server-side -f https://github.com/kedacore/keda/releases/download/v2.17.2/keda-2.17.2.yaml`;之後 chunk 3 SQS 圖+情境題、F(volley≤2)、無 G、課尾卡;KEDA 尚未安裝。預習頁 https://claude.ai/artifact/DLLVyRhGNuV9CQ6mizkqkc
 
 <!-- schema §3 = 恰好一行。敘事與次要待辦寫 session-log.md,長效教練紀律寫 session-log.md
      「教練執行紀律」,不要在這裡疊舊堂。s32 及更早斷點原文見 session-log.md 對應堂,
