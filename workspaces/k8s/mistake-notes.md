@@ -68,6 +68,7 @@
 - **s38(2026-09-21)**:同堂三次裸結論(etcd 輸出預測「B」、KMS 開啟後開發者看不看得到「B」、volume 那格「cat 是最新的」),都要追問才補。正樣本:「甲,因為他沒有 KMS 解密的權限」、「env 在啟動那一刻寫進 memory,之後副本不會同步」、ECS task 啟動抓 SSM 的自發類比。
 - **s26 明顯正向,但出現新形狀**。正面:預測題**全部作答無一跳過**(s24 連跳三次的洞補上);三句無鷹架機制句(「pod 沒有換 container 換掉只有 upperdir 換掉」/「因為路徑存在 container id 底下的資料夾」/ AZ 順序完整鏈)。負面兩處:① **同義反覆**(dry-run 題「因為它不會去查」= 把問題換句話說,已命名並給檢驗法「對方有沒有拿到一個新事實」)② **F 段獨白純結論**(對完全不懂容器的人只丟三個名詞加三句結論,機制要追問才出來)。
 - 註:s26 的 EKS 順序題雖自帶「因為」,但屬**當堂剛教 + 教練指定「用順序講」的鷹架下複述,不計入無提示正樣本**。無提示正樣本累計:s22 站 7、s24 kernel 題、s25 PV/PVC 1:1、**s26 upperdir 句**。08-09 續盯,新增盯點=**有沒有同義反覆**。
+- s52(2026-10-29):課尾複習 1 沒要求「因為」,自己給出判準 ✅。同堂前段多次要求過「選 X,因為 Y」格式,有 priming,不算 resolved。→ 7 天。
 
 ## 2026-07-17 | default-deny 後的分層(DNS 層 vs 連線層)
 
@@ -149,6 +150,7 @@
 - 判準句:**能重現的東西可以晚點修,不能重現的東西必須當場採證。**
 - L6 顧問版:"A restart clears the symptom and the evidence at the same time. I'd capture node conditions and kubelet logs first, then restart — otherwise the same incident comes back next week and we're starting from zero."
 - 08-09 抽:給一個 node NotReady 情境,要他排出「先做什麼、再做什麼」的順序 + 講出為什麼 restart 不能第一個。
+- s52(2026-10-29)複習:9:05 5xx 飆高、同事要 rollout restart,答「可能是 DB,restart 不會解決,查 DB load」✗:拒絕 restart 對,理由是猜嫌犯,沒講 restart 洗掉 Events / logs --previous。直給後換皮「delete CrashLoopBackOff Pod vs logs --previous」選 B,理由「急著砍 pod 就把 log 刪除了」✅(supported)。學員忘了 5xx 各碼(未教,不入卡):只記 500 = app 回、502/503/504 = 前面 proxy 回。→ reset 3 天。下次:node NotReady 或 OOMKilled 情境,排「先做什麼再做什麼」。
 
 ## 2026-08-06 | PID 1 的 signal 保護(kernel 層,新知識卡)
 
@@ -433,6 +435,7 @@
 - 判準:找 `Insufficient <resource>` = 容量問題,加 node 有用。`untolerated taint`(cp)每次都在,當背景。`didn't match node affinity/selector` = Pod 要的 label,新 node 沒那個 label 就沒用(Karpenter 會照 Pod 需求開帶 label 的 node,前提 NodePool 允許)。
 - s49:首答「沒用」被 taint 行帶走;四台表格填空後到位。taint vs affinity 為 C-2 內容,教練未教先考。
 - 下次抽考:`3 node(s) didn't match pod anti-affinity rules`,加 node 有沒有用?
+- s52(2026-10-29)複習:VPA 把 requests 拉到 1500m,`1 untolerated taint, 2 Insufficient cpu`,自答「cp 沒通行證正常、2 台 cpu 不夠 → 要加」帶因為 ✅,未提示格式。→ 14 天。L6 補:加 node 救火,另查 1500m 是真實用量還是尖峰(maxAllowed)。下次仍用 anti-affinity 那題。
 
 ## 2026-10-16 | unschedulable Pod 何時被重排
 - 判準:排不進去的 Pod 進 unschedulable queue,不輪詢;等叢集事件(node 加入、Pod 刪除、label 改)才撈回 activeQ。scheduler 重啟時重新 list 所有 nodeName 空的 Pod。
@@ -474,3 +477,9 @@
 - 判準:延遲(metrics 抓取 + HPA 同步 + Pod 啟動)跟 target 無關;調低 target 只是平常多開 Pod,用錢買緩衝。可預期尖峰用排程拉高 minReplicas。
 - s51:F 誘答答「應該算對」;二選一「盲區哪段變短」答 B 沒有 ✅ 後直給。
 - 下次抽考:老闆說「把 target 從 70% 降到 40%,HPA 反應就快一倍」,哪裡錯?他真正買到了什麼?
+
+## 2026-10-29 | VPA Auto 實際行為(驅逐時間 / 改 Pod 不改 Deployment)
+- 正解:Recreate / Auto 模式由 VPA Updater 決定何時驅逐(每分鐘檢查,Pod requests 超出建議範圍就砍),時間點不受控,可能落在流量尖峰。300s 是 HPA scaleDown stabilization window,跟 VPA 無關。Admission Controller 把建議值寫進新建的 Pod,Deployment template 不變。
+- 判準句:HPA 不看 CPU 只解決「打架」,不解決「什麼時候重建」。驗 VPA 生效看 `kubectl get pod -o yaml` 的 requests 與 `vpaUpdates` annotation;`describe vpa` 只是建議值。
+- s52 由來:F volley「HPA 看 RPS,VPA 開 Auto 完全沒問題?」同意;追問尖峰何時砍答「9 點過 5 分鐘」;「deploy YAML 沒變 = 沒生效?」不確定,二選一後答對。
+- 下次抽考:客戶 VPA Auto + HPA 看 queue 長度,週一早上 Pod 一波重建、502 飆高。問:是誰砍的、去哪裡看證據?(Updater / Events `EvictedByVPA`)

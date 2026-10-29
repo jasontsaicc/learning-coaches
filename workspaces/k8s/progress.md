@@ -7,15 +7,15 @@
 
 ## Meta
 
-- session_count: 51
+- session_count: 52
 - last_weekly_review: 49(WR10 於 s49 課尾壓縮版:NetworkPolicy DNS supported / RBAC watch 結論對判準錯 / Secret 分層冷測過)
-- last_session_date: 2026-10-28
+- last_session_date: 2026-10-29
 - warm_up_classification: mid
 - target_role: 雙目標 NVIDIA Pre-Production Engineer + AWS ProServe DC Cloud Architect,兼顧台廠資深 SRE(2026-09-30,curriculum-plan §12);投遞最快 2027-01
 
 ## Current Session breakpoint
 
-無(s51 正常收工)。下一堂:P3 C-4 VPA(圖+情境題,無 lab,預習頁 s52-vpa-layers.html 已出)→ 再下一堂 C-3b KEDA lab(curriculum-plan §12.6);P2a/P2b Phase Gate 仍待考,學員挑時機;registry 超過 15 張上限,開場先 triage;每堂無 G(§12.4)。
+無(s52 正常收工)。下一堂:P3 C-3b KEDA lab(curriculum-plan §12.6);P2a/P2b Phase Gate 仍待考,學員挑時機;registry 已於 s52 triage 到 15 張;每堂無 G(§12.4)。
 
 <!-- schema §3 = 恰好一行。敘事與次要待辦寫 session-log.md,長效教練紀律寫 session-log.md
      「教練執行紀律」,不要在這裡疊舊堂。s32 及更早斷點原文見 session-log.md 對應堂,
@@ -75,6 +75,7 @@ weak-topic flags(2026-08-03 啟用,P2a 帶 flag 前進、gate 未考,學員決�
 - P3 C-1 scheduler(邊界 / FailedScheduling 判準 / preemption): low-med (s49)
 - P3 C-2 調度約束(taint/affinity 專用節點、antiAffinity vs topologySpread、rollout 卡死): low(supported) (s50)
 - P3 C-3 HPA(按比例擴 / 分母 requests / 盲區 / scaleDown 300s 窗口): low-med (s51)
+- P3 C-4 VPA(updateMode / limit 等比例 / HPA 分母衝突 / 生產用 Off): low(supported) (s52)
 - P1 kubectl debug / ephemeral container: low (2026-09-01,ad hoc 非主線,未經 gate)
 
 ## Scorecard history
@@ -115,155 +116,61 @@ weak-topic flags(2026-08-03 啟用,P2a 帶 flag 前進、gate 未考,學員決�
      interval 2 = +2 天臨時複習格(口頭型 resolved,過了才進 3/7/14)。
      unresolved-session-count 於 2026-07-10 遷移時依複測紀錄初始化(近似值)。 -->
 
-- 2026-10-16 | Pending 時 FailedScheduling 是誰寫的 | 預測「scheduler 活著但全 node 不合」會 Events <none> ✗,實驗 From default-scheduler 推翻 | Event 由 scheduler 寫;有 = scheduler 活著被規則擋,<none> = 查 scheduler 本身 | unresolved | 3 | 2026-10-19 | 0
-- 2026-10-16 | 讀 FailedScheduling 判斷加 node 有沒有用 | `1 taint, 2 Insufficient memory` 答加 node 沒用(被 cp taint 行帶走) | 找 Insufficient = 容量問題;cp taint 行每次都在是背景 | unresolved | 7 | 2026-10-27 | 0
-- 2026-10-16 | unschedulable Pod 何時被重排 | F 答「有個機制會去檢查」;s50 冷測結論對、因為答「會重試」 | 精準版:冷宮等叢集事件(node 加入、Pod 被刪)喚醒,不是輪詢 | unresolved | 3 | 2026-10-23 | 1
-- 2026-10-16 | RBAC `-w` 需要 watch 的判準 | 結論對,因為答「風險不同」 | verb 由 API 請求形狀決定,不看指令名字 | unresolved | 3 | 2026-10-19 | 0
-- 2026-10-12 | 誰是 bootstrap 元件不能依賴自己(calico-node hostNetwork / apiserver 靠 kubelet) | calico-node 為何用 node IP:「不知道該怎麼說」→ 縮小後答出 Pod IP 由 Calico 給,仍接不到「Calico 不能等自己」,直給 | 「負責建立 X 的元件不能依賴 X」規則未內化;apiserver 那題(B kubelet)二選一答對 | unresolved | 3 | 2026-10-15 | 0
-- 2026-10-12 | static pod manifest 被移走 → Pod Pending 的因果 | 預測 Pending ✅,因為答「找不到設定 yaml」 | 沒接到 kubelet 停 scheduler static pod → 沒人填 nodeName;Pending + Events 空 = 懷疑 scheduler 本身 | unresolved | 3 | 2026-10-19 | 1
-- 2026-10-12 | kubeadm 職責邊界 | 總結成「安裝每個節點需要的網路、憑證、依賴」 | 依賴是 Ansible 裝的、Pod 網路是 CNI;kubeadm 只產 certs/kubeconfig/static pod manifest 後退出 | unresolved | 3 | 2026-10-15 | 0
+- 2026-10-29 | VPA Auto 實際行為(驅逐時間 / 改 Pod 不改 Deployment) | F 追問尖峰會不會被砍答「9 點過 5 分鐘」(混成 HPA scaleDown 300s);「deploy YAML 沒變 = 沒生效?」答不確定,縮成二選一才答對 | Updater 自己決定驅逐時間,差距超出範圍就砍,可能落在尖峰;Admission 寫 Pod 不寫 Deployment,生效看 get pod | unresolved | 3 | 2026-11-01 | 0
+- 2026-10-16 | 讀 FailedScheduling 判斷加 node 有沒有用 | `1 taint, 2 Insufficient memory` 答加 node 沒用(被 cp taint 行帶走) | 找 Insufficient = 容量問題;cp taint 行每次都在是背景 | unresolved | 14 | 2026-11-12 | 0
 - 2026-10-12 | 下 kubectl 前先確認在跟哪個叢集講話 | bastion 上兩次 `kubectl get nodes` 打到 PROD atlas-aws-billing-prod(本意查 lab),第二次在教練提醒後 | prompt 雖顯示 context 但未看;唯讀無損,換成 delete/drain 即事故。對策:lab kubectl 一律在 cp session 跑 | unresolved | 3 | 2026-10-15 | 0
-- 2026-10-06 | SG inbound 開在誰身上(listen 方 vs 發起方) | 6443 忘了 port 號;答「6443 三台都開,因為要互相溝通」;10250 二選一選「只開 cp-1,來源 worker」 | 用「誰發起連線」決定 inbound,沒看「冒號後面的 port 在誰身上 listen」;apiserver 只在 cp-1,kubelet 在每台。s42 同日:bastion→cp:22 SSH 事後解釋,首答只給 port,一階提示後答「listen 的 cp SG 過濾進來流量」✅ 帶判準;換皮 cp→bastion 給對 port+source(SG 優於 IP),未明講改哪個 SG(supported,未冷測) | unresolved | 3 | 2026-10-09 | 0
-- 2026-09-30 | terraform 哪一步發現錯誤(validate / plan / apply) | 假 AMI 字串答「plan 發現」(兩次);換皮 data "aws_ami" 查不到又答「apply」 | plan 只 refresh 既有資源 + 讀 data 區塊;新 resource 參數要 apply 才送 AWS。學員二分法只有「plan 打不打 API」,沒分 data 查詢 vs resource 建立。10-06:預測 data 查 subnet「apply 才打」✗ → 假 subnet id 實驗 plan 報錯自己推翻;換皮 t3.meduim 打錯字答 apply + 因為 resource ✅(supported,未冷測) | unresolved | 3 | 2026-10-09 | 1
 - 2026-09-30 | node Ready 是誰回報的(kubelet heartbeat 走 6443) | SG 缺 IPIP 預測 nodes NotReady,理由「etcd 和 calico 沒開」;提示後改答「metrics-server」 | Ready = kubelet → apiserver heartbeat,與 etcd(cp 本機)/ CNI 資料面 / metrics-server 無關;P0 symptom→棒次地圖留存不足 。10-12 再現:cp NotReady 答「node 跟 api server 不通」✗(那是 Unknown);直給 CNI 缺 → kubelet 回報 Ready=False → not-ready taint → coredns Pending,describe node 實證 | unresolved | 3 | 2026-10-15 | 2
 - 2026-09-29 | 啟動前被擋 vs 啟動後自己死(CreateContainerConfigError vs CrashLoopBackOff) | 原版 nginx + runAsUser 1000,預測 STATUS 答 CreateContainerConfigError(同時自己填 kubelet 放行) | 沒用 STATUS 定位死在哪一棒:kubelet 放行 = 容器已啟動,綁 port 80 失敗 = 程序退出 = CrashLoopBackOff;反證後改對(supported),/root 寫檔換皮帶因為 ✅ | unresolved | 3 | 2026-10-02 | 0
-- 2026-09-29 | PSS 只檢查 Pod 不檢查 Deployment(產生者找錯人) | G 題 Deployment apply configured 但新 Pod 不出現,根因沒講出「PSS 擋的是 RS controller 建 Pod 的請求」;先查 rs 的因為只給「看不出來」 | 產生者 vs 消費者 + 成功訊息不保證生效 兩張舊卡同題重現 | unresolved | 3 | 2026-10-12 | 1
-- 2026-09-26 | app 為什麼要 root | 猜 nginx 要 root 是因為「會改 kernel 的路由表」 | 把一般 app 要 root 的普通原因(綁 <1024 port、寫 root 擁有的目錄)跟 node 系統元件(CNI/kube-proxy 要 NET_ADMIN)混為一談 | unresolved | 3 | 2026-09-30 | 0
-- 2026-09-25 | container 存取兩道門(namespace 視野 vs UID 身分) | 「UID 0 沒翻牆讀得到 node 的 /etc/shadow 嗎」答「可以,因為是 root」 | RP2 兩道獨立檢查混成一步(同 IRSA trust vs permission 形狀):只看 UID 欄,漏 mnt ns 決定看不看得到 | unresolved | 3 | 2026-09-28 | 0
 - 2026-09-18 | IRSA trust vs permission policy | 首答「擋在 B policy」;誘答「改 SA annotation 就能讀別人的 S3」同意;F 段又同意「STS 看 policy 有無 s3:GetObject 就放行」 | RP2 驗身分(trust policy 比 JWT sub)與授權(permission policy)混成一步;annotation 只是申請單 | unresolved | 7 | 2026-10-16 | 0
-- 2026-09-13 | 權限爆炸半徑跑錯判準軸 | 評 SA 外洩痛不痛時先看 ns 廣度(漏 resource 深度);評 secret 危險度跑到 base64 存法軸,不是「能否離開 RBAC 管轄」軸 | RP3 判準軸選錯:該問「憑證外洩後攻擊者碰得到的 ns×resource×verb 上限,以及能否跳出 RBAC 管轄」 | unresolved | 3 | 2026-10-12 | 3
-- 2026-06-18 | YAML validation | `matchLabels` 打成 `metaLabels` | 不讀 strict decoding error;驗證在 API Server | unresolved | 7 | 2026-06-30 | 2
 - 2026-06-22 | probe 職責 | 把 readiness 的「準備好接流量」塞給 liveness | 兩種 probe 失敗後動作不同(重啟 vs 切流量) | unresolved | 7 | 2026-07-10 | 1
-- 2026-06-23 | ImagePullBackOff | image 打成 `ngimx:1.25`,apply 過卻卡住 | 驗證有邊界:repo 存不存在要 kubelet 拉了才知 | unresolved | 7 | 2026-07-03 | 1
 - 2026-06-27 | ClusterIP/kube-proxy/DNAT 全鏈(謎題B) | 「封包先去 ClusterIP 拿 IP」+ 手/名單混淆 | ClusterIP 不是地方;改寫在出發地本機 kernel | resolved | 14 | 2026-07-13 | 0
 - 2026-06-28 | 叢集 DNS 排障 | nslookup NXDOMAIN 差點誤判 CoreDNS 壞 | 排障第一刀「先用 FQDN 二分」沒成肌肉 | unresolved | 3 | 2026-07-10 | 3
-- 2026-07-03 | dry-run 兩層 + Service port | `--dry-run=client` 綠燈騙人;port/targetPort 靜默不通 | strict decoding 在 API Server 不在 client | unresolved | 3 | 2026-07-17 | 3
-- 2026-07-14 | 規則/狀態/資料 三分類(W2 家族 pattern 卡,M2 追蹤用) | conntrack 初分類答「規則」;etcd 未自答 | 規則/狀態/資料判準沒成反射 | unresolved | 3 | 2026-07-22 | 1
 - 2026-07-06 | L4 vs L7 | 記成場景標籤(叢集內=L4、外部=L7) | 本質是轉發決定要讀到哪層資訊 | unresolved | 3 | 2026-07-22 | 3
-- 2026-07-17 | NetworkPolicy 出廠全通 | 預測「陌生 Pod 連不到 db」,實測連得到 | 出廠全通;namespace 不做網路隔離 | unresolved | 3 | 2026-07-23 | 1
-- 2026-07-23 | 跨 node 走路由表不是 iptables(層級混淆家族) | 問跨 node 第一個指令答 iptables,縮小重問答 resolv.conf | 改寫層(NAT)與轉送層(routing)混淆 | unresolved | 7 | 2026-09-10 | 0
-- 2026-07-23 | kube-proxy 不在 Pod 啟動路徑上 | 把 kube-proxy 列為 kubelet 建 Pod 三件事之一 | 控制路徑 vs 資料路徑混淆 | unresolved | 3 | 2026-08-07 | 1
-- 2026-07-23 | 只給結論不給判準(pattern 卡,升級追蹤) | 同堂三次只給結論不 show work;2026-09-08 續犯(「因為是 get」=複述觀察非判準);09-25 續犯(「B 因為」後空白) | 輸出習慣不是能力;面試官無法區分會與猜對 | unresolved | 3 | 2026-09-24 | 7
-- 2026-07-17 | default-deny 後的分層(DNS 層 vs 連線層) | 只答「連線不到」,不分辨死在 DNS 層還是連線層 | 層級混淆;兩步都被鎖時不問哪步先發生 | unresolved | 3 | 2026-10-19 | 2
-- 2026-07-28 | veth 誤記「跨 node 連線」 | 答「veth 是跨 node 的網卡連線」 | veth 只管 Pod netns 到 root netns 那段 | unresolved | 7 | 2026-08-10 | 1
-- 2026-07-28 | iptables=一棟樓(nat 表/filter 表) | 幻影站 4 + 誘答「DNAT 做完才進 iptables」 | 把 iptables 當一站,不知 DNAT 就在 nat 表裡 | unresolved | 3 | 2026-07-31 | 0
-- 2026-07-20 | CNI 基本合約 vs 選配 | 合約三件事兩輪講不出,把 NetworkPolicy 混進合約本體 | 新教內容首輪未固化 | unresolved | 3 | 2026-07-23 | 0
-- 2026-07-19 | 兩張獨立名單(3-2 坑二) | 「只開 backend ingress,frontend curl 通嗎」答「可以吧」 | 規則剛教完沒跑兩關檢查程序,憑感覺猜 | unresolved | 3 | 2026-07-22 | 0
-- 2026-07-19 | NetworkPolicy 靜默無效(四引擎第四行) | Transfer 只給零件不組裝整條鏈 | 先跳結論等追問才補深度 + 隱性會 | unresolved | 3 | 2026-07-22 | 0
-- 2026-07-07 | Ingress YAML schema | `backend.service` 寫成字串 + `pathType: prefix` 小寫 | service 是 object 型別;enum 大小寫敏感 | unresolved | 3 | 2026-07-10 | 1
+- 2026-07-23 | 只給結論不給判準(pattern 卡,升級追蹤) | 同堂三次只給結論不 show work;2026-09-08 續犯(「因為是 get」=複述觀察非判準);09-25 續犯(「B 因為」後空白) | 輸出習慣不是能力;面試官無法區分會與猜對 | unresolved | 7 | 2026-11-05 | 7
 - 2026-07-07 | Ingress 404 排障 | 差點改沒壞的規則;真兇是半死的 port-forward | 規則層全綠時兇手在你測試經過的那層 | parked(2026-07-16 ROI 篩:Q1 半 yes,但「port-forward 半死」是 lab 夾具產物、prod 不長這樣;同一判準已三種問法重問三次=題目壞掉。判準留檔備查,不再抽) | - | - | 3
 - 2026-07-09 | no-Host→404 的 why | 結果預測對,講不出 curl 自動填 Host | 會用會預測不等於會講 why(隱性會) | resolved(2026-07-16 ROI 篩:Q1=no,curl 填 header 是 tool trivia,面試不考;學員答「沒帶 domain → Ingress 對應不上」= 機制正確,教練題目壞掉不是學員沒懂。結案) | - | - | 1
-- 2026-08-04 | 分層判準:關掉 API Server 還在不在(工具卡,層級混淆家族的解藥) | s25 冷測 4/5,cgroup memory limit 誤放右欄 | 同名詞的兩個分身(宣告 vs 執行體)沒分開 | unresolved | 3 | 2026-08-08 | 1
-- 2026-08-05 | 誰把 limit 寫進 cgroup、什麼時候寫 | 答「scheduler 嗎」 | 控制面與 node 上元件職責混淆 | unresolved | 3 | 2026-08-08 | 0
-- 2026-09-04 | 判準跑錯軸:RBAC 題答成 NetworkPolicy | 跨 ns RoleBinding 題結論對,理由給 NetworkPolicy | 物件存在範圍 vs 網路隔離兩軸混用 | unresolved | 3 | 2026-09-07 | 0
-- 2026-09-03 | RWO 的 Once 數的是 node 不是 Pod | 共用 PVC 誘答答「RWO 應該是 POD」 | 把 volume 掛載限制記在 Pod 層,實際在 node 層 | unresolved | 3 | 2026-09-06 | 0
-- 2026-08-05 | LVM 三層 + 擴容四步(學員課後自己要求復習,foundational pull) | Q1/Q2 結論皆對但兩題都只給結論 | 判準句慣性省略;LVM 的 PV 與 k8s 的 PV 同名不同物 | unresolved | 3 | 2026-08-08 | 0
-- 2026-08-05 | PV ↔ PVC 是 1:1 獨佔 | 自曝「我以為是 PV 1:多」 | 「一份儲存給多人用」的直覺貼錯層 | unresolved | 3 | 2026-08-08 | 0
-- 2026-08-04 | container 可寫層在硬碟不在 memory(overlayfs 三層) | 「process 死掉檔案去哪」答「存在 memory」 | 把 ephemeral 誤等於 in-memory | unresolved | 3 | 2026-08-07 | 0
-- 2026-08-04 | emptyDir 綁 Pod 不綁 container | 「emptyDir 撐不撐得過 kill 1」答「不在了」 | 三層階梯中間一階沒有實體錨點 | unresolved | 3 | 2026-08-07 | 0
-- 2026-08-06 | 排障:restart 排在採證前面(MTTR / 治標 vs 治本第三次同形狀) | 三台 node NotReady,三選一選 C 直接 restart | 「先試試」不是診斷;restart 清掉症狀也清掉證據 | unresolved | 3 | 2026-08-09 | 0
-- 2026-08-06 | PID 1 的 signal 保護(kernel 層,新知識卡) | 未答錯,實驗意外撞出,全程教練驅動未經抽考 | 需抽考驗留存 | unresolved | 3 | 2026-08-09 | 0
-- 2026-08-06 | Pod 不會「重啟」,只會被丟掉重建 | 答「pod 會重啟 or 調節 編排」,講不出誰在什麼條件動手 | 把 Pod 當會重啟的長壽物件而非可拋棄單位 | unresolved | 3 | 2026-08-09 | 0
-- 2026-08-06 | 持久性看「掛在哪」不看名字(兩個分身判準第四次換皮) | 未答錯,`/proc/mounts` 撞出 emptyDir 在真磁碟、PVC 在 tmpfs | `PersistentVolume` 這名字沒有保證力 | unresolved | 3 | 2026-08-09 | 0
+- 2026-08-06 | 排障:restart 排在採證前面(MTTR / 治標 vs 治本第三次同形狀) | 三台 node NotReady,三選一選 C 直接 restart | 「先試試」不是診斷;restart 清掉症狀也清掉證據 | unresolved | 3 | 2026-11-01 | 1
 - 2026-08-06 | EKS 儲存拓撲:EBS AZ-scoped / nodeAffinity / volumeBindingMode(**學員主動提問引出**,ProServe 高權重) | 未答錯;Transfer 過但屬當堂鷹架下複述 | 需冷測驗留存 | unresolved | 3 | 2026-08-09 | 0
-- 2026-08-20 | 判準給完當場套用不上(pattern 卡,教學法層級) | 同堂兩次,判準給完 30 秒內套用不上 | 判準被當成聽過的一句話,不是拿來用的工具 | unresolved | 3 | 2026-08-23 | 0
-- 2026-08-28 | StatefulSet 每個 replica 一份獨立資料(不是共用一份) | 3 開到 5 問幾份資料,答「still is 3 data」 | 把「每人一份儲存」誤讀成「大家共用一份」 | unresolved | 3 | 2026-09-04 | 0
 - 2026-08-28 | 排障兩步:先鎖 fault domain 再查內部(MTTR 核心卡) | 同堂兩次先跳單一成員內部狀態 | 沒先問「這條路徑上有幾個東西」 | unresolved | 3 | 2026-08-31 | 0
-- 2026-09-01 | 建 Pod 的權限 vs Pod 裡程式呼叫 API 的權限(誰用誰的身分) | 答「不會,因為根本沒有到建立 pod」 | controller 建 Pod 與 Pod 呼叫 API 誤用同一身分 | unresolved | 3 | 2026-09-04 | 0
 - 2026-09-08 | RBAC 動詞看有無物件名字(get vs list vs watch) | Role 只給 get,預測 `kubectl get pods` 會成功,實測 403 cannot list | 把 kubectl 指令名字當成 RBAC 動詞 | parked(2026-09-15 ROI 篩:Q1 no,403 訊息本身就寫出 verb `cannot list`,背對照表 ROI 低;學員決定退役,判準留檔備查) | - | - | 0
-- 2026-09-08 | 成功訊息不保證做到你以為的事(pattern 卡,ops 判準,同堂三次) | `-n ALL` 查了不存在的 ns、`--as=$SA` 空變數沒假扮、`patched (no change)` | 不先驗證指令是否真的生效就改結論 | unresolved | 3 | lab 中即測(2026-09-15 起不排卡) | 0
-- 2026-09-08 | `auth can-i --list` 不加 `--as` 問的是自己 | chunk 3 驗收給裸指令,無 `--as` 無 `-n`(同堂第二次);09-15 首答「`--as` 用 role 去模擬」 | 排障要問壞掉的身分,預設問的是自己;Role 是權限清單不是身分 | unresolved | 3 | C-5 引子題 | 0
 - 2026-09-08 | `--list` 三分判準(只剩噪音 / 缺 resource / 缺動詞) | 首答把原本 403 訊息當成 `--list` 輸出,且用「會 403」當判準(兩種都 403) | 兩個不同指令的輸出混為一談 | parked(2026-09-15 ROI 篩:Q1 no,面試不考讀 `--list` 輸出;學員決定退役,判準留檔備查) | - | - | 0
-- 2026-10-13 | NetworkPolicy 只管 podSelector 選到的 Pod | 答「有一條 NP 被套用就以這條為主」,提示後自答;s48 換皮(prometheus 被 Ingress-only policy 選中,它打 web)答「不會通,因為被選中了」✗,方向提示後 ✅ | 把 policy 當 ns 級開關 / 選中就全擋,不看 policyTypes 方向 | unresolved | 3 | 2026-10-19 | 1
 - 2026-10-13 | default-deny 先死在 DNS 層 | 答「全部擋住」,提示後答連線層,連錯兩次直給;s48 F 段誘答「egress 只放 orders:5432 就能連」直接同意,Resolving 提示後仍答查 db ingress,二選一後自答補 53 | 沒把 DNS 查詢當成第一個 egress 封包 | unresolved | 3 | 2026-10-19 | 1
-- 2026-10-13 | NetworkPolicy port 看 DNAT 後的 Pod port | ingress 先答 80;egress 又答 80,實驗 timeout 後自答 DNAT | Service port 被當成一路帶到 gate | unresolved | 3 | 2026-10-16 | 0
-- 2026-10-13 | from 裡 `-` 的 AND/OR | B(OR)答「只要 ns=netpol-lab 就可以」,學員累直給;s47 A 預測 ✅ 帶因為、B 三顆全通結論對,壓測 y(ns other、app=prometheus)答「通,因為符合 app=prometheus」✗;s48 實測 y=FAIL 推翻,G 根因一句到位、AND 修法寫對(supported),追問兩個 `-` 後果只答「規則聯集」 | OR 要逐項算再相加;單獨 podSelector = policy 所在 ns;OR 的 blast radius 講不具體 | unresolved | 3 | 2026-10-19 | 2
 
-- 2026-10-16 | NetworkPolicy stateful:回程封包靠 conntrack 放行 | prometheus 被 Ingress 全擋,預測它 curl web 拿不到 response(timeout),實測 200 | 把 policy 當成逐封包過濾,不知規則只檢查連線第一個封包 | unresolved | 3 | 2026-10-19 | 0
-- 2026-10-20 | nodeAffinity 只有軟性 | 以為 nodeAffinity 沒對到就去別台、nodeSelector 才硬;F teach-back 又講成「Score 加分」,追問後改口 required | required=Filter 硬擋 Pending、preferred=Score;nodeSelector=required 簡化版 | unresolved | 3 | 2026-10-23 | 0
-- 2026-10-20 | maxUnavailable 讀成不能砍 | surge=0/unavailable=1 答「跑不動,不能新增也不能砍」;填空答最少剩 1 顆(應 2) | maxUnavailable=可少幾顆,最少在跑 = replicas − maxUnavailable | unresolved | 3 | 2026-10-23 | 0
-- 2026-10-20 | antiAffinity 能表達數量 | F 誘答「required antiAffinity zone 可把 6 副本平均 3 AZ」答「也行」,反證後想改成「no 3 pods」 | required antiAffinity 只有是非(每 domain 最多 1),數量只能 topologySpread maxSkew | unresolved | 3 | 2026-10-31 | 0
-- 2026-10-20 | FailedScheduling 行對應修法 | `didn't match affinity/selector` 答修 toleration;`untolerated taint` 答加 label(兩向皆反,s49 同錯) | 照訊息關鍵字:taint 行→Pod 加 toleration;affinity/selector 行→node 加 label 或改 selector;Insufficient→容量 | unresolved | 7 | 2026-11-04 | 1
 - 2026-10-28 | HPA 超標就 +1 顆 | 1 顆 250m/requests 200m/target 50% 預測連答「2 顆」「超過就多建立一 pod」 | HPA 按比例 ceil(current×current/target) 一次跳到需要的顆數(lab 實測 1→3→5) | unresolved | 3 | 2026-10-31 | 0
-- 2026-10-28 | 調低 target 讓 HPA 變快 | F 誘答「target 50%→30% 解決前 1 分鐘 5xx」答「應該算對」 | 盲區延遲不變;調低 target 只是平常多開 Pod 買緩衝(延遲 vs 緩衝兩個變數) | unresolved | 3 | 2026-10-31 | 0
 
 ## Spaced-repetition queue
 
 <!-- PROGRESS-SCHEMA §8 = item-ref | type | interval | next-review-date | status。
      檢視序:過期優先、interval 小者優先;step A 每堂 ~2 題上限。
      每張卡的重測歷史與下次抽考題在 mistake-notes.md;term 卡到期日在 term-registry.md。 -->
-- mistake:FailedScheduling是scheduler寫的 | mistake | 3 | 2026-10-19 | active
-- mistake:Insufficient才是容量問題 | mistake | 7 | 2026-10-27 | active
-- mistake:unschedulable等事件喚醒 | mistake | 3 | 2026-10-23 | active
-- mistake:RBAC-watch看請求形狀 | mistake | 3 | 2026-10-19 | active
+- mistake:Insufficient才是容量問題 | mistake | 14 | 2026-11-12 | active
 
 - topic:P2a-chunk3-NetworkPolicy | topic | 3 | 2026-10-19 | active
 - mistake:IRSA-trust-vs-permission | mistake | 7 | 2026-10-16 | active
-- mistake:兩道門(namespace視野vsUID身分) | mistake | 3 | 2026-09-28 | active
-- mistake:YAML-validation | mistake | 3 | 2026-08-08 | active
-- mistake:ImagePullBackOff | mistake | 3 | 2026-08-09 | active
-- mistake:dry-run-兩層 | mistake | 3 | 2026-08-09 | active
-- mistake:三分類-家族卡 | mistake | 3 | 2026-07-22 | active
 - mistake:L4-vs-L7 | mistake | 3 | 2026-07-22 | active
-- mistake:NetworkPolicy-出廠全通 | mistake | 3 | 2026-07-23 | active
-- mistake:default-deny-分層(DNS vs 連線) | mistake | 3 | 2026-10-19 | active
-- mistake:跨-node-走路由表 | mistake | 3 | 2026-08-13 | active
-- mistake:blackhole路由與本機/32 | mistake | 3 | 2026-08-13 | active
 - mistake:跨-node-走路由表-舊記錄 | mistake | - | 2026-08-09 | retired(s27 已執行,由上面的新列接手)
-- mistake:分層判準-關掉APIServer還在不在 | mistake | 3 | 2026-08-08 | active
-- mistake:誰把limit寫進cgroup(kubelet不是scheduler) | mistake | 3 | 2026-08-08 | active
-- mistake:LVM三層+擴容四步 | mistake | 3 | 2026-08-08 | active
-- mistake:PV↔PVC是1:1獨佔 | mistake | 3 | 2026-08-08 | active
-- mistake:可寫層在硬碟不在memory(overlayfs) | mistake | 7 | 2026-08-13 | active
-- mistake:emptyDir-綁Pod不綁container | mistake | 7 | 2026-08-13 | active
-- mistake:restart排在採證前面(MTTR) | mistake | 7 | 2026-08-27 | active
-- mistake:scheduler當萬用嫌犯 | mistake | 3 | 2026-08-13 | active
-- mistake:產生者vs消費者(排障找誰) | mistake | 3 | 2026-08-13 | active
-- mistake:對照組判準(同層有好有壞) | mistake | 3 | 2026-08-23 | active
-- mistake:active≠還在幹活(健康檢查三層) | mistake | 3 | 2026-08-27 | active
-- mistake:DeadlineExceeded語義 | mistake | 7 | 2026-08-27 | active
-- mistake:PID1-signal保護 | mistake | 3 | 2026-08-09 | active
-- mistake:Pod不會重啟只會被丟掉重建 | mistake | 3 | 2026-08-09 | active
-- mistake:持久性看掛在哪不看名字(tmpfs) | mistake | 3 | 2026-08-09 | active
+- mistake:restart排在採證前面(MTTR) | mistake | 3 | 2026-11-01 | active
 - mistake:EKS儲存拓撲(EBS AZ/nodeAffinity/volumeBindingMode) | mistake | 3 | 2026-08-09 | active
-- mistake:veth-誤記跨node連線 | mistake | 7 | 2026-08-10 | active
-- mistake:iptables-一棟樓 | mistake | 3 | 2026-08-06 | active
-- mistake:kube-proxy-不在-Pod-啟動路徑 | mistake | 3 | 2026-08-07 | active
-- mistake:判準給完當場套用不上(pattern) | mistake | 3 | 2026-08-31 | active
-- mistake:StatefulSet每個replica一份獨立資料 | mistake | 7 | 2026-09-10 | active
-- mistake:RWO數的是node不是Pod | mistake | 3 | 2026-09-06 | active
-- mistake:判準跑錯軸(RBAC答成NetworkPolicy) | mistake | 3 | 2026-09-07 | active
 - mistake:先鎖fault-domain再查內部(MTTR) | mistake | 7 | 2026-09-10 | active
-- mistake:只給結論不給判準(pattern) | mistake | 3 | 2026-09-24 | active
-- mistake:建Pod的權限vs呼叫API的權限(誰用誰的身分) | mistake | 3 | 2026-09-04 | active
-- mistake:NetworkPolicy-靜默無效 | mistake | 3 | 2026-07-31 | active
-- mistake:CNI-合約三件事 | mistake | 3 | 2026-07-23 | active
-- mistake:兩張獨立名單 | mistake | 3 | 2026-08-06 | active
+- mistake:只給結論不給判準(pattern) | mistake | 7 | 2026-11-05 | active
 - term:conntrack | term | 7 | 2026-07-26 | active
 - mistake:probe-職責 | mistake | 3 | 2026-08-27 | active
 - mistake:DNS-排障第一刀 | mistake | 3 | 2026-07-10 | active
-- mistake:Ingress-YAML-schema | mistake | 3 | 2026-07-10 | active
 - term:(07-10 到期各卡) | term | - | 2026-07-10 | active(見 term-registry.md)
-- mistake:ClusterIP-全鏈(謎題B) | mistake | 14 | 2026-07-13 | active(resolved,考精度)
 - mistake:RBAC動詞-get-vs-list | mistake | - | 2026-09-11 | retired(2026-09-15 ROI 篩)
-- mistake:成功訊息不保證生效(pattern) | mistake | 3 | 2026-09-11 | active(2026-09-15 起不排卡,lab 中即測)
-- mistake:--list-要加---as | mistake | 3 | 2026-09-11 | active(09-15 supported 答對 A 框;C-5 引子題冷問)
 - mistake:--list-三分判準 | mistake | - | 2026-09-11 | retired(2026-09-15 ROI 篩)
-- mistake:權限爆炸半徑跑錯判準軸 | mistake | 3 | 2026-10-12 | active(併入 C-5 IAM policy 收斂抽,不另開複習堂)
 - topic:C-6-Secrets(分層+輪替) | topic | 3 | 2026-09-24 | active
 - topic:C-6-PSS(admission 看 YAML / kubelet 看 image user) | topic | 3 | 2026-09-30 | active
 - mistake:啟動前被擋vs啟動後自己死 | mistake | 3 | 2026-10-02 | active
-- mistake:PSS只查Pod不查Deployment | mistake | 3 | 2026-10-12 | active
-- mistake:app為什麼要root(port<1024/root目錄) | mistake | 3 | 2026-09-30 | active
 - topic:C-4-RBAC-最小權限+等價升權 | topic | 3 | 2026-09-16 | active(4b create pods=借SA 僅 supported,冷測換皮;併入 C-5)
 - topic:P3-C2-調度約束 | topic | 3 | 2026-10-23 | active
-- mistake:nodeAffinity只有軟性 | mistake | 3 | 2026-10-23 | active
-- mistake:maxUnavailable讀成不能砍 | mistake | 3 | 2026-10-23 | active
-- mistake:antiAffinity能表達數量 | mistake | 3 | 2026-10-31 | active
-- mistake:FailedScheduling行對應修法 | mistake | 7 | 2026-11-04 | active
 - topic:P3-C3-HPA | topic | 3 | 2026-10-31 | active
 - mistake:HPA超標就+1顆 | mistake | 3 | 2026-10-31 | active
-- mistake:調低target讓HPA變快 | mistake | 3 | 2026-10-31 | active
+- mistake:下kubectl前先確認context | mistake | 3 | 2026-10-15 | active
+- mistake:node-Ready是kubelet回報 | mistake | 3 | 2026-10-15 | active
+- mistake:default-deny先死在DNS層 | mistake | 3 | 2026-10-19 | active
+- topic:P3-C4-VPA | topic | 3 | 2026-11-01 | active
+- mistake:VPA-Auto實際行為 | mistake | 3 | 2026-11-01 | active
 
 ## Curiosity branch
 
