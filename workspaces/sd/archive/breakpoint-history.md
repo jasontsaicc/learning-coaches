@@ -98,3 +98,20 @@
 三指標 S44 讀數:argument 🟡(page 句最小單位完整;兩球開局皆裸/棄)/ ops ❌(最小單位過但全程 max scaffold,不算 unprompted;第 6+ 記)/ capacity 未測。連續計數:全部 0。
 
 清帳收完 → 主衝刺:Tier 1 剩 5 題(Day 33 Notification System 起)每題一場 mock(產業情境 + 4-step + AWS 映射),三指標當評分維度續盯:S42 讀數 argument 🟡 / ops ❌(第 6 記)/ capacity 🟡。Gauntlet 專門 drill 與 parked PoC 全部取消。
+
+
+## S52–S55 breakpoint 原文(2026-10-29 S56 收帳時遷入,一字未改)
+
+**Day 35 Chat System 1v1 收(S52 G,2026-10-13)**:開場短 G 換皮(叫車 driver↔rider)A/B 兩條路 unprompted 走對;catch-up 用 timestamp 回退、counter scope/owner 冷回憶卡住,Redis failover 支線由 coach 挖太深後停車。學生拍板快收、直進下一題。
+
+P3 / Chat System(Day 36)/ chunk 1 group fan-out ✅(S53 2026-10-14,supported):Recall 自講兩表 + 500→50;10 萬人 capacity 先猜後算(500k ✅、PUBLISH 漏 ×5);server 訂閱 group 由 coach 教;「成員表省掉」錯 → 修成「查的時機換了」,答「成員改變時」(半對,連線時由 coach 補)。
+
+P3 / Chat System(Day 36)/ chunk 2 Presence heartbeat ✅(S54 2026-10-25,supported,最小單位):暖身 catch-up 冷測 last_message_id + 不用 timestamp ✅、clock skew 後果「以為收到其實漏」自產;scope 答 user_id ❌ → 反例後「group id 嗎」→ 圖後自講 conversation 單位 + DB 原子 +1(supported)。heartbeat:10 萬/s 自算 ✅;耗電由 coach 給;太長=誤判在線不走推播自產;interval 選擇未 commit(30s + 2-3× timeout 由 coach 給)。學生兩次要求全貌圖(圖先行有效)。
+
+P3 / Chat System(Day 36)/ chunk 2b status propagation ✅(S55 2026-10-27,supported):暖身 s54 interval 條目:兩邊代價重講、未 commit → 改判準「訊息不會漏(DB=truth),壞的是 push 延遲 ≤T」(push 被跳過由 coach 給,學生忘)→ commit N=5s 但理由 30s 也滿足、代價寫成對面那邊 → 第三輪自講 QPS + 15s stale window(學生喊「夠了吧」,coach 停追)。fan-out:拆步後自算 ~2.5k changes/s × 200 = 500k/s ✅;(a)(b)(c) 分類答不出 = coach 先考未教機制(coach 失誤),改 worked example 教 subscribe-on-view(GET snapshot → SUBSCRIBE delta → 離開畫面 UNSUB,接 K8s LIST+WATCH)。Recall 自講 GET→SUB 順序 ✅,但「離線就取消訂閱」❌(應為離開畫面)→ 自己用 LINE 未點開群組類比修正(Transfer,問句收尾)。本場兩次「不會/不知道」= slow-down 訊號。
+
+P3 / Chat System(Day 36)/ chunk 3 Read Receipts ✅(S55 2026-10-27,supported):coach 先教 per-message row vs per-(conv, reader) last_read_seq watermark;msg 57 誰讀過 ✅、「已讀 N 人」= last_read_seq ≥ 57 的成員數 ✅ 一句直述。學生問「是否教太細」→ coach 給 4 積木壓縮圖(seq / store-then-deliver / pub/sub / heartbeat)。
+
+P3 / Chat System(Day 36)/ F Teach Yuki ✅(S55,volley 3 題):monologue presence(heartbeat + pub/sub、view 訂閱、GET 後 SUB)+ read receipts(seq + 計數);漏 timeout T、漏 watermark 怎麼存。Q1 bait「一次沒收到就 offline」抓到 ✅(用詞 retry 修成 tolerate missed heartbeats);Q2 snapshot vs catch-up 表格縮小後填對 ✅;Q3 per-message list 卡住 → 見 s55 registry。
+
+下一場 resume:Day 36 G(含 3AM page + cost 雙問)→ H 收帳。

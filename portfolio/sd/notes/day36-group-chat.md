@@ -35,3 +35,17 @@
 **Deeper:** Q: "What breaks at 100k members?" A: "Per-member fan-out. 100k members × 5 msg/s is 500k lookups per second. So servers subscribe to the group, and the sender publishes once. The cost is a membership lookup at connect time, which we cache."
 
 **Production:** "I'd watch delivery latency by group size and Redis output buffers, since one big group is a hot channel."
+
+## G (S56): 3AM page + cost
+
+**3AM:** "Everyone looks offline, but messages still arrive."
+- Messages OK → WS → DB path is fine. Snapshot says offline → the presence keys are gone, not pub/sub (pub/sub alone only makes status stale).
+- Check `evicted_keys` (maxmemory), a recent Redis failover, WS → Redis write errors. Presence is soft state: fix the write path and keys regrow within one TTL (15s).
+- Alert: online-user count drops >50% in 5 min → page.
+
+**Cost (-30%):** rank knobs by your own numbers first.
+- Presence fan-out 500k/s is 25× heartbeat writes 20k/s → coalesce status updates, or turn off presence in big groups.
+- Heartbeat 5s → longer: check ALB idle timeout first; cost = stale "online" → push skipped, no message loss (DB = truth).
+- Prove reliability held: compare push-delivery latency and missed-push rate before vs after.
+
+🔴 Mistakes: blamed pub/sub for a snapshot symptom (split snapshot vs delta first); listed knobs without ranking by numbers.

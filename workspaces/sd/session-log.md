@@ -13,6 +13,13 @@
      - docs/curriculum-roadmap.md、docs/planning-review.md → workspaces/sd/archive/pre-migration/
      - sd-coach skill 本體         → skills/sd-coach/(curriculum 詳文=references/curriculum-detail.md) -->
 
+## S56(2026-10-29,Day 36 G 快收;Chat System 結束)
+
+- 學生說 chat 卡太久很痛苦,要快收:G 壓成 3AM + cost 兩題,每題一問一答。6/8。
+- 3AM「全部離線、訊息照收」第一刀指 pub/sub(path 錯),(a)/(b) 縮題後答對 snapshot 不受影響;presence key 消失三因由 coach 給。
+- cost:主動提 ALB idle timeout + 「以為在線→不推播、訊息不丟」(S55 忘掉那半撈回);沒用 500k vs 20k 排 knob。
+- 下一場:Metrics/Logging(Day 46)。
+
 ## S55(2026-10-27,Day 36 chunk 2b + chunk 3 + F;G 前停)
 
 - 學到:status fan-out 500k/s(拆步後自算)→ subscribe-on-view(GET snapshot → SUB delta → 離開畫面 UNSUB,接 K8s LIST+WATCH);read receipts = per-(conv, reader) last_read_seq watermark,「已讀 N 人」自答。

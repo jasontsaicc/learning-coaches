@@ -11,9 +11,9 @@
 
 ## Meta
 
-- session_count: 55
+- session_count: 56
 - last_weekly_review: 50 — WR5 於 S50 收帳(Topic 1 @S42 / Topic 2 @S45 / **Topic 3 @S50 學生選「收」**;過期卡 sweep 以 S50 倒帳形式完成:14 → 7 張 + 7 封存)。⚠️ **artifact audit 未跑**(engine WR flow 第 6 步),掛在下一次 WR
-- last_session_date: 2026-10-27
+- last_session_date: 2026-10-29
 - warm_up_classification: (standalone 時期未記錄;學員已 P3,Step 0 模式預設 Exploration)
 
 ## Current Session breakpoint
@@ -23,19 +23,9 @@
      S50 的 coach 自產假訊息事故與應對規則另遷入 coaching-brief.md「Coach 自檢硬規則」。
      本區段 2026-08-19 之前的完整原文封存於 archive/breakpoint-history.md(冷檔,一字未刪)。 -->
 
-**Day 35 Chat System 1v1 收(S52 G,2026-10-13)**:開場短 G 換皮(叫車 driver↔rider)A/B 兩條路 unprompted 走對;catch-up 用 timestamp 回退、counter scope/owner 冷回憶卡住,Redis failover 支線由 coach 挖太深後停車。學生拍板快收、直進下一題。
+**Chat System(Day 35-36)結束(S56 G 快收,2026-10-29)**:G 6/8 測到的維度;Day 37 PoC 依 10-17 re-plan 跳過。S52–S55 的 chunk 紀錄已遷至 archive/breakpoint-history.md。
 
-P3 / Chat System(Day 36)/ chunk 1 group fan-out ✅(S53 2026-10-14,supported):Recall 自講兩表 + 500→50;10 萬人 capacity 先猜後算(500k ✅、PUBLISH 漏 ×5);server 訂閱 group 由 coach 教;「成員表省掉」錯 → 修成「查的時機換了」,答「成員改變時」(半對,連線時由 coach 補)。
-
-P3 / Chat System(Day 36)/ chunk 2 Presence heartbeat ✅(S54 2026-10-25,supported,最小單位):暖身 catch-up 冷測 last_message_id + 不用 timestamp ✅、clock skew 後果「以為收到其實漏」自產;scope 答 user_id ❌ → 反例後「group id 嗎」→ 圖後自講 conversation 單位 + DB 原子 +1(supported)。heartbeat:10 萬/s 自算 ✅;耗電由 coach 給;太長=誤判在線不走推播自產;interval 選擇未 commit(30s + 2-3× timeout 由 coach 給)。學生兩次要求全貌圖(圖先行有效)。
-
-P3 / Chat System(Day 36)/ chunk 2b status propagation ✅(S55 2026-10-27,supported):暖身 s54 interval 條目:兩邊代價重講、未 commit → 改判準「訊息不會漏(DB=truth),壞的是 push 延遲 ≤T」(push 被跳過由 coach 給,學生忘)→ commit N=5s 但理由 30s 也滿足、代價寫成對面那邊 → 第三輪自講 QPS + 15s stale window(學生喊「夠了吧」,coach 停追)。fan-out:拆步後自算 ~2.5k changes/s × 200 = 500k/s ✅;(a)(b)(c) 分類答不出 = coach 先考未教機制(coach 失誤),改 worked example 教 subscribe-on-view(GET snapshot → SUBSCRIBE delta → 離開畫面 UNSUB,接 K8s LIST+WATCH)。Recall 自講 GET→SUB 順序 ✅,但「離線就取消訂閱」❌(應為離開畫面)→ 自己用 LINE 未點開群組類比修正(Transfer,問句收尾)。本場兩次「不會/不知道」= slow-down 訊號。
-
-P3 / Chat System(Day 36)/ chunk 3 Read Receipts ✅(S55 2026-10-27,supported):coach 先教 per-message row vs per-(conv, reader) last_read_seq watermark;msg 57 誰讀過 ✅、「已讀 N 人」= last_read_seq ≥ 57 的成員數 ✅ 一句直述。學生問「是否教太細」→ coach 給 4 積木壓縮圖(seq / store-then-deliver / pub/sub / heartbeat)。
-
-P3 / Chat System(Day 36)/ F Teach Yuki ✅(S55,volley 3 題):monologue presence(heartbeat + pub/sub、view 訂閱、GET 後 SUB)+ read receipts(seq + 計數);漏 timeout T、漏 watermark 怎麼存。Q1 bait「一次沒收到就 offline」抓到 ✅(用詞 retry 修成 tolerate missed heartbeats);Q2 snapshot vs catch-up 表格縮小後填對 ✅;Q3 per-message list 卡住 → 見 s55 registry。
-
-下一場 resume:Day 36 G(含 3AM page + cost 雙問)→ H 收帳。
+下一場 resume:Metrics/Logging(Day 46,10-17 re-plan 隊列下一題;預習頁已有)。
 
 ## Phase status
 
@@ -75,6 +65,7 @@ Weak-topic flags: 無(至今沒有帶 flag 過 gate 的紀錄)。
 - Unique ID Generator (Day 29-30): high (s36)— PoC(bit packing + clock skew 偵測)park
 - Distributed Rate Limiter (Day 31-32): high (s40)— 設計知識到位;S40 Gauntlet 暴露輸出習慣病灶
 - Chat System (Day 35-37): med (s52)— Day 35 1v1 chunk 1–6 全過;F ✅ supported;G(換皮叫車)A/B 兩條路 unprompted ✅,catch-up 用 timestamp 回退 + counter scope/owner 冷回憶卡 = ordering 未留存;3AM/cost 未測
+- Chat System Day 36(group fan-out / presence / read receipts): low-med (s56)— chunk 1-3 全 supported;F 3 題 2 過;G 6/8:3AM 第一刀 path 錯需縮題、cost 有 knob 無數字排序
 
 ## Scorecard history
 
@@ -100,6 +91,7 @@ Weak-topic flags: 無(至今沒有帶 flag 過 gate 的紀錄)。
 - 2026-07-08 | step G (s40, Distributed Rate Limiter, Gauntlet #1, L3) | 3/9(原記 ~3/9;原符號:Scope❌ TWY❌ Ops❌ FM🟡 Cap🟡✅ Hint🟡 TB❌) | 三指標:unprompted-argument ❌ / unprompted-ops ❌(第 5 次) / no-freeze-capacity 🟡✅ | 「謝謝你拒絕我,逃避心態又來了」頂回去自推 5000/min=反脆弱本身 | coach
 - 2026-07-11 | weekly review (s42, WR5 Topic 1: Multi-Region Session Store, S41-S42 跨場) | 1/6(✅=1 正規化:security/殭屍免疫✅;trade-off🟡 capacity🟡 failure-timeline🟡 one-liner🟡未抽;ops❌;scale trigger 未測) | 3AM page test 句型組裝獨立跑不動;SLI 標籤掉 | 「上一筆成功時間」零提示 = dead man's switch 直覺,素材在缺組裝 | coach
 - 2026-08-11 | cold retest (s49, Day 33 Notification System 留存冷測,非完整 step G) | 3/5 測到的維度(機制鏈✅ capacity×2✅ / headroom 論證🟡 / trade-off 反面❌;Think Aloud、scope、ops、failure modes 本場未測,不計分母) | 第一句就給論證:「我會開 120 台」不附 why = 裸結論被打回;separate 決策的自付代價要能一口氣講「管理面 ×N + idle」 | `300萬÷1000=3000s` 之後自己接著換算並對撞 P99 60s 得出 50 倍,S47 停住的那兩步這次零提示做完 | coach
+- 2026-10-29 | step G (s56, Chat System Day 36 快收:3AM page + cost 雙問, L3) | 6/8 測到的維度(Think Aloud✅ Q2 每個決定帶理由 / building block✅ heartbeat+TTL、DB=truth / trade-off✅ 拉長 heartbeat → 以為在線 → 跳過 push、訊息不丟 / ops✅ 主動提 ALB idle timeout / hint response✅ (a)(b) 縮題後答對 snapshot 不受 pub/sub 影響 / time-breadth✅ / failure modes❌ 第一刀指 pub/sub,path 錯 / capacity❌ 沒用 500k/s vs 20k/s 排 knob;scope 未測不計分母) | 砍成本先用數字排序:fan-out 500k/s 是 heartbeat 20k/s 的 25 倍,先動大的 | Q2 沒被問就補「拉長 heartbeat 前要先確認 ALB idle timeout」 | coach
 - 2026-10-13 | step G (s52, Chat System 1v1 換皮叫車, L3, 短 G) | 3/5 測到的維度(Think Aloud✅ building block✅ hint response✅ / trade-off🟡:push content-free 帶 why,但 DB「MongoDB 或 PostgreSQL 也 OK」裸結論 / failure modes❌ 未主動;scope、ops、capacity、time/breadth 未測或 coach 造成 rat-hole,不計分母) | catch-up 鍵用 `conv_id + seq > last_seen`,不要用 timestamp(clock skew 會漏訊息,chunk 4 已教) | Q1 第一段 A/B 兩條路一口氣講完、NAT 理由軸正確、push 只放通知帶隱私 why,全程直述句零「嗎」 | coach
 
 ## Mistake Registry
@@ -111,10 +103,12 @@ Weak-topic flags: 無(至今沒有帶 flag 過 gate 的紀錄)。
      無卡的設 3 天(2026-07-13)。unresolved-session-count = 40 - 建立 session(近似;≥5 依 engine
      Priority Override 置頂,step A 每堂上限內逐步清)。 -->
 
-### Live(unresolved,48 筆)
+### Live(unresolved,50 筆)
 
+- (s56 G) | Chat System(3AM page:症狀→路徑) | 「好友全部顯示離線、訊息照收」第一刀指 Redis pub/sub;縮成 (a)/(b) 後答對「只壞 pub/sub,snapshot 仍正確」;結論 presence key 不見(eviction / failover / heartbeat 寫入失敗)由 coach 給 | 元件對、path 錯:snapshot(GET key)vs delta(pub/sub)沒先拆就下刀(RP1) | unresolved | 3 | 2026-11-01 | 0
+- (s56 G) | Chat System(cost 排序) | 砍 30% 列出「拉長 heartbeat」「減少通知對象」兩個 knob,沒用自算數字排先後(fan-out 500k/s vs heartbeat 20k/s = 25×);「怎麼證明沒砍到可靠性」未答 | 有選項無判準:cost 決策沒接回 capacity 數字(RP7/RP3) | unresolved | 3 | 2026-11-01 | 0
 - (s55) | Chat System(read receipts 論證) | F Yuki 故意錯建議「每則訊息存已讀 user_id list」卡住;縮成「Bob 滑過 50 則,A/B 各寫幾次」仍只答原則「每人只記讀到哪」,50 writes vs 1 未算出 | 機制在、反方案的代價論證缺(RP3:有結論無論證);當堂剛教 (A)/(B) 對照圖仍撈不出 | unresolved | 3 | 2026-10-30 | 0
-- (s54) | Chat System(heartbeat interval) | trade-off 兩邊代價講出,但沒 commit 選擇;「60 秒嗎」問句 | 頭號主線 commit 缺席(s38 家族)| unresolved | 3 | 2026-10-30 | 0 S55 暖身 fail(reset):三輪才 commit N=5s,且靠句型填空;判準先講「漏訊息」,S54 自產的「誤判在線→跳過 push」忘記由 coach 給;理由(ALB 60s、3×)30s 也滿足;代價先寫成對面那邊,第三輪才自講 QPS + 15s stale window。
+- (s54) | Chat System(heartbeat interval) | trade-off 兩邊代價講出,但沒 commit 選擇;「60 秒嗎」問句 | 頭號主線 commit 缺席(s38 家族)| unresolved | 3 | 2026-11-01 | 0 S56 G cost 題 fail(reset,仍「會思考是不是需要拉長」未 commit 數字);但 ALB idle timeout 前提 + 代價「以為在線→不推播、訊息不丟」unprompted 自產 = S55 忘掉那半撈回。S55 暖身 fail(reset):三輪才 commit N=5s,且靠句型填空;判準先講「漏訊息」,S54 自產的「誤判在線→跳過 push」忘記由 coach 給;理由(ALB 60s、3×)30s 也滿足;代價先寫成對面那邊,第三輪才自講 QPS + 15s stale window。
 
 - (s53) | Chat System(group fan-out) | server 訂閱 group 後說「省掉查 group 有多少 member」;問 chat-2 怎麼決定訂閱哪些 group 只答「group ID 吧」 | 「移走」當「刪除」:成員查詢從每則訊息移到連線時/成員異動時,沒消失(RP2 causal chain 少一環)。connection map 省掉那點對,但 why(server 自知身上連了誰)未自產 | unresolved | 3 | 2026-10-17 | 0
 - (s52 G) | Chat System(ordering 留存) [S54 冷測:scope 仍答 user_id,反例+圖後 supported;interval 維持 3,next 2026-10-28] | 換皮 G:B 路徑 catch-up 答「查該客戶 ID 最後收到的訊息時間戳」;clock skew 圖戳後修法撈回「NTP 不準、只往前、原子 +1」,但 counter 的 scope(per conversation)要縮題才出、owner 選 Redis INCR(S51 定案是 DB 欄位) | 強先驗劫持:時間戳 = 舊 DevOps 直覺,chunk 4(S51)教過仍回退;scope 格 S51 已漏一次 = 同格重犯(RP5 cold transfer) | unresolved | 3 | 2026-10-16 | 0
@@ -213,7 +207,7 @@ Weak-topic flags: 無(至今沒有帶 flag 過 gate 的紀錄)。
      ✅ 2026-08-19(S50)執行完畢:14 → 7 張。留下的判準 = 有 open registry 條目、或有明確
      回退史;其餘封存(複測改由 mock 順帶抽,不再排程)。到期日重新錯開,避免再次整批過期。 -->
 
-### Active(8 張)
+### Active(9 張)
 
 - chunk:Load-Balancer | chunk | 3 | 2026-08-19(S50 quick-fire:sticky vs external store 兩策略 + Least Connections 命名;s4 四筆條目未結) | active
 - chunk:Rate-Limiting-&-CB | chunk | 3 | 2026-10-14(S52 quick-fire fail:OPEN 名字掉,見 s52 條目) | active
@@ -223,6 +217,7 @@ Weak-topic flags: 無(至今沒有帶 flag 過 gate 的紀錄)。
 - chunk:Consistency-Models | chunk | 3 | 2026-08-26(session store / LWW 的地基) | active
 - chunk:Database(B-tree/LSM) | chunk | 3 | 2026-08-29(S39 過但逼問才補全論證) | active
 - chunk:Chat-System-1v1 | chunk | 3 | 2026-10-16(S52 G:A/B 過,ordering catch-up 鍵回退) | active
+- chunk:Chat-System-Group(Day 36) | chunk | 3 | 2026-11-01(S56 G 6/8:3AM path 錯、cost 無數字排序) | active
 
 ### Archived(7 張,2026-08-19 S50 封存)
 
