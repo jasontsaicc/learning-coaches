@@ -49,6 +49,8 @@ Never shown: session logs, breakpoint text, story-bank, career files.
 | `portfolio/leetcode/notes/<problem-slug>.html` | that problem (folder slug or title slug) |
 | anything else | course-level "全部筆記 / HTML" only |
 
+Per-topic page set (`-layers` / `-hub` / `-mock-l6` suffixes on one prefix): see `skills/deep-dive-notes/SKILL.md` 主題頁面組.
+
 HTML buttons show the page `<title>`. To bring in a claude.ai artifact: `Artifact read` with `path: "index.html"` saves the file, then copy it here under a name from this table. Skip work artifacts and English drills.
 
 ## Traps

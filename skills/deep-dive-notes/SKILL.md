@@ -80,5 +80,17 @@ ADHD：版面規則見下方「ADHD 版面」。chat 端一回合只給一張圖
 - Layer 7 的 L4/L6 對照用 `<details>` 收起來，先讓讀者自己想。
 - 每批 publish 後，把同一個 HTML 檔 `cp` 到 `../../portfolio/<coach>/notes/`（相對於本 SKILL.md 的實體目錄，即 learning-coaches repo 根目錄），覆蓋舊版（scratchpad 會隨 session 消失，學習地圖網站從這裡讀）。檔名照 `../../site/README.md` 的命名規則（例：`s40-pss-layers.html`、`day35-chat-system-layers.html`、leetcode 用 `<problem-slug>.html`），網站才會掛到對應 topic。`general` 不 cp。
 
+## 主題頁面組（2026-10-29 學員拍板）
+一個主題收尾時要有三種頁面，同一個檔名前綴（`../../site/README.md`），網站會掛在同一個 topic 下：
+
+| 頁面 | 檔名 | 何時做 | 放什麼 |
+|---|---|---|---|
+| chunk 深入頁 | `<prefix>-<chunk>-layers.html` | 開課前預習（Layer 0–2），chunk 教完補滿 | 該 chunk 的七層。深入內容只住在這裡 |
+| hub（主筆記） | `<prefix>-<topic>-hub.html` | 主題收尾 | 全貌圖；每個 chunk 一張圖 + 一句話 + 連結；錯題；面試重點。不複製 chunk 的深入內容（避免兩份不同步） |
+| 面試頁 | `<prefix>-<topic>-mock-l6.html` | hub 之後 | 完整情境題 + 8 步：clarify → capacity → high-level → deep dive → 3AM → operate → cost → wrap。每步：面試官 / 想 / L6 怎麼說（`<details>` 收起）/ L4 vs L6 |
+
+- hub 連到每個 chunk 頁與面試頁；面試頁連回 hub。
+- 舊主題不回頭補。第一個範例：`day35-chat-system-hub.html`（收尾複習版，複製了較多 chunk 內容，之後的 hub 要更短）、`day35-chat-system-mock-l6.html`。
+
 ## 語言
 繁體中文敘述，技術名詞保留英文。
