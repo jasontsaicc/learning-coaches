@@ -55,7 +55,7 @@ HTML buttons show the page `<title>`. To bring in a claude.ai artifact: `Artifac
 
 - A progress/curriculum format change breaks the build (by design). Fix the parser + add a `test_build.py` case; don't loosen to silent skips.
 - Don't write `workspaces/` from dev work (repo CLAUDE.md). Imported notes go to `portfolio/`.
-- `python -m http.server` sends no Cache-Control: after a rebuild, open with `?v=N` or hard refresh.
+- Builds add content versions to the entry JS and CSS URLs so refreshed pages load changed assets. Already-open tabs still need a reload.
 - Verify UI with a screenshot (`/browse`), not just data. If headless Chromium dies with "No usable sandbox", the AppArmor profile `/etc/apparmor.d/playwright-chromium` (userns) is missing or not loaded.
 - Flashcard state is per-browser `localStorage`; it never writes back to progress.md (source of truth).
 - Server: user unit `~/.config/systemd/user/learning-map.service` (linger on, survives reboot). Never needs a restart after a rebuild.
@@ -141,3 +141,17 @@ all input types, keyboard sorting, draft and feedback resume, search, reading, m
 failed requests, stale responses, storage quota errors and CDN fallbacks. It also checks
 simultaneous reading/practice resume, note-to-practice links, per-question reviews,
 first/latest separation, revision isolation and safe rendering of saved answer text.
+
+
+## HTML-first notes
+
+Course pages place HTML notes inside the learning path: phase notes precede that
+phase’s topics as compact links. Topic titles open their first HTML note directly;
+additional HTML and small `md` links sit alongside a topic/practice action. Only notes
+without a phase/topic attachment appear in “其他補充筆記”. Existing filename/topic
+metadata determines attachment; no title-based guessing is used. Topic, phase and
+map lists use compact links, with Markdown in smaller text and no disclosure panels. Search includes
+HTML and topics by default; check “包含 Markdown 補充資料” to search older notes.
+This is a presentation preference, not proof of content parity: original Markdown
+exports, reading URLs and exercise source links remain available until their content
+and citations have been explicitly migrated. Development does not modify workspaces.

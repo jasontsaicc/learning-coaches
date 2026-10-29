@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { searchContent, resolveRecent } from "./app.js";
+import { searchContent, resolveRecent, noteList } from "./app.js";
 const data = {
   nodes: [
     { id: "me", kind: "root" },
@@ -18,7 +18,7 @@ const data = {
 };
 test("search trims and folds case, deduplicates shared files", () => {
   assert.equal(searchContent(data, "  READINESS ").length, 1);
-  assert.equal(searchContent(data, "probe").length, 1);
+  assert.equal(searchContent(data, "probe", true).length, 1);
   assert.equal(searchContent(data, "").length, 0);
 });
 test("recent topic requires unambiguous stable parent and label", () => {
@@ -56,4 +56,22 @@ test("lesson labels separate activity, materials, plans and assessment", async (
   assert.equal(level({ planned: true }), "課綱待學");
   assert.equal(level({ status: "practice-recorded" }), "已練習 · 尚無章節評級");
   assert.equal(level({ level: "high" }), "教練評量 · high");
+});
+
+
+test("search defaults to HTML while Markdown remains opt-in", () => {
+  const mixed = { ...data, nodes: [...data.nodes,
+    { id: "html", kind: "topic", parent: "p", label: "Diagram", files: ["probe.html", "a.md"] }],
+    titles: { ...data.titles, "probe.html": "Probe diagram" } };
+  assert.deepEqual(searchContent(mixed, "probe").map((x) => x.path), ["probe.html"]);
+  assert.equal(searchContent(mixed, "probe", true).length, 2);
+});
+
+test("notes are compact links, HTML first, without disclosure panels", () => {
+  const rendered = noteList(["a.md", "b.html", "a.md"], (f) => `<a>${f}</a>`);
+  assert.ok(rendered.indexOf("b.html") < rendered.indexOf("a.md"));
+  assert.equal((rendered.match(/a.md/g) ?? []).length, 1);
+  assert.ok(!rendered.includes("<details"));
+  assert.ok(!rendered.includes("Markdown 補充資料"));
+  assert.ok(noteList(["a.md"], String).includes("a.md"));
 });

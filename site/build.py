@@ -5,6 +5,7 @@ Usage: python3 site/build.py [--check]   (--check parses everything, writes noth
 Any unparseable input raises, so a bad build never reaches deploy.
 """
 import html
+import hashlib
 import json
 import re
 import shutil
@@ -399,6 +400,14 @@ def build():
     return {"nodes": nodes, "titles": titles, "chapters": chapters}
 
 
+def version_entry(entry, assets):
+    """Refresh browser asset URLs when the built JS or CSS changes."""
+    for name, content in assets.items():
+        version = hashlib.sha256(content).hexdigest()[:12]
+        entry = entry.replace(f'{name}"', f'{name}?v={version}"')
+    return entry
+
+
 def main():
     data = build()
     topics = sum(n["kind"] == "topic" for n in data["nodes"])
@@ -415,6 +424,10 @@ def main():
     (DIST / "data.json").write_text(json.dumps(data, ensure_ascii=False))
     for name in ('index.html', 'styles.css', 'app.js', 'exercises.js', 'review.js', 'map.js'):
         shutil.copy2(ROOT / 'site' / name, DIST / name)
+    entry = (DIST / "index.html").read_text()
+    (DIST / "index.html").write_text(version_entry(entry, {
+        name: (DIST / name).read_bytes() for name in ('app.js', 'styles.css')
+    }))
     shutil.copytree(ROOT / "site" / "img", DIST / "img")
     print(f"wrote {DIST}")
 

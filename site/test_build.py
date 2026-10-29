@@ -199,3 +199,14 @@ wrong = [{'label':'Other (Day 33-34)','parent':'sd:P3','planned':True,'files':[]
 sd_topic_states(wrong, scorecard)
 assert wrong[0]['planned']
 print('SD recorded practice OK')
+
+
+from build import version_entry
+entry = '<link href="styles.css"><script>import "./app.js"</script>'
+assets = {'styles.css': b'css', 'app.js': b'js'}
+versioned = version_entry(entry, assets)
+assert 'href="styles.css?v=' in versioned and '"./app.js?v=' in versioned
+assert version_entry(entry, assets) == versioned
+assert version_entry(entry, {**assets, 'app.js': b'changed'}) != versioned
+assert entry == '<link href="styles.css"><script>import "./app.js"</script>'
+print('asset cache versions OK')

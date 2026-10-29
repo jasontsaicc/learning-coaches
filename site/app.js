@@ -49,7 +49,7 @@ function coachOf(data, n) {
   while (n && n.kind !== "coach") n = byId.get(n.parent);
   return n?.id;
 }
-export function searchContent(data, query) {
+export function searchContent(data, query, includeMarkdown = false) {
   const q = query.trim().toLowerCase();
   if (!q) return [];
   const out = [],
@@ -59,7 +59,7 @@ export function searchContent(data, query) {
     if (isLeaf(n) && n.label.toLowerCase().includes(q))
       out.push({ kind: "topic", id: n.id, title: n.label, coachId });
     for (const path of n.files ?? []) {
-      if (files.has(path)) continue;
+      if (files.has(path) || (!includeMarkdown && path.endsWith(".md"))) continue;
       files.add(path);
       const title = data.titles?.[path] ?? path.split("/").pop();
       if (`${title} ${path}`.toLowerCase().includes(q))
@@ -67,6 +67,13 @@ export function searchContent(data, query) {
     }
   }
   return out;
+}
+export function noteList(files, renderLink) {
+  const unique = [...new Set(files ?? [])];
+  if (!unique.length) return '<p class="muted">尚無筆記。</p>';
+  const html = unique.filter((f) => f.endsWith(".html"));
+  const markdown = unique.filter((f) => f.endsWith(".md"));
+  return `<div class="note-links">${[...html, ...markdown].map(renderLink).join("")}</div>`;
 }
 export function resolveRecent(data, recent) {
   if (!recent) return null;
@@ -159,6 +166,11 @@ export async function startApp() {
   }
   const fileLink = (f) =>
     `<a class="file" href="${f.endsWith(".md") ? "#/read/" + encodeURIComponent(f) : "files/" + encodeURI(f)}" ${f.endsWith(".md") ? "" : 'target="_blank" rel="noopener"'}><span>${esc(data.titles?.[f] ?? f.split("/").pop())}</span><span>${f.endsWith(".md") ? "閱讀 →" : "開新頁 ↗"}</span></a>`;
+  const noteLink = (f) => {
+    const md = f.endsWith(".md");
+    const title = data.titles?.[f] ?? f.split("/").pop();
+    return `<a class="note-link${md ? " md-link" : ""}" href="${md ? "#/read/" + encodeURIComponent(f) : "files/" + encodeURI(f)}" ${md ? "" : 'target="_blank" rel="noopener"'}>${md ? "md · " : ""}${esc(title)}${md ? "" : " ↗"}</a>`;
+  };
   const chapterCard = (c) => {
     const st = practice.chapters[c.id],
       count = c.questions.filter((q) => !q.variantOf).length,
@@ -175,7 +187,7 @@ export async function startApp() {
     );
     modal(
       n.label,
-      `<p class="badge">${esc(level(n))}</p>${n.point ? `<p class="point">${esc(n.point)}</p>` : ""}${chapters.map((c) => `<p><a class="btn primary" href="#/practice/${c.id}">開始本章練習 →</a></p>`).join("")}${!chapters.length ? '<p class="muted">這個主題的練習尚未建立。</p>' : ""}<div class="files">${(n.files ?? []).map(fileLink).join("")}</div>${!n.files?.length ? "<p>尚無對應筆記，可回課程查看全部教材。</p>" : ""}`,
+      `<p class="badge">${esc(level(n))}</p>${n.point ? `<p class="point">${esc(n.point)}</p>` : ""}${chapters.map((c) => `<p><a class="btn primary" href="#/practice/${c.id}">開始本章練習 →</a></p>`).join("")}${!chapters.length ? '<p class="muted">這個主題的練習尚未建立。</p>' : ""}${n.files?.length ? noteList(n.files, noteLink) : ""}${!n.files?.length ? "<p>尚無對應筆記，可回課程查看全部教材。</p>" : ""}`,
     );
   }
   function bindTopics() {
@@ -228,19 +240,20 @@ export async function startApp() {
     const phases = children(id).filter((n) => !isLeaf(n)),
       loose = children(id).filter(isLeaf),
       chapters = data.chapters.filter((x) => x.coachId === id),
-      files = [
-        ...new Set([
-          ...(c.files ?? []),
-          ...leaves(id).flatMap((n) => n.files ?? []),
-        ]),
-      ],
+      attached = new Set([...phases, ...leaves(id)].flatMap((n) => n.files ?? [])),
+      files = [...new Set(c.files ?? [])].filter((f) => !attached.has(f)),
       first =
         phases.find((n) => n.status === "in-progress")?.id ?? phases[0]?.id;
-    const lesson = (n) =>
-      `<button class="lesson" data-topic="${esc(n.id)}"><span class="lesson-dot ${n.planned ? "planned" : ""}">${n.planned ? "○" : n.level === "high" ? "✓" : "↗"}</span><span><strong>${esc(n.label)}</strong><small>${esc(level(n))}</small></span></button>`;
+    const lesson = (n) => {
+      const primary = n.files?.find((f) => f.endsWith(".html"));
+      const extra = (n.files ?? []).filter((f) => f !== primary);
+      const title = `<span class="lesson-dot ${n.planned ? "planned" : ""}">${n.planned ? "○" : n.level === "high" ? "✓" : "↗"}</span><span><strong>${esc(n.label)}${primary ? " ↗" : ""}</strong><small>${esc(level(n))}</small></span>`;
+      return `<article class="lesson-node" aria-label="${esc(n.label)}">${primary ? `<a class="lesson" href="files/${encodeURI(primary)}" target="_blank" rel="noopener">${title}</a>` : `<button class="lesson" data-topic="${esc(n.id)}">${title}</button>`}<div class="lesson-extras">${extra.length ? noteList(extra, noteLink) : ""}${primary ? `<button class="text-btn topic-detail" data-topic="${esc(n.id)}">主題與練習</button>` : ""}</div></article>`;
+    };
     app.innerHTML = `<a class="back" href="#/">← 我的課程</a><section class="course-header"><div><span class="eyebrow">YOUR LEARNING PATH</span><h1>${TITLE[id]}</h1><p class="lead">${SUB[id]}</p><div class="actions"><button class="btn" id="map">知識地圖 ↗</button>${deckOf(c).length ? '<button class="btn" id="cards">記憶卡片</button>' : ""}</div></div><div class="course-illustration t-${id}"><img src="img/${id}.svg" alt=""></div></section>
+  <h2>學習路徑</h2><p class="muted">點選主題開啟 HTML 筆記，小字 md 連結可查看原筆記。</p><div class="phase-list">${phases.map((p, i) => `<details class="phase" ${p.id === first ? "open" : ""}><summary><span class="phase-number">${String(i + 1).padStart(2, "0")}</span><span><strong>${esc(p.label)}</strong><small>${esc(p.status === "in-progress" ? "進行中" : p.status === "gate-passed" ? "已通過階段檢查" : p.status === "not-started" ? "尚未開始" : (p.status ?? "主題群"))}</small></span><span class="expand">＋</span></summary><div class="phase-content">${p.plan ? `<p class="muted">${esc(p.plan)}</p>` : ""}${p.files?.length ? `<section class="phase-notes" aria-label="階段筆記與圖解">${noteList(p.files, noteLink)}</section>` : ""}${children(p.id).filter(isLeaf).map(lesson).join("")}</div></details>`).join("")}</div>${loose.length ? `<h2>其他已學主題</h2>${loose.map(lesson).join("")}` : ""}
+  ${files.length ? `<section aria-labelledby="notes-title"><h2 id="notes-title">其他補充筆記</h2><p class="muted">尚未對應到特定學習節點的教材。</p>${noteList(files, noteLink)}</section>` : ""}
   <div class="section-heading"><h2>章節練習</h2><span class="muted">${chapters.length} 章已有題庫</span></div><div class="chapter-grid">${chapters.map(chapterCard).join("")}</div><p class="muted">其餘主題的練習尚未建立。練習分數與教練評量分開記錄。</p>
-  <h2>學習路徑</h2><div class="phase-list">${phases.map((p, i) => `<details class="phase" ${p.id === first ? "open" : ""}><summary><span class="phase-number">${String(i + 1).padStart(2, "0")}</span><span><strong>${esc(p.label)}</strong><small>${esc(p.status === "in-progress" ? "進行中" : p.status === "gate-passed" ? "已通過階段檢查" : p.status === "not-started" ? "尚未開始" : (p.status ?? "主題群"))}</small></span><span class="expand">＋</span></summary><div class="phase-content">${p.plan ? `<p class="muted">${esc(p.plan)}</p>` : ""}${children(p.id).filter(isLeaf).map(lesson).join("")}${(p.files ?? []).map(fileLink).join("")}</div></details>`).join("")}</div>${loose.length ? `<h2>其他已學主題</h2>${loose.map(lesson).join("")}` : ""}
   ${
     c.keypoints?.length
       ? `<h2>學習重點</h2>${c.keypoints
@@ -259,7 +272,7 @@ export async function startApp() {
           )
           .join("")}`
       : ""
-  }<h2>全部筆記與圖解</h2><div class="files">${files.map(fileLink).join("") || '<p class="muted">尚無筆記。</p>'}</div>`;
+  }`;
     bindTopics();
     app.querySelector("#map").onclick = () => {
       modal(
@@ -269,7 +282,7 @@ export async function startApp() {
       drawTree(dialogBody.querySelector("#tree"), data.nodes, id, {
         onSelect: (n) => {
           const box = dialogBody.querySelector("#map-selection");
-          box.innerHTML = `<strong>${esc(n.label)}</strong>${isLeaf(n) ? '<button class="btn" id="map-topic">開啟主題</button>' : (n.files ?? []).map(fileLink).join("")}`;
+          box.innerHTML = `<strong>${esc(n.label)}</strong>${isLeaf(n) ? '<button class="btn" id="map-topic">開啟主題</button>' : noteList(n.files, noteLink)}`;
           box.querySelector("#map-topic")?.addEventListener("click", () => {
             close();
             showTopic(n);
@@ -284,10 +297,10 @@ export async function startApp() {
   }
   function search() {
     app.innerHTML =
-      '<a class="back" href="#/">← 學習首頁</a><span class="eyebrow">FIND A CONNECTION</span><h1>找回學過的想法。</h1><p class="lead">搜尋主題名稱、筆記標題或檔名。</p><form id="search-form"><label for="query">搜尋教材</label><div class="search-row"><input id="query" type="search" placeholder="例如：Cache、probe、linked list" autocomplete="off"><button class="btn primary">搜尋 →</button></div></form><div id="results" aria-live="polite"><p class="muted">輸入一個你想找的概念。</p></div>';
+      '<a class="back" href="#/">← 學習首頁</a><span class="eyebrow">FIND A CONNECTION</span><h1>找回學過的想法。</h1><p class="lead">搜尋主題與 HTML 筆記；需要時可納入 Markdown 補充資料。</p><form id="search-form"><label for="query">搜尋教材</label><div class="search-row"><input id="query" type="search" placeholder="例如：Cache、probe、linked list" autocomplete="off"><button class="btn primary">搜尋 →</button></div><label><input id="include-markdown" type="checkbox"> 包含 Markdown 補充資料</label></form><div id="results" aria-live="polite"><p class="muted">輸入一個你想找的概念。</p></div>';
     const run = () => {
       const input = app.querySelector("#query"),
-        r = searchContent(data, input.value);
+        r = searchContent(data, input.value, app.querySelector("#include-markdown").checked);
       app.querySelector("#results").innerHTML = !input.value.trim()
         ? '<p class="muted">輸入一個你想找的概念。</p>'
         : `<p class="muted">${r.length} 個結果</p><div class="files">${r.map((x) => (x.kind === "file" ? fileLink(x.path) : `<button class="file" data-topic="${esc(x.id)}"><span>${esc(x.title)}</span><span>${esc(TITLE[x.coachId])} · 主題</span></button>`)).join("")}</div>${!r.length ? '<button class="btn" id="clear">清除搜尋</button>' : ""}`;
@@ -303,6 +316,7 @@ export async function startApp() {
       run();
     };
     app.querySelector("#query").oninput = run;
+    app.querySelector("#include-markdown").onchange = run;
   }
   async function read(path, token) {
     const owner = data.nodes.find((n) => n.files?.includes(path));

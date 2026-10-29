@@ -29,6 +29,50 @@ async function smoke(browser) {
       path: "/tmp/learning-site-preview/home-desktop.png",
       fullPage: true,
     });
+    await page.goto(url + "#/c/k8s");
+    const notes = page.locator(".phase-list > details").filter({ hasText: "P1 核心物件" }).first();
+    await notes.locator(":scope > summary").click();
+    await notes.locator('a[href$=".html"]').first().waitFor();
+    assert.equal(await notes.locator('a.md-link').first().isVisible(), true);
+    assert.equal(await page.locator('.markdown-notes').count(), 0);
+    const primary = notes.locator('.lesson-node a.lesson').first();
+    const [popup] = await Promise.all([page.waitForEvent('popup'), primary.click()]);
+    await popup.waitForLoadState();
+    assert.ok(popup.url().endsWith('.html'));
+    await popup.close();
+    for (const width of [1280, 360]) {
+      await page.setViewportSize({ width, height: 960 });
+      await page.screenshot({ path: `/tmp/learning-site-preview/html-notes-${width}.png`, fullPage: true });
+      assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
+    }
+    await page.setViewportSize({ width: 1280, height: 960 });
+    const built = await (await page.request.get(url + "data.json")).json();
+    for (const coach of ["k8s", "sd", "leetcode", "ca"]) {
+      await page.goto(url + "#/c/" + coach);
+      await page.locator(".phase-list").waitFor();
+      assert.equal(await page.locator('.markdown-notes').count(), 0);
+      for (const size of await page.locator('.md-link').evaluateAll((links) => links.map((a) => getComputedStyle(a).fontSize)))
+        assert.equal(size, '12px');
+      const byId = new Map(built.nodes.map((n) => [n.id, n]));
+      const belongs = (n) => {
+        while (n && n.kind !== "coach") n = byId.get(n.parent);
+        return n?.id === coach;
+      };
+      const nodes = built.nodes.filter(belongs);
+      const expected = [...new Set(nodes.flatMap((n) => n.files ?? []))];
+      const hrefs = await page.locator("#app a[href]").evaluateAll((links) => links.map((a) => a.getAttribute("href")));
+      for (const f of expected) assert.ok(hrefs.includes(f.endsWith(".md") ? "#/read/" + encodeURIComponent(f) : "files/" + encodeURI(f)), `missing note: ${f}`);
+      for (const n of nodes.filter((n) => ["topic", "problem"].includes(n.kind))) {
+        const node = page.locator(".lesson-node").filter({ has: page.locator(`[data-topic="${n.id}"]`) });
+        for (const f of (n.files ?? []).filter((f) => f.endsWith(".html")))
+          assert.equal(await node.locator(`a[href="files/${encodeURI(f)}"]`).count(), 1);
+      }
+    }
+    await page.goto(url + "#/search");
+    await page.locator("#query").fill("p1-pod-probe.md");
+    assert.equal(await page.locator('#results a[href*="#/read/"]').count(), 0);
+    await page.getByLabel("包含 Markdown 補充資料").check();
+    await page.locator('#results a[href*="#/read/"]').first().waitFor();
     await page.goto(url + "#/practice/k8s-probes");
     await page.locator("#answer-form").waitFor();
     await page.locator("[name=answer][value=b]").check();
