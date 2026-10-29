@@ -1,0 +1,283 @@
+<title>Chat System L6 Mock</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC:wght@400;700&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: one notebook column on graph paper; teal sd accent band; figures on taped cards, failure cases as comic panels */
+:root {
+  --paper: #F6F8FA;
+  --grid: rgba(90,130,170,.16);
+  --ink: #23313E;
+  --ink-soft: #55677A;
+  --card: #FFFFFF;
+  --accent: #0B7285;
+  --on-accent: #FFFFFF;
+  --tape: color-mix(in srgb, var(--accent) 35%, transparent);
+  --who: #FFE98A;
+  --see: #BDEEF6;
+  --may: #F9CDE0;
+  --wrong: #D2453A;
+  --ok: #2F8F5B;
+  --line: #9DB0C2;
+  --font-hand: "LXGW WenKai TC", "Noto Sans TC", "PingFang TC", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #1A2320; --grid: rgba(200,230,210,.08); --ink: #E6EDE8; --ink-soft: #A9BAB1;
+    --card: #24302C; --accent: #3BC9DB; --on-accent: #10221F; --who: #8A7A2A; --see: #2B6A74; --may: #7A3F57;
+    --wrong: #FF8A7E; --ok: #7FD3A1; --line: #5E7268; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #1A2320; --grid: rgba(200,230,210,.08); --ink: #E6EDE8; --ink-soft: #A9BAB1;
+  --card: #24302C; --accent: #3BC9DB; --on-accent: #10221F; --who: #8A7A2A; --see: #2B6A74; --may: #7A3F57;
+  --wrong: #FF8A7E; --ok: #7FD3A1; --line: #5E7268; color-scheme: dark;
+}
+body {
+  background-color: var(--paper);
+  background-image: linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 22px 22px;
+  color: var(--ink);
+  font-family: var(--font-hand);
+  font-size: 17px;
+  line-height: 1.75;
+}
+.band { background: var(--accent); color: var(--on-accent); padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 22px 18px; }
+.band > div { max-width: 760px; margin: 0 auto; display: grid; gap: 8px; }
+.band a { color: inherit; }
+.page { max-width: 760px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 28px 64px; display: grid; gap: 36px; }
+h1, h2, h3 { text-wrap: balance; line-height: 1.3; margin: 0; }
+h1 { font-size: 2.1rem; }
+h2 { font-size: 1.4rem; display: flex; flex-wrap: wrap; align-items: baseline; gap: 10px; }
+h2 .badge { font-family: var(--font-mono); font-size: .78rem; background: var(--accent); color: var(--on-accent); padding: 1px 8px; border-radius: 3px; }
+h2 .time { font-family: var(--font-mono); font-size: .74rem; color: var(--ink-soft); letter-spacing: .04em; }
+p { margin: 0; }
+section { display: grid; gap: 14px; min-width: 0; }
+.sub { font-size: .95rem; opacity: .9; }
+.lead { font-size: 1.12rem; font-weight: 700; }
+.progress { display: flex; flex-wrap: wrap; gap: 6px 12px; font-family: var(--font-mono); font-size: .8rem; }
+.progress a { color: inherit; text-decoration: none; }
+mark { background: linear-gradient(transparent 52%, var(--who) 52%); color: inherit; padding: 0 2px; }
+mark.see { background: linear-gradient(transparent 52%, var(--see) 52%); }
+mark.may { background: linear-gradient(transparent 52%, var(--may) 52%); }
+code { font-family: var(--font-mono); font-size: .86em; background: color-mix(in srgb, var(--line) 22%, transparent); padding: 1px 5px; border-radius: 3px; }
+.card { position: relative; background: var(--card); padding: 22px 16px 14px; box-shadow: 0 1px 3px rgba(0,0,0,.12); min-width: 0; }
+.card::before { content: ""; position: absolute; top: -9px; left: 50%; width: 92px; height: 20px; transform: translateX(-50%) rotate(-2deg); background: var(--tape); }
+.scroll { overflow-x: auto; }
+svg.fig { display: block; min-width: 600px; width: 100%; height: auto; }
+svg text { font-family: var(--font-mono); fill: var(--ink); }
+svg .hand { font-family: var(--font-hand); }
+.rule { border-left: 4px solid var(--accent); padding: 6px 12px; font-size: 1.05rem; }
+.wrong { border-left: 4px solid var(--wrong); padding: 4px 12px; display: grid; gap: 2px; }
+.wrong b { color: var(--wrong); font-size: .85rem; letter-spacing: .05em; }
+.fix { border-left: 4px solid var(--ok); padding: 4px 12px; }
+.panels { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 14px; }
+.panel { border: 2px solid var(--ink); background: var(--card); padding: 10px; display: grid; gap: 6px; min-width: 0; align-content: start; }
+.panel h3 { font-size: 1rem; font-family: var(--font-mono); }
+.panel p { font-size: .92rem; }
+.panel svg { width: 100%; height: auto; display: block; }
+@media (max-width: 560px) { .panels { grid-template-columns: 1fr; } }
+table { border-collapse: collapse; width: 100%; font-size: .95rem; font-variant-numeric: tabular-nums; }
+th, td { border-bottom: 1px dashed var(--line); padding: 8px 6px; text-align: left; vertical-align: top; }
+th { font-family: var(--font-mono); font-size: .78rem; letter-spacing: .05em; color: var(--ink-soft); font-weight: 600; }
+ol, ul { margin: 0; padding-left: 1.3em; display: grid; gap: 6px; }
+details { background: var(--card); border: 2px dashed var(--line); padding: 10px 14px; }
+details[open] { border-style: solid; }
+details summary { cursor: pointer; font-weight: 700; }
+details > div { display: grid; gap: 10px; margin-top: 10px; }
+.two { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 14px; }
+@media (max-width: 560px) { .two { grid-template-columns: 1fr; } }
+.en { font-family: var(--font-mono); font-size: .88rem; color: var(--ink-soft); }
+pre { margin: 0; font-family: var(--font-mono); font-size: .82rem; line-height: 1.5; background: var(--card); border: 1px solid var(--line); padding: 10px 12px; overflow-x: auto; }
+.next { border: 3px solid var(--accent); background: var(--card); padding: 14px 16px; display: grid; gap: 6px; }
+a { color: var(--accent); text-underline-offset: 3px; }
+a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="var(--ink)"/></marker>
+  </defs>
+</svg>
+
+<header class="band">
+  <div>
+    <p class="sub">sd 課程 · P3 Chat System · 模擬面試逐字稿 · 2026-10-29</p>
+    <h1>Chat System L6 Mock</h1>
+    <p>讀完這頁你能：照 8 個步驟，把 chat system 從 clarify 一路講到 cost，每一步都接一句「所以我決定 ___」。</p>
+    <nav class="progress" aria-label="steps"><a href="#s1">1 Clarify</a><a href="#s2">2 Capacity</a><a href="#s3">3 High-level</a><a href="#s4">4 Deep dive</a><a href="#s5">5 3AM</a><a href="#s6">6 Operate</a><a href="#s7">7 Cost</a><a href="#s8">8 Wrap</a></nav>
+  </div>
+</header>
+
+<main class="page">
+
+  <p class="sub">情境：AWS Senior SRE 面試官。每一步先看題目，自己想 30 秒，再展開「L6 怎麼說」。機制細節回 <a href="day35-chat-system-complete.html">Chat System 全貌</a>。</p>
+
+  <div class="rule">整場骨架只有一句：先定誰是 truth，再讓每個元件壞掉時都只會變「慢」，不會變「丟」。</div>
+
+  <section id="s1">
+    <h2><span class="badge">Step 1</span>Clarify<span class="time">約 3 分鐘</span></h2>
+    <p class="lead">先用數字定出「什麼最重要」，再主動縮小 scope。</p>
+    <p><b>面試官：</b>我們要在 fintech App 裡加聊天功能。客戶跟客服一對一聊，客服之間也有小組群組。要有在線狀態和已讀。請設計後端。</p>
+    <p><b>想：</b>fintech = 稽核與 durability 優先。先拿數字。</p>
+    <details>
+      <summary>L6 怎麼說（先自己想 30 秒）</summary>
+      <div>
+        <p>「畫圖之前我先問幾題。總用戶多少？尖峰同時在線多少？群組最大幾人？有沒有保存或稽核要求？送達延遲要承諾多少？」</p>
+        <p><b>面試官：</b>1M DAU，尖峰 10 萬人在線，群組最多 500 人，訊息保存 7 年供稽核，送達 2 秒內。</p>
+        <p>「了解。順序是 durability 和稽核第一，latency 第二。我先只做文字，不做多媒體、不做 end-to-end encryption，先單一 region。這樣可以嗎？」</p>
+      </div>
+    </details>
+    <p class="sub"><b>L4 vs L6：</b>L4 直接開始畫圖。L6 先問出數字，再主動圈 scope。</p>
+  </section>
+
+  <section id="s2">
+    <h2><span class="badge">Step 2</span>Capacity<span class="time">約 3 分鐘</span></h2>
+    <p class="lead">只算會改變設計的數字。每個數字後面接「所以我決定」。</p>
+    <div class="card scroll">
+      <table>
+        <thead><tr><th>項目</th><th>算式</th><th>結果</th><th>所以決定</th></tr></thead>
+        <tbody>
+          <tr><td>訊息寫入</td><td>1M × 20 則/天 ÷ 86,400 × 5（尖峰）</td><td>~1.2k/s</td><td>一個 Aurora writer 就夠</td></tr>
+          <tr><td>儲存</td><td>20M 則 × 1 KB × 365</td><td>~7 TB/年</td><td>熱資料 Aurora，舊資料 S3</td></tr>
+          <tr><td>連線</td><td>10 萬 ÷ 每台 2 萬</td><td>5 台 + 餘裕 → 6 台</td><td>平均分在 3 個 AZ</td></tr>
+          <tr><td>heartbeat</td><td>10 萬 ÷ 5s</td><td>2 萬/s</td><td>一個 Redis node 撐得住</td></tr>
+          <tr><td>presence 推送</td><td>2.5k 變化/s × 200 觀看者</td><td><mark class="may">50 萬/s</mark></td><td>不能廣播給所有人</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <details>
+      <summary>L6 怎麼說</summary>
+      <div><p>「寫入量很小，尖峰才 1.2k/s。真正決定設計的是兩個數字：10 萬條長連線，以及天真做法下每秒 50 萬次的 presence 推送。」</p></div>
+    </details>
+    <p class="sub"><b>L4 vs L6：</b>L4 列完數字就停。L6 讓數字直接推出設計。</p>
+  </section>
+
+  <section id="s3">
+    <h2><span class="badge">Step 3</span>High-level<span class="time">約 5 分鐘</span></h2>
+    <p class="lead">兩條軸：Aurora 管「存」，Redis pub/sub 管「送」，presence 另外一組 Redis。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 700 280" role="img" aria-label="App to ALB to chat fleet. Chat fleet writes to Aurora with S3 audit, publishes to Redis pub/sub, writes heartbeats to Redis presence, and sends push via SNS and APNs when PUBLISH returns zero.">
+        <g font-size="12">
+          <rect x="10" y="110" width="70" height="46" fill="var(--see)" stroke="var(--ink)"/><text x="45" y="137" text-anchor="middle">App</text>
+          <rect x="110" y="110" width="80" height="46" fill="var(--card)" stroke="var(--ink)"/><text x="150" y="137" text-anchor="middle">ALB</text>
+          <rect x="225" y="95" width="150" height="76" fill="var(--card)" stroke="var(--accent)" stroke-width="2.5"/><text x="300" y="128" text-anchor="middle">chat fleet</text><text x="300" y="148" text-anchor="middle" font-size="10">6 台 / 3 AZ</text>
+          <rect x="450" y="14" width="170" height="48" fill="var(--card)" stroke="var(--ink)"/><text x="535" y="34" text-anchor="middle">Redis #1 pub/sub</text><text x="535" y="52" text-anchor="middle" font-size="10" class="hand">只管速度</text>
+          <rect x="450" y="80" width="170" height="48" fill="var(--card)" stroke="var(--ink)"/><text x="535" y="100" text-anchor="middle">Redis #2 presence</text><text x="535" y="118" text-anchor="middle" font-size="10" class="hand">soft state，15s 可重建</text>
+          <rect x="450" y="146" width="170" height="48" fill="var(--card)" stroke="var(--accent)" stroke-width="2.5"/><text x="535" y="166" text-anchor="middle">Aurora + S3 audit</text><text x="535" y="184" text-anchor="middle" font-size="10" class="hand">truth：訊息、seq、已讀</text>
+          <rect x="450" y="212" width="170" height="48" fill="var(--may)" stroke="var(--ink)"/><text x="535" y="232" text-anchor="middle">SNS → APNs/FCM</text><text x="535" y="250" text-anchor="middle" font-size="10" class="hand">PUBLISH 回 0 才送</text>
+        </g>
+        <g stroke="var(--ink)" stroke-width="2">
+          <line x1="80" y1="133" x2="106" y2="133" marker-end="url(#ah)" marker-start="url(#ah)"/>
+          <line x1="190" y1="133" x2="221" y2="133" marker-end="url(#ah)" marker-start="url(#ah)"/>
+          <line x1="375" y1="105" x2="446" y2="40" marker-end="url(#ah)" marker-start="url(#ah)"/>
+          <line x1="375" y1="125" x2="446" y2="104" marker-end="url(#ah)"/>
+          <line x1="375" y1="145" x2="446" y2="170" marker-end="url(#ah)"/>
+          <line x1="375" y1="165" x2="446" y2="236" marker-end="url(#ah)"/>
+        </g>
+        <text x="390" y="200" font-size="11" class="hand">① commit 才 ack</text>
+        <text x="380" y="62" font-size="11" class="hand">② PUBLISH / SUB</text>
+      </svg>
+    </div>
+    <details>
+      <summary>L6 怎麼說</summary>
+      <div>
+        <p>「我把系統拆成兩條軸。儲存軸是 Aurora：訊息帶 per-conversation seq 寫入並 commit，之後才回 sender 打勾，所以打了勾就一定查得到、可以稽核。投遞軸是 Redis pub/sub：每台 chat server 替連在自己身上的使用者和群組訂閱，sender 不需要知道對方連在哪一台。presence 放另一組 Redis，因為它變動頻繁，又是可重建的 soft state。」</p>
+      </div>
+    </details>
+    <p class="sub"><b>L4 vs L6：</b>L4 說「用 WebSocket 加 Redis」。L6 先講誰是 truth、誰只負責速度。</p>
+  </section>
+
+  <section id="s4">
+    <h2><span class="badge">Step 4</span>Deep dive<span class="time">約 12 分鐘</span></h2>
+    <p class="lead">面試官會挑三個點往下挖：丟訊息、在線狀態、已讀。每一題都先講「壞了誰補」。</p>
+    <p><b>Q4-1：</b>Bob 連在另一台 server，訊息在路上丟了，會怎樣？</p>
+    <details>
+      <summary>L6 怎麼說</summary>
+      <div><p>「pub/sub 是 fire-and-forget，我不靠它保證正確性。每則訊息帶 seq。Bob 收到 1045 但上一則是 1043，client 先 buffer，等約 500ms，再從 DB 補 <code>conversation_id = X AND seq &gt; 1043</code>。重連也走同一條路。所以 pub/sub 壞了只影響速度，不會丟訊息。」</p></div>
+    </details>
+    <p><b>Q4-2：</b>在線狀態在這個規模下怎麼做？</p>
+    <details>
+      <summary>L6 怎麼說</summary>
+      <div><p>「client 每 5 秒 heartbeat，SET 一個 TTL 15 秒的 key，連漏 3 次算離線。我不廣播給所有人：client 只訂閱畫面上的人，先 GET snapshot，再 SUBSCRIBE 變化，離開畫面就 UNSUB。50 萬/s 只剩真的有人在看的那部分。」</p></div>
+    </details>
+    <p><b>Q4-3：</b>500 人群組的已讀怎麼做？</p>
+    <details>
+      <summary>L6 怎麼說</summary>
+      <div><p>「每個對話的每個讀者一列 <code>last_read_seq</code>。往下滑過 50 則只 UPDATE 1 次，不是 INSERT 50 列。『已讀 N 人』= 成員中 <code>last_read_seq</code> ≥ 這則 seq 的人數。」</p></div>
+    </details>
+    <p class="sub"><b>L4 vs L6：</b>L4 只講一切正常的路徑。L6 自己先講元件壞了誰來補。</p>
+  </section>
+
+  <section id="s5">
+    <h2><span class="badge">Step 5</span>3AM page<span class="time">約 5 分鐘</span></h2>
+    <p class="lead">先採證，不 restart。先判斷症狀落在哪條軸。</p>
+    <p><b>面試官：</b>凌晨 3 點被 page：所有人顯示離線，但訊息照常在跑。你怎麼處理？</p>
+    <details>
+      <summary>L6 怎麼說</summary>
+      <div>
+        <p>「第一步我不 restart 任何東西。訊息正常 → Aurora 和投遞路徑沒事。只壞 pub/sub 只會讓狀態變舊，不會全部離線。全部離線 = presence key 不見了。我查三件事：」</p>
+        <ol>
+          <li>ElastiCache 的 Evictions metric。預設 eviction policy 先踢有 TTL 的 key，而 presence key 全都有 TTL。</li>
+          <li>剛剛有沒有 failover。</li>
+          <li>chat fleet 寫 heartbeat 有沒有錯誤。</li>
+        </ol>
+        <p>「presence 是 soft state，寫入恢復後一個 TTL（15 秒）內自己長回來。事後給 presence 多留記憶體餘裕，並加 online users 數量的 alert。」</p>
+      </div>
+    </details>
+    <div class="wrong"><b>L4 會踩的雷</b><span>直接 restart Redis。restart 會讓所有 key 再掉一次，也把現場證據清掉。</span></div>
+  </section>
+
+  <section id="s6">
+    <h2><span class="badge">Step 6</span>Operate<span class="time">約 3 分鐘</span></h2>
+    <p class="lead">page 在使用者症狀上，不 page 在 CPU 上。</p>
+    <p><b>面試官：</b>你怎麼在客戶抱怨之前就知道壞了？</p>
+    <details>
+      <summary>L6 怎麼說</summary>
+      <div>
+        <table>
+          <thead><tr><th>項目</th><th>做法</th></tr></thead>
+          <tbody>
+            <tr><td>主要 SLI</td><td>送達延遲 = client ACK − commit，只算在線收件人；30 天 99% &lt; 2s，搭 burn-rate alert</td></tr>
+            <tr><td>presence</td><td>online users 5 分鐘內掉 50% 以上 → page</td></tr>
+            <tr><td>部署</td><td>deregistration delay 慢慢 drain；client 重連加 jitter + backoff，避免 thundering herd 打爆 auth</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </details>
+  </section>
+
+  <section id="s7">
+    <h2><span class="badge">Step 7</span>Cost<span class="time">約 3 分鐘</span></h2>
+    <p class="lead">按負載大小排順序，講代價，再證明可靠性沒變差。</p>
+    <p><b>面試官：</b>財務要 Redis 和 WebSocket 帳單砍 30%，你先動哪裡？</p>
+    <details>
+      <summary>L6 怎麼說</summary>
+      <div>
+        <ol>
+          <li>presence fan-out 是 heartbeat 的 25 倍（50 萬/s vs 2 萬/s），先動它：每 2 秒合併一次狀態變化，大群組關掉 presence。</li>
+          <li>再拉長 heartbeat，先確認 ALB idle timeout。代價是 stale window 變長、有些 push 被跳過，訊息不丟。</li>
+          <li>先 canary，比較改動前後的送達延遲 SLI。</li>
+        </ol>
+      </div>
+    </details>
+    <p class="sub"><b>L4 vs L6：</b>L4 丟出幾個想法。L6 用數字排順序，並說怎麼證明沒變差。</p>
+  </section>
+
+  <section id="s8">
+    <h2><span class="badge">Step 8</span>Wrap<span class="time">約 1 分鐘</span></h2>
+    <p class="lead">一句總結 + 有時間還會做什麼。</p>
+    <details>
+      <summary>L6 怎麼說</summary>
+      <div><p>「Aurora 是 truth，Redis 是速度。Redis 任何一部分壞掉，都只降級成『慢』，不會變成『丟』。有更多時間的話，我會加第二個 region 做 DR，多媒體用 S3 presigned URL，再加 per-tenant rate limit。」</p></div>
+    </details>
+  </section>
+
+  <div class="next">
+    <b>2 分鐘下一步</b>
+    <p>不看頁面，講出 Step 5 的三個檢查點，以及為什麼第一步不 restart。</p>
+  </div>
+
+</main>
