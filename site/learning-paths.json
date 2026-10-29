@@ -1,0 +1,2398 @@
+{
+  "sd": [
+    {
+      "id": "sd-path-p0",
+      "label": "P0 · 先學會把問題講清楚",
+      "nodes": [
+        {
+          "id": "sd-path-p0-n1",
+          "label": "面試如何評估設計",
+          "source": "面試如何評估設計 / D1",
+          "chunks": [
+            {
+              "id": "sd-path-p0-n1-c1",
+              "label": "辨認需求與評分維度",
+              "note": "portfolio/sd/notes/day01-interview-rubric-layers.html",
+              "material": "共用筆記"
+            },
+            {
+              "id": "sd-path-p0-n1-c2",
+              "label": "比較好壞回答，指出缺少的論證",
+              "note": "portfolio/sd/notes/day01-interview-rubric-layers.html",
+              "material": "共用筆記"
+            }
+          ],
+          "note": "portfolio/sd/notes/day01-interview-rubric-layers.html",
+          "material": "專題筆記",
+          "references": [
+            "portfolio/sd/notes/day01-interview-rubric-layers.html"
+          ],
+          "days": [
+            1
+          ]
+        },
+        {
+          "id": "sd-path-p0-n2",
+          "label": "容量估算",
+          "source": "容量估算 / D2",
+          "chunks": [
+            {
+              "id": "sd-path-p0-n2-c1",
+              "label": "從 workload 算 QPS",
+              "note": "portfolio/sd/notes/day02-estimation-layers.html",
+              "material": "共用筆記"
+            },
+            {
+              "id": "sd-path-p0-n2-c2",
+              "label": "算儲存與頻寬",
+              "note": "portfolio/sd/notes/day02-estimation-layers.html",
+              "material": "共用筆記"
+            },
+            {
+              "id": "sd-path-p0-n2-c3",
+              "label": "用估算找第一個瓶頸",
+              "note": "portfolio/sd/notes/day02-estimation-layers.html",
+              "material": "共用筆記"
+            }
+          ],
+          "note": "portfolio/sd/notes/day02-estimation-layers.html",
+          "material": "專題筆記",
+          "references": [
+            "portfolio/sd/notes/day02-estimation-layers.html"
+          ],
+          "days": [
+            2
+          ]
+        },
+        {
+          "id": "sd-path-p0-n3",
+          "label": "組織設計答案",
+          "source": "組織設計答案 / D3",
+          "chunks": [
+            {
+              "id": "sd-path-p0-n3-c1",
+              "label": "澄清需求",
+              "note": "portfolio/sd/notes/day03-framework-layers.html",
+              "material": "共用筆記"
+            },
+            {
+              "id": "sd-path-p0-n3-c2",
+              "label": "畫最小資料流",
+              "note": "portfolio/sd/notes/day03-framework-layers.html",
+              "material": "共用筆記"
+            },
+            {
+              "id": "sd-path-p0-n3-c3",
+              "label": "沿瓶頸深入與量化取捨",
+              "note": "portfolio/sd/notes/day03-framework-layers.html",
+              "material": "共用筆記"
+            }
+          ],
+          "note": "portfolio/sd/notes/day03-framework-layers.html",
+          "material": "專題筆記",
+          "references": [
+            "portfolio/sd/notes/day03-framework-layers.html"
+          ],
+          "days": [
+            3
+          ]
+        }
+      ],
+      "note": "portfolio/sd/notes/p0-chapter-thinking-framework.html"
+    },
+    {
+      "id": "sd-path-p1",
+      "label": "P1 · 核心元件",
+      "nodes": [
+        {
+          "id": "sd-path-p1-n1",
+          "label": "流量入口與負載平衡",
+          "source": "流量入口與負載平衡 / D4–5",
+          "chunks": [
+            {
+              "id": "sd-path-p1-n1-c1",
+              "label": "DNS 與入口",
+              "note": "portfolio/sd/notes/day04-load-balancer-layers.html",
+              "material": "共用筆記"
+            },
+            {
+              "id": "sd-path-p1-n1-c2",
+              "label": "L4/L7、分流策略",
+              "note": "portfolio/sd/notes/day04-load-balancer-layers.html",
+              "material": "共用筆記"
+            },
+            {
+              "id": "sd-path-p1-n1-c3",
+              "label": "health check、sticky session、draining",
+              "note": "portfolio/sd/notes/day04-load-balancer-layers.html",
+              "material": "共用筆記"
+            },
+            {
+              "id": "sd-path-p1-n1-c4",
+              "label": "ALB/NLB 與故障判讀",
+              "note": "portfolio/sd/notes/day04-load-balancer-layers.html",
+              "material": "共用筆記"
+            }
+          ],
+          "note": "portfolio/sd/notes/day04-load-balancer-layers.html",
+          "material": "專題筆記",
+          "references": [
+            "portfolio/sd/notes/day04-load-balancer-layers.html"
+          ],
+          "days": [
+            4,
+            5
+          ]
+        },
+        {
+          "id": "sd-path-p1-n2",
+          "label": "Cache 與 CDN",
+          "source": "Cache 與 CDN / D6–7",
+          "chunks": [
+            {
+              "id": "sd-path-p1-n2-c1",
+              "label": "Cache-Aside 與寫入策略",
+              "note": "portfolio/sd/notes/day06-07-caching.html",
+              "material": "共用筆記"
+            },
+            {
+              "id": "sd-path-p1-n2-c2",
+              "label": "TTL、eviction、失效",
+              "note": "portfolio/sd/notes/day06-07-caching.html",
+              "material": "共用筆記"
+            },
+            {
+              "id": "sd-path-p1-n2-c3",
+              "label": "CDN 與邊緣快取",
+              "note": "portfolio/sd/notes/day06-07-caching.html",
+              "material": "共用筆記"
+            },
+            {
+              "id": "sd-path-p1-n2-c4",
+              "label": "用命中率和延遲驗證取捨",
+              "note": "portfolio/sd/notes/day06-07-caching.html",
+              "material": "共用筆記"
+            }
+          ],
+          "note": "portfolio/sd/notes/day06-07-caching.html",
+          "material": "專題筆記",
+          "references": [
+            "portfolio/sd/notes/day06-07-caching.html"
+          ],
+          "days": [
+            6,
+            7
+          ]
+        },
+        {
+          "id": "sd-path-p1-n3",
+          "label": "資料庫選型",
+          "source": "資料庫選型 / D8–9",
+          "chunks": [
+            {
+              "id": "sd-path-p1-n3-c1",
+              "label": "access pattern 與資料模型",
+              "note": "portfolio/sd/notes/day08-database-selection-layers.html",
+              "material": "共用筆記"
+            },
+            {
+              "id": "sd-path-p1-n3-c2",
+              "label": "SQL/NoSQL、B-tree/LSM",
+              "note": "portfolio/sd/notes/day08-database-selection-layers.html",
+              "material": "共用筆記"
+            },
+            {
+              "id": "sd-path-p1-n3-c3",
+              "label": "WAL、replica、partition key",
+              "note": "portfolio/sd/notes/day08-database-selection-layers.html",
+              "material": "共用筆記"
+            },
+            {
+              "id": "sd-path-p1-n3-c4",
+              "label": "連線池與熱分區",
+              "note": "portfolio/sd/notes/day08-database-selection-layers.html",
+              "material": "共用筆記"
+            }
+          ],
+          "note": "portfolio/sd/notes/day08-database-selection-layers.html",
+          "material": "專題筆記",
+          "references": [
+            "portfolio/sd/notes/day08-database-selection-layers.html"
+          ],
+          "days": [
+            8,
+            9
+          ]
+        },
+        {
+          "id": "sd-path-p1-n4",
+          "label": "非同步處理",
+          "source": "非同步處理 / D10–11",
+          "chunks": [
+            {
+              "id": "sd-path-p1-n4-c1",
+              "label": "解耦、緩衝與背壓",
+              "note": "portfolio/sd/notes/day10-message-queue-layers.html",
+              "material": "共用筆記"
+            },
+            {
+              "id": "sd-path-p1-n4-c2",
+              "label": "delivery semantics、冪等",
+              "note": "portfolio/sd/notes/day10-message-queue-layers.html",
+              "material": "共用筆記"
+            },
+            {
+              "id": "sd-path-p1-n4-c3",
+              "label": "retry、DLQ",
+              "note": "portfolio/sd/notes/day10-message-queue-layers.html",
+              "material": "共用筆記"
+            },
+            {
+              "id": "sd-path-p1-n4-c4",
+              "label": "SQS/Kafka/RabbitMQ 選型",
+              "note": "portfolio/sd/notes/day10-message-queue-layers.html",
+              "material": "共用筆記"
+            }
+          ],
+          "note": "portfolio/sd/notes/day10-message-queue-layers.html",
+          "material": "專題筆記",
+          "references": [
+            "portfolio/sd/notes/day10-message-queue-layers.html"
+          ],
+          "days": [
+            10,
+            11
+          ]
+        },
+        {
+          "id": "sd-path-p1-n5",
+          "label": "API 契約",
+          "source": "API 契約 / D12–13",
+          "chunks": [
+            {
+              "id": "sd-path-p1-n5-c1",
+              "label": "REST/gRPC/GraphQL",
+              "note": "portfolio/sd/notes/day12-api-design-layers.html",
+              "material": "共用筆記"
+            },
+            {
+              "id": "sd-path-p1-n5-c2",
+              "label": "分頁與版本",
+              "note": "portfolio/sd/notes/day12-api-design-layers.html",
+              "material": "共用筆記"
+            },
+            {
+              "id": "sd-path-p1-n5-c3",
+              "label": "冪等與錯誤契約",
+              "note": "portfolio/sd/notes/day12-api-design-layers.html",
+              "material": "共用筆記"
+            },
+            {
+              "id": "sd-path-p1-n5-c4",
+              "label": "從使用者流量驗證設計",
+              "note": "portfolio/sd/notes/day12-api-design-layers.html",
+              "material": "共用筆記"
+            }
+          ],
+          "note": "portfolio/sd/notes/day12-api-design-layers.html",
+          "material": "專題筆記",
+          "references": [
+            "portfolio/sd/notes/day12-api-design-layers.html"
+          ],
+          "days": [
+            12,
+            13
+          ]
+        },
+        {
+          "id": "sd-path-p1-n6",
+          "label": "身分與權限",
+          "source": "身分與權限 / D14",
+          "chunks": [
+            {
+              "id": "sd-path-p1-n6-c1",
+              "label": "authentication vs authorization",
+              "note": "portfolio/sd/notes/day14-security-auth-layers.html",
+              "material": "共用筆記"
+            },
+            {
+              "id": "sd-path-p1-n6-c2",
+              "label": "session/JWT/OAuth",
+              "note": "portfolio/sd/notes/day14-security-auth-layers.html",
+              "material": "共用筆記"
+            },
+            {
+              "id": "sd-path-p1-n6-c3",
+              "label": "撤銷與生命週期",
+              "note": "portfolio/sd/notes/day14-security-auth-layers.html",
+              "material": "共用筆記"
+            },
+            {
+              "id": "sd-path-p1-n6-c4",
+              "label": "威脅與防護取捨",
+              "note": "portfolio/sd/notes/day14-security-auth-layers.html",
+              "material": "共用筆記"
+            }
+          ],
+          "note": "portfolio/sd/notes/day14-security-auth-layers.html",
+          "material": "專題筆記",
+          "references": [
+            "portfolio/sd/notes/day14-security-auth-layers.html"
+          ],
+          "days": [
+            14
+          ]
+        },
+        {
+          "id": "sd-path-p1-n7",
+          "label": "分片與資料分布",
+          "source": "分片與資料分布 / D15–16",
+          "chunks": [
+            {
+              "id": "sd-path-p1-n7-c1",
+              "label": "單機瓶頸與 partition",
+              "note": "portfolio/sd/notes/day15-consistent-hashing.html",
+              "material": "共用筆記"
+            },
+            {
+              "id": "sd-path-p1-n7-c2",
+              "label": "consistent hashing",
+              "note": "portfolio/sd/notes/day15-consistent-hashing.html",
+              "material": "共用筆記"
+            },
+            {
+              "id": "sd-path-p1-n7-c3",
+              "label": "vnodes 與熱點",
+              "note": "portfolio/sd/notes/day15-consistent-hashing.html",
+              "material": "共用筆記"
+            },
+            {
+              "id": "sd-path-p1-n7-c4",
+              "label": "擴縮容的資料搬動",
+              "note": "portfolio/sd/notes/day15-consistent-hashing.html",
+              "material": "共用筆記"
+            }
+          ],
+          "note": "portfolio/sd/notes/day15-consistent-hashing.html",
+          "material": "專題筆記",
+          "references": [
+            "portfolio/sd/notes/day15-consistent-hashing.html"
+          ],
+          "days": [
+            15,
+            16
+          ]
+        }
+      ],
+      "note": "portfolio/sd/notes/p1-chapter-building-blocks.html"
+    },
+    {
+      "id": "sd-path-p2",
+      "label": "P2 · 以 Distributed Cache 帶出分散式核心",
+      "nodes": [
+        {
+          "id": "sd-path-p2-n1",
+          "label": "分區時如何取捨",
+          "source": "分區時如何取捨 / D17–18",
+          "chunks": [
+            {
+              "id": "sd-path-p2-n1-c1",
+              "label": "網路分區情境",
+              "note": "portfolio/sd/notes/day17-cap-layers.html",
+              "material": "共用筆記"
+            },
+            {
+              "id": "sd-path-p2-n1-c2",
+              "label": "availability/consistency 選擇",
+              "note": "portfolio/sd/notes/day17-cap-layers.html",
+              "material": "共用筆記"
+            },
+            {
+              "id": "sd-path-p2-n1-c3",
+              "label": "回到 cache 的讀寫決策",
+              "note": "portfolio/sd/notes/day17-cap-layers.html",
+              "material": "共用筆記"
+            }
+          ],
+          "note": "portfolio/sd/notes/day17-cap-layers.html",
+          "material": "專題筆記",
+          "references": [
+            "portfolio/sd/notes/day17-cap-layers.html"
+          ],
+          "days": [
+            17,
+            18
+          ]
+        },
+        {
+          "id": "sd-path-p2-n2",
+          "label": "一致性承諾",
+          "source": "一致性承諾 / D19–20",
+          "chunks": [
+            {
+              "id": "sd-path-p2-n2-c1",
+              "label": "使用者需要什麼保證",
+              "note": "portfolio/sd/notes/day19-consistency-models-layers.html",
+              "material": "共用筆記"
+            },
+            {
+              "id": "sd-path-p2-n2-c2",
+              "label": "strong/eventual/causal",
+              "note": "portfolio/sd/notes/day19-consistency-models-layers.html",
+              "material": "共用筆記"
+            },
+            {
+              "id": "sd-path-p2-n2-c3",
+              "label": "read-your-writes 與代價",
+              "note": "portfolio/sd/notes/day19-consistency-models-layers.html",
+              "material": "共用筆記"
+            }
+          ],
+          "note": "portfolio/sd/notes/day19-consistency-models-layers.html",
+          "material": "專題筆記",
+          "references": [
+            "portfolio/sd/notes/day19-consistency-models-layers.html"
+          ],
+          "days": [
+            19,
+            20
+          ]
+        },
+        {
+          "id": "sd-path-p2-n3",
+          "label": "複寫與故障切換",
+          "source": "複寫與故障切換 / D21–22",
+          "chunks": [
+            {
+              "id": "sd-path-p2-n3-c1",
+              "label": "leader/follower",
+              "note": "portfolio/sd/notes/day21-replication-layers.html",
+              "material": "共用筆記"
+            },
+            {
+              "id": "sd-path-p2-n3-c2",
+              "label": "同步與非同步複寫",
+              "note": "portfolio/sd/notes/day21-replication-layers.html",
+              "material": "共用筆記"
+            },
+            {
+              "id": "sd-path-p2-n3-c3",
+              "label": "選主、quorum 與故障窗口",
+              "note": "portfolio/sd/notes/day21-replication-layers.html",
+              "material": "共用筆記"
+            }
+          ],
+          "note": "portfolio/sd/notes/day21-replication-layers.html",
+          "material": "專題筆記",
+          "references": [
+            "portfolio/sd/notes/day21-replication-layers.html"
+          ],
+          "days": [
+            21,
+            22
+          ]
+        },
+        {
+          "id": "sd-path-p2-n4",
+          "label": "過載與故障隔離",
+          "source": "過載與故障隔離 / D23–24",
+          "chunks": [
+            {
+              "id": "sd-path-p2-n4-c1",
+              "label": "限流演算法",
+              "note": "portfolio/sd/notes/day23-rate-limiting-circuit-breaker-layers.html",
+              "material": "共用筆記"
+            },
+            {
+              "id": "sd-path-p2-n4-c2",
+              "label": "timeout/retry 放大",
+              "note": "portfolio/sd/notes/day23-rate-limiting-circuit-breaker-layers.html",
+              "material": "共用筆記"
+            },
+            {
+              "id": "sd-path-p2-n4-c3",
+              "label": "circuit breaker 與恢復",
+              "note": "portfolio/sd/notes/day23-rate-limiting-circuit-breaker-layers.html",
+              "material": "共用筆記"
+            }
+          ],
+          "note": "portfolio/sd/notes/day23-rate-limiting-circuit-breaker-layers.html",
+          "material": "專題筆記",
+          "references": [
+            "portfolio/sd/notes/day23-rate-limiting-circuit-breaker-layers.html"
+          ],
+          "days": [
+            23,
+            24
+          ]
+        },
+        {
+          "id": "sd-path-p2-n5",
+          "label": "可觀測的設計",
+          "source": "可觀測的設計 / D25",
+          "chunks": [
+            {
+              "id": "sd-path-p2-n5-c1",
+              "label": "SLI/SLO",
+              "note": "portfolio/sd/notes/day25-observability-layers.html",
+              "material": "共用筆記"
+            },
+            {
+              "id": "sd-path-p2-n5-c2",
+              "label": "metrics/logs/traces 的證據",
+              "note": "portfolio/sd/notes/day25-observability-layers.html",
+              "material": "共用筆記"
+            },
+            {
+              "id": "sd-path-p2-n5-c3",
+              "label": "告警與 3AM 排障",
+              "note": "portfolio/sd/notes/day25-observability-layers.html",
+              "material": "共用筆記"
+            }
+          ],
+          "note": "portfolio/sd/notes/day25-observability-layers.html",
+          "material": "專題筆記",
+          "references": [
+            "portfolio/sd/notes/day25-observability-layers.html"
+          ],
+          "days": [
+            25
+          ]
+        },
+        {
+          "id": "sd-path-p2-n6",
+          "label": "大規模摘要與成員資訊",
+          "source": "大規模摘要與成員資訊 / D26",
+          "chunks": [
+            {
+              "id": "sd-path-p2-n6-c1",
+              "label": "Bloom filter 與誤判",
+              "note": "portfolio/sd/notes/day26-bloom-gossip-layers.html",
+              "material": "共用筆記"
+            },
+            {
+              "id": "sd-path-p2-n6-c2",
+              "label": "gossip 傳播",
+              "note": "portfolio/sd/notes/day26-bloom-gossip-layers.html",
+              "material": "共用筆記"
+            },
+            {
+              "id": "sd-path-p2-n6-c3",
+              "label": "何時值得用近似或最終收斂",
+              "note": "portfolio/sd/notes/day26-bloom-gossip-layers.html",
+              "material": "共用筆記"
+            }
+          ],
+          "note": "portfolio/sd/notes/day26-bloom-gossip-layers.html",
+          "material": "專題筆記",
+          "references": [
+            "portfolio/sd/notes/day26-bloom-gossip-layers.html"
+          ],
+          "days": [
+            26
+          ]
+        }
+      ],
+      "note": "portfolio/sd/notes/p2-chapter-distributed-core.html"
+    },
+    {
+      "id": "sd-path-p3",
+      "label": "P3 · 設計題與目前隊列",
+      "nodes": [
+        {
+          "id": "sd-path-p3-n1",
+          "label": "URL Shortener",
+          "source": "URL Shortener / D27–28",
+          "chunks": [
+            {
+              "id": "sd-path-p3-n1-c1",
+              "label": "需求與容量",
+              "note": "portfolio/sd/notes/day27-url-shortener.html",
+              "material": "共用筆記"
+            },
+            {
+              "id": "sd-path-p3-n1-c2",
+              "label": "key 產生與資料模型",
+              "note": "portfolio/sd/notes/day27-url-shortener.html",
+              "material": "共用筆記"
+            },
+            {
+              "id": "sd-path-p3-n1-c3",
+              "label": "redirect/cache",
+              "note": "portfolio/sd/notes/day27-url-shortener.html",
+              "material": "共用筆記"
+            },
+            {
+              "id": "sd-path-p3-n1-c4",
+              "label": "故障與設計驗收",
+              "note": "portfolio/sd/notes/day27-url-shortener.html",
+              "material": "共用筆記"
+            }
+          ],
+          "note": "portfolio/sd/notes/day27-url-shortener.html",
+          "material": "專題筆記",
+          "references": [
+            "portfolio/sd/notes/day27-url-shortener.html"
+          ],
+          "days": [
+            27,
+            28
+          ]
+        },
+        {
+          "id": "sd-path-p3-n2",
+          "label": "Unique ID",
+          "source": "Unique ID / D29–30",
+          "chunks": [
+            {
+              "id": "sd-path-p3-n2-c1",
+              "label": "唯一、有序、吞吐的需求",
+              "note": "portfolio/sd/notes/day29-snowflake-id-layers.html",
+              "material": "共用筆記"
+            },
+            {
+              "id": "sd-path-p3-n2-c2",
+              "label": "UUID/Snowflake",
+              "note": "portfolio/sd/notes/day29-snowflake-id-layers.html",
+              "material": "共用筆記"
+            },
+            {
+              "id": "sd-path-p3-n2-c3",
+              "label": "時鐘回撥與 worker ID",
+              "note": "portfolio/sd/notes/day29-snowflake-id-layers.html",
+              "material": "共用筆記"
+            },
+            {
+              "id": "sd-path-p3-n2-c4",
+              "label": "取捨驗收",
+              "note": "portfolio/sd/notes/day29-snowflake-id-layers.html",
+              "material": "共用筆記"
+            }
+          ],
+          "note": "portfolio/sd/notes/day29-snowflake-id-layers.html",
+          "material": "專題筆記",
+          "references": [
+            "portfolio/sd/notes/day29-snowflake-id-layers.html"
+          ],
+          "days": [
+            29,
+            30
+          ]
+        },
+        {
+          "id": "sd-path-p3-n3",
+          "label": "Distributed Rate Limiter",
+          "source": "Distributed Rate Limiter / D31–32",
+          "chunks": [
+            {
+              "id": "sd-path-p3-n3-c1",
+              "label": "單機到分散式",
+              "note": "portfolio/sd/notes/day31-distributed-rate-limiter-layers.html",
+              "material": "共用筆記"
+            },
+            {
+              "id": "sd-path-p3-n3-c2",
+              "label": "Redis 原子更新",
+              "note": "portfolio/sd/notes/day31-distributed-rate-limiter-layers.html",
+              "material": "共用筆記"
+            },
+            {
+              "id": "sd-path-p3-n3-c3",
+              "label": "故障時 fail-open/closed",
+              "note": "portfolio/sd/notes/day31-distributed-rate-limiter-layers.html",
+              "material": "共用筆記"
+            },
+            {
+              "id": "sd-path-p3-n3-c4",
+              "label": "容量與驗收",
+              "note": "portfolio/sd/notes/day31-distributed-rate-limiter-layers.html",
+              "material": "共用筆記"
+            }
+          ],
+          "note": "portfolio/sd/notes/day31-distributed-rate-limiter-layers.html",
+          "material": "專題筆記",
+          "references": [
+            "portfolio/sd/notes/day31-distributed-rate-limiter-layers.html"
+          ],
+          "days": [
+            31,
+            32
+          ]
+        },
+        {
+          "id": "sd-path-p3-n4",
+          "label": "Notification",
+          "source": "Notification / D33–34",
+          "chunks": [
+            {
+              "id": "sd-path-p3-n4-c1",
+              "label": "多通道資料流",
+              "note": "portfolio/sd/notes/day33-notification-system-layers.html",
+              "material": "共用筆記"
+            },
+            {
+              "id": "sd-path-p3-n4-c2",
+              "label": "優先級與使用者偏好",
+              "note": "portfolio/sd/notes/day33-notification-system-layers.html",
+              "material": "共用筆記"
+            },
+            {
+              "id": "sd-path-p3-n4-c3",
+              "label": "重試、去重與送達",
+              "note": "portfolio/sd/notes/day33-notification-system-layers.html",
+              "material": "共用筆記"
+            },
+            {
+              "id": "sd-path-p3-n4-c4",
+              "label": "整體設計驗收",
+              "note": "portfolio/sd/notes/day33-notification-system-layers.html",
+              "material": "共用筆記"
+            }
+          ],
+          "note": "portfolio/sd/notes/day33-notification-system-layers.html",
+          "material": "專題筆記",
+          "references": [
+            "portfolio/sd/notes/day33-notification-system-layers.html"
+          ],
+          "days": [
+            33,
+            34
+          ]
+        },
+        {
+          "id": "sd-path-p3-n5",
+          "label": "Chat",
+          "source": "Chat / D35–37",
+          "chunks": [
+            {
+              "id": "sd-path-p3-n5-c1",
+              "label": "連線、持久化、ordering",
+              "note": "portfolio/sd/notes/day35-chat-system-layers.html",
+              "material": "專題筆記"
+            },
+            {
+              "id": "sd-path-p3-n5-c2",
+              "label": "離線補送與推播",
+              "note": "portfolio/sd/notes/day35-chat-offline-push-slo.html",
+              "material": "專題筆記"
+            },
+            {
+              "id": "sd-path-p3-n5-c3",
+              "label": "群組 fan-out",
+              "note": "portfolio/sd/notes/day36-group-fanout.html",
+              "material": "專題筆記"
+            },
+            {
+              "id": "sd-path-p3-n5-c4",
+              "label": "presence/read receipt",
+              "note": "portfolio/sd/notes/day36-presence-heartbeat.html",
+              "material": "專題筆記"
+            },
+            {
+              "id": "sd-path-p3-n5-c5",
+              "label": "完整 mock",
+              "note": "portfolio/sd/notes/day35-chat-system-mock-l6.html",
+              "material": "專題筆記"
+            }
+          ],
+          "note": "portfolio/sd/notes/day35-chat-system-hub.html",
+          "material": "專題筆記",
+          "references": [
+            "portfolio/sd/notes/day35-chat-system-hub.html",
+            "portfolio/sd/notes/day35-chat-system-layers.html",
+            "portfolio/sd/notes/day35-chat-offline-push-slo.html",
+            "portfolio/sd/notes/day36-group-fanout.html",
+            "portfolio/sd/notes/day36-presence-heartbeat.html",
+            "portfolio/sd/notes/day35-chat-system-mock-l6.html"
+          ],
+          "days": [
+            35,
+            36,
+            37
+          ]
+        },
+        {
+          "id": "sd-path-p3-n6",
+          "label": "Metrics & Logging",
+          "source": "1. Metrics & Logging / D46–47",
+          "chunks": [
+            {
+              "id": "sd-path-p3-n6-c1",
+              "label": "agent→collector→buffer",
+              "note": "portfolio/sd/notes/day46-metrics-logging-layers.html",
+              "material": "共用筆記"
+            },
+            {
+              "id": "sd-path-p3-n6-c2",
+              "label": "TSDB 與 cardinality",
+              "note": "portfolio/sd/notes/day46-metrics-logging-layers.html",
+              "material": "共用筆記"
+            },
+            {
+              "id": "sd-path-p3-n6-c3",
+              "label": "aggregation/downsampling/retention",
+              "note": "portfolio/sd/notes/day46-metrics-logging-layers.html",
+              "material": "共用筆記"
+            },
+            {
+              "id": "sd-path-p3-n6-c4",
+              "label": "mock 與收帳"
+            }
+          ],
+          "note": "portfolio/sd/notes/day46-metrics-logging-layers.html",
+          "material": "部分教材",
+          "references": [
+            "portfolio/sd/notes/day46-metrics-logging-layers.html"
+          ],
+          "days": [
+            46,
+            47
+          ]
+        },
+        {
+          "id": "sd-path-p3-n7",
+          "label": "Top-K",
+          "source": "2. Top-K / D56–57",
+          "chunks": [
+            {
+              "id": "sd-path-p3-n7-c1",
+              "label": "ZSET vs CMS + heap"
+            },
+            {
+              "id": "sd-path-p3-n7-c2",
+              "label": "time window 與 sketch 合併"
+            },
+            {
+              "id": "sd-path-p3-n7-c3",
+              "label": "mock 與收帳"
+            }
+          ],
+          "material": "待補 HTML",
+          "days": [
+            56,
+            57
+          ]
+        },
+        {
+          "id": "sd-path-p3-n8",
+          "label": "Brownfield",
+          "source": "3. Brownfield / D62–63",
+          "chunks": [
+            {
+              "id": "sd-path-p3-n8-c1",
+              "label": "Strangler Fig",
+              "note": "portfolio/sd/notes/day62-brownfield-migration-layers.html",
+              "material": "共用筆記"
+            },
+            {
+              "id": "sd-path-p3-n8-c2",
+              "label": "dual-write/backfill",
+              "note": "portfolio/sd/notes/day62-brownfield-migration-layers.html",
+              "material": "共用筆記"
+            },
+            {
+              "id": "sd-path-p3-n8-c3",
+              "label": "shadow traffic",
+              "note": "portfolio/sd/notes/day62-brownfield-migration-layers.html",
+              "material": "共用筆記"
+            },
+            {
+              "id": "sd-path-p3-n8-c4",
+              "label": "cutover/rollback/雙重監控",
+              "note": "portfolio/sd/notes/day62-brownfield-migration-layers.html",
+              "material": "共用筆記"
+            },
+            {
+              "id": "sd-path-p3-n8-c5",
+              "label": "mock 與收帳"
+            }
+          ],
+          "note": "portfolio/sd/notes/day62-brownfield-migration-layers.html",
+          "material": "部分教材",
+          "references": [
+            "portfolio/sd/notes/day62-brownfield-migration-layers.html"
+          ],
+          "days": [
+            62,
+            63
+          ]
+        },
+        {
+          "id": "sd-path-p3-n9",
+          "label": "Deploy System",
+          "source": "4. Deploy System / 組裝 mock",
+          "chunks": [
+            {
+              "id": "sd-path-p3-n9-c1",
+              "label": "rollout、health、自動 rollback、fleet capacity mock"
+            },
+            {
+              "id": "sd-path-p3-n9-c2",
+              "label": "debrief 與收帳"
+            }
+          ],
+          "material": "待補 HTML"
+        },
+        {
+          "id": "sd-path-p3-n10",
+          "label": "Distributed Cache",
+          "source": "5. Distributed Cache / D38–39",
+          "chunks": [
+            {
+              "id": "sd-path-p3-n10-c1",
+              "label": "分片與 invalidation at scale"
+            },
+            {
+              "id": "sd-path-p3-n10-c2",
+              "label": "thundering herd、locking、coalescing"
+            },
+            {
+              "id": "sd-path-p3-n10-c3",
+              "label": "mock 與收帳"
+            }
+          ],
+          "material": "部分教材",
+          "references": [
+            "portfolio/sd/notes/phase1-gate-distributed-cache-layers.html",
+            "portfolio/sd/notes/day15-consistent-hashing.html"
+          ],
+          "days": [
+            38,
+            39
+          ]
+        },
+        {
+          "id": "sd-path-p3-n11",
+          "label": "Payment",
+          "source": "6. Payment / D43–45",
+          "chunks": [
+            {
+              "id": "sd-path-p3-n11-c1",
+              "label": "authorization→capture→settlement"
+            },
+            {
+              "id": "sd-path-p3-n11-c2",
+              "label": "idempotency key"
+            },
+            {
+              "id": "sd-path-p3-n11-c3",
+              "label": "SAGA"
+            },
+            {
+              "id": "sd-path-p3-n11-c4",
+              "label": "ledger/reconciliation"
+            },
+            {
+              "id": "sd-path-p3-n11-c5",
+              "label": "mock 與收帳"
+            }
+          ],
+          "material": "待補 HTML",
+          "days": [
+            43,
+            44,
+            45
+          ]
+        },
+        {
+          "id": "sd-path-p3-n12",
+          "label": "Ticket",
+          "source": "7. Ticket / D54–55",
+          "chunks": [
+            {
+              "id": "sd-path-p3-n12-c1",
+              "label": "TOCTOU 與超賣"
+            },
+            {
+              "id": "sd-path-p3-n12-c2",
+              "label": "row lock/DECR/queue"
+            },
+            {
+              "id": "sd-path-p3-n12-c3",
+              "label": "預扣、TTL、對帳"
+            },
+            {
+              "id": "sd-path-p3-n12-c4",
+              "label": "overload 與入口排隊"
+            },
+            {
+              "id": "sd-path-p3-n12-c5",
+              "label": "mock 與收帳"
+            }
+          ],
+          "material": "待補 HTML",
+          "days": [
+            54,
+            55
+          ]
+        },
+        {
+          "id": "sd-path-p3-n13",
+          "label": "News Feed",
+          "source": "8. News Feed / D40–42",
+          "chunks": [
+            {
+              "id": "sd-path-p3-n13-c1",
+              "label": "fan-out on write/read"
+            },
+            {
+              "id": "sd-path-p3-n13-c2",
+              "label": "大帳號 hybrid、ranking、cache warming"
+            },
+            {
+              "id": "sd-path-p3-n13-c3",
+              "label": "mock 與收帳"
+            }
+          ],
+          "material": "待補 HTML",
+          "days": [
+            40,
+            41,
+            42
+          ]
+        }
+      ],
+      "note": "portfolio/sd/notes/p3-chapter-classic-problems.html"
+    },
+    {
+      "id": "sd-path-p4",
+      "label": "P4 · 輸出、遷移能力驗證與陌生題",
+      "nodes": [
+        {
+          "id": "sd-path-p4-n1",
+          "label": "Trade-off",
+          "source": "Trade-off / D60–61",
+          "chunks": [
+            {
+              "id": "sd-path-p4-n1-c1",
+              "label": "量化成本與容量"
+            },
+            {
+              "id": "sd-path-p4-n1-c2",
+              "label": "陷阱與需求改變"
+            },
+            {
+              "id": "sd-path-p4-n1-c3",
+              "label": "解釋何時換方案"
+            }
+          ],
+          "material": "部分教材",
+          "days": [
+            60,
+            61
+          ]
+        },
+        {
+          "id": "sd-path-p4-n2",
+          "label": "Mock round 1",
+          "source": "Mock round 1 / D64–65",
+          "chunks": [
+            {
+              "id": "sd-path-p4-n2-c1",
+              "label": "無提示完整設計"
+            },
+            {
+              "id": "sd-path-p4-n2-c2",
+              "label": "feedback"
+            },
+            {
+              "id": "sd-path-p4-n2-c3",
+              "label": "重做薄弱段"
+            }
+          ],
+          "material": "部分教材",
+          "days": [
+            64,
+            65
+          ]
+        },
+        {
+          "id": "sd-path-p4-n3",
+          "label": "Weak spots",
+          "source": "Weak spots / D66–67",
+          "chunks": [
+            {
+              "id": "sd-path-p4-n3-c1",
+              "label": "辨認反覆錯誤"
+            },
+            {
+              "id": "sd-path-p4-n3-c2",
+              "label": "挑 2–3 題重做"
+            },
+            {
+              "id": "sd-path-p4-n3-c3",
+              "label": "用新情境驗證修正"
+            }
+          ],
+          "material": "部分教材",
+          "days": [
+            66,
+            67
+          ]
+        },
+        {
+          "id": "sd-path-p4-n4",
+          "label": "Final mock",
+          "source": "Final mock / D68–69",
+          "chunks": [
+            {
+              "id": "sd-path-p4-n4-c1",
+              "label": "需求變更"
+            },
+            {
+              "id": "sd-path-p4-n4-c2",
+              "label": "連續 pivot"
+            },
+            {
+              "id": "sd-path-p4-n4-c3",
+              "label": "gate 與下一輪重點"
+            }
+          ],
+          "material": "部分教材",
+          "days": [
+            68,
+            69
+          ]
+        }
+      ],
+      "note": "portfolio/sd/notes/p4-chapter-advanced-mocks.html"
+    },
+    {
+      "id": "sd-path-transfer",
+      "label": "陌生題池 · mock 抽題",
+      "nodes": [
+        {
+          "id": "sd-path-p4-n5",
+          "label": "Autocomplete",
+          "source": "Autocomplete / D48–49",
+          "chunks": [
+            {
+              "id": "sd-path-p4-n5-c1",
+              "label": "prefix index"
+            },
+            {
+              "id": "sd-path-p4-n5-c2",
+              "label": "ranking"
+            },
+            {
+              "id": "sd-path-p4-n5-c3",
+              "label": "更新與延遲取捨"
+            }
+          ],
+          "material": "待補 HTML",
+          "days": [
+            48,
+            49
+          ],
+          "optional": true
+        },
+        {
+          "id": "sd-path-p4-n6",
+          "label": "Crawler",
+          "source": "Crawler / D50–51",
+          "chunks": [
+            {
+              "id": "sd-path-p4-n6-c1",
+              "label": "frontier"
+            },
+            {
+              "id": "sd-path-p4-n6-c2",
+              "label": "去重與 politeness"
+            },
+            {
+              "id": "sd-path-p4-n6-c3",
+              "label": "擴展與失敗恢復"
+            }
+          ],
+          "material": "待補 HTML",
+          "days": [
+            50,
+            51
+          ],
+          "optional": true
+        },
+        {
+          "id": "sd-path-p4-n7",
+          "label": "Proximity",
+          "source": "Proximity / D52–53",
+          "chunks": [
+            {
+              "id": "sd-path-p4-n7-c1",
+              "label": "geo index"
+            },
+            {
+              "id": "sd-path-p4-n7-c2",
+              "label": "鄰近查詢"
+            },
+            {
+              "id": "sd-path-p4-n7-c3",
+              "label": "精度與更新成本"
+            }
+          ],
+          "material": "待補 HTML",
+          "days": [
+            52,
+            53
+          ],
+          "optional": true
+        },
+        {
+          "id": "sd-path-p4-n8",
+          "label": "Ride Matching",
+          "source": "Ride Matching / D58–59",
+          "chunks": [
+            {
+              "id": "sd-path-p4-n8-c1",
+              "label": "位置 ingest"
+            },
+            {
+              "id": "sd-path-p4-n8-c2",
+              "label": "dispatch"
+            },
+            {
+              "id": "sd-path-p4-n8-c3",
+              "label": "trip state machine；前置 Proximity"
+            }
+          ],
+          "material": "待補 HTML",
+          "days": [
+            58,
+            59
+          ],
+          "optional": true
+        },
+        {
+          "id": "sd-path-transfer-cloud",
+          "label": "Cloud Storage",
+          "source": "Tier 3 按需抽題",
+          "material": "待補 HTML",
+          "optional": true,
+          "chunks": [
+            {
+              "id": "sd-path-transfer-cloud-c1",
+              "label": "分塊與 metadata"
+            },
+            {
+              "id": "sd-path-transfer-cloud-c2",
+              "label": "同步與版本衝突"
+            }
+          ]
+        },
+        {
+          "id": "sd-path-transfer-video",
+          "label": "Video / Instagram",
+          "source": "Tier 3 按需抽題",
+          "material": "待補 HTML",
+          "optional": true,
+          "chunks": [
+            {
+              "id": "sd-path-transfer-video-c1",
+              "label": "上傳與轉碼"
+            },
+            {
+              "id": "sd-path-transfer-video-c2",
+              "label": "CDN 與分發"
+            }
+          ]
+        },
+        {
+          "id": "sd-path-transfer-task",
+          "label": "Task Scheduler",
+          "source": "Tier 3 按需抽題",
+          "material": "待補 HTML",
+          "optional": true,
+          "chunks": [
+            {
+              "id": "sd-path-transfer-task-c1",
+              "label": "DAG 與執行順序"
+            },
+            {
+              "id": "sd-path-transfer-task-c2",
+              "label": "重試與冪等"
+            }
+          ]
+        },
+        {
+          "id": "sd-path-transfer-a/b",
+          "label": "A/B Testing",
+          "source": "Tier 3 按需抽題",
+          "material": "待補 HTML",
+          "optional": true,
+          "chunks": [
+            {
+              "id": "sd-path-transfer-a/b-c1",
+              "label": "分流與 feature flag"
+            },
+            {
+              "id": "sd-path-transfer-a/b-c2",
+              "label": "量測與驗證"
+            }
+          ]
+        },
+        {
+          "id": "sd-path-transfer-twitter",
+          "label": "Twitter",
+          "source": "Tier 3 按需抽題",
+          "material": "待補 HTML",
+          "optional": true,
+          "chunks": [
+            {
+              "id": "sd-path-transfer-twitter-c1",
+              "label": "Feed 組裝"
+            },
+            {
+              "id": "sd-path-transfer-twitter-c2",
+              "label": "熱點與規模化"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "k8s": [
+    {
+      "id": "k8s-path-p0",
+      "label": "P0 · 從宣告到執行",
+      "nodes": [
+        {
+          "id": "k8s-path-p0-n1",
+          "label": "宣告與協調",
+          "source": "宣告與協調 / C0–1",
+          "chunks": [
+            {
+              "id": "k8s-path-p0-n1-c1",
+              "label": "desired/actual state",
+              "note": "portfolio/k8s/notes/s25-declaration-vs-executor.html",
+              "material": "專題筆記"
+            },
+            {
+              "id": "k8s-path-p0-n1-c2",
+              "label": "reconcile loop",
+              "note": "portfolio/k8s/notes/p0-reconcile-loop.html",
+              "material": "專題筆記"
+            },
+            {
+              "id": "k8s-path-p0-n1-c3",
+              "label": "宣告與執行者的責任界線",
+              "note": "portfolio/k8s/notes/s25-declaration-vs-executor.html",
+              "material": "專題筆記"
+            }
+          ],
+          "note": "portfolio/k8s/notes/p0-reconcile-loop.html",
+          "material": "專題筆記",
+          "references": [
+            "portfolio/k8s/notes/p0-reconcile-loop.html",
+            "portfolio/k8s/notes/s25-declaration-vs-executor.html"
+          ],
+          "codes": [
+            "C-0",
+            "C-1"
+          ]
+        },
+        {
+          "id": "k8s-path-p0-n2",
+          "label": "apply 到 Running",
+          "source": "apply 到 Running / C2–3",
+          "chunks": [
+            {
+              "id": "k8s-path-p0-n2-c1",
+              "label": "control plane 分工",
+              "note": "portfolio/k8s/notes/s10-apply-to-running.html",
+              "material": "專題筆記"
+            },
+            {
+              "id": "k8s-path-p0-n2-c2",
+              "label": "API 請求鏈",
+              "note": "portfolio/k8s/notes/p0-apiserver-request-chain.html",
+              "material": "專題筆記"
+            },
+            {
+              "id": "k8s-path-p0-n2-c3",
+              "label": "scheduler→kubelet→runtime",
+              "note": "portfolio/k8s/notes/s10-apply-to-running.html",
+              "material": "專題筆記"
+            },
+            {
+              "id": "k8s-path-p0-n2-c4",
+              "label": "找出卡住的一棒",
+              "note": "portfolio/k8s/notes/s10-apply-to-running.html",
+              "material": "專題筆記"
+            }
+          ],
+          "note": "portfolio/k8s/notes/p0-apiserver-request-chain.html",
+          "material": "專題筆記",
+          "references": [
+            "portfolio/k8s/notes/p0-apiserver-request-chain.html",
+            "portfolio/k8s/notes/s10-apply-to-running.html"
+          ],
+          "codes": [
+            "C-2",
+            "C-3"
+          ]
+        },
+        {
+          "id": "k8s-path-p0-n3",
+          "label": "狀態與共識",
+          "source": "狀態與共識 / C4",
+          "chunks": [
+            {
+              "id": "k8s-path-p0-n3-c1",
+              "label": "etcd 儲存什麼",
+              "note": "portfolio/k8s/notes/p0-etcd-raft.html",
+              "material": "共用筆記"
+            },
+            {
+              "id": "k8s-path-p0-n3-c2",
+              "label": "Raft/quorum 入門",
+              "note": "portfolio/k8s/notes/p0-etcd-raft.html",
+              "material": "共用筆記"
+            },
+            {
+              "id": "k8s-path-p0-n3-c3",
+              "label": "失去多數時的行為",
+              "note": "portfolio/k8s/notes/p0-etcd-raft.html",
+              "material": "共用筆記"
+            }
+          ],
+          "note": "portfolio/k8s/notes/p0-etcd-raft.html",
+          "material": "專題筆記",
+          "references": [
+            "portfolio/k8s/notes/p0-etcd-raft.html"
+          ],
+          "codes": [
+            "C-4"
+          ]
+        }
+      ],
+      "note": "portfolio/k8s/notes/p0-chapter-mental-model.html"
+    },
+    {
+      "id": "k8s-path-p1",
+      "label": "P1 · 讓 workload 正確運作",
+      "nodes": [
+        {
+          "id": "k8s-path-p1-n1",
+          "label": "容器與 Pod",
+          "source": "容器與 Pod",
+          "chunks": [
+            {
+              "id": "k8s-path-p1-n1-c1",
+              "label": "process/namespace/cgroup",
+              "note": "portfolio/k8s/notes/s6-container-namespace-cgroup.html",
+              "material": "專題筆記"
+            },
+            {
+              "id": "k8s-path-p1-n1-c2",
+              "label": "Pod 共享邊界",
+              "note": "portfolio/k8s/notes/s6-container-namespace-cgroup.html",
+              "material": "共用筆記"
+            },
+            {
+              "id": "k8s-path-p1-n1-c3",
+              "label": "PID 1、signal 與退出",
+              "note": "portfolio/k8s/notes/s26-pid1-signal.html",
+              "material": "專題筆記"
+            }
+          ],
+          "note": "portfolio/k8s/notes/s6-container-namespace-cgroup.html",
+          "material": "專題筆記",
+          "references": [
+            "portfolio/k8s/notes/s6-container-namespace-cgroup.html",
+            "portfolio/k8s/notes/s26-pid1-signal.html"
+          ]
+        },
+        {
+          "id": "k8s-path-p1-n2",
+          "label": "健康與發布",
+          "source": "健康與發布",
+          "chunks": [
+            {
+              "id": "k8s-path-p1-n2-c1",
+              "label": "startup/readiness/liveness",
+              "note": "portfolio/k8s/notes/s6-probe.html",
+              "material": "專題筆記"
+            },
+            {
+              "id": "k8s-path-p1-n2-c2",
+              "label": "Deployment/ReplicaSet",
+              "note": "portfolio/k8s/notes/s6-deployment-rollout.html",
+              "material": "專題筆記"
+            },
+            {
+              "id": "k8s-path-p1-n2-c3",
+              "label": "rollout/rollback",
+              "note": "portfolio/k8s/notes/s6-deployment-rollout.html",
+              "material": "專題筆記"
+            },
+            {
+              "id": "k8s-path-p1-n2-c4",
+              "label": "失敗發布排障",
+              "note": "portfolio/k8s/notes/s6-deployment-rollout.html",
+              "material": "專題筆記"
+            }
+          ],
+          "note": "portfolio/k8s/notes/s6-probe.html",
+          "material": "專題筆記",
+          "references": [
+            "portfolio/k8s/notes/s6-probe.html",
+            "portfolio/k8s/notes/s6-deployment-rollout.html"
+          ]
+        },
+        {
+          "id": "k8s-path-p1-n3",
+          "label": "資源與生命週期",
+          "source": "資源與生命週期",
+          "chunks": [
+            {
+              "id": "k8s-path-p1-n3-c1",
+              "label": "requests/limits",
+              "note": "portfolio/k8s/notes/s10-resource-qos-oom.html",
+              "material": "專題筆記"
+            },
+            {
+              "id": "k8s-path-p1-n3-c2",
+              "label": "QoS/OOM",
+              "note": "portfolio/k8s/notes/s10-resource-qos-oom.html",
+              "material": "專題筆記"
+            },
+            {
+              "id": "k8s-path-p1-n3-c3",
+              "label": "StatefulSet vs Deployment",
+              "note": "portfolio/k8s/notes/s32-statefulset-keeps.html",
+              "material": "專題筆記"
+            },
+            {
+              "id": "k8s-path-p1-n3-c4",
+              "label": "Job 批次任務"
+            }
+          ],
+          "material": "部分教材",
+          "references": [
+            "portfolio/k8s/notes/s10-resource-qos-oom.html"
+          ]
+        }
+      ],
+      "note": "portfolio/k8s/notes/p1-chapter-core-objects.html"
+    },
+    {
+      "id": "k8s-path-p2a",
+      "label": "P2a · 追一個封包",
+      "nodes": [
+        {
+          "id": "k8s-path-p2a-n1",
+          "label": "服務發現",
+          "source": "服務發現 / C1",
+          "chunks": [
+            {
+              "id": "k8s-path-p2a-n1-c1",
+              "label": "Service 與 endpoints"
+            },
+            {
+              "id": "k8s-path-p2a-n1-c2",
+              "label": "kube-proxy 資料路徑",
+              "note": "portfolio/k8s/notes/p2a-kube-proxy.html",
+              "material": "專題筆記"
+            },
+            {
+              "id": "k8s-path-p2a-n1-c3",
+              "label": "CoreDNS"
+            },
+            {
+              "id": "k8s-path-p2a-n1-c4",
+              "label": "DNS 分層排障"
+            }
+          ],
+          "material": "部分教材",
+          "references": [
+            "portfolio/k8s/notes/p2a-kube-proxy.html"
+          ],
+          "codes": [
+            "C-1"
+          ]
+        },
+        {
+          "id": "k8s-path-p2a-n2",
+          "label": "外部流量入口",
+          "source": "外部流量入口 / C2",
+          "chunks": [
+            {
+              "id": "k8s-path-p2a-n2-c1",
+              "label": "Ingress 與 controller"
+            },
+            {
+              "id": "k8s-path-p2a-n2-c2",
+              "label": "host/path/TLS"
+            },
+            {
+              "id": "k8s-path-p2a-n2-c3",
+              "label": "404/502/503"
+            },
+            {
+              "id": "k8s-path-p2a-n2-c4",
+              "label": "Gateway API 對照"
+            }
+          ],
+          "material": "部分教材",
+          "codes": [
+            "C-2"
+          ]
+        },
+        {
+          "id": "k8s-path-p2a-n3",
+          "label": "網路隔離",
+          "source": "網路隔離 / C3",
+          "chunks": [
+            {
+              "id": "k8s-path-p2a-n3-c1",
+              "label": "selector 與 allow 規則"
+            },
+            {
+              "id": "k8s-path-p2a-n3-c2",
+              "label": "default deny、DNS egress"
+            },
+            {
+              "id": "k8s-path-p2a-n3-c3",
+              "label": "CNI 執行與 Calico lab"
+            }
+          ],
+          "material": "部分教材",
+          "references": [
+            "portfolio/k8s/notes/s25-declaration-vs-executor.html"
+          ],
+          "codes": [
+            "C-3"
+          ]
+        },
+        {
+          "id": "k8s-path-p2a-n4",
+          "label": "封包全鏈路",
+          "source": "封包全鏈路 / C4–5",
+          "chunks": [
+            {
+              "id": "k8s-path-p2a-n4-c1",
+              "label": "netns/veth/bridge"
+            },
+            {
+              "id": "k8s-path-p2a-n4-c2",
+              "label": "跨 node 路由與封裝"
+            },
+            {
+              "id": "k8s-path-p2a-n4-c3",
+              "label": "Service NAT/回程"
+            },
+            {
+              "id": "k8s-path-p2a-n4-c4",
+              "label": "EKS VPC CNI 對照（選配）"
+            }
+          ],
+          "material": "部分教材",
+          "codes": [
+            "C-4",
+            "C-5"
+          ]
+        }
+      ],
+      "note": "portfolio/k8s/notes/p2a-chapter-networking.html"
+    },
+    {
+      "id": "k8s-path-p2b",
+      "label": "P2b · 資料與權限",
+      "nodes": [
+        {
+          "id": "k8s-path-p2b-n1",
+          "label": "持久化資料",
+          "source": "持久化資料 / C1–3",
+          "chunks": [
+            {
+              "id": "k8s-path-p2b-n1-c1",
+              "label": "Volume/PV/PVC"
+            },
+            {
+              "id": "k8s-path-p2b-n1-c2",
+              "label": "StorageClass/CSI"
+            },
+            {
+              "id": "k8s-path-p2b-n1-c3",
+              "label": "StatefulSet identity/storage",
+              "note": "portfolio/k8s/notes/s32-statefulset-keeps.html",
+              "material": "專題筆記"
+            },
+            {
+              "id": "k8s-path-p2b-n1-c4",
+              "label": "AZ、重建與資料保留",
+              "note": "portfolio/k8s/notes/s32-statefulset-keeps.html",
+              "material": "專題筆記"
+            }
+          ],
+          "material": "部分教材",
+          "references": [
+            "portfolio/k8s/notes/s32-statefulset-keeps.html"
+          ],
+          "codes": [
+            "C-1",
+            "C-2",
+            "C-3"
+          ]
+        },
+        {
+          "id": "k8s-path-p2b-n2",
+          "label": "API 與雲端權限",
+          "source": "API 與雲端權限 / C4–5",
+          "chunks": [
+            {
+              "id": "k8s-path-p2b-n2-c1",
+              "label": "SA/RBAC/binding",
+              "note": "workspaces/k8s/notes/rbac-three-lines.html",
+              "material": "專題筆記"
+            },
+            {
+              "id": "k8s-path-p2b-n2-c2",
+              "label": "verb/subresource 排障",
+              "note": "portfolio/k8s/notes/s33-rbac-verb-traps.html",
+              "material": "專題筆記"
+            },
+            {
+              "id": "k8s-path-p2b-n2-c3",
+              "label": "IRSA 身分鏈"
+            },
+            {
+              "id": "k8s-path-p2b-n2-c4",
+              "label": "區分 Linux、k8s、AWS 權限",
+              "note": "portfolio/k8s/notes/p2b-permission-three-doors.html",
+              "material": "專題筆記"
+            }
+          ],
+          "material": "部分教材",
+          "references": [
+            "workspaces/k8s/notes/rbac-three-lines.html",
+            "portfolio/k8s/notes/s33-rbac-verb-traps.html",
+            "portfolio/k8s/notes/p2b-permission-three-doors.html"
+          ],
+          "codes": [
+            "C-4",
+            "C-5"
+          ]
+        },
+        {
+          "id": "k8s-path-p2b-n3",
+          "label": "機密與 Pod 安全",
+          "source": "機密與 Pod 安全 / C6",
+          "chunks": [
+            {
+              "id": "k8s-path-p2b-n3-c1",
+              "label": "Secrets 的保護邊界"
+            },
+            {
+              "id": "k8s-path-p2b-n3-c2",
+              "label": "securityContext"
+            },
+            {
+              "id": "k8s-path-p2b-n3-c3",
+              "label": "PSS/PSA",
+              "note": "portfolio/k8s/notes/s40-pss-layers.html",
+              "material": "專題筆記"
+            },
+            {
+              "id": "k8s-path-p2b-n3-c4",
+              "label": "拒絕事件與分階段導入",
+              "note": "portfolio/k8s/notes/s40-pss-gate-notes.html",
+              "material": "專題筆記"
+            }
+          ],
+          "material": "部分教材",
+          "references": [
+            "portfolio/k8s/notes/s40-pss-layers.html",
+            "portfolio/k8s/notes/s40-pss-gate-notes.html"
+          ],
+          "codes": [
+            "C-6"
+          ]
+        }
+      ],
+      "note": "portfolio/k8s/notes/p2b-chapter-storage-permissions.html"
+    },
+    {
+      "id": "k8s-path-p3",
+      "label": "P3 · 調度、伸縮與韌性",
+      "nodes": [
+        {
+          "id": "k8s-path-p3-n1",
+          "label": "實驗叢集",
+          "source": "實驗叢集 / 前導",
+          "chunks": [
+            {
+              "id": "k8s-path-p3-n1-c1",
+              "label": "Terraform EC2"
+            },
+            {
+              "id": "k8s-path-p3-n1-c2",
+              "label": "Ansible/kubeadm"
+            },
+            {
+              "id": "k8s-path-p3-n1-c3",
+              "label": "Calico 與 NetworkPolicy 補課"
+            },
+            {
+              "id": "k8s-path-p3-n1-c4",
+              "label": "收工與資源檢查"
+            }
+          ],
+          "material": "部分教材"
+        },
+        {
+          "id": "k8s-path-p3-n2",
+          "label": "調度與放置",
+          "source": "調度與放置 / C1–2",
+          "chunks": [
+            {
+              "id": "k8s-path-p3-n2-c1",
+              "label": "filter/score 與 Pending"
+            },
+            {
+              "id": "k8s-path-p3-n2-c2",
+              "label": "affinity/taints"
+            },
+            {
+              "id": "k8s-path-p3-n2-c3",
+              "label": "topology spread"
+            },
+            {
+              "id": "k8s-path-p3-n2-c4",
+              "label": "DRA 裝置分配概念"
+            }
+          ],
+          "material": "部分教材",
+          "codes": [
+            "C-1",
+            "C-2"
+          ]
+        },
+        {
+          "id": "k8s-path-p3-n3",
+          "label": "自動伸縮",
+          "source": "自動伸縮 / C3→C4→C3b→C5",
+          "chunks": [
+            {
+              "id": "k8s-path-p3-n3-c1",
+              "label": "HPA 公式、requests、窗口",
+              "note": "portfolio/k8s/notes/s51-hpa-layers.html",
+              "material": "專題筆記"
+            },
+            {
+              "id": "k8s-path-p3-n3-c2",
+              "label": "VPA 與 HPA 共存",
+              "note": "portfolio/k8s/notes/s52-vpa-layers.html",
+              "material": "專題筆記"
+            },
+            {
+              "id": "k8s-path-p3-n3-c3",
+              "label": "KEDA 事件與縮到零",
+              "note": "portfolio/k8s/notes/s53-keda-layers.html",
+              "material": "部分教材"
+            },
+            {
+              "id": "k8s-path-p3-n3-c4",
+              "label": "CA/Karpenter 節點供給"
+            }
+          ],
+          "material": "部分教材",
+          "references": [
+            "portfolio/k8s/notes/s51-hpa-layers.html",
+            "portfolio/k8s/notes/s52-vpa-layers.html",
+            "portfolio/k8s/notes/s53-keda-layers.html"
+          ],
+          "codes": [
+            "C-3",
+            "C-4",
+            "C-3b",
+            "C-5"
+          ]
+        },
+        {
+          "id": "k8s-path-p3-n4",
+          "label": "維護與可用性",
+          "source": "維護與可用性 / C6",
+          "chunks": [
+            {
+              "id": "k8s-path-p3-n4-c1",
+              "label": "PDB 與 eviction"
+            },
+            {
+              "id": "k8s-path-p3-n4-c2",
+              "label": "drain"
+            },
+            {
+              "id": "k8s-path-p3-n4-c3",
+              "label": "graceful shutdown 與流量排空"
+            },
+            {
+              "id": "k8s-path-p3-n4-c4",
+              "label": "驗證中斷範圍"
+            }
+          ],
+          "material": "部分教材",
+          "references": [
+            "portfolio/k8s/notes/s26-pid1-signal.html"
+          ],
+          "codes": [
+            "C-6"
+          ]
+        },
+        {
+          "id": "k8s-path-p3-n5",
+          "label": "容量與整體排障",
+          "source": "容量與整體排障 / C7 + drills",
+          "chunks": [
+            {
+              "id": "k8s-path-p3-n5-c1",
+              "label": "headroom 與容量規劃"
+            },
+            {
+              "id": "k8s-path-p3-n5-c2",
+              "label": "kubelet/containerd/node 壓力"
+            },
+            {
+              "id": "k8s-path-p3-n5-c3",
+              "label": "七站流量排障"
+            },
+            {
+              "id": "k8s-path-p3-n5-c4",
+              "label": "incident commander 與 mini-mock"
+            }
+          ],
+          "material": "部分教材",
+          "codes": [
+            "C-7"
+          ]
+        }
+      ],
+      "note": "portfolio/k8s/notes/p3-chapter-scheduling-resilience.html"
+    },
+    {
+      "id": "k8s-path-p4",
+      "label": "P4 · 可觀測性工程",
+      "nodes": [
+        {
+          "id": "k8s-path-p4-n1",
+          "label": "建立觀測資料",
+          "source": "建立觀測資料 / 前導、C1–2",
+          "chunks": [
+            {
+              "id": "k8s-path-p4-n1-c1",
+              "label": "API + DB 觀測對象"
+            },
+            {
+              "id": "k8s-path-p4-n1-c2",
+              "label": "metrics/logs/traces"
+            },
+            {
+              "id": "k8s-path-p4-n1-c3",
+              "label": "Prometheus discovery/scrape"
+            },
+            {
+              "id": "k8s-path-p4-n1-c4",
+              "label": "exporter、node-exporter"
+            }
+          ],
+          "material": "部分教材"
+        },
+        {
+          "id": "k8s-path-p4-n2",
+          "label": "從數據到可靠性",
+          "source": "從數據到可靠性 / C3–4",
+          "chunks": [
+            {
+              "id": "k8s-path-p4-n2-c1",
+              "label": "counter/rate/reset"
+            },
+            {
+              "id": "k8s-path-p4-n2-c2",
+              "label": "histogram/quantile/cardinality"
+            },
+            {
+              "id": "k8s-path-p4-n2-c3",
+              "label": "SLI/SLO"
+            },
+            {
+              "id": "k8s-path-p4-n2-c4",
+              "label": "error budget"
+            }
+          ],
+          "material": "部分教材",
+          "codes": [
+            "C-3",
+            "C-4"
+          ]
+        },
+        {
+          "id": "k8s-path-p4-n3",
+          "label": "追蹤與告警",
+          "source": "追蹤與告警 / C5–6",
+          "chunks": [
+            {
+              "id": "k8s-path-p4-n3-c1",
+              "label": "OTel context/span"
+            },
+            {
+              "id": "k8s-path-p4-n3-c2",
+              "label": "端到端 trace"
+            },
+            {
+              "id": "k8s-path-p4-n3-c3",
+              "label": "symptom-based alert"
+            },
+            {
+              "id": "k8s-path-p4-n3-c4",
+              "label": "burn rate 與告警演練"
+            }
+          ],
+          "material": "部分教材",
+          "codes": [
+            "C-5",
+            "C-6"
+          ]
+        }
+      ],
+      "note": "portfolio/k8s/notes/p4-chapter-observability.html"
+    },
+    {
+      "id": "k8s-path-p5",
+      "label": "Terraform 接力與 P5 · 平台工程",
+      "nodes": [
+        {
+          "id": "k8s-path-p5-n1",
+          "label": "宣告式交付",
+          "source": "宣告式交付 / C1–2",
+          "chunks": [
+            {
+              "id": "k8s-path-p5-n1-c1",
+              "label": "Helm template/release"
+            },
+            {
+              "id": "k8s-path-p5-n1-c2",
+              "label": "ArgoCD reconcile"
+            },
+            {
+              "id": "k8s-path-p5-n1-c3",
+              "label": "drift/sync/回復"
+            },
+            {
+              "id": "k8s-path-p5-n1-c4",
+              "label": "Git→上線閉環"
+            }
+          ],
+          "material": "部分教材",
+          "codes": [
+            "C-1",
+            "C-2"
+          ]
+        },
+        {
+          "id": "k8s-path-p5-n2",
+          "label": "擴充與攔截",
+          "source": "擴充與攔截 / C3–4",
+          "chunks": [
+            {
+              "id": "k8s-path-p5-n2-c1",
+              "label": "CRD/schema"
+            },
+            {
+              "id": "k8s-path-p5-n2-c2",
+              "label": "Operator reconcile"
+            },
+            {
+              "id": "k8s-path-p5-n2-c3",
+              "label": "admission webhook"
+            },
+            {
+              "id": "k8s-path-p5-n2-c4",
+              "label": "失效策略與故障演練"
+            }
+          ],
+          "material": "部分教材",
+          "codes": [
+            "C-3",
+            "C-4"
+          ]
+        },
+        {
+          "id": "k8s-path-p5-n3",
+          "label": "叢集生命週期",
+          "source": "叢集生命週期 / C5–6",
+          "chunks": [
+            {
+              "id": "k8s-path-p5-n3-c1",
+              "label": "升級相容性與順序"
+            },
+            {
+              "id": "k8s-path-p5-n3-c2",
+              "label": "kubeadm minor upgrade/憑證"
+            },
+            {
+              "id": "k8s-path-p5-n3-c3",
+              "label": "etcd snapshot/restore/DR"
+            },
+            {
+              "id": "k8s-path-p5-n3-c4",
+              "label": "EKS 升級對照"
+            }
+          ],
+          "material": "部分教材",
+          "references": [
+            "portfolio/k8s/notes/p0-etcd-raft.html"
+          ],
+          "codes": [
+            "C-5",
+            "C-6"
+          ]
+        },
+        {
+          "id": "k8s-path-p5-n4",
+          "label": "EKS 與安全發布",
+          "source": "EKS 與安全發布 / C7–8",
+          "chunks": [
+            {
+              "id": "k8s-path-p5-n4-c1",
+              "label": "EKS production IaC"
+            },
+            {
+              "id": "k8s-path-p5-n4-c2",
+              "label": "平台權限與網路整合"
+            },
+            {
+              "id": "k8s-path-p5-n4-c3",
+              "label": "canary/blue-green"
+            },
+            {
+              "id": "k8s-path-p5-n4-c4",
+              "label": "指標判定與 rollback"
+            }
+          ],
+          "material": "部分教材",
+          "codes": [
+            "C-7",
+            "C-8"
+          ]
+        }
+      ],
+      "note": "portfolio/k8s/notes/p5-chapter-platform-gitops.html",
+      "intro": "先完成 Terraform senior 接力（EKS + RDS），再進入平台工程。"
+    },
+    {
+      "id": "k8s-path-migration",
+      "label": "P5 後 · Migration 與選修",
+      "nodes": [
+        {
+          "id": "k8s-path-migration-n1",
+          "label": "Migration",
+          "source": "Migration / 必修",
+          "chunks": [
+            {
+              "id": "k8s-path-migration-n1-c1",
+              "label": "既有服務盤點與容器化"
+            },
+            {
+              "id": "k8s-path-migration-n1-c2",
+              "label": "kubeadm→EKS + RDS"
+            },
+            {
+              "id": "k8s-path-migration-n1-c3",
+              "label": "資料遷移與驗證"
+            },
+            {
+              "id": "k8s-path-migration-n1-c4",
+              "label": "cutover/rollback"
+            },
+            {
+              "id": "k8s-path-migration-n1-c5",
+              "label": "migration runbook"
+            }
+          ],
+          "material": "待補 HTML",
+          "references": [
+            "portfolio/sd/notes/day62-brownfield-migration-layers.html"
+          ]
+        },
+        {
+          "id": "k8s-path-migration-n2",
+          "label": "自寫 Controller",
+          "source": "自寫 Controller / FLEX",
+          "chunks": [
+            {
+              "id": "k8s-path-migration-n2-c1",
+              "label": "watch/reconcile"
+            },
+            {
+              "id": "k8s-path-migration-n2-c2",
+              "label": "status/finalizer"
+            },
+            {
+              "id": "k8s-path-migration-n2-c3",
+              "label": "失敗重試與驗證"
+            }
+          ],
+          "material": "待補 HTML",
+          "optional": true
+        },
+        {
+          "id": "k8s-path-migration-n3",
+          "label": "GPU",
+          "source": "GPU / FLEX",
+          "chunks": [
+            {
+              "id": "k8s-path-migration-n3-c1",
+              "label": "driver/toolkit/device plugin"
+            },
+            {
+              "id": "k8s-path-migration-n3-c2",
+              "label": "GPU Operator/MIG"
+            },
+            {
+              "id": "k8s-path-migration-n3-c3",
+              "label": "升級順序與短期 lab"
+            }
+          ],
+          "material": "待補 HTML",
+          "optional": true
+        },
+        {
+          "id": "k8s-path-migration-n4",
+          "label": "CKA",
+          "source": "CKA / 副線",
+          "chunks": [
+            {
+              "id": "k8s-path-migration-n4-c1",
+              "label": "kubeadm 操作"
+            },
+            {
+              "id": "k8s-path-migration-n4-c2",
+              "label": "etcd/故障題"
+            },
+            {
+              "id": "k8s-path-migration-n4-c3",
+              "label": "限時整合練習"
+            }
+          ],
+          "material": "待補 HTML",
+          "optional": true
+        }
+      ]
+    },
+    {
+      "id": "k8s-path-p6",
+      "label": "P6 · 面試整合",
+      "nodes": [
+        {
+          "id": "k8s-path-p6-n1",
+          "label": "個人衝刺",
+          "source": "個人衝刺 / C1",
+          "chunks": [
+            {
+              "id": "k8s-path-p6-n1-c1",
+              "label": "弱點盤點"
+            },
+            {
+              "id": "k8s-path-p6-n1-c2",
+              "label": "安排 mock 配比"
+            },
+            {
+              "id": "k8s-path-p6-n1-c3",
+              "label": "檢查覆蓋與重測"
+            }
+          ],
+          "material": "部分教材",
+          "codes": [
+            "C-1"
+          ]
+        },
+        {
+          "id": "k8s-path-p6-n2",
+          "label": "Incident",
+          "source": "Incident / C2",
+          "chunks": [
+            {
+              "id": "k8s-path-p6-n2-c1",
+              "label": "故障假設與證據"
+            },
+            {
+              "id": "k8s-path-p6-n2-c2",
+              "label": "止血/恢復"
+            },
+            {
+              "id": "k8s-path-p6-n2-c3",
+              "label": "溝通與復盤"
+            }
+          ],
+          "material": "部分教材",
+          "codes": [
+            "C-2"
+          ]
+        },
+        {
+          "id": "k8s-path-p6-n3",
+          "label": "k8s × SD",
+          "source": "k8s × SD / C3",
+          "chunks": [
+            {
+              "id": "k8s-path-p6-n3-c1",
+              "label": "multi-tenancy"
+            },
+            {
+              "id": "k8s-path-p6-n3-c2",
+              "label": "multi-cluster/DR"
+            },
+            {
+              "id": "k8s-path-p6-n3-c3",
+              "label": "cost/capacity"
+            },
+            {
+              "id": "k8s-path-p6-n3-c4",
+              "label": "upgrade-at-scale"
+            }
+          ],
+          "material": "部分教材",
+          "codes": [
+            "C-3"
+          ]
+        },
+        {
+          "id": "k8s-path-p6-n4",
+          "label": "Behavioral",
+          "source": "Behavioral / C4",
+          "chunks": [
+            {
+              "id": "k8s-path-p6-n4-c1",
+              "label": "挑證據"
+            },
+            {
+              "id": "k8s-path-p6-n4-c2",
+              "label": "STAR"
+            },
+            {
+              "id": "k8s-path-p6-n4-c3",
+              "label": "追問與取捨"
+            }
+          ],
+          "material": "部分教材",
+          "codes": [
+            "C-4"
+          ]
+        },
+        {
+          "id": "k8s-path-p6-english",
+          "label": "English polish",
+          "source": "C6 · 依個人計畫暫緩",
+          "material": "待補 HTML",
+          "optional": true,
+          "chunks": [
+            {
+              "id": "k8s-path-p6-english-c1",
+              "label": "英文 mock 與表達回饋（暫緩）"
+            }
+          ]
+        }
+      ],
+      "note": "portfolio/k8s/notes/p6-chapter-interview-sprint.html"
+    }
+  ]
+}

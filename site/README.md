@@ -157,3 +157,22 @@ HTML and topics by default; check “包含 Markdown 補充資料” to search o
 This is a presentation preference, not proof of content parity: original Markdown
 exports, reading URLs and exercise source links remain available until their content
 and citations have been explicitly migrated. Development does not modify workspaces.
+
+## SD / k8s expandable curriculum
+
+`learning-paths.json` is the explicit phase → node → chunk navigation catalog for
+SD and k8s. Order is intentional (SD follows the October 29 queue, rather than Day
+numbers). Node disclosure buttons and HTML links are separate. Missing HTML is
+shown as text; shared and partial notes are labelled. Additional legacy notes,
+exercises, maps and cards remain available; their IDs and storage are unchanged.
+
+`build.py` validates unique IDs and all catalog destinations against the existing
+export allowlist (including fragments). `pathCurrent` exports only a derived node
+ID from the current breakpoint; it never exports the breakpoint or infers mastery
+from reading. Ambiguous/missing positions remain unknown. Changing a source
+breakpoint format requires updating `path_position` and its test.
+
+Catalog titles are searchable; `#/c/<coach>/<node-id>` opens and locates a node.
+Expansion is retained in memory while navigating in the app. HTML still opens in
+a separate tab. This catalog replaces text-splitting as the displayed curriculum
+for these two coaches; the older topic graph remains for exercises and the map.

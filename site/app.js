@@ -66,6 +66,14 @@ export function searchContent(data, query, includeMarkdown = false) {
         out.push({ kind: "file", id: path, title, path, coachId });
     }
   }
+  for (const [coachId, phases] of Object.entries(data.paths ?? {})) {
+    for (const p of phases) for (const n of p.nodes) {
+      for (const item of [n, ...n.chunks]) {
+        if (item.label.toLowerCase().includes(q))
+          out.push({ kind: "path", id: n.id, title: item.label, coachId });
+      }
+    }
+  }
   return out;
 }
 export function noteList(files, renderLink) {
@@ -74,6 +82,22 @@ export function noteList(files, renderLink) {
   const html = unique.filter((f) => f.endsWith(".html"));
   const markdown = unique.filter((f) => f.endsWith(".md"));
   return `<div class="note-links">${[...html, ...markdown].map(renderLink).join("")}</div>`;
+}
+export function learningPath(data, coach, open = new Map()) {
+  const phases = data.paths?.[coach];
+  if (!phases) return "";
+  const current = data.pathCurrent?.[coach];
+  const all = phases.flatMap((p) => p.nodes);
+  const selected = all.find((n) => n.id === current);
+  const link = (label, path, cls = "") => `<a class="${cls}" href="files/${esc(encodeURI(path))}" target="_blank" rel="noopener" aria-label="${esc(label)}（新分頁）">${esc(label)} <span aria-hidden="true">↗</span></a>`;
+  const primary = selected?.note;
+  return `<section class="learning-path" aria-label="課程單元">
+    <div class="path-resume"><div><span class="path-kicker">${selected ? "目前單元" : "從課程目錄開始"}</span><p>${esc(selected?.label ?? "選一個主題，深入理解")}</p></div>${primary ? link("開啟目前筆記", primary, "path-primary") : selected ? `<button class="path-primary" data-path-jump="${esc(current)}">定位目前單元</button>` : ""}</div>
+    <div class="path-toolbar"><label>前往階段 <select id="path-phase"><option value="">選擇階段</option>${phases.map((p) => `<option value="${esc(p.id)}">${esc(p.label)}</option>`).join("")}</select></label><button class="text-btn" id="path-collapse">收合所有主題</button></div>
+    ${phases.map((p) => `<section class="path-phase" id="${esc(p.id)}"><header><h2>${esc(p.label)}</h2>${p.note ? link("階段總覽", p.note) : ""}</header>${p.intro ? `<p class="muted">${esc(p.intro)}</p>` : ""}<div class="path-nodes">${p.nodes.map((n) => {
+      const expanded = open.has(n.id) ? open.get(n.id) : n.id === (current ?? all[0]?.id);
+      return `<article class="path-node ${n.id === current ? "is-current" : ""}" id="${esc(n.id)}"><div class="path-node-head"><button class="path-toggle" aria-expanded="${expanded}" aria-controls="${esc(n.id)}-chunks" aria-label="${expanded ? "收合" : "展開"}${esc(n.label)}"><span aria-hidden="true">›</span></button><div class="path-node-title"><h3>${n.note ? link(n.label, n.note) : esc(n.label)}</h3><p>${n.id === current ? '<span class="path-current">目前單元</span> · ' : ""}${esc(n.optional ? "選修／抽題" : n.source)}${!n.note ? " · 主題總覽待補" : ""}</p></div><span class="path-material">${esc(n.material)}</span></div><div id="${esc(n.id)}-chunks" ${expanded ? "" : "hidden"}><ol class="path-chunks">${n.chunks.map((c) => `<li id="${esc(c.id)}"><div>${c.note ? link(c.label, c.note) : `<span>${esc(c.label)}</span>`}</div><small>${esc(c.note ? (c.material ?? "共用筆記") : "待補 HTML")}</small></li>`).join("")}</ol>${n.references?.length ? `<div class="path-references"><span>相關筆記</span>${n.references.map((f) => link(data.titles?.[f] ?? f.split("/").pop(), f)).join("")}</div>` : ""}</div></article>`;
+    }).join("")}</div></section>`).join("")}</section>`;
 }
 export function resolveRecent(data, recent) {
   if (!recent) return null;
@@ -118,6 +142,7 @@ export async function startApp() {
     readingTimer,
     readError = "";
   let data, practice, practiceError, sessionRecent;
+  const pathOpen = new Map();
   const close = () => dialog.close();
   document.querySelector("#dialog-close").onclick = close;
   dialog.addEventListener("click", (e) => {
@@ -200,6 +225,7 @@ export async function startApp() {
       );
   }
   function home() {
+    app.classList.remove("path-course");
     const coaches = children("me"),
       last = recent(),
       target = resolveRecent(data, last),
@@ -232,6 +258,7 @@ export async function startApp() {
     bindTopics();
   }
   function course(id) {
+    app.classList.remove("path-course");
     const c = data.nodes.find((n) => n.id === id && n.kind === "coach");
     if (!c) {
       notFound();
@@ -240,7 +267,9 @@ export async function startApp() {
     const phases = children(id).filter((n) => !isLeaf(n)),
       loose = children(id).filter(isLeaf),
       chapters = data.chapters.filter((x) => x.coachId === id),
-      attached = new Set([...phases, ...leaves(id)].flatMap((n) => n.files ?? [])),
+      attached = new Set(data.paths?.[id]
+        ? data.paths[id].flatMap((p) => [p.note, ...p.nodes.flatMap((n) => [n.note, ...(n.references ?? []), ...n.chunks.map((c) => c.note)])]).filter(Boolean)
+        : [...phases, ...leaves(id)].flatMap((n) => n.files ?? [])),
       files = [...new Set(c.files ?? [])].filter((f) => !attached.has(f)),
       first =
         phases.find((n) => n.status === "in-progress")?.id ?? phases[0]?.id;
@@ -251,8 +280,7 @@ export async function startApp() {
       return `<article class="lesson-node" aria-label="${esc(n.label)}">${primary ? `<a class="lesson" href="files/${encodeURI(primary)}" target="_blank" rel="noopener">${title}</a>` : `<button class="lesson" data-topic="${esc(n.id)}">${title}</button>`}<div class="lesson-extras">${extra.length ? noteList(extra, noteLink) : ""}${primary ? `<button class="text-btn topic-detail" data-topic="${esc(n.id)}">主題與練習</button>` : ""}</div></article>`;
     };
     app.innerHTML = `<a class="back" href="#/">← 我的課程</a><section class="course-header"><div><span class="eyebrow">YOUR LEARNING PATH</span><h1>${TITLE[id]}</h1><p class="lead">${SUB[id]}</p><div class="actions"><button class="btn" id="map">知識地圖 ↗</button>${deckOf(c).length ? '<button class="btn" id="cards">記憶卡片</button>' : ""}</div></div><div class="course-illustration t-${id}"><img src="img/${id}.svg" alt=""></div></section>
-  <h2>學習路徑</h2><p class="muted">點選主題開啟 HTML 筆記，小字 md 連結可查看原筆記。</p><div class="phase-list">${phases.map((p, i) => `<details class="phase" ${p.id === first ? "open" : ""}><summary><span class="phase-number">${String(i + 1).padStart(2, "0")}</span><span><strong>${esc(p.label)}</strong><small>${esc(p.status === "in-progress" ? "進行中" : p.status === "gate-passed" ? "已通過階段檢查" : p.status === "not-started" ? "尚未開始" : (p.status ?? "主題群"))}</small></span><span class="expand">＋</span></summary><div class="phase-content">${p.plan ? `<p class="muted">${esc(p.plan)}</p>` : ""}${p.files?.length ? `<section class="phase-notes" aria-label="階段筆記與圖解">${noteList(p.files, noteLink)}</section>` : ""}${children(p.id).filter(isLeaf).map(lesson).join("")}</div></details>`).join("")}</div>${loose.length ? `<h2>其他已學主題</h2>${loose.map(lesson).join("")}` : ""}
-  ${files.length ? `<section aria-labelledby="notes-title"><h2 id="notes-title">其他補充筆記</h2><p class="muted">尚未對應到特定學習節點的教材。</p>${noteList(files, noteLink)}</section>` : ""}
+  ${data.paths?.[id] ? learningPath(data, id, pathOpen) : `<h2>學習路徑</h2><p class="muted">點選主題開啟 HTML 筆記，小字 md 連結可查看原筆記。</p><div class="phase-list">${phases.map((p, i) => `<details class="phase" ${p.id === first ? "open" : ""}><summary><span class="phase-number">${String(i + 1).padStart(2, "0")}</span><span><strong>${esc(p.label)}</strong><small>${esc(p.status === "in-progress" ? "進行中" : p.status === "gate-passed" ? "已通過階段檢查" : p.status === "not-started" ? "尚未開始" : (p.status ?? "主題群"))}</small></span><span class="expand">＋</span></summary><div class="phase-content">${p.plan ? `<p class="muted">${esc(p.plan)}</p>` : ""}${p.files?.length ? `<section class="phase-notes" aria-label="階段筆記與圖解">${noteList(p.files, noteLink)}</section>` : ""}${children(p.id).filter(isLeaf).map(lesson).join("")}</div></details>`).join("")}</div>${loose.length ? `<h2>其他已學主題</h2>${loose.map(lesson).join("")}` : ""}`}${files.length ? `<section aria-labelledby="notes-title"><h2 id="notes-title">其他補充筆記</h2><p class="muted">尚未對應到特定學習節點的教材。</p>${noteList(files, noteLink)}</section>` : ""}
   <div class="section-heading"><h2>章節練習</h2><span class="muted">${chapters.length} 章已有題庫</span></div><div class="chapter-grid">${chapters.map(chapterCard).join("")}</div><p class="muted">其餘主題的練習尚未建立。練習分數與教練評量分開記錄。</p>
   ${
     c.keypoints?.length
@@ -273,6 +301,29 @@ export async function startApp() {
           .join("")}`
       : ""
   }`;
+    if (data.paths?.[id]) {
+      app.classList.add("path-course");
+      const jump = (id) => {
+        const target = document.getElementById(id);
+        const toggle = target?.querySelector('.path-toggle[aria-expanded="false"]');
+        if (target?.classList.contains("path-node")) toggle?.click();
+        target?.scrollIntoView({ block: "start", behavior: "instant" });
+      };
+      app.querySelector("#path-phase").onchange = (e) => { if (e.target.value) jump(e.target.value); };
+      app.querySelector("[data-path-jump]")?.addEventListener("click", (e) => jump(e.currentTarget.dataset.pathJump));
+      app.querySelectorAll(".path-toggle").forEach((button) => {
+        button.onclick = () => {
+          const expanded = button.getAttribute("aria-expanded") !== "true";
+          button.setAttribute("aria-expanded", String(expanded));
+          button.setAttribute("aria-label", button.getAttribute("aria-label").replace(/^(展開|收合)/, expanded ? "收合" : "展開"));
+          document.getElementById(button.getAttribute("aria-controls")).hidden = !expanded;
+          pathOpen.set(button.closest("article").id, expanded);
+        };
+      });
+      app.querySelector("#path-collapse").onclick = () => {
+        app.querySelectorAll('.path-toggle[aria-expanded="true"]').forEach((button) => button.click());
+      };
+    }
     bindTopics();
     app.querySelector("#map").onclick = () => {
       modal(
@@ -296,6 +347,7 @@ export async function startApp() {
     });
   }
   function search() {
+    app.classList.remove("path-course");
     app.innerHTML =
       '<a class="back" href="#/">← 學習首頁</a><span class="eyebrow">FIND A CONNECTION</span><h1>找回學過的想法。</h1><p class="lead">搜尋主題與 HTML 筆記；需要時可納入 Markdown 補充資料。</p><form id="search-form"><label for="query">搜尋教材</label><div class="search-row"><input id="query" type="search" placeholder="例如：Cache、probe、linked list" autocomplete="off"><button class="btn primary">搜尋 →</button></div><label><input id="include-markdown" type="checkbox"> 包含 Markdown 補充資料</label></form><div id="results" aria-live="polite"><p class="muted">輸入一個你想找的概念。</p></div>';
     const run = () => {
@@ -303,7 +355,7 @@ export async function startApp() {
         r = searchContent(data, input.value, app.querySelector("#include-markdown").checked);
       app.querySelector("#results").innerHTML = !input.value.trim()
         ? '<p class="muted">輸入一個你想找的概念。</p>'
-        : `<p class="muted">${r.length} 個結果</p><div class="files">${r.map((x) => (x.kind === "file" ? fileLink(x.path) : `<button class="file" data-topic="${esc(x.id)}"><span>${esc(x.title)}</span><span>${esc(TITLE[x.coachId])} · 主題</span></button>`)).join("")}</div>${!r.length ? '<button class="btn" id="clear">清除搜尋</button>' : ""}`;
+        : `<p class="muted">${r.length} 個結果</p><div class="files">${r.map((x) => (x.kind === "file" ? fileLink(x.path) : x.kind === "path" ? `<a class="file" href="#/c/${esc(x.coachId)}/${esc(x.id)}"><span>${esc(x.title)}</span><span>${esc(TITLE[x.coachId])} · 課程單元</span></a>` : `<button class="file" data-topic="${esc(x.id)}"><span>${esc(x.title)}</span><span>${esc(TITLE[x.coachId])} · 主題</span></button>`)).join("")}</div>${!r.length ? '<button class="btn" id="clear">清除搜尋</button>' : ""}`;
       bindTopics();
       app.querySelector("#clear")?.addEventListener("click", () => {
         input.value = "";
@@ -397,6 +449,7 @@ export async function startApp() {
     }
   }
   function notFound() {
+    app.classList.remove("path-course");
     app.innerHTML =
       '<h1>找不到這個學習頁面</h1><p>教材或章節可能已移動。</p><a class="btn primary" href="#/">返回學習首頁</a>';
   }
@@ -416,7 +469,11 @@ export async function startApp() {
     }
     window.scrollTo(0, 0);
     if (!parts[0]) home();
-    else if (parts[0] === "c") course(parts[1]);
+    else if (parts[0] === "c") {
+      if (parts[2]) pathOpen.set(parts[2], true);
+      course(parts[1]);
+      if (parts[2]) document.getElementById(parts[2])?.scrollIntoView({ block: "start", behavior: "instant" });
+    }
     else if (parts[0] === "search") search();
     else if (parts[0] === "read") {
       app.className = "reading";

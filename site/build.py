@@ -296,6 +296,41 @@ def validate_chapters(chapters, nodes, allowed_files):
                 require(False, 'unknown question type')
 
 
+def validate_paths(paths, allowed_files):
+    """Course navigation may only link notes already approved for export."""
+    ids = set()
+    for coach, phases in paths.items():
+        if coach not in ('sd', 'k8s') or not isinstance(phases, list):
+            raise ValueError('Invalid learning path course')
+        for phase in phases:
+            for entry in [phase, *phase['nodes'], *[c for n in phase['nodes'] for c in n['chunks']]]:
+                if not entry.get('label') or not entry.get('id') or entry['id'] in ids:
+                    raise ValueError('Invalid or duplicate learning path ID/label')
+                ids.add(entry['id'])
+                for target in ([entry['note']] if entry.get('note') else []) + entry.get('references', []):
+                    path, _, fragment = target.partition('#')
+                    if path not in allowed_files or not path.endswith('.html'):
+                        raise ValueError(f'Learning path note not exported: {target}')
+                    if fragment and not re.search(r'\bid=[\"\x27]' + re.escape(fragment) + r'[\"\x27]', (ROOT / path).read_text()):
+                        raise ValueError(f'Learning path fragment missing: {target}')
+
+
+def path_position(phases, progress, coach):
+    section = re.search(r'## Current Session breakpoint\s*\n(.*?)(?=\n## |\Z)', progress, re.S)
+    if not section:
+        return None
+    # Only export the derived catalog ID, never private breakpoint text.
+    text = section[1].split('<!--')[0]
+    if coach == 'sd':
+        day = re.search(r'Day\s+(\d+)', text)
+        matches = [n['id'] for p in phases for n in p['nodes'] if day and int(day[1]) in n.get('days', [])]
+    else:
+        code = re.search(r'\b(P\d[a-b]?)\s+(C-\d+[a-z]?)\b', text)
+        matches = [n['id'] for p in phases for n in p['nodes']
+                   if code and p['id'] == f'k8s-path-{code[1].lower()}' and code[2] in n.get('codes', [])]
+    return matches[0] if len(matches) == 1 else None
+
+
 def build():
     nodes = [{"id": "me", "label": "me", "kind": "root"}]
 
@@ -397,7 +432,11 @@ def build():
     for bank in sorted((ROOT / 'site/exercises').glob('*.json')):
         chapters.extend(json.loads(bank.read_text()))
     validate_chapters(chapters, nodes, {f for n in nodes for f in n.get('files', [])})
-    return {"nodes": nodes, "titles": titles, "chapters": chapters}
+    paths = json.loads((ROOT / 'site/learning-paths.json').read_text())
+    validate_paths(paths, {f for n in nodes for f in n.get('files', [])})
+    current = {c: path_position(phases, (ROOT / 'workspaces' / c / 'progress.md').read_text(), c)
+               for c, phases in paths.items()}
+    return {"nodes": nodes, "titles": titles, "chapters": chapters, "paths": paths, "pathCurrent": current}
 
 
 def version_entry(entry, assets):

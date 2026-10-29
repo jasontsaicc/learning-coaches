@@ -75,3 +75,17 @@ test("notes are compact links, HTML first, without disclosure panels", () => {
   assert.ok(!rendered.includes("Markdown 補充資料"));
   assert.ok(noteList(["a.md"], String).includes("a.md"));
 });
+
+test('learning paths separate disclosure, note links and missing material', async () => {
+  const { learningPath } = await import('./app.js');
+  const d = { paths: { k8s: [{ id: 'p', label: 'P3', nodes: [{ id: 'n', label: '<HPA>', source: 'C-3', material: '部分教材', chunks: [{ id: 'c', label: '公式', note: 'portfolio/k8s/notes/hpa.html' }, { id: 'missing', label: 'Lab' }] }] }] }, pathCurrent: { k8s: 'n' } };
+  const html = learningPath(d, 'k8s');
+  assert.match(html, /aria-expanded="true"/);
+  assert.match(html, /aria-controls="n-chunks"/);
+  assert.match(html, /&lt;HPA&gt;/);
+  assert.match(html, /href="files\/portfolio\/k8s\/notes\/hpa.html"/);
+  assert.match(html, /待補 HTML/);
+  assert.doesNotMatch(html, /<a[^>]*>Lab/);
+  assert.match(learningPath(d, 'k8s', new Map([['n', false]])), /id="n-chunks" hidden/);
+  assert.equal(learningPath(d, 'sd'), '');
+});

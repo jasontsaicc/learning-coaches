@@ -210,3 +210,25 @@ assert version_entry(entry, assets) == versioned
 assert version_entry(entry, {**assets, 'app.js': b'changed'}) != versioned
 assert entry == '<link href="styles.css"><script>import "./app.js"</script>'
 print('asset cache versions OK')
+
+# Explicit paths reject missing notes and preserve the learner's actual queue.
+from build import validate_paths, path_position, ROOT
+import json
+catalog = json.loads((ROOT / 'site/learning-paths.json').read_text())
+sd_queue = catalog['sd'][3]['nodes'][5:]
+assert [n['label'] for n in sd_queue] == ['Metrics & Logging', 'Top-K', 'Brownfield', 'Deploy System', 'Distributed Cache', 'Payment', 'Ticket', 'News Feed']
+scaling = next(n for p in catalog['k8s'] for n in p['nodes'] if n['label'] == '自動伸縮')
+assert [c['label'].split()[0] for c in scaling['chunks']] == ['HPA', 'VPA', 'KEDA', 'CA/Karpenter']
+assert path_position(catalog['k8s'], '## Current Session breakpoint\ns53:P3 C-3b KEDA chunk 1/3\n## Next\nsecret', 'k8s') == scaling['id']
+assert path_position(catalog['k8s'], '## Current Session breakpoint\nunknown\n', 'k8s') is None
+try:
+    validate_paths({'k8s': [{'id': 'p', 'label': 'P', 'note': '../private.html', 'nodes': []}]}, set())
+    raise AssertionError('unexported note accepted')
+except ValueError:
+    pass
+try:
+    validate_paths({'k8s': [{'id': 'p', 'label': 'P', 'nodes': [{'id': 'p', 'label': 'N', 'chunks': []}]}]}, set())
+    raise AssertionError('duplicate id accepted')
+except ValueError:
+    pass
+print('Learning paths OK')

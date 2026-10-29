@@ -30,12 +30,12 @@ async function smoke(browser) {
       fullPage: true,
     });
     await page.goto(url + "#/c/k8s");
-    const notes = page.locator(".phase-list > details").filter({ hasText: "P1 核心物件" }).first();
-    await notes.locator(":scope > summary").click();
-    await notes.locator('a[href$=".html"]').first().waitFor();
-    assert.equal(await notes.locator('a.md-link').first().isVisible(), true);
-    assert.equal(await page.locator('.markdown-notes').count(), 0);
-    const primary = notes.locator('.lesson-node a.lesson').first();
+    const notes = page.locator(".path-node").filter({ hasText: "健康與發布" }).first();
+    const toggle = notes.locator(".path-toggle");
+    await toggle.click();
+    assert.equal(await toggle.getAttribute('aria-expanded'), 'true');
+    const primary = notes.locator('.path-chunks a').first();
+    await primary.waitFor();
     const [popup] = await Promise.all([page.waitForEvent('popup'), primary.click()]);
     await popup.waitForLoadState();
     assert.ok(popup.url().endsWith('.html'));
@@ -49,7 +49,22 @@ async function smoke(browser) {
     const built = await (await page.request.get(url + "data.json")).json();
     for (const coach of ["k8s", "sd", "leetcode", "ca"]) {
       await page.goto(url + "#/c/" + coach);
-      await page.locator(".phase-list").waitFor();
+      await page.locator(built.paths?.[coach] ? ".learning-path" : ".phase-list").waitFor();
+      if (built.paths?.[coach]) {
+        const nodes = built.paths[coach].flatMap((p) => p.nodes);
+        assert.equal(await page.locator('.path-node').count(), nodes.length);
+        for (const n of nodes) for (const chunk of n.chunks) {
+          const row = page.locator(`[id="${chunk.id}"]`);
+          assert.equal(await row.locator('a').count(), chunk.note ? 1 : 0);
+        }
+        await page.locator('#path-collapse').click();
+        const button = page.locator('.path-toggle').first();
+        await button.focus();
+        await page.keyboard.press('Enter');
+        assert.equal(await button.getAttribute('aria-expanded'), 'true');
+        await page.keyboard.press('Space');
+        assert.equal(await button.getAttribute('aria-expanded'), 'false');
+      }
       assert.equal(await page.locator('.markdown-notes').count(), 0);
       for (const size of await page.locator('.md-link').evaluateAll((links) => links.map((a) => getComputedStyle(a).fontSize)))
         assert.equal(size, '12px');
@@ -62,7 +77,7 @@ async function smoke(browser) {
       const expected = [...new Set(nodes.flatMap((n) => n.files ?? []))];
       const hrefs = await page.locator("#app a[href]").evaluateAll((links) => links.map((a) => a.getAttribute("href")));
       for (const f of expected) assert.ok(hrefs.includes(f.endsWith(".md") ? "#/read/" + encodeURIComponent(f) : "files/" + encodeURI(f)), `missing note: ${f}`);
-      for (const n of nodes.filter((n) => ["topic", "problem"].includes(n.kind))) {
+      for (const n of (built.paths?.[coach] ? [] : nodes).filter((n) => ["topic", "problem"].includes(n.kind))) {
         const node = page.locator(".lesson-node").filter({ has: page.locator(`[data-topic="${n.id}"]`) });
         for (const f of (n.files ?? []).filter((f) => f.endsWith(".html")))
           assert.equal(await node.locator(`a[href="files/${encodeURI(f)}"]`).count(), 1);
@@ -144,7 +159,7 @@ async function smoke(browser) {
     await page.setViewportSize({ width: 360, height: 800 });
     for (const [route, name, selector] of [
       ["", "home", "#chapters"],
-      ["#/c/k8s", "course", ".phase"],
+      ["#/c/k8s", "course", ".path-node"],
       ["#/practice/sd-cache-aside", "practice", "#answer-form"],
       [
         "#/read/" +
