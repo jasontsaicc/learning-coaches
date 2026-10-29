@@ -25,7 +25,7 @@
 
 **Chat System(Day 35-36)結束(S56 G 快收,2026-10-29)**:G 6/8 測到的維度;Day 37 PoC 依 10-17 re-plan 跳過。S52–S55 的 chunk 紀錄已遷至 archive/breakpoint-history.md。
 
-下一場 resume:Metrics/Logging(Day 46,10-29 方案 B 隊列第 1 題;預習頁已有)。
+下一場 resume:Metrics/Logging(Day 46,10-29 方案 B 隊列第 1 題;預習頁 https://claude.ai/artifact/UX2d2QxkGp1UD5Fyznwdbe ,repo 檔 portfolio/sd/notes/day46-metrics-logging-layers.html)。
 
 ## Phase status
 
