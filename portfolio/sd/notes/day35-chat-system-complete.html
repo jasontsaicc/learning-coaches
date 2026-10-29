@@ -1,0 +1,630 @@
+<title>Chat System 全貌</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC:wght@400;700&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: one notebook column on graph paper; teal sd accent band; figures on taped cards, failure cases as comic panels */
+:root {
+  --paper: #F6F8FA;
+  --grid: rgba(90,130,170,.16);
+  --ink: #23313E;
+  --ink-soft: #55677A;
+  --card: #FFFFFF;
+  --accent: #0B7285;
+  --on-accent: #FFFFFF;
+  --tape: color-mix(in srgb, var(--accent) 35%, transparent);
+  --who: #FFE98A;
+  --see: #BDEEF6;
+  --may: #F9CDE0;
+  --wrong: #D2453A;
+  --ok: #2F8F5B;
+  --line: #9DB0C2;
+  --font-hand: "LXGW WenKai TC", "Noto Sans TC", "PingFang TC", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #1A2320; --grid: rgba(200,230,210,.08); --ink: #E6EDE8; --ink-soft: #A9BAB1;
+    --card: #24302C; --accent: #3BC9DB; --on-accent: #10221F; --who: #8A7A2A; --see: #2B6A74; --may: #7A3F57;
+    --wrong: #FF8A7E; --ok: #7FD3A1; --line: #5E7268; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #1A2320; --grid: rgba(200,230,210,.08); --ink: #E6EDE8; --ink-soft: #A9BAB1;
+  --card: #24302C; --accent: #3BC9DB; --on-accent: #10221F; --who: #8A7A2A; --see: #2B6A74; --may: #7A3F57;
+  --wrong: #FF8A7E; --ok: #7FD3A1; --line: #5E7268; color-scheme: dark;
+}
+body {
+  background-color: var(--paper);
+  background-image: linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 22px 22px;
+  color: var(--ink);
+  font-family: var(--font-hand);
+  font-size: 17px;
+  line-height: 1.75;
+}
+.band { background: var(--accent); color: var(--on-accent); padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 22px 18px; }
+.band > div { max-width: 760px; margin: 0 auto; display: grid; gap: 8px; }
+.band a { color: inherit; }
+.page { max-width: 760px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 28px 64px; display: grid; gap: 36px; }
+h1, h2, h3 { text-wrap: balance; line-height: 1.3; margin: 0; }
+h1 { font-size: 2.1rem; }
+h2 { font-size: 1.4rem; display: flex; flex-wrap: wrap; align-items: baseline; gap: 10px; }
+h2 .badge { font-family: var(--font-mono); font-size: .78rem; background: var(--accent); color: var(--on-accent); padding: 1px 8px; border-radius: 3px; }
+h2 .time { font-family: var(--font-mono); font-size: .74rem; color: var(--ink-soft); letter-spacing: .04em; }
+p { margin: 0; }
+section { display: grid; gap: 14px; min-width: 0; }
+.sub { font-size: .95rem; opacity: .9; }
+.lead { font-size: 1.12rem; font-weight: 700; }
+.progress { display: flex; flex-wrap: wrap; gap: 6px 12px; font-family: var(--font-mono); font-size: .8rem; }
+.progress a { color: inherit; text-decoration: none; }
+mark { background: linear-gradient(transparent 52%, var(--who) 52%); color: inherit; padding: 0 2px; }
+mark.see { background: linear-gradient(transparent 52%, var(--see) 52%); }
+mark.may { background: linear-gradient(transparent 52%, var(--may) 52%); }
+code { font-family: var(--font-mono); font-size: .86em; background: color-mix(in srgb, var(--line) 22%, transparent); padding: 1px 5px; border-radius: 3px; }
+.card { position: relative; background: var(--card); padding: 22px 16px 14px; box-shadow: 0 1px 3px rgba(0,0,0,.12); min-width: 0; }
+.card::before { content: ""; position: absolute; top: -9px; left: 50%; width: 92px; height: 20px; transform: translateX(-50%) rotate(-2deg); background: var(--tape); }
+.scroll { overflow-x: auto; }
+svg.fig { display: block; min-width: 600px; width: 100%; height: auto; }
+svg text { font-family: var(--font-mono); fill: var(--ink); }
+svg .hand { font-family: var(--font-hand); }
+.rule { border-left: 4px solid var(--accent); padding: 6px 12px; font-size: 1.05rem; }
+.wrong { border-left: 4px solid var(--wrong); padding: 4px 12px; display: grid; gap: 2px; }
+.wrong b { color: var(--wrong); font-size: .85rem; letter-spacing: .05em; }
+.fix { border-left: 4px solid var(--ok); padding: 4px 12px; }
+.panels { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 14px; }
+.panel { border: 2px solid var(--ink); background: var(--card); padding: 10px; display: grid; gap: 6px; min-width: 0; align-content: start; }
+.panel h3 { font-size: 1rem; font-family: var(--font-mono); }
+.panel p { font-size: .92rem; }
+.panel svg { width: 100%; height: auto; display: block; }
+@media (max-width: 560px) { .panels { grid-template-columns: 1fr; } }
+table { border-collapse: collapse; width: 100%; font-size: .95rem; font-variant-numeric: tabular-nums; }
+th, td { border-bottom: 1px dashed var(--line); padding: 8px 6px; text-align: left; vertical-align: top; }
+th { font-family: var(--font-mono); font-size: .78rem; letter-spacing: .05em; color: var(--ink-soft); font-weight: 600; }
+ol, ul { margin: 0; padding-left: 1.3em; display: grid; gap: 6px; }
+details { background: var(--card); border: 2px dashed var(--line); padding: 10px 14px; }
+details[open] { border-style: solid; }
+details summary { cursor: pointer; font-weight: 700; }
+details > div { display: grid; gap: 10px; margin-top: 10px; }
+.two { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 14px; }
+@media (max-width: 560px) { .two { grid-template-columns: 1fr; } }
+.en { font-family: var(--font-mono); font-size: .88rem; color: var(--ink-soft); }
+pre { margin: 0; font-family: var(--font-mono); font-size: .82rem; line-height: 1.5; background: var(--card); border: 1px solid var(--line); padding: 10px 12px; overflow-x: auto; }
+.next { border: 3px solid var(--accent); background: var(--card); padding: 14px 16px; display: grid; gap: 6px; }
+a { color: var(--accent); text-underline-offset: 3px; }
+a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+section > h3 { font-size: 1.1rem; margin-top: 6px; }
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="var(--ink)"/></marker>
+    <marker id="ah-r" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="var(--wrong)"/></marker>
+    <marker id="ah-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="var(--accent)"/></marker>
+  </defs>
+</svg>
+
+<header class="band">
+  <div>
+    <p class="sub">sd 課程 · P3 Chat System · Day 35–36 總整理 · S49–S56（2026-10-29 收尾）</p>
+    <h1>Chat System 全貌</h1>
+    <p>讀完這頁你能：用一張圖從「Alice 按送出」講到「Bob 看到已讀」，並答出 3AM page 與砍成本兩題。</p>
+    <nav class="progress" aria-label="layers"><a href="#l0">L0 ✓</a><a href="#l1">L1 ✓</a><a href="#l2">L2 ✓</a><a href="#l3">L3 ✓</a><a href="#l4">L4 ✓</a><a href="#l5">L5 ✓</a><a href="#l6">L6 ✓</a><a href="#l7">L7 ✓</a><a href="#trail">錯題</a></nav>
+  </div>
+</header>
+
+<main class="page">
+
+  <p class="sub">這頁把四份舊頁收成一份。細節回原頁：<a href="day35-chat-system-layers.html">1v1 Layers</a>、<a href="day35-chat-offline-push-slo.html">Offline Push + SLO</a>、<a href="day36-group-fanout.html">Group Fan-out</a>、<a href="day36-presence-heartbeat.html">Presence Heartbeat</a>。</p>
+
+  <!-- L0 -->
+  <section id="l0">
+    <h2><span class="badge">L0</span>一張圖<span class="time">讀 1 分鐘</span></h2>
+    <p class="lead">信先投進信箱（DB），再用對講機喊一聲（pub/sub）；沒人在聽就按門鈴（push），Bob 回來自己開信箱拿。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 680 245" role="img" aria-label="Alice stores the message in the DB mailbox, the walkie-talkie pub/sub shouts it to online Bob, and if nobody listens a doorbell push wakes offline Bob, who then fetches from the mailbox.">
+        <circle cx="40" cy="110" r="24" fill="var(--who)" stroke="var(--ink)" stroke-width="1.5"/>
+        <text x="40" y="114" text-anchor="middle" font-size="12">Alice</text>
+        <line x1="64" y1="110" x2="106" y2="110" stroke="var(--ink)" stroke-width="2" marker-end="url(#ah)"/>
+        <text x="85" y="100" text-anchor="middle" font-size="11" class="hand">1 存</text>
+        <rect x="110" y="85" width="130" height="50" fill="var(--card)" stroke="var(--accent)" stroke-width="2.5"/>
+        <text x="175" y="106" text-anchor="middle" font-size="15" class="hand">信箱</text>
+        <text x="175" y="125" text-anchor="middle" font-size="11">DB = truth</text>
+        <line x1="240" y1="92" x2="296" y2="58" stroke="var(--ink)" stroke-width="2" marker-end="url(#ah)"/>
+        <text x="258" y="64" text-anchor="middle" font-size="11" class="hand">2 喊</text>
+        <rect x="300" y="25" width="140" height="50" fill="var(--card)" stroke="var(--ink)" stroke-width="2"/>
+        <text x="370" y="46" text-anchor="middle" font-size="15" class="hand">對講機</text>
+        <text x="370" y="65" text-anchor="middle" font-size="11">Redis pub/sub</text>
+        <line x1="440" y1="50" x2="536" y2="50" stroke="var(--ink)" stroke-width="2" marker-end="url(#ah)"/>
+        <text x="488" y="42" text-anchor="middle" font-size="11" class="hand">3 即時送</text>
+        <rect x="540" y="25" width="120" height="50" fill="var(--see)" stroke="var(--ink)" stroke-width="1.5"/>
+        <text x="600" y="46" text-anchor="middle" font-size="14" class="hand">Bob 在線</text>
+        <text x="600" y="65" text-anchor="middle" font-size="10">WebSocket 連著</text>
+        <line x1="370" y1="75" x2="370" y2="156" stroke="var(--wrong)" stroke-width="2" stroke-dasharray="5 4" marker-end="url(#ah-r)"/>
+        <text x="380" y="120" font-size="11" class="hand" fill="var(--wrong)">PUBLISH 回 0 = 沒人在聽</text>
+        <rect x="300" y="160" width="140" height="50" fill="var(--card)" stroke="var(--ink)" stroke-width="2"/>
+        <text x="370" y="181" text-anchor="middle" font-size="15" class="hand">門鈴</text>
+        <text x="370" y="200" text-anchor="middle" font-size="10">push (APNs / FCM)</text>
+        <line x1="440" y1="185" x2="536" y2="185" stroke="var(--ink)" stroke-width="2" marker-end="url(#ah)"/>
+        <text x="488" y="177" text-anchor="middle" font-size="11" class="hand">叮咚</text>
+        <rect x="540" y="160" width="120" height="50" fill="var(--may)" stroke="var(--ink)" stroke-width="1.5"/>
+        <text x="600" y="181" text-anchor="middle" font-size="14" class="hand">Bob 離線</text>
+        <text x="600" y="200" text-anchor="middle" font-size="10">手機鎖屏</text>
+        <path d="M600 210 V232 H175 V139" fill="none" stroke="var(--accent)" stroke-width="2" stroke-dasharray="6 4" marker-end="url(#ah-a)"/>
+        <text x="390" y="226" text-anchor="middle" font-size="11" class="hand">4 Bob 打開 App → 回信箱拿漏掉的（catch-up）</text>
+      </svg>
+    </div>
+    <p>整個 chat system 就是這四步。後面每一層都只是在回答：哪一步會壞、壞了誰來補。</p>
+  </section>
+
+  <!-- L1 -->
+  <section id="l1">
+    <h2><span class="badge">L1</span>第一性原理<span class="time">讀 2 分鐘</span></h2>
+    <p class="lead">四個躲不掉的限制，逼出四個設計。設計不是選出來的，是被限制推出來的。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 680 270" role="img" aria-label="Four constraints on the left map to four design choices on the right.">
+        <text x="155" y="16" text-anchor="middle" font-size="13" class="hand" fill="var(--wrong)">躲不掉的限制</text>
+        <text x="525" y="16" text-anchor="middle" font-size="13" class="hand" fill="var(--accent)">被逼出來的設計</text>
+        <g font-size="12.5" class="hand">
+          <rect x="10" y="28" width="290" height="46" fill="var(--card)" stroke="var(--wrong)" stroke-width="2"/>
+          <text x="22" y="56">server 撥不進手機（carrier NAT）</text>
+          <rect x="380" y="28" width="290" height="46" fill="var(--card)" stroke="var(--accent)" stroke-width="2"/>
+          <text x="392" y="56">client 自己開 WebSocket；離線靠 push</text>
+          <rect x="10" y="88" width="290" height="46" fill="var(--card)" stroke="var(--wrong)" stroke-width="2"/>
+          <text x="22" y="116">連線黏在某一台，Bob 在別台</text>
+          <rect x="380" y="88" width="290" height="46" fill="var(--card)" stroke="var(--accent)" stroke-width="2"/>
+          <text x="392" y="116">pub/sub 當路由：發的人不必知道 Bob 在哪</text>
+          <rect x="10" y="148" width="290" height="46" fill="var(--card)" stroke="var(--wrong)" stroke-width="2"/>
+          <text x="22" y="176">每台機器的時鐘都不一樣</text>
+          <rect x="380" y="148" width="290" height="46" fill="var(--card)" stroke="var(--accent)" stroke-width="2"/>
+          <text x="392" y="176">per-conversation seq（DB atomic +1）</text>
+          <rect x="10" y="208" width="290" height="46" fill="var(--card)" stroke="var(--wrong)" stroke-width="2"/>
+          <text x="22" y="236">網路會斷；pub/sub 不補送</text>
+          <rect x="380" y="208" width="290" height="46" fill="var(--card)" stroke="var(--accent)" stroke-width="2"/>
+          <text x="392" y="236">DB = truth；client 帶 last seq 補（catch-up）</text>
+        </g>
+        <g stroke="var(--ink)" stroke-width="2" marker-end="url(#ah)">
+          <line x1="304" y1="51" x2="374" y2="51"/><line x1="304" y1="111" x2="374" y2="111"/><line x1="304" y1="171" x2="374" y2="171"/><line x1="304" y1="231" x2="374" y2="231"/>
+        </g>
+      </svg>
+    </div>
+    <p class="rule">拿掉任何一個設計，就回到左邊那個限制的後果：拿掉 pub/sub = server 輪詢 DB；拿掉 seq = 稽核紀錄出現假劇情；拿掉 catch-up = 斷線那幾秒的訊息永遠消失。</p>
+  </section>
+
+  <!-- L2 -->
+  <section id="l2">
+    <h2><span class="badge">L2</span>機制<span class="time">讀 8 分鐘</span></h2>
+    <p class="lead">一則訊息走兩條軸：先存（durability），再送（delivery）。存成功才回 Alice 打勾。</p>
+
+    <h3>2a · 1v1 送一則訊息</h3>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 700 350" role="img" aria-label="Sequence: Alice sends to chat-1, chat-1 inserts with seq 58 and commits, acks Alice, publishes to user:Bob, Redis delivers to chat-7, chat-7 sends frame to Bob, Bob acks.">
+        <rect x="0" y="56" width="700" height="104" fill="var(--see)" opacity=".35"/>
+        <rect x="0" y="166" width="700" height="104" fill="var(--who)" opacity=".35"/>
+        <g font-size="12">
+          <rect x="10" y="12" width="80" height="28" fill="var(--card)" stroke="var(--ink)"/><text x="50" y="31" text-anchor="middle">Alice</text>
+          <rect x="125" y="12" width="80" height="28" fill="var(--card)" stroke="var(--ink)"/><text x="165" y="31" text-anchor="middle">chat-1</text>
+          <rect x="245" y="12" width="80" height="28" fill="var(--card)" stroke="var(--accent)" stroke-width="2"/><text x="285" y="31" text-anchor="middle">DB</text>
+          <rect x="365" y="12" width="80" height="28" fill="var(--card)" stroke="var(--ink)"/><text x="405" y="31" text-anchor="middle">Redis</text>
+          <rect x="485" y="12" width="80" height="28" fill="var(--card)" stroke="var(--ink)"/><text x="525" y="31" text-anchor="middle">chat-7</text>
+          <rect x="605" y="12" width="80" height="28" fill="var(--card)" stroke="var(--ink)"/><text x="645" y="31" text-anchor="middle">Bob</text>
+        </g>
+        <g stroke="var(--line)" stroke-dasharray="3 4"><line x1="50" y1="40" x2="50" y2="275"/><line x1="165" y1="40" x2="165" y2="275"/><line x1="285" y1="40" x2="285" y2="275"/><line x1="405" y1="40" x2="405" y2="275"/><line x1="525" y1="40" x2="525" y2="275"/><line x1="645" y1="40" x2="645" y2="275"/></g>
+        <g stroke="var(--ink)" stroke-width="1.8">
+          <line x1="50" y1="72" x2="161" y2="72" marker-end="url(#ah)"/>
+          <line x1="165" y1="98" x2="281" y2="98" marker-end="url(#ah)"/>
+          <line x1="285" y1="124" x2="169" y2="124" marker-end="url(#ah)"/>
+          <line x1="165" y1="150" x2="54" y2="150" stroke-dasharray="5 3" marker-end="url(#ah)"/>
+          <line x1="165" y1="184" x2="401" y2="184" marker-end="url(#ah)"/>
+          <line x1="405" y1="210" x2="521" y2="210" marker-end="url(#ah)"/>
+          <line x1="525" y1="236" x2="641" y2="236" marker-end="url(#ah)"/>
+          <line x1="645" y1="262" x2="529" y2="262" stroke-dasharray="5 3" marker-end="url(#ah)"/>
+        </g>
+        <g font-size="11">
+          <text x="107" y="66" text-anchor="middle">send(text)</text>
+          <text x="225" y="92" text-anchor="middle">INSERT + seq=58</text>
+          <text x="225" y="118" text-anchor="middle">COMMIT ok</text>
+          <text x="107" y="144" text-anchor="middle">ack ✓（存好了）</text>
+          <text x="285" y="178" text-anchor="middle">PUBLISH user:Bob</text>
+          <text x="465" y="204" text-anchor="middle">有訂閱者才收到</text>
+          <text x="585" y="230" text-anchor="middle">WS frame seq=58</text>
+          <text x="585" y="256" text-anchor="middle">ACK</text>
+        </g>
+        <text x="405" y="294" text-anchor="middle" font-size="11" fill="var(--wrong)">PUBLISH 回 0 → 改走 push</text>
+        <text x="560" y="314" text-anchor="middle" font-size="11" fill="var(--accent)">SLI = t(ACK) − t(COMMIT)</text>
+        <text x="10" y="340" font-size="12" class="hand">藍底 = durability 軸（存，DB 負責）　黃底 = delivery 軸（送，pub/sub 負責）</text>
+      </svg>
+    </div>
+    <p>DB 掛了 = 送出失敗，要明確回錯，不能假 ack。pub/sub 掛了 = 只掉即時性，訊息還在 DB。</p>
+
+    <h3>2b · 斷線補洞：catch-up 與 gap detection</h3>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 620 120" role="img" aria-label="Client has 1041 to 1043, 1044 never arrived, 1045 is buffered. After 500 ms the client runs catch-up from 1043.">
+        <g font-size="13">
+          <rect x="20" y="20" width="90" height="40" fill="var(--card)" stroke="var(--ok)" stroke-width="2"/><text x="65" y="45" text-anchor="middle">1041</text>
+          <rect x="130" y="20" width="90" height="40" fill="var(--card)" stroke="var(--ok)" stroke-width="2"/><text x="175" y="45" text-anchor="middle">1042</text>
+          <rect x="240" y="20" width="90" height="40" fill="var(--card)" stroke="var(--ok)" stroke-width="2"/><text x="285" y="45" text-anchor="middle">1043</text>
+          <rect x="350" y="20" width="90" height="40" fill="none" stroke="var(--wrong)" stroke-width="2" stroke-dasharray="5 4"/><text x="395" y="45" text-anchor="middle" fill="var(--wrong)">1044 ?</text>
+          <rect x="460" y="20" width="90" height="40" fill="var(--who)" stroke="var(--ink)" stroke-width="1.5"/><text x="505" y="45" text-anchor="middle">1045</text>
+        </g>
+        <text x="285" y="78" text-anchor="middle" font-size="11" class="hand">last_seen</text>
+        <text x="395" y="78" text-anchor="middle" font-size="11" class="hand" fill="var(--wrong)">沒到（看不見的洞）</text>
+        <text x="505" y="78" text-anchor="middle" font-size="11" class="hand">先 buffer</text>
+        <text x="20" y="106" font-size="12" class="hand">seq 連續才看得出洞 → 等 ~500ms → 1044 還沒來 → catch-up WHERE seq &gt; 1043 → 用 seq 去重</text>
+      </svg>
+    </div>
+<pre>-- Bob 重連，帶 last_seq = 1043
+SELECT * FROM messages
+WHERE conversation_id = :cid   -- 少這行 = 改 cid 就讀到別人的對話
+  AND seq &gt; 1043
+ORDER BY seq LIMIT 100;        -- 新手機 last = 0 → 全部歷史，要分頁
+-- 查之前先驗證 Bob 是 :cid 的成員</pre>
+
+    <h3>2c · Group：從 per-member 到 server 訂閱 group</h3>
+    <div class="panels">
+      <div class="panel">
+        <h3>A · 一人一個 channel</h3>
+        <svg viewBox="0 0 300 180" role="img" aria-label="Sender publishes 500 times, once per member channel.">
+          <rect x="10" y="70" width="64" height="36" fill="var(--card)" stroke="var(--ink)"/><text x="42" y="93" text-anchor="middle" font-size="11">sender</text>
+          <g stroke="var(--wrong)" stroke-width="1"><line x1="74" y1="88" x2="246" y2="20"/><line x1="74" y1="88" x2="246" y2="36"/><line x1="74" y1="88" x2="246" y2="52"/><line x1="74" y1="88" x2="246" y2="68"/><line x1="74" y1="88" x2="246" y2="84"/><line x1="74" y1="88" x2="246" y2="100"/><line x1="74" y1="88" x2="246" y2="116"/><line x1="74" y1="88" x2="246" y2="132"/><line x1="74" y1="88" x2="246" y2="148"/></g>
+          <g fill="var(--see)" stroke="var(--ink)"><circle cx="252" cy="20" r="6"/><circle cx="252" cy="36" r="6"/><circle cx="252" cy="52" r="6"/><circle cx="252" cy="68" r="6"/><circle cx="252" cy="84" r="6"/><circle cx="252" cy="100" r="6"/><circle cx="252" cy="116" r="6"/><circle cx="252" cy="132" r="6"/><circle cx="252" cy="148" r="6"/></g>
+          <text x="266" y="88" font-size="11">… ×500</text>
+          <text x="10" y="174" font-size="11" class="hand">每則先查 500 人在哪台，再 PUBLISH 500 次</text>
+        </svg>
+        <p>10 萬人 × 5 則/s = <mark class="may">每秒 50 萬次查詢</mark>。瓶頸是查，不是 PUBLISH。</p>
+      </div>
+      <div class="panel">
+        <h3>B · server 訂閱 group</h3>
+        <svg viewBox="0 0 300 180" role="img" aria-label="Sender publishes once to group channel; three chat servers already subscribed receive it.">
+          <rect x="6" y="70" width="60" height="36" fill="var(--card)" stroke="var(--ink)"/><text x="36" y="93" text-anchor="middle" font-size="11">sender</text>
+          <line x1="66" y1="88" x2="96" y2="88" stroke="var(--ok)" stroke-width="2" marker-end="url(#ah)"/>
+          <rect x="100" y="68" width="96" height="40" fill="var(--who)" stroke="var(--ink)"/><text x="148" y="92" text-anchor="middle" font-size="10">group:all-co</text>
+          <g stroke="var(--ok)" stroke-width="2"><line x1="196" y1="80" x2="222" y2="36" marker-end="url(#ah)"/><line x1="196" y1="88" x2="222" y2="88" marker-end="url(#ah)"/><line x1="196" y1="96" x2="222" y2="138" marker-end="url(#ah)"/></g>
+          <g font-size="10"><rect x="226" y="20" width="68" height="30" fill="var(--card)" stroke="var(--ink)"/><text x="260" y="39" text-anchor="middle">chat-1</text><rect x="226" y="73" width="68" height="30" fill="var(--card)" stroke="var(--ink)"/><text x="260" y="92" text-anchor="middle">chat-2</text><text x="260" y="118" text-anchor="middle">⋮</text><rect x="226" y="124" width="68" height="30" fill="var(--card)" stroke="var(--ink)"/><text x="260" y="143" text-anchor="middle">chat-50</text></g>
+          <text x="6" y="174" font-size="11" class="hand">PUBLISH 1 次；server 連線時已 SUBSCRIBE</text>
+        </svg>
+        <p>成員查詢沒有消失，是<mark>移到「連線時 / 成員異動時」</mark>查一次並 cache。</p>
+      </div>
+    </div>
+
+    <h3>2d · Presence：heartbeat + subscribe-on-view</h3>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 700 300" role="img" aria-label="Bob sends heartbeat at 0, 5, 10 seconds then stops; the presence key lives until 25 seconds, so others see a stale online state for up to 15 seconds. Below, Alice opens her friend list: GET snapshot, then SUBSCRIBE, then UNSUB when leaving the screen.">
+        <text x="20" y="20" font-size="13" class="hand">Bob 的 heartbeat（每 5s SET presence:bob EX 15）</text>
+        <line x1="60" y1="56" x2="670" y2="56" stroke="var(--line)" stroke-width="2"/>
+        <g fill="var(--ok)" stroke="var(--ink)"><circle cx="60" cy="56" r="7"/><circle cx="160" cy="56" r="7"/><circle cx="260" cy="56" r="7"/></g>
+        <g fill="none" stroke="var(--wrong)" stroke-dasharray="3 2" stroke-width="1.5"><circle cx="360" cy="56" r="7"/><circle cx="460" cy="56" r="7"/></g>
+        <text x="300" y="42" font-size="11" class="hand" fill="var(--wrong)">Bob 斷線，hb 停了</text>
+        <rect x="60" y="72" width="500" height="18" fill="var(--see)"/>
+        <rect x="260" y="72" width="300" height="18" fill="var(--may)" opacity=".85"/>
+        <text x="70" y="86" font-size="11">key 存在</text>
+        <text x="270" y="86" font-size="11" class="hand">其實斷了，別人仍看到「在線」（stale ≤ 15s）</text>
+        <line x1="560" y1="66" x2="560" y2="100" stroke="var(--wrong)" stroke-width="3"/>
+        <text x="566" y="100" font-size="11" class="hand" fill="var(--wrong)">key 過期 → offline</text>
+        <g font-size="10" fill="var(--ink-soft)" text-anchor="middle"><text x="60" y="116">0s</text><text x="160" y="116">5s</text><text x="260" y="116">10s</text><text x="360" y="116">15s</text><text x="460" y="116">20s</text><text x="560" y="116">25s</text></g>
+        <text x="20" y="150" font-size="13" class="hand">Alice 打開好友列表</text>
+        <g font-size="12">
+          <rect x="20" y="162" width="200" height="54" fill="var(--card)" stroke="var(--accent)" stroke-width="2"/>
+          <text x="120" y="184" text-anchor="middle">1 GET snapshot</text><text x="120" y="204" text-anchor="middle" class="hand" font-size="11">現在誰在線（讀 key）</text>
+          <rect x="250" y="162" width="200" height="54" fill="var(--card)" stroke="var(--accent)" stroke-width="2"/>
+          <text x="350" y="184" text-anchor="middle">2 SUBSCRIBE delta</text><text x="350" y="204" text-anchor="middle" class="hand" font-size="11">之後的變化（pub/sub）</text>
+          <rect x="480" y="162" width="200" height="54" fill="var(--card)" stroke="var(--accent)" stroke-width="2"/>
+          <text x="580" y="184" text-anchor="middle">3 離開畫面 → UNSUB</text><text x="580" y="204" text-anchor="middle" class="hand" font-size="11">不是「離線」才取消</text>
+        </g>
+        <g stroke="var(--ink)" stroke-width="2"><line x1="220" y1="189" x2="246" y2="189" marker-end="url(#ah)"/><line x1="450" y1="189" x2="476" y2="189" marker-end="url(#ah)"/></g>
+        <text x="20" y="246" font-size="12" class="hand">跟 K8s LIST + WATCH 同一招：先拿全量，再收變化。</text>
+        <text x="20" y="274" font-size="12" class="hand">Redis 裡有兩條路：key = snapshot、pub/sub = delta。只壞 pub/sub → 狀態變舊；key 不見 → 全部離線。</text>
+      </svg>
+    </div>
+    <p>數字：10 萬人 ÷ 5s = <mark>每秒 2 萬次 heartbeat 寫入</mark>。狀態變化約 2.5k/s × 每人約 200 個觀看者 = <mark class="may">每秒 50 萬次推送</mark>，所以只推給「正在看畫面」的人。</p>
+
+    <h3>2e · Read receipts：watermark</h3>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 680 215" role="img" aria-label="Messages 55 to 60. Bob read up to 58, Carol up to 57, Dave up to 55. Message 57 has been read by 2 people.">
+        <rect x="250" y="22" width="80" height="158" fill="var(--who)" opacity=".5"/>
+        <g font-size="12">
+          <rect x="60" y="28" width="80" height="34" fill="var(--card)" stroke="var(--ink)"/><text x="100" y="50" text-anchor="middle">msg 55</text>
+          <rect x="155" y="28" width="80" height="34" fill="var(--card)" stroke="var(--ink)"/><text x="195" y="50" text-anchor="middle">msg 56</text>
+          <rect x="250" y="28" width="80" height="34" fill="var(--card)" stroke="var(--ink)" stroke-width="2"/><text x="290" y="50" text-anchor="middle">msg 57</text>
+          <rect x="345" y="28" width="80" height="34" fill="var(--card)" stroke="var(--ink)"/><text x="385" y="50" text-anchor="middle">msg 58</text>
+          <rect x="440" y="28" width="80" height="34" fill="var(--card)" stroke="var(--ink)"/><text x="480" y="50" text-anchor="middle">msg 59</text>
+          <rect x="535" y="28" width="80" height="34" fill="var(--card)" stroke="var(--ink)"/><text x="575" y="50" text-anchor="middle">msg 60</text>
+        </g>
+        <g font-size="12" class="hand"><text x="10" y="96">Bob</text><text x="10" y="128">Carol</text><text x="10" y="160">Dave</text></g>
+        <rect x="60" y="84" width="365" height="16" fill="var(--see)"/><text x="432" y="97" font-size="11">last_read_seq = 58</text>
+        <rect x="60" y="116" width="270" height="16" fill="var(--see)"/><text x="337" y="129" font-size="11">57</text>
+        <rect x="60" y="148" width="80" height="16" fill="var(--see)"/><text x="147" y="161" font-size="11">55</text>
+        <text x="10" y="204" font-size="12" class="hand">msg 57 已讀幾人？count(last_read_seq ≥ 57) = 2（Bob、Carol）。每人一列，Bob 往下滑只 UPDATE 1 次。</text>
+      </svg>
+    </div>
+
+    <div class="rule">四塊積木就夠組出整個 chat：<b>seq</b>（排序 + 補洞 + 已讀）、<b>store-then-deliver</b>（先存再送）、<b>pub/sub</b>（路由）、<b>heartbeat</b>（在線狀態）。</div>
+  </section>
+
+  <!-- L3 -->
+  <section id="l3">
+    <h2><span class="badge">L3</span>取捨<span class="time">讀 4 分鐘</span></h2>
+    <p class="lead">每個選擇都用一個數字或一個風險換來。面試要講得出「選 X 不選 Y，代價是 Z」。</p>
+    <div class="card scroll">
+      <table>
+        <thead><tr><th>選了</th><th>沒選</th><th>為什麼</th><th>代價</th></tr></thead>
+        <tbody>
+          <tr><td>WebSocket</td><td>2s polling</td><td>polling 約 25k req/s，99.9% 是空的</td><td>長連線：idle timeout、drain、重連風暴</td></tr>
+          <tr><td>per-conversation seq</td><td>timestamp</td><td>多台時鐘會互相衝突，稽核紀錄出現假順序</td><td>同一對話寫入排隊（row lock）</td></tr>
+          <tr><td>server 訂閱 group</td><td>per-member PUBLISH</td><td>50 萬查詢/s → 250 PUBLISH/s</td><td>連線時要查成員並 cache</td></tr>
+          <tr><td>watermark</td><td>每則存已讀名單</td><td>Bob 滑過 50 則：1 次 UPDATE vs 50 列 INSERT</td><td>只知道「讀到哪」，不知道每則的讀取時間</td></tr>
+          <tr><td>content-free push</td><td>payload 放訊息</td><td>payload 離開信任邊界（Apple/Google、鎖屏）</td><td>Bob 要多解鎖一次</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="panels">
+      <div class="panel">
+        <h3>每則存已讀名單</h3>
+        <svg viewBox="0 0 300 140" role="img" aria-label="Fifty rows inserted, one per message Bob read.">
+          <g font-size="11"><rect x="20" y="10" width="200" height="22" fill="var(--card)" stroke="var(--ink)"/><text x="30" y="26">msg 1 | Bob | 10:01</text>
+          <rect x="20" y="34" width="200" height="22" fill="var(--card)" stroke="var(--ink)"/><text x="30" y="50">msg 2 | Bob | 10:01</text>
+          <rect x="20" y="58" width="200" height="22" fill="var(--card)" stroke="var(--ink)"/><text x="30" y="74">msg 3 | Bob | 10:01</text>
+          <text x="120" y="96" text-anchor="middle">⋮</text>
+          <rect x="20" y="104" width="200" height="22" fill="var(--card)" stroke="var(--wrong)" stroke-width="2"/><text x="30" y="120">msg 50 | Bob | 10:01</text></g>
+          <text x="232" y="70" font-size="12" class="hand" fill="var(--wrong)">INSERT ×50</text>
+        </svg>
+        <p>500 人群組 × 每則訊息都要寫，寫入量跟著人數 × 訊息數長。</p>
+      </div>
+      <div class="panel">
+        <h3>watermark</h3>
+        <svg viewBox="0 0 300 140" role="img" aria-label="One row per conversation and reader, updated once to 50.">
+          <rect x="20" y="50" width="200" height="30" fill="var(--card)" stroke="var(--ok)" stroke-width="2"/>
+          <text x="30" y="70" font-size="11">(conv, Bob) | last_read = 50</text>
+          <text x="120" y="38" text-anchor="middle" font-size="10" fill="var(--ink-soft)">舊值 0 被覆蓋</text>
+          <text x="232" y="70" font-size="12" class="hand" fill="var(--ok)">UPDATE ×1</text>
+        </svg>
+        <p>一人一列。「已讀 N 人」用 <code>last_read_seq ≥ 57</code> 算出來。</p>
+      </div>
+    </div>
+    <details>
+      <summary>之後再看：heartbeat interval 與 subscribe 範圍</summary>
+      <div>
+        <p><b>heartbeat 5s vs 30s。</b>短 = stale window 小，但寫入多（20k/s vs 3.3k/s）、手機耗電。長 = 便宜，但 Bob 斷線後別人更久以為他在線 → 系統跳過 push。訊息不會丟（DB = truth），壞的是通知延遲。上限被 ALB idle timeout 60s 卡住：hb 走同一條 WS 時，間隔要小於它。</p>
+        <p class="en">"I'd pick 5 seconds with a 15-second TTL, three missed beats. The cost is 20k writes per second, which is cheap on one Redis node. Going longer only delays pushes, it never loses messages."</p>
+        <p><b>subscribe-on-view vs 訂閱所有好友。</b>訂閱全部 = 50 萬推送/s，大部分沒人在看。只訂閱畫面上的人，代價是每次打開畫面多一次 GET snapshot。</p>
+      </div>
+    </details>
+  </section>
+
+  <!-- L4 -->
+  <section id="l4">
+    <h2><span class="badge">L4</span>AWS 怎麼做<span class="time">讀 5 分鐘</span></h2>
+    <p class="lead">ALB 接 WebSocket，chat fleet 照連線數擴，ElastiCache 分兩組（pub/sub、presence），訊息進 Aurora 或 DynamoDB，離線走 SNS。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 700 300" role="img" aria-label="App to ALB to chat fleet; chat fleet to ElastiCache pub/sub, ElastiCache presence, Aurora or DynamoDB, and SNS which goes to APNs/FCM.">
+        <g font-size="12">
+          <rect x="10" y="120" width="76" height="50" fill="var(--see)" stroke="var(--ink)"/><text x="48" y="149" text-anchor="middle">App</text>
+          <rect x="116" y="120" width="96" height="50" fill="var(--card)" stroke="var(--ink)"/><text x="164" y="141" text-anchor="middle">ALB</text><text x="164" y="160" text-anchor="middle" font-size="10">idle 60s</text>
+          <rect x="250" y="100" width="150" height="90" fill="var(--card)" stroke="var(--accent)" stroke-width="2.5"/><text x="325" y="135" text-anchor="middle">chat fleet (ASG)</text><text x="325" y="155" text-anchor="middle" font-size="10">scale on</text><text x="325" y="170" text-anchor="middle" font-size="10">ActiveConnectionCount</text>
+          <rect x="450" y="14" width="160" height="48" fill="var(--card)" stroke="var(--ink)"/><text x="530" y="34" text-anchor="middle">ElastiCache #1</text><text x="530" y="52" text-anchor="middle" font-size="10">pub/sub (SPUBLISH)</text>
+          <rect x="450" y="82" width="160" height="48" fill="var(--card)" stroke="var(--ink)"/><text x="530" y="102" text-anchor="middle">ElastiCache #2</text><text x="530" y="120" text-anchor="middle" font-size="10">presence keys（獨立）</text>
+          <rect x="450" y="150" width="160" height="48" fill="var(--card)" stroke="var(--accent)" stroke-width="2"/><text x="530" y="170" text-anchor="middle">Aurora / DynamoDB</text><text x="530" y="188" text-anchor="middle" font-size="10">messages + seq（truth）</text>
+          <rect x="450" y="218" width="160" height="48" fill="var(--card)" stroke="var(--ink)"/><text x="530" y="238" text-anchor="middle">SNS mobile push</text><text x="530" y="256" text-anchor="middle" font-size="10">PUBLISH 回 0 時</text>
+          <rect x="630" y="218" width="64" height="48" fill="var(--may)" stroke="var(--ink)"/><text x="662" y="238" text-anchor="middle" font-size="10">APNs</text><text x="662" y="254" text-anchor="middle" font-size="10">FCM</text>
+        </g>
+        <g stroke="var(--ink)" stroke-width="2">
+          <line x1="86" y1="145" x2="112" y2="145" marker-end="url(#ah)" marker-start="url(#ah)"/>
+          <line x1="212" y1="145" x2="246" y2="145" marker-end="url(#ah)" marker-start="url(#ah)"/>
+          <line x1="400" y1="115" x2="446" y2="40" marker-end="url(#ah)"/>
+          <line x1="400" y1="135" x2="446" y2="106" marker-end="url(#ah)"/>
+          <line x1="400" y1="160" x2="446" y2="174" marker-end="url(#ah)"/>
+          <line x1="400" y1="180" x2="446" y2="240" marker-end="url(#ah)"/>
+          <line x1="610" y1="242" x2="626" y2="242" marker-end="url(#ah)"/>
+        </g>
+        <text x="10" y="292" font-size="12" class="hand">presence 放獨立 cluster：它是高頻、可重建的 soft state，不要跟 pub/sub 或 cache 搶記憶體。</text>
+      </svg>
+    </div>
+    <div class="card scroll">
+      <table>
+        <thead><tr><th>服務</th><th>用途</th><th>陷阱</th></tr></thead>
+        <tbody>
+          <tr><td>ALB</td><td>WebSocket 入口</td><td>idle timeout 預設 60s，沒流量就斷 → ping 間隔要小於它</td></tr>
+          <tr><td>ALB target group</td><td>drain 一台 chat</td><td>deregistration delay 預設 300s；client 沒 jitter 就同秒重連（thundering herd）</td></tr>
+          <tr><td>ElastiCache presence</td><td>presence key + TTL</td><td>預設 <code>maxmemory-policy</code> 是 volatile-lru：記憶體滿時<mark class="may">先踢有 TTL 的 key，正好是 presence</mark></td></tr>
+          <tr><td>ElastiCache pub/sub</td><td>路由訊息</td><td>cluster mode 下 <code>PUBLISH</code> 廣播到所有 shard；Redis 7 改用 <code>SPUBLISH</code></td></tr>
+          <tr><td>SNS → APNs</td><td>離線門鈴</td><td>APNs 憑證一年到期，到期日 iOS push 全斷；改用 .p8 token 不會過期</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <details>
+      <summary>之後再看：其他陷阱</summary>
+      <div>
+        <ul>
+          <li>API Gateway WebSocket：單一連線最長 2 小時、閒置 10 分鐘就斷，client 要能自動重連。</li>
+          <li>DynamoDB：一個超大 group 的訊息集中在同一 partition key，單 partition 寫入上限 1,000 WCU/s → hot partition。</li>
+          <li>SNS endpoint：token 失效後 endpoint 變 <code>Enabled=false</code>，App 每次登入要重新註冊。</li>
+          <li>ElastiCache 封鎖 <code>CONFIG</code> 指令，改 parameter group 才能改 policy。</li>
+        </ul>
+      </div>
+    </details>
+
+    <h3>砍 30% 成本：先用數字排 knob</h3>
+    <div class="card scroll">
+      <table>
+        <thead><tr><th>順位</th><th>knob（可調的參數）</th><th>現在負載</th><th>怎麼動</th><th>代價</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>presence fan-out</td><td>500k/s</td><td>每 2s 合併一次狀態變化；大群組關掉 presence</td><td>狀態最多晚 2s；大群組看不到誰在線</td></tr>
+          <tr><td>2</td><td>heartbeat interval</td><td>20k/s</td><td>5s → 15s（先確認 ALB idle 60s）</td><td>stale window 變長 → 多跳過幾次 push，訊息不丟</td></tr>
+          <tr><td>3</td><td>WS fleet</td><td>10 萬連線</td><td>Graviton、提高每台連線數</td><td>單台掛掉影響更多人</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="rule">怎麼證明沒砍到可靠性：改之前和之後比 delivery latency SLI、push 漏推率、presence 誤判率。先 canary 一個 region 一週。</p>
+    <p class="sub">職場現實：產品要「每個群組都看得到誰在線」，SRE 和財務要關掉大群組的 presence。拿 500k/s 這個數字去 design review，比講「感覺很貴」有用。</p>
+  </section>
+
+  <!-- L5 -->
+  <section id="l5">
+    <h2><span class="badge">L5</span>規模化<span class="time">讀 3 分鐘</span></h2>
+    <p class="lead">每升一級，都是因為某個數字撐不住，才把一塊拆出去。</p>
+    <div class="card scroll">
+      <svg class="fig" viewBox="0 0 680 250" role="img" aria-label="Evolution ladder with four steps: single server, multiple servers with Redis pub/sub, group subscriptions with split presence, big tech gateway and channel servers.">
+        <g stroke="var(--ink)" stroke-width="1.5">
+          <rect x="10" y="170" width="160" height="70" fill="var(--card)"/>
+          <rect x="180" y="125" width="160" height="115" fill="var(--card)"/>
+          <rect x="350" y="80" width="160" height="160" fill="var(--card)"/>
+          <rect x="520" y="35" width="150" height="205" fill="var(--see)"/>
+        </g>
+        <g font-size="12" class="hand">
+          <text x="20" y="190" font-weight="700">1 一台 server</text><text x="20" y="208">WS + DB</text><text x="20" y="226">~1 萬人</text>
+          <text x="190" y="145" font-weight="700">2 多台 + pub/sub</text><text x="190" y="163">per-user channel</text><text x="190" y="181">+ push + catch-up</text><text x="190" y="199">~10 萬人</text>
+          <text x="360" y="100" font-weight="700">3 拆出去</text><text x="360" y="118">group 訂閱</text><text x="360" y="136">presence 獨立 cluster</text><text x="360" y="154">連線層 / 業務層</text><text x="360" y="172">分開部署</text>
+          <text x="530" y="55" font-weight="700">4 大廠</text><text x="530" y="73">gateway 層</text><text x="530" y="91">channel server</text><text x="530" y="109">（consistent hashing）</text><text x="530" y="127">wide-column 存歷史</text>
+        </g>
+        <g font-size="10" fill="var(--wrong)">
+          <text x="180" y="118">一台連線滿了</text>
+          <text x="350" y="73">50 萬查詢/s</text>
+          <text x="520" y="28">百萬連線、跨 region</text>
+        </g>
+      </svg>
+    </div>
+    <div class="card scroll">
+      <table>
+        <thead><tr><th>路線</th><th>誰選</th><th>優點</th><th>代價</th></tr></thead>
+        <tbody>
+          <tr><td>自建（ALB + chat fleet + Redis）</td><td>chat 本身是產品的公司</td><td>完全控制延遲、成本、功能</td><td>連線層、presence、推播全部自己 on-call</td></tr>
+          <tr><td>買（Amazon Connect Chat、Twilio）</td><td>銀行客服這類「chat 是功能」的公司</td><td>排隊、轉真人、錄存稽核現成</td><td>按量計費、客製受限</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <details>
+      <summary>之後再看：公開的大廠做法</summary>
+      <div>
+        <ul>
+          <li>Discord：<a href="https://discord.com/blog/how-discord-stores-trillions-of-messages">How Discord Stores Trillions of Messages</a>，訊息從 Cassandra 搬到 ScyllaDB。</li>
+          <li>Slack：<a href="https://slack.engineering/real-time-messaging/">Real-time Messaging</a>，gateway server 管連線，channel server 用 consistent hashing 分 channel。</li>
+        </ul>
+      </div>
+    </details>
+  </section>
+
+  <!-- L6 -->
+  <section id="l6">
+    <h2><span class="badge">L6</span>故障與 on-call<span class="time">讀 5 分鐘</span></h2>
+    <p class="lead">先看症狀落在哪條軸：訊息掉了是 storage 軸，訊息慢了或狀態錯了是 delivery 軸。</p>
+    <div class="panels">
+      <div class="panel">
+        <h3>① 全部顯示離線，訊息正常</h3>
+        <svg viewBox="0 0 280 90" role="img" aria-label="Chain App, chat, presence key, DB with presence key crossed out.">
+          <g font-size="10"><rect x="6" y="24" width="56" height="28" fill="var(--card)" stroke="var(--ink)"/><text x="34" y="42" text-anchor="middle">App</text><rect x="76" y="24" width="56" height="28" fill="var(--card)" stroke="var(--ink)"/><text x="104" y="42" text-anchor="middle">chat</text><rect x="146" y="24" width="60" height="28" fill="var(--card)" stroke="var(--wrong)" stroke-width="2"/><text x="176" y="42" text-anchor="middle">key</text><rect x="220" y="24" width="56" height="28" fill="var(--card)" stroke="var(--ok)" stroke-width="2"/><text x="248" y="42" text-anchor="middle">DB</text></g>
+          <g stroke="var(--wrong)" stroke-width="3"><line x1="150" y1="20" x2="202" y2="56"/><line x1="202" y1="20" x2="150" y2="56"/></g>
+          <text x="6" y="80" font-size="11" class="hand">presence key 不見了（S56 那題）</text>
+        </svg>
+        <p>看 <code>Evictions</code>、有沒有剛 failover、WS → Redis 寫入錯誤率。key 是 soft state，修好寫入路徑，15s 內自己長回來。</p>
+      </div>
+      <div class="panel">
+        <h3>② 訊息變慢，DB 全綠</h3>
+        <svg viewBox="0 0 280 90" role="img" aria-label="Chain with pub/sub crossed out, DB green.">
+          <g font-size="10"><rect x="6" y="24" width="56" height="28" fill="var(--card)" stroke="var(--ink)"/><text x="34" y="42" text-anchor="middle">App</text><rect x="76" y="24" width="56" height="28" fill="var(--card)" stroke="var(--ink)"/><text x="104" y="42" text-anchor="middle">chat</text><rect x="146" y="24" width="60" height="28" fill="var(--card)" stroke="var(--wrong)" stroke-width="2"/><text x="176" y="42" text-anchor="middle">pub/sub</text><rect x="220" y="24" width="56" height="28" fill="var(--card)" stroke="var(--ok)" stroke-width="2"/><text x="248" y="42" text-anchor="middle">DB</text></g>
+          <g stroke="var(--wrong)" stroke-width="3"><line x1="150" y1="20" x2="202" y2="56"/><line x1="202" y1="20" x2="150" y2="56"/></g>
+          <text x="6" y="80" font-size="11" class="hand">pub/sub 掛了：只掉即時性</text>
+        </svg>
+        <p>delivery latency SLI 爆、元件 dashboard 全綠。訊息還在 DB，client 重連或發現 gap 就 catch-up。</p>
+      </div>
+      <div class="panel">
+        <h3>③ drain 一台，auth 被打爆</h3>
+        <svg viewBox="0 0 280 90" role="img" aria-label="Many clients reconnect at the same second to auth.">
+          <g stroke="var(--wrong)" stroke-width="1.2"><line x1="20" y1="10" x2="190" y2="40"/><line x1="20" y1="22" x2="190" y2="40"/><line x1="20" y1="34" x2="190" y2="40"/><line x1="20" y1="46" x2="190" y2="40"/><line x1="20" y1="58" x2="190" y2="40"/><line x1="20" y1="70" x2="190" y2="40"/></g>
+          <rect x="190" y="24" width="80" height="32" fill="var(--card)" stroke="var(--wrong)" stroke-width="2"/><text x="230" y="44" text-anchor="middle" font-size="10">auth / DB</text>
+          <text x="6" y="86" font-size="11" class="hand">2 萬 client 同一秒重連</text>
+        </svg>
+        <p>thundering herd。修法：client 加 jitter + exponential backoff；ALB 設 deregistration delay 讓連線慢慢走。</p>
+      </div>
+      <div class="panel">
+        <h3>④ iOS 完全收不到通知</h3>
+        <svg viewBox="0 0 280 90" role="img" aria-label="Chain chat, SNS, APNs crossed out, iPhone.">
+          <g font-size="10"><rect x="6" y="24" width="56" height="28" fill="var(--card)" stroke="var(--ink)"/><text x="34" y="42" text-anchor="middle">chat</text><rect x="76" y="24" width="56" height="28" fill="var(--card)" stroke="var(--ink)"/><text x="104" y="42" text-anchor="middle">SNS</text><rect x="146" y="24" width="60" height="28" fill="var(--card)" stroke="var(--wrong)" stroke-width="2"/><text x="176" y="42" text-anchor="middle">APNs</text><rect x="220" y="24" width="56" height="28" fill="var(--card)" stroke="var(--ink)"/><text x="248" y="42" text-anchor="middle">iPhone</text></g>
+          <g stroke="var(--wrong)" stroke-width="3"><line x1="150" y1="20" x2="202" y2="56"/><line x1="202" y1="20" x2="150" y2="56"/></g>
+          <text x="6" y="80" font-size="11" class="hand">APNs 憑證到期</text>
+        </svg>
+        <p>push 成功率掉到 0，只有 iOS。訊息不丟，使用者打開 App 照樣 catch-up。長期改 .p8 token。</p>
+      </div>
+    </div>
+    <div class="card scroll">
+      <table>
+        <thead><tr><th>SLI</th><th>SLO / alert</th><th>為什麼這樣定</th></tr></thead>
+        <tbody>
+          <tr><td>delivery latency = t(ACK) − t(COMMIT)，只算 PUBLISH 回 1 的</td><td>99% &lt; 2s / 30 天；burn rate 14.4x/1h 與 6x/6h page，1x/3d 開 ticket</td><td>使用者症狀；離線 3 天的人不是系統的錯</td></tr>
+          <tr><td>online users 數量</td><td>5 分鐘內掉 50% 以上 → page</td><td>抓 ① 這種「元件綠、狀態全錯」</td></tr>
+          <tr><td>push 成功率 + 410 比率</td><td>依平台分開看</td><td>抓 ④；410 = token 失效</td></tr>
+        </tbody>
+      </table>
+    </div>
+<pre># ① 第一刀：presence key 還在嗎？
+redis-cli -h $PRESENCE_HOST INFO stats | grep evicted_keys
+redis-cli -h $PRESENCE_HOST INFO keyspace          # keys 數是不是掉到接近 0
+# CloudWatch：ElastiCache Evictions、CurrItems；ALB ActiveConnectionCount</pre>
+  </section>
+
+  <!-- L7 -->
+  <section id="l7">
+    <h2><span class="badge">L7</span>面試<span class="time">讀 4 分鐘</span></h2>
+    <p class="lead">題目："Design a chat system for 100k concurrent users. Support 1:1 and groups up to 500 members, with online status and read receipts."</p>
+    <p>先自己用 L1 的四個限制開場，再展開下面對照。</p>
+    <details>
+      <summary>L4 vs L6 回答對照</summary>
+      <div>
+        <table>
+          <thead><tr><th></th><th>L4</th><th>L6</th></tr></thead>
+          <tbody>
+            <tr><td>開場</td><td>「用 WebSocket 跟 Redis」</td><td>先拆兩軸：storage 給 DB，delivery 給 pub/sub，存好才 ack</td></tr>
+            <tr><td>數字</td><td>沒有</td><td>heartbeat 20k/s、group 查詢 50 萬/s → 所以改 server 訂閱 group</td></tr>
+            <tr><td>排序</td><td>timestamp</td><td>per-conversation seq，順便拿來補洞與算已讀</td></tr>
+            <tr><td>故障</td><td>「Redis 掛了會怎樣」答不出</td><td>pub/sub 掛只掉即時性；presence key 掉 = 全部離線，15s 長回來</td></tr>
+            <tr><td>營運</td><td>看 CPU</td><td>page 在 end-to-end delivery latency；presence 有自己的 alert</td></tr>
+          </tbody>
+        </table>
+        <p class="en">"I split it into two axes. The DB is the source of truth, and I ack the sender only after commit. Delivery goes through Redis pub/sub, so servers don't need to know where the recipient is. Pub/sub is fire-and-forget, so clients track a per-conversation sequence and backfill from the DB on reconnect or on a gap. The same sequence drives read receipts as a per-reader watermark."</p>
+      </div>
+    </details>
+    <details>
+      <summary>收尾雙問（S56）：3AM page + 砍 30%</summary>
+      <div>
+        <p><b>3AM：</b>"Everyone shows offline, but messages still arrive."</p>
+        <p class="en">"Messages flow, so the DB path is fine. The snapshot says offline, so the presence keys are gone. Pub/sub alone would only make status stale. I'd check evictions, a recent failover, and heartbeat write errors. Presence is soft state, so once writes recover it rebuilds within one TTL."</p>
+        <p><b>Cost：</b>"Cut the Redis and WebSocket bill by 30%."</p>
+        <p class="en">"Fan-out is 500k per second and heartbeats are 20k, so I'd start with fan-out: coalesce status updates and turn presence off in large groups. Then stretch the heartbeat, after checking the ALB idle timeout. The cost is a longer stale window, so a few pushes get skipped, but no messages are lost. I'd prove it with the delivery-latency SLI before and after a canary."</p>
+      </div>
+    </details>
+  </section>
+
+  <!-- trail -->
+  <section id="trail">
+    <h2><span class="badge">錯題</span>我錯在這<span class="time">讀 3 分鐘</span></h2>
+    <p class="lead">五個最常回來的錯。每個都對應上面某一張圖。</p>
+    <div class="wrong"><b>我錯在這 · S50</b><span>以為訊息寫進 DB 就送到了。</span></div>
+    <div class="fix">DB 是被動的，不會通知 chat-7。存和送是兩條軸（2a 的藍底 / 黃底）。</div>
+    <div class="wrong"><b>我錯在這 · S51、S52 G</b><span>catch-up 用「最後收到的 timestamp」。</span></div>
+    <div class="fix">用 <code>conversation_id + seq &gt; last_seen</code>。clock skew 會讓晚送的訊息時間比較早，直接漏掉（2b）。</div>
+    <div class="wrong"><b>我錯在這 · S52</b><span>server 不能主動連手機，因為 HTTP 是單向的。</span></div>
+    <div class="fix">限制是 carrier NAT：誰能撥給誰。換 WebSocket 也撥不進去，所以要 client 自己連、離線靠 push（L1 第一列）。</div>
+    <div class="wrong"><b>我錯在這 · S56</b><span>「全部顯示離線、訊息正常」第一刀指 pub/sub。</span></div>
+    <div class="fix">只壞 pub/sub，snapshot 還是對的。全部離線 = presence key 不見（2d 最後一行、L6 ①）。</div>
+    <div class="wrong"><b>我錯在這 · S54、S55、S56</b><span>heartbeat interval 兩邊代價都講了，就是不 commit 數字。</span></div>
+    <div class="fix">用句型收：「I'd pick 5s because…, the cost is…」。砍成本時先用數字排 knob（L4 表格）。</div>
+    <details>
+      <summary>之後再看：其他錯題</summary>
+      <div>
+        <ul>
+          <li>S51：以為 pub/sub 恢復後會補送。Redis pub/sub 是 fire-and-forget。</li>
+          <li>S51：catch-up 交給 Redis。正解是 client 帶 last seq，server 查 DB。</li>
+          <li>S53：server 訂閱 group 後「成員表就省掉了」。沒省掉，是移到連線時查。</li>
+          <li>S55：「離線就取消訂閱」。應該是離開畫面就 UNSUB。</li>
+          <li>S55：每則存已讀名單的代價講不出數字。Bob 滑 50 則 = 50 列 vs 1 次 UPDATE。</li>
+        </ul>
+      </div>
+    </details>
+  </section>
+
+  <div class="next">
+    <b>2 分鐘下一步</b>
+    <p>回 chat 用一句話回答：pub/sub 掛了 10 分鐘，為什麼一則訊息都不會丟？</p>
+  </div>
+
+</main>
