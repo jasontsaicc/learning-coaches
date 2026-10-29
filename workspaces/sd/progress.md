@@ -64,8 +64,7 @@ Weak-topic flags: 無(至今沒有帶 flag 過 gate 的紀錄)。
 - URL Shortener (Day 27-28): high (s35)— S34 Drill 8/9 + S35 PoC 全綠(50 萬碼 0 碰撞 + -race 零警告)
 - Unique ID Generator (Day 29-30): high (s36)— PoC(bit packing + clock skew 偵測)park
 - Distributed Rate Limiter (Day 31-32): high (s40)— 設計知識到位;S40 Gauntlet 暴露輸出習慣病灶
-- Chat System (Day 35-37): med (s52)— Day 35 1v1 chunk 1–6 全過;F ✅ supported;G(換皮叫車)A/B 兩條路 unprompted ✅,catch-up 用 timestamp 回退 + counter scope/owner 冷回憶卡 = ordering 未留存;3AM/cost 未測
-- Chat System Day 36(group fan-out / presence / read receipts): low-med (s56)— chunk 1-3 全 supported;F 3 題 2 過;G 6/8:3AM 第一刀 path 錯需縮題、cost 有 knob 無數字排序
+- Chat System (Day 35-37): med (s56)— Day 35 1v1 chunk 1–6 全過;F ✅ supported;G(換皮叫車)A/B 兩條路 unprompted ✅,catch-up 用 timestamp 回退 + counter scope/owner 冷回憶卡 = ordering 未留存;3AM/cost 未測;Day 36(s53–s56,group fan-out / presence / read receipts)low-med:chunk 1-3 全 supported;F 3 題 2 過;G 6/8:3AM 第一刀 path 錯需縮題、cost 有 knob 無數字排序
 
 ## Scorecard history
 

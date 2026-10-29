@@ -153,8 +153,8 @@ Chat(Day 35-36)S56 收。學員要求把「不排課」的題目排回一部分;
 | 3 | Brownfield migration(Day 62-63) | 5 | ProServe 最可能題型 |
 | 4 | Deploy system mock | 2 | pattern 組裝,不新增教學 |
 | 5 | Distributed Cache(Day 38-39) | 3 | P2 錨定題已蓋大半 |
-| 6 | Ticket / Flash Sale(Day 54-55) | 5 | 熱點爭搶 + overload,接 cache |
-| 7 | Payment(Day 43-45) | 5 | 同日追加(學員拍板):idempotency / exactly-once / ledger,接 Ticket 的下單流程 |
+| 6 | Payment(Day 43-45) | 5 | 同日追加(學員拍板):idempotency / SAGA / ledger + reconciliation |
+| 7 | Ticket / Flash Sale(Day 54-55) | 5 | 熱點爭搶 + overload;curriculum-detail 前置 = Payment 的 idempotency,故排 Payment 後 |
 | 8 | News Feed(Day 40-42) | 3 | fan-out 同 Chat 一族,複習成本低 |
 
 - 未排的題(Autocomplete、Crawler、Proximity、Ride Matching)= P4 mock 的「沒看過的題」,測 pattern transfer。
