@@ -144,7 +144,7 @@ drill 才進 4-step。理由:clarify 不需新知識但後面三步需要,拿新
 
 Chat(Day 35-36)S56 收。學員要求把「不排課」的題目排回一部分;看過 A/B/C 三案的時程後選 B。
 
-**新隊列(約 25 堂,每週 2 堂 SD → P4 約 2027-02 初開始):**
+**新隊列(約 30 堂,每週 2 堂 SD → P4 約 2027-02 中開始):**
 
 | # | 題目 | 估堂數 | 排這裡的理由 |
 |---|---|---|---|
@@ -154,9 +154,10 @@ Chat(Day 35-36)S56 收。學員要求把「不排課」的題目排回一部分;
 | 4 | Deploy system mock | 2 | pattern 組裝,不新增教學 |
 | 5 | Distributed Cache(Day 38-39) | 3 | P2 錨定題已蓋大半 |
 | 6 | Ticket / Flash Sale(Day 54-55) | 5 | 熱點爭搶 + overload,接 cache |
-| 7 | News Feed(Day 40-42) | 3 | fan-out 同 Chat 一族,複習成本低 |
+| 7 | Payment(Day 43-45) | 5 | 同日追加(學員拍板):idempotency / exactly-once / ledger,接 Ticket 的下單流程 |
+| 8 | News Feed(Day 40-42) | 3 | fan-out 同 Chat 一族,複習成本低 |
 
-- 未排的題(Payment、Autocomplete、Crawler、Proximity、Ride Matching)= P4 mock 的「沒看過的題」,測 pattern transfer。
+- 未排的題(Autocomplete、Crawler、Proximity、Ride Matching)= P4 mock 的「沒看過的題」,測 pattern transfer。
 - 估堂數基準:Chat 8 堂(S49-S56)、Notification 約 5 堂。每章目標 = 預習 + chunk(一堂一個)+ F + G/H;收尾產出 hub + mock-l6 頁(deep-dive-notes 主題頁面組)。
 - P3 Phase Gate 是否考:隊列走完時由學員決定。
 
