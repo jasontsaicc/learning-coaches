@@ -69,6 +69,7 @@
 - **s26 明顯正向,但出現新形狀**。正面:預測題**全部作答無一跳過**(s24 連跳三次的洞補上);三句無鷹架機制句(「pod 沒有換 container 換掉只有 upperdir 換掉」/「因為路徑存在 container id 底下的資料夾」/ AZ 順序完整鏈)。負面兩處:① **同義反覆**(dry-run 題「因為它不會去查」= 把問題換句話說,已命名並給檢驗法「對方有沒有拿到一個新事實」)② **F 段獨白純結論**(對完全不懂容器的人只丟三個名詞加三句結論,機制要追問才出來)。
 - 註:s26 的 EKS 順序題雖自帶「因為」,但屬**當堂剛教 + 教練指定「用順序講」的鷹架下複述,不計入無提示正樣本**。無提示正樣本累計:s22 站 7、s24 kernel 題、s25 PV/PVC 1:1、**s26 upperdir 句**。08-09 續盯,新增盯點=**有沒有同義反覆**。
 - s52(2026-10-29):課尾複習 1 沒要求「因為」,自己給出判準 ✅。同堂前段多次要求過「選 X,因為 Y」格式,有 priming,不算 resolved。→ 7 天。
+- s52 同堂收尾:503 nginx 頁換皮明講「選 X,因為 Y」仍只答「B」,追問後補「看到裡面寫 nginx」。同堂前段的 ✅ 不成立 → reset 3 天。
 
 ## 2026-07-17 | default-deny 後的分層(DNS 層 vs 連線層)
 
@@ -483,3 +484,9 @@
 - 判準句:HPA 不看 CPU 只解決「打架」,不解決「什麼時候重建」。驗 VPA 生效看 `kubectl get pod -o yaml` 的 requests 與 `vpaUpdates` annotation;`describe vpa` 只是建議值。
 - s52 由來:F volley「HPA 看 RPS,VPA 開 Auto 完全沒問題?」同意;追問尖峰何時砍答「9 點過 5 分鐘」;「deploy YAML 沒變 = 沒生效?」不確定,二選一後答對。
 - 下次抽考:客戶 VPA Auto + HPA 看 queue 長度,週一早上 Pod 一波重建、502 飆高。問:是誰砍的、去哪裡看證據?(Updater / Events `EvictedByVPA`)
+
+## 2026-10-29 | 4xx vs 5xx 是誰產生的(面試答不出)
+- 正解:4xx = 請求本身不對(404 = ingress 規則沒對上 host / path / ingressClassName);5xx = 請求沒問題、伺服器這邊出錯。所有回應都經過 ingress 回 client,要分的是誰「產生」狀態碼:500 由 app 產生、ingress 原樣轉送;502(連線被拒/重設)、503(Endpoints 空)、504(timeout)由 ingress 自己產生。看 body(app JSON vs nginx HTML 頁)與 header(`Server: nginx` / `awselb/2.0`);後端也是 nginx 時看 ingress access log 的 upstream status。
+- 判準句:先問「這個碼是誰產生的」,再縮小嫌犯;不要從碼直接跳到 DB / Pod。
+- s52 由來:學員自述面試答不出且跟 404 混;複習 2 答「5xx 可能是 DB」;503 nginx 頁換皮選 B ✅(supported,因為要追問)。教材在 phase-2a-networking.md「404 / 502 / 503 排障階梯」。
+- 下次抽考:ALB 回 504、body 是 awselb 頁,app log 完全沒有這筆請求。是誰產生的、第一個查什麼?

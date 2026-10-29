@@ -122,9 +122,9 @@ footer.next strong { color: var(--accent); }
 
 <header class="top">
   <h1>VPA 垂直調整 (P3 C-4)</h1>
-  <p class="goal">讀完這頁你能:說出 VPA 改的是哪個數字、為什麼生產環境大多只開建議模式、為什麼 HPA 和 VPA 不能看同一個 CPU。</p>
+  <p class="goal">讀完這頁你能:說出 VPA 改的是哪個數字、為什麼生產環境大多只開建議模式、為什麼 HPA 和 VPA 不能看同一個 CPU、VPA 出事時去哪裡找證據。</p>
   <div class="progress" aria-label="閱讀進度">
-    <span class="done">Layer 0 ✓</span><span class="done">1 ✓</span><span class="done">2 ✓</span><span>3 ○</span><span>4 ○</span><span>5 ○</span><span>6 ○</span><span>7 ○</span>
+    <span class="done">Layer 0 ✓</span><span class="done">1 ✓</span><span class="done">2 ✓</span><span class="done">3 ✓</span><span class="done">4 ✓</span><span class="done">5 ✓</span><span class="done">6 ✓</span><span class="done">7 ✓</span>
   </div>
 </header>
 
@@ -233,7 +233,7 @@ footer.next strong { color: var(--accent); }
     </svg>
   </div>
 
-  <h3>2b. 4 種模式(updateMode)</h3>
+  <h3>2b. 4 種模式(updateMode),新版多 1 種</h3>
   <p class="lead">生產環境最常用的是 <code>Off</code>:只出建議,由人決定要不要改。</p>
   <div class="tbl">
     <table>
@@ -243,6 +243,7 @@ footer.next strong { color: var(--accent); }
         <tr><td><code>Initial</code></td><td>只在 Pod 建立時套用</td><td>不會主動砍</td><td>不想被中途重啟的服務</td></tr>
         <tr><td><code>Recreate</code></td><td>差太多就砍掉重建</td><td>會</td><td>能接受隨時重啟的服務</td></tr>
         <tr><td><code>Auto</code></td><td>目前行為跟 Recreate 一樣</td><td>會</td><td>同上</td></tr>
+        <tr><td><code>InPlaceOrRecreate</code></td><td>先用 in-place resize 改 cgroup,改不成才驅逐</td><td>改不成才會</td><td>新版 VPA 才有(1.4 起,成熟度需確認),先查叢集裝的版本</td></tr>
       </tbody>
     </table>
   </div>
@@ -344,8 +345,239 @@ spec:
   </details>
 </section>
 
+<!-- ===================== LAYER 3 ===================== -->
+<section class="layer" id="l3">
+  <div class="layer-head"><span class="badge">LAYER 3</span><h2>取捨:為什麼長這樣</h2><span class="time">讀 3 分鐘</span></div>
+  <p class="lead">因為 Layer 1 的「cgroup 數字在 Pod 建立時寫死」,VPA 選擇改 Pod 不改 Deployment、預設砍掉重建,代價是重建的時間點你控制不了。</p>
+  <div class="tbl">
+    <table>
+      <thead><tr><th>設計選擇</th><th>沒選的做法</th><th>沒選的原因</th><th>付出的代價</th></tr></thead>
+      <tbody>
+        <tr><td>Admission 寫進新 Pod,Deployment template 不變</td><td>直接改 Deployment</td><td>改 template 等於整個 Deployment rollout,也會跟 Helm / ArgoCD 管的 YAML 互相覆蓋</td><td><code>get deploy</code> 看不出有沒有生效,要看 Pod</td></tr>
+        <tr><td>預設 <code>RequestsAndLimits</code>,limit 跟 requests 等比例變</td><td>只改 requests</td><td>requests 比 limit 大的 Pod spec,API server 不收</td><td>limit 不是天花板,上限要另外設 <code>maxAllowed</code></td></tr>
+        <tr><td>Updater 差距超出範圍才驅逐</td><td>建議值一變就砍</td><td>每次小變動都砍,服務一直在滾動重建</td><td>小差距會一直留著不調</td></tr>
+        <tr><td>生產環境用 <code>Off</code></td><td><code>Auto</code></td><td>跟 HPA 搶 CPU 分母,而且重建時間不受控</td><td>要有人看建議、手動改 requests</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="card fig">
+    <svg viewBox="0 0 370 150" width="370" role="img" aria-label="原本 requests 100m limit 300m,VPA target 200m 後變成 requests 200m limit 600m,比例 3 倍不變">
+      <text x="92" y="20" class="t-ink" font-size="13" font-weight="700" text-anchor="middle">原本</text>
+      <text x="278" y="20" class="t-ink" font-size="13" font-weight="700" text-anchor="middle">VPA target 200m 之後</text>
+      <line x1="185" y1="8" x2="185" y2="140" class="s-line" stroke-width="1.2" stroke-dasharray="4 4"/>
+      <rect x="40" y="40" width="25" height="20" class="f-accsoft s-acc" stroke-width="1.3"/>
+      <text x="72" y="55" class="t-ink t-mono" font-size="11">req 100m</text>
+      <rect x="40" y="72" width="75" height="20" class="f-card s-ink" stroke-width="1.3"/>
+      <text x="77" y="87" class="t-ink t-mono" font-size="10.5" text-anchor="middle">lim 300m</text>
+      <rect x="200" y="40" width="50" height="20" class="f-accsoft s-acc" stroke-width="1.3"/>
+      <text x="258" y="55" class="t-ink t-mono" font-size="11">req 200m</text>
+      <rect x="200" y="72" width="150" height="20" class="f-card s-ink" stroke-width="1.3"/>
+      <text x="275" y="87" class="t-ink t-mono" font-size="10.5" text-anchor="middle">lim 600m</text>
+      <text x="185" y="112" class="t-mut" font-size="10.5" text-anchor="middle">長度照比例畫</text>
+      <text x="185" y="134" class="t-acc" font-size="12" font-weight="700" text-anchor="middle">limit / requests = 3 倍,前後不變</text>
+    </svg>
+    <p class="caption">只有設 <code>controlledValues: RequestsOnly</code> 時,limit 才不動,requests 最多到 limit。</p>
+  </div>
+  <p>誰會為這件事吵架:Dev 想開 Auto 省事,SRE 怕尖峰時被砍,財務想把虛胖的 requests 收回來。常見的結論是 <code>Off</code> 全叢集鋪開,每季照建議值調一次。</p>
+</section>
+
+<!-- ===================== LAYER 4 ===================== -->
+<section class="layer" id="l4">
+  <div class="layer-head"><span class="badge">LAYER 4</span><h2>AWS 上怎麼做</h2><span class="time">讀 4 分鐘</span></div>
+  <p class="lead">EKS 沒有內建 VPA。3 個元件和 metrics-server 都要自己裝,跑在你的 node 上;requests 調小之後,要靠 Karpenter 把空出來的 node 收掉,帳單才會下降。</p>
+  <div class="card fig">
+    <svg viewBox="0 0 370 450" width="370" role="img" aria-label="EKS 上的 VPA:API Server 在 AWS 管的 control plane;Recommender、Updater、Admission webhook、metrics-server、Karpenter 跑在你的 node 上">
+      <defs>
+        <marker id="ar5" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="f-acc"/></marker>
+      </defs>
+      <rect x="10" y="10" width="350" height="70" class="f-accsoft s-acc" stroke-width="1.5" stroke-dasharray="6 4"/>
+      <text x="20" y="28" class="t-acc" font-size="12" font-weight="700">EKS control plane(AWS 管)</text>
+      <rect x="110" y="36" width="150" height="36" class="f-card s-ink" stroke-width="1.2"/>
+      <text x="185" y="59" class="t-ink" font-size="13" text-anchor="middle">API Server</text>
+      <rect x="10" y="100" width="350" height="220" class="s-line" stroke-width="1.5"/>
+      <text x="20" y="118" class="t-mut" font-size="12" font-weight="700">你的 node(EC2,你管)</text>
+      <rect x="22" y="128" width="104" height="44" class="f-card s-ink" stroke-width="1.2"/>
+      <text x="74" y="147" class="t-ink" font-size="12" text-anchor="middle">Recommender</text>
+      <text x="74" y="163" class="t-mut" font-size="10.5" text-anchor="middle">算建議值</text>
+      <rect x="133" y="128" width="104" height="44" class="f-card s-ink" stroke-width="1.2"/>
+      <text x="185" y="147" class="t-ink" font-size="12" text-anchor="middle">Updater</text>
+      <text x="185" y="163" class="t-mut" font-size="10.5" text-anchor="middle">驅逐 Pod</text>
+      <rect x="244" y="128" width="104" height="44" class="f-card s-ink" stroke-width="1.2"/>
+      <text x="296" y="147" class="t-ink" font-size="12" text-anchor="middle">Admission</text>
+      <text x="296" y="163" class="t-mut" font-size="10.5" text-anchor="middle">webhook</text>
+      <rect x="22" y="190" width="104" height="40" class="f-card s-ink" stroke-width="1.2"/>
+      <text x="74" y="207" class="t-ink" font-size="11.5" text-anchor="middle">metrics-server</text>
+      <text x="74" y="222" class="t-bad" font-size="10.5" text-anchor="middle">預設沒裝</text>
+      <rect x="133" y="190" width="104" height="40" class="f-card s-ink" stroke-width="1.2"/>
+      <text x="185" y="207" class="t-ink" font-size="11.5" text-anchor="middle">Karpenter</text>
+      <text x="185" y="222" class="t-mut" font-size="10.5" text-anchor="middle">Pending 就開機</text>
+      <rect x="22" y="250" width="326" height="44" class="f-card s-ink" stroke-width="1.2"/>
+      <text x="185" y="269" class="t-ink" font-size="12.5" text-anchor="middle">billing-api Pods</text>
+      <text x="185" y="285" class="t-mut" font-size="10.5" text-anchor="middle">requests 由 Admission 寫入,Deployment 不變</text>
+      <path d="M74,190 V174" class="s-acc" stroke-width="1.6" marker-end="url(#ar5)"/>
+      <path d="M185,128 V74" class="s-acc" stroke-width="1.6" marker-end="url(#ar5)"/>
+      <text x="192" y="96" class="t-acc" font-size="10.5">驅逐</text>
+      <path d="M260,54 H296 V126" class="s-acc" stroke-width="1.6" marker-end="url(#ar5)"/>
+      <text x="290" y="96" class="t-acc" font-size="10.5" text-anchor="end">建 Pod 時呼叫</text>
+      <path d="M296,172 V248" class="s-acc" stroke-width="1.6" marker-end="url(#ar5)"/>
+      <text x="302" y="214" class="t-acc" font-size="10">寫 requests</text>
+      <path d="M185,250 V232" class="s-acc" stroke-width="1.4" stroke-dasharray="4 3" marker-end="url(#ar5)"/>
+      <text x="185" y="312" class="t-mut" font-size="10.5" text-anchor="middle">VPA 3 個元件都是跑在你 node 上的 Deployment</text>
+      <rect x="22" y="352" width="150" height="40" class="f-card s-ink" stroke-width="1.2"/>
+      <text x="97" y="377" class="t-ink" font-size="12.5" text-anchor="middle">EC2</text>
+      <rect x="198" y="352" width="150" height="40" class="f-card s-ink" stroke-width="1.2"/>
+      <text x="273" y="369" class="t-ink" font-size="11.5" text-anchor="middle">CloudWatch</text>
+      <text x="273" y="384" class="t-ink" font-size="11.5" text-anchor="middle">Container Insights</text>
+      <path d="M97,320 V350" class="s-acc" stroke-width="1.6" marker-end="url(#ar5)"/>
+      <text x="104" y="340" class="t-acc" font-size="10.5">開機 1 到 5 分</text>
+      <path d="M273,320 V350" class="s-acc" stroke-width="1.4" stroke-dasharray="4 3" marker-end="url(#ar5)"/>
+      <text x="280" y="340" class="t-acc" font-size="10.5">長期用量</text>
+      <text x="185" y="428" class="t-ink" font-size="12" font-weight="700" text-anchor="middle">VPA 管 Pod 大小,Karpenter 管 node 數量</text>
+    </svg>
+  </div>
+  <div class="tbl">
+    <table>
+      <thead><tr><th>服務 / 元件</th><th>常見陷阱</th></tr></thead>
+      <tbody>
+        <tr><td>metrics-server</td><td>沒裝或掛了,Recommender 沒資料,VPA 物件一直沒有 Recommendation</td></tr>
+        <tr><td><code>maxAllowed</code> + Karpenter</td><td>沒設上限,一次尖峰把 requests 拉到 1500m,新 Pod <code>Insufficient cpu</code> Pending;NodePool 的 <code>limits</code> 到頂就永遠開不出 node</td></tr>
+        <tr><td>HPA(看 CPU)</td><td>同一個 Deployment 再開 VPA Auto 管 CPU,兩個搶分母一直上下跳</td></tr>
+        <tr><td>Updater + PDB</td><td>Updater 走 Eviction API,會被 PDB 擋。沒設 PDB 時一次可能砍掉多顆(預設 eviction tolerance 需確認)</td></tr>
+        <tr><td>Updater + 單副本</td><td><code>replicas: 1</code> 的服務,Auto 模式也不會被驅逐,建議值一直沒套用(updater 預設 min-replicas 2,需確認)</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <details>
+    <summary>之後再看:跟 ECS 對照(你工作上在用的)</summary>
+    <p>ECS 沒有 VPA 這種 controller。task definition 的 CPU / memory 要自己改,改完開新 revision,service 滾動換 task。VPA <code>Off</code> 的做法跟 ECS 一樣:拿用量數字(CloudWatch / Container Insights)決定新值,由人送出變更。</p>
+  </details>
+</section>
+
+<!-- ===================== LAYER 5 ===================== -->
+<section class="layer" id="l5">
+  <div class="layer-head"><span class="badge">LAYER 5</span><h2>規模化:團隊長大後換掉什麼</h2><span class="time">讀 3 分鐘</span></div>
+  <p class="lead">規模越大,越不靠人猜 requests,改成「VPA 出數字、流程決定什麼時候套用」。</p>
+  <div class="card fig">
+    <svg viewBox="0 0 370 300" width="370" role="img" aria-label="三級階梯:小團隊用猜的 requests;成長期 VPA Off 全叢集加看板;大廠 rightsize 進 PR 流程,少數服務自動 resize">
+      <rect x="20" y="200" width="110" height="80" class="f-card s-ink" stroke-width="1.4"/>
+      <rect x="130" y="130" width="110" height="150" class="f-card s-ink" stroke-width="1.4"/>
+      <rect x="240" y="60" width="110" height="220" class="f-accsoft s-acc" stroke-width="1.8"/>
+      <text x="75" y="220" class="t-ink" font-size="13" font-weight="700" text-anchor="middle">小團隊</text>
+      <text x="75" y="240" class="t-mut" font-size="11" text-anchor="middle">requests 用猜</text>
+      <text x="75" y="256" class="t-mut" font-size="11" text-anchor="middle">OOM 了才調</text>
+      <text x="75" y="272" class="t-mut" font-size="11" text-anchor="middle">不裝 VPA</text>
+      <text x="185" y="150" class="t-ink" font-size="13" font-weight="700" text-anchor="middle">成長期</text>
+      <text x="185" y="170" class="t-mut" font-size="11" text-anchor="middle">VPA Off 全叢集</text>
+      <text x="185" y="186" class="t-mut" font-size="11" text-anchor="middle">Goldilocks 看板</text>
+      <text x="185" y="202" class="t-mut" font-size="11" text-anchor="middle">每季 rightsize</text>
+      <text x="185" y="218" class="t-mut" font-size="11" text-anchor="middle">設 maxAllowed</text>
+      <text x="295" y="80" class="t-ink" font-size="13" font-weight="700" text-anchor="middle">大廠</text>
+      <text x="295" y="100" class="t-mut" font-size="11" text-anchor="middle">建議值自動開 PR</text>
+      <text x="295" y="116" class="t-mut" font-size="11" text-anchor="middle">review 後才套用</text>
+      <text x="295" y="132" class="t-mut" font-size="11" text-anchor="middle">HPA 改看 RPS</text>
+      <text x="295" y="148" class="t-mut" font-size="11" text-anchor="middle">單例服務才自動</text>
+      <text x="295" y="164" class="t-mut" font-size="11" text-anchor="middle">InPlaceOrRecreate</text>
+      <text x="295" y="180" class="t-mut" font-size="11" text-anchor="middle">成本報表對帳</text>
+      <text x="185" y="34" class="t-mut" font-size="11.5" text-anchor="middle">往右:數字越準,套用的時間點越受控</text>
+    </svg>
+  </div>
+  <div class="tbl">
+    <table>
+      <thead><tr><th>級別</th><th>換掉什麼</th><th>為什麼換</th></tr></thead>
+      <tbody>
+        <tr><td>小團隊 → 成長期</td><td>用猜的 requests</td><td>虛胖浪費 node,太小就 OOM;HPA 分母也跟著歪</td></tr>
+        <tr><td>成長期 → 大廠</td><td>每季人工調</td><td>服務太多人工跟不上;改成 PR 流程,保留 review 和回退</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>業界兩條常見路線:</p>
+  <div class="tbl">
+    <table>
+      <thead><tr><th></th><th>VPA Off + 人審</th><th>自動 resize</th></tr></thead>
+      <tbody>
+        <tr><td>做法</td><td>VPA 只出建議,改 Helm values / manifest 走 PR</td><td><code>InPlaceOrRecreate</code> 或 Auto,controller 自己套用</td></tr>
+        <tr><td>強項</td><td>變更有紀錄、可回退,不會跟 GitOps 打架</td><td>不用人力,用量變化跟得上</td></tr>
+        <tr><td>弱點</td><td>慢,建議值會過期</td><td>套用時間不受控;memory 往下調有 OOM 風險</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ===================== LAYER 6 ===================== -->
+<section class="layer" id="l6">
+  <div class="layer-head"><span class="badge">LAYER 6</span><h2>故障與 on-call</h2><span class="time">讀 4 分鐘</span></div>
+  <p class="lead">VPA 出事時,第一個指令是查 Events 有沒有 <code>EvictedByVPA</code>,而且要在 restart 之前查。</p>
+  <div class="formula">kubectl get events --field-selector reason=EvictedByVPA --sort-by=.lastTimestamp</div>
+  <h3>一個早上的時間線</h3>
+  <ul class="timeline">
+    <li><span class="when">08:55</span><div class="what">流量開始上升<div class="sub">billing-api 開了 VPA Auto,HPA 看 RPS</div></div></li>
+    <li class="blind"><span class="when">09:00</span><div class="what">Updater 判斷舊 Pod 的 requests 超出建議範圍,開始驅逐<div class="sub">時間點是 Updater 決定的,剛好落在尖峰</div></div></li>
+    <li class="blind"><span class="when">09:01</span><div class="what">Ready 的 Pod 變少,ingress 回 502 / 503<div class="sub">5xx 是 ingress 產生的,不是 app</div></div></li>
+    <li><span class="when">09:05</span><div class="what">值班想 <code>rollout restart</code>:先擋下<div class="sub">restart 會把 Events 和 <code>logs --previous</code> 一起清掉</div></div></li>
+    <li><span class="when">09:07</span><div class="what">Events 看到 <code>EvictedByVPA</code>,把 VPA 改成 Off 止血</div></li>
+  </ul>
+  <div class="formula">kubectl patch vpa billing-api --type merge -p '{"spec":{"updatePolicy":{"updateMode":"Off"}}}'</div>
+  <div class="tbl">
+    <table>
+      <thead><tr><th>症狀</th><th>最可能的原因</th><th>第一個查的</th></tr></thead>
+      <tbody>
+        <tr><td>尖峰時一波 502 / 503,Pod AGE 都很新</td><td>Updater 驅逐</td><td>Events <code>EvictedByVPA</code></td></tr>
+        <tr><td>replicas 和 requests 一直上下跳</td><td>HPA 和 VPA 搶 CPU 分母</td><td><code>describe hpa</code> 看 metric 是不是 CPU</td></tr>
+        <tr><td>新 Pod Pending,<code>Insufficient cpu</code></td><td>VPA 把 requests 拉太大</td><td><code>describe vpa</code> 看 Target;設 <code>maxAllowed</code></td></tr>
+        <tr><td>Deployment 的 requests 沒變</td><td>正常,VPA 只改 Pod</td><td><code>get pod -o yaml</code> 看 requests 和 <code>vpaUpdates</code> annotation</td></tr>
+        <tr><td>memory 往下調後 OOMKilled</td><td>memory 收不回來</td><td><code>describe pod</code> 看 Last State</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <h3>5xx 是誰產生的</h3>
+  <p>所有回應都經過 ingress 回到 client,要分的是狀態碼是誰產生的:看 body 是 app 的 JSON,還是 nginx 的 HTML 頁(header <code>Server: nginx</code>;ALB 是 <code>awselb/2.0</code>)。</p>
+  <div class="tbl">
+    <table>
+      <thead><tr><th>碼</th><th>誰產生</th><th>代表</th><th>先查</th></tr></thead>
+      <tbody>
+        <tr><td>404</td><td>ingress</td><td>路由規則沒對上(4xx = 請求本身不對)</td><td><code>describe ingress</code> 的 host / path</td></tr>
+        <tr><td>500</td><td>app</td><td>程式出錯,DB 錯誤通常也變成 500</td><td>app log</td></tr>
+        <tr><td>502</td><td>ingress</td><td>連到 Pod 但連線被拒或被重設</td><td>Pod port、Events</td></tr>
+        <tr><td>503</td><td>ingress</td><td>Service 後面沒有 Ready 的 Pod</td><td><code>get endpoints &lt;svc&gt;</code></td></tr>
+        <tr><td>504</td><td>ingress</td><td>Pod 太慢,超過 timeout</td><td>app latency、下游</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>SLO 怎麼定:看服務的可用率(非 5xx 比例)和 p99 latency。VPA 的建議值是成本數字,使用者感受不到。</p>
+</section>
+
+<!-- ===================== LAYER 7 ===================== -->
+<section class="layer" id="l7">
+  <div class="layer-head"><span class="badge">LAYER 7</span><h2>面試</h2><span class="time">讀 3 分鐘</span></div>
+  <p class="lead">題目:Can HPA and VPA be used together on the same Deployment? What breaks, and how would you set them up in production?</p>
+  <p>先自己用 3 句話回答,再打開下面的對照。</p>
+  <details>
+    <summary>L4 的回答</summary>
+    <p>可以一起用。HPA 管數量,VPA 管大小,剛好互補,兩個都開 Auto 最完整。</p>
+    <p class="wrong">問題:沒看到 HPA 的分母就是 requests;沒講重建的時間點;沒講怎麼驗證有沒有生效。</p>
+  </details>
+  <details>
+    <summary>L6 的回答</summary>
+    <p><b>1. 會壞在哪:</b>HPA 的 CPU% 分母是 <code>requests.cpu</code>。VPA 改 requests 就是改分母,兩個 controller 對同一個訊號各自出手,replicas 和 requests 會震盪。改成 <code>Initial</code> 也不行,HPA 擴容新建的 Pod 一樣會被寫入新 requests。</p>
+    <p><b>2. 生產怎麼配:</b>預設 VPA <code>Off</code> 當建議引擎,每季照建議值走 PR 調 requests。要自動的話,HPA 改看 RPS 或 queue 長度,或 VPA 設 <code>controlledResources: ["memory"]</code>。</p>
+    <p><b>3. 就算不打架:</b>Auto 的驅逐時間由 Updater 決定,可能落在尖峰。要配 PDB,或改用 <code>InPlaceOrRecreate</code>;設 <code>maxAllowed</code> 避免一次拉太大造成 Pending。</p>
+    <p><b>4. 怎麼驗證:</b>看 Pod 的 requests 和 <code>vpaUpdates</code> annotation,不是看 Deployment。</p>
+  </details>
+  <p>L6 多了什麼:分母的機制、Initial 為什麼不行、重建時間的風險,和驗證方法。</p>
+</section>
+
+<!-- ===================== CLARIFICATIONS ===================== -->
+<section class="layer" id="clar">
+  <div class="layer-head"><span class="badge">這次的釐清</span><h2>s52 我答錯或不確定的地方</h2><span class="time">讀 2 分鐘</span></div>
+  <div class="wrong"><b>✗ 我以為</b>:VPA 調 requests,最多只能調到 limit。<br><b>✓ 其實是</b>:預設 limit 跟 requests 等比例一起變(100m / 300m → 200m / 600m),上限是 <code>maxAllowed</code>。只有 <code>RequestsOnly</code> 才卡在 limit。<br><b>→ 為什麼會搞混</b>:把 limit 當成 VPA 的天花板。</div>
+  <div class="wrong"><b>✗ 我以為</b>:HPA 擴容、縮容都會砍掉 Pod 重建。<br><b>✓ 其實是</b>:HPA 只改 replicas:擴容是新建 Pod,縮容是刪 Pod,留下來的 Pod 不動。砍掉重建是 VPA Updater 的行為。<br><b>→ 為什麼會搞混</b>:把兩個 controller 的動作混在一起。</div>
+  <div class="wrong"><b>✗ 我不確定</b>:VPA 改成 Initial 能不能解決跟 HPA 打架。<br><b>✓ 其實是</b>:不行。HPA 擴容出來的新 Pod,Initial 一樣會寫入新 requests,分母還是變了。只有 <code>Off</code> 或 VPA 不碰 CPU 才行。<br><b>→ 為什麼會搞混</b>:只想到 Initial 不砍舊 Pod,沒想到 HPA 擴容本身就是新建 Pod。</div>
+  <div class="wrong"><b>✗ 我以為</b>:VPA Auto 會在尖峰過 5 分鐘後才砍;Deployment YAML 沒變就是沒生效。<br><b>✓ 其實是</b>:300 秒是 HPA 的 scaleDown 窗口。VPA Updater 自己決定,可能剛好在尖峰砍。VPA 只改 Pod,生效要看 <code>get pod</code>。<br><b>→ 為什麼會搞混</b>:把 HPA 的參數套到 VPA 上。</div>
+  <div class="wrong"><b>✗ 我以為</b>:5xx 先懷疑 DB,面試時還跟 404 搞混。<br><b>✓ 其實是</b>:4xx 是請求本身不對,5xx 是伺服器這邊出錯。500 是 app 產生的,502 / 503 / 504 是 ingress 產生的。restart 之前先採證。<br><b>→ 為什麼會搞混</b>:沒有先問「這個碼是誰產生的」,直接猜嫌犯。</div>
+</section>
+
 <footer class="next">
-  <strong>下一步(2 分鐘):</strong>上課前,用一句話回答:為什麼生產環境大多只開 <code>updateMode: "Off"</code>?
+  <strong>下一步(2 分鐘):</strong>不看頁面,用 3 句話回答 Layer 7 的面試題,再打開 L6 對照。
 </footer>
 
 </div>

@@ -15,7 +15,7 @@
 
 ## Current Session breakpoint
 
-無(s52 正常收工)。下一堂:P3 C-3b KEDA lab(curriculum-plan §12.6);P2a/P2b Phase Gate 仍待考,學員挑時機;registry 已於 s52 triage 到 15 張;每堂無 G(§12.4)。
+無(s52 正常收工)。下一堂:P3 C-3b KEDA lab(curriculum-plan §12.6);P2a/P2b Phase Gate 仍待考,學員挑時機;registry 16 張(s52 triage 到 15 後,學員選擇多留 5xx 卡);每堂無 G(§12.4)。
 
 <!-- schema §3 = 恰好一行。敘事與次要待辦寫 session-log.md,長效教練紀律寫 session-log.md
      「教練執行紀律」,不要在這裡疊舊堂。s32 及更早斷點原文見 session-log.md 對應堂,
@@ -116,6 +116,7 @@ weak-topic flags(2026-08-03 啟用,P2a 帶 flag 前進、gate 未考,學員決�
      interval 2 = +2 天臨時複習格(口頭型 resolved,過了才進 3/7/14)。
      unresolved-session-count 於 2026-07-10 遷移時依複測紀錄初始化(近似值)。 -->
 
+- 2026-10-29 | 4xx vs 5xx 是誰產生的(面試答不出) | 學員自述面試被問「K8s 遇到 5xx 怎麼辦」答不出、跟 404 混;s52 複習把 5xx 直接猜成 DB 問題 | 先分 4xx(請求不對)/ 5xx(伺服器錯),再看碼是誰產生的:500 = app,502/503/504 = ingress;P2a 404/502/503 階梯留存不足 | unresolved | 3 | 2026-11-01 | 0
 - 2026-10-29 | VPA Auto 實際行為(驅逐時間 / 改 Pod 不改 Deployment) | F 追問尖峰會不會被砍答「9 點過 5 分鐘」(混成 HPA scaleDown 300s);「deploy YAML 沒變 = 沒生效?」答不確定,縮成二選一才答對 | Updater 自己決定驅逐時間,差距超出範圍就砍,可能落在尖峰;Admission 寫 Pod 不寫 Deployment,生效看 get pod | unresolved | 3 | 2026-11-01 | 0
 - 2026-10-16 | 讀 FailedScheduling 判斷加 node 有沒有用 | `1 taint, 2 Insufficient memory` 答加 node 沒用(被 cp taint 行帶走) | 找 Insufficient = 容量問題;cp taint 行每次都在是背景 | unresolved | 14 | 2026-11-12 | 0
 - 2026-10-12 | 下 kubectl 前先確認在跟哪個叢集講話 | bastion 上兩次 `kubectl get nodes` 打到 PROD atlas-aws-billing-prod(本意查 lab),第二次在教練提醒後 | prompt 雖顯示 context 但未看;唯讀無損,換成 delete/drain 即事故。對策:lab kubectl 一律在 cp session 跑 | unresolved | 3 | 2026-10-15 | 0
@@ -126,7 +127,7 @@ weak-topic flags(2026-08-03 啟用,P2a 帶 flag 前進、gate 未考,學員決�
 - 2026-06-27 | ClusterIP/kube-proxy/DNAT 全鏈(謎題B) | 「封包先去 ClusterIP 拿 IP」+ 手/名單混淆 | ClusterIP 不是地方;改寫在出發地本機 kernel | resolved | 14 | 2026-07-13 | 0
 - 2026-06-28 | 叢集 DNS 排障 | nslookup NXDOMAIN 差點誤判 CoreDNS 壞 | 排障第一刀「先用 FQDN 二分」沒成肌肉 | unresolved | 3 | 2026-07-10 | 3
 - 2026-07-06 | L4 vs L7 | 記成場景標籤(叢集內=L4、外部=L7) | 本質是轉發決定要讀到哪層資訊 | unresolved | 3 | 2026-07-22 | 3
-- 2026-07-23 | 只給結論不給判準(pattern 卡,升級追蹤) | 同堂三次只給結論不 show work;2026-09-08 續犯(「因為是 get」=複述觀察非判準);09-25 續犯(「B 因為」後空白) | 輸出習慣不是能力;面試官無法區分會與猜對 | unresolved | 7 | 2026-11-05 | 7
+- 2026-07-23 | 只給結論不給判準(pattern 卡,升級追蹤) | 同堂三次只給結論不 show work;2026-09-08 續犯(「因為是 get」=複述觀察非判準);09-25 續犯(「B 因為」後空白) | 輸出習慣不是能力;面試官無法區分會與猜對 | unresolved | 3 | 2026-11-01 | 7
 - 2026-07-07 | Ingress 404 排障 | 差點改沒壞的規則;真兇是半死的 port-forward | 規則層全綠時兇手在你測試經過的那層 | parked(2026-07-16 ROI 篩:Q1 半 yes,但「port-forward 半死」是 lab 夾具產物、prod 不長這樣;同一判準已三種問法重問三次=題目壞掉。判準留檔備查,不再抽) | - | - | 3
 - 2026-07-09 | no-Host→404 的 why | 結果預測對,講不出 curl 自動填 Host | 會用會預測不等於會講 why(隱性會) | resolved(2026-07-16 ROI 篩:Q1=no,curl 填 header 是 tool trivia,面試不考;學員答「沒帶 domain → Ingress 對應不上」= 機制正確,教練題目壞掉不是學員沒懂。結案) | - | - | 1
 - 2026-08-06 | 排障:restart 排在採證前面(MTTR / 治標 vs 治本第三次同形狀) | 三台 node NotReady,三選一選 C 直接 restart | 「先試試」不是診斷;restart 清掉症狀也清掉證據 | unresolved | 3 | 2026-11-01 | 1
@@ -152,7 +153,7 @@ weak-topic flags(2026-08-03 啟用,P2a 帶 flag 前進、gate 未考,學員決�
 - mistake:restart排在採證前面(MTTR) | mistake | 3 | 2026-11-01 | active
 - mistake:EKS儲存拓撲(EBS AZ/nodeAffinity/volumeBindingMode) | mistake | 3 | 2026-08-09 | active
 - mistake:先鎖fault-domain再查內部(MTTR) | mistake | 7 | 2026-09-10 | active
-- mistake:只給結論不給判準(pattern) | mistake | 7 | 2026-11-05 | active
+- mistake:只給結論不給判準(pattern) | mistake | 3 | 2026-11-01 | active
 - term:conntrack | term | 7 | 2026-07-26 | active
 - mistake:probe-職責 | mistake | 3 | 2026-08-27 | active
 - mistake:DNS-排障第一刀 | mistake | 3 | 2026-07-10 | active
@@ -171,6 +172,7 @@ weak-topic flags(2026-08-03 啟用,P2a 帶 flag 前進、gate 未考,學員決�
 - mistake:default-deny先死在DNS層 | mistake | 3 | 2026-10-19 | active
 - topic:P3-C4-VPA | topic | 3 | 2026-11-01 | active
 - mistake:VPA-Auto實際行為 | mistake | 3 | 2026-11-01 | active
+- mistake:4xx-vs-5xx誰產生 | mistake | 3 | 2026-11-01 | active
 
 ## Curiosity branch
 

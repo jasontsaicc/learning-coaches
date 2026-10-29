@@ -22,9 +22,9 @@ mistake 時才納入此數字。
 以下以 `workspace / topic` 指向原始 evidence。分類是多對一治理，不改動 progress.md
 內原有的 `root-cause-tag`。一筆 evidence 只指定一個 primary pattern，避免重複計數。
 
-### K8s（40）
+### K8s（41）
 
-- RP1（23）：YAML validation、probe 職責、ImagePullBackOff、dry-run 兩層 + Service port、L4 vs L7、跨 node 走路由表不是 iptables、kube-proxy 不在 Pod 啟動路徑上、default-deny 後的分層、veth 誤記跨 node、iptables=一棟樓、分層判準、誰把 limit 寫進 cgroup、PV↔PVC 1:1、container 可寫層、啟動前被擋 vs 啟動後自己死(STATUS 定位棒次)、PSS 只查 Pod 不查 Deployment(產生者找錯人)、kubeadm 職責邊界(2026-10-12)、NetworkPolicy stateful 回程靠 conntrack(2026-10-16)、FailedScheduling 是 scheduler 寫的(2026-10-16)、FailedScheduling 行→改 Pod 還是改 node(2026-10-20)、antiAffinity 只有是非沒有數量(2026-10-20)。、HPA 超標就 +1(2026-10-28)、調低 target 讓 HPA 變快(延遲 vs 緩衝,2026-10-28)、VPA Auto 驅逐時間 / 改 Pod 不改 Deployment(2026-10-29)
+- RP1（24）：YAML validation、probe 職責、ImagePullBackOff、dry-run 兩層 + Service port、L4 vs L7、跨 node 走路由表不是 iptables、kube-proxy 不在 Pod 啟動路徑上、default-deny 後的分層、veth 誤記跨 node、iptables=一棟樓、分層判準、誰把 limit 寫進 cgroup、PV↔PVC 1:1、container 可寫層、啟動前被擋 vs 啟動後自己死(STATUS 定位棒次)、PSS 只查 Pod 不查 Deployment(產生者找錯人)、kubeadm 職責邊界(2026-10-12)、NetworkPolicy stateful 回程靠 conntrack(2026-10-16)、FailedScheduling 是 scheduler 寫的(2026-10-16)、FailedScheduling 行→改 Pod 還是改 node(2026-10-20)、antiAffinity 只有是非沒有數量(2026-10-20)。、HPA 超標就 +1(2026-10-28)、調低 target 讓 HPA 變快(延遲 vs 緩衝,2026-10-28)、VPA Auto 驅逐時間 / 改 Pod 不改 Deployment(2026-10-29)、4xx vs 5xx 是誰產生的(2026-10-29)
 - RP2（6）：規則/狀態/資料三分類、NetworkPolicy 靜默無效、emptyDir 綁 Pod、Pod 不會重啟、NAPI/CNI 類整鏈以 K8s 的 CNI 基本合約列代表、static pod 移走 → Pending 因果、bootstrap 元件不能依賴自己(2026-10-12)、unschedulable 等事件喚醒(2026-10-16)。
 - RP3（6）：叢集 DNS 排障、只給結論不給判準、兩張獨立名單、LVM 三層 + 擴容四步、Insufficient 才是容量問題、RBAC watch 看請求形狀(2026-10-16)。
 - RP4（2）：restart 排在採證前面、kubectl 前未確認 context(bastion 打到 PROD,2026-10-12)。
