@@ -1,0 +1,324 @@
+<title>KEDA 事件擴容</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC:wght@400;700&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<style>
+/* layout: one narrow notebook column on graph paper; each layer = header badge + taped figure card */
+:root {
+  --bg: #F6F8FA;
+  --grid: rgba(90,130,170,.16);
+  --ink: #23313E;
+  --muted: #5B6B7A;
+  --card: #FFFFFF;
+  --line: #C9D3DD;
+  --accent: #326CE5;
+  --accent-soft: rgba(50,108,229,.12);
+  --tape: rgba(50,108,229,.28);
+  --bad: #C92A2A;
+  --bad-soft: rgba(201,42,42,.18);
+  --waste: rgba(91,107,122,.22);
+  --hl-who: #FFE98A;
+  --hl-see: #BDEEF6;
+  --hl-may: #F9CDE0;
+  --font-body: "LXGW WenKai TC", "Noto Sans TC", "PingFang TC", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #1A2320; --grid: rgba(200,230,215,.07); --ink: #E4ECE7; --muted: #A3B3AA;
+    --card: #24302B; --line: #3D4D46; --accent: #74A0F0; --accent-soft: rgba(116,160,240,.16);
+    --tape: rgba(116,160,240,.35); --bad: #FF8787; --bad-soft: rgba(255,135,135,.2);
+    --waste: rgba(163,179,170,.22); --hl-who: rgba(255,233,138,.38); --hl-see: rgba(189,238,246,.3);
+    --hl-may: rgba(249,205,224,.3); color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #1A2320; --grid: rgba(200,230,215,.07); --ink: #E4ECE7; --muted: #A3B3AA;
+  --card: #24302B; --line: #3D4D46; --accent: #74A0F0; --accent-soft: rgba(116,160,240,.16);
+  --tape: rgba(116,160,240,.35); --bad: #FF8787; --bad-soft: rgba(255,135,135,.2);
+  --waste: rgba(163,179,170,.22); --hl-who: rgba(255,233,138,.38); --hl-see: rgba(189,238,246,.3);
+  --hl-may: rgba(249,205,224,.3); color-scheme: dark;
+}
+body {
+  background-color: var(--bg);
+  background-image: linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 22px 22px;
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 17px;
+  line-height: 1.75;
+}
+.page { max-width: 760px; margin: 0 auto; padding-block: 24px 64px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: flex; flex-direction: column; gap: 36px; }
+header.top { background: var(--accent); color: #fff; border-radius: 4px; padding: 18px 20px; display: flex; flex-direction: column; gap: 8px; }
+header.top h1 { margin: 0; font-size: 1.7rem; line-height: 1.3; text-wrap: balance; }
+header.top .goal { margin: 0; font-size: 1rem; }
+.progress { font-family: var(--font-mono); font-size: .85rem; display: flex; flex-wrap: wrap; gap: 6px; }
+.progress span { background: rgba(255,255,255,.18); padding: 2px 8px; border-radius: 3px; }
+.progress span.done { background: #fff; color: #1F4FB8; font-weight: 600; }
+section.layer { display: flex; flex-direction: column; gap: 14px; }
+.layer-head { display: flex; align-items: baseline; flex-wrap: wrap; gap: 10px; }
+.badge { font-family: var(--font-mono); font-size: .8rem; background: var(--accent); color: #fff; padding: 2px 8px; border-radius: 3px; letter-spacing: .04em; }
+.layer-head h2 { margin: 0; font-size: 1.35rem; text-wrap: balance; }
+.time { font-family: var(--font-mono); font-size: .78rem; color: var(--muted); }
+h3 { margin: 10px 0 0; font-size: 1.12rem; }
+p { margin: 0; }
+.lead { font-size: 1.08rem; font-weight: 700; }
+mark { color: inherit; padding: 0 2px; background: linear-gradient(transparent 50%, var(--hl-who) 50%); }
+mark.see { background: linear-gradient(transparent 50%, var(--hl-see) 50%); }
+mark.may { background: linear-gradient(transparent 50%, var(--hl-may) 50%); }
+code, .mono { font-family: var(--font-mono); font-size: .88em; }
+.card { position: relative; background: var(--card); border: 1px solid var(--line); padding: 22px 14px 14px; margin-top: 8px; }
+.card::before { content: ""; position: absolute; top: -9px; left: 50%; width: 92px; height: 18px; transform: translateX(-50%) rotate(-2deg); background: var(--tape); }
+.fig { overflow-x: auto; }
+.fig svg { display: block; margin: 0 auto; max-width: 100%; height: auto; }
+.caption { font-size: .9rem; color: var(--muted); text-align: center; margin-top: 6px; }
+.formula { font-family: var(--font-mono); font-size: 1rem; background: var(--accent-soft); border-left: 3px solid var(--accent); padding: 10px 12px; overflow-x: auto; white-space: pre; }
+.tbl { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-size: .95rem; background: var(--card); }
+th, td { border: 1px solid var(--line); padding: 6px 10px; text-align: left; vertical-align: top; }
+th { background: var(--accent-soft); }
+td.num, th.num { font-family: var(--font-mono); font-variant-numeric: tabular-nums; text-align: right; }
+.panels { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.panel { background: var(--card); border: 1px solid var(--line); padding: 10px; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.panel .t { font-weight: 700; font-size: .95rem; }
+.panel .r { font-size: .88rem; }
+.panel.bad { border-left: 4px solid var(--bad); }
+.panel.good { border-left: 4px solid var(--accent); }
+@media (max-width: 560px) { .panels { grid-template-columns: minmax(0, 1fr); } }
+.timeline { list-style: none; margin: 0; padding: 0 0 0 4px; display: flex; flex-direction: column; }
+.timeline li { position: relative; display: grid; grid-template-columns: 112px minmax(0, 1fr); gap: 12px; padding: 0 0 14px; }
+.timeline li::before { content: ""; position: absolute; left: 105px; top: 10px; bottom: -4px; width: 2px; background: var(--line); }
+.timeline li:last-child::before { display: none; }
+.timeline .when { font-family: var(--font-mono); font-size: .82rem; text-align: right; padding-right: 14px; color: var(--accent); font-weight: 600; }
+.timeline .what { position: relative; }
+.timeline .what::before { content: ""; position: absolute; left: -18px; top: 9px; width: 10px; height: 10px; border-radius: 50%; background: var(--accent); }
+.timeline li.blind .what { background: var(--bad-soft); padding: 2px 8px; }
+.timeline li.blind .what::before { background: var(--bad); }
+.timeline .sub { font-size: .88rem; color: var(--muted); }
+.wrong { border-left: 4px solid var(--bad); background: var(--bad-soft); padding: 8px 12px; }
+details { background: var(--card); border: 1px dashed var(--line); padding: 8px 12px; }
+details summary { cursor: pointer; font-weight: 700; }
+details summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+details > *:not(summary) { margin-top: 8px; }
+pre.yaml { font-family: var(--font-mono); font-size: .85rem; background: var(--accent-soft); padding: 10px 12px; overflow-x: auto; margin: 8px 0 0; }
+footer.next { background: var(--card); border: 2px solid var(--accent); padding: 14px 16px; }
+footer.next strong { color: var(--accent); }
+/* svg tokens */
+.s-ink { stroke: var(--ink); fill: none; }
+.s-line { stroke: var(--line); fill: none; }
+.s-acc { stroke: var(--accent); fill: none; }
+.f-card { fill: var(--card); }
+.f-acc { fill: var(--accent); }
+.f-accsoft { fill: var(--accent-soft); }
+.f-bad { fill: var(--bad-soft); }
+.f-waste { fill: var(--waste); }
+.t-ink { fill: var(--ink); font-family: var(--font-body); }
+.t-mut { fill: var(--muted); font-family: var(--font-body); }
+.t-acc { fill: var(--accent); font-family: var(--font-body); }
+.t-bad { fill: var(--bad); font-family: var(--font-body); }
+.t-mono { font-family: var(--font-mono); }
+</style>
+<div class="page">
+
+<header class="top">
+  <h1>KEDA 事件擴容 (P3 C-3b)</h1>
+  <p class="goal">讀完這頁你能:說出 HPA 為什麼自己縮不到 0、KEDA 補了哪兩件事、0 ↔ 1 和 1 ↔ N 各是誰負責。</p>
+  <div class="progress" aria-label="閱讀進度">
+    <span class="done">Layer 0 ✓</span><span class="done">1 ✓</span><span class="done">2 ✓</span><span>3 ○</span><span>4 ○</span><span>5 ○</span><span>6 ○</span><span>7 ○</span>
+  </div>
+</header>
+
+<!-- ===================== LAYER 0 ===================== -->
+<section class="layer" id="l0">
+  <div class="layer-head"><span class="badge">LAYER 0</span><h2>一張圖</h2><span class="time">讀 1 分鐘</span></div>
+  <p class="lead">HPA 只看 CPU / memory,而且最少留 1 顆。KEDA 讓 HPA 能看 cron、SQS 這類外部事件,而且能縮到 0。</p>
+  <div class="card fig">
+    <svg viewBox="0 0 370 240" width="370" role="img" aria-label="左邊 HPA:讀 metrics-server 的 CPU,replicas 1 到 N;右邊 HPA 加 KEDA:讀 cron、SQS、Kafka,replicas 0 到 N">
+      <defs>
+        <marker id="k0" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="f-acc"/></marker>
+      </defs>
+      <text x="92" y="22" class="t-ink" font-size="14" font-weight="700" text-anchor="middle">只有 HPA</text>
+      <text x="278" y="22" class="t-ink" font-size="14" font-weight="700" text-anchor="middle">HPA + KEDA</text>
+      <line x1="185" y1="10" x2="185" y2="230" class="s-line" stroke-width="1.2" stroke-dasharray="4 4"/>
+      <rect x="32" y="40" width="120" height="40" class="f-card s-ink" stroke-width="1.3"/>
+      <text x="92" y="58" class="t-ink" font-size="12" text-anchor="middle">CPU / memory</text>
+      <text x="92" y="73" class="t-mut" font-size="10.5" text-anchor="middle">metrics-server</text>
+      <rect x="198" y="40" width="50" height="40" class="f-card s-ink" stroke-width="1.3"/>
+      <text x="223" y="64" class="t-ink" font-size="11.5" text-anchor="middle">cron</text>
+      <rect x="254" y="40" width="50" height="40" class="f-card s-ink" stroke-width="1.3"/>
+      <text x="279" y="64" class="t-ink" font-size="11.5" text-anchor="middle">SQS</text>
+      <rect x="310" y="40" width="50" height="40" class="f-card s-ink" stroke-width="1.3"/>
+      <text x="335" y="64" class="t-ink" font-size="11.5" text-anchor="middle">Kafka</text>
+      <path d="M92,80 V108" class="s-acc" stroke-width="1.6" marker-end="url(#k0)"/>
+      <path d="M279,80 V108" class="s-acc" stroke-width="1.6" marker-end="url(#k0)"/>
+      <!-- HPA replicas -->
+      <rect x="40" y="118" width="30" height="30" class="f-accsoft s-acc" stroke-width="1.4"/>
+      <rect x="78" y="118" width="30" height="30" class="f-accsoft s-acc" stroke-width="1.4"/>
+      <rect x="116" y="118" width="30" height="30" class="s-acc" stroke-width="1.2" stroke-dasharray="3 3"/>
+      <text x="92" y="174" class="t-ink" font-size="12" text-anchor="middle">replicas 1 到 N</text>
+      <text x="92" y="194" class="t-bad" font-size="11.5" text-anchor="middle">最少 1 顆,半夜也在燒錢</text>
+      <!-- KEDA replicas -->
+      <rect x="214" y="118" width="30" height="30" class="s-line" stroke-width="1.4" stroke-dasharray="3 3"/>
+      <text x="229" y="138" class="t-mut t-mono" font-size="11" text-anchor="middle">0</text>
+      <rect x="252" y="118" width="30" height="30" class="f-accsoft s-acc" stroke-width="1.4"/>
+      <rect x="290" y="118" width="30" height="30" class="f-accsoft s-acc" stroke-width="1.4"/>
+      <rect x="328" y="118" width="30" height="30" class="s-acc" stroke-width="1.2" stroke-dasharray="3 3"/>
+      <text x="278" y="174" class="t-ink" font-size="12" text-anchor="middle">replicas 0 到 N</text>
+      <text x="278" y="194" class="t-acc" font-size="11.5" text-anchor="middle">沒事件就縮到 0</text>
+    </svg>
+    <p class="caption">KEDA 不是取代 HPA。它幫你建一個 HPA,再補上 HPA 做不到的部分。</p>
+  </div>
+</section>
+
+<!-- ===================== LAYER 1 ===================== -->
+<section class="layer" id="l1">
+  <div class="layer-head"><span class="badge">LAYER 1</span><h2>第一性原理:HPA 卡在哪</h2><span class="time">讀 2 分鐘</span></div>
+  <p class="lead">HPA 的公式是拿「現在的顆數」去乘。現在是 0 顆,乘什麼都是 0,所以 HPA 自己永遠長不回 1 顆。</p>
+  <div class="formula">desired = ceil( 現在顆數 × 現在值 / target )
+        = ceil( 0 × 任何數 ) = 0</div>
+  <p>而且 0 顆的時候沒有 Pod 在跑,也就沒有 CPU 數字可以算。要從 0 變 1,一定要有 HPA 以外的人來做。</p>
+  <div class="tbl">
+    <table>
+      <thead><tr><th>HPA 的限制</th><th>從哪來</th><th>KEDA 的做法</th></tr></thead>
+      <tbody>
+        <tr><td>長不回 1 顆</td><td>公式乘上現在顆數;0 顆沒有 metric</td><td>keda-operator 看外部事件,自己把 0 改成 1</td></tr>
+        <tr><td>minReplicas 不能設 0</td><td>預設不允許(要開 alpha 的 HPAScaleToZero feature gate,1.36 狀態需確認)</td><td>0 ↔ 1 不交給 HPA</td></tr>
+        <tr><td>看不到 SQS、cron</td><td>HPA 只會問 Kubernetes 的 metrics API</td><td>KEDA 跑一個 metrics API server,把 SQS 長度、cron 時段翻成 HPA 看得懂的數字</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>這就是公司 dev 環境下班縮減在做的事:沒有人用的時段,Pod 數直接歸 0,不是留 1 顆。</p>
+</section>
+
+<!-- ===================== LAYER 2 ===================== -->
+<section class="layer" id="l2">
+  <div class="layer-head"><span class="badge">LAYER 2</span><h2>機制:誰建 HPA、誰管 0 ↔ 1、兩種 scaler</h2><span class="time">讀 6 分鐘</span></div>
+
+  <h3>2a. 你寫 ScaledObject,KEDA 幫你建 HPA</h3>
+  <p class="lead">你只寫一個 ScaledObject。keda-operator 照它建一個叫 <code>keda-hpa-&lt;名字&gt;</code> 的 HPA,HPA 再去問 KEDA 的 metrics API server 拿數字。</p>
+  <div class="card fig">
+    <svg viewBox="0 0 370 420" width="370" role="img" aria-label="ScaledObject 給 keda-operator,operator 建 HPA 並負責 0 到 1;HPA 每 15 秒問 KEDA metrics API server;metrics API server 問 cron 或 SQS">
+      <defs>
+        <marker id="k1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="f-acc"/></marker>
+      </defs>
+      <rect x="40" y="10" width="290" height="46" class="f-card s-ink" stroke-width="1.4"/>
+      <text x="185" y="30" class="t-ink" font-size="13.5" text-anchor="middle" font-weight="700">① ScaledObject(你寫的)</text>
+      <text x="185" y="47" class="t-mut t-mono" font-size="10.5" text-anchor="middle">scaleTargetRef / min / max / triggers</text>
+      <path d="M185,56 V78" class="s-acc" stroke-width="1.6" marker-end="url(#k1)"/>
+      <rect x="40" y="80" width="290" height="58" class="f-accsoft s-acc" stroke-width="2"/>
+      <text x="185" y="102" class="t-ink" font-size="14" text-anchor="middle" font-weight="700">② keda-operator</text>
+      <text x="185" y="120" class="t-mut" font-size="11.5" text-anchor="middle">建 HPA;自己負責 0 ↔ 1</text>
+      <text x="185" y="133" class="t-mut" font-size="10.5" text-anchor="middle">每 30 秒問一次 trigger(pollingInterval)</text>
+      <path d="M185,138 V160" class="s-acc" stroke-width="1.6" marker-end="url(#k1)"/>
+      <rect x="40" y="162" width="290" height="52" class="f-card s-ink" stroke-width="1.4"/>
+      <text x="185" y="184" class="t-ink" font-size="14" text-anchor="middle" font-weight="700">③ HPA keda-hpa-billing-worker</text>
+      <text x="185" y="204" class="t-mut" font-size="11.5" text-anchor="middle">C-3 那個 HPA:負責 1 ↔ N,公式和窗口都一樣</text>
+      <path d="M185,214 V236" class="s-acc" stroke-width="1.6" marker-end="url(#k1)"/>
+      <text x="192" y="230" class="t-acc" font-size="10.5">每 15 秒問 metric</text>
+      <rect x="40" y="238" width="290" height="52" class="f-card s-ink" stroke-width="1.4"/>
+      <text x="185" y="260" class="t-ink" font-size="13.5" text-anchor="middle" font-weight="700">④ keda-operator-metrics-apiserver</text>
+      <text x="185" y="280" class="t-mut t-mono" font-size="10.5" text-anchor="middle">external.metrics.k8s.io</text>
+      <path d="M185,290 V312" class="s-acc" stroke-width="1.6" marker-end="url(#k1)"/>
+      <rect x="40" y="314" width="135" height="44" class="f-card s-ink" stroke-width="1.4"/>
+      <text x="107" y="341" class="t-ink" font-size="12.5" text-anchor="middle">cron:現在幾點</text>
+      <rect x="195" y="314" width="135" height="44" class="f-card s-ink" stroke-width="1.4"/>
+      <text x="262" y="341" class="t-ink" font-size="12.5" text-anchor="middle">SQS:有幾則訊息</text>
+      <text x="185" y="390" class="t-bad" font-size="12" text-anchor="middle" font-weight="700">注意:HPA 是 KEDA 建的,不要自己再建一個</text>
+      <text x="185" y="408" class="t-mut" font-size="11" text-anchor="middle">要改 min / max,改 ScaledObject,不是改 HPA</text>
+    </svg>
+  </div>
+
+  <h3>2b. 0 ↔ 1 和 1 ↔ N 是兩個不同的人在做</h3>
+  <p class="lead">從 0 開始和縮回 0,是 keda-operator 做的;中間 1 到 N,是 HPA 照 C-3 的公式做的。</p>
+  <div class="tbl">
+    <table>
+      <thead><tr><th>變化</th><th>誰做</th><th>依據</th><th>時間參數(預設)</th></tr></thead>
+      <tbody>
+        <tr><td>0 → 1</td><td>keda-operator</td><td>trigger 變成 active</td><td><code>pollingInterval</code> 30 秒</td></tr>
+        <tr><td>1 → N</td><td>HPA</td><td>C-3 公式</td><td>HPA 每 15 秒,擴容窗口 0 秒</td></tr>
+        <tr><td>N → 1</td><td>HPA</td><td>C-3 公式</td><td>縮容窗口 300 秒</td></tr>
+        <tr><td>1 → 0</td><td>keda-operator</td><td>trigger 停止 active 一段時間</td><td><code>cooldownPeriod</code> 300 秒</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>兩個 300 秒不是同一個東西:一個是 HPA 的縮容窗口(C-3),一個是 KEDA 縮到 0 前的等待時間。</p>
+
+  <h3>2c. cron scaler:下班縮到 0</h3>
+  <p class="lead">cron trigger 在時段內給 <code>desiredReplicas</code>;時段外沒有事件,就縮回 <code>minReplicaCount</code>,設 0 就歸 0。</p>
+  <div class="card fig">
+    <svg viewBox="0 0 370 190" width="370" role="img" aria-label="一天 24 小時:09:00 到 19:00 維持 3 顆,其他時間 0 顆,19:00 後約 5 分鐘縮到 0">
+      <line x1="20" y1="140" x2="350" y2="140" class="s-ink" stroke-width="1.4"/>
+      <text x="20" y="160" class="t-mut t-mono" font-size="10.5" text-anchor="middle">00</text>
+      <text x="144" y="160" class="t-mut t-mono" font-size="10.5" text-anchor="middle">09</text>
+      <text x="281" y="160" class="t-mut t-mono" font-size="10.5" text-anchor="middle">19</text>
+      <text x="350" y="160" class="t-mut t-mono" font-size="10.5" text-anchor="middle">24</text>
+      <rect x="144" y="62" width="137" height="78" class="f-accsoft s-acc" stroke-width="1.6"/>
+      <text x="212" y="96" class="t-ink" font-size="13" font-weight="700" text-anchor="middle">3 顆</text>
+      <text x="212" y="116" class="t-mut" font-size="10.5" text-anchor="middle">desiredReplicas: 3</text>
+      <rect x="281" y="114" width="5" height="26" class="f-bad"/>
+      <text x="300" y="104" class="t-bad" font-size="10.5">約 5 分鐘</text>
+      <text x="300" y="118" class="t-bad" font-size="10.5">才歸 0</text>
+      <text x="80" y="130" class="t-mut" font-size="11.5" text-anchor="middle">0 顆</text>
+      <text x="318" y="134" class="t-mut" font-size="11.5" text-anchor="middle">0 顆</text>
+      <text x="185" y="36" class="t-ink" font-size="12" text-anchor="middle">週一到週五,timezone: Asia/Taipei</text>
+      <text x="185" y="182" class="t-mut" font-size="10.5" text-anchor="middle">19:00 後要等 cooldownPeriod 300 秒,operator 才縮到 0</text>
+    </svg>
+  </div>
+  <details>
+    <summary>之後再看:這個 ScaledObject 長怎樣</summary>
+<pre class="yaml">apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: billing-web
+spec:
+  scaleTargetRef:
+    name: billing-web        # Deployment name
+  minReplicaCount: 0         # outside the window
+  maxReplicaCount: 5
+  triggers:
+  - type: cron
+    metadata:
+      timezone: Asia/Taipei
+      start: 0 9 * * 1-5
+      end: 0 19 * * 1-5
+      desiredReplicas: "3"</pre>
+    <p>建好之後 <code>kubectl get hpa</code> 會多一個 <code>keda-hpa-billing-web</code>。</p>
+  </details>
+
+  <h3>2d. SQS scaler:看訊息數決定顆數</h3>
+  <p class="lead"><code>queueLength</code> 是「一顆 Pod 負責幾則訊息」。HPA 拿 queue 裡的訊息數除以它,算出要幾顆。</p>
+  <div class="card fig">
+    <svg viewBox="0 0 370 170" width="370" role="img" aria-label="SQS 有 120 則訊息,queueLength 20,HPA 算出 6 顆 Pod;KEDA 讀 SQS 要 IRSA 權限">
+      <defs>
+        <marker id="k2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="f-acc"/></marker>
+      </defs>
+      <rect x="20" y="30" width="100" height="56" class="f-card s-ink" stroke-width="1.4"/>
+      <text x="70" y="53" class="t-ink" font-size="13" font-weight="700" text-anchor="middle">SQS</text>
+      <text x="70" y="73" class="t-mut t-mono" font-size="11" text-anchor="middle">120 則</text>
+      <path d="M120,58 H150" class="s-acc" stroke-width="1.6" marker-end="url(#k2)"/>
+      <rect x="152" y="30" width="80" height="56" class="f-accsoft s-acc" stroke-width="1.6"/>
+      <text x="192" y="53" class="t-ink" font-size="12.5" font-weight="700" text-anchor="middle">KEDA</text>
+      <text x="192" y="72" class="t-mut" font-size="10.5" text-anchor="middle">翻成 metric</text>
+      <path d="M232,58 H262" class="s-acc" stroke-width="1.6" marker-end="url(#k2)"/>
+      <rect x="264" y="30" width="86" height="56" class="f-card s-ink" stroke-width="1.4"/>
+      <text x="307" y="53" class="t-ink" font-size="12.5" font-weight="700" text-anchor="middle">HPA</text>
+      <text x="307" y="72" class="t-mut" font-size="10.5" text-anchor="middle">算顆數</text>
+      <text x="185" y="114" class="t-ink t-mono" font-size="12" text-anchor="middle">ceil(120 / queueLength 20) = 6 顆</text>
+      <text x="185" y="140" class="t-mut" font-size="11" text-anchor="middle">KEDA 讀 SQS 要 AWS 權限:用 IRSA(P2b C-5 教過的)</text>
+      <text x="185" y="158" class="t-mut" font-size="11" text-anchor="middle">queue 空了,就照 cooldownPeriod 縮到 0</text>
+    </svg>
+  </div>
+  <p>queue 長度比 CPU 更早看到尖峰:訊息先堆起來,CPU 才會跟著升高。這是 C-3 講的「訊號選對比調參重要」。</p>
+
+  <div class="wrong"><b>常見踩坑</b>:on-call 時照 C-3 的止血方式 <code>kubectl patch hpa</code> 改 minReplicas。HPA 是 keda-operator 管的,它會照 ScaledObject 改回去。要改 ScaledObject 的 <code>minReplicaCount</code>。</div>
+</section>
+
+<footer class="next">
+  <strong>上課前(2 分鐘):</strong>用一句話回答:為什麼 HPA 自己沒辦法從 0 顆長回 1 顆?
+  <details>
+    <summary>選做:對照公司 dev 環境</summary>
+    <p>先跑 <code>kubectl config current-context</code>,確認是 dev,不是 prod。再跑唯讀的 <code>kubectl get scaledobjects -A</code>,看 trigger 是不是 cron。</p>
+  </details>
+</footer>
+
+</div>

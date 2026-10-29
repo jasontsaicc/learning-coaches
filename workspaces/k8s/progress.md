@@ -15,7 +15,7 @@
 
 ## Current Session breakpoint
 
-無(s52 正常收工)。下一堂:P3 C-3b KEDA lab(curriculum-plan §12.6);P2a/P2b Phase Gate 仍待考,學員挑時機;registry 16 張(s52 triage 到 15 後,學員選擇多留 5xx 卡);每堂無 G(§12.4)。
+無(s52 正常收工)。下一堂:P3 C-3b KEDA lab(curriculum-plan §12.6,預習頁 s53-keda-layers.html Layer 0-2 已出 https://claude.ai/artifact/DLLVyRhGNuV9CQ6mizkqkc);P2a/P2b Phase Gate 仍待考,學員挑時機;registry 16 張(s52 triage 到 15 後,學員選擇多留 5xx 卡);每堂無 G(§12.4)。
 
 <!-- schema §3 = 恰好一行。敘事與次要待辦寫 session-log.md,長效教練紀律寫 session-log.md
      「教練執行紀律」,不要在這裡疊舊堂。s32 及更早斷點原文見 session-log.md 對應堂,
