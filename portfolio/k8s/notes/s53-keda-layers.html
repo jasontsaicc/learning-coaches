@@ -124,7 +124,7 @@ footer.next strong { color: var(--accent); }
   <h1>KEDA 事件擴容 (P3 C-3b)</h1>
   <p class="goal">讀完這頁你能:說出 HPA 為什麼自己縮不到 0、KEDA 補了哪兩件事、0 ↔ 1 和 1 ↔ N 各是誰負責。</p>
   <div class="progress" aria-label="閱讀進度">
-    <span class="done">Layer 0 ✓</span><span class="done">1 ✓</span><span class="done">2 ✓</span><span>3 ○</span><span>4 ○</span><span>5 ○</span><span>6 ○</span><span>7 ○</span>
+    <span class="done">Layer 0 ✓</span><span class="done">1 ✓</span><span class="done">2 ✓</span><span>3 ○</span><span>4 ○</span><span>5 ○</span><span>6 ○</span><span>7 ○</span><span class="done">S53 釐清 ✓</span>
   </div>
 </header>
 
@@ -313,8 +313,140 @@ spec:
   <div class="wrong"><b>常見踩坑</b>:on-call 時照 C-3 的止血方式 <code>kubectl patch hpa</code> 改 minReplicas。HPA 是 keda-operator 管的,它會照 ScaledObject 改回去。要改 ScaledObject 的 <code>minReplicaCount</code>。</div>
 </section>
 
+<!-- ===================== S53 釐清 ===================== -->
+<section class="layer" id="clarify">
+  <div class="layer-head"><span class="badge">S53 釐清</span><h2>課堂上搞混的點</h2><span class="time">讀 4 分鐘</span></div>
+  <p class="lead">能不能從 0 叫醒,看的是「數字住在 Pod 裡面還是外面」,跟 trigger 走 HPA 還是走 KEDA 無關。</p>
+
+  <div class="wrong">
+    <p>✗ 我以為:CPU trigger 走 HPA,SQS trigger 走 KEDA,所以 SQS 叫得醒。</p>
+    <p>✓ 其實是:兩種都寫在 ScaledObject,都是 KEDA 建 HPA,都是 keda-operator 每 30 秒問 scaler「現在 active 嗎」。差在 0 顆時,那個數字還在不在。</p>
+    <p>→ 為什麼會搞混:原本以為 HPA 只會看 CPU,所以把「看 CPU 的」歸給 HPA、「看 SQS 的」歸給 KEDA。</p>
+  </div>
+
+  <h3>HPA 只會讀數字,數字來自兩個 API</h3>
+  <p>HPA 不認識 SQS,也不只會看 CPU。它只跟 API Server 要數字,來源分兩條。下圖是 Deployment 已經 0 顆的狀態。</p>
+  <div class="card fig">
+    <svg viewBox="0 0 370 330" width="370" role="img" aria-label="HPA 讀兩個 API。左邊 metrics.k8s.io 由 metrics-server 從 Pod 收 CPU,0 顆時沒有數字;右邊 external.metrics.k8s.io 由 KEDA metrics apiserver 讀 SQS,0 顆時仍有 120 則">
+      <defs>
+        <marker id="k3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="f-acc"/></marker>
+      </defs>
+      <rect x="95" y="10" width="180" height="44" class="f-card s-ink" stroke-width="1.4"/>
+      <text x="185" y="30" class="t-ink" font-size="13.5" font-weight="700" text-anchor="middle">HPA</text>
+      <text x="185" y="46" class="t-mut" font-size="10.5" text-anchor="middle">只會跟 API Server 要數字</text>
+      <path d="M92,108 L150,56" class="s-acc" stroke-width="1.5" marker-end="url(#k3)"/>
+      <path d="M278,108 L220,56" class="s-acc" stroke-width="1.5" marker-end="url(#k3)"/>
+      <text x="92" y="84" class="t-mut t-mono" font-size="9.5" text-anchor="middle">type: Resource</text>
+      <text x="282" y="84" class="t-mut t-mono" font-size="9.5" text-anchor="middle">type: External</text>
+      <rect x="14" y="110" width="160" height="40" class="f-card s-ink" stroke-width="1.3"/>
+      <text x="94" y="127" class="t-ink t-mono" font-size="10.5" text-anchor="middle">metrics.k8s.io</text>
+      <text x="94" y="142" class="t-mut" font-size="10.5" text-anchor="middle">metrics-server</text>
+      <rect x="196" y="110" width="160" height="40" class="f-accsoft s-acc" stroke-width="1.5"/>
+      <text x="276" y="127" class="t-ink t-mono" font-size="10" text-anchor="middle">external.metrics.k8s.io</text>
+      <text x="276" y="142" class="t-mut" font-size="10.5" text-anchor="middle">keda-metrics-apiserver</text>
+      <path d="M94,196 V152" class="s-line" stroke-width="1.5" stroke-dasharray="4 3"/>
+      <path d="M276,196 V152" class="s-acc" stroke-width="1.5" marker-end="url(#k3)"/>
+      <text x="100" y="180" class="t-bad" font-size="10.5">沒東西可收</text>
+      <text x="282" y="180" class="t-acc" font-size="10.5">call AWS API</text>
+      <rect x="44" y="198" width="30" height="30" class="s-line" stroke-width="1.3" stroke-dasharray="3 3"/>
+      <rect x="80" y="198" width="30" height="30" class="s-line" stroke-width="1.3" stroke-dasharray="3 3"/>
+      <rect x="116" y="198" width="30" height="30" class="s-line" stroke-width="1.3" stroke-dasharray="3 3"/>
+      <text x="95" y="248" class="t-mut" font-size="11" text-anchor="middle">Pod 0 顆(空格)</text>
+      <rect x="216" y="198" width="120" height="34" class="f-card s-ink" stroke-width="1.3"/>
+      <text x="276" y="220" class="t-ink" font-size="12" text-anchor="middle">SQS queue 120 則</text>
+      <text x="276" y="248" class="t-mut" font-size="11" text-anchor="middle">住在 AWS,不靠 Pod</text>
+      <rect x="14" y="268" width="160" height="50" class="f-bad"/>
+      <text x="94" y="290" class="t-bad" font-size="12.5" font-weight="700" text-anchor="middle">沒有數字</text>
+      <text x="94" y="308" class="t-bad" font-size="11" text-anchor="middle">叫不醒,停在 0</text>
+      <rect x="196" y="268" width="160" height="50" class="f-accsoft"/>
+      <text x="276" y="290" class="t-acc" font-size="12.5" font-weight="700" text-anchor="middle">120 &gt; 0,active</text>
+      <text x="276" y="308" class="t-acc" font-size="11" text-anchor="middle">operator 把 0 改成 1</text>
+    </svg>
+    <p class="caption">沒裝 adapter 的叢集只有左邊那條,所以會以為 HPA 只能看 CPU。</p>
+  </div>
+
+  <h3>判準表:數字住哪裡</h3>
+  <div class="tbl">
+    <table>
+      <thead><tr><th>trigger 的數字</th><th>誰產生</th><th>0 顆時叫得醒?</th></tr></thead>
+      <tbody>
+        <tr><td>CPU / memory</td><td>Pod 自己</td><td>✗</td></tr>
+        <tr><td>Prometheus:app 自己 expose 的 <code>http_requests_total</code></td><td>Pod 自己(Prometheus 去 scrape,0 顆就沒 target)</td><td>✗</td></tr>
+        <tr><td>Prometheus:ingress-nginx controller 記的 request 數</td><td>Pod 外面的 controller</td><td>✓</td></tr>
+        <tr><td>SQS 訊息數、cron 時段</td><td>AWS / 時鐘</td><td>✓</td></tr>
+        <tr><td>PostgreSQL <code>count(*) WHERE status='pending'</code></td><td>DB</td><td>✓</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>所以實務上 CPU trigger 不會單獨用在要縮到 0 的服務,會搭一個 Pod 外面的 trigger(cron 或 queue)。</p>
+
+  <h3>KEDA 可以取代 HPA 嗎</h3>
+  <p class="lead">不行。KEDA 是「HPA 產生器 + 0 ↔ 1 外掛」。同一個 Deployment 同時掛手寫 HPA 和 ScaledObject,會有兩個 HPA 搶 <code>replicas</code>,KEDA 的 admission webhook 預設會擋。</p>
+  <details>
+    <summary>之後再看:cron / SQS 以外的 scaler(約 70 種)和兩個常用功能</summary>
+    <div class="tbl">
+      <table>
+        <thead><tr><th>類型</th><th>例子</th><th>看的數字</th></tr></thead>
+        <tbody>
+          <tr><td>Queue / stream</td><td>SQS, Kafka, RabbitMQ, Kinesis</td><td>backlog 訊息數 / consumer lag</td></tr>
+          <tr><td>Metrics</td><td>Prometheus, CloudWatch, Datadog</td><td>任一條 query 結果</td></tr>
+          <tr><td>Database</td><td>PostgreSQL, MySQL, Redis</td><td>SQL row 數 / list 長度</td></tr>
+          <tr><td>HTTP</td><td>HTTP add-on(另裝)</td><td>in-flight request 數</td></tr>
+          <tr><td>時間 / 資源</td><td>cron, cpu, memory</td><td>時段 / Pod 用量</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p><code>ScaledJob</code>:一則訊息開一個 K8s Job(batch),不是擴一個常駐 Deployment。</p>
+    <p><code>autoscaling.keda.sh/paused-replicas: "1"</code>:把顆數釘在 1,KEDA 暫停自動擴縮(維護、debug 用)。</p>
+  </details>
+
+  <h3>GitLab 加班情境:打一個連結就能 0 → 1 嗎</h3>
+  <p class="lead">簡單的 web app 可以(HTTP add-on),GitLab 不適合。實務用 break-glass annotation。</p>
+  <div class="card fig">
+    <svg viewBox="0 0 370 250" width="370" role="img" aria-label="HTTP add-on:瀏覽器請求先到 interceptor,interceptor 扣住請求並通知 scaler,operator 把 webservice 從 0 改 1,Pod Ready 後才轉送;Pod 啟動期間請求在等,可能 timeout">
+      <defs>
+        <marker id="k4" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="f-acc"/></marker>
+      </defs>
+      <rect x="14" y="14" width="90" height="36" class="f-card s-ink" stroke-width="1.3"/>
+      <text x="59" y="37" class="t-ink" font-size="12" text-anchor="middle">瀏覽器</text>
+      <path d="M104,32 H138" class="s-acc" stroke-width="1.5" marker-end="url(#k4)"/>
+      <text x="121" y="26" class="t-acc t-mono" font-size="9.5" text-anchor="middle">① GET</text>
+      <rect x="140" y="14" width="110" height="36" class="f-accsoft s-acc" stroke-width="1.5"/>
+      <text x="195" y="31" class="t-ink" font-size="12" font-weight="700" text-anchor="middle">interceptor</text>
+      <text x="195" y="45" class="t-mut" font-size="10" text-anchor="middle">② 扣住 request</text>
+      <path d="M250,32 H284" class="s-acc" stroke-width="1.5" marker-end="url(#k4)"/>
+      <rect x="286" y="14" width="70" height="36" class="f-card s-ink" stroke-width="1.3"/>
+      <text x="321" y="37" class="t-ink" font-size="11" text-anchor="middle">scaler</text>
+      <path d="M321,50 V84" class="s-acc" stroke-width="1.5" marker-end="url(#k4)"/>
+      <text x="327" y="70" class="t-acc" font-size="9.5">③ pending</text>
+      <rect x="256" y="86" width="100" height="36" class="f-card s-ink" stroke-width="1.3"/>
+      <text x="306" y="109" class="t-ink" font-size="11" text-anchor="middle">keda-operator</text>
+      <path d="M256,104 H214" class="s-acc" stroke-width="1.5" marker-end="url(#k4)"/>
+      <text x="236" y="98" class="t-acc t-mono" font-size="9.5" text-anchor="middle">④ 0→1</text>
+      <rect x="112" y="86" width="100" height="36" class="s-line" stroke-width="1.3" stroke-dasharray="3 3"/>
+      <text x="162" y="109" class="t-mut" font-size="11" text-anchor="middle">webservice 冷啟動</text>
+      <path d="M150,86 L180,52" class="s-acc" stroke-width="1.3" stroke-dasharray="4 3" marker-start="url(#k4)"/>
+      <text x="96" y="70" class="t-acc" font-size="9.5">⑤ Ready 才轉送</text>
+      <rect x="14" y="140" width="342" height="30" class="f-bad"/>
+      <text x="185" y="160" class="t-bad" font-size="11.5" text-anchor="middle">④ 到 ⑤ 之間 = Pod 啟動時間。GitLab 要幾分鐘,第一個人會 timeout</text>
+      <text x="14" y="194" class="t-ink" font-size="11.5">另外兩個洞(圖上沒有箭頭的部分):</text>
+      <text x="14" y="214" class="t-mut" font-size="11">sidekiq、gitaly、redis 沒有 HTTP 流量,不會被叫醒</text>
+      <text x="14" y="234" class="t-mut" font-size="11">git clone 走 SSH port 22,不經過 interceptor</text>
+    </svg>
+  </div>
+  <details>
+    <summary>實務做法:break-glass annotation(不用每次開 MR)</summary>
+    <ol>
+      <li>在每個 ScaledObject 加 <code>autoscaling.keda.sh/paused-replicas: "1"</code>,KEDA 釘在 1 顆、停止自動擴縮。</li>
+      <li>包成 pipeline 按鈕或 Slack 指令,讓人自助喚醒,不需要 kubectl 權限,也留下誰、何時開的紀錄。</li>
+      <li>ArgoCD 管這些物件時,把這個 annotation 加進 <code>ignoreDifferences</code>,並開 sync option <code>RespectIgnoreDifferences=true</code>,否則下一次 sync 會把它蓋回 Git 的版本。</li>
+      <li>隔天早上移除 annotation(或用 cron job 自動移除),不然環境一直開著燒錢。</li>
+    </ol>
+  </details>
+</section>
+
 <footer class="next">
-  <strong>上課前(2 分鐘):</strong>用一句話回答:為什麼 HPA 自己沒辦法從 0 顆長回 1 顆?
+  <strong>下堂開頭(2 分鐘):</strong>這台 kind 沒裝 metrics-server。裝完 KEDA 之後,<code>kubectl get apiservice | grep metrics</code> 會出現 <code>metrics.k8s.io</code>、<code>external.metrics.k8s.io</code> 哪幾個?因為?
   <details>
     <summary>選做:對照公司 dev 環境</summary>
     <p>先跑 <code>kubectl config current-context</code>,確認是 dev,不是 prod。再跑唯讀的 <code>kubectl get scaledobjects -A</code>,看 trigger 是不是 cron。</p>
