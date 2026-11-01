@@ -7,15 +7,15 @@
 
 ## Meta
 
-- session_count: 53
+- session_count: 54
 - last_weekly_review: 49(WR10 於 s49 課尾壓縮版:NetworkPolicy DNS supported / RBAC watch 結論對判準錯 / Secret 分層冷測過)
-- last_session_date: 2026-10-29
+- last_session_date: 2026-11-01
 - warm_up_classification: mid
 - target_role: 雙目標 NVIDIA Pre-Production Engineer + AWS ProServe DC Cloud Architect,兼顧台廠資深 SRE(2026-09-30,curriculum-plan §12);投遞最快 2027-01
 
 ## Current Session breakpoint
 
-s53 Gap stop(2026-10-29,家用 VM kind-k8s-coach-p2a):P3 C-3b KEDA chunk 1 ✅ supported;下一步 = chunk 2 cron lab 開頭,先問預測題「沒 metrics-server 的 kind 裝完 KEDA v2.17.2,`kubectl get apiservice | grep metrics` 會出現哪幾個、因為?」再讓學員 `kubectl apply --server-side -f https://github.com/kedacore/keda/releases/download/v2.17.2/keda-2.17.2.yaml`;之後 chunk 3 SQS 圖+情境題、F(volley≤2)、無 G、課尾卡;KEDA 尚未安裝。預習頁 https://claude.ai/artifact/DLLVyRhGNuV9CQ6mizkqkc
+s54 Gap stop(2026-11-01,家用 VM kind-k8s-coach-p2a,學員頭痛):P3 C-3b KEDA chunk 2 預測題 ✅(一次縮小提示後答「cron/SQS 數字住 Pod 外 → external.metrics」帶因為;首答把 keda-hpa 物件當 APIService,當場分清);下一步 = 學員自敲 `kubectl apply --server-side -f https://github.com/kedacore/keda/releases/download/v2.17.2/keda-2.17.2.yaml` → `kubectl get pods -n keda; kubectl get apiservice | grep metrics` 驗預測 → cron ScaledObject lab;之後 chunk 3 SQS 圖+情境題、F(volley≤2)、無 G、課尾卡;KEDA 尚未安裝。預習頁 https://claude.ai/artifact/DLLVyRhGNuV9CQ6mizkqkc
 
 <!-- schema §3 = 恰好一行。敘事與次要待辦寫 session-log.md,長效教練紀律寫 session-log.md
      「教練執行紀律」,不要在這裡疊舊堂。s32 及更早斷點原文見 session-log.md 對應堂,
