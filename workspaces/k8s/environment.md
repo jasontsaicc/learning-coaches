@@ -22,6 +22,9 @@
 - SG `k8s-lab-nodes`(`sg-0e339ce43dd3492e3`):22/6443 來源 bastion SG `sg-03f8578ae1ba8fc3a`,node 間 self 全開。SSH key `~/.ssh/k8s-lab`。
 - `billing-eks-bastion` 只當控制台,**不裝 kubeadm、不當 node**(有 PROD `eks` kubeconfig)。
 - 每堂收工:stop 3 台並查 instance state;EKS 當堂 destroy + 查空。
+- instance:cp `i-07d1f6b84b28b7085`(10.86.47.25)、w1 `i-023330305ef657042`(10.86.40.56)、w2 `i-0a711dc638fa0fc4f`(10.86.34.124);`ssh -i ~/.ssh/k8s-lab ubuntu@<ip>`,cp context `kubernetes-admin@kubernetes`。
+- (2026-11-02 s55)v1.36.5;root EBS 8→20 GB(fs 19 GB),原 8 GB 裝 KEDA + 拉 image 後 DiskPressure。KEDA v2.21.0(裝前查相容表,v2.17 只到 1.32),metrics-server 已裝。
+- ⚠️ `labs/kubeadm/terraform/main.tf` gitignored,改動只在這台 bastion:加了 `root_block_device` + `lifecycle { ignore_changes = [ami] }`。AMI 是 `most_recent`,沒有這行 plan 會 3 destroy。apply 前必讀 plan 最後一行。
 - 詳見 curriculum-plan §12.1。
 
 ## 機器

@@ -210,6 +210,8 @@
 - **s32 第三次同形狀(2026-08-28)**:剛給完「先鎖 fault domain 再查內部」的兩步判準,**下一題換皮 Postgres 立刻又答「檢查 replicas 的 log」= 第 2 步**。梯子問「這是第幾步」後能正確複述順序,再給三選一才挑到 B。**證實診斷:不是記不住,是不會把剛拿到的判準當工具用。**
 - **加碼規格(s33 起)**:排障題不直接問「第一發是什麼」,先強迫學員答「**我這一發回答的是第 1 步還是第 2 步**」,答完才給指令選項。把「用一次」變成強制動作,不是期待他自己想到。
 
+- **s55 再現(2026-11-02)**:視窗 19:00 結束、19:08 還是 3 顆,首答「檢查 cron 時區以及 log」,時區是合理嫌犯但順序錯。第一刀是 `kubectl get scaledobject` 的 `ACTIVE`:True 查時區/end,False 查 KEDA Pod 再看 log。同堂 `df` 跑在 cp,被趕的是 worker。下次抽考:視窗 09:00 開始、09:10 還是 0 顆、`ACTIVE=False`,嫌犯在哪(當堂未答)。
+
 ## 2026-09-01 | 建 Pod 的權限 vs Pod 裡程式呼叫 API 的權限(誰用誰的身分)
 
 - 正解:Pod 會正常建立、`Running`。建 Pod 是 kube-controller-manager 裡的控制器用**它自己的系統級身分**做的,跟 CronJob 宣告的那個 SA 完全無關;那個 SA 只在 **Pod 裡的程式自己呼叫 API** 時才用得到。比喻:建 Pod 像 HR 幫新人辦入職,不需要新人自己的識別證;403 發生在員工已經到職、自己拿識別證開某個門的那一刻。
@@ -490,3 +492,9 @@
 - 判準句:先問「這個碼是誰產生的」,再縮小嫌犯;不要從碼直接跳到 DB / Pod。
 - s52 由來:學員自述面試答不出且跟 404 混;複習 2 答「5xx 可能是 DB」;503 nginx 頁換皮選 B ✅(supported,因為要追問)。教材在 phase-2a-networking.md「404 / 502 / 503 排障階梯」。
 - 下次抽考:ALB 回 504、body 是 awselb 頁,app log 完全沒有這筆請求。是誰產生的、第一個查什麼?
+
+## 2026-11-02 | 裝 KEDA 會不會取代 metrics-server
+- 正解:不會。`metrics.k8s.io` 回答 Pod 的 CPU / memory(metrics-server),`external.metrics.k8s.io` 回答 Pod 外的數字(keda-metrics-apiserver)。實測 `kubectl get apiservice | grep metrics` 2 行。
+- 判準句:一個 API group 一行。KEDA 註冊新的 group,舊的不動。
+- 延伸:一座叢集只能一個 active 的 external.metrics server,要是 KEDA 自己;真正會搶的是這一行。
+- 下次抽考:叢集已裝 metrics-server,ScaledObject 同時有 cpu 和 cron 兩個 trigger,HPA 會問 APIService 表的哪幾行?因為?
