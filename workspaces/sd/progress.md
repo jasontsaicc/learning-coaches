@@ -11,9 +11,9 @@
 
 ## Meta
 
-- session_count: 56
+- session_count: 57
 - last_weekly_review: 50 — WR5 於 S50 收帳(Topic 1 @S42 / Topic 2 @S45 / **Topic 3 @S50 學生選「收」**;過期卡 sweep 以 S50 倒帳形式完成:14 → 7 張 + 7 封存)。⚠️ **artifact audit 未跑**(engine WR flow 第 6 步),掛在下一次 WR
-- last_session_date: 2026-10-29
+- last_session_date: 2026-11-01
 - warm_up_classification: (standalone 時期未記錄;學員已 P3,Step 0 模式預設 Exploration)
 
 ## Current Session breakpoint
@@ -23,9 +23,9 @@
      S50 的 coach 自產假訊息事故與應對規則另遷入 coaching-brief.md「Coach 自檢硬規則」。
      本區段 2026-08-19 之前的完整原文封存於 archive/breakpoint-history.md(冷檔,一字未刪)。 -->
 
-**Chat System(Day 35-36)結束(S56 G 快收,2026-10-29)**:G 6/8 測到的維度;Day 37 PoC 依 10-17 re-plan 跳過。S52–S55 的 chunk 紀錄已遷至 archive/breakpoint-history.md。
+P3 / Metrics & Logging(Day 46)/ chunk 1 capacity 未過 gate(S57 2026-11-01 停):1M samples/s 整輪範例後答對,約 140 GB/day 由 coach 給;MySQL B-tree read-modify-write 已教,Recall 一句話與 Postgres Transfer(heap vs index 哪邊散)皆未答。
 
-下一場 resume:Metrics/Logging(Day 46,10-29 方案 B 隊列第 1 題;預習頁 https://claude.ai/artifact/UX2d2QxkGp1UD5Fyznwdbe ,repo 檔 portfolio/sd/notes/day46-metrics-logging-layers.html)。
+下一場 resume:Weekly Review 到期(57-50=7,含未跑的 artifact audit)。WR 後從 chunk 1 Recall 起,接 Postgres Transfer,過 gate 才進 chunk 2 cardinality(Day 46,10-29 方案 B 隊列第 1 題;預習頁 https://claude.ai/artifact/UX2d2QxkGp1UD5Fyznwdbe ,repo 檔 portfolio/sd/notes/day46-metrics-logging-layers.html)。
 
 ## Phase status
 
@@ -102,10 +102,12 @@ Weak-topic flags: 無(至今沒有帶 flag 過 gate 的紀錄)。
      無卡的設 3 天(2026-07-13)。unresolved-session-count = 40 - 建立 session(近似;≥5 依 engine
      Priority Override 置頂,step A 每堂上限內逐步清)。 -->
 
-### Live(unresolved,50 筆)
+### Live(unresolved,52 筆)
 
+- (s57) | Metrics capacity(samples/s 算式) | `5000 × 3000 × 15 = 225,000,000`,把每 15 秒一輪當乘數;單條 series rate 問法答「不懂」(coach 問法彆扭),整輪範例後答對 1M 但帶「嗎」;GB/day 學生說不想算,由 coach 給;教完仍問 sample 是否類似 metric | 場景轉算式,未檢查單位方向(RP2,S46 除法留存同家族) | unresolved | 3 | 2026-11-04 | 0
+- (s57) | Database(B-tree write path) | 選 write 先撐不住正確,理由停在「B-tree read > write」;1M samples/s 落點答「集中在少數 page」;不知 leaf page;「page 不在 RAM 先做什麼」答「先找放哪裡」,read-modify-write 由 coach 給 | 前置機制缺口:key 開頭是 series → 寫入分散 → random I/O 這條鏈未建立(RP2) | unresolved | 3 | 2026-11-04 | 0
 - (s56 G) | Chat System(3AM page:症狀→路徑) | 「好友全部顯示離線、訊息照收」第一刀指 Redis pub/sub;縮成 (a)/(b) 後答對「只壞 pub/sub,snapshot 仍正確」;結論 presence key 不見(eviction / failover / heartbeat 寫入失敗)由 coach 給 | 元件對、path 錯:snapshot(GET key)vs delta(pub/sub)沒先拆就下刀(RP1) | unresolved | 3 | 2026-11-01 | 0
-- (s56 G) | Chat System(cost 排序) | 砍 30% 列出「拉長 heartbeat」「減少通知對象」兩個 knob,沒用自算數字排先後(fan-out 500k/s vs heartbeat 20k/s = 25×);「怎麼證明沒砍到可靠性」未答 | 有選項無判準:cost 決策沒接回 capacity 數字(RP7/RP3) | unresolved | 3 | 2026-11-01 | 0
+- (s56 G) | Chat System(cost 排序) | 砍 30% 列出「拉長 heartbeat」「減少通知對象」兩個 knob,沒用自算數字排先後(fan-out 500k/s vs heartbeat 20k/s = 25×);「怎麼證明沒砍到可靠性」未答 | 有選項無判準:cost 決策沒接回 capacity 數字(RP7/RP3) | unresolved | 3 | 2026-11-04 | 0 S57 暖身 fail(interval 維持 3):題目給 500k/s vs 20k/s 仍先選 heartbeat,理由「大幅減少」未比較;coach 畫 A 極限圖後自答「最多的消耗是 fan-out」= supported,3.8% 上限未自算;另把拉長 interval 的耗電方向講反(實際更省電),「以為在線→跳過 push」unprompted ✅。
 - (s55) | Chat System(read receipts 論證) | F Yuki 故意錯建議「每則訊息存已讀 user_id list」卡住;縮成「Bob 滑過 50 則,A/B 各寫幾次」仍只答原則「每人只記讀到哪」,50 writes vs 1 未算出 | 機制在、反方案的代價論證缺(RP3:有結論無論證);當堂剛教 (A)/(B) 對照圖仍撈不出 | unresolved | 3 | 2026-10-30 | 0
 - (s54) | Chat System(heartbeat interval) | trade-off 兩邊代價講出,但沒 commit 選擇;「60 秒嗎」問句 | 頭號主線 commit 缺席(s38 家族)| unresolved | 3 | 2026-11-01 | 0 S56 G cost 題 fail(reset,仍「會思考是不是需要拉長」未 commit 數字);但 ALB idle timeout 前提 + 代價「以為在線→不推播、訊息不丟」unprompted 自產 = S55 忘掉那半撈回。S55 暖身 fail(reset):三輪才 commit N=5s,且靠句型填空;判準先講「漏訊息」,S54 自產的「誤判在線→跳過 push」忘記由 coach 給;理由(ALB 60s、3×)30s 也滿足;代價先寫成對面那邊,第三輪才自講 QPS + 15s stale window。
 
@@ -216,7 +218,7 @@ Weak-topic flags: 無(至今沒有帶 flag 過 gate 的紀錄)。
 - chunk:Consistency-Models | chunk | 3 | 2026-08-26(session store / LWW 的地基) | active
 - chunk:Database(B-tree/LSM) | chunk | 3 | 2026-08-29(S39 過但逼問才補全論證) | active
 - chunk:Chat-System-1v1 | chunk | 3 | 2026-10-16(S52 G:A/B 過,ordering catch-up 鍵回退) | active
-- chunk:Chat-System-Group(Day 36) | chunk | 3 | 2026-11-01(S56 G 6/8:3AM path 錯、cost 無數字排序) | active
+- chunk:Chat-System-Group(Day 36) | chunk | 3 | 2026-11-04(S57 暖身 cost 排序 fail;3AM path 未測) | active
 
 ### Archived(7 張,2026-08-19 S50 封存)
 
@@ -227,6 +229,7 @@ Consistent-Hashing(S40 過,vnode 數學已 park)
 
 ## Curiosity branch
 
+- Postgres 深入(heap + MVCC + vacuum、JSONB/GIN、partitioning、TimescaleDB、何時取代 NoSQL)| (s57) | 學生主動想深學;Q2 no(超過 chunk 1 需要的深度),Metrics 章收尾後排 deep-dive-notes | 已給一句結論:Postgres 一樣撞寫入牆,heap 不排序但 index 仍散
 - Redis INCR 當 per-conversation counter 遇 failover(async replication 掉號 → seq 重複)| (s52 G) | 學生喊太深,coach 挖過 depth ceiling;Q2 no(G 範圍外) | 一句結論已給:seq 跟訊息同存 DB
 - MQ long polling | (s13 前後) | Q1 no(Day 33-34 Notification System 大概率會用到,先 park) | 長輪詢怎麼運作
 - Trace/log sampling(head vs tail-based)+ metrics high-cardinality | (s29) | Q1 no(面試不問細節) | follow-up preview 已預告,Day 31-32/46-47 可拉

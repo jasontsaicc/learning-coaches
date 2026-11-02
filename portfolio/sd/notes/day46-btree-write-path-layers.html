@@ -1,0 +1,269 @@
+<title>B-tree 寫入路徑</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC:wght@400;700&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: one notebook column on graph paper; teal sd accent band; every mechanism on a taped figure card */
+:root {
+  --paper: #F6F8FA;
+  --grid: rgba(90,130,170,.16);
+  --ink: #23313E;
+  --ink-soft: #55677A;
+  --card: #FFFFFF;
+  --accent: #0B7285;
+  --on-accent: #FFFFFF;
+  --who: #FFE98A;
+  --see: #BDEEF6;
+  --may: #F9CDE0;
+  --wrong: #D2453A;
+  --ok: #2F8F5B;
+  --line: #9DB0C2;
+  --font-hand: "LXGW WenKai TC", "Noto Sans TC", "PingFang TC", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #1A2320; --grid: rgba(200,230,210,.08); --ink: #E6EDE8; --ink-soft: #A9BAB1;
+    --card: #24302C; --accent: #3BC9DB; --on-accent: #10221F; --who: #8A7A2A; --see: #2B6A74; --may: #7A3F57;
+    --wrong: #FF8A7E; --ok: #7FD3A1; --line: #5E7268; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #1A2320; --grid: rgba(200,230,210,.08); --ink: #E6EDE8; --ink-soft: #A9BAB1;
+  --card: #24302C; --accent: #3BC9DB; --on-accent: #10221F; --who: #8A7A2A; --see: #2B6A74; --may: #7A3F57;
+  --wrong: #FF8A7E; --ok: #7FD3A1; --line: #5E7268; color-scheme: dark;
+}
+body {
+  background-color: var(--paper);
+  background-image: linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 22px 22px;
+  color: var(--ink);
+  font-family: var(--font-hand);
+  font-size: 17px;
+  line-height: 1.75;
+}
+.band { background: var(--accent); color: var(--on-accent); padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 22px 18px; }
+.band > div { max-width: 760px; margin: 0 auto; display: grid; gap: 8px; }
+.page { max-width: 760px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 28px 64px; display: grid; gap: 36px; }
+h1, h2 { text-wrap: balance; line-height: 1.3; margin: 0; }
+h1 { font-size: 2.1rem; }
+h2 { font-size: 1.4rem; display: flex; flex-wrap: wrap; align-items: baseline; gap: 10px; }
+.badge { font-family: var(--font-mono); font-size: .78rem; background: var(--accent); color: var(--on-accent); padding: 1px 8px; border-radius: 3px; }
+.time { font-family: var(--font-mono); font-size: .74rem; color: var(--ink-soft); letter-spacing: .04em; }
+p { margin: 0; }
+section { display: grid; gap: 14px; min-width: 0; }
+.sub { font-size: .95rem; }
+.progress { font-family: var(--font-mono); font-size: .8rem; letter-spacing: .03em; }
+.lead { font-weight: 700; }
+mark { color: inherit; padding: 0 2px; background: linear-gradient(transparent 45%, var(--who) 45%); }
+mark.see { background: linear-gradient(transparent 45%, var(--see) 45%); }
+mark.may { background: linear-gradient(transparent 45%, var(--may) 45%); }
+code { font-family: var(--font-mono); font-size: .88em; }
+.card { position: relative; background: var(--card); border: 1px solid var(--line); padding: 20px 14px 12px; margin-top: 8px; min-width: 0; }
+.card::before { content: ""; position: absolute; top: -9px; left: 50%; width: 92px; height: 18px; margin-left: -46px; background: var(--accent); opacity: .35; }
+.scroll { overflow-x: auto; }
+.fig { display: block; width: 100%; min-width: 560px; height: auto; font-family: var(--font-hand); }
+.cap { font-size: .9rem; color: var(--ink-soft); margin-top: 6px; }
+.t { fill: var(--ink); font-size: 14px; }
+.ts { fill: var(--ink-soft); font-size: 12px; }
+.tm { fill: var(--ink); font-size: 12px; font-family: var(--font-mono); }
+.ta { fill: var(--accent); font-size: 14px; font-weight: 700; }
+.tw { fill: var(--wrong); font-size: 13px; font-weight: 700; }
+.box { fill: var(--card); stroke: var(--ink); stroke-width: 1.5; }
+.boxd { fill: none; stroke: var(--ink-soft); stroke-width: 1.5; stroke-dasharray: 5 4; }
+.hl { fill: var(--who); stroke: var(--ink); stroke-width: 1.5; }
+.hs { fill: var(--see); stroke: var(--ink); stroke-width: 1.5; }
+.hm { fill: var(--may); stroke: var(--ink); stroke-width: 1.5; }
+.ln { stroke: var(--line); stroke-width: 1.5; fill: none; }
+.ar { stroke: var(--accent); stroke-width: 2; fill: none; }
+.aw { stroke: var(--wrong); stroke-width: 2; fill: none; }
+.dot { fill: var(--ink); }
+.adot { fill: var(--wrong); }
+.head-a { fill: var(--accent); }
+.head-w { fill: var(--wrong); }
+.oops { border-left: 4px solid var(--wrong); padding: 2px 0 2px 12px; }
+.oops strong { color: var(--wrong); }
+table { border-collapse: collapse; width: 100%; font-size: .95rem; }
+th, td { border: 1px solid var(--line); padding: 6px 10px; text-align: left; vertical-align: top; }
+th { font-weight: 700; }
+.tablewrap { overflow-x: auto; background: var(--card); }
+details { border: 1px dashed var(--line); padding: 8px 12px; background: var(--card); }
+summary { cursor: pointer; font-weight: 700; }
+summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+details > p { margin-top: 8px; }
+.next { border: 2px solid var(--accent); background: var(--card); padding: 12px 14px; }
+</style>
+
+<div class="band"><div>
+  <p class="sub">sd 課程 · P3 經典題 · Day 46 · chunk 1 補充</p>
+  <h1>B-tree 寫入路徑</h1>
+  <p>讀完這頁你能：分清 metric / series / sample，並指著圖講一筆 INSERT 為什麼貴。</p>
+  <p class="progress">L0 ✓ L1 ✓ L2 ✓ L3 ○ L4 ○ L5 ○ L6 ○ L7 ○</p>
+</div></div>
+
+<main class="page">
+
+<section>
+  <h2><span class="badge">L0</span> 一張圖 <span class="time">讀 1 分鐘</span></h2>
+  <p class="lead">B-tree 像一座依名字排好的檔案櫃：每張新紙條都要走到它專屬的抽屜。</p>
+  <div class="card"><div class="scroll">
+    <svg class="fig" viewBox="0 0 680 210" role="img" aria-label="Left: three new slips each walk to a different drawer of a sorted cabinet. Right: a notebook where every new line goes on the next empty line.">
+      <defs>
+        <marker id="a1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="head-a" d="M0 0 L10 5 L0 10 z"/></marker>
+        <marker id="w1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="head-w" d="M0 0 L10 5 L0 10 z"/></marker>
+      </defs>
+      <text class="t" x="20" y="24">B-tree：依 key 排序的櫃子</text>
+      <rect class="hl" x="20" y="60" width="86" height="28"/><text class="tm" x="30" y="79">cpu{h1}</text>
+      <rect class="hl" x="20" y="100" width="86" height="28"/><text class="tm" x="30" y="119">disk{h5}</text>
+      <rect class="hl" x="20" y="140" width="86" height="28"/><text class="tm" x="30" y="159">mem{h9}</text>
+      <rect class="box" x="230" y="40" width="120" height="30"/><text class="t" x="262" y="60">cpu 抽屜</text>
+      <rect class="box" x="230" y="100" width="120" height="30"/><text class="t" x="262" y="120">disk 抽屜</text>
+      <rect class="box" x="230" y="160" width="120" height="30"/><text class="t" x="262" y="180">mem 抽屜</text>
+      <path class="aw" d="M106 74 L228 56" marker-end="url(#w1)"/>
+      <path class="aw" d="M106 114 L228 115" marker-end="url(#w1)"/>
+      <path class="aw" d="M106 154 L228 174" marker-end="url(#w1)"/>
+      <text class="t" x="420" y="24">Time-series 寫法（chunk 3）</text>
+      <rect class="box" x="420" y="40" width="230" height="150"/>
+      <line class="ln" x1="420" y1="70" x2="650" y2="70"/><line class="ln" x1="420" y1="100" x2="650" y2="100"/><line class="ln" x1="420" y1="130" x2="650" y2="130"/><line class="ln" x1="420" y1="160" x2="650" y2="160"/>
+      <text class="tm" x="432" y="60">cpu{h1}  t=30</text>
+      <text class="tm" x="432" y="90">disk{h5} t=30</text>
+      <text class="tm" x="432" y="120">cpu{h1}  t=45</text>
+      <text class="ta" x="432" y="150">下一筆寫這裡</text>
+      <text class="ts" x="432" y="180">（空行）</text>
+    </svg>
+  </div><p class="cap">左邊是今天要懂的。右邊只是預告：不必插回排序位置，寫入就便宜。</p></div>
+</section>
+
+<section>
+  <h2><span class="badge">L1</span> 第一性原理 <span class="time">讀 3 分鐘</span></h2>
+  <p class="lead">限制有兩個：寫入量極大，而 RAM 放不下所有 page。先分清計量單位。</p>
+  <div class="card"><div class="scroll">
+    <svg class="fig" viewBox="0 0 680 220" role="img" aria-label="One metric named cpu_usage contains three series, one for each label combination. Each series is a line with a dot every 15 seconds. One dot is highlighted as a sample with timestamp 30 and value 71.2.">
+      <text class="t" x="20" y="24">metric</text><text class="t" x="170" y="24">series（一條線）</text><text class="t" x="440" y="24">sample（線上的點）</text>
+      <rect class="hl" x="20" y="96" width="110" height="38"/><text class="tm" x="32" y="120">cpu_usage</text>
+      <path class="ln" d="M130 115 L170 60"/><path class="ln" d="M130 115 L170 115"/><path class="ln" d="M130 115 L170 170"/>
+      <rect class="box" x="170" y="42" width="210" height="34"/><text class="tm" x="180" y="64">{host=h1, core=0}</text>
+      <rect class="box" x="170" y="98" width="210" height="34"/><text class="tm" x="180" y="120">{host=h1, core=1}</text>
+      <rect class="box" x="170" y="154" width="210" height="34"/><text class="tm" x="180" y="176">{host=h2, core=0}</text>
+      <line class="ln" x1="390" y1="59" x2="640" y2="59"/><line class="ln" x1="390" y1="115" x2="640" y2="115"/><line class="ln" x1="390" y1="171" x2="640" y2="171"/>
+      <circle class="dot" cx="430" cy="59" r="5"/><circle class="dot" cx="510" cy="59" r="5"/><circle class="dot" cx="590" cy="59" r="5"/>
+      <circle class="dot" cx="430" cy="115" r="5"/><circle class="dot" cx="510" cy="115" r="5"/><circle class="adot" cx="590" cy="115" r="7"/>
+      <circle class="dot" cx="430" cy="171" r="5"/><circle class="dot" cx="510" cy="171" r="5"/><circle class="dot" cx="590" cy="171" r="5"/>
+      <text class="ts" x="421" y="205">t=0</text><text class="ts" x="498" y="205">t=15</text><text class="ts" x="578" y="205">t=30</text>
+      <text class="tw" x="520" y="98">(t=30, 71.2)</text>
+    </svg>
+  </div><p class="cap">Metric 是量測的名字。Metric + 一組 label 才是一條 series。Sample 是 series 上的一個資料點。</p></div>
+  <div class="tablewrap"><table>
+    <tr><th>單位</th><th>範例</th><th>本題數量</th></tr>
+    <tr><td>metric</td><td><code>cpu_usage</code></td><td>沒給，也不需要</td></tr>
+    <tr><td>series</td><td><code>cpu_usage{host=h1,core=1}</code></td><td>15M 條</td></tr>
+    <tr><td>sample</td><td><code>(t=30, 71.2)</code></td><td>1M 個/秒</td></tr>
+  </table></div>
+  <p>限制長這樣。下圖<mark>假設 10% 的 INSERT 遇到 buffer pool miss</mark>，再跟一顆 gp3 的 baseline 3,000 IOPS 比，長條照比例畫：</p>
+  <div class="card"><div class="scroll">
+    <svg class="fig" viewBox="0 0 680 130" role="img" aria-label="Bar chart to scale. Required random reads 100,000 per second is 600 units wide. A gp3 volume baseline of 3,000 IOPS is 18 units wide.">
+      <text class="t" x="20" y="24">需要：100,000 random reads/s</text>
+      <rect class="hm" x="20" y="34" width="600" height="24"/>
+      <text class="t" x="20" y="86">gp3 baseline：3,000 IOPS</text>
+      <rect class="hs" x="20" y="96" width="18" height="24"/>
+    </svg>
+  </div><p class="cap">10% 是教學假設，不是量測值。換更快的 disk 只會把牆往後推，寫入位置依然分散。</p></div>
+</section>
+
+<section>
+  <h2><span class="badge">L2</span> 機制 <span class="time">讀 5 分鐘</span></h2>
+  <p class="lead">對，每筆 INSERT 都從 root 走到 leaf。走路本身便宜，貴的是 leaf 不在 RAM。</p>
+  <div class="card"><div class="scroll">
+    <svg class="fig" viewBox="0 0 680 270" role="img" aria-label="B-tree with a root, two internal pages and four leaf pages. The path root, internal A, leaf page 1 is highlighted. Root and internal pages are in RAM. Leaf page 1 is dashed because it is only on disk.">
+      <defs><marker id="a2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="head-a" d="M0 0 L10 5 L0 10 z"/></marker></defs>
+      <rect class="hs" x="285" y="20" width="110" height="36"/><text class="t" x="322" y="43">root</text>
+      <rect class="hs" x="130" y="94" width="130" height="36"/><text class="t" x="150" y="117">internal A</text>
+      <rect class="hs" x="420" y="94" width="130" height="36"/><text class="t" x="440" y="117">internal B</text>
+      <path class="ar" d="M310 56 L215 92" marker-end="url(#a2)"/>
+      <path class="ln" d="M370 56 L485 94"/>
+      <path class="ar" d="M165 130 L95 168" marker-end="url(#a2)"/>
+      <path class="ln" d="M225 130 L255 170"/><path class="ln" d="M455 130 L425 170"/><path class="ln" d="M515 130 L585 170"/>
+      <rect class="boxd" x="30" y="170" width="130" height="50"/><text class="tm" x="46" y="191">page 1</text><text class="tm" x="46" y="210">cpu{h1}</text>
+      <rect class="hs" x="190" y="170" width="130" height="50"/><text class="tm" x="206" y="191">page 2</text><text class="tm" x="206" y="210">cpu{h2}</text>
+      <rect class="boxd" x="360" y="170" width="130" height="50"/><text class="tm" x="376" y="191">page 3</text><text class="tm" x="376" y="210">disk{h5}</text>
+      <rect class="boxd" x="520" y="170" width="130" height="50"/><text class="tm" x="536" y="191">page N</text><text class="tm" x="536" y="210">mem{h9}</text>
+      <rect class="hs" x="30" y="240" width="18" height="16"/><text class="ts" x="54" y="253">在 RAM（buffer pool）</text>
+      <rect class="boxd" x="220" y="240" width="18" height="16"/><text class="ts" x="244" y="253">只在 disk，RAM 裡是空的</text>
+      <path class="ar" d="M450 248 L490 248" marker-end="url(#a2)"/><text class="ts" x="498" y="253">這筆 INSERT 的路徑</text>
+    </svg>
+  </div><p class="cap">Leaf page 是最底層真正放資料的小塊，InnoDB 預設 16 KB。上層 page 常被讀，通常都留在 RAM。</p></div>
+
+  <p>走到 leaf 之後分兩種結果：</p>
+  <div class="card"><div class="scroll">
+    <svg class="fig" viewBox="0 0 680 220" role="img" aria-label="Two panels. Buffer pool hit: the page is in RAM, the row is added, no disk read. Buffer pool miss: an old page may be flushed and evicted to make room, then the target page is read from disk, then the row is added.">
+      <defs><marker id="w2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="head-w" d="M0 0 L10 5 L0 10 z"/></marker></defs>
+      <rect class="box" x="10" y="10" width="290" height="200"/>
+      <text class="ta" x="24" y="36">Hit：page 已在 RAM</text>
+      <rect class="hs" x="24" y="56" width="120" height="40"/><text class="tm" x="44" y="81">page 2</text>
+      <text class="t" x="160" y="81">加一列，完成</text>
+      <text class="ts" x="24" y="130">不必讀 disk</text>
+      <text class="ts" x="24" y="152">改過的 page 稍後才 flush</text>
+      <rect class="box" x="320" y="10" width="350" height="200"/>
+      <text class="tw" x="334" y="36">Miss：page 不在 RAM</text>
+      <rect class="hm" x="334" y="52" width="130" height="36"/><text class="tm" x="344" y="75">old page</text>
+      <path class="aw" d="M464 70 L500 70" marker-end="url(#w2)"/><text class="t" x="508" y="75">踢出，騰位置</text>
+      <text class="ts" x="508" y="94">有改過的要先寫回 disk</text>
+      <rect class="boxd" x="334" y="112" width="130" height="36"/><text class="tm" x="344" y="135">page 1</text>
+      <path class="aw" d="M464 130 L500 130" marker-end="url(#w2)"/><text class="t" x="508" y="135">從 disk 讀進 RAM</text>
+      <rect class="hs" x="334" y="164" width="130" height="36"/><text class="tm" x="344" y="187">page 1</text>
+      <text class="t" x="480" y="187">加一列，完成</text>
+    </svg>
+  </div></div>
+
+  <p>Miss 時 page 1 的狀態這樣變，舊內容也畫出來。這就是 <mark class="see">read-modify-write</mark>：</p>
+  <div class="card"><div class="scroll">
+    <svg class="fig" viewBox="0 0 680 230" role="img" aria-label="Timeline with four columns and three rows. Disk holds the old page until step 4. RAM is empty at step 1, holds a copy at step 2, the changed page at step 3, and stays changed at step 4. The redo log gets an entry at step 3.">
+      <text class="t" x="120" y="24">① 開始</text><text class="t" x="260" y="24">② 讀進 RAM</text><text class="t" x="400" y="24">③ 改 page</text><text class="t" x="540" y="24">④ 之後 flush</text>
+      <text class="t" x="16" y="66">RAM</text><text class="t" x="16" y="126">Disk</text><text class="t" x="16" y="186">Redo log</text>
+      <rect class="boxd" x="110" y="42" width="120" height="40"/><text class="ts" x="146" y="67">（空）</text>
+      <rect class="box" x="250" y="42" width="120" height="40"/><text class="tm" x="260" y="67">0,15,30</text>
+      <rect class="hl" x="390" y="42" width="120" height="40"/><text class="tm" x="400" y="67">0,15,30,45</text>
+      <rect class="box" x="530" y="42" width="120" height="40"/><text class="tm" x="540" y="67">0,15,30,45</text>
+      <rect class="box" x="110" y="102" width="120" height="40"/><text class="tm" x="120" y="127">0,15,30</text>
+      <rect class="box" x="250" y="102" width="120" height="40"/><text class="tm" x="260" y="127">0,15,30</text>
+      <rect class="hm" x="390" y="102" width="120" height="40"/><text class="tm" x="400" y="127">0,15,30</text>
+      <rect class="hl" x="530" y="102" width="120" height="40"/><text class="tm" x="540" y="127">0,15,30,45</text>
+      <rect class="boxd" x="110" y="162" width="120" height="40"/>
+      <rect class="boxd" x="250" y="162" width="120" height="40"/>
+      <rect class="hl" x="390" y="162" width="120" height="40"/><text class="tm" x="400" y="187">append t=45</text>
+      <rect class="box" x="530" y="162" width="120" height="40"/><text class="tm" x="540" y="187">append t=45</text>
+      <text class="ts" x="390" y="222">Disk 暫時還是舊版</text>
+    </svg>
+  </div><p class="cap">Commit 靠 redo log 保證當機不掉資料，它是順序寫，便宜。貴的是 ② 的 random read 和 ④ 的 random write。</p></div>
+
+  <p>最後把 15M 條 series 放回來。同一秒的 sample 分別屬於不同 series，所以散在整顆 disk：</p>
+  <div class="card"><div class="scroll">
+    <svg class="fig" viewBox="0 0 680 130" role="img" aria-label="A strip of disk pages. Writes for cpu h1, disk h5 and mem h9 land on pages far apart, and the arrows jump across the strip.">
+      <defs><marker id="w3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="head-w" d="M0 0 L10 5 L0 10 z"/></marker></defs>
+      <g class="ln">
+        <rect class="box" x="20" y="60" width="50" height="40"/><rect class="box" x="70" y="60" width="50" height="40"/><rect class="box" x="120" y="60" width="50" height="40"/><rect class="box" x="170" y="60" width="50" height="40"/><rect class="box" x="220" y="60" width="50" height="40"/><rect class="box" x="270" y="60" width="50" height="40"/><rect class="box" x="320" y="60" width="50" height="40"/><rect class="box" x="370" y="60" width="50" height="40"/><rect class="box" x="420" y="60" width="50" height="40"/><rect class="box" x="470" y="60" width="50" height="40"/><rect class="box" x="520" y="60" width="50" height="40"/><rect class="box" x="570" y="60" width="50" height="40"/>
+      </g>
+      <rect class="hl" x="70" y="60" width="50" height="40"/><text class="tm" x="84" y="85">p1</text>
+      <rect class="hl" x="320" y="60" width="50" height="40"/><text class="tm" x="334" y="85">p3</text>
+      <rect class="hl" x="570" y="60" width="50" height="40"/><text class="tm" x="584" y="85">pN</text>
+      <path class="aw" d="M95 58 C 150 12, 290 12, 343 58" marker-end="url(#w3)"/>
+      <path class="aw" d="M345 58 C 400 12, 540 12, 593 58" marker-end="url(#w3)"/>
+      <text class="ts" x="20" y="122">一秒內要這樣跳的次數，取決於 miss 有多少</text>
+    </svg>
+  </div></div>
+  <p class="oops"><strong>我錯在這：</strong>我以為 1M samples/s 集中在少數 page。Key 開頭是 series，所以不同 series 分在不同位置，寫入是散開的。</p>
+
+  <details>
+    <summary>之後再看：把 buffer pool 開大就解決了嗎？</summary>
+    <p>每條 series 最新的那塊 leaf page 都得留在 RAM，才能避開 miss。長期運作下每條 series 大約佔一塊，<code>15M × 16 KB = 240 GB</code>，而且這只是最新資料。Batch INSERT 可以合併 commit，但資料位置依然分散。</p>
+  </details>
+</section>
+
+<section class="next">
+  <h2>下一步 <span class="time">1 分鐘</span></h2>
+  <p>看著第三張圖，回 chat 用一句話講：為什麼 1M samples/s 寫進 MySQL，write 會先撐不住？</p>
+  <p class="sub">L3 到 L7（取捨、AWS、規模化、故障、面試）下一批再加。</p>
+</section>
+
+</main>

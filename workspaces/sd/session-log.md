@@ -13,6 +13,13 @@
      - docs/curriculum-roadmap.md、docs/planning-review.md → workspaces/sd/archive/pre-migration/
      - sd-coach skill 本體         → skills/sd-coach/(curriculum 詳文=references/curriculum-detail.md) -->
 
+## S57(2026-11-01,Metrics & Logging chunk 1;gate 前停)
+
+- 學到:metric / series / sample 三層;15M series ÷ 15s = 1M samples/s;MySQL B-tree 寫入分散與 read-modify-write(筆記 https://claude.ai/artifact/CtJwkNgL3MsLVNuJUCmQQh ,repo 檔 portfolio/sd/notes/day46-btree-write-path-layers.html,L0–L2)。
+- 卡住:暖身 cost 排序先選 heartbeat;算式 ×15;說不想算數學,GB/day 由 coach 給;leaf page / buffer pool 是前置缺口。Coach 出題時亂加 1000 萬 DAU,已更正。
+- 學生主動想深學 Postgres,記 curiosity branch,Metrics 章收尾後排。
+- 下一場:Weekly Review 到期;之後 chunk 1 Recall + Postgres Transfer。
+
 ## S56(2026-10-29,Day 36 G 快收;Chat System 結束)
 
 - 學生說 chat 卡太久很痛苦,要快收:G 壓成 3AM + cost 兩題,每題一問一答。6/8。
