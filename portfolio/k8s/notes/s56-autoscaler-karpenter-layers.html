@@ -1,0 +1,549 @@
+<title>Cluster Autoscaler vs Karpenter</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC:wght@400;700&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<style>
+/* layout: one narrow notebook column on graph paper; each layer = header badge + taped figure card */
+:root {
+  --bg: #F6F8FA;
+  --grid: rgba(90,130,170,.16);
+  --ink: #23313E;
+  --muted: #5B6B7A;
+  --card: #FFFFFF;
+  --line: #C9D3DD;
+  --accent: #326CE5;
+  --accent-soft: rgba(50,108,229,.12);
+  --tape: rgba(50,108,229,.28);
+  --bad: #C92A2A;
+  --bad-soft: rgba(201,42,42,.18);
+  --waste: rgba(91,107,122,.22);
+  --hl-who: #FFE98A;
+  --hl-see: #BDEEF6;
+  --hl-may: #F9CDE0;
+  --font-body: "LXGW WenKai TC", "Noto Sans TC", "PingFang TC", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #1A2320; --grid: rgba(200,230,215,.07); --ink: #E4ECE7; --muted: #A3B3AA;
+    --card: #24302B; --line: #3D4D46; --accent: #74A0F0; --accent-soft: rgba(116,160,240,.16);
+    --tape: rgba(116,160,240,.35); --bad: #FF8787; --bad-soft: rgba(255,135,135,.2);
+    --waste: rgba(163,179,170,.22); --hl-who: rgba(255,233,138,.38); --hl-see: rgba(189,238,246,.3);
+    --hl-may: rgba(249,205,224,.3); color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #1A2320; --grid: rgba(200,230,215,.07); --ink: #E4ECE7; --muted: #A3B3AA;
+  --card: #24302B; --line: #3D4D46; --accent: #74A0F0; --accent-soft: rgba(116,160,240,.16);
+  --tape: rgba(116,160,240,.35); --bad: #FF8787; --bad-soft: rgba(255,135,135,.2);
+  --waste: rgba(163,179,170,.22); --hl-who: rgba(255,233,138,.38); --hl-see: rgba(189,238,246,.3);
+  --hl-may: rgba(249,205,224,.3); color-scheme: dark;
+}
+body {
+  background-color: var(--bg);
+  background-image: linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 22px 22px;
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 17px;
+  line-height: 1.75;
+}
+.page { max-width: 760px; margin: 0 auto; padding-block: 24px 64px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: flex; flex-direction: column; gap: 36px; }
+header.top { background: var(--accent); color: #fff; border-radius: 4px; padding: 18px 20px; display: flex; flex-direction: column; gap: 8px; }
+header.top h1 { margin: 0; font-size: 1.7rem; line-height: 1.3; text-wrap: balance; }
+header.top .goal { margin: 0; font-size: 1rem; }
+.progress { font-family: var(--font-mono); font-size: .85rem; display: flex; flex-wrap: wrap; gap: 6px; }
+.progress span { background: rgba(255,255,255,.18); padding: 2px 8px; border-radius: 3px; }
+.progress span.done { background: #fff; color: #1F4FB8; font-weight: 600; }
+section.layer { display: flex; flex-direction: column; gap: 14px; }
+.layer-head { display: flex; align-items: baseline; flex-wrap: wrap; gap: 10px; }
+.badge { font-family: var(--font-mono); font-size: .8rem; background: var(--accent); color: #fff; padding: 2px 8px; border-radius: 3px; letter-spacing: .04em; }
+.layer-head h2 { margin: 0; font-size: 1.35rem; text-wrap: balance; }
+.time { font-family: var(--font-mono); font-size: .78rem; color: var(--muted); }
+h3 { margin: 10px 0 0; font-size: 1.12rem; }
+p { margin: 0; }
+.lead { font-size: 1.08rem; font-weight: 700; }
+mark { color: inherit; padding: 0 2px; background: linear-gradient(transparent 50%, var(--hl-who) 50%); }
+mark.see { background: linear-gradient(transparent 50%, var(--hl-see) 50%); }
+mark.may { background: linear-gradient(transparent 50%, var(--hl-may) 50%); }
+code, .mono { font-family: var(--font-mono); font-size: .88em; }
+.card { position: relative; background: var(--card); border: 1px solid var(--line); padding: 22px 14px 14px; margin-top: 8px; }
+.card::before { content: ""; position: absolute; top: -9px; left: 50%; width: 92px; height: 18px; transform: translateX(-50%) rotate(-2deg); background: var(--tape); }
+.fig { overflow-x: auto; }
+.fig svg { display: block; margin: 0 auto; max-width: 100%; height: auto; }
+.caption { font-size: .9rem; color: var(--muted); text-align: center; margin-top: 6px; }
+.formula { font-family: var(--font-mono); font-size: 1rem; background: var(--accent-soft); border-left: 3px solid var(--accent); padding: 10px 12px; overflow-x: auto; white-space: pre; }
+.tbl { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-size: .95rem; background: var(--card); }
+th, td { border: 1px solid var(--line); padding: 6px 10px; text-align: left; vertical-align: top; }
+th { background: var(--accent-soft); }
+td.num, th.num { font-family: var(--font-mono); font-variant-numeric: tabular-nums; text-align: right; }
+.panels { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.panel { background: var(--card); border: 1px solid var(--line); padding: 10px; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.panel .t { font-weight: 700; font-size: .95rem; }
+.panel .r { font-size: .88rem; }
+.panel.bad { border-left: 4px solid var(--bad); }
+.panel.good { border-left: 4px solid var(--accent); }
+@media (max-width: 560px) { .panels { grid-template-columns: minmax(0, 1fr); } }
+.timeline { list-style: none; margin: 0; padding: 0 0 0 4px; display: flex; flex-direction: column; }
+.timeline li { position: relative; display: grid; grid-template-columns: 112px minmax(0, 1fr); gap: 12px; padding: 0 0 14px; }
+.timeline li::before { content: ""; position: absolute; left: 105px; top: 10px; bottom: -4px; width: 2px; background: var(--line); }
+.timeline li:last-child::before { display: none; }
+.timeline .when { font-family: var(--font-mono); font-size: .82rem; text-align: right; padding-right: 14px; color: var(--accent); font-weight: 600; }
+.timeline .what { position: relative; }
+.timeline .what::before { content: ""; position: absolute; left: -18px; top: 9px; width: 10px; height: 10px; border-radius: 50%; background: var(--accent); }
+.timeline li.blind .what { background: var(--bad-soft); padding: 2px 8px; }
+.timeline li.blind .what::before { background: var(--bad); }
+.timeline .sub { font-size: .88rem; color: var(--muted); }
+.wrong { border-left: 4px solid var(--bad); background: var(--bad-soft); padding: 8px 12px; }
+details { background: var(--card); border: 1px dashed var(--line); padding: 8px 12px; }
+details summary { cursor: pointer; font-weight: 700; }
+details summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+details > *:not(summary) { margin-top: 8px; }
+pre.yaml { font-family: var(--font-mono); font-size: .85rem; background: var(--accent-soft); padding: 10px 12px; overflow-x: auto; margin: 8px 0 0; }
+footer.next { background: var(--card); border: 2px solid var(--accent); padding: 14px 16px; }
+footer.next strong { color: var(--accent); }
+/* svg tokens */
+.s-ink { stroke: var(--ink); fill: none; }
+.s-line { stroke: var(--line); fill: none; }
+.s-acc { stroke: var(--accent); fill: none; }
+.f-card { fill: var(--card); }
+.f-acc { fill: var(--accent); }
+.f-accsoft { fill: var(--accent-soft); }
+.f-bad { fill: var(--bad-soft); }
+.f-waste { fill: var(--waste); }
+.t-ink { fill: var(--ink); font-family: var(--font-body); }
+.t-mut { fill: var(--muted); font-family: var(--font-body); }
+.t-acc { fill: var(--accent); font-family: var(--font-body); }
+.t-bad { fill: var(--bad); font-family: var(--font-body); }
+.t-mono { font-family: var(--font-mono); }
+</style>
+<style>
+.panels.two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.panel svg { display: block; width: 100%; height: auto; }
+.wrong p + p { margin-top: 4px; }
+@media (max-width: 560px) { .panels.two { grid-template-columns: minmax(0, 1fr); } }
+</style>
+<div class="page">
+
+<header class="top">
+  <h1>Cluster Autoscaler vs Karpenter (P3 C-5)</h1>
+  <p class="goal">讀完這頁你能:說出尖峰當下生 node 為什麼來不及、CA 和 Karpenter 差在哪一層、看到 FailedScheduling 判斷加 node 有沒有用。</p>
+  <div class="progress" aria-label="閱讀進度">
+    <span class="done">Layer 0 ✓</span><span class="done">1 ✓</span><span class="done">2 ✓</span><span class="done">3 ✓</span><span class="done">4 ✓</span><span class="done">5 ✓</span><span class="done">6 ✓</span><span class="done">7 ✓</span>
+  </div>
+</header>
+
+<!-- ===================== LAYER 0 ===================== -->
+<section class="layer" id="l0">
+  <div class="layer-head"><span class="badge">LAYER 0</span><h2>一張圖</h2><span class="time">讀 1 分鐘</span></div>
+  <p class="lead">Pod 排不上去時,要有人去開新機器。CA 透過 ASG 開,Karpenter 直接叫 EC2 開。</p>
+  <div class="card fig">
+    <svg viewBox="0 0 400 330" width="400" role="img" aria-label="Pending Pod 分兩條路:左邊 Cluster Autoscaler 改 ASG desired,ASG 開 EC2;右邊 Karpenter 直接呼叫 CreateFleet 開 EC2;最後都由 scheduler 排 Pod">
+      <defs>
+        <marker id="a0" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="f-acc"/></marker>
+      </defs>
+      <rect x="90" y="8" width="220" height="48" class="f-accsoft s-acc" stroke-width="1.4"/>
+      <text x="200" y="28" class="t-ink" font-size="14" font-weight="700" text-anchor="middle">新 Pod 卡在 Pending</text>
+      <text x="200" y="46" class="t-mut t-mono" font-size="11" text-anchor="middle">Insufficient cpu</text>
+      <path d="M150,56 L105,86" class="s-acc" stroke-width="1.6" marker-end="url(#a0)"/>
+      <path d="M250,56 L295,86" class="s-acc" stroke-width="1.6" marker-end="url(#a0)"/>
+
+      <rect x="20" y="88" width="170" height="46" class="f-card s-ink" stroke-width="1.3"/>
+      <text x="105" y="107" class="t-ink" font-size="13" font-weight="700" text-anchor="middle">Cluster Autoscaler</text>
+      <text x="105" y="125" class="t-mut" font-size="11" text-anchor="middle">哪個 ASG 加一台有用?</text>
+      <path d="M105,134 V156" class="s-acc" stroke-width="1.6" marker-end="url(#a0)"/>
+      <rect x="20" y="158" width="170" height="46" class="f-waste s-ink" stroke-width="1.3"/>
+      <text x="105" y="177" class="t-ink t-mono" font-size="12.5" font-weight="600" text-anchor="middle">ASG desired +1</text>
+      <text x="105" y="195" class="t-mut" font-size="11" text-anchor="middle">機型事先定好</text>
+      <path d="M105,204 V226" class="s-acc" stroke-width="1.6" marker-end="url(#a0)"/>
+      <rect x="20" y="228" width="170" height="46" class="f-card s-ink" stroke-width="1.3"/>
+      <text x="105" y="247" class="t-ink" font-size="13" text-anchor="middle">EC2 開機 + join</text>
+      <text x="105" y="265" class="t-bad" font-size="11" text-anchor="middle">分鐘級,兩邊一樣</text>
+
+      <rect x="210" y="88" width="170" height="46" class="f-card s-ink" stroke-width="1.3"/>
+      <text x="295" y="107" class="t-ink" font-size="13" font-weight="700" text-anchor="middle">Karpenter</text>
+      <text x="295" y="125" class="t-mut" font-size="11" text-anchor="middle">這批 Pod 要什麼機器?</text>
+      <path d="M272,134 V226" class="s-acc" stroke-width="1.6" marker-end="url(#a0)"/>
+      <text x="281" y="164" class="t-acc" font-size="11.5" font-weight="700">沒有 ASG 這層</text>
+      <text x="281" y="182" class="t-ink t-mono" font-size="10">ec2:CreateFleet</text>
+      <text x="281" y="199" class="t-mut" font-size="11">當場挑機型</text>
+      <rect x="210" y="228" width="170" height="46" class="f-card s-ink" stroke-width="1.3"/>
+      <text x="295" y="247" class="t-ink" font-size="13" text-anchor="middle">EC2 開機 + join</text>
+      <text x="295" y="265" class="t-bad" font-size="11" text-anchor="middle">分鐘級,兩邊一樣</text>
+
+      <path d="M105,274 V296" class="s-acc" stroke-width="1.6" marker-end="url(#a0)"/>
+      <path d="M295,274 V296" class="s-acc" stroke-width="1.6" marker-end="url(#a0)"/>
+      <rect x="20" y="298" width="360" height="28" class="f-accsoft s-acc" stroke-width="1.2"/>
+      <text x="200" y="317" class="t-ink" font-size="12.5" text-anchor="middle">最後都是 scheduler 把 Pod 排到新 node</text>
+    </svg>
+    <p class="caption">兩邊只差開機之前那一段。開機本身的時間一樣。</p>
+  </div>
+</section>
+
+<!-- ===================== LAYER 1 ===================== -->
+<section class="layer" id="l1">
+  <div class="layer-head"><span class="badge">LAYER 1</span><h2>第一性原理:開機器要幾分鐘</h2><span class="time">讀 2 分鐘</span></div>
+  <p class="lead">流量是秒級暴增,開 node 是分鐘級。所以 node autoscaler 救不了尖峰當下,它只補之後的趨勢。</p>
+  <div class="card fig">
+    <svg viewBox="0 0 400 205" width="400" role="img" aria-label="流量在第 30 秒暴增,容量要到 node Ready 才上升。Karpenter 例子約 2 分鐘,CA 例子約 4 分鐘。兩者之前都有一段容量不足的紅色區間">
+      <rect x="69" y="44" width="201" height="66" class="f-bad"/>
+      <line x1="40" y1="170" x2="385" y2="170" class="s-ink" stroke-width="1.2"/>
+      <line x1="40" y1="20" x2="40" y2="170" class="s-ink" stroke-width="1.2"/>
+      <path d="M40,120 H69 V44 H385" class="s-ink" stroke-width="2"/>
+      <path d="M40,110 H270 V36 H385" class="s-acc" stroke-width="2.4"/>
+      <path d="M155,110 V36 H270" class="s-acc" stroke-width="1.6" stroke-dasharray="5 4"/>
+      <text x="155" y="29" class="t-acc" font-size="11" text-anchor="middle">Karpenter 例:2 分</text>
+      <text x="270" y="29" class="t-acc" font-size="11" text-anchor="middle">CA 例:4 分</text>
+      <text x="380" y="30" class="t-acc" font-size="12" font-weight="700" text-anchor="end">容量</text>
+      <text x="380" y="60" class="t-ink" font-size="12" font-weight="700" text-anchor="end">流量</text>
+      <text x="212" y="72" class="t-bad" font-size="12" text-anchor="middle">新 Pod 在 Pending</text>
+      <text x="212" y="90" class="t-bad" font-size="12" text-anchor="middle">舊 Pod 扛全部流量</text>
+      <g class="t-mut t-mono" font-size="10.5" text-anchor="middle">
+        <text x="40" y="184">0</text><text x="97.5" y="184">1</text><text x="155" y="184">2</text><text x="212.5" y="184">3</text><text x="270" y="184">4</text><text x="327.5" y="184">5</text><text x="385" y="184">6</text>
+      </g>
+      <text x="212" y="200" class="t-mut" font-size="11" text-anchor="middle">時間(分鐘)</text>
+    </svg>
+    <p class="caption">紅色 = 流量超過容量。Karpenter 縮短紅色段,但消不掉。2 分和 4 分只是舉例,實際看 AMI、bootstrap、image 大小。</p>
+  </div>
+  <ul class="timeline">
+    <li><span class="when">0 秒</span><span class="what">流量暴增,現有 Pod CPU 衝高</span></li>
+    <li><span class="when">幾十秒內</span><span class="what">HPA 加 replicas<br><span class="sub">Pod 物件建好了,但 node 滿了</span></span></li>
+    <li class="blind"><span class="when">等待中</span><span class="what">新 Pod 全部 Pending<br><span class="sub">這段完全不接流量</span></span></li>
+    <li><span class="when">分鐘級</span><span class="what">新 node Ready<br><span class="sub">EC2 開機、bootstrap、kubelet join、CNI 就緒</span></span></li>
+    <li><span class="when">再加</span><span class="what">Pod Ready,開始接流量<br><span class="sub">拉 image、跑 readiness probe</span></span></li>
+  </ul>
+  <p><strong>底下的原理:</strong>它和 Deployment controller 一樣是 reconcile loop。desired state 是「沒有 Unschedulable 的 Pod」,動手的方式是呼叫雲端 API。</p>
+  <p><strong>拿掉它會怎樣:</strong>Pod 一直 Pending,直到有人手動加 node。scheduler 只能把 Pod 放到已經存在的 node,HPA 只會加 Pod,兩個都不會開機器。</p>
+  <p><strong>尖峰怎麼辦:</strong>只能靠事先站好的容量(C-7 的 headroom)。</p>
+</section>
+
+<!-- ===================== LAYER 2 ===================== -->
+<section class="layer" id="l2">
+  <div class="layer-head"><span class="badge">LAYER 2</span><h2>機制:看什麼、怎麼開、怎麼收</h2><span class="time">讀 7 分鐘</span></div>
+  <p class="lead">兩者都只看 Pending 和 requests。差別在誰決定機型,以及縮容時多積極。</p>
+
+  <h3>先認字</h3>
+  <div class="tbl"><table>
+    <tr><th>術語</th><th>字面意思</th><th>在這裡做什麼</th></tr>
+    <tr><td><code>desired count</code></td><td>想要的數量</td><td>ASG 要維持幾台。CA 只改這個數字</td></tr>
+    <tr><td><code>expander</code></td><td>擴充時的選擇規則</td><td>多個 node group 都能救時,CA 用它選一個</td></tr>
+    <tr><td><code>NodeClaim</code></td><td>node 申請單</td><td>Karpenter 要開機器時建的物件</td></tr>
+    <tr><td><code>bin packing</code></td><td>裝箱</td><td>把不同 requests 的 Pod 塞進便宜的機器組合</td></tr>
+    <tr><td><code>consolidation</code></td><td>合併</td><td>把 Pod 搬到較少的 node,關掉多的 node</td></tr>
+  </table></div>
+
+  <h3>共同規則:看 requests,不看實際 CPU</h3>
+  <p>Pod 宣告 <code>requests</code> 多少,就算它佔多少。實際 CPU 只有 5% 也一樣。沒設 requests 的 Pod 算不出需求,不會替它多開機器。這和 HPA 的分母是同一個欄位。</p>
+  <p>先讀 FailedScheduling 訊息。不是每種 Pending 都能靠加 node 解決:</p>
+  <div class="tbl"><table>
+    <tr><th>訊息關鍵字</th><th>意思</th><th>加 node 有用嗎</th></tr>
+    <tr><td><code>Insufficient cpu/memory</code></td><td>node 的 requests 額度不夠</td><td><mark>有用</mark></td></tr>
+    <tr><td><code>didn't match node affinity/selector</code></td><td>Pod 要的 label,現有 node 沒有</td><td><mark class="may">新 node 要有那個 label 才有用</mark></td></tr>
+    <tr><td><code>volume node affinity conflict</code></td><td>EBS 在另一個 AZ</td><td><mark class="may">新 node 要開在那個 AZ 才有用</mark></td></tr>
+    <tr><td><code>untolerated taint</code></td><td>node 有 taint,Pod 沒 toleration</td><td>cp 那行每次都在,當背景看</td></tr>
+  </table></div>
+
+  <h3>Cluster Autoscaler:選一個 group 加一台</h3>
+  <ul class="timeline">
+    <li><span class="when">每 10 秒</span><span class="what">掃 Unschedulable Pod<br><span class="sub"><code>--scan-interval</code> 預設值</span></span></li>
+    <li><span class="when">模擬</span><span class="what">拿每個 node group 的範本算:加一台,這個 Pod 排得上嗎</span></li>
+    <li><span class="when">挑 group</span><span class="what">多個都行時交給 expander<br><span class="sub">預設 <code>least-waste</code>:加完剩最少閒置的那個</span></span></li>
+    <li><span class="when">改 ASG</span><span class="what">調 desired count,Pod event 出現 <code>TriggeredScaleUp</code></span></li>
+    <li><span class="when">開機</span><span class="what">ASG 照 launch template 開 EC2,kubelet join</span></li>
+  </ul>
+
+  <h3>Karpenter:看這批 Pod,當場算機型</h3>
+  <ul class="timeline">
+    <li><span class="when">1~10 秒</span><span class="what">收集 Pending Pod 成一批<br><span class="sub">1 秒沒有新 Pod 就結束,最長 10 秒</span></span></li>
+    <li><span class="when">讀需求</span><span class="what">requests、nodeSelector、affinity、topologySpread</span></li>
+    <li><span class="when">算機型</span><span class="what">在 NodePool 允許的範圍內 bin packing,挑便宜的<br><span class="sub">只用 requests 算,也算進 DaemonSet</span></span></li>
+    <li><span class="when">開機器</span><span class="what">建 NodeClaim,呼叫 EC2 <code>CreateFleet</code></span></li>
+    <li><span class="when">開機</span><span class="what">EC2 開機,kubelet join</span></li>
+  </ul>
+  <details>
+    <summary>NodePool 長怎樣(看一下欄位就好)</summary>
+<pre class="yaml">apiVersion: karpenter.sh/v1
+kind: NodePool
+metadata:
+  name: general
+spec:
+  template:
+    spec:
+      nodeClassRef:                # 怎麼開:AMI、subnet、SG 寫在 EC2NodeClass
+        group: karpenter.k8s.aws
+        kind: EC2NodeClass
+        name: default
+      requirements:                # 可以開什麼
+        - key: karpenter.sh/capacity-type
+          operator: In
+          values: ["spot", "on-demand"]
+        - key: karpenter.k8s.aws/instance-family
+          operator: In
+          values: ["m5", "c5"]
+  limits:
+    cpu: "100"                     # 總量上限,沒設就沒有上限
+  disruption:
+    consolidationPolicy: WhenEmptyOrUnderutilized
+    consolidateAfter: 1m</pre>
+  </details>
+
+  <h3>差別一:機型由誰決定</h3>
+  <p>CA 官方要求同一個 node group 內的機器規格完全相同。所以 CA 只能在你事先建好的 group 裡選。</p>
+  <div class="panels two">
+    <div class="panel bad">
+      <div class="t">CA:沒有夠大的 group</div>
+      <svg viewBox="0 0 300 200" role="img" aria-label="Pod 要 6 CPU,m5.large 2 vCPU 和 m5.xlarge 4 vCPU 都裝不下,出現 NotTriggerScaleUp,Pod 一直 Pending">
+        <rect x="75" y="8" width="150" height="34" class="f-accsoft s-acc" stroke-width="1.3"/>
+        <text x="150" y="30" class="t-ink" font-size="13" text-anchor="middle">Pod 要 6 CPU</text>
+        <path d="M130,42 L80,72 M170,42 L220,72" class="s-line" stroke-width="1.5"/>
+        <rect x="15" y="72" width="130" height="46" class="f-card s-ink" stroke-width="1.2"/>
+        <text x="80" y="91" class="t-ink t-mono" font-size="12" text-anchor="middle">m5.large</text>
+        <text x="80" y="108" class="t-mut" font-size="11" text-anchor="middle">2 vCPU</text>
+        <rect x="155" y="72" width="130" height="46" class="f-card s-ink" stroke-width="1.2"/>
+        <text x="220" y="91" class="t-ink t-mono" font-size="12" text-anchor="middle">m5.xlarge</text>
+        <text x="220" y="108" class="t-mut" font-size="11" text-anchor="middle">4 vCPU</text>
+        <text x="80" y="135" class="t-bad" font-size="12" text-anchor="middle">裝不下</text>
+        <text x="220" y="135" class="t-bad" font-size="12" text-anchor="middle">裝不下</text>
+        <rect x="15" y="146" width="270" height="46" class="f-bad"/>
+        <text x="150" y="165" class="t-bad t-mono" font-size="12" text-anchor="middle">NotTriggerScaleUp</text>
+        <text x="150" y="183" class="t-bad" font-size="12" text-anchor="middle">沒有 group 救得了,Pod 一直 Pending</text>
+      </svg>
+    </div>
+    <div class="panel good">
+      <div class="t">Karpenter:範圍內當場挑</div>
+      <svg viewBox="0 0 300 200" role="img" aria-label="Pod 要 6 CPU,NodePool 允許 m5 系列,Karpenter 選 m5.2xlarge 8 vCPU 並用 CreateFleet 開機">
+        <rect x="75" y="8" width="150" height="34" class="f-accsoft s-acc" stroke-width="1.3"/>
+        <text x="150" y="30" class="t-ink" font-size="13" text-anchor="middle">Pod 要 6 CPU</text>
+        <path d="M150,42 V58" class="s-line" stroke-width="1.5"/>
+        <rect x="10" y="58" width="280" height="80" class="s-line" stroke-width="1.3" stroke-dasharray="4 4"/>
+        <text x="150" y="75" class="t-mut" font-size="11.5" text-anchor="middle">NodePool 允許 m5 系列</text>
+        <rect x="18" y="84" width="82" height="46" class="f-card s-line" stroke-width="1.2"/>
+        <text x="59" y="103" class="t-mut t-mono" font-size="11" text-anchor="middle">large</text>
+        <text x="59" y="120" class="t-mut" font-size="11" text-anchor="middle">2 vCPU</text>
+        <rect x="109" y="84" width="82" height="46" class="f-card s-line" stroke-width="1.2"/>
+        <text x="150" y="103" class="t-mut t-mono" font-size="11" text-anchor="middle">xlarge</text>
+        <text x="150" y="120" class="t-mut" font-size="11" text-anchor="middle">4 vCPU</text>
+        <rect x="200" y="84" width="82" height="46" class="f-accsoft s-acc" stroke-width="1.8"/>
+        <text x="241" y="103" class="t-acc t-mono" font-size="11" font-weight="600" text-anchor="middle">2xlarge</text>
+        <text x="241" y="120" class="t-acc" font-size="11" font-weight="700" text-anchor="middle">8 vCPU</text>
+        <rect x="10" y="146" width="280" height="46" class="f-accsoft s-acc" stroke-width="1.2"/>
+        <text x="150" y="165" class="t-acc t-mono" font-size="12" text-anchor="middle">CreateFleet</text>
+        <text x="150" y="183" class="t-ink" font-size="12" text-anchor="middle">開一台 m5.2xlarge</text>
+      </svg>
+    </div>
+  </div>
+  <p>代價:ASG 以前替你決定的事,現在要寫進 NodePool。範圍設太寬,可能開到你不想要的機型。</p>
+
+  <h3>差別二:縮容多積極</h3>
+  <div class="tbl"><table>
+    <tr><th></th><th>Cluster Autoscaler</th><th>Karpenter</th></tr>
+    <tr><td>怎樣算多餘</td><td>requests 總和低於 50%,連續 10 分鐘</td><td><code>consolidateAfter</code> 到期,而且移掉或換掉能省錢</td></tr>
+    <tr><td>動作</td><td>drain 那台,再關掉</td><td>關掉,或換成一台更便宜的</td></tr>
+    <tr><td>煞車</td><td>PDB;scale up 後 10 分鐘內不評估縮容</td><td>PDB、<code>do-not-disrupt</code> annotation、budget(預設同時最多 10% 的 node)</td></tr>
+  </table></div>
+  <div class="card fig">
+    <svg viewBox="0 0 400 150" width="400" role="img" aria-label="併之前兩台 node 各跑一個 Pod,併之後 api 搬到第一台,第二台關掉。api 搬家時舊 Pod 砍掉、新 Pod 還沒 Ready">
+      <defs>
+        <marker id="a2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="f-acc"/></marker>
+      </defs>
+      <text x="90" y="18" class="t-ink" font-size="13" font-weight="700" text-anchor="middle">併之前</text>
+      <text x="300" y="18" class="t-ink" font-size="13" font-weight="700" text-anchor="middle">併之後</text>
+      <rect x="15" y="28" width="70" height="84" class="f-card s-ink" stroke-width="1.3"/>
+      <rect x="25" y="74" width="50" height="28" class="f-accsoft s-acc" stroke-width="1.2"/>
+      <text x="50" y="93" class="t-ink t-mono" font-size="11.5" text-anchor="middle">web</text>
+      <rect x="95" y="28" width="70" height="84" class="f-card s-ink" stroke-width="1.3"/>
+      <rect x="105" y="74" width="50" height="28" class="f-accsoft s-acc" stroke-width="1.2"/>
+      <text x="130" y="93" class="t-ink t-mono" font-size="11.5" text-anchor="middle">api</text>
+      <path d="M175,70 H215" class="s-acc" stroke-width="1.8" marker-end="url(#a2)"/>
+      <rect x="225" y="28" width="70" height="84" class="f-card s-ink" stroke-width="1.3"/>
+      <rect x="235" y="38" width="50" height="28" class="f-accsoft s-acc" stroke-width="1.2"/>
+      <text x="260" y="57" class="t-ink t-mono" font-size="11.5" text-anchor="middle">api</text>
+      <rect x="235" y="74" width="50" height="28" class="f-accsoft s-acc" stroke-width="1.2"/>
+      <text x="260" y="93" class="t-ink t-mono" font-size="11.5" text-anchor="middle">web</text>
+      <rect x="305" y="28" width="70" height="84" class="s-line" stroke-width="1.3" stroke-dasharray="4 4"/>
+      <text x="340" y="75" class="t-bad" font-size="12" text-anchor="middle">關掉</text>
+      <text x="200" y="136" class="t-bad" font-size="12" text-anchor="middle">api 搬家時:舊 Pod 已砍,新 Pod 還沒 Ready</text>
+    </svg>
+    <p class="caption">api 只有 1 個副本又沒設 PDB 時,這段就是服務中斷。PDB(PodDisruptionBudget)規定驅逐時至少留幾顆,C-6 會教。</p>
+  </div>
+</section>
+
+<!-- ===================== S56 釐清 ===================== -->
+<section class="layer" id="s56">
+  <div class="layer-head"><span class="badge">S56 釐清</span><h2>這堂搞混的點</h2><span class="time">讀 3 分鐘</span></div>
+  <p class="lead">四個點:CA 不是做不到、回收不看 workload 類型、<code>0/0</code> 沒有 Pod 可查、annotation 要寫在 Runner。</p>
+  <div class="wrong">
+    <p>✗ 我以為:CA 功能比較單一,所以解不了 64 GiB 的 Pod。</p>
+    <p>✓ 其實是:加一個 <code>r</code> 系列 node group 就解得了。差別在每多一種需求,CA 就要多維護一個 group。</p>
+    <p>→ 為什麼會搞混:把「維護成本高」講成「功能做不到」。面試比較兩者時,要講取捨。</p>
+  </div>
+  <div class="wrong">
+    <p>✗ 我以為:Karpenter 可以設定「只剩 StatefulSet 就回收」。</p>
+    <p>✓ 其實是:<code>consolidationPolicy</code> 不看 workload 類型。<code>WhenEmpty</code> 看的是 node 上還有沒有 DaemonSet 以外的 Pod。</p>
+    <p>→ 為什麼會搞混:記得有「只剩某種 Pod 也算空」,但想不起 DaemonSet 這個名詞。</p>
+  </div>
+  <div class="wrong">
+    <p>✗ 我以為:<code>ACTIVE=False</code> 又沒有 Pod 時,第一條跑 <code>describe pod</code>。</p>
+    <p>✓ 其實是:<code>READY 0/0</code> 表示 desired 是 0,沒有 Pod,scheduler 也沒事做。視窗開始後的 <code>ACTIVE=False</code> 要查 ScaledObject 的 <code>timezone</code> 和 <code>start</code>。</p>
+    <p>→ 為什麼會搞混:習慣從 Pod 查起。要從上往下讀 ScaledObject → Deployment → Pod → scheduler,卡在哪層就查哪層。</p>
+  </div>
+  <h3>annotation 怎麼加到 CI job Pod</h3>
+  <p>job Pod 由 Runner 動態建立,沒有 YAML 可以改。所以改 Runner 的 <code>config.toml</code>,讓它建每個 Pod 時都帶上註記:</p>
+<pre class="yaml">[runners.kubernetes.pod_annotations]
+  "karpenter.sh/do-not-disrupt" = "true"</pre>
+  <p>Runner 建出來的 Pod 會多一行 <code>annotations</code>。Karpenter 讀到後,就不會為了 consolidation 去動這台 node。</p>
+  <h3>你的實測</h3>
+  <p>你在公司環境看到 Karpenter 的新 node 約 <mark class="see">2~4 分鐘</mark> Ready。這比頁面的舉例可靠,面試就講這個數字,並說明是自己環境量到的。</p>
+</section>
+
+<!-- ===================== LAYER 3 ===================== -->
+<section class="layer" id="l3">
+  <div class="layer-head"><span class="badge">LAYER 3</span><h2>取捨:少一層,但要多管設定</h2><span class="time">讀 3 分鐘</span></div>
+  <p class="lead">因為 Layer 1 的開機時間兩邊一樣,所以選型不是比誰救得了尖峰,而是比機型彈性和維護成本。</p>
+  <div class="tbl"><table>
+    <tr><th></th><th>CA + ASG</th><th>Karpenter</th></tr>
+    <tr><td>機型決定</td><td>事先建好 group</td><td>NodePool 寫範圍,當場挑</td></tr>
+    <tr><td>新需求來了</td><td>多建一個 group</td><td>改 <code>requirements</code>,不一定要新 NodePool</td></tr>
+    <tr><td>縮容</td><td>較保守</td><td>主動併機、換便宜機型,Pod 搬動較多</td></tr>
+    <tr><td>行為預測</td><td>機型固定,容易預測</td><td>機型會變,要靠 <code>limits</code> 和帳單告警控制</td></tr>
+    <tr><td>適合</td><td>穩定的工作負載</td><td>尖峰多、機型需求多</td></tr>
+  </table></div>
+  <p>AWS 最佳實務也這樣分,而且兩種可以混用:靜態部分用 managed node group,變動部分用 Karpenter。</p>
+  <p><strong>被淘汰的做法:</strong>ASG 只用 EC2 CPU 當擴容訊號。Pending 的原因是 requests 額度不夠,node 的實際 CPU 可能很低,這時 ASG 不會動。所以才需要看得懂 Pending 的元件。</p>
+  <p><strong>誰會吵:</strong>財務要 consolidation 省錢,服務 owner 怕 Pod 被搬動。design review 會問:「這個服務有 PDB 嗎?被搬動時會掉請求嗎?」</p>
+</section>
+
+<!-- ===================== LAYER 4 ===================== -->
+<section class="layer" id="l4">
+  <div class="layer-head"><span class="badge">LAYER 4</span><h2>AWS 怎麼做:EKS + Karpenter</h2><span class="time">讀 4 分鐘</span></div>
+  <p class="lead">Karpenter 跑在自己不管理的 node 上,用 IRSA 權限呼叫 EC2,用 SQS 收 Spot 中斷通知。</p>
+  <div class="card fig">
+    <svg viewBox="0 0 400 372" width="400" role="img" aria-label="Karpenter controller 跑在 node group 或 Fargate,watch EKS API server 的 Pending Pod,用 IRSA 呼叫 EC2 CreateFleet 開 On-Demand 或 Spot node;EventBridge 把中斷事件送到 SQS,Karpenter 再讀 SQS;新 node 的 kubelet 向 API server 註冊">
+      <defs>
+        <marker id="a4" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="f-acc"/></marker>
+      </defs>
+      <rect x="34" y="14" width="160" height="48" class="f-accsoft s-acc" stroke-width="1.4"/>
+      <text x="114" y="34" class="t-ink" font-size="13" font-weight="700" text-anchor="middle">EKS API server</text>
+      <text x="114" y="52" class="t-mut" font-size="11" text-anchor="middle">Pending Pod、NodePool</text>
+      <path d="M114,112 V64" class="s-acc" stroke-width="1.6" marker-end="url(#a4)"/>
+      <text x="122" y="92" class="t-mut" font-size="11">watch</text>
+      <rect x="34" y="114" width="160" height="56" class="f-card s-ink" stroke-width="1.3"/>
+      <text x="114" y="136" class="t-ink" font-size="13" font-weight="700" text-anchor="middle">Karpenter controller</text>
+      <text x="114" y="156" class="t-mut" font-size="11" text-anchor="middle">跑在 node group 或 Fargate</text>
+      <path d="M114,170 V214" class="s-acc" stroke-width="1.6" marker-end="url(#a4)"/>
+      <text x="122" y="196" class="t-mut" font-size="11">IRSA 權限</text>
+      <rect x="34" y="216" width="160" height="44" class="f-card s-ink" stroke-width="1.3"/>
+      <text x="114" y="243" class="t-ink t-mono" font-size="12" font-weight="600" text-anchor="middle">EC2 CreateFleet</text>
+      <path d="M114,260 V304" class="s-acc" stroke-width="1.6" marker-end="url(#a4)"/>
+      <rect x="34" y="306" width="346" height="58" class="s-line" stroke-width="1.3" stroke-dasharray="4 4"/>
+      <rect x="46" y="316" width="150" height="38" class="f-card s-ink" stroke-width="1.2"/>
+      <text x="121" y="340" class="t-ink" font-size="12.5" text-anchor="middle">On-Demand node</text>
+      <rect x="218" y="316" width="150" height="38" class="f-card s-ink" stroke-width="1.2"/>
+      <text x="293" y="340" class="t-ink" font-size="12.5" text-anchor="middle">Spot node</text>
+      <path d="M34,335 H18 V38 H32" class="s-acc" stroke-width="1.4" marker-end="url(#a4)"/>
+      <text x="13" y="190" class="t-mut" font-size="10.5" text-anchor="middle" transform="rotate(-90 13 190)">kubelet join</text>
+      <rect x="240" y="14" width="140" height="48" class="f-card s-ink" stroke-width="1.3"/>
+      <text x="310" y="34" class="t-ink" font-size="13" text-anchor="middle">EventBridge</text>
+      <text x="310" y="52" class="t-mut" font-size="11" text-anchor="middle">EC2 中斷事件</text>
+      <path d="M310,62 V112" class="s-acc" stroke-width="1.6" marker-end="url(#a4)"/>
+      <rect x="240" y="114" width="140" height="56" class="f-card s-ink" stroke-width="1.3"/>
+      <text x="310" y="136" class="t-ink" font-size="13" text-anchor="middle">SQS 佇列</text>
+      <text x="310" y="156" class="t-mut" font-size="11" text-anchor="middle">Spot 2 分鐘通知</text>
+      <path d="M240,142 H196" class="s-acc" stroke-width="1.6" marker-end="url(#a4)"/>
+      <text x="218" y="134" class="t-mut" font-size="11" text-anchor="middle">讀</text>
+    </svg>
+    <p class="caption">虛線框是 Karpenter 開的 node。controller 自己不放在這裡面。</p>
+  </div>
+  <div class="tbl"><table>
+    <tr><th>服務 / 設定</th><th>常見陷阱</th></tr>
+    <tr><td>Karpenter controller</td><td>不要跑在 Karpenter 管的 node 上。node 被收掉時,開機器的程式也沒了</td></tr>
+    <tr><td>NodePool <code>limits</code></td><td>沒設就沒有總量上限。limits 只管單一 NodePool,沒有叢集全域上限,要加帳單告警</td></tr>
+    <tr><td>EC2NodeClass AMI</td><td><code>@latest</code> 會帶入未測試的 AMI。生產環境要釘版本,例:<code>al2023@v20240807</code></td></tr>
+    <tr><td>Spot</td><td>機型範圍太窄,回收後沒有替代機型就會 Pending。interruption queue 要另外設定</td></tr>
+    <tr><td>CA + 跨 AZ 的 ASG</td><td>新 node 不一定在 EBS 所在的 AZ。有 PVC 的工作負載要每個 AZ 一個 group</td></tr>
+  </table></div>
+  <p><strong>成本:</strong>Karpenter 軟體本身不收費,成本是 EC2 和跑 controller 的小 node group。省多少要在自己環境量。</p>
+  <h3>你公司的 GitLab Runner</h3>
+  <div class="tbl"><table>
+    <tr><th>做法</th><th>擋什麼</th><th>代價</th></tr>
+    <tr><td><code>consolidationPolicy: WhenEmpty</code></td><td>node 上還有 job 時,不因 consolidation 收掉</td><td>零散的 job 不會被併機,閒置容量較多</td></tr>
+    <tr><td><code>karpenter.sh/do-not-disrupt</code></td><td>consolidation 和大部分 drift</td><td>擋不住 expiration、interruption、node repair</td></tr>
+    <tr><td>Runner <code>pod_disruption_budget = true</code></td><td>node drain 時驅逐 job Pod</td><td>job 跑完前 drain 會卡住</td></tr>
+  </table></div>
+</section>
+
+<!-- ===================== LAYER 5 ===================== -->
+<section class="layer" id="l5">
+  <div class="layer-head"><span class="badge">LAYER 5</span><h2>規模化:每一級換掉什麼</h2><span class="time">讀 2 分鐘</span></div>
+  <p class="lead">機型種類和團隊變多時,維護 group 的成本會超過學 Karpenter 的成本,這時才換。</p>
+  <div class="card fig">
+    <svg viewBox="0 0 400 214" width="400" role="img" aria-label="三級階梯:小團隊固定 node group 加 CA,成長期 Karpenter 加多機型和 Spot,大廠多個 NodePool 加 headroom">
+      <rect x="16" y="146" width="116" height="60" class="f-accsoft s-acc" stroke-width="1.3"/>
+      <text x="74" y="168" class="t-ink" font-size="12.5" font-weight="700" text-anchor="middle">小團隊</text>
+      <text x="74" y="186" class="t-mut" font-size="10.5" text-anchor="middle">固定 node group + CA</text>
+      <rect x="142" y="84" width="116" height="122" class="f-accsoft s-acc" stroke-width="1.3"/>
+      <text x="200" y="106" class="t-ink" font-size="12.5" font-weight="700" text-anchor="middle">成長期</text>
+      <text x="200" y="126" class="t-mut" font-size="10.5" text-anchor="middle">group 太多難維護</text>
+      <text x="200" y="146" class="t-acc" font-size="11" text-anchor="middle">換成 Karpenter</text>
+      <text x="200" y="166" class="t-mut" font-size="10.5" text-anchor="middle">多機型 + Spot</text>
+      <rect x="268" y="16" width="116" height="190" class="f-accsoft s-acc" stroke-width="1.3"/>
+      <text x="326" y="38" class="t-ink" font-size="12.5" font-weight="700" text-anchor="middle">大廠</text>
+      <text x="326" y="58" class="t-mut" font-size="10.5" text-anchor="middle">多團隊共用叢集</text>
+      <text x="326" y="78" class="t-acc" font-size="11" text-anchor="middle">多個 NodePool</text>
+      <text x="326" y="98" class="t-mut" font-size="10.5" text-anchor="middle">GPU、Runner 分開</text>
+      <text x="326" y="118" class="t-acc" font-size="11" text-anchor="middle">加 headroom</text>
+      <text x="326" y="138" class="t-mut" font-size="10.5" text-anchor="middle">扛突發尖峰</text>
+    </svg>
+    <p class="caption">柱子越高,要管的設定越多。不用一開始就爬到最右邊。</p>
+  </div>
+  <div class="tbl"><table>
+    <tr><th>路線</th><th>你管什麼</th><th>代價</th></tr>
+    <tr><td>自己裝 Karpenter</td><td>升級、IAM、NodePool、interruption queue</td><td>要自己維運,但控制最多</td></tr>
+    <tr><td>EKS Auto Mode</td><td>AWS 代管 Karpenter 等元件,你主要寫 NodePool</td><td>EC2 之外另收每台管理費,可調的設定較少</td></tr>
+  </table></div>
+</section>
+
+<!-- ===================== LAYER 6 ===================== -->
+<section class="layer" id="l6">
+  <div class="layer-head"><span class="badge">LAYER 6</span><h2>故障與 on-call</h2><span class="time">讀 3 分鐘</span></div>
+  <p class="lead">Pod Pending 時先讀 event,判斷是「不該開」還是「開不了」,再查 autoscaler 的 log。</p>
+  <div class="tbl"><table>
+    <tr><th>看到什麼</th><th>代表</th><th>第一條查</th><th>止血</th></tr>
+    <tr><td><code>NotTriggerScaleUp</code></td><td>CA 認為沒有 group 救得了,或已到 ASG max</td><td><code>kubectl describe pod</code></td><td>加 group、調 max 或改 requests</td></tr>
+    <tr><td><code>no instance type met the scheduling requirements</code></td><td>NodePool 範圍裝不下這個 Pod</td><td>Karpenter controller log</td><td>放寬 <code>requirements</code></td></tr>
+    <tr><td><code>InsufficientInstanceCapacity</code></td><td>EC2 沒有這種機器可開</td><td>Karpenter controller log</td><td>至少開放第二種 size 或 family</td></tr>
+    <tr><td><code>exceeds limit</code></td><td>已到 NodePool <code>limits</code></td><td>Karpenter controller log</td><td>確認需求真實後才調高</td></tr>
+    <tr><td><code>failed to assign an IP address</code></td><td>node 開好了,但 subnet IP 不夠或 <code>maxPods</code> 設錯</td><td><code>kubectl describe pod</code></td><td>檢查 <code>maxPods</code> 和 subnet 容量</td></tr>
+  </table></div>
+  <p><strong>凌晨閃斷:</strong>單副本服務沒有 PDB,consolidation 併機時中斷。先對時間,看 Pod 被搬動的時間點和 Karpenter log 是否對得上。修法是至少 2 個副本加 PDB(C-6)。</p>
+  <p><strong>SLO 例子(依服務調整):</strong>Pod Pending 超過 5 分鐘要告警,因為你們的 node 正常 2~4 分鐘就 Ready。告警留到 P4 再接。</p>
+</section>
+
+<!-- ===================== LAYER 7 ===================== -->
+<section class="layer" id="l7">
+  <div class="layer-head"><span class="badge">LAYER 7</span><h2>面試</h2><span class="time">讀 3 分鐘</span></div>
+  <p class="lead">Compare Cluster Autoscaler and Karpenter. Why is node provisioning time a design constraint for handling traffic spikes?</p>
+  <details>
+    <summary>L4 回答</summary>
+    <p>Karpenter 比較快也比較便宜,可以自動選機型。CA 要設定 node group。尖峰時 node 開得不夠快,所以要提早擴容。</p>
+  </details>
+  <details>
+    <summary>L6 回答(多了取捨、數字、故障模式)</summary>
+    <p><strong>定調:</strong>兩者都由 Pending Pod 觸發,都用 requests 計算。差別在機型決定放在哪裡:CA 放在事先建好的 group,Karpenter 放在 NodePool 的範圍。</p>
+    <p><strong>數字:</strong>開機時間兩邊都躲不掉。我們環境量到 node 約 2~4 分鐘 Ready,流量尖峰是秒級,所以 node autoscaler 只能補趨勢。</p>
+    <p><strong>怎麼設計:</strong>預期內的尖峰用 KEDA cron 提早拉高 replicas。預期外的尖峰靠事先留好的 headroom。</p>
+    <p><strong>故障模式:</strong>consolidation 遇到單副本服務會中斷,要加 PDB。CI job Pod 沒有 controller,被砍不會重建,所以 Runner 的 NodePool 用 <code>WhenEmpty</code> 加 <code>do-not-disrupt</code>。</p>
+    <p><strong>怎麼選:</strong>穩定的工作負載留 CA 也合理,尖峰多或機型需求多才換 Karpenter。換了之後一定要設 <code>limits</code> 和帳單告警。</p>
+  </details>
+  <details>
+    <summary>L6 English version</summary>
+    <p>Both are triggered by Pending Pods and both calculate from requests. The real difference is where the instance decision lives: CA uses pre-built node groups, and Karpenter picks from a NodePool range. Neither one can absorb a spike, because a new node takes minutes. In our environment it takes 2 to 4 minutes. So I pre-scale for known peaks and keep headroom for unknown ones. The main risk with Karpenter is consolidation, so I add PDBs for services and protect CI job Pods. I keep CA for stable workloads and use Karpenter for spiky or mixed ones.</p>
+  </details>
+</section>
+
+<footer class="next">
+  <strong>選做(2 分鐘):</strong>先跑 <code>kubectl config current-context</code> 確認是 dev,再跑唯讀的 <code>kubectl get nodepool -o yaml | grep consolidationPolicy</code>,看公司 Runner 的 NodePool 設哪個值。
+</footer>
+
+</div>

@@ -7,15 +7,15 @@
 
 ## Meta
 
-- session_count: 55
+- session_count: 56
 - last_weekly_review: 49(WR10 於 s49 課尾壓縮版:NetworkPolicy DNS supported / RBAC watch 結論對判準錯 / Secret 分層冷測過)
-- last_session_date: 2026-11-02
+- last_session_date: 2026-11-03
 - warm_up_classification: mid
 - target_role: 雙目標 NVIDIA Pre-Production Engineer + AWS ProServe DC Cloud Architect,兼顧台廠資深 SRE(2026-09-30,curriculum-plan §12);投遞最快 2027-01
 
 ## Current Session breakpoint
 
-s55 學員下班停課(2026-11-02,公司 bastion,kubeadm cp ssh 內):KEDA 依學員要求快速收尾,C-3b cron lab 全走完,chunk 3 SQS 只進筆記未考;下一堂 = P3 C-5 Cluster Autoscaler vs Karpenter(無 lab,圖 + 一題情境題,課前預習頁 Layer 0-2)。課尾帶:①未答題「視窗 09:00 開始、09:10 還是 0 顆、ACTIVE=False,嫌犯在哪」②SQS 情境題 + F(volley≤2)③kubeadm 跑 `kubectl delete pods -A --field-selector=status.phase=Failed` 清 Evicted 紀錄。開場 registry 17 張超過上限 15,step A 先 triage。KEDA v2.21.0 與 ScaledObject `php-apache`(每日 17:08-17:18 Asia/Taipei)留在 kubeadm。筆記 https://claude.ai/artifact/DLLVyRhGNuV9CQ6mizkqkc
+s56 完成(2026-11-03):P3 C-5 CA vs Karpenter ✅(三 chunk + F,無 lab);課尾 ACTIVE=False 兩題完成(第 1 題要提示,第 2 題當場給判準後過);registry triage 17 → 15。加開 KEDA SQS lab:真 SQS 0→1→4→0 跑完,憑證失效實驗沒做,學員累了收課。學員自評 KEDA 和 Karpenter 差不多完成。**下一堂 = Weekly Review**(56-49=7,WR11),帶 KEDA F 和「`cooldownPeriod` 改 600,queue 清空後 replicas 怎麼走」,再進 P3 C-6 PDB + drain + graceful shutdown(keystone,有 lab,開課前預習頁 Layer 0-2)。**開課先查 lab 資源已刪**(s56 已給指令,學員自己跑):namespace `sqs-lab`、queue `k8s-lab-keda-sqs`、`jason.tsai` 的 key `AKIA4R6XVNI2IYSAPEWZ`(只刪這組)。下次開 lab 帶:kubeadm cp 跑 `kubectl delete pods -A --field-selector=status.phase=Failed` 清 Evicted 紀錄。KEDA v2.21.0 與 ScaledObject `php-apache`(每日 17:08-17:18 Asia/Taipei)留在 kubeadm。C-5 筆記 https://claude.ai/artifact/TnuA5b8f1qXC6DCkHRoZoS ;KEDA 筆記 https://claude.ai/artifact/DLLVyRhGNuV9CQ6mizkqkc
 
 <!-- schema §3 = 恰好一行。敘事與次要待辦寫 session-log.md,長效教練紀律寫 session-log.md
      「教練執行紀律」,不要在這裡疊舊堂。s32 及更早斷點原文見 session-log.md 對應堂,
@@ -27,7 +27,7 @@ s55 學員下班停課(2026-11-02,公司 bastion,kubeadm cp ssh 內):KEDA 依學
 - P1 核心物件 + 容器底層: gate-passed(2026-06-25,legacy pre-Examiner)
 - P2a 網路深水區: in-progress(chunk 1 ✅ / chunk 2 ✅ / chunk 3 NetworkPolicy ✅ s48(lab Step 1-6 s46 + AND/OR 實測 + F/G s48) / chunk 4 零件 4-1~4-4 ✅,4-5 盲講式已於 2026-08-11 退役改情境排障題)
 - P2b 儲存 + 權限: in-progress(C-1 ✅ s26,欠 `cg-demo` memory.max 讀數 / C-2 ✅ s29,欠 `reclaimPolicy: Delete` teardown 實證 / C-3 ✅ s31-32,step G 2/4 未過 / C-4 chunk 1-4 ✅ s33/s35/s36,4b 僅 supported,C-4 F/G 併入 s37 的 C-5 F/G;C-5 ✅ s37(chunk 3 supported、kind JWT 教練代跑);C-6 chunk 1 supported / 2 ✅ s38 / 3 ✅ supported s39,F ✅ s40,G 2/4 未過 s40)
-- P3 調度 + 高並發 + 排障: in-progress(curriculum-plan §12.2 開場:kubeadm 3 台叢集 s45 建成,cp + w1/w2 + Calico;P2b 殘債壓課尾;C-1 scheduler ✅ s49;C-2 調度約束 ✅ supported s50,無 lab;C-3 HPA ✅ s51;C-4 VPA supported s52;C-3b KEDA 帶 flag 前進 s55)
+- P3 調度 + 高並發 + 排障: in-progress(curriculum-plan §12.2 開場:kubeadm 3 台叢集 s45 建成,cp + w1/w2 + Calico;P2b 殘債壓課尾;C-1 scheduler ✅ s49;C-2 調度約束 ✅ supported s50,無 lab;C-3 HPA ✅ s51;C-4 VPA supported s52;C-3b KEDA 帶 flag 前進 s55,s56 補真 SQS lab;C-5 CA vs Karpenter ✅ s56,無 lab)
 - P4 可觀測性工程: not-started
 - P5 平台工程 / GitOps: not-started
 - P6 面試衝刺: not-started
@@ -36,7 +36,7 @@ weak-topic flags(2026-08-03 啟用,P2a 帶 flag 前進、gate 未考,學員決�
 - 七站封包全旅程(4-5):盲講式退役,改以情境排障題驗收(curriculum-plan §10.2)
 - chunk 3 NetworkPolicy 收尾:Step 5/6 ✅ s46;AND/OR 實測 ✅ s48(supported,OR 後果講不具體)
 - 判準句 pattern(只給結論):跨七堂未愈,每堂續盯
-- P3 C-3b KEDA(2026-11-02 學員下班前要求快速收尾):chunk 2 Transfer 首刀未過、換皮未答,chunk 3 SQS 未考,F 未跑;課尾補
+- P3 C-3b KEDA(2026-11-02 學員下班前要求快速收尾):chunk 2 Transfer 首刀未過,s56 換皮題要提示才到位;chunk 3 真 SQS lab s56 跑完(0→1→4→0),KEDA / HPA 分工預測對,縮回路徑預測錯(實測 KEDA 直接 4→0);憑證失效實驗沒做;F 和 `cooldownPeriod` 600 題未答,WR11 帶完再解 flag
 
 ## Mastery
 
@@ -77,7 +77,8 @@ weak-topic flags(2026-08-03 啟用,P2a 帶 flag 前進、gate 未考,學員決�
 - P3 C-2 調度約束(taint/affinity 專用節點、antiAffinity vs topologySpread、rollout 卡死): low(supported) (s50)
 - P3 C-3 HPA(按比例擴 / 分母 requests / 盲區 / scaleDown 300s 窗口): low-med (s51)
 - P3 C-4 VPA(updateMode / limit 等比例 / HPA 分母衝突 / 生產用 Off): low(supported) (s52)
-- P3 C-3b KEDA(0↔1 operator / 1↔N HPA / cooldownPeriod / external.metrics): low(supported) (s55)
+- P3 C-3b KEDA(0↔1 operator / 1↔N HPA / cooldownPeriod / external.metrics): low-med(supported) (s56)
+- P3 C-5 node autoscaler(Pending 觸發 / ASG 同規格 vs NodePool / 開機分鐘級救不了尖峰 / consolidation): low-med (s56)
 - P1 kubectl debug / ephemeral container: low (2026-09-01,ad hoc 非主線,未經 gate)
 
 ## Scorecard history
@@ -121,7 +122,7 @@ weak-topic flags(2026-08-03 啟用,P2a 帶 flag 前進、gate 未考,學員決�
 - 2026-10-29 | 4xx vs 5xx 是誰產生的(面試答不出) | 學員自述面試被問「K8s 遇到 5xx 怎麼辦」答不出、跟 404 混;s52 複習把 5xx 直接猜成 DB 問題 | 先分 4xx(請求不對)/ 5xx(伺服器錯),再看碼是誰產生的:500 = app,502/503/504 = ingress;P2a 404/502/503 階梯留存不足 | unresolved | 3 | 2026-11-01 | 0
 - 2026-10-29 | VPA Auto 實際行為(驅逐時間 / 改 Pod 不改 Deployment) | F 追問尖峰會不會被砍答「9 點過 5 分鐘」(混成 HPA scaleDown 300s);「deploy YAML 沒變 = 沒生效?」答不確定,縮成二選一才答對 | Updater 自己決定驅逐時間,差距超出範圍就砍,可能落在尖峰;Admission 寫 Pod 不寫 Deployment,生效看 get pod | unresolved | 3 | 2026-11-01 | 0
 - 2026-10-16 | 讀 FailedScheduling 判斷加 node 有沒有用 | `1 taint, 2 Insufficient memory` 答加 node 沒用(被 cp taint 行帶走) | 找 Insufficient = 容量問題;cp taint 行每次都在是背景 | unresolved | 14 | 2026-11-12 | 0
-- 2026-10-12 | 下 kubectl 前先確認在跟哪個叢集講話 | bastion 上兩次 `kubectl get nodes` 打到 PROD atlas-aws-billing-prod(本意查 lab),第二次在教練提醒後 | prompt 雖顯示 context 但未看;唯讀無損,換成 delete/drain 即事故。對策:lab kubectl 一律在 cp session 跑 | unresolved | 3 | 2026-10-15 | 0
+- 2026-10-12 | 下 kubectl 前先確認在跟哪個叢集講話 | bastion 上兩次 `kubectl get nodes` 打到 PROD atlas-aws-billing-prod(本意查 lab),第二次在教練提醒後 | prompt 雖顯示 context 但未看;唯讀無損,換成 delete/drain 即事故。對策:lab kubectl 一律在 cp session 跑 | parked(2026-11-03 s56 triage ROI 篩:Q1 no,面試不考;防呆由 coach-rules「lab kubectl 一律在 cp ssh session 跑」承擔;學員同意) | - | - | 0
 - 2026-09-30 | node Ready 是誰回報的(kubelet heartbeat 走 6443) | SG 缺 IPIP 預測 nodes NotReady,理由「etcd 和 calico 沒開」;提示後改答「metrics-server」 | Ready = kubelet → apiserver heartbeat,與 etcd(cp 本機)/ CNI 資料面 / metrics-server 無關;P0 symptom→棒次地圖留存不足 。10-12 再現:cp NotReady 答「node 跟 api server 不通」✗(那是 Unknown);直給 CNI 缺 → kubelet 回報 Ready=False → not-ready taint → coredns Pending,describe node 實證 | unresolved | 3 | 2026-10-15 | 2
 - 2026-09-29 | 啟動前被擋 vs 啟動後自己死(CreateContainerConfigError vs CrashLoopBackOff) | 原版 nginx + runAsUser 1000,預測 STATUS 答 CreateContainerConfigError(同時自己填 kubelet 放行) | 沒用 STATUS 定位死在哪一棒:kubelet 放行 = 容器已啟動,綁 port 80 失敗 = 程序退出 = CrashLoopBackOff;反證後改對(supported),/root 寫檔換皮帶因為 ✅ | unresolved | 3 | 2026-10-02 | 0
 - 2026-09-18 | IRSA trust vs permission policy | 首答「擋在 B policy」;誘答「改 SA annotation 就能讀別人的 S3」同意;F 段又同意「STS 看 policy 有無 s3:GetObject 就放行」 | RP2 驗身分(trust policy 比 JWT sub)與授權(permission policy)混成一步;annotation 只是申請單 | unresolved | 7 | 2026-10-16 | 0
@@ -129,12 +130,12 @@ weak-topic flags(2026-08-03 啟用,P2a 帶 flag 前進、gate 未考,學員決�
 - 2026-06-27 | ClusterIP/kube-proxy/DNAT 全鏈(謎題B) | 「封包先去 ClusterIP 拿 IP」+ 手/名單混淆 | ClusterIP 不是地方;改寫在出發地本機 kernel | resolved | 14 | 2026-07-13 | 0
 - 2026-06-28 | 叢集 DNS 排障 | nslookup NXDOMAIN 差點誤判 CoreDNS 壞 | 排障第一刀「先用 FQDN 二分」沒成肌肉 | unresolved | 3 | 2026-07-10 | 3
 - 2026-07-06 | L4 vs L7 | 記成場景標籤(叢集內=L4、外部=L7) | 本質是轉發決定要讀到哪層資訊 | unresolved | 3 | 2026-07-22 | 3
-- 2026-07-23 | 只給結論不給判準(pattern 卡,升級追蹤) | 同堂三次只給結論不 show work;2026-09-08 續犯(「因為是 get」=複述觀察非判準);09-25 續犯(「B 因為」後空白) | 輸出習慣不是能力;面試官無法區分會與猜對 | unresolved | 3 | 2026-11-01 | 7
+- 2026-07-23 | 只給結論不給判準(pattern 卡,升級追蹤) | 同堂三次只給結論不 show work;2026-09-08 續犯(「因為是 get」=複述觀察非判準);09-25 續犯(「B 因為」後空白) | 輸出習慣不是能力;面試官無法區分會與猜對 | unresolved | 3 | 2026-11-06 | 8
 - 2026-07-07 | Ingress 404 排障 | 差點改沒壞的規則;真兇是半死的 port-forward | 規則層全綠時兇手在你測試經過的那層 | parked(2026-07-16 ROI 篩:Q1 半 yes,但「port-forward 半死」是 lab 夾具產物、prod 不長這樣;同一判準已三種問法重問三次=題目壞掉。判準留檔備查,不再抽) | - | - | 3
 - 2026-07-09 | no-Host→404 的 why | 結果預測對,講不出 curl 自動填 Host | 會用會預測不等於會講 why(隱性會) | resolved(2026-07-16 ROI 篩:Q1=no,curl 填 header 是 tool trivia,面試不考;學員答「沒帶 domain → Ingress 對應不上」= 機制正確,教練題目壞掉不是學員沒懂。結案) | - | - | 1
 - 2026-08-06 | 排障:restart 排在採證前面(MTTR / 治標 vs 治本第三次同形狀) | 三台 node NotReady,三選一選 C 直接 restart | 「先試試」不是診斷;restart 清掉症狀也清掉證據 | unresolved | 7 | 2026-11-09 | 1
-- 2026-08-06 | EKS 儲存拓撲:EBS AZ-scoped / nodeAffinity / volumeBindingMode(**學員主動提問引出**,ProServe 高權重) | 未答錯;Transfer 過但屬當堂鷹架下複述 | 需冷測驗留存 | unresolved | 3 | 2026-08-09 | 0
-- 2026-08-28 | 排障兩步:先鎖 fault domain 再查內部(MTTR 核心卡) | 同堂兩次先跳單一成員內部狀態;s55 下班沒縮首刀查時區和 log、df 跑在 cp(被趕的是 worker) | 沒先問「這條路徑上有幾個東西」 | unresolved | 3 | 2026-11-05 | 0
+- 2026-08-06 | EKS 儲存拓撲:EBS AZ-scoped / nodeAffinity / volumeBindingMode(**學員主動提問引出**,ProServe 高權重) | 未答錯;Transfer 過但屬當堂鷹架下複述 | 需冷測驗留存 | parked(2026-11-03 s56 triage:沒有錯誤答案,不符合 Mistake Registry 收錄條件;移到 queue 當 topic 卡,冷測照舊) | - | - | 0
+- 2026-08-28 | 排障兩步:先鎖 fault domain 再查內部(MTTR 核心卡) | 同堂兩次先跳單一成員內部狀態;s55 下班沒縮首刀查時區和 log、df 跑在 cp(被趕的是 worker);s56 `ACTIVE=False` + `0/0` 首刀 describe pod(沒有 Pod) | 沒先問「這條路徑上有幾個東西」 | unresolved | 3 | 2026-11-06 | 1
 - 2026-09-08 | RBAC 動詞看有無物件名字(get vs list vs watch) | Role 只給 get,預測 `kubectl get pods` 會成功,實測 403 cannot list | 把 kubectl 指令名字當成 RBAC 動詞 | parked(2026-09-15 ROI 篩:Q1 no,403 訊息本身就寫出 verb `cannot list`,背對照表 ROI 低;學員決定退役,判準留檔備查) | - | - | 0
 - 2026-09-08 | `--list` 三分判準(只剩噪音 / 缺 resource / 缺動詞) | 首答把原本 403 訊息當成 `--list` 輸出,且用「會 403」當判準(兩種都 403) | 兩個不同指令的輸出混為一談 | parked(2026-09-15 ROI 篩:Q1 no,面試不考讀 `--list` 輸出;學員決定退役,判準留檔備查) | - | - | 0
 - 2026-10-13 | default-deny 先死在 DNS 層 | 答「全部擋住」,提示後答連線層,連錯兩次直給;s48 F 段誘答「egress 只放 orders:5432 就能連」直接同意,Resolving 提示後仍答查 db ingress,二選一後自答補 53 | 沒把 DNS 查詢當成第一個 egress 封包 | unresolved | 3 | 2026-10-19 | 1
@@ -154,9 +155,9 @@ weak-topic flags(2026-08-03 啟用,P2a 帶 flag 前進、gate 未考,學員決�
 - mistake:L4-vs-L7 | mistake | 3 | 2026-07-22 | active
 - mistake:跨-node-走路由表-舊記錄 | mistake | - | 2026-08-09 | retired(s27 已執行,由上面的新列接手)
 - mistake:restart排在採證前面(MTTR) | mistake | 7 | 2026-11-09 | active
-- mistake:EKS儲存拓撲(EBS AZ/nodeAffinity/volumeBindingMode) | mistake | 3 | 2026-08-09 | active
-- mistake:先鎖fault-domain再查內部(MTTR) | mistake | 3 | 2026-11-05 | active
-- mistake:只給結論不給判準(pattern) | mistake | 3 | 2026-11-01 | active
+- topic:EKS儲存拓撲(EBS AZ/nodeAffinity/volumeBindingMode) | topic | 3 | 2026-08-09 | active
+- mistake:先鎖fault-domain再查內部(MTTR) | mistake | 3 | 2026-11-06 | active
+- mistake:只給結論不給判準(pattern) | mistake | 3 | 2026-11-06 | active
 - term:conntrack | term | 7 | 2026-07-26 | active
 - mistake:probe-職責 | mistake | 3 | 2026-08-27 | active
 - mistake:DNS-排障第一刀 | mistake | 3 | 2026-07-10 | active
@@ -170,13 +171,14 @@ weak-topic flags(2026-08-03 啟用,P2a 帶 flag 前進、gate 未考,學員決�
 - topic:P3-C2-調度約束 | topic | 3 | 2026-10-23 | active
 - topic:P3-C3-HPA | topic | 3 | 2026-10-31 | active
 - mistake:HPA超標就+1顆 | mistake | 3 | 2026-10-31 | active
-- mistake:下kubectl前先確認context | mistake | 3 | 2026-10-15 | active
+- mistake:下kubectl前先確認context | mistake | - | 2026-10-15 | retired(2026-11-03 ROI 篩)
 - mistake:node-Ready是kubelet回報 | mistake | 3 | 2026-10-15 | active
 - mistake:default-deny先死在DNS層 | mistake | 3 | 2026-10-19 | active
 - topic:P3-C4-VPA | topic | 3 | 2026-11-01 | active
 - mistake:VPA-Auto實際行為 | mistake | 3 | 2026-11-01 | active
 - mistake:4xx-vs-5xx誰產生 | mistake | 3 | 2026-11-01 | active
-- topic:P3-C3b-KEDA | topic | 3 | 2026-11-05 | active
+- topic:P3-C3b-KEDA | topic | 3 | 2026-11-06 | active
+- topic:P3-C5-node-autoscaler(CA vs Karpenter 取捨 / consolidation) | topic | 3 | 2026-11-06 | active
 - mistake:裝KEDA會不會取代metrics-server | mistake | 3 | 2026-11-05 | active
 
 ## Curiosity branch

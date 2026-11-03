@@ -70,6 +70,7 @@
 - 註:s26 的 EKS 順序題雖自帶「因為」,但屬**當堂剛教 + 教練指定「用順序講」的鷹架下複述,不計入無提示正樣本**。無提示正樣本累計:s22 站 7、s24 kernel 題、s25 PV/PVC 1:1、**s26 upperdir 句**。08-09 續盯,新增盯點=**有沒有同義反覆**。
 - s52(2026-10-29):課尾複習 1 沒要求「因為」,自己給出判準 ✅。同堂前段多次要求過「選 X,因為 Y」格式,有 priming,不算 resolved。→ 7 天。
 - s52 同堂收尾:503 nginx 頁換皮明講「選 X,因為 Y」仍只答「B」,追問後補「看到裡面寫 nginx」。同堂前段的 ✅ 不成立 → reset 3 天。
+- **s56(2026-11-03)**:混合。cron 題首答「B 先進行冷啟動」只給結論;之後 64 GiB 題、job Pod 題、KEDA 誘答都主動帶機制。多數題目有明確要求「因為」,所以不算無提示通過。SQS lab 的 KEDA / HPA 分工答對沒講原因,縮回路徑只答「A吧」且錯。
 
 ## 2026-07-17 | default-deny 後的分層(DNS 層 vs 連線層)
 
@@ -211,6 +212,7 @@
 - **加碼規格(s33 起)**:排障題不直接問「第一發是什麼」,先強迫學員答「**我這一發回答的是第 1 步還是第 2 步**」,答完才給指令選項。把「用一次」變成強制動作,不是期待他自己想到。
 
 - **s55 再現(2026-11-02)**:視窗 19:00 結束、19:08 還是 3 顆,首答「檢查 cron 時區以及 log」,時區是合理嫌犯但順序錯。第一刀是 `kubectl get scaledobject` 的 `ACTIVE`:True 查時區/end,False 查 KEDA Pod 再看 log。同堂 `df` 跑在 cp,被趕的是 worker。下次抽考:視窗 09:00 開始、09:10 還是 0 顆、`ACTIVE=False`,嫌犯在哪(當堂未答)。
+- **s56 再現(2026-11-03)**:上面那題首答 `describe pod` 查 scheduler 或 KEDA 設定(兩個嫌犯分對,第一刀錯)。縮成「`0/0` 時 scheduler 有 Pod 要排嗎」後自答沒有 Pod、只能看 KEDA。判準:從上往下讀 ScaledObject → Deployment → Pod → scheduler,卡在哪層查哪層。同堂 SQS 換皮(120 則訊息、`ACTIVE=False`、同事要查 NodePool)答看 ACTIVE,屬當場給判準後過。下次抽考:Karpenter 叢集,Pod Pending 但沒開機器,event `NoCompatibleInstanceTypes`,先答這一發是第 1 步還是第 2 步,再選指令。
 
 ## 2026-09-01 | 建 Pod 的權限 vs Pod 裡程式呼叫 API 的權限(誰用誰的身分)
 
