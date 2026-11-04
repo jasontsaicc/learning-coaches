@@ -25,6 +25,7 @@
 - instance:cp `i-07d1f6b84b28b7085`(10.86.47.25)、w1 `i-023330305ef657042`(10.86.40.56)、w2 `i-0a711dc638fa0fc4f`(10.86.34.124);`ssh -i ~/.ssh/k8s-lab ubuntu@<ip>`,cp context `kubernetes-admin@kubernetes`。
 - (2026-11-02 s55)v1.36.5;root EBS 8→20 GB(fs 19 GB),原 8 GB 裝 KEDA + 拉 image 後 DiskPressure。KEDA v2.21.0(裝前查相容表,v2.17 只到 1.32),metrics-server 已裝。
 - ⚠️ `labs/kubeadm/terraform/main.tf` gitignored,改動只在這台 bastion:加了 `root_block_device` + `lifecycle { ignore_changes = [ami] }`。AMI 是 `most_recent`,沒有這行 plan 會 3 destroy。apply 前必讀 plan 最後一行。
+- (2026-11-04 s57)w1 還有無 controller 的舊 Pod `andor/web`、`monitoring/debug`、`other/y`,drain w1 要 `--force`,不然碰不到 PDB。w2 的 `andor/x`、`monitoring/prometheus` 已被 `--force` 刪除,NetworkPolicy AND/OR 場景要重建。
 - 詳見 curriculum-plan §12.1。
 
 ## 機器

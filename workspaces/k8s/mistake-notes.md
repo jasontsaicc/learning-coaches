@@ -500,3 +500,21 @@
 - 判準句:一個 API group 一行。KEDA 註冊新的 group,舊的不動。
 - 延伸:一座叢集只能一個 active 的 external.metrics server,要是 KEDA 自己;真正會搶的是這一行。
 - 下次抽考:叢集已裝 metrics-server,ScaledObject 同時有 cpu 和 cron 兩個 trigger,HPA 會問 APIService 表的哪幾行?因為?
+
+## 2026-11-04 | Pod 終止時間差歸給 drain / preStop 讓請求轉移
+- 正解:Pod 進入 terminating 後,規則更新和殺程序同時開始、互不等待,沒有任何一步會等所有 node 改完。drain、delete pod、rolling update 都一樣。請求被 DNAT 到已退出的 Pod,node 本身是好的。
+- 判準句:PDB 決定能不能開始砍,時間差發生在開始砍之後。preStop sleep 讓程序活得比規則久,規則先拆完才送 SIGTERM。
+- s57 實測:凍結 client 所在 node 的 kube-proxy 後 delete pod(沒有 drain,ALLOWED 0),08:50:46-54 共 5 個 000 / 8 個 200,解凍後全 200。加 preStop 20 秒後,舊 Pod Terminating 期間 15 秒收 23 次請求,client 30 秒 97 個 200 / 0 個 000。
+- 下次抽考:客戶說「我們沒有用 drain,只是 rollout restart,不應該掉請求」,但每次換版都有零星 502。你怎麼回?先查什麼?
+
+## 2026-11-04 | PDB 卡死怎麼解(1 副本 minAvailable 1)
+- 正解:先 scale 到 2,ALLOWED 變 1,drain 通過,全程至少 1 顆接流量。手動 delete 能過但流量歸零。--force 只處理沒有 controller 的 Pod,不繞過 PDB。長期修法:至少 2 副本。
+- 判準句:ALLOWED = 現在健康幾顆 - 最少要留幾顆。要解卡死就加分子。
+- s57 由來:同堂才用 scale 把 2 副本解開,換皮題仍答 delete,再答 force,連錯 2 次直給。
+- 下次抽考:3 副本 `minAvailable: 3`,升級 pipeline 卡在 `Cannot evict pod`。值班同事想加 `--force` 重跑。你怎麼說?
+
+## 2026-11-04 | grace period 包含 preStop
+- 正解:grace 從 Pod 進入 terminating 起算,preStop 也算在內,到期 SIGKILL。preStop 25 + 排空 10 = 35 > 30,第 30 秒被殺,app 只拿到 5 秒。修法是 grace 設 40,它是上限,app 提早做完就提早結束。
+- 判準句:preStop 時間 + app 排空時間 < terminationGracePeriodSeconds。
+- s57 由來:兩次都答不知道(25 + 10 vs 30、`sleep 300` 第 30 秒);誘答「preStop 是給 app 做完請求」有抓到,但沒講處理中的請求靠什麼。未實測。
+- 下次抽考:Pod 刪除時 exit code 137,而且剛好等滿 30 秒。preStop sleep 20,app 排空要 15 秒。根因和要改的欄位?(二選一可接受;能 lab 就 lab)

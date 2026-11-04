@@ -1,0 +1,630 @@
+<title>PDB drain graceful shutdown</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC:wght@400;700&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<style>
+/* layout: one narrow notebook column on graph paper; each layer = header badge + taped figure card */
+:root {
+  --bg: #F6F8FA;
+  --grid: rgba(90,130,170,.16);
+  --ink: #23313E;
+  --muted: #5B6B7A;
+  --card: #FFFFFF;
+  --line: #C9D3DD;
+  --accent: #326CE5;
+  --accent-soft: rgba(50,108,229,.12);
+  --tape: rgba(50,108,229,.28);
+  --bad: #C92A2A;
+  --bad-soft: rgba(201,42,42,.18);
+  --waste: rgba(91,107,122,.22);
+  --hl-who: #FFE98A;
+  --hl-see: #BDEEF6;
+  --hl-may: #F9CDE0;
+  --font-body: "LXGW WenKai TC", "Noto Sans TC", "PingFang TC", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #1A2320; --grid: rgba(200,230,215,.07); --ink: #E4ECE7; --muted: #A3B3AA;
+    --card: #24302B; --line: #3D4D46; --accent: #74A0F0; --accent-soft: rgba(116,160,240,.16);
+    --tape: rgba(116,160,240,.35); --bad: #FF8787; --bad-soft: rgba(255,135,135,.2);
+    --waste: rgba(163,179,170,.22); --hl-who: rgba(255,233,138,.38); --hl-see: rgba(189,238,246,.3);
+    --hl-may: rgba(249,205,224,.3); color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #1A2320; --grid: rgba(200,230,215,.07); --ink: #E4ECE7; --muted: #A3B3AA;
+  --card: #24302B; --line: #3D4D46; --accent: #74A0F0; --accent-soft: rgba(116,160,240,.16);
+  --tape: rgba(116,160,240,.35); --bad: #FF8787; --bad-soft: rgba(255,135,135,.2);
+  --waste: rgba(163,179,170,.22); --hl-who: rgba(255,233,138,.38); --hl-see: rgba(189,238,246,.3);
+  --hl-may: rgba(249,205,224,.3); color-scheme: dark;
+}
+body {
+  background-color: var(--bg);
+  background-image: linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 22px 22px;
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 17px;
+  line-height: 1.75;
+}
+.page { max-width: 760px; margin: 0 auto; padding-block: 24px 64px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: flex; flex-direction: column; gap: 36px; }
+header.top { background: var(--accent); color: #fff; border-radius: 4px; padding: 18px 20px; display: flex; flex-direction: column; gap: 8px; }
+header.top h1 { margin: 0; font-size: 1.7rem; line-height: 1.3; text-wrap: balance; }
+header.top .goal { margin: 0; font-size: 1rem; }
+.progress { font-family: var(--font-mono); font-size: .85rem; display: flex; flex-wrap: wrap; gap: 6px; }
+.progress span { background: rgba(255,255,255,.18); padding: 2px 8px; border-radius: 3px; }
+.progress span.done { background: #fff; color: #1F4FB8; font-weight: 600; }
+section.layer { display: flex; flex-direction: column; gap: 14px; }
+.layer-head { display: flex; align-items: baseline; flex-wrap: wrap; gap: 10px; }
+.badge { font-family: var(--font-mono); font-size: .8rem; background: var(--accent); color: #fff; padding: 2px 8px; border-radius: 3px; letter-spacing: .04em; }
+.layer-head h2 { margin: 0; font-size: 1.35rem; text-wrap: balance; }
+.time { font-family: var(--font-mono); font-size: .78rem; color: var(--muted); }
+h3 { margin: 10px 0 0; font-size: 1.12rem; }
+p { margin: 0; }
+.lead { font-size: 1.08rem; font-weight: 700; }
+mark { color: inherit; padding: 0 2px; background: linear-gradient(transparent 50%, var(--hl-who) 50%); }
+mark.see { background: linear-gradient(transparent 50%, var(--hl-see) 50%); }
+mark.may { background: linear-gradient(transparent 50%, var(--hl-may) 50%); }
+code, .mono { font-family: var(--font-mono); font-size: .88em; }
+.card { position: relative; background: var(--card); border: 1px solid var(--line); padding: 22px 14px 14px; margin-top: 8px; }
+.card::before { content: ""; position: absolute; top: -9px; left: 50%; width: 92px; height: 18px; transform: translateX(-50%) rotate(-2deg); background: var(--tape); }
+.fig { overflow-x: auto; }
+.fig svg { display: block; margin: 0 auto; max-width: 100%; height: auto; }
+.caption { font-size: .9rem; color: var(--muted); text-align: center; margin-top: 6px; }
+.formula { font-family: var(--font-mono); font-size: 1rem; background: var(--accent-soft); border-left: 3px solid var(--accent); padding: 10px 12px; overflow-x: auto; white-space: pre; }
+.tbl { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-size: .95rem; background: var(--card); }
+th, td { border: 1px solid var(--line); padding: 6px 10px; text-align: left; vertical-align: top; }
+th { background: var(--accent-soft); }
+td.num, th.num { font-family: var(--font-mono); font-variant-numeric: tabular-nums; text-align: right; }
+.panels { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.panel { background: var(--card); border: 1px solid var(--line); padding: 10px; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.panel .t { font-weight: 700; font-size: .95rem; }
+.panel .r { font-size: .88rem; }
+.panel.bad { border-left: 4px solid var(--bad); }
+.panel.good { border-left: 4px solid var(--accent); }
+@media (max-width: 560px) { .panels { grid-template-columns: minmax(0, 1fr); } }
+.timeline { list-style: none; margin: 0; padding: 0 0 0 4px; display: flex; flex-direction: column; }
+.timeline li { position: relative; display: grid; grid-template-columns: 112px minmax(0, 1fr); gap: 12px; padding: 0 0 14px; }
+.timeline li::before { content: ""; position: absolute; left: 105px; top: 10px; bottom: -4px; width: 2px; background: var(--line); }
+.timeline li:last-child::before { display: none; }
+.timeline .when { font-family: var(--font-mono); font-size: .82rem; text-align: right; padding-right: 14px; color: var(--accent); font-weight: 600; }
+.timeline .what { position: relative; }
+.timeline .what::before { content: ""; position: absolute; left: -18px; top: 9px; width: 10px; height: 10px; border-radius: 50%; background: var(--accent); }
+.timeline li.blind .what { background: var(--bad-soft); padding: 2px 8px; }
+.timeline li.blind .what::before { background: var(--bad); }
+.timeline .sub { font-size: .88rem; color: var(--muted); }
+.wrong { border-left: 4px solid var(--bad); background: var(--bad-soft); padding: 8px 12px; }
+details { background: var(--card); border: 1px dashed var(--line); padding: 8px 12px; }
+details summary { cursor: pointer; font-weight: 700; }
+details summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+details > *:not(summary) { margin-top: 8px; }
+pre.yaml { font-family: var(--font-mono); font-size: .85rem; background: var(--accent-soft); padding: 10px 12px; overflow-x: auto; margin: 8px 0 0; }
+footer.next { background: var(--card); border: 2px solid var(--accent); padding: 14px 16px; }
+footer.next strong { color: var(--accent); }
+/* svg tokens */
+.s-ink { stroke: var(--ink); fill: none; }
+.s-line { stroke: var(--line); fill: none; }
+.s-acc { stroke: var(--accent); fill: none; }
+.f-card { fill: var(--card); }
+.f-acc { fill: var(--accent); }
+.f-accsoft { fill: var(--accent-soft); }
+.f-bad { fill: var(--bad-soft); }
+.f-waste { fill: var(--waste); }
+.t-ink { fill: var(--ink); font-family: var(--font-body); }
+.t-mut { fill: var(--muted); font-family: var(--font-body); }
+.t-acc { fill: var(--accent); font-family: var(--font-body); }
+.t-bad { fill: var(--bad); font-family: var(--font-body); }
+.t-mono { font-family: var(--font-mono); }
+</style>
+
+<style>
+.panels.two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.panel svg { display: block; width: 100%; height: auto; }
+@media (max-width: 560px) { .panels.two { grid-template-columns: minmax(0, 1fr); } }
+</style>
+<div class="page">
+
+<header class="top">
+  <h1>PDB + drain + graceful shutdown (P3 C-6)</h1>
+  <p class="goal">讀完這頁你能:說出 drain 為什麼會卡住、誰拒絕的、Pod 被砍時為什麼還會有請求失敗,以及 preStop 和 grace period 各管哪一種請求。</p>
+  <div class="progress" aria-label="閱讀進度">
+    <span class="done">Layer 0 ✓</span><span class="done">1 ✓</span><span class="done">2 ✓</span><span class="done">3 ✓</span><span class="done">4 ✓</span><span class="done">5 ✓</span><span class="done">6 ✓</span><span class="done">7 ✓</span>
+  </div>
+</header>
+
+<!-- ===================== LAYER 0 ===================== -->
+<section class="layer" id="l0">
+  <div class="layer-head"><span class="badge">LAYER 0</span><h2>一張圖</h2><span class="time">讀 1 分鐘</span></div>
+  <p class="lead">drain 要清空 node 時,先問 PDB 能不能砍。不管 Pod 怎麼被砍,進入 terminating 後,拆轉發規則和殺程序都同時開始,不會互等。</p>
+  <div class="card fig">
+    <svg viewBox="0 0 420 364" width="420" role="img" aria-label="kubectl drain 先 cordon,再呼叫 Eviction API。ALLOWED DISRUPTIONS 為 0 時回 429,drain 卡住重試。大於 0 時准,Pod 進入 terminating。kubectl delete pod 和 rolling update 不問 PDB,直接進入 terminating。之後路徑 A 拆轉發規則、路徑 B 殺程序同時起跑">
+      <defs>
+        <marker id="a0" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="f-acc"/></marker>
+      </defs>
+      <rect x="60" y="8" width="270" height="46" class="f-accsoft s-acc" stroke-width="1.4"/>
+      <text x="195" y="28" class="t-ink t-mono" font-size="13" font-weight="600" text-anchor="middle">kubectl drain worker-2</text>
+      <text x="195" y="46" class="t-mut" font-size="11.5" text-anchor="middle">先 cordon:不再排新 Pod 上來</text>
+      <path d="M195,54 V78" class="s-acc" stroke-width="1.6" marker-end="url(#a0)"/>
+
+      <rect x="50" y="80" width="290" height="46" class="f-card s-ink" stroke-width="1.3"/>
+      <text x="195" y="100" class="t-ink" font-size="13" font-weight="700" text-anchor="middle">Eviction API:這顆能砍嗎?</text>
+      <text x="195" y="118" class="t-mut t-mono" font-size="10.5" text-anchor="middle">看 PDB 的 ALLOWED DISRUPTIONS</text>
+      <rect x="348" y="8" width="66" height="118" class="f-card s-ink" stroke-width="1.3"/>
+      <text x="381" y="30" class="t-ink t-mono" font-size="10" text-anchor="middle">delete</text>
+      <text x="381" y="44" class="t-ink t-mono" font-size="10" text-anchor="middle">pod</text>
+      <text x="381" y="62" class="t-mut" font-size="10.5" text-anchor="middle">或</text>
+      <text x="381" y="78" class="t-ink t-mono" font-size="10" text-anchor="middle">rolling</text>
+      <text x="381" y="92" class="t-ink t-mono" font-size="10" text-anchor="middle">update</text>
+      <text x="381" y="114" class="t-bad" font-size="10.5" font-weight="700" text-anchor="middle">不問 PDB</text>
+      <path d="M381,126 V156" class="s-acc" stroke-width="1.6" marker-end="url(#a0)"/>
+      <path d="M130,126 L90,156" class="s-acc" stroke-width="1.6" marker-end="url(#a0)"/>
+      <path d="M290,126 L300,156" class="s-acc" stroke-width="1.6" marker-end="url(#a0)"/>
+
+      <rect x="10" y="158" width="160" height="54" class="f-bad s-ink" stroke-width="1.3"/>
+      <text x="90" y="179" class="t-bad" font-size="13" font-weight="700" text-anchor="middle">= 0:回 429</text>
+      <text x="90" y="199" class="t-ink" font-size="11.5" text-anchor="middle">drain 卡住,每 5 秒重試</text>
+
+      <rect x="190" y="158" width="220" height="54" class="f-card s-ink" stroke-width="1.3"/>
+      <text x="300" y="179" class="t-acc" font-size="13" font-weight="700" text-anchor="middle">&gt; 0:准</text>
+      <text x="300" y="199" class="t-ink" font-size="11.5" text-anchor="middle">Pod 進入 terminating</text>
+      <path d="M300,212 L110,260" class="s-acc" stroke-width="1.6" marker-end="url(#a0)"/>
+      <path d="M300,212 L312,260" class="s-acc" stroke-width="1.6" marker-end="url(#a0)"/>
+      <text x="238" y="256" class="t-bad" font-size="12" font-weight="700" text-anchor="middle">同時起跑</text>
+
+      <rect x="10" y="262" width="195" height="94" class="f-card s-ink" stroke-width="1.3"/>
+      <text x="107" y="283" class="t-ink" font-size="13" font-weight="700" text-anchor="middle">路徑 A:拆轉發規則</text>
+      <text x="107" y="303" class="t-mut t-mono" font-size="10" text-anchor="middle">EndpointSlice: ready=false</text>
+      <text x="107" y="322" class="t-ink" font-size="11.5" text-anchor="middle">每台 kube-proxy 各自 watch</text>
+      <text x="107" y="341" class="t-ink" font-size="11.5" text-anchor="middle">各自改 iptables</text>
+
+      <rect x="215" y="262" width="195" height="94" class="f-card s-ink" stroke-width="1.3"/>
+      <text x="312" y="283" class="t-ink" font-size="13" font-weight="700" text-anchor="middle">路徑 B:殺程序</text>
+      <text x="312" y="303" class="t-ink" font-size="11.5" text-anchor="middle">kubelet 跑完 preStop</text>
+      <text x="312" y="322" class="t-ink" font-size="11.5" text-anchor="middle">送 SIGTERM,app 排空</text>
+      <text x="312" y="341" class="t-ink" font-size="11.5" text-anchor="middle">超過 grace 就 SIGKILL</text>
+    </svg>
+    <p class="caption">PDB 只決定能不能開始砍。下面兩條路徑是所有 Pod 終止都會走的。被砍的 Pod 由 ReplicaSet 開新的:新名字、新 IP,不是搬家。</p>
+  </div>
+
+  <div class="tbl"><table>
+    <thead><tr><th>單字</th><th>字面意思</th><th>在 K8s 裡實際做的事</th></tr></thead>
+    <tbody>
+      <tr><td><code>cordon</code></td><td>封鎖線</td><td>node 標 <code>unschedulable</code>,不排新 Pod,舊 Pod 不動</td></tr>
+      <tr><td><code>drain</code></td><td>排空</td><td>cordon + 把這台的 Pod 一顆一顆 evict</td></tr>
+      <tr><td><code>eviction</code></td><td>驅逐</td><td>透過 API 砍 Pod,砍之前先問 PDB</td></tr>
+      <tr><td><code>PDB</code></td><td>PodDisruptionBudget,Pod 中斷預算</td><td>一個 K8s 物件,寫這組 Pod 最少要留幾顆。有人透過 Eviction API 要砍 Pod 時,API Server 先看它</td></tr>
+      <tr><td><code>grace period</code></td><td>寬限期</td><td>SIGKILL 前最多等多久。<code>terminationGracePeriodSeconds</code>,預設 30 秒</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- ===================== LAYER 1 ===================== -->
+<section class="layer" id="l1">
+  <div class="layer-head"><span class="badge">LAYER 1</span><h2>第一性原理:兩個躲不掉的限制</h2><span class="time">讀 2 分鐘</span></div>
+
+  <h3>限制 1:每台 node 的轉發規則不會同一時間更新</h3>
+  <p class="lead">K8s 沒有「先從每台 node 拿掉這顆 Pod,全部確認後才殺程序」的機制。每個 kube-proxy 自己 watch、自己改。</p>
+  <div class="card fig">
+    <svg viewBox="0 0 420 208" width="420" role="img" aria-label="沒有 preStop 時,程序在 0.2 秒退出,但 node-1 到 1 秒、node-2 到 1.8 秒、node-3 到 3.2 秒才拆掉規則。退出之後到拆掉規則之間是紅色,新連線會失敗">
+      <text x="8" y="33" class="t-ink" font-size="12" font-weight="700">Pod 程序</text>
+      <rect x="100" y="20" width="15" height="18" class="f-acc"/>
+      <text x="123" y="33" class="t-bad" font-size="12">收到 SIGTERM,0.2 秒就退出</text>
+
+      <text x="8" y="73" class="t-ink t-mono" font-size="11">node-1 規則</text>
+      <rect x="100" y="60" width="15" height="18" class="f-accsoft"/>
+      <rect x="115" y="60" width="60" height="18" class="f-bad"/>
+      <text x="181" y="73" class="t-mut" font-size="11">拆掉</text>
+
+      <text x="8" y="113" class="t-ink t-mono" font-size="11">node-2 規則</text>
+      <rect x="100" y="100" width="15" height="18" class="f-accsoft"/>
+      <rect x="115" y="100" width="120" height="18" class="f-bad"/>
+      <text x="241" y="113" class="t-mut" font-size="11">拆掉</text>
+
+      <text x="8" y="153" class="t-ink t-mono" font-size="11">node-3 規則</text>
+      <rect x="100" y="140" width="15" height="18" class="f-accsoft"/>
+      <rect x="115" y="140" width="225" height="18" class="f-bad"/>
+      <text x="346" y="153" class="t-mut" font-size="11">拆掉</text>
+
+      <path d="M115,14 V172" class="s-ink" stroke-width="1" stroke-dasharray="4 3"/>
+      <line x1="100" y1="172" x2="400" y2="172" class="s-ink" stroke-width="1.2"/>
+      <g class="t-mut t-mono" font-size="10.5" text-anchor="middle">
+        <text x="100" y="188">0s</text><text x="175" y="188">1s</text><text x="250" y="188">2s</text><text x="325" y="188">3s</text><text x="400" y="188">4s</text>
+      </g>
+    </svg>
+    <p class="caption">紅色 = 這台 node 還把新連線 DNAT 到已經退出的 Pod,client 看到 <code>connection refused</code>。數字是示意,實際值看叢集大小和 kube-proxy 同步速度。</p>
+  </div>
+  <p>這個時間差消不掉,因為沒有中央控制點:P2a 你比對過,每台 node 的 iptables 是各自寫的。能做的只有讓程序活得比「最慢那台更新完」更久。</p>
+
+  <h3>限制 2:砍 Pod 的人不只一個,彼此不知道對方</h3>
+  <p class="lead">Karpenter 併機、node 升級、維運手動 drain 都會砍 Pod。需要一個共用的地方回答「現在還能再少一顆嗎」。</p>
+  <div class="tbl"><table>
+    <thead><tr><th>拿掉什麼</th><th>會發生什麼</th></tr></thead>
+    <tbody>
+      <tr><td><code>PDB</code></td><td>併機一次趕走同服務兩顆副本,剩 0 顆可用</td></tr>
+      <tr><td><code>preStop</code> 等待</td><td>程序比規則先走,上圖紅色那段時間的新連線失敗</td></tr>
+      <tr><td>app 處理 SIGTERM</td><td>等滿 grace period 後 SIGKILL,處理中的請求被切斷</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- ===================== LAYER 2 ===================== -->
+<section class="layer" id="l2">
+  <div class="layer-head"><span class="badge">LAYER 2</span><h2>機制</h2><span class="time">讀 5 分鐘</span></div>
+
+  <h3>2-1 PDB:API Server 看一個數字決定准不准</h3>
+  <p class="lead"><code>kubectl get pdb</code> 的 <code>ALLOWED DISRUPTIONS</code> 就是還能砍幾顆。0 就回 429。</p>
+  <p>例子:<code>payments</code> 5 副本,<code>minAvailable: 3</code>。</p>
+  <div class="panels">
+    <div class="panel good">
+      <svg viewBox="0 0 200 50" role="img" aria-label="5 顆都健康,可砍 2 顆">
+        <circle cx="24" cy="25" r="14" class="f-acc"/><circle cx="62" cy="25" r="14" class="f-acc"/><circle cx="100" cy="25" r="14" class="f-acc"/><circle cx="138" cy="25" r="14" class="f-acc"/><circle cx="176" cy="25" r="14" class="f-acc"/>
+      </svg>
+      <div class="t">健康 5 顆,ALLOWED 2</div><div class="r">evict 第 1 顆:准</div>
+    </div>
+    <div class="panel good">
+      <svg viewBox="0 0 200 50" role="img" aria-label="4 顆健康,可砍 1 顆">
+        <circle cx="24" cy="25" r="14" class="f-acc"/><circle cx="62" cy="25" r="14" class="f-acc"/><circle cx="100" cy="25" r="14" class="f-acc"/><circle cx="138" cy="25" r="14" class="f-acc"/><circle cx="176" cy="25" r="13" class="s-line" stroke-width="1.5" stroke-dasharray="4 3"/>
+      </svg>
+      <div class="t">健康 4 顆,ALLOWED 1</div><div class="r">evict 第 2 顆:准</div>
+    </div>
+    <div class="panel bad">
+      <svg viewBox="0 0 200 50" role="img" aria-label="3 顆健康,可砍 0 顆">
+        <circle cx="24" cy="25" r="14" class="f-acc"/><circle cx="62" cy="25" r="14" class="f-acc"/><circle cx="100" cy="25" r="14" class="f-acc"/><circle cx="138" cy="25" r="13" class="s-line" stroke-width="1.5" stroke-dasharray="4 3"/><circle cx="176" cy="25" r="13" class="s-line" stroke-width="1.5" stroke-dasharray="4 3"/>
+      </svg>
+      <div class="t">健康 3 顆,ALLOWED 0</div><div class="r">evict 第 3 顆:429,等著</div>
+    </div>
+  </div>
+  <p>被砍的副本在別台重建,readiness 過了才算健康,<code>ALLOWED</code> 才回升,drain 才能繼續。</p>
+
+  <p><mark>PDB 只有走 Eviction API 才生效。</mark>下面這張表是重點:</p>
+  <div class="tbl"><table>
+    <thead><tr><th>Pod 怎麼死的</th><th>問 PDB 嗎</th></tr></thead>
+    <tbody>
+      <tr><td><code>kubectl drain</code>、Karpenter 併機、Cluster Autoscaler 縮容</td><td><mark class="see">問</mark></td></tr>
+      <tr><td>preemption(C-1 教過)</td><td>盡量問,必要時還是砍</td></tr>
+      <tr><td><code>kubectl delete pod</code></td><td><mark class="may">不問</mark></td></tr>
+      <tr><td>Deployment rolling update</td><td><mark class="may">不問</mark>,用自己的 <code>maxUnavailable</code></td></tr>
+      <tr><td>kubelet 磁碟或記憶體壓力趕人(你 s55 看到的 Evicted)</td><td><mark class="may">不問</mark></td></tr>
+      <tr><td>node 掛掉、OOM kill</td><td><mark class="may">不問</mark></td></tr>
+    </tbody>
+  </table></div>
+  <p>注意撞名:<code>eviction</code> 有兩種。API 發起的會問 PDB,kubelet 因為資源壓力發起的不問。</p>
+
+  <h3>2-2 兩套預算不要混</h3>
+  <div class="tbl"><table>
+    <thead><tr><th></th><th>Deployment rollingUpdate</th><th>PDB</th></tr></thead>
+    <tbody>
+      <tr><td>管什麼時候</td><td>自己換版時</td><td>外力要清 node 時</td></tr>
+      <tr><td>誰在算</td><td>Deployment controller</td><td>API Server 的 Eviction API</td></tr>
+      <tr><td>欄位</td><td><code>maxSurge</code> / <code>maxUnavailable</code></td><td><code>minAvailable</code> 或 <code>maxUnavailable</code>(二選一)</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>2-3 drain 之前和之後</h3>
+  <p class="lead">舊 Pod 被砍,controller 在別台開一顆新的。中間容量是少一顆的。</p>
+  <div class="panels two">
+    <div class="panel">
+      <svg viewBox="0 0 220 104" role="img" aria-label="drain 之前:worker-1 有 Pod abc,worker-2 有 Pod def">
+        <rect x="4" y="4" width="102" height="96" class="f-card s-ink" stroke-width="1.2"/>
+        <text x="55" y="22" class="t-ink t-mono" font-size="11" text-anchor="middle">worker-1</text>
+        <rect x="14" y="36" width="82" height="42" class="f-accsoft s-acc"/>
+        <text x="55" y="53" class="t-ink t-mono" font-size="10" text-anchor="middle">pay-abc</text>
+        <text x="55" y="69" class="t-mut t-mono" font-size="9" text-anchor="middle">192.168.1.5</text>
+        <rect x="114" y="4" width="102" height="96" class="f-card s-ink" stroke-width="1.2"/>
+        <text x="165" y="22" class="t-ink t-mono" font-size="11" text-anchor="middle">worker-2</text>
+        <rect x="124" y="36" width="82" height="42" class="f-accsoft s-acc"/>
+        <text x="165" y="53" class="t-ink t-mono" font-size="10" text-anchor="middle">pay-def</text>
+        <text x="165" y="69" class="t-mut t-mono" font-size="9" text-anchor="middle">192.168.2.7</text>
+      </svg>
+      <div class="t">drain worker-2 之前</div>
+    </div>
+    <div class="panel">
+      <svg viewBox="0 0 220 104" role="img" aria-label="drain 之後:worker-1 有 abc 和新的 xyz,worker-2 空了並標 SchedulingDisabled">
+        <rect x="4" y="4" width="102" height="96" class="f-card s-ink" stroke-width="1.2"/>
+        <text x="55" y="20" class="t-ink t-mono" font-size="11" text-anchor="middle">worker-1</text>
+        <rect x="12" y="26" width="86" height="32" class="f-accsoft s-acc"/>
+        <text x="55" y="39" class="t-ink t-mono" font-size="9.5" text-anchor="middle">pay-abc</text>
+        <text x="55" y="52" class="t-mut t-mono" font-size="8.5" text-anchor="middle">192.168.1.5</text>
+        <rect x="12" y="62" width="86" height="32" class="f-acc"/>
+        <text x="55" y="75" font-size="9.5" fill="#fff" font-family="var(--font-mono)" text-anchor="middle">pay-xyz 新</text>
+        <text x="55" y="88" font-size="8.5" fill="#fff" font-family="var(--font-mono)" text-anchor="middle">192.168.1.9</text>
+        <rect x="114" y="4" width="102" height="96" class="f-waste s-ink" stroke-width="1.2"/>
+        <text x="165" y="22" class="t-ink t-mono" font-size="11" text-anchor="middle">worker-2</text>
+        <text x="165" y="52" class="t-bad t-mono" font-size="8.5" text-anchor="middle">SchedulingDisabled</text>
+        <text x="165" y="72" class="t-mut" font-size="11" text-anchor="middle">pay-def 已刪除</text>
+      </svg>
+      <div class="t">drain worker-2 之後</div>
+    </div>
+  </div>
+  <div class="tbl"><table>
+    <thead><tr><th>這台上的東西</th><th>drain 怎麼處理</th><th>旗標</th></tr></thead>
+    <tbody>
+      <tr><td>DaemonSet Pod</td><td>不趕,趕了也會立刻回來</td><td><code>--ignore-daemonsets</code></td></tr>
+      <tr><td>emptyDir 資料</td><td>隨 Pod 一起消失,要你確認</td><td><code>--delete-emptydir-data</code></td></tr>
+      <tr><td>沒有 controller 的裸 Pod</td><td>砍了不會回來,要你確認</td><td><code>--force</code></td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>2-4 Pod 終止:preStop 和 grace period 各管一種請求</h3>
+  <p class="lead">preStop 等待處理「新請求還會進來」。SIGTERM 之後的排空處理「已經收到的請求」。</p>
+  <div class="formula">preStop 時間 + app 排空時間 &lt; terminationGracePeriodSeconds</div>
+  <p>grace period 從 Pod 開始 terminating 就起算,<mark>preStop 的時間也算在裡面</mark>。例子:grace 30 秒,app 排空要 3 秒或 20 秒,比較三種設定。</p>
+
+  <div class="panels">
+    <div class="panel bad">
+      <svg viewBox="0 0 210 92" role="img" aria-label="沒有 preStop:程序立刻退出,規則還要 3 秒才拆完,這 3 秒新連線失敗">
+        <text x="2" y="28" class="t-mut" font-size="10">規則</text><rect x="34" y="18" width="12.6" height="12" class="f-bad"/>
+        <text x="2" y="56" class="t-mut" font-size="10">程序</text><rect x="34" y="46" width="3" height="12" class="f-acc"/>
+        <line x1="34" y1="70" x2="202" y2="70" class="s-ink" stroke-width="1"/>
+        <g class="t-mut t-mono" font-size="9.5" text-anchor="middle"><text x="34" y="84">0</text><text x="97" y="84">15s</text><text x="160" y="84">30s</text></g>
+      </svg>
+      <div class="t">不設 preStop</div><div class="r">程序立刻退出,規則還沒拆完。<mark class="may">新請求失敗</mark></div>
+    </div>
+    <div class="panel good">
+      <svg viewBox="0 0 210 92" role="img" aria-label="preStop 15 秒:規則 3 秒拆完,第 15 秒才送 SIGTERM,排空 3 秒後退出">
+        <text x="2" y="28" class="t-mut" font-size="10">規則</text><rect x="34" y="18" width="12.6" height="12" class="f-accsoft s-acc"/>
+        <text x="2" y="56" class="t-mut" font-size="10">程序</text><rect x="34" y="46" width="63" height="12" class="f-waste"/><rect x="97" y="46" width="12.6" height="12" class="f-acc"/>
+        <line x1="34" y1="70" x2="202" y2="70" class="s-ink" stroke-width="1"/>
+        <g class="t-mut t-mono" font-size="9.5" text-anchor="middle"><text x="34" y="84">0</text><text x="97" y="84">15s</text><text x="160" y="84">30s</text></g>
+      </svg>
+      <div class="t">preStop 15 秒,排空 3 秒</div><div class="r">規則先拆完才送 SIGTERM,第 18 秒就結束。<mark class="see">不掉請求</mark></div>
+    </div>
+    <div class="panel bad">
+      <svg viewBox="0 0 210 92" role="img" aria-label="preStop 15 秒加排空 20 秒要 35 秒,超過 grace 30 秒,第 30 秒被 SIGKILL">
+        <text x="2" y="28" class="t-mut" font-size="10">規則</text><rect x="34" y="18" width="12.6" height="12" class="f-accsoft s-acc"/>
+        <text x="2" y="56" class="t-mut" font-size="10">程序</text><rect x="34" y="46" width="63" height="12" class="f-waste"/><rect x="97" y="46" width="63" height="12" class="f-acc"/><rect x="160" y="46" width="21" height="12" class="f-bad"/>
+        <line x1="160" y1="38" x2="160" y2="64" class="s-ink" stroke-width="1.6"/>
+        <line x1="34" y1="70" x2="202" y2="70" class="s-ink" stroke-width="1"/>
+        <g class="t-mut t-mono" font-size="9.5" text-anchor="middle"><text x="34" y="84">0</text><text x="97" y="84">15s</text><text x="160" y="84">30s</text></g>
+      </svg>
+      <div class="t">preStop 15 秒,排空 20 秒</div><div class="r">共要 35 秒,第 30 秒被 SIGKILL。<mark class="may">處理中的請求被切斷</mark></div>
+    </div>
+  </div>
+  <p class="caption">程序那排:灰色 = preStop 等待,此時 app 正常服務。藍色 = 收到 SIGTERM 後排空。紅色 = 來不及做完的部分。</p>
+
+  <p>grace period 是上限,不是固定等待時間:app 提早退出,Pod 就提早結束。</p>
+  <p>規則拆掉只影響新連線。已建立的連線走 conntrack(P2a 學過),還是會到這顆 Pod,所以 app 要把手上的做完。</p>
+  <p>SIGTERM 只送給容器的 PID 1。PID 1 是 <code>sh -c</code> 又沒轉送的話,app 收不到,一路等到 SIGKILL(P2b PID 1 signal 學過)。</p>
+
+  <h3>2-5 看到什麼,查什麼</h3>
+  <div class="tbl"><table>
+    <thead><tr><th>看到</th><th>代表</th><th>查 / 改</th></tr></thead>
+    <tbody>
+      <tr><td><code>Cannot evict pod as it would violate the pod's disruption budget</code></td><td>Eviction API 回 429</td><td><code>kubectl get pdb</code> 看 <code>ALLOWED DISRUPTIONS</code>;改 PDB 或多開副本</td></tr>
+      <tr><td>換版或 drain 時零星 <code>connection refused</code></td><td>程序比規則先走</td><td>加 <code>preStop</code> 等待</td></tr>
+      <tr><td>Pod 刪除時 exit code 137,而且剛好等滿 grace</td><td>被 SIGKILL</td><td>app 有沒有接 SIGTERM;grace 夠不夠</td></tr>
+    </tbody>
+  </table></div>
+
+  <details>
+    <summary>之後再看:YAML 長什麼樣</summary>
+    <pre class="yaml">apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: payments
+spec:
+  minAvailable: 3        # or maxUnavailable, pick one
+  selector:
+    matchLabels:
+      app: payments
+---
+# Deployment pod template
+spec:
+  terminationGracePeriodSeconds: 30
+  containers:
+    - name: app
+      lifecycle:
+        preStop:
+          exec:
+            command: ["sleep", "15"]   # image must contain sleep</pre>
+    <p>image 裡沒有 <code>sleep</code> 時,新版 K8s 可以改寫 <code>preStop: {sleep: {seconds: 15}}</code>,lab 的 v1.36 可用。</p>
+  </details>
+</section>
+
+<!-- ===================== LAYER 3 ===================== -->
+<section class="layer" id="l3">
+  <div class="layer-head"><span class="badge">LAYER 3</span><h2>取捨</h2><span class="time">讀 3 分鐘</span></div>
+  <p class="lead">K8s 選擇刪 Pod 時不等任何 node 確認。叢集因此不會被一台 node 拖住,代價是 app 要自己補上時間差。</p>
+  <div class="panels two">
+    <div class="panel bad">
+      <svg viewBox="0 0 220 108" role="img" aria-label="被淘汰的設計:kubelet 等三台 node 都確認才殺程序,node-3 卡住,Pod 永遠刪不掉">
+        <rect x="6" y="34" width="84" height="40" class="f-card s-ink"/>
+        <text x="48" y="51" class="t-ink t-mono" font-size="11" text-anchor="middle">kubelet</text>
+        <text x="48" y="66" class="t-bad" font-size="10.5" text-anchor="middle">等全部確認</text>
+        <rect x="130" y="6" width="84" height="26" class="f-accsoft s-acc"/><text x="172" y="23" class="t-ink t-mono" font-size="10" text-anchor="middle">node-1 ok</text>
+        <rect x="130" y="41" width="84" height="26" class="f-accsoft s-acc"/><text x="172" y="58" class="t-ink t-mono" font-size="10" text-anchor="middle">node-2 ok</text>
+        <rect x="130" y="76" width="84" height="26" class="f-bad s-ink"/><text x="172" y="93" class="t-bad t-mono" font-size="10" text-anchor="middle">node-3 stuck</text>
+        <path d="M130,19 L90,44 M130,54 H90 M130,89 L90,64" class="s-ink" stroke-width="1.1" stroke-dasharray="4 3"/>
+      </svg>
+      <div class="t">被淘汰:等全部 node 確認</div><div class="r">一台 node 卡住,這顆 Pod 就刪不掉。node 越多越慢。</div>
+    </div>
+    <div class="panel good">
+      <svg viewBox="0 0 220 108" role="img" aria-label="實際設計:kubelet 和各 node 的 kube-proxy 各自 watch API Server,互不等待,app 用 preStop 補時間差">
+        <rect x="68" y="4" width="84" height="26" class="f-accsoft s-acc"/><text x="110" y="21" class="t-ink t-mono" font-size="10" text-anchor="middle">API Server</text>
+        <rect x="6" y="66" width="92" height="38" class="f-card s-ink"/>
+        <text x="52" y="82" class="t-ink t-mono" font-size="11" text-anchor="middle">kubelet</text>
+        <text x="52" y="97" class="t-acc" font-size="10.5" text-anchor="middle">app 用 preStop</text>
+        <rect x="122" y="66" width="92" height="38" class="f-card s-ink"/>
+        <text x="168" y="82" class="t-ink t-mono" font-size="10.5" text-anchor="middle">kube-proxy</text>
+        <text x="168" y="97" class="t-mut" font-size="10.5" text-anchor="middle">每台各自改</text>
+        <path d="M92,30 L60,66 M128,30 L160,66" class="s-acc" stroke-width="1.3"/>
+      </svg>
+      <div class="t">實際設計:各自 watch</div><div class="r">叢集不會被一台 node 拖住。時間差由 app 自己補。</div>
+    </div>
+  </div>
+  <h3>minAvailable 還是 maxUnavailable</h3>
+  <p>副本數會變動時,用 <code>maxUnavailable</code>。例子:HPA 把服務從 5 顆縮到 2 顆。</p>
+  <div class="tbl"><table>
+    <thead><tr><th>寫法</th><th>2 顆時的 ALLOWED</th><th>結果</th></tr></thead>
+    <tbody>
+      <tr><td><code>minAvailable: 2</code></td><td class="num">0</td><td>drain 卡住</td></tr>
+      <tr><td><code>maxUnavailable: 1</code></td><td class="num">1</td><td>drain 能過,一次少一顆</td></tr>
+    </tbody>
+  </table></div>
+  <h3>PDB 的兩種失敗</h3>
+  <div class="tbl"><table>
+    <thead><tr><th>設定</th><th>後果</th><th>誰會來找你</th></tr></thead>
+    <tbody>
+      <tr><td>設太緊</td><td>node 升級卡住,pipeline timeout</td><td>平台 / SRE</td></tr>
+      <tr><td>沒設</td><td>併機一次趕走多顆副本,可用性掉下來</td><td>服務 owner</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- ===================== LAYER 4 ===================== -->
+<section class="layer" id="l4">
+  <div class="layer-head"><span class="badge">LAYER 4</span><h2>AWS 怎麼做</h2><span class="time">讀 4 分鐘</span></div>
+  <p class="lead">Layer 1 的時間差在 ALB 上一樣存在。IP mode 的流量直接到 Pod IP,不經過 kube-proxy,所以 preStop 要等的是 ALB 不再送新請求。</p>
+  <div class="card fig">
+    <svg viewBox="0 0 420 176" width="420" role="img" aria-label="Client 經 ALB 和 target group 直接連到 Pod IP。AWS Load Balancer Controller watch API Server 後才向 target group 註銷 Pod,這段是非同步的">
+      <defs><marker id="a4" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="f-acc"/></marker></defs>
+      <rect x="6" y="14" width="66" height="44" class="f-card s-ink"/><text x="39" y="41" class="t-ink" font-size="12.5" text-anchor="middle">Client</text>
+      <path d="M72,36 H100" class="s-acc" stroke-width="1.6" marker-end="url(#a4)"/>
+      <rect x="102" y="14" width="78" height="44" class="f-accsoft s-acc"/><text x="141" y="41" class="t-ink t-mono" font-size="12.5" text-anchor="middle">ALB</text>
+      <path d="M180,36 H228" class="s-acc" stroke-width="1.6" marker-end="url(#a4)"/>
+      <rect x="230" y="8" width="184" height="56" class="f-card s-ink"/>
+      <text x="322" y="30" class="t-ink t-mono" font-size="12" text-anchor="middle">target group</text>
+      <text x="322" y="50" class="t-mut" font-size="11" text-anchor="middle">直接列 Pod IP(IP mode)</text>
+      <path d="M322,64 V108" class="s-acc" stroke-width="1.6" marker-end="url(#a4)"/>
+      <text x="330" y="92" class="t-mut" font-size="11">新請求</text>
+      <rect x="256" y="110" width="158" height="56" class="f-bad s-ink"/>
+      <text x="335" y="132" class="t-ink" font-size="12.5" font-weight="700" text-anchor="middle">Pod terminating</text>
+      <text x="335" y="152" class="t-ink" font-size="11" text-anchor="middle">preStop 期間還要能服務</text>
+      <rect x="6" y="110" width="96" height="56" class="f-card s-ink"/><text x="54" y="143" class="t-ink t-mono" font-size="11" text-anchor="middle">API Server</text>
+      <path d="M102,138 H128" class="s-acc" stroke-width="1.6" marker-end="url(#a4)"/>
+      <rect x="130" y="110" width="110" height="56" class="f-card s-ink"/>
+      <text x="185" y="133" class="t-ink t-mono" font-size="10.5" text-anchor="middle">AWS Load</text>
+      <text x="185" y="149" class="t-ink t-mono" font-size="10.5" text-anchor="middle">Balancer Controller</text>
+      <path d="M200,110 L262,66" class="s-ink" stroke-width="1.4" stroke-dasharray="5 4" marker-end="url(#a4)"/>
+      <text x="196" y="88" class="t-bad" font-size="11" text-anchor="end">註銷 target,非同步</text>
+    </svg>
+    <p class="caption">虛線這段要時間。它還沒完成時,ALB 還會把新請求送到 Pod。</p>
+  </div>
+  <div class="tbl"><table>
+    <thead><tr><th>服務 / 設定</th><th>做什麼</th><th>常見陷阱</th></tr></thead>
+    <tbody>
+      <tr><td>EKS managed node group 升級</td><td>先 drain 舊 node,會遵守 PDB</td><td>Pod 15 分鐘內趕不走就 <code>PodEvictionFailure</code>;開 force 會無視 PDB 繼續</td></tr>
+      <tr><td>ALB <code>deregistration_delay.timeout_seconds</code></td><td>target 註銷後,讓處理中的請求做完</td><td>預設 300 秒。要和 app 排空時間、grace 對齊,不要各設各的</td></tr>
+      <tr><td>AWS Load Balancer Controller</td><td>把 Pod IP 同步到 target group</td><td>preStop 太短,Pod 比 ALB 先走,客戶看到 502</td></tr>
+      <tr><td>Karpenter</td><td>併機、替換 node,會遵守 PDB</td><td>NodePool 的 <code>terminationGracePeriod</code> 到期後會無視 PDB 強制清空</td></tr>
+      <tr><td>Spot 中斷</td><td>收回前有 2 分鐘通知</td><td>時間到 instance 就沒了,PDB 擋不住。grace 不要超過這個時間</td></tr>
+    </tbody>
+  </table></div>
+  <p>這三件都不收費。代價是升級變慢:每顆 Pod 多等 preStop 的秒數,這也是 Dev 和 SRE 會討論的地方。Dev 想要換版快,SRE 想要 5xx 少。</p>
+</section>
+
+<!-- ===================== LAYER 5 ===================== -->
+<section class="layer" id="l5">
+  <div class="layer-head"><span class="badge">LAYER 5</span><h2>規模化</h2><span class="time">讀 2 分鐘</span></div>
+  <p class="lead">規模變大時,換掉的是「靠每個人記得設定」。設定改由平台提供,升級改由自動化控制速度。</p>
+  <div class="card fig">
+    <svg viewBox="0 0 424 190" width="424" role="img" aria-label="三級階梯:小團隊用 2 副本加 PDB 加固定 preStop;成長期由平台範本內建並用 CI 擋住錯誤設定;大廠分批自動升級,跟 error budget 連動,由 proxy 負責排空">
+      <rect x="6" y="122" width="132" height="62" class="f-card s-ink"/>
+      <text x="72" y="141" class="t-acc" font-size="13" font-weight="700" text-anchor="middle">小團隊</text>
+      <text x="72" y="158" class="t-ink" font-size="11" text-anchor="middle">2 副本 + PDB</text>
+      <text x="72" y="174" class="t-ink" font-size="11" text-anchor="middle">preStop 固定秒數</text>
+      <rect x="146" y="64" width="132" height="120" class="f-card s-ink"/>
+      <text x="212" y="84" class="t-acc" font-size="13" font-weight="700" text-anchor="middle">成長期</text>
+      <text x="212" y="102" class="t-ink" font-size="11" text-anchor="middle">平台範本內建</text>
+      <text x="212" y="119" class="t-ink" font-size="11" text-anchor="middle">CI 擋 ALLOWED 永遠 0</text>
+      <text x="212" y="136" class="t-ink" font-size="11" text-anchor="middle">ALLOWED 長期 0 告警</text>
+      <rect x="286" y="8" width="132" height="176" class="f-card s-ink"/>
+      <text x="352" y="28" class="t-acc" font-size="13" font-weight="700" text-anchor="middle">大廠</text>
+      <text x="352" y="46" class="t-ink" font-size="11" text-anchor="middle">升級分批自動化</text>
+      <text x="352" y="63" class="t-ink" font-size="11" text-anchor="middle">跟 error budget 連動</text>
+      <text x="352" y="80" class="t-ink" font-size="11" text-anchor="middle">proxy 負責排空</text>
+    </svg>
+  </div>
+  <div class="tbl"><table>
+    <thead><tr><th>路線</th><th>怎麼做</th><th>優點</th><th>代價</th></tr></thead>
+    <tbody>
+      <tr><td>固定 preStop sleep</td><td>每個服務等固定秒數</td><td>簡單,不用改 app</td><td>秒數靠估,每次換版都要等滿</td></tr>
+      <tr><td>Proxy 排空</td><td>service mesh 或 sidecar 負責拒新、做完舊的</td><td>統一處理,細節不進 app</td><td>多一層元件要維運</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- ===================== LAYER 6 ===================== -->
+<section class="layer" id="l6">
+  <div class="layer-head"><span class="badge">LAYER 6</span><h2>故障與 on-call</h2><span class="time">讀 3 分鐘</span></div>
+  <p class="lead">先看症狀屬於哪一段:開始砍之前(PDB),還是開始砍之後(時間差、grace)。</p>
+  <div class="card fig">
+    <svg viewBox="0 0 420 166" width="420" role="img" aria-label="三個症狀對應三個第一步:drain 卡住查 PDB;換版零星 502 查 preStop;exit 137 且等滿 grace 查 describe pod">
+      <defs><marker id="a6" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="f-acc"/></marker></defs>
+      <rect x="6" y="8" width="176" height="44" class="f-bad s-ink"/><text x="94" y="35" class="t-ink" font-size="12.5" text-anchor="middle">drain 卡住</text>
+      <path d="M182,30 H220" class="s-acc" stroke-width="1.6" marker-end="url(#a6)"/>
+      <rect x="222" y="8" width="192" height="44" class="f-card s-ink"/><text x="318" y="35" class="t-ink t-mono" font-size="11.5" text-anchor="middle">kubectl get pdb -A</text>
+      <rect x="6" y="60" width="176" height="44" class="f-bad s-ink"/><text x="94" y="87" class="t-ink" font-size="12.5" text-anchor="middle">換版時零星 502</text>
+      <path d="M182,82 H220" class="s-acc" stroke-width="1.6" marker-end="url(#a6)"/>
+      <rect x="222" y="60" width="192" height="44" class="f-card s-ink"/><text x="318" y="87" class="t-ink" font-size="12" text-anchor="middle">Pod 有沒有設 preStop</text>
+      <rect x="6" y="112" width="176" height="44" class="f-bad s-ink"/><text x="94" y="139" class="t-ink" font-size="12.5" text-anchor="middle">exit 137,等滿 grace</text>
+      <path d="M182,134 H220" class="s-acc" stroke-width="1.6" marker-end="url(#a6)"/>
+      <rect x="222" y="112" width="192" height="44" class="f-card s-ink"/><text x="318" y="139" class="t-ink t-mono" font-size="11.5" text-anchor="middle">kubectl describe pod</text>
+    </svg>
+  </div>
+  <div class="tbl"><table>
+    <thead><tr><th>症狀</th><th>證據</th><th>止血</th><th>不要做</th></tr></thead>
+    <tbody>
+      <tr><td>drain 卡住</td><td><code>ALLOWED DISRUPTIONS</code> 是 0</td><td>先 scale up,等 Ready</td><td>刪 PDB、手動 delete 單副本</td></tr>
+      <tr><td>換版零星 502</td><td>ALB <code>HTTPCode_ELB_502_Count</code>、<code>TargetConnectionErrorCount</code> 在換版時升高</td><td>加 preStop 再換版</td><td>只看 app log,這些請求可能沒進到 app</td></tr>
+      <tr><td>exit 137,等滿 grace</td><td><code>Last State</code> 的 <code>Reason</code>。<code>OOMKilled</code> 是另一回事</td><td>加大 grace,確認 app 有接 SIGTERM</td><td>只加 grace,不查 PID 1</td></tr>
+      <tr><td>drain 後 Pod 全擠一台</td><td><code>kubectl get pods -o wide</code></td><td><code>kubectl rollout restart</code> + topology spread</td><td>以為 uncordon 會自己平衡</td></tr>
+    </tbody>
+  </table></div>
+  <p><strong>告警:</strong><code>kube_poddisruptionbudget_status_pod_disruptions_allowed == 0</code> 持續太久,代表下次 drain 會卡。<strong>SLO:</strong>升級期間的 5xx 也算進可用性,不另開例外,這樣才會有動力把這組設定做好。</p>
+</section>
+
+<!-- ===================== LAYER 7 ===================== -->
+<section class="layer" id="l7">
+  <div class="layer-head"><span class="badge">LAYER 7</span><h2>面試</h2><span class="time">讀 3 分鐘</span></div>
+  <p class="lead">題目:A Pod receives SIGTERM during a rolling update, but some clients still get connection errors. Walk me through the race and how you fix it.</p>
+  <ol class="timeline">
+    <li><span class="when">新 Pod</span><div class="what">readiness 過了才進 EndpointSlice,開始接流量</div></li>
+    <li><span class="when">t = 0</span><div class="what">舊 Pod 進入 terminating,兩條路徑同時開始</div></li>
+    <li class="blind"><span class="when">風險</span><div class="what">程序先退出,某台 node 或 ALB 還沒拆規則,新連線失敗</div></li>
+    <li><span class="when">preStop</span><div class="what">程序撐過這段,規則先拆完</div></li>
+    <li><span class="when">SIGTERM</span><div class="what">app 拒新連線,把處理中的請求做完,在 grace 內退出</div></li>
+  </ol>
+  <details>
+    <summary>L4 和 L6 的回答差在哪(先自己想)</summary>
+    <div class="tbl"><table>
+      <thead><tr><th></th><th>L4</th><th>L6</th></tr></thead>
+      <tbody>
+        <tr><td>原因</td><td>Pod 還沒準備好就被砍</td><td>刪除沒有分散式 transaction,kubelet 和 kube-proxy 各自 watch</td></tr>
+        <tr><td>修法</td><td>加 preStop sleep</td><td>preStop 擋新請求,SIGTERM 排空處理舊請求,<code>preStop + 排空 &lt; grace</code></td></tr>
+        <tr><td>數字</td><td>沒有</td><td>sleep 依 ALB 註銷時間決定,再和 deregistration delay 對齊</td></tr>
+        <tr><td>驗證</td><td>沒有</td><td>換版時持續打流量,比較有無 preStop 的錯誤數,看 ALB 5xx metric</td></tr>
+        <tr><td>界線</td><td>有 PDB 就安全</td><td>PDB 只限制同時少幾顆,而且 rolling update 不問它</td></tr>
+      </tbody>
+    </table></div>
+  </details>
+</section>
+
+<!-- ===================== 釐清 ===================== -->
+<section class="layer" id="fixes">
+  <div class="layer-head"><span class="badge">s57</span><h2>這次的釐清</h2><span class="time">讀 2 分鐘</span></div>
+  <div class="wrong"><strong>我錯在這:</strong>時間差是 drain 造成的,直接 delete pod 就不會有。<br>其實:所有 Pod 終止都有。Lab 裡 delete pod 在 08:50:46 到 54 出現 5 個 <code>000</code>、8 個 <code>200</code>。</div>
+  <div class="wrong"><strong>我錯在這:</strong><code>minAvailable: 2</code> 所以 <code>ALLOWED</code> 是 2。<br>其實:<code>ALLOWED</code> = 健康 2 − 最少 2 = 0。實測是 0。</div>
+  <div class="wrong"><strong>我錯在這:</strong>1 副本卡住時,用手動 delete 或 <code>--force</code> 解。<br>其實:delete 會讓流量歸零,<code>--force</code> 不繞過 PDB(lab 加了還是卡)。要先 scale up。</div>
+  <div class="wrong"><strong>我錯在這:</strong>加 preStop 後,請求會轉移到正常的 Pod。<br>其實:舊 Pod 在 Terminating 期間 15 秒還收到 23 次請求。成功是因為它還活著。</div>
+  <div class="wrong"><strong>還不會:</strong>grace 包含 preStop。<code>sleep 300</code> 配 grace 30,第 30 秒左右就被 SIGKILL。</div>
+  <div class="card fig">
+    <svg viewBox="0 0 420 92" width="420" role="img" aria-label="Lab 結果對照:沒有 preStop 時 13 個請求有 5 個失敗;有 preStop 時 97 個請求沒有失敗">
+      <text x="6" y="26" class="t-ink" font-size="12">沒有 preStop</text>
+      <rect x="110" y="12" width="185" height="20" class="f-accsoft s-acc"/><rect x="295" y="12" width="115" height="20" class="f-bad s-ink"/>
+      <text x="202" y="27" class="t-ink t-mono" font-size="11" text-anchor="middle">200 × 8</text><text x="352" y="27" class="t-bad t-mono" font-size="11" text-anchor="middle">000 × 5</text>
+      <text x="6" y="70" class="t-ink" font-size="12">有 preStop</text>
+      <rect x="110" y="56" width="300" height="20" class="f-accsoft s-acc"/>
+      <text x="260" y="71" class="t-ink t-mono" font-size="11" text-anchor="middle">200 × 97,000 × 0</text>
+    </svg>
+    <p class="caption">比例對照,兩次的觀察時間不同:上面是砍 Pod 後約 9 秒,下面是 30 秒。kube-proxy 都被凍結約 15 秒以內。</p>
+  </div>
+</section>
+
+<footer class="next">
+  <strong>下一步(2 分鐘):</strong>不看頁面,寫下 <code>preStop + 排空 &lt; grace</code> 這個式子,再回答:<code>sleep 300</code> 配 grace 30 會怎樣?下一堂會冷測。
+</footer>
+
+</div>

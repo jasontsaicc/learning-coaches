@@ -32,6 +32,8 @@
 | maxSkew | /mæks skjuː/ | The largest allowed difference in replica count between the fullest and emptiest topology domain. | 最多跟最少的 domain 差幾顆;topologySpread 的旋鈕 | 2026-10-20 | 2026-10-23 |
 | bin packing | /bɪn ˈpæk.ɪŋ/ | Fitting items of different sizes into the fewest or cheapest containers. | 把不同 requests 的 Pod 塞進便宜的機器組合,Karpenter 的核心計算 | 2026-11-03 | 2026-11-06 |
 | consolidation | /kənˌsɒl.ɪˈdeɪ.ʃən/ | Moving Pods onto fewer nodes and removing the extra nodes to reduce cost. | Karpenter 主動併機省錢;沒有 PDB 時就是計畫性中斷的來源 | 2026-11-03 | 2026-11-06 |
+| eviction | /ɪˈvɪk.ʃən/ | Removing a Pod through the API, which checks the PodDisruptionBudget first. | 走 Eviction API 才問 PDB;kubelet 資源壓力趕人同名但不問 | 2026-11-04 | 2026-11-07 |
+| connection draining | /kəˈnek.ʃən ˈdreɪn.ɪŋ/ | Finishing in-flight requests while refusing new ones before shutdown. | 拒新、做完舊的、再退出;preStop + SIGTERM 的通用名字 | 2026-11-04 | 2026-11-07 |
 <!-- 2026-06-22 移除 kubeconfig / context / kind 三張卡:定義型瑣碼詞/工具名,面試不考,違反價值門檻(見 SKILL.md 術語卡)。current-context 改記為 ops 安全習慣,不當單字卡。 -->
 <!-- ops 安全習慣(非術語卡): `kubectl config current-context` = 動手前先確認指到哪個叢集,避免誤打 prod EKS。 -->
 
