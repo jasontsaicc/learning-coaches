@@ -1,0 +1,619 @@
+<title>前序中序蓋回樹</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC:wght@400;700&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: one notebook column on graph paper. Root is always yellow, left subtree cyan, right subtree pink. */
+:root{
+  --paper:#F6F8FA; --grid:rgba(90,130,170,.16); --ink:#23313E; --soft:#55677A;
+  --card:#FFFFFF; --line:#C9D4DE;
+  --accent:#2B8A3E; --accent-ink:#FFFFFF; --accent-soft:#DFF3E3; --tape:rgba(43,138,62,.32);
+  --root:#FFE98A; --left:#BDEEF6; --right:#F9CDE0; --none:#7C8B99;
+  --wrong:#C92A2A; --wrong-soft:#FDECEC;
+  --code-bg:#1F2A33; --code-fg:#E6EDF3; --code-dim:#9FB0BF; --code-kw:#FFD479; --code-fn:#8FE3A2; --code-hl:rgba(143,227,162,.16);
+  --body-font:"LXGW WenKai TC","Noto Sans TC","Microsoft JhengHei",sans-serif;
+  --mono-font:"IBM Plex Mono","Noto Sans TC",monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#1A2320; --grid:rgba(180,220,200,.08); --ink:#E6EFEA; --soft:#A3B5AC;
+    --card:#222E2A; --line:#3A4A44;
+    --accent:#69DB7C; --accent-ink:#10251A; --accent-soft:#1F3A2A; --tape:rgba(105,219,124,.28);
+    --root:#6A5C16; --left:#15525E; --right:#652C49; --none:#8FA098;
+    --wrong:#FF8787; --wrong-soft:#3A2424;
+    --code-bg:#121A17; --code-fg:#DCE7E1; --code-dim:#8FA098; --code-kw:#FFD479; --code-fn:#8FE3A2; --code-hl:rgba(143,227,162,.14);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#1A2320; --grid:rgba(180,220,200,.08); --ink:#E6EFEA; --soft:#A3B5AC;
+  --card:#222E2A; --line:#3A4A44;
+  --accent:#69DB7C; --accent-ink:#10251A; --accent-soft:#1F3A2A; --tape:rgba(105,219,124,.28);
+  --root:#6A5C16; --left:#15525E; --right:#652C49; --none:#8FA098;
+  --wrong:#FF8787; --wrong-soft:#3A2424;
+  --code-bg:#121A17; --code-fg:#DCE7E1; --code-dim:#8FA098; --code-kw:#FFD479; --code-fn:#8FE3A2; --code-hl:rgba(143,227,162,.14);
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{
+  background-color:var(--paper); color:var(--ink);
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+  background-size:22px 22px;
+  font-family:var(--body-font); font-size:17px; line-height:1.8;
+  padding-left:max(16px,env(safe-area-inset-left,0px));
+  padding-right:max(16px,env(safe-area-inset-right,0px));
+  padding-block:1.5rem 4rem;
+}
+.wrap{max-width:46rem; margin:0 auto; display:grid; gap:2.5rem; min-width:0}
+.wrap > *{min-width:0}
+
+header{background:var(--accent); color:var(--accent-ink); padding:1.4rem 1.5rem 1.3rem}
+.kicker{font-family:var(--mono-font); font-size:.74rem; letter-spacing:.06em}
+h1{font-size:clamp(2rem,7vw,2.8rem); line-height:1.2; margin:.35rem 0 .3rem; font-weight:700; text-wrap:balance}
+.sub{margin:0; font-size:.95rem; overflow-wrap:anywhere}
+
+.orient{display:grid; gap:.6rem; margin-top:1rem}
+.progress{list-style:none; margin:0; padding:0; display:flex; flex-wrap:wrap; gap:.35rem .4rem}
+.progress a{
+  display:block; font-family:var(--mono-font); font-size:.76rem; font-weight:600;
+  color:var(--accent); background:var(--card); border:1px solid var(--accent);
+  padding:.1rem .5rem; text-decoration:none;
+}
+.progress a:focus-visible,summary:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+.orient p{margin:0}
+
+h2{font-size:1.45rem; line-height:1.35; margin:0; font-weight:700; text-wrap:balance}
+.layer-head{display:flex; flex-wrap:wrap; gap:.3rem .7rem; align-items:baseline; margin-bottom:.6rem}
+.badge{font-family:var(--mono-font); font-size:.72rem; font-weight:600; background:var(--accent); color:var(--accent-ink); padding:.1rem .45rem}
+.time{font-family:var(--mono-font); font-size:.72rem; color:var(--soft)}
+h3{font-size:1.1rem; margin:1.6rem 0 .3rem; font-weight:700}
+h4{font-size:1rem; margin:1.1rem 0 .3rem; font-weight:700}
+p{margin:.6rem 0}
+.lead{font-size:1.15rem; font-weight:700; margin:.2rem 0 .8rem}
+code{font-family:var(--mono-font); font-size:.86em; background:var(--accent-soft); padding:.05em .3em; overflow-wrap:anywhere}
+mark{color:inherit; padding:0 .1em}
+mark.root{background:linear-gradient(transparent 50%,var(--root) 50%)}
+mark.left{background:linear-gradient(transparent 50%,var(--left) 50%)}
+mark.right{background:linear-gradient(transparent 50%,var(--right) 50%)}
+
+.card{position:relative; background:var(--card); border:1px solid var(--line); padding:1.25rem 1.1rem 1rem; margin:1.3rem 0}
+.card::before{
+  content:""; position:absolute; top:-9px; left:50%; width:84px; height:18px; margin-left:-42px;
+  background:var(--tape); transform:rotate(-1.5deg);
+}
+.card > :first-child{margin-top:0}
+.card > :last-child{margin-bottom:0}
+.step-no{font-family:var(--mono-font); font-size:.74rem; font-weight:600; color:var(--accent)}
+.card h3{margin:0 0 .4rem}
+
+.scroll{overflow-x:auto; max-width:100%}
+.arrname{font-family:var(--mono-font); font-size:.82rem; color:var(--soft); margin:.7rem 0 .2rem}
+.strip{display:inline-grid; grid-template-columns:repeat(var(--n),minmax(2.7rem,auto)); font-family:var(--mono-font)}
+.c{border:1px solid var(--line); margin-left:-1px; padding:.25rem .35rem; text-align:center; font-weight:600; background:var(--card); font-size:.95rem}
+.c.root,.g.root{background:var(--root)}
+.c.left,.g.left{background:var(--left)}
+.c.right,.g.right{background:var(--right)}
+.g{margin:.2rem 0 0 -1px; padding:0 .35rem; text-align:center; font-size:.7rem}
+.i{text-align:center; font-size:.7rem; color:var(--soft); padding-bottom:.1rem}
+
+.tablewrap{overflow-x:auto; max-width:100%; margin:.9rem 0; border:1px solid var(--line); background:var(--card)}
+table{border-collapse:collapse; width:100%; font-size:.9rem; font-variant-numeric:tabular-nums}
+th,td{text-align:left; padding:.45rem .7rem; border-bottom:1px solid var(--line); vertical-align:top}
+th{font-weight:700; white-space:nowrap}
+tr:last-child td{border-bottom:none}
+td.m,th.m{font-family:var(--mono-font); font-size:.84rem; white-space:nowrap}
+td.none{color:var(--none)}
+
+.tree{display:block; width:100%; height:auto; margin:.4rem auto}
+.tree line{stroke:var(--soft); stroke-width:2}
+.tree line.nil{stroke:var(--none); stroke-dasharray:4 4; stroke-width:1.5}
+.tree rect{stroke:var(--soft); stroke-width:1.5; fill:var(--card)}
+.tree rect.root{fill:var(--root)}
+.tree rect.left{fill:var(--left)}
+.tree rect.right{fill:var(--right)}
+.tree rect.todo{stroke-dasharray:5 3}
+.tree rect.nil{fill:none; stroke:var(--none); stroke-dasharray:3 3}
+.tree text{fill:var(--ink); font-family:var(--mono-font); font-size:15px; font-weight:600; text-anchor:middle; dominant-baseline:central}
+.tree text.nil{fill:var(--none); font-size:11px; font-weight:400}
+.grid3{display:grid; grid-template-columns:repeat(auto-fit,minmax(10.5rem,1fr)); gap:.8rem; margin:1rem 0}
+.grid3 > div{min-width:0; background:var(--card); border:1px solid var(--line); padding:.6rem .7rem}
+.grid3 .cap{font-family:var(--mono-font); font-size:.78rem; margin:0 0 .2rem; overflow-wrap:anywhere}
+
+.signals{list-style:none; padding:0; margin:.7rem 0; display:grid; gap:.4rem}
+.signals li{background:var(--card); border:1px solid var(--line); padding:.45rem .8rem}
+
+.film{display:grid; gap:.8rem; margin:1rem 0}
+.shot{background:var(--card); border:1px solid var(--line); padding:.75rem .85rem; min-width:0}
+.shot .cap{margin:0 0 .5rem; font-size:.95rem}
+.shot .no{font-family:var(--mono-font); font-size:.7rem; font-weight:600; color:var(--accent); display:block}
+.stack{display:grid; gap:3px; font-family:var(--mono-font); font-size:.78rem; line-height:1.5}
+.fr{border:1px solid var(--line); padding:.3rem .5rem; color:var(--soft); overflow-wrap:anywhere}
+.fr.run{background:var(--accent-soft); border-color:var(--accent); color:var(--ink); font-weight:600}
+.fr.gone{border-style:dashed; text-decoration:line-through; opacity:.6}
+.bottom{font-family:var(--mono-font); font-size:.68rem; color:var(--soft); border-top:2px solid var(--line); margin-top:2px}
+
+pre{
+  background:var(--code-bg); color:var(--code-fg); padding:.9rem 1rem; overflow-x:auto; max-width:100%;
+  font-family:var(--mono-font); font-size:.84rem; line-height:1.7; margin:.8rem 0;
+}
+pre .cm{color:var(--code-dim)}
+pre .kw{color:var(--code-kw)}
+pre .fn{color:var(--code-fn)}
+pre .hl{background:var(--code-hl); display:block}
+
+details{background:var(--card); border:1px solid var(--line); margin:.9rem 0}
+summary{cursor:pointer; padding:.7rem .95rem; font-weight:700}
+summary .hint{font-weight:400; font-size:.82rem; color:var(--soft); margin-left:.4rem}
+.dbody{padding:.2rem .95rem 1rem; border-top:1px solid var(--line); min-width:0}
+
+.wrongline{border-left:4px solid var(--wrong); background:var(--wrong-soft); padding:.5rem .8rem; margin:.6rem 0}
+.wrongline .tag{display:block; font-size:.76rem; font-weight:700; color:var(--wrong)}
+.mantra{font-size:1.15rem; font-weight:700; background:var(--accent-soft); padding:.7rem 1rem; margin:.8rem 0}
+.move{border:1px solid var(--line); padding:.65rem .8rem; margin:.7rem 0; min-width:0}
+.move h4{margin:0 0 .35rem}
+.mv{font-family:var(--mono-font); font-size:.7rem; font-weight:600; color:var(--accent); margin-right:.4rem}
+.say,.think{margin:.35rem 0}
+.say b,.think b{font-family:var(--mono-font); font-size:.72rem; color:var(--accent); margin-right:.4rem}
+.think{color:var(--soft); font-size:.92rem}
+.next{border:2px solid var(--accent); background:var(--card); padding:1rem 1.1rem}
+.next h2{font-size:1.2rem}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+
+<div class="wrap">
+
+<div>
+  <header>
+    <div class="kicker">LeetCode #105 · Medium · Tree · 2026-11-04</div>
+    <h1>前序中序蓋回樹</h1>
+    <p class="sub">Construct Binary Tree from Preorder and Inorder Traversal</p>
+  </header>
+  <div class="orient">
+    <ol class="progress">
+      <li><a href="#l0">Layer 0 ✓</a></li><li><a href="#l1">1 ✓</a></li><li><a href="#l2">2 ✓</a></li><li><a href="#l3">3 ✓</a></li><li><a href="#l4">4 ✓</a></li><li><a href="#l5">5 ✓</a></li><li><a href="#l6">6 ✓</a></li><li><a href="#l7">7 ✓</a></li><li><a href="#clear">釐清</a></li>
+    </ol>
+    <p><strong>讀完這頁你能:</strong>拿到前序和中序兩個 list,用手把樹畫回來。</p>
+    <p>速刷只要讀 Layer 0 到 2,大約 8 分鐘。整頁都用同一棵樹。</p>
+  </div>
+</div>
+
+<section id="l0">
+  <div class="layer-head"><span class="badge">LAYER 0</span><h2>這題在幹嘛</h2><span class="time">讀 1 分鐘</span></div>
+  <p class="lead">給你同一棵樹的前序和中序,把樹蓋回來,交回 root。</p>
+  <div class="scroll">
+    <div class="arrname">preorder(我、左、右)</div>
+    <div class="strip" style="--n:5"><span class="c root">3</span><span class="c left">9</span><span class="c right">20</span><span class="c right">15</span><span class="c right">7</span></div>
+    <div class="arrname">inorder(左、我、右)</div>
+    <div class="strip" style="--n:5"><span class="c left">9</span><span class="c root">3</span><span class="c right">15</span><span class="c right">20</span><span class="c right">7</span></div>
+  </div>
+  <div class="card">
+    <svg class="tree" viewBox="0 0 500 262" role="img" aria-label="蓋回來的樹:root 是 3,左小孩 9,右小孩 20。20 的左小孩 15,右小孩 7。9、15、7 的小孩都是 None。">
+      <line x1="250" y1="50" x2="120" y2="88"/><line x1="250" y1="50" x2="380" y2="88"/>
+      <line class="nil" x1="120" y1="120" x2="70" y2="162"/><line class="nil" x1="120" y1="120" x2="170" y2="162"/>
+      <line x1="380" y1="120" x2="295" y2="158"/><line x1="380" y1="120" x2="440" y2="158"/>
+      <line class="nil" x1="295" y1="190" x2="255" y2="232"/><line class="nil" x1="295" y1="190" x2="335" y2="232"/>
+      <line class="nil" x1="440" y1="190" x2="405" y2="232"/><line class="nil" x1="440" y1="190" x2="470" y2="232"/>
+      <rect class="root" x="226" y="18" width="48" height="32"/><text x="250" y="34">3</text>
+      <rect class="left" x="96" y="88" width="48" height="32"/><text x="120" y="104">9</text>
+      <rect class="right" x="356" y="88" width="48" height="32"/><text x="380" y="104">20</text>
+      <rect class="right" x="271" y="158" width="48" height="32"/><text x="295" y="174">15</text>
+      <rect class="right" x="416" y="158" width="48" height="32"/><text x="440" y="174">7</text>
+      <rect class="nil" x="50" y="162" width="40" height="24"/><text class="nil" x="70" y="174">None</text>
+      <rect class="nil" x="150" y="162" width="40" height="24"/><text class="nil" x="170" y="174">None</text>
+      <rect class="nil" x="235" y="232" width="40" height="24"/><text class="nil" x="255" y="244">None</text>
+      <rect class="nil" x="315" y="232" width="40" height="24"/><text class="nil" x="335" y="244">None</text>
+      <rect class="nil" x="385" y="232" width="40" height="24"/><text class="nil" x="405" y="244">None</text>
+      <rect class="nil" x="450" y="232" width="40" height="24"/><text class="nil" x="470" y="244">None</text>
+    </svg>
+  </div>
+</section>
+
+<section id="l1">
+  <div class="layer-head"><span class="badge">LAYER 1</span><h2>這是什麼型</h2><span class="time">讀 2 分鐘</span></div>
+  <p class="lead">遞迴切兩半:找到 root,把兩個 list 切成左右,每一邊做同一件事。</p>
+  <ul class="signals">
+    <li>題目給兩種走訪的 list,要你交回 root。</li>
+    <li>值都不重複,所以 root 在中序只會出現一次。</li>
+    <li>這題等於:<strong>前序</strong>(root 在最前面)+ <strong>中序</strong>(root 把左右分開)+ <strong>遞迴</strong>。</li>
+  </ul>
+
+  <h3>為什麼要給兩個 list</h3>
+  <p>只有一個 list 蓋不出唯一的樹。下面三棵樹的前序都是 <code>[1, 2, 3]</code>,中序才分得出來。</p>
+  <div class="grid3">
+    <div>
+      <p class="cap">inorder = [2, 1, 3]</p>
+      <svg class="tree" viewBox="0 0 200 170" role="img" aria-label="1 的左小孩 2,右小孩 3。">
+        <line x1="100" y1="39" x2="50" y2="79"/><line x1="100" y1="39" x2="150" y2="79"/>
+        <rect x="80" y="9" width="40" height="30"/><text x="100" y="24">1</text>
+        <rect x="30" y="79" width="40" height="30"/><text x="50" y="94">2</text>
+        <rect x="130" y="79" width="40" height="30"/><text x="150" y="94">3</text>
+      </svg>
+    </div>
+    <div>
+      <p class="cap">inorder = [1, 2, 3]</p>
+      <svg class="tree" viewBox="0 0 200 170" role="img" aria-label="全部往右:1 的右小孩 2,2 的右小孩 3。">
+        <line x1="50" y1="39" x2="100" y2="69"/><line x1="100" y1="99" x2="150" y2="129"/>
+        <rect x="30" y="9" width="40" height="30"/><text x="50" y="24">1</text>
+        <rect x="80" y="69" width="40" height="30"/><text x="100" y="84">2</text>
+        <rect x="130" y="129" width="40" height="30"/><text x="150" y="144">3</text>
+      </svg>
+    </div>
+    <div>
+      <p class="cap">inorder = [3, 2, 1]</p>
+      <svg class="tree" viewBox="0 0 200 170" role="img" aria-label="全部往左:1 的左小孩 2,2 的左小孩 3。">
+        <line x1="150" y1="39" x2="100" y2="69"/><line x1="100" y1="99" x2="50" y2="129"/>
+        <rect x="130" y="9" width="40" height="30"/><text x="150" y="24">1</text>
+        <rect x="80" y="69" width="40" height="30"/><text x="100" y="84">2</text>
+        <rect x="30" y="129" width="40" height="30"/><text x="50" y="144">3</text>
+      </svg>
+    </div>
+  </div>
+  <div class="tablewrap"><table>
+    <tr><th>list</th><th>它告訴你</th></tr>
+    <tr><td class="m">preorder</td><td>誰是 root:第一個</td></tr>
+    <tr><td class="m">inorder</td><td>誰在哪一邊:root 左邊的數是左子樹,右邊的數是右子樹</td></tr>
+  </table></div>
+
+  <h3>暴力法:每種形狀都試</h3>
+  <p>列出所有形狀的樹,一棵一棵走訪,比對兩個 list。3 個 node 有 5 種形狀,10 個 node 有 16796 種。兩個 list 已經寫明 root 和左右,這個做法完全沒用到。</p>
+</section>
+
+<section id="l2">
+  <div class="layer-head"><span class="badge">LAYER 2</span><h2>做法:手動切一遍</h2><span class="time">讀 5 分鐘</span></div>
+  <p class="lead">前序找 root,中序數左邊有幾個,用這個數字切前序。</p>
+
+  <div class="card">
+    <span class="step-no">第 1 步</span>
+    <h3>前序第一個是 root</h3>
+    <div class="scroll">
+      <div class="arrname">preorder</div>
+      <div class="strip" style="--n:5"><span class="c root">3</span><span class="c">9</span><span class="c">20</span><span class="c">15</span><span class="c">7</span><span class="g root">root</span></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <span class="step-no">第 2 步</span>
+    <h3>在中序找到 root,切成兩邊</h3>
+    <p><code>mid = inorder.index(3) = 1</code></p>
+    <div class="scroll">
+      <div class="arrname">inorder</div>
+      <div class="strip" style="--n:5">
+        <span class="i">[0]</span><span class="i">[1]</span><span class="i">[2]</span><span class="i">[3]</span><span class="i">[4]</span>
+        <span class="c left">9</span><span class="c root">3</span><span class="c right">15</span><span class="c right">20</span><span class="c right">7</span>
+        <span class="g left">left</span><span class="g root">root</span><span class="g right" style="grid-column:span 3">right</span>
+      </div>
+    </div>
+    <p>index 從 0 開始,所以位置 <code>mid</code> 的左邊剛好有 <code>mid</code> 個數。<strong><code>mid</code> 就是左子樹的 node 數</strong>,這裡是 1 個。root 自己不算在任何一邊。</p>
+  </div>
+
+  <div class="card">
+    <span class="step-no">第 3 步</span>
+    <h3>用左子樹的個數切前序</h3>
+    <p>前序的順序是「我、左、右」。跳過 root,接著拿 <code>mid</code> 個就是左子樹,剩下的是右子樹。</p>
+    <div class="scroll">
+      <div class="arrname">preorder</div>
+      <div class="strip" style="--n:5">
+        <span class="i">[0]</span><span class="i">[1]</span><span class="i">[2]</span><span class="i">[3]</span><span class="i">[4]</span>
+        <span class="c root">3</span><span class="c left">9</span><span class="c right">20</span><span class="c right">15</span><span class="c right">7</span>
+        <span class="g root">root</span><span class="g left">left</span><span class="g right" style="grid-column:span 3">right</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <span class="step-no">第 4 步</span>
+    <h3>每一邊都拿到一對 list</h3>
+    <div class="tablewrap"><table>
+      <tr><th></th><th class="m">preorder</th><th class="m">inorder</th></tr>
+      <tr><td><mark class="left">左子樹</mark></td><td class="m">[9]</td><td class="m">[9]</td></tr>
+      <tr><td><mark class="right">右子樹</mark></td><td class="m">[20, 15, 7]</td><td class="m">[15, 20, 7]</td></tr>
+    </table></div>
+    <p>兩對都還是合法的前序和中序,只是樹比較小。所以直接回到第 1 步,再做一次。</p>
+    <svg class="tree" viewBox="0 0 300 126" role="img" aria-label="目前的樹:root 3。左邊待蓋 [9],右邊待蓋 [15, 20, 7]。" style="max-width:24rem">
+      <line x1="150" y1="42" x2="60" y2="84"/><line x1="150" y1="42" x2="215" y2="84"/>
+      <rect class="root" x="126" y="10" width="48" height="32"/><text x="150" y="26">3</text>
+      <rect class="left todo" x="30" y="84" width="60" height="32"/><text x="60" y="100">[9]</text>
+      <rect class="right todo" x="150" y="84" width="130" height="32"/><text x="215" y="100">[15, 20, 7]</text>
+    </svg>
+  </div>
+
+  <div class="card">
+    <span class="step-no">第 5 步</span>
+    <h3>右子樹再切一次</h3>
+    <div class="tablewrap"><table>
+      <tr><th>輸入</th><th>root</th><th>mid</th><th>左邊</th><th>右邊</th></tr>
+      <tr><td class="m">[20, 15, 7]<br>[15, 20, 7]</td><td class="m">20</td><td class="m">1</td><td class="m">[15] [15]</td><td class="m">[7] [7]</td></tr>
+    </table></div>
+    <svg class="tree" viewBox="0 0 320 196" role="img" aria-label="目前的樹:3 的左小孩 9,右小孩 20。20 的左邊待蓋 [15],右邊待蓋 [7]。" style="max-width:24rem">
+      <line x1="150" y1="42" x2="70" y2="80"/><line x1="150" y1="42" x2="230" y2="80"/>
+      <line x1="230" y1="112" x2="185" y2="150"/><line x1="230" y1="112" x2="275" y2="150"/>
+      <rect class="root" x="126" y="10" width="48" height="32"/><text x="150" y="26">3</text>
+      <rect class="left" x="46" y="80" width="48" height="32"/><text x="70" y="96">9</text>
+      <rect class="right" x="206" y="80" width="48" height="32"/><text x="230" y="96">20</text>
+      <rect class="right todo" x="157" y="150" width="56" height="32"/><text x="185" y="166">[15]</text>
+      <rect class="right todo" x="250" y="150" width="50" height="32"/><text x="275" y="166">[7]</text>
+    </svg>
+    <p>只剩一個數的 list:root 就是它,<code>mid = 0</code>,左右都切出空 list。空 list 交回 <code>None</code>,這棵樹就蓋完了。</p>
+  </div>
+
+  <details>
+    <summary>完整 code 加逐行解釋<span class="hint">先看上面的圖,想看再開</span></summary>
+    <div class="dbody">
+<pre><span class="kw">def</span> <span class="fn">buildTree</span>(self, preorder, inorder):
+    <span class="kw">if</span> <span class="kw">not</span> preorder:
+        <span class="kw">return</span> None
+    root = TreeNode(preorder[0])
+<span class="hl">    mid = inorder.index(preorder[0])</span>    root.left = self.buildTree(preorder[1:mid + 1], inorder[:mid])
+    root.right = self.buildTree(preorder[mid + 1:], inorder[mid + 1:])
+    <span class="kw">return</span> root</pre>
+      <div class="tablewrap"><table>
+        <tr><th>行</th><th>做什麼</th></tr>
+        <tr><td class="m">if not preorder</td><td>沒有數字就沒有 node,交回 <code>None</code></td></tr>
+        <tr><td class="m">TreeNode(preorder[0])</td><td>第 1 步。蓋出這一層的 root</td></tr>
+        <tr><td class="m">inorder.index(...)</td><td>第 2 步。拿值去找,不是拿 node 去找</td></tr>
+        <tr><td class="m">root.left = ...</td><td>第 3、4 步。先等左子樹蓋完,接住它交回的 node</td></tr>
+        <tr><td class="m">root.right = ...</td><td>同上,換右子樹</td></tr>
+        <tr><td class="m">return root</td><td>把這層蓋好的 node 交給呼叫者</td></tr>
+      </table></div>
+      <h4>切片對照,<code>mid = 1</code></h4>
+      <div class="tablewrap"><table>
+        <tr><th></th><th>左子樹</th><th>右子樹</th></tr>
+        <tr><td class="m">preorder</td><td class="m">[1:mid + 1] = [1:2] = [9]</td><td class="m">[mid + 1:] = [2:] = [20, 15, 7]</td></tr>
+        <tr><td class="m">inorder</td><td class="m">[:mid] = [:1] = [9]</td><td class="m">[mid + 1:] = [2:] = [15, 20, 7]</td></tr>
+      </table></div>
+    </div>
+  </details>
+
+  <details>
+    <summary>Call stack:哪個 frame 在跑、哪個在等<span class="hint">5 格</span></summary>
+    <div class="dbody">
+      <p>每個 frame 都有自己的 <code>root</code>。最新的 frame 在最上面。</p>
+      <div class="film">
+        <div class="shot"><span class="no">SHOT 1</span><p class="cap">3 這層算完 <code>mid</code>,開始蓋左子樹,自己暫停。</p>
+          <div class="stack">
+            <div class="fr run">preorder=[9], inorder=[9] | root=9, mid=0 | 正在跑</div>
+            <div class="fr">preorder=[3,9,20,15,7] | root=3, mid=1 | 暫停在 root.left = ...</div>
+            <div class="bottom">STACK BOTTOM</div>
+          </div></div>
+        <div class="shot"><span class="no">SHOT 2</span><p class="cap">9 的左右都是空 list,都拿到 <code>None</code>,接著交回自己。</p>
+          <div class="stack">
+            <div class="fr run">root=9 | root.left=None, root.right=None | return root(9)</div>
+            <div class="fr">root=3, mid=1 | 暫停在 root.left = ...</div>
+            <div class="bottom">STACK BOTTOM</div>
+          </div></div>
+        <div class="shot"><span class="no">SHOT 3</span><p class="cap">9 的 frame 結束。3 從暫停的那一行接著跑,把 9 接上去。</p>
+          <div class="stack">
+            <div class="fr gone">root=9</div>
+            <div class="fr run">root=3, mid=1 | root.left = 9 | 下一行蓋右子樹</div>
+            <div class="bottom">STACK BOTTOM</div>
+          </div></div>
+        <div class="shot"><span class="no">SHOT 4</span><p class="cap">開始蓋右子樹,3 再暫停一次。20 這層會再往下開 15 和 7 的 frame。</p>
+          <div class="stack">
+            <div class="fr run">preorder=[20,15,7], inorder=[15,20,7] | root=20, mid=1 | 正在跑</div>
+            <div class="fr">root=3, mid=1, root.left=9 | 暫停在 root.right = ...</div>
+            <div class="bottom">STACK BOTTOM</div>
+          </div></div>
+        <div class="shot"><span class="no">SHOT 5</span><p class="cap">20 交回之後,3 把它接上去,再交回自己。這就是最後的答案。</p>
+          <div class="stack">
+            <div class="fr gone">root=20</div>
+            <div class="fr run">root=3 | root.left=9, root.right=20 | return root(3)</div>
+            <div class="bottom">STACK BOTTOM</div>
+          </div></div>
+      </div>
+    </div>
+  </details>
+
+  <details>
+    <summary>逐次呼叫模擬表<span class="hint">11 次呼叫,實際跑 code 印出來的</span></summary>
+    <div class="dbody">
+      <div class="tablewrap"><table>
+        <tr><th>#</th><th>誰叫的</th><th class="m">preorder</th><th class="m">inorder</th><th class="m">root</th><th class="m">mid</th><th>交回</th></tr>
+        <tr><td>1</td><td>起點</td><td class="m">[3,9,20,15,7]</td><td class="m">[9,3,15,20,7]</td><td class="m">3</td><td class="m">1</td><td class="m">3</td></tr>
+        <tr><td>2</td><td class="m">3.left</td><td class="m">[9]</td><td class="m">[9]</td><td class="m">9</td><td class="m">0</td><td class="m">9</td></tr>
+        <tr><td>3</td><td class="m">9.left</td><td class="m">[]</td><td class="m">[]</td><td></td><td></td><td class="m none">None</td></tr>
+        <tr><td>4</td><td class="m">9.right</td><td class="m">[]</td><td class="m">[]</td><td></td><td></td><td class="m none">None</td></tr>
+        <tr><td>5</td><td class="m">3.right</td><td class="m">[20,15,7]</td><td class="m">[15,20,7]</td><td class="m">20</td><td class="m">1</td><td class="m">20</td></tr>
+        <tr><td>6</td><td class="m">20.left</td><td class="m">[15]</td><td class="m">[15]</td><td class="m">15</td><td class="m">0</td><td class="m">15</td></tr>
+        <tr><td>7</td><td class="m">15.left</td><td class="m">[]</td><td class="m">[]</td><td></td><td></td><td class="m none">None</td></tr>
+        <tr><td>8</td><td class="m">15.right</td><td class="m">[]</td><td class="m">[]</td><td></td><td></td><td class="m none">None</td></tr>
+        <tr><td>9</td><td class="m">20.right</td><td class="m">[7]</td><td class="m">[7]</td><td class="m">7</td><td class="m">0</td><td class="m">7</td></tr>
+        <tr><td>10</td><td class="m">7.left</td><td class="m">[]</td><td class="m">[]</td><td></td><td></td><td class="m none">None</td></tr>
+        <tr><td>11</td><td class="m">7.right</td><td class="m">[]</td><td class="m">[]</td><td></td><td></td><td class="m none">None</td></tr>
+      </table></div>
+    </div>
+  </details>
+</section>
+
+<section id="l3">
+  <div class="layer-head"><span class="badge">LAYER 3</span><h2>複雜度</h2><span class="time">讀 2 分鐘</span></div>
+  <p class="lead">切片版好懂但最慢 O(n²)。hash map 版省掉「找位置」和「複製 list」,變 O(n)。</p>
+  <div class="tablewrap"><table>
+    <tr><th></th><th>切片版</th><th>hash map 版</th></tr>
+    <tr><td>找 root 位置</td><td><code>index</code>,O(n)</td><td><code>pos[val]</code>,O(1)</td></tr>
+    <tr><td>切 list</td><td>每層複製,O(n)</td><td>不複製,只傳 <code>lo</code>、<code>hi</code></td></tr>
+    <tr><td>時間</td><td>樹平衡 O(n log n),一條鏈 O(n²)</td><td><strong>O(n)</strong></td></tr>
+    <tr><td>空間</td><td>一條鏈 O(n²)</td><td><strong>O(n)</strong></td></tr>
+  </table></div>
+  <p>面試順序:先寫切片版,講完複雜度,再說怎麼優化成 hash map 版。</p>
+  <details>
+    <summary>hash map 版 code<span class="hint">速刷可跳過</span></summary>
+    <div class="dbody">
+<pre><span class="kw">def</span> <span class="fn">buildTree</span>(self, preorder, inorder):
+    pos = {val: i <span class="kw">for</span> i, val <span class="kw">in</span> enumerate(inorder)}
+    next_root = 0
+
+    <span class="kw">def</span> <span class="fn">dfs</span>(lo, hi):
+        <span class="kw">nonlocal</span> next_root
+        <span class="kw">if</span> lo &gt; hi:
+            <span class="kw">return</span> None
+        root = TreeNode(preorder[next_root])
+        next_root += 1
+        mid = pos[root.val]
+        root.left = dfs(lo, mid - 1)
+        root.right = dfs(mid + 1, hi)
+        <span class="kw">return</span> root
+
+    <span class="kw">return</span> dfs(0, len(inorder) - 1)</pre>
+      <p>這裡 <code>mid</code> 是整條 <code>inorder</code> 的位置,不再等於左子樹個數。前序靠 <code>next_root</code> 往前走:先蓋完整棵左子樹,<code>next_root</code> 就剛好指到右子樹的 root,所以一定要先蓋左邊。</p>
+    </div>
+  </details>
+</section>
+
+<section id="l4">
+  <div class="layer-head"><span class="badge">LAYER 4</span><h2>真實系統</h2><span class="time">讀 10 秒</span></div>
+  <p class="lead">工作上幾乎不會寫這題,也沒有常見的生產場景對應。它考的是遞迴切兩半。</p>
+</section>
+
+<section id="l5">
+  <div class="layer-head"><span class="badge">LAYER 5</span><h2>變形題</h2><span class="time">讀 1 分鐘</span></div>
+  <details>
+    <summary>四種變形</summary>
+    <div class="dbody">
+      <div class="tablewrap"><table>
+        <tr><th>變形</th><th>差在哪</th></tr>
+        <tr><td>#106 中序 + 後序</td><td>root 改成在後序的最後一個,其他一樣</td></tr>
+        <tr><td>#889 前序 + 後序</td><td>沒有中序就分不清左右,答案可能不唯一</td></tr>
+        <tr><td>#297 Serialize</td><td>把 <code>None</code> 也存進去,一個 list 就夠</td></tr>
+        <tr><td>值會重複</td><td><code>index</code> 只找第一個,可能切錯。本題保證不重複</td></tr>
+      </table></div>
+    </div>
+  </details>
+</section>
+
+<section id="l6">
+  <div class="layer-head"><span class="badge">LAYER 6</span><h2>你最可能犯的錯</h2><span class="time">讀 2 分鐘</span></div>
+  <p class="lead">最容易錯的是前序的左子樹切片少 <code>+ 1</code>。</p>
+  <div class="wrongline"><span class="tag">切片少 + 1</span><code>preorder[1:mid]</code>,<code>mid = 1</code> 時是 <code>[1:1] = []</code>,9 就不見了。起點是 1,要拿 <code>mid</code> 個,所以終點是 <code>mid + 1</code>。</div>
+  <div class="wrongline"><span class="tag">呼叫少 self.</span>寫成 <code>buildTree(...)</code> 會 <code>NameError</code>。它是方法,要寫 <code>self.buildTree(...)</code>。</div>
+  <div class="wrongline"><span class="tag">拿 node 去找</span><code>inorder.index(root)</code> 會 <code>ValueError</code>。list 裡放的是數字,<code>root</code> 是 <code>TreeNode</code>,要找 <code>preorder[0]</code>。</div>
+  <div class="wrongline"><span class="tag">漏 return root</span>這層蓋好了卻沒交回,上一層的 <code>root.left</code> 收到 <code>None</code>,整棵樹接不起來。</div>
+  <div class="wrongline"><span class="tag">漏 base case</span>空 list 跑 <code>preorder[0]</code> 會 <code>IndexError</code>。</div>
+  <h3>Edge cases</h3>
+  <div class="tablewrap"><table>
+    <tr><th>情況</th><th><code>mid</code></th><th>靠什麼答對</th></tr>
+    <tr><td>只有 1 個 node</td><td class="m">0</td><td>左右都切出空 list,base case 接住</td></tr>
+    <tr><td>沒有左子樹</td><td class="m">0</td><td><code>preorder[1:1]</code> 和 <code>inorder[:0]</code> 都是空的</td></tr>
+    <tr><td>沒有右子樹</td><td class="m">n - 1</td><td><code>[mid + 1:]</code> 超過尾巴,切片交回空 list,不會報錯</td></tr>
+    <tr><td>一條鏈,3000 個 node</td><td class="m">0 或 n - 1</td><td>遞迴 3000 層。本機實測超過 Python 預設上限 1000,會 <code>RecursionError</code></td></tr>
+  </table></div>
+</section>
+
+<section id="l7">
+  <div class="layer-head"><span class="badge">LAYER 7</span><h2>口訣與面試</h2><span class="time">讀 5 分鐘,速刷可跳過</span></div>
+  <div class="mantra">前序找 root,中序數左邊,兩邊一起切。</div>
+  <details>
+    <summary>模板<span class="hint">切片版</span></summary>
+    <div class="dbody">
+<pre><span class="kw">def</span> <span class="fn">build</span>(pre, ino):
+    <span class="kw">if</span> <span class="kw">not</span> pre:
+        <span class="kw">return</span> None
+    root = TreeNode(pre[0])                       <span class="cm"># 找 root</span>
+    mid = ino.index(pre[0])                       <span class="cm"># 數左邊</span>
+    root.left = build(pre[1:mid + 1], ino[:mid])  <span class="cm"># 切左邊</span>
+    root.right = build(pre[mid + 1:], ino[mid + 1:])  <span class="cm"># 切右邊</span>
+    <span class="kw">return</span> root</pre>
+    </div>
+  </details>
+  <details>
+    <summary>L6 面試逐字稿<span class="hint">說、想、寫</span></summary>
+    <div class="dbody">
+      <p>這是完整答題示範和英文 shadowing 素材,不代表職級認證。</p>
+      <div class="move"><h4><span class="mv">MOVE 0</span>先問 constraint</h4>
+        <p class="say"><b>說</b>"Are all values unique? Can the input be empty? Do both lists always come from the same tree?"</p>
+        <p class="think"><b>想</b>值不重複,<code>index</code> 才切得準。這句換到的是「先釐清再動手」。</p></div>
+      <div class="move"><h4><span class="mv">MOVE 1</span>舉例</h4>
+        <p class="say"><b>說</b>"Let me use preorder 3, 9, 20, 15, 7 and inorder 9, 3, 15, 20, 7. The tree has 3 on top, 9 on the left, 20 on the right, and 15 and 7 under 20."</p>
+        <p class="think"><b>寫</b>畫 Layer 0 那棵樹,上面寫兩個 list。</p></div>
+      <div class="move"><h4><span class="mv">MOVE 2</span>暴力解 20 秒</h4>
+        <p class="say"><b>說</b>"I could try every tree shape and compare traversals, but the number of shapes grows exponentially. It ignores what the two lists already tell me."</p>
+        <p class="think"><b>想</b>點出它浪費的免費情報:前序給 root,中序給左右。</p></div>
+      <div class="move"><h4><span class="mv">MOVE 3</span>Invariant</h4>
+        <p class="say"><b>說</b>"Preorder always starts with the root. In inorder, everything before the root is in the left subtree, and everything after it is in the right subtree. Each side is still a valid pair of traversals."</p>
+        <p class="think"><b>想</b>最後一句是遞迴成立的理由。這題等於前序 + 中序 + 遞迴。</p></div>
+      <div class="move"><h4><span class="mv">MOVE 4</span>關鍵手法</h4>
+        <p class="say"><b>說</b>"The size of the left subtree comes from inorder, and it tells me where to cut preorder."</p></div>
+      <div class="move"><h4><span class="mv">MOVE 5</span>複雜度先講</h4>
+        <p class="say"><b>說</b>"With slicing, this is O(n squared) in the worst case, on a chain. A hash map and index bounds bring it down to O(n) time and space. I'll start with slicing because it's clearer. Sound reasonable?"</p></div>
+      <div class="move"><h4><span class="mv">MOVE 6</span>code 分 3 段</h4>
+        <p class="say"><b>說</b>"If there are no values left, there is no node."</p>
+<pre><span class="kw">if</span> <span class="kw">not</span> preorder:
+    <span class="kw">return</span> None</pre>
+        <p class="say"><b>說</b>"The first value is the root. Its position in inorder is the size of the left subtree."</p>
+<pre>root = TreeNode(preorder[0])
+mid = inorder.index(preorder[0])</pre>
+        <p class="say"><b>說</b>"I cut both lists, build each side, and return the root."</p>
+<pre>root.left = self.buildTree(preorder[1:mid + 1], inorder[:mid])
+root.right = self.buildTree(preorder[mid + 1:], inorder[mid + 1:])
+<span class="kw">return</span> root</pre></div>
+      <div class="move"><h4><span class="mv">MOVE 7</span>主動 dry run</h4>
+        <p class="say"><b>說</b>"3 is the root and mid is 1. The left side gets 9. The right side gets 20, 15, 7 and 15, 20, 7. There, 20 is the root and mid is 1 again, so 15 goes left and 7 goes right."</p></div>
+      <div class="move"><h4><span class="mv">MOVE 8</span>主動掃 edge case</h4>
+        <p class="say"><b>說</b>"With one node, mid is 0, so both sides are empty and the base case handles them. On a chain, the recursion goes n levels deep, so a very long chain can hit Python's recursion limit."</p></div>
+      <div class="move"><h4><span class="mv">MOVE 9</span>推廣</h4>
+        <p class="say"><b>說</b>"The same idea works for inorder and postorder, where the root is the last value. Preorder and postorder alone may not give one unique tree."</p></div>
+
+      <h4>哪一句話對應哪幾行</h4>
+      <div class="tablewrap"><table>
+        <tr><th>那句話</th><th>code</th></tr>
+        <tr><td>"no values left, no node"</td><td class="m">if not preorder: return None</td></tr>
+        <tr><td>"the first value is the root"</td><td class="m">root = TreeNode(preorder[0])</td></tr>
+        <tr><td>"position is the left size"</td><td class="m">mid = inorder.index(preorder[0])</td></tr>
+        <tr><td>"cut both lists, build each side"</td><td class="m">root.left = ..., root.right = ...</td></tr>
+        <tr><td>"return the root"</td><td class="m">return root</td></tr>
+      </table></div>
+
+      <h4>只給結論 vs 說明推理</h4>
+      <div class="tablewrap"><table>
+        <tr><th>Move</th><th>只給結論</th><th>說明推理</th></tr>
+        <tr><td>3</td><td>"I use recursion."</td><td>"Each side is still a valid pair of traversals, so the same steps apply."</td></tr>
+        <tr><td>4</td><td>"I split at mid."</td><td>"mid is the left size, and that's where preorder gets cut."</td></tr>
+        <tr><td>5</td><td>"It's O(n squared)."</td><td>"index and slicing cost O(n) per call, and a chain has n calls."</td></tr>
+      </table></div>
+
+      <h4>Native English(可背、可換題用)</h4>
+      <ul>
+        <li>"Preorder always starts with the root."</li>
+        <li>"Everything before the root in inorder belongs to the left subtree."</li>
+        <li>"The size of the left subtree tells me where to cut."</li>
+        <li>"Each side is the same problem on a smaller input."</li>
+      </ul>
+    </div>
+  </details>
+</section>
+
+<section id="clear">
+  <div class="layer-head"><span class="badge">釐清</span><h2>這次的釐清</h2><span class="time">2026-11-04</span></div>
+  <details>
+    <summary>這堂卡住的地方</summary>
+    <div class="dbody">
+      <div class="wrongline"><span class="tag">✗ 我以為</span>給我一個樹的 list,應該看得出是前序、中序還是後序。</div>
+      <p><strong>✓ 其實是:</strong>看不出來。同一個 <code>[1, 2, 3]</code> 可以是三棵不同的樹各自的前序、中序、後序。要靠參數名字或題目告訴你。LeetCode 的 <code>root = [3,9,20,null,null,15,7]</code> 固定是一層一層列。</p>
+      <p><strong>→ 為什麼會搞混:</strong>list 長得都一樣,走訪順序不會寫在 list 裡。</p>
+      <div class="wrongline"><span class="tag">✗ 我答</span>中序 <code>[9, 3, 15, 20, 7]</code> 裡,<code>3</code> 的左邊是 3。</div>
+      <p><strong>✓ 其實是:</strong>左邊是 <code>9</code>。<code>3</code> 自己是 root,不算在任何一邊。右邊 <code>15, 20, 7</code> 答對。</p>
+      <p><strong>→ 為什麼會搞混:</strong>還沒確定。有可能只是打錯,下次回來看第 2 步時順便確認。</p>
+      <p><strong>還沒答的那一格:</strong>前序拿掉 <code>3</code> 後的 <code>[9, 20, 15, 7]</code>,哪些是左子樹。答案在 Layer 2 第 3 步。</p>
+    </div>
+  </details>
+</section>
+
+<section class="next">
+  <h2>下一步(2 分鐘)</h2>
+  <p>有空回來時,用手切這一組,把 <code>root</code>、<code>mid</code>、左邊、右邊貼回 chat:</p>
+  <div class="tablewrap"><table>
+    <tr><td class="m">preorder</td><td class="m">[1, 2, 4, 3]</td></tr>
+    <tr><td class="m">inorder</td><td class="m">[4, 2, 1, 3]</td></tr>
+  </table></div>
+  <details>
+    <summary>對答案<span class="hint">切完再開</span></summary>
+    <div class="dbody">
+      <div class="tablewrap"><table>
+        <tr><th>root</th><th>mid</th><th>左邊</th><th>右邊</th></tr>
+        <tr><td class="m">1</td><td class="m">2</td><td class="m">preorder [2, 4]<br>inorder [4, 2]</td><td class="m">preorder [3]<br>inorder [3]</td></tr>
+      </table></div>
+    </div>
+  </details>
+</section>
+
+</div>

@@ -4,7 +4,10 @@
 
 # leetcode
 
-- 今天做到:2026-10-20。**開場默 #98:外殼 + 主邏輯逐格自填,只有啟動行 `return` 給答案;加壓題 `[0,-1]` 地板 0 答對。#230 圖解頁 + drill.py 做好,學員沒讀就收工。**
+- 今天做到:2026-11-04。**改速刷一輪(學員定:一個 pattern 一題,對照打跑綠就下一題,不默寫不拷問)。#230 對照打 7/7。#105 對照打 7/7,但學員說太難看不懂,退到 3 個 node 重切,停在第 3 步切前序,學員說晚點再做,出圖解頁。#208 Trie drill 做好,還沒打(0/9)。**
+  逐格:中序 `[2,1,3]` 的 1 左邊答 2 對;中序 `[9,3,15,20,7]` 的 3 左邊答「3」(錯,是 9,可能打錯),右邊 `15 20 7` 對;`[9,20,15,7]` 哪些是左子樹沒答。學員問「一個 list 怎麼知道前中後」→ 看不出來,三棵樹收出同一個 `[1,2,3]`。
+  **下次:先問要接 Trie 還是 #105。#105 從圖解頁第 3 步接,或做頁尾 `[1,2,4,3]` / `[4,2,1,3]` 手切。**
+- 前一場 2026-10-20。**開場默 #98:外殼 + 主邏輯逐格自填,只有啟動行 `return` 給答案;加壓題 `[0,-1]` 地板 0 答對。#230 圖解頁 + drill.py 做好,學員沒讀就收工。**
   默寫原稿:外殼三格(def / `if not node` / `(-inf, inf)`)對;中間寫成「檢查 `node.left` 在範圍內就 `return True`」,沒有遞迴、啟動行沒 `return`。
   逐格修:`None` 交什麼不確定(「之前都寫 False」,混到 #572)→ 一問自答 `True`;檢查誰三選一答 `node.val`;
   抓壞人 `if` 一次對(`<=`/`>=`/`or`);左小孩 `high` **又答 `root`**(10/13 也答 root)→ 深一層 `5→6→3` 答 6 → 二選一答 `node.val`;
@@ -232,17 +235,24 @@
 | Tree 前序 + 往下傳值(#1448 紙條 `max_so_far`) | ✓ 10/09 圖解頁 | ✓ 10/09 | 🟡 10/09 清空重寫 7/7;(5) 交錯紙條 `node.val`、啟動行用內層名字,各一格修 | ✓ 爸爸把路上最大交給小孩 |
 | Tree 前序 + 往下傳範圍(#98 `low`/`high`) | ✓ 10/13 圖解頁 + 數線圖 | | 🟡 10/19 規則自推(壓扁數線 + 直樹紙條),code 逐格長出,對照打 8/8;**10/20 隔 1 天默寫:外殼對、主邏輯逐格補回,爸爸值答 `root`(二次),啟動行漏 `return`** | ✓ 往左換 high,往右換 low |
 | Tree 兩棵一起走(#100 煞車 3 組合 + `and`) | | | 🟡 9/17 兔模式 9/9;煞車漏 ●▢、委派行階 2 | ✓ 先攔都空,再攔一邊空 |
+| Tree 中序收值(#230) | ✓ 11/04 右側圖 | ✓ 11/04 | | ✓ BST 中序就是排好的 |
+| Tree 前序 + 中序蓋樹(#105) | ✓ 11/04 圖解頁已出,未讀 | ✓ 11/04 | | ✓ 前序找 root,中序數左邊,兩邊一起切 |
 | Heap k-way merge(每條一個 head) | ✓ | | ✓ | ✓ |
 | Hashmap + 雙向鏈(LRU) | | | | |
 
 ## 做過
 
+- **#105 Construct Binary Tree from Preorder and Inorder Traversal** — `tree/construct-binary-tree-from-preorder-and-inorder-traversal/`
+  圖解頁:https://claude.ai/artifact/66SxPuqbeVBrm2D6i2bUjJ
+  2026-11-04 速刷插題:對照打 7/7,學員說太難看不懂,手切停在第 3 步。
+- **#208 Implement Trie (Prefix Tree)** — `trie/implement-trie-prefix-tree/`
+  2026-11-04 drill.py 產出(空 stub 0/9、參考解 9/9 已驗),學員未打。
 - **#98 Validate Binary Search Tree** — `tree/validate-binary-search-tree/`
   圖解頁:https://claude.ai/artifact/Mx3kyyce7CJUUhwFxAYxKA
   2026-10-13 龜模式首刷,看懂題目 + 看過 code,未動手寫。2026-10-19 逐格長出 + 對照打 8/8。2026-10-20 開場默寫,逐格補完。
 - **#230 Kth Smallest Element in a BST** — `tree/kth-smallest-element-in-a-bst/`
   圖解頁:https://claude.ai/artifact/Mzdfwkz1dR2ZLFDkjWsqUF
-  2026-10-20 圖解頁 + drill.py(空格,7 cases)產出,學員未讀。
+  2026-10-20 圖解頁 + drill.py(空格,7 cases)產出,學員未讀。2026-11-04 速刷:對照打 7/7,回頭看過一次,學員說大概懂。
 - **#1448 Count Good Nodes in Binary Tree** — `tree/count-good-nodes-in-binary-tree/`
   圖解頁:https://claude.ai/artifact/JzFxwemQcQvzKKHqFbEoNm
   2026-10-09 龜模式首刷,對照打一次後清空重寫 7/7。L6 逐字稿在圖解頁,未口頭練。
@@ -320,6 +330,8 @@
   缺 eli5 圖解頁 + L6 逐字稿。
 
 ## 接下來
+
+**2026-11-04 起速刷一輪,優先於下面清單:** Trie #208 → Heap #215 → Backtracking #78 → Islands #200 → Course Schedule #207 → Dijkstra #743 → Climbing Stairs #70 → House Robber #198 → Unique Paths #62 → Max Subarray #53 → Merge Intervals #56。學員可隨時插題,#105 就是插題,做到一半。
 
 0. **照 NeetCode 150 Trees 順序**(學員 9/29 定案,清單外的題不排):
    #235 ✓(10/08 補)→ #102 ✓ → #199 ✓ → #1448 ✓(10/09)→ #98 ✓(10/20 默寫逐格補完)→ **#230 Kth Smallest BST**(圖解頁已做,未讀)

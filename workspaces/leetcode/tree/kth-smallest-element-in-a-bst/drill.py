@@ -28,7 +28,15 @@ class Solution:
         # ── 打在這裡 ──────────────────────────────────────
         # (1) 收值的 list 放外層;def dfs(node): 走到 None -> return
         #     先往左、收我、再往右(append 夾在兩個呼叫中間)
-
+        res =[]
+        def dfs(node):
+            if not node:
+                return
+            dfs(node.left)
+            res.append(node.val)
+            dfs(node.right)
+        dfs(root)
+        return res[k - 1]
         # (2) 從 root 啟動
 
         # (3) 交回第 k 個(k 從 1 數,index 從 0 數)
